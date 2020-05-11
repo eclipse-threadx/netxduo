@@ -35,6 +35,10 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)
 # Pick up the apps directory containing the protocol and app-layer components
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/protocol_handlers)
 
+# Network security and crypto components
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/crypto_libraries)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/nx_secure)
+
 # If the user provided an override, copy it to the custom directory
 if (NOT NX_USER_FILE)
     message(STATUS "Using default nx_user.h file")
