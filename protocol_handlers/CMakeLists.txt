@@ -38,7 +38,6 @@ set(SOURCES
 
 # Remove the file server files if the user doesn't want them
 if(NOT NXD_ENABLE_FILE_SERVERS)
-    message(STATUS "*** Not using filex ***")
     list(REMOVE_ITEM SOURCES     
         "${CMAKE_CURRENT_LIST_DIR}/web/nx_web_http_server.c"
         "${CMAKE_CURRENT_LIST_DIR}/http/nxd_http_server.c"
