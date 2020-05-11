@@ -6,6 +6,8 @@ project(netxduo
     LANGUAGES C ASM
 )    
 
+option(NXD_ENABLE_FILE_SERVERS "Includes a dependency on FileX to support 'server' protocol handlers" ON)
+
 if(NOT DEFINED THREADX_ARCH)
     message(FATAL_ERROR "Error: THREADX_ARCH not defined")
 endif()
@@ -18,10 +20,12 @@ add_library(${PROJECT_NAME})
 add_library("azrtos::${PROJECT_NAME}" ALIAS ${PROJECT_NAME})
 
 # Define any required dependencies between this library and others
-target_link_libraries(${PROJECT_NAME} PUBLIC 
-    "azrtos::threadx"
-    "azrtos::filex"
-)
+target_link_libraries(${PROJECT_NAME} PUBLIC "azrtos::threadx")
+
+if(NXD_ENABLE_FILE_SERVERS)
+    message(STATUS "NXD_ENABLE_FILE_SERVERS - defined")
+    target_link_libraries(${PROJECT_NAME} PUBLIC "azrtos::filex")
+endif()
 
 # A place for generated/copied include files (no need to change)
 set(CUSTOM_INC_DIR ${CMAKE_CURRENT_BINARY_DIR}/custom_inc)
