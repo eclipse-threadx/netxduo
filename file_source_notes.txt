@@ -1,8 +1,0 @@
-NetxDuo
-	common                                          netx/netxduo/*.[ch]
-	crypto_libraries                                nx_secure/crypto_modules/generic
-	ipsec (exclude from default build)              netx/ipsec
-	nx_secure                                       nx_secure/src  (+ one from port_files)
-	ports                                           netx/port_files/*.[ch]
-	protocol_handlers                               generated from the files in netx/application
-

@@ -1,3 +1,0 @@
-
-* tftp_server, web_server, ftp_server and http_server have an optional dependency on FileX. We should be able to make that
-  ifdef smarter and know whether FIleX is included in the build or not.
