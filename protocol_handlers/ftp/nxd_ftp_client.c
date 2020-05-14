@@ -4404,7 +4404,7 @@ UINT  _nx_ftp_client_file_write(NX_FTP_CLIENT *ftp_client_ptr, NX_PACKET *packet
 {
 
 UINT    status;
-ULONG   file_size;
+ULONG   file_size = 0;
 
 
     /* Determine if the file is open for writing.  */
