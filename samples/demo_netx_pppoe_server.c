@@ -51,7 +51,7 @@
 
 #ifndef NX_DISABLE_IPV4
 
-/* Defined NX_PPP_PPPOE_ENABLE if use Express Logic's PPP, since PPP module has been modified to match PPPoE moduler under this definition.  */
+/* Defined NX_PPP_PPPOE_ENABLE if using PPP, since PPP module has been modified to match PPPoE module under this definition.  */
 #ifdef NX_PPP_PPPOE_ENABLE
                 
 /* If the driver is not initialized in other module, define NX_PPPOE_SERVER_INITIALIZE_DRIVER_ENABLE to initialize the driver in PPPoE module .  
@@ -101,8 +101,7 @@ void    PppCloseReq(UINT interfaceHandle);
 void    PppTransmitDataReq(UINT interfaceHandle, ULONG length, UCHAR *data, UINT packet_id);
 void    PppReceiveDataRsp(UINT interfaceHandle, UCHAR *data);
 
-/* Define the porting layer function for Express Logic's PPP to simulate TTP's PPP.  
-   Functions to be provided by PPP for calling by the PPPoE Stack.  */
+/* Define the porting layer function for PPP. */
 void    ppp_server_packet_send(NX_PACKET *packet_ptr);
 
 /* Define main entry point.  */
@@ -369,7 +368,7 @@ void    PppReceiveDataRsp(UINT interfaceHandle, UCHAR *data)
 void    ppp_server_packet_send(NX_PACKET *packet_ptr)
 {      
 
-/* For Express Logic's PPP test, the session should be the first session, so set interfaceHandle as 0.  */
+/* For PPP test, the session should be the first session, so set interfaceHandle as 0.  */
 UINT    interfaceHandle = 0;  
 
 #ifdef NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE

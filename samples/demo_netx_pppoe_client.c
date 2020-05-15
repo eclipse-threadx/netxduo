@@ -51,7 +51,7 @@
 
 #ifndef NX_DISABLE_IPV4
 
-/* Defined NX_PPP_PPPOE_ENABLE if use Express Logic's PPP, since PPP module has been modified to match PPPoE moduler under this definition.  */
+/* Defined NX_PPP_PPPOE_ENABLE if using PPP, since PPP module has been modified to match PPPoE module under this definition.  */
 #ifdef NX_PPP_PPPOE_ENABLE
 
 /* If the driver is not initialized in other module, define NX_PPPOE_CLIENT_INITIALIZE_DRIVER_ENABLE to initialize the driver in PPPoE module .  
@@ -89,8 +89,7 @@ extern void    _nx_ppp_driver(NX_IP_DRIVER *driver_req_ptr);
 /***** Substitute your Ethernet driver entry function here *********/ 
 extern void    _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr);
 
-/* Define the porting layer function for Express Logic's PPP to simulate TTP's PPP.  
-   Functions to be provided by PPP for calling by the PPPoE Stack.  */
+/* Define the porting layer function for PPP */
 void    ppp_client_packet_send(NX_PACKET *packet_ptr);
 void    pppoe_client_packet_receive(NX_PACKET *packet_ptr);
 
