@@ -37,7 +37,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ports/${THREADX_ARCH}/${THREADX_TOOLC
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)
 
 # Pick up the apps directory containing the protocol and app-layer components
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/protocol_handlers)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/addons)
 
 # Network security and crypto components
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/crypto_libraries)

@@ -55,6 +55,8 @@ Each official release (preview or GA) will be tagged to mark the commit and push
 ## Directory layout
 
 ```
+- addons
+  - auto_ip, BSD, dhcp, dns, ftp, http, mdns, mqtt, nat, pop3, ppp, pppoe, smtp, sntp, telnet, tftp, web
 - cmake
 - common
   - inc
@@ -78,8 +80,6 @@ Each official release (preview or GA) will be tagged to mark the commit and push
   - cortex_m7/gnu
     - inc
     - src
-- protocol_handlers
-  - auto_ip, BSD, dhcp, dns, ftp, http, mdns, mqtt, nat, pop3, ppp, pppoe, smtp, sntp, telnet, tftp, web
 - samples
 ```
 
