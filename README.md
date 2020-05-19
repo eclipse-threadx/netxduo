@@ -4,7 +4,7 @@ This advanced, industrial-grade TCP/IP network stack is designed specifically fo
 
 ## Documentation
 
-Documentation for this library can be found here: http://docs.microsoft.com/azure/rtos/netxduo
+Documentation for this library can be found here: http://docs.microsoft.com/azure/rtos/netx-duo
 
 # Understanding inter-component dependencies
 
