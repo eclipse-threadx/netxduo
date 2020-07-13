@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_helloverifyrequest          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -62,6 +62,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_helloverifyrequest(NX_SECURE_DTLS_SESSION *dtls_session,
@@ -69,7 +72,6 @@ UINT _nx_secure_dtls_process_helloverifyrequest(NX_SECURE_DTLS_SESSION *dtls_ses
 {
 UINT length;
 
-    NX_PARAMETER_NOT_USED(message_length);
 
     /* Parse the HelloVerifyRequest message.
      * Structure:
@@ -92,8 +94,13 @@ UINT length;
         return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
     }
 
+    if ((3u + dtls_session -> nx_secure_dtls_cookie_length) > message_length)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
+
     /* Save off the cookie. */
-    NX_SECURE_MEMCPY(dtls_session -> nx_secure_dtls_cookie, &packet_buffer[length], dtls_session -> nx_secure_dtls_cookie_length);
+    NX_SECURE_MEMCPY(dtls_session -> nx_secure_dtls_cookie, &packet_buffer[length], dtls_session -> nx_secure_dtls_cookie_length); 
 
     /* Set our state to indicate we sucessfully parsed the HelloVerifyRequest. */
     dtls_session -> nx_secure_dtls_tls_session.nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_HELLO_VERIFY;

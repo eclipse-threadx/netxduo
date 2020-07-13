@@ -38,7 +38,7 @@ static UCHAR decrypted_signature[512];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_server_key_exchange           PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,6 +80,9 @@ static UCHAR decrypted_signature[512];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), update   */
+/*                                            ECC find curve method,      */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_server_key_exchange(NX_SECURE_TLS_SESSION *tls_session,
@@ -156,7 +159,7 @@ UINT                                  i;
 
         /* Extract the identity hint and save in the TLS Session. Then when pre-master is generated
            in client_handshake, we can do the right thing... */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_remote_psk_id, &packet_buffer[0], length);
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_remote_psk_id, &packet_buffer[0], length); 
         tls_session -> nx_secure_tls_credentials.nx_secure_tls_remote_psk_id_size = length;
 
         return(NX_SECURE_TLS_SUCCESS);
@@ -226,7 +229,7 @@ UINT                                  i;
         }
 
         /* Find out which named curve the server is using. */
-        status = _nx_secure_tls_find_curve_method(tls_session, (USHORT)((packet_buffer[1] << 8) + packet_buffer[2]), &curve_method);
+        status = _nx_secure_tls_find_curve_method(tls_session, (USHORT)((packet_buffer[1] << 8) + packet_buffer[2]), &curve_method, NX_NULL);
 
         if(status != NX_SUCCESS)
         {
@@ -742,7 +745,7 @@ UINT                                  i;
             ec_pubkey = &server_certificate -> nx_secure_x509_public_key.ec_public_key;
 
             /* Find out which named curve the remote certificate is using. */
-            status = _nx_secure_tls_find_curve_method(tls_session, (USHORT)(ec_pubkey -> nx_secure_ec_named_curve), &curve_method_cert);
+            status = _nx_secure_tls_find_curve_method(tls_session, (USHORT)(ec_pubkey -> nx_secure_ec_named_curve), &curve_method_cert, NX_NULL);
 
             if(status != NX_SUCCESS)
             {

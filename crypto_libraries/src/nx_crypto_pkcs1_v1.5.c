@@ -306,7 +306,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_pkcs1_v1_5_encode                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -335,6 +335,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_pkcs1_v1_5_encode(UCHAR *input, UINT input_length,
@@ -406,6 +409,10 @@ UINT status;
 
     /* Calculate our final signature length for later offset calculations. */
     signature_length = der_encoding_length + hash_length; /* DER encoding size + hash size = plaintext encoded signature length */
+    if (signature_length + 1 > expected_output_length)
+    {
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
     output[expected_output_length - signature_length - 1] = 0;
 
     /* Get a working pointer into the padded signature buffer. All PKCS-1 encoded data
@@ -413,7 +420,7 @@ UINT status;
     working_ptr = &output[expected_output_length - signature_length];
 
     /* Copy in the DER encoding. */
-    NX_CRYPTO_MEMCPY(working_ptr, der_encoding, der_encoding_length);
+    NX_CRYPTO_MEMCPY(working_ptr, der_encoding, der_encoding_length); 
 
     /* Move the working pointer to the end of the DER encoding. */
     working_ptr += der_encoding_length;

@@ -129,7 +129,7 @@ UINT         offset;
             }
 
             /* Name and lengths check out, save off the name data. */
-            NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, &data_ptr[offset], dns_name -> nx_secure_x509_dns_name_length);
+            NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, &data_ptr[offset], dns_name -> nx_secure_x509_dns_name_length); 
 
             /* Success! */
             return(NX_SUCCESS);

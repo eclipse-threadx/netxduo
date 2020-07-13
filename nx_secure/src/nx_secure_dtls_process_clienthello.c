@@ -40,7 +40,7 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_clienthello                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -81,6 +81,12 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), added    */
+/*                                            priority ciphersuite logic, */
+/*                                            fixed configuration problem */
+/*                                            that would result in        */
+/*                                            compiler error,             */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_clienthello(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
@@ -95,13 +101,13 @@ UINT                                  status;
 USHORT                                protocol_version;
 UINT                                  total_extensions_length;
 const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_info = NX_NULL;
+USHORT                                ciphersuite_priority;
+USHORT                                new_ciphersuite_priority = 0;
 NX_SECURE_TLS_SESSION                *tls_session;
 NX_SECURE_TLS_HELLO_EXTENSION         extension_data[NX_SECURE_TLS_HELLO_EXTENSIONS_MAX];
 UINT                                  num_extensions = NX_SECURE_TLS_HELLO_EXTENSIONS_MAX;
 UCHAR                                *ciphersuite_list;
-#if defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) || defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE)
 UCHAR                                *packet_buffer_start;
-#endif /* NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE || NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 #ifdef NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE
 INT                                   extension_total_length;
 USHORT                                extension_length;
@@ -133,9 +139,8 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
         return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
     }
 
-#if defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) || defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE)
+    /* Get a pointer to the start of our packet buffer so we can read ahead later. */
     packet_buffer_start = packet_buffer;
-#endif /* NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE || NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
     /* Get a reference to TLS state. */
     tls_session = &dtls_session -> nx_secure_dtls_tls_session;
@@ -178,7 +183,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
     tls_session -> nx_secure_tls_protocol_version = protocol_version;
 
     /* Save off the random value for key generation later. */
-    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, packet_buffer, NX_SECURE_TLS_RANDOM_SIZE);
+    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, packet_buffer, NX_SECURE_TLS_RANDOM_SIZE); 
     packet_buffer += NX_SECURE_TLS_RANDOM_SIZE;
 
     /* Extract the session ID if there is one. */
@@ -189,7 +194,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
     tls_session -> nx_secure_tls_session_id_length = session_id_length;
     if (session_id_length > 0)
     {
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_session_id, &packet_buffer[0], session_id_length);
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_session_id, &packet_buffer[0], session_id_length); 
         packet_buffer += session_id_length;
     }
 
@@ -206,7 +211,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
 
     if (dtls_session -> nx_secure_dtls_cookie_length > 0)
     {
-        NX_SECURE_MEMCPY(dtls_session -> nx_secure_dtls_cookie, packet_buffer, dtls_session -> nx_secure_dtls_cookie_length);
+        NX_SECURE_MEMCPY(dtls_session -> nx_secure_dtls_cookie, packet_buffer, dtls_session -> nx_secure_dtls_cookie_length); 
         packet_buffer += dtls_session -> nx_secure_dtls_cookie_length;
     }
 
@@ -344,28 +349,32 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
     }
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
+    /* Set our initial priority to the maximum value - the size of our ciphersuite crypto table. */
+    ciphersuite_priority = (USHORT)(0xFFFFFFFF); 
+
     for (i = 0; i < ciphersuite_list_length; i += 2)
     {
         /* Loop through list of acceptable ciphersuites. */
         cipher_entry = (USHORT)((ciphersuite_list[i] << 8) + ciphersuite_list[i + 1]);
 
-        status = _nx_secure_tls_ciphersuite_lookup(tls_session, cipher_entry, &ciphersuite_info);
+        status = _nx_secure_tls_ciphersuite_lookup(tls_session, cipher_entry, &ciphersuite_info, &new_ciphersuite_priority);
 
-        if (status == NX_SUCCESS)
+        if (status == NX_SUCCESS && (new_ciphersuite_priority < ciphersuite_priority))
         {
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
             if (NX_SUCCESS == _nx_secure_dtls_check_ciphersuite(ciphersuite_info, cert, selected_curve, cert_curve_supported))
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
             {
                 tls_session -> nx_secure_tls_session_ciphersuite = ciphersuite_info;
-                break;
+                ciphersuite_priority = new_ciphersuite_priority;
             }
         }
     }
 
     /* See if we found an acceptable ciphersuite. */
-    if (i >= ciphersuite_list_length)
+    if (tls_session -> nx_secure_tls_session_ciphersuite == NX_NULL)
     {
+
         /* No supported ciphersuites found. */
         return(NX_SECURE_TLS_NO_SUPPORTED_CIPHERS);
     }

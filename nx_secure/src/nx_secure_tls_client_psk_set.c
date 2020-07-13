@@ -86,15 +86,15 @@ UINT status;
         hint_length <= NX_SECURE_TLS_MAX_PSK_ID_SIZE)
     {
         /* Save off the PSK and its length. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_data, pre_shared_key, psk_length);
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_data, pre_shared_key, psk_length); 
         tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_data_size = psk_length;
 
         /* Save off the identity and its length. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_id, psk_identity, identity_length);
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_id, psk_identity, identity_length); 
         tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_id_size = identity_length;
 
         /* Save off the hint and its length. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_id_hint, hint, hint_length);
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_id_hint, hint, hint_length); 
         tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_id_hint_size = hint_length;
 
         status = NX_SUCCESS;

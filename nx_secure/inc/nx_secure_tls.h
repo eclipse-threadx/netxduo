@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -41,6 +41,13 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            fixed race condition for    */
+/*                                            multithread transmission,   */
+/*                                            priority ciphersuite and ECC*/
+/*                                            curve logic, updated product*/
+/*                                            constants,                  */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -98,16 +105,18 @@ extern   "C" {
 /* ID is used to determine if a TLS session has been initialized. */
 #define NX_SECURE_TLS_ID                                ((ULONG)0x544c5320)
 
-#define EL_PRODUCT_NETX_SECURE
+#define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
 #define NETX_SECURE_MINOR_VERSION                       0
-#define NETX_SECURE_SERVICE_PACK_VERSION                0
+#define NETX_SECURE_PATCH_VERSION                       1
 
 /* The following symbols are defined for backward compatibility reasons. */
+#define EL_PRODUCT_NETX_SECURE
 #define __PRODUCT_NETX_SECURE__
 #define __NETX_SECURE_MAJOR_VERSION__                   NETX_SECURE_MAJOR_VERSION
 #define __NETX_SECURE_MINOR_VERSION__                   NETX_SECURE_MINOR_VERSION
-#define __NETX_SECURE_SERVICE_PACK_VERSION__            NETX_SECURE_SERVICE_PACK_VERSION
+#define __NETX_SECURE_SERVICE_PACK_VERSION__            NETX_SECURE_PATCH_VERSION
+#define NETX_SECURE_SERVICE_PACK_VERSION                NETX_SECURE_PATCH_VERSION
 
 /* Define memcpy, memset and memcmp functions used internal. */
 #ifndef NX_SECURE_MEMCPY
@@ -229,6 +238,7 @@ extern   "C" {
 #define NX_SECURE_TLS_AEAD_DECRYPT_FAIL                 0x150       /* An incoming record did not pass integrity check with AEAD ciphers. */
 #define NX_SECURE_TLS_RECORD_OVERFLOW                   0x151       /* Received a TLSCiphertext record that had a length too long. */
 #define NX_SECURE_TLS_HANDSHAKE_FRAGMENT_RECEIVED       0x152       /* Received a fragmented handshake message - take appropriate action at a higher level of the state machine. */
+#define NX_SECURE_TLS_TRANSMIT_LOCKED                   0x153       /* Another thread is transmitting. */
 
 /* NX_CONTINUE is a symbol defined in NetX Duo 5.10.  For backward compatibility, this symbol is defined here */
 #if ((__NETXDUO_MAJOR_VERSION__ == 5) && (__NETXDUO_MINOR_VERSION__ == 9))
@@ -1131,6 +1141,9 @@ typedef struct NX_SECURE_TLS_SESSION_STRUCT
        we have not received credentials from the remote host and should fail the handshake. */
     USHORT nx_secure_tls_received_remote_credentials;
 
+    /* This mutex used for TLS session while transmitting packets. */
+    TX_MUTEX nx_secure_tls_session_transmit_mutex;
+
     /* If we receive a hello message from the remote server during a session,
        we have a re-negotiation handshake we need to process. */
     USHORT nx_secure_tls_renegotiation_handshake;
@@ -1305,7 +1318,7 @@ UINT _nx_secure_tls_allocate_handshake_packet(NX_SECURE_TLS_SESSION *tls_session
 UINT _nx_secure_tls_check_protocol_version(NX_SECURE_TLS_SESSION *tls_session,
                                            USHORT protocol_version, UINT id);
 UINT _nx_secure_tls_ciphersuite_lookup(NX_SECURE_TLS_SESSION *tls_session, UINT ciphersuite,
-                                       const NX_SECURE_TLS_CIPHERSUITE_INFO **info);
+                                       const NX_SECURE_TLS_CIPHERSUITE_INFO **info, USHORT *ciphersuite_priority);
 UINT _nx_secure_tls_client_handshake(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
                                      UINT data_length, ULONG wait_option);
 UINT _nx_secure_tls_finished_hash_generate(NX_SECURE_TLS_SESSION *tls_session,
@@ -1427,7 +1440,7 @@ UINT _nx_secure_tls_verify_mac(NX_SECURE_TLS_SESSION *tls_session, UCHAR *header
 UINT _nx_secure_tls_ecc_generate_keys(NX_SECURE_TLS_SESSION *tls_session, UINT ecc_named_curve, USHORT sign_key,
                                       UCHAR *public_key, UINT *public_key_size, NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA *ecc_data);
 UINT _nx_secure_tls_find_curve_method(NX_SECURE_TLS_SESSION *tls_session,
-                                      USHORT named_curve, const NX_CRYPTO_METHOD **curve_method);
+                                      USHORT named_curve, const NX_CRYPTO_METHOD **curve_method, UINT *curve_priority);
 UINT _nx_secure_tls_proc_clienthello_sec_sa_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                       NX_SECURE_TLS_HELLO_EXTENSION *exts,
                                                       UINT num_extensions,

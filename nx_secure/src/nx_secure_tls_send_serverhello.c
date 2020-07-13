@@ -47,7 +47,7 @@ const UCHAR _nx_secure_tls_1_1_random[8] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -81,6 +81,9 @@ const UCHAR _nx_secure_tls_1_1_random[8] =
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_serverhello(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet)
@@ -130,14 +133,14 @@ UINT   status;
     }
     NX_CHANGE_ULONG_ENDIAN(gmt_time);
 
-    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random, (UCHAR *)&gmt_time, sizeof(gmt_time));
+    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random, (UCHAR *)&gmt_time, sizeof(gmt_time)); 
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
     if (tls_session -> nx_secure_tls_server_state == NX_SECURE_TLS_SERVER_STATE_SEND_HELLO_RETRY)
     {
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random,
                          _nx_secure_tls_hello_retry_request_random,
-                         sizeof(_nx_secure_tls_hello_retry_request_random));
+                         sizeof(_nx_secure_tls_hello_retry_request_random)); 
     }
     else if (!(tls_session -> nx_secure_tls_1_3) && !(tls_session -> nx_secure_tls_protocol_version_override))
     {
@@ -158,13 +161,13 @@ UINT   status;
         {
             NX_SECURE_MEMCPY(&(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random[24]),
                              _nx_secure_tls_1_2_random,
-                             sizeof(_nx_secure_tls_1_2_random));
+                             sizeof(_nx_secure_tls_1_2_random)); 
         }
         else
         {
             NX_SECURE_MEMCPY(&(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random[24]),
                              _nx_secure_tls_1_1_random,
-                             sizeof(_nx_secure_tls_1_1_random));
+                             sizeof(_nx_secure_tls_1_1_random)); 
         }
     }
     else
@@ -184,7 +187,7 @@ UINT   status;
 
     /* Copy the random data into the packet. */
     NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random,
-                     sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random));
+                     sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random)); 
     length += sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random);
 
     /* Session ID length is one byte. Session ID data follows if we ever implement session resumption. */
@@ -197,8 +200,15 @@ UINT   status;
         packet_buffer[length] = tls_session->nx_secure_tls_session_id_length;
         length++;
 
+        if ((length + tls_session->nx_secure_tls_session_id_length + 3) >
+            ((ULONG)(send_packet -> nx_packet_data_end) - (ULONG)(send_packet -> nx_packet_append_ptr)))
+        {
 
-        NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_session_id, tls_session->nx_secure_tls_session_id_length);
+            /* Packet buffer is too small to hold random. */
+            return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
+        }
+
+        NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_session_id, tls_session->nx_secure_tls_session_id_length); 
         length += tls_session->nx_secure_tls_session_id_length;
     }
     else

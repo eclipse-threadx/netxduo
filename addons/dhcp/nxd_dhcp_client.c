@@ -4298,7 +4298,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_interface_user_option_retrieve             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4341,6 +4341,9 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_interface_user_option_retrieve(NX_DHCP *dhcp_ptr, UINT iface_index, UINT option_request, UCHAR *destination_ptr, UINT *destination_size)
@@ -4432,7 +4435,7 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
             long_ptr = (ULONG *) destination_ptr;
 
             /* Loop to set the long value.  */
-            for (i = 0; i < size;)
+            for (i = 0; i + 4 <= size;)
             {
 
                 /* Set the long value.  */
@@ -9157,7 +9160,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_client_interface_restore_record            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9211,6 +9214,10 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            restored the gateway        */
+/*                                            address,                    */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_client_interface_restore_record(NX_DHCP *dhcp_ptr, UINT iface_index, NX_DHCP_CLIENT_RECORD *client_record_ptr, ULONG time_elapsed)
@@ -9259,6 +9266,23 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
         /* Release the DHCP mutex.  */
         tx_mutex_put(&(dhcp_ptr -> nx_dhcp_mutex));
         return status;
+    }
+
+    /* Check if the gateway address is valid.  */
+    if (interface_record -> nx_dhcp_gateway_address)
+    {
+
+        /* Set the gateway address.  */
+        status = nx_ip_gateway_address_set(dhcp_ptr -> nx_dhcp_ip_ptr, interface_record -> nx_dhcp_gateway_address);
+
+        /* Check status.  */
+        if (status != NX_SUCCESS)
+        {
+
+            /* Release the DHCP mutex.  */
+            tx_mutex_put(&(dhcp_ptr -> nx_dhcp_mutex));
+            return(status);
+        }
     }
 
     /* Now apply the time elapsed to update the DHCP Client time remaining on its lease and current DHCP state. */

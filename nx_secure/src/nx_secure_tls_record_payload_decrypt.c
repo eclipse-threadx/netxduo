@@ -33,7 +33,7 @@ static UCHAR save_iv[20]; /* Must be large enough to hold the block size for ses
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_payload_decrypt               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +70,9 @@ static UCHAR save_iv[20]; /* Must be large enough to hold the block size for ses
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), fixed    */
+/*                                            AES-CBC padding oracle,     */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_record_payload_decrypt(NX_SECURE_TLS_SESSION *tls_session, UCHAR *data,
@@ -176,7 +179,7 @@ UINT                                  data_offset;
             nonce[0] = 12;
 
             /* Copy client_write_IV or server_write_IV.  */
-            NX_SECURE_MEMCPY(&nonce[1], iv, 12);
+            NX_SECURE_MEMCPY(&nonce[1], iv, 12); 
 
             /* Correct the endianness of our sequence number and XOR with
              * the IV. Pad to the left with zeroes. */
@@ -251,7 +254,7 @@ UINT                                  data_offset;
             nonce[0] = 12;
 
             /* Copy client_write_IV or server_write_IV.  */
-            NX_SECURE_MEMCPY(&nonce[1], iv, 4);
+            NX_SECURE_MEMCPY(&nonce[1], iv, 4); 
 
             /* Correct the endianness of our sequence number before hashing. */
             additional_data[0] = (UCHAR)(sequence_num[1] >> 24);
@@ -264,7 +267,7 @@ UINT                                  data_offset;
             additional_data[7] = (UCHAR)(sequence_num[0]);
 
             /* Copy nonce_explicit from the data.  */
-            NX_SECURE_MEMCPY(&nonce[5], data, 8);
+            NX_SECURE_MEMCPY(&nonce[5], data, 8); 
 
             /*  additional_data = seq_num + TLSCompressed.type +
                             TLSCompressed.version + TLSCompressed.length;
@@ -380,7 +383,7 @@ UINT                                  data_offset;
         {
 
             /* Message length error. */
-            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            return(NX_SECURE_TLS_PADDING_CHECK_FAILED);
         }
 
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED)
@@ -390,14 +393,14 @@ UINT                                  data_offset;
             if (session_cipher_method -> nx_crypto_algorithm == NX_CRYPTO_ENCRYPTION_AES_CBC)
             {
                 /* New IV is the last encrypted block of the output. */
-                NX_SECURE_MEMCPY(save_iv, &encrypted_data[*length - iv_size], iv_size);
+                NX_SECURE_MEMCPY(save_iv, &encrypted_data[*length - iv_size], iv_size); 
             }
         }
         else /* TLS 1.1, 1.2 */
 #endif
         {
             /* Copy IV from the beginning of the payload into our session buffer. */
-            NX_SECURE_MEMCPY(iv, data, iv_size);
+            NX_SECURE_MEMCPY(iv, data, iv_size); 
 
             /* Adjust payload length to account for IV that we saved off above. */
             *length -= iv_size;
@@ -466,7 +469,7 @@ UINT                                  data_offset;
         {
             if (session_cipher_method -> nx_crypto_algorithm == NX_CRYPTO_ENCRYPTION_AES_CBC)
             {
-                NX_SECURE_MEMCPY(iv, save_iv, iv_size);
+                NX_SECURE_MEMCPY(iv, save_iv, iv_size); 
             }
         }
 #endif

@@ -28,7 +28,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_phash                                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -60,6 +60,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_phash(NX_CRYPTO_PHASH *phash, UCHAR *output, UINT desired_length)
@@ -117,9 +120,14 @@ NX_CRYPTO_METHOD *hash_method = phash -> nx_crypto_hmac_method;
         return(NX_CRYPTO_INVALID_PARAMETER);
     }
 
+    if (seed_len > temp_A_size)
+    {
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
+
     /* Assign the seed as A(0). */
     NX_CRYPTO_MEMSET(temp_A, 0, temp_A_size);
-    NX_CRYPTO_MEMCPY(temp_A, seed, seed_len);
+    NX_CRYPTO_MEMCPY(temp_A, seed, seed_len); 
     A_len = phash -> nx_crypto_phash_seed_length;
 
     remaining_len = desired_length;
@@ -164,8 +172,13 @@ NX_CRYPTO_METHOD *hash_method = phash -> nx_crypto_hmac_method;
         /* Updated the length of A(i) */
         A_len = hash_size;
 
+        if ((A_len + seed_len) > temp_A_size)
+        {
+            return(NX_CRYPTO_SIZE_ERROR);
+        }
+
         /* Concatenate A[i] and seed to feed into digest. */
-        NX_CRYPTO_MEMCPY(&temp_A[A_len], seed, seed_len);
+        NX_CRYPTO_MEMCPY(&temp_A[A_len], seed, seed_len); 
 
         /* Output block is the size of the digest unless the remaining
            desired length is smaller than the digest length. */

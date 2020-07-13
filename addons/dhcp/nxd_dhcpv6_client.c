@@ -4423,7 +4423,7 @@ UCHAR     original_state;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_client_duid                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4436,8 +4436,8 @@ UCHAR     original_state;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dhcpv6_ptr                        Pointer to DHCPV6 Client instance */ 
-/*    received_buffer                   Pointer to server reply           */
-/*    length                            Size of server reply buffer       */
+/*    option_data                       Pointer to option data            */
+/*    option_length                     Size of option data               */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -4458,23 +4458,29 @@ UCHAR     original_state;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_dhcpv6_process_client_duid(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length)
+UINT _nx_dhcpv6_process_client_duid(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length)
 {
 
 ULONG   data;
-UINT    index;
+UINT    index = 0;
 
-
-    /* Set an index past the option code and data length. */
-    index = 4;
 
     /* The Client should already have its own DUID on record. So just parse the 
        data and compare each DUID field with the Client's DUID. */
 
+    /* Check option length for DUID type and hardware type.  */
+    if (option_length < 4)
+    {
+        return(NX_DHCPV6_INVALID_CLIENT_DUID);
+    }
+
     /* Extract the DUID type which should be the next 2 bytes.  */
-    _nx_dhcpv6_utility_get_data((received_buffer + index), 2, &data);
+    _nx_dhcpv6_utility_get_data((option_data + index), 2, &data);
 
     /* Does this match the Client DUID type on record? */
     if (data != (dhcpv6_ptr -> nx_dhcpv6_client_duid.nx_duid_type))
@@ -4487,7 +4493,7 @@ UINT    index;
     index += 2;
 
     /* Extract the hardware type which should be the next 2 bytes.  */
-    _nx_dhcpv6_utility_get_data((received_buffer + index), 2, &data);
+    _nx_dhcpv6_utility_get_data((option_data + index), 2, &data);
 
     /* Does this match the Client DUID hardware type on record? */
     if (data != (dhcpv6_ptr -> nx_dhcpv6_client_duid.nx_hardware_type))
@@ -4502,9 +4508,15 @@ UINT    index;
     /* IS this a link layer plus time DUID type? */
     if ((dhcpv6_ptr -> nx_dhcpv6_client_duid.nx_duid_type) == NX_DHCPV6_DUID_TYPE_LINK_TIME)
     {
-    
+
+        /* Check option length for time.  */
+        if (index + 4 > option_length)
+        {
+            return(NX_DHCPV6_INVALID_CLIENT_DUID);
+        }
+
         /* Yes; Extract the time which should be the next 4 bytes.  */
-        _nx_dhcpv6_utility_get_data((received_buffer + index), 4, &data);
+        _nx_dhcpv6_utility_get_data((option_data + index), 4, &data);
     
         /* Does this match the Client DUID time on record? */
         if (data != (dhcpv6_ptr -> nx_dhcpv6_client_duid.nx_duid_time))
@@ -4522,9 +4534,15 @@ UINT    index;
     {
 
         /* The length of link layer address is 48 bits.  */
+ 
+        /* Check option length for 48 bits mac address.  */
+        if (index + 6 > option_length)
+        {
+            return(NX_DHCPV6_INVALID_CLIENT_DUID);
+        }
 
         /* Yes; Extract the link local address msw which should be the next 2 bytes.  */
-        _nx_dhcpv6_utility_get_data((received_buffer + index), 2, &data);
+        _nx_dhcpv6_utility_get_data((option_data + index), 2, &data);
         index += 2;
     }
     else if (dhcpv6_ptr -> nx_dhcpv6_client_duid.nx_hardware_type == NX_DHCPV6_CLIENT_HARDWARE_TYPE_EUI_64)
@@ -4532,8 +4550,14 @@ UINT    index;
 
         /* The length of link layer address is 64 bits.  */
 
+        /* Check option length for 64 bits mac address.  */
+        if (index + 8 > option_length)
+        {
+            return(NX_DHCPV6_INVALID_CLIENT_DUID);
+        }
+
         /* Yes; Extract the link local address msw which should be the next 4 bytes.  */
-        _nx_dhcpv6_utility_get_data((received_buffer + index), 4, &data);
+        _nx_dhcpv6_utility_get_data((option_data + index), 4, &data);
         index += 4;
     }
 
@@ -4546,7 +4570,7 @@ UINT    index;
     }
 
     /* Yes; Extract the link local address lsw which should be the next 4 bytes.  */
-    _nx_dhcpv6_utility_get_data((received_buffer + index), 4, &data);
+    _nx_dhcpv6_utility_get_data((option_data + index), 4, &data);
     index += 4;
 
     /* Does this match the Client DUID link layer least significant bytes on record? */
@@ -4557,9 +4581,8 @@ UINT    index;
         return NX_DHCPV6_INVALID_CLIENT_DUID;
     }
 
-    /* Are we past the end of the buffer, subtracting for the toplevel opcode and 
-       length of the IANA option? */
-    if (((index - 4) > length) || ((index - 4) < length))
+    /* Are we past the end of the buffer.  */
+    if (index != option_length)
     {
 
         /* Yes, return the error status to reject this packet. */
@@ -4575,7 +4598,7 @@ UINT    index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_domain_name                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4589,8 +4612,9 @@ UINT    index;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dhcpv6_ptr                        Pointer to DHCPV6 Client instance */ 
-/*    buffer_ptr                        Pointer to request packet buffer  */
-/*    length                            Location into buffer to read data */
+/*    packet_start                      Pointer to packet buffer          */
+/*    option_data                       Pointer to option data            */
+/*    option_length                     Size of option data               */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -4611,9 +4635,12 @@ UINT    index;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_dhcpv6_process_domain_name(NX_DHCPV6 *dhcpv6_ptr, UCHAR *packet_start, UCHAR *received_buffer, UINT length)
+UINT _nx_dhcpv6_process_domain_name(NX_DHCPV6 *dhcpv6_ptr, UCHAR *packet_start, UCHAR *option_data, UINT option_length)
 {
 
 UINT        domain_name_length;
@@ -4627,24 +4654,30 @@ UINT        i;
     /* Initialize the value.  */
     domain_name_length = 0;
     temp_length = 0;
-    domain_name_ptr = received_buffer + 4;
+    domain_name_ptr = option_data;
     buffer_prepend_ptr = &dhcpv6_ptr -> nx_dhcpv6_domain_name[0];
     buffer_size = NX_DHCPV6_DOMAIN_NAME_BUFFER_SIZE;
 
     /* Process the domain search list options.  */
-    while(temp_length < length)
+    while(temp_length < option_length)
     {
 
         /* Calculate the domain name length in the Domaim Search List option,include the null flag '\0'.  */
-        for (i = 0; (i + temp_length < length) && (domain_name_ptr[i] != '\0'); i++);
+        for (i = 0; (i + temp_length < option_length) && (domain_name_ptr[i] != '\0'); i++);
 
-        if (i + temp_length == length)
+        if (i + temp_length == option_length)
         {
             return(NX_DHCPV6_PROCESSING_ERROR);
         }
         else
         {
             temp_length += (i + 1);
+        }
+
+        /* Check buffer size.  */
+        if (buffer_size < 1)
+        {
+            return(NX_DHCPV6_PROCESSING_ERROR);
         }
 
         /* Record the real domain name and return the length, one less for NULL termination. */
@@ -4886,7 +4919,7 @@ UINT    length = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_DNS_server                       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4900,8 +4933,8 @@ UINT    length = 0;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dhcpv6_ptr                        Pointer to DHCPV6 Client instance */ 
-/*    buffer_ptr                        Pointer to request packet buffer  */
-/*    length                            Location into buffer to read data*/
+/*    option_data                       Pointer to option data            */
+/*    option_length                     Size of option data               */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -4924,54 +4957,57 @@ UINT    length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_dhcpv6_process_DNS_server(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length)
+UINT _nx_dhcpv6_process_DNS_server(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length)
 {
 
-UINT   index;
-UINT   w, j;
+UINT   index = 0;
+UINT   w, j = 0;
 
-
-    /* Set the location of the read pointer into the buffer. */
-    index = 4; 
-    j = 0;
 
     /* Loop through the length of the buffer to parse. */
-    while ((index - 4) < length)
+    while ((index + 16) <= option_length)
     {
 
-        /* Set the IP version. */
-        dhcpv6_ptr -> nx_dhcpv6_DNS_name_server_address[j].nxd_ip_version = NX_IP_VERSION_V6;
-
-        /* Get the next IPv6 DNS server address. */
-        for (w = 0; w <= 3; w++)
+        /* Is the DHCPv6 Client configured to store another DNS server address? */
+        if (j < NX_DHCPV6_NUM_DNS_SERVERS)
         {
 
-            /* Is the DHCPv6 Client configured to store another DNS server address? */
-            if (j < NX_DHCPV6_NUM_DNS_SERVERS)
+            /* Set the IP version. */
+            dhcpv6_ptr -> nx_dhcpv6_DNS_name_server_address[j].nxd_ip_version = NX_IP_VERSION_V6;
+
+            /* Get the next IPv6 DNS server address. */
+            for (w = 0; w <= 3; w++)
             {
 
                 /* Yes; copy the next word into the current DNS server address. */
                 memcpy(&(dhcpv6_ptr -> nx_dhcpv6_DNS_name_server_address[j].nxd_ip_address.v6[w]),
-                       (received_buffer + index), sizeof(ULONG));
+                        (option_data + index), sizeof(ULONG));
 
                 /* Adjust for endianness. */
                 NX_CHANGE_ULONG_ENDIAN(dhcpv6_ptr -> nx_dhcpv6_DNS_name_server_address[j].nxd_ip_address.v6[w]);
+
+                /* Move to the next IPv6 address word. */
+                index += 4;
             }
 
-            /* Move to the next IPv6 address word. */
-            index += 4;
+            /* Get the next DNS server address in the reply buffer. */
+            j++;
         }
+        else
+        {
 
-        dhcpv6_ptr -> nx_dhcpv6_DNS_name_server_address[j].nxd_ip_version = NX_IP_VERSION_V6;
-
-        /* Get the next DNS server address in the reply buffer. */
-        j++;
+            /* Move to the next IPv6 address. */
+            index += 16;
+        }
     }
 
     /* Is there any more data in the buffer? */
-    if (((index - 4 ) > length) ||   ((index - 4 )< length))
+    if (index != option_length)
     {
 
         /* Yes, not sure what is going on with this packet. Treat as an error. */
@@ -4987,7 +5023,7 @@ UINT   w, j;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_ia                               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5002,8 +5038,8 @@ UINT   w, j;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dhcpv6_ptr                        Pointer to DHCPV6 Client instance */ 
-/*    buffer_ptr                        Pointer to request packet buffer  */
-/*    length                            Size of server reply buffer       */
+/*    option_data                       Pointer to option data            */
+/*    option_length                     Size of option data               */
 /*    ia_index                          The index of IA address           */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
@@ -5032,57 +5068,58 @@ UINT   w, j;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_dhcpv6_process_ia(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length, UINT ia_index)
+UINT _nx_dhcpv6_process_ia(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length, UINT ia_index)
 {
 
 ULONG   preferred_lifetime;
 ULONG   valid_lifetime;
-UINT    index, w;
+UINT    index = 0, w;
 UINT    status;
-ULONG   opcode, option_length;
+ULONG   ia_option_code, ia_option_length;
 
 
     /* Fill in the IA address code and length. Client might already have one on
        record, but use the server's data instead. */
-    dhcpv6_ptr -> nx_dhcpv6_ia[ia_index].nx_op_code = NX_DHCPV6_OP_IA_ADDRESS;
+    dhcpv6_ptr -> nx_dhcpv6_ia[ia_index].nx_op_code = (USHORT)NX_DHCPV6_OP_IA_ADDRESS;
+    dhcpv6_ptr -> nx_dhcpv6_ia[ia_index].nx_option_length = (USHORT)option_length;
 
-    /* Set the index for the read pointer past the option header. */
-    index = 4; 
+    /* Check option length for Ipv6 address (16 bytes), preferred-lifetime (4 bytes) and valid-lifetime (4 bytes).  */
+    if (option_length < 24)
+    {
+        return(NX_DHCPV6_INVALID_IA_DATA);
+    }
 
+    /* Process IPv6 address.  */
     for (w = 0; w <= 3; w++)
     {
 
         /* Copy each IPv6 address word into the IA address. */
         memcpy(&(dhcpv6_ptr -> nx_dhcpv6_ia[ia_index].nx_global_address.nxd_ip_address.v6[w]),
-               (received_buffer + index), sizeof(ULONG));
+               (option_data + index), sizeof(ULONG));
 
         /* Adjust for endianness. */
         NX_CHANGE_ULONG_ENDIAN(dhcpv6_ptr -> nx_dhcpv6_ia[ia_index].nx_global_address.nxd_ip_address.v6[w]);
 
         /* Move to the next IPv6 address word. */
         index += 4;
-
-        /* Check if we're going past the end of the option data. */
-        if ((index - 4) > length)
-        {
-            /* Yes, return an error status.*/
-            return NX_DHCPV6_INVALID_IA_DATA;
-        }
     }
 
     dhcpv6_ptr -> nx_dhcpv6_ia[ia_index].nx_global_address.nxd_ip_version = NX_IP_VERSION_V6;
 
     /* Copy the lifetime data from the reply buffer to temporary variables.*/
-    memcpy(&preferred_lifetime, (received_buffer + index), sizeof(ULONG));
-    index += (ULONG)sizeof(ULONG);
+    memcpy(&preferred_lifetime, (option_data + index), sizeof(ULONG));
+    index += 4;
 
     /* Adjust for endianness. */
     NX_CHANGE_ULONG_ENDIAN(preferred_lifetime);
 
-    memcpy(&valid_lifetime, (received_buffer + index), sizeof(ULONG));
-    index += (ULONG)sizeof(ULONG);
+    memcpy(&valid_lifetime, (option_data + index), sizeof(ULONG));
+    index += 4;
 
     /* Adjust for endianness. */
     NX_CHANGE_ULONG_ENDIAN(valid_lifetime);
@@ -5110,15 +5147,21 @@ ULONG   opcode, option_length;
     dhcpv6_ptr -> nx_dhcpv6_ia[ia_index].nx_address_map = 0xFFFFFFFF;
 
     /* Check if we're at the end of option data yet. */
-    if (index - 4 == length)
+    if (index == option_length)
     {
 
         /* Yes, all done. */
         return NX_SUCCESS;
     }
 
+    /* Check option length for status code option.  */
+    if (index + 4 > option_length)
+    {
+        return(NX_DHCPV6_INVALID_IA_DATA);
+    }
+
     /* Process the status code option. */
-    status = _nx_dhcpv6_utility_get_block_option_length(received_buffer + index, &opcode, &option_length);
+    status = _nx_dhcpv6_utility_get_block_option_length(option_data + index, &ia_option_code, &ia_option_length);
 
     /* Check that the block data is valid. */
     if (status != NX_SUCCESS)
@@ -5128,13 +5171,22 @@ ULONG   opcode, option_length;
         return status;
     }
 
+    /* Skip status option code and length.  */
+    index += 4;
+
+    /* This is a double check to verify we haven't gone off the end of the packet buffer. */
+    if (index + ia_option_length > option_length)
+    {
+        return (NX_DHCPV6_INVALID_IA_DATA);
+    }
+
     /* Check if this is an IAaddr status option request. */
-    if (opcode == NX_DHCPV6_OP_STATUS_CODE)
+    if (ia_option_code == NX_DHCPV6_OP_STATUS_CODE)
     {
         /* The IAaddr option returned by the DHCPv6 server includes a status option. */
 
         /* Process the status. */
-        status = _nx_dhcpv6_process_status(dhcpv6_ptr, (received_buffer + index), option_length);
+        status = _nx_dhcpv6_process_status(dhcpv6_ptr, (option_data + index), ia_option_length);
 
         /* Now check on the server status of the previous option in the DHCP message. */
         if ((status == NX_SUCCESS) && (dhcpv6_ptr -> nx_status_code != NX_DHCPV6_SUCCESS))
@@ -5165,10 +5217,10 @@ ULONG   opcode, option_length;
     }
 
     /* Keep track of how far into the packet we have parsed. */
-    index += option_length + 4; 
+    index += ia_option_length; 
 
     /* Check if we went past the reported size of IA address data. */
-    if ((index - 4) != length)
+    if (index != option_length)
     {
 
         /* Return an error status. Cannot accept this reply. */
@@ -5184,7 +5236,7 @@ ULONG   opcode, option_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_iana                             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5200,8 +5252,8 @@ ULONG   opcode, option_length;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dhcpv6_ptr                        Pointer to DHCPV6 Client instance */ 
-/*    received_buffer                   Pointer to server reply           */
-/*    length                            Size of server reply buffer       */
+/*    option_data                       Pointer to option data            */
+/*    option_length                     Size of option data               */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -5231,25 +5283,31 @@ ULONG   opcode, option_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_dhcpv6_process_iana(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length)
+UINT _nx_dhcpv6_process_iana(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length)
 {
 
 UINT    status;
 ULONG   T1, T2, data;
-UINT    index;
-ULONG   opcode, option_length;
+UINT    index = 0;
+ULONG   iana_option_code, iana_option_length;
 UINT    ia_index; 
 UINT    ia_count = 0;
 UINT    ia_status;
 
-    
-    /* Set up the location of the read pointer past option header. */
-    index = 4; 
 
-    /* The first word should contain the IANA option code and its option data length. */
-    memcpy(&data, (received_buffer + index), sizeof(ULONG));
+    /* Check option length for IANA ID.  */
+    if (option_length < 4)
+    {
+        return(NX_DHCPV6_INVALID_IANA_DATA);
+    }
+
+    /* Get the IANA ID. */
+    memcpy(&data, (option_data + index), 4);
 
     /* Adjust for endianness. */
     NX_CHANGE_ULONG_ENDIAN(data);
@@ -5266,15 +5324,21 @@ UINT    ia_status;
     /* Update the write location index. */
     index += 4; 
 
+    /* Check option length for T1 and T2.  */
+    if (index + 8 > option_length)
+    {
+        return(NX_DHCPV6_INVALID_IANA_DATA);
+    }
+
     /* Copy T1 and T2 from the buffer into temporary variables. */
-    memcpy(&T1, (received_buffer + index), sizeof(ULONG));
-    index += (ULONG)sizeof(ULONG); 
+    memcpy(&T1, (option_data + index), 4);
+    index += 4; 
 
     /* Adjust for endianness. */
     NX_CHANGE_ULONG_ENDIAN(T1);
 
-    memcpy(&T2, (received_buffer + index), sizeof(ULONG));
-    index += (ULONG)sizeof(ULONG); 
+    memcpy(&T2, (option_data + index), 4);
+    index += 4; 
 
     /* Adjust for endianness. */
     NX_CHANGE_ULONG_ENDIAN(T2);
@@ -5304,7 +5368,7 @@ UINT    ia_status;
     }
 
     /* Check if we're at the end of option data yet. */
-    if (index == length)
+    if (index == option_length)
     {
 
         /* Yes, all done. */
@@ -5330,11 +5394,11 @@ UINT    ia_status;
     }
 
     /* Now we recurse into the options embedded in the IANA option. */
-    do
+    while (index + 4 <= option_length)
     {
 
         /* Get the next option code and length. */
-        status = _nx_dhcpv6_utility_get_block_option_length((received_buffer + index), &opcode, &option_length);
+        status = _nx_dhcpv6_utility_get_block_option_length((option_data + index), &iana_option_code, &iana_option_length);
        
         /* Check that the block data is valid. */
         if (status != NX_SUCCESS)
@@ -5344,8 +5408,17 @@ UINT    ia_status;
             return status;
         }
 
+        /* Skip IANA sub option code and length.  */
+        index += 4;
+
+        /* This is a double check to verify we haven't gone off the end of the packet buffer. */
+        if (index + iana_option_length > option_length)
+        {
+            return (NX_DHCPV6_INVALID_IANA_DATA);
+        }
+
         /* Check if this is an IA address option request. */
-        if (opcode == NX_DHCPV6_OP_IA_ADDRESS)
+        if (iana_option_code == NX_DHCPV6_OP_IA_ADDRESS)
         {
 
             /* Set the ia count to record the IA option of reply message.  */
@@ -5361,7 +5434,7 @@ UINT    ia_status;
                 {
 
                     /* Yes, find it, update the IA option.  */
-                    status = _nx_dhcpv6_process_ia(dhcpv6_ptr, (received_buffer + index), option_length, ia_index);
+                    status = _nx_dhcpv6_process_ia(dhcpv6_ptr, (option_data + index), iana_option_length, ia_index);
 
                     /* Check the process status. */
                     if (status != NX_SUCCESS)
@@ -5391,7 +5464,7 @@ UINT    ia_status;
                     {
 
                         /* Yes, it is available, update the IA option.  */
-                        status = _nx_dhcpv6_process_ia(dhcpv6_ptr, (received_buffer + index), option_length, ia_index);
+                        status = _nx_dhcpv6_process_ia(dhcpv6_ptr, (option_data + index), iana_option_length, ia_index);
 
                         /* Check the process status. */
                         if (status != NX_SUCCESS)
@@ -5405,15 +5478,15 @@ UINT    ia_status;
                     }
                 }
             }
-        }        
-        
+        }
+
         /* Check if this is an IAaddr status option request. */
-        if (opcode == NX_DHCPV6_OP_STATUS_CODE)
+        if (iana_option_code == NX_DHCPV6_OP_STATUS_CODE)
         {
             /* The IAaddr option returned by the DHCPv6 server includes a status option. */
 
             /* Process the status. */
-            status = _nx_dhcpv6_process_status(dhcpv6_ptr, (received_buffer + index), option_length);
+            status = _nx_dhcpv6_process_status(dhcpv6_ptr, (option_data + index), iana_option_length);
 
             /* Now check on the server status of the previous option in the DHCP message. */
             if ((status == NX_SUCCESS) && (dhcpv6_ptr -> nx_status_code != NX_DHCPV6_SUCCESS))
@@ -5439,9 +5512,8 @@ UINT    ia_status;
         }
 
         /* Keep track of how far into the packet we have parsed. */
-        index += option_length + 4; 
-
-    } while ((index - 4) < length);
+        index += iana_option_length;
+    }
 
     return NX_SUCCESS;
 }
@@ -5452,7 +5524,7 @@ UINT    ia_status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_preference                       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5466,8 +5538,8 @@ UINT    ia_status;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dhcpv6_ptr                        Pointer to DHCPV6 Client instance */ 
-/*    buffer_ptr                        Pointer to request packet buffer  */
-/*    length                            Location into buffer to read data */
+/*    option_data                       Pointer to option data            */
+/*    option_length                     Size of option data               */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -5489,42 +5561,27 @@ UINT    ia_status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_dhcpv6_process_preference(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length)
+UINT _nx_dhcpv6_process_preference(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length)
 {
-
-UINT    index;
-USHORT  temp;
 
 
     /* Fill in the option code and length. */
     dhcpv6_ptr -> nx_dhcpv6_preference.nx_op_code = NX_DHCPV6_OP_PREFERENCE;
-    dhcpv6_ptr -> nx_dhcpv6_preference.nx_option_length = (USHORT)length;
+    dhcpv6_ptr -> nx_dhcpv6_preference.nx_option_length = (USHORT)option_length;
 
-    /* Set the location of the read pointer into the buffer. */
-    index = 4; 
-
-    /* set local variable for convenience.  */ 
-    temp = *(received_buffer + index);
+    /* Check option length for preference value.  */
+    if (option_length != 1)
+    {
+        return(NX_DHCPV6_INVALID_PREF_DATA);
+    }
 
     /* Get the server preference field, and apply to the DHCPv6 Client. */
-    dhcpv6_ptr -> nx_dhcpv6_preference.nx_pref_value = temp;
-
-
-    /* Adjust for endianness. */
-    NX_CHANGE_USHORT_ENDIAN(dhcpv6_ptr -> nx_dhcpv6_preference.nx_pref_value);
-
-    /* Update the pointer past the data we just extracted.  */
-    index++; 
-
-    /* Is there any more data in this option? */
-    if (((index - 4) > length) || ((index - 4) < length))
-    {
-
-        /* Yes, but there shouldn't be. Return as an error status. */
-        return NX_DHCPV6_INVALID_PREF_DATA;
-    }
+    dhcpv6_ptr -> nx_dhcpv6_preference.nx_pref_value = (USHORT)(*option_data);
 
     return NX_SUCCESS;
 }
@@ -5535,7 +5592,7 @@ USHORT  temp;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_server_duid                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5549,8 +5606,8 @@ USHORT  temp;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dhcpv6_ptr                        Pointer to DHCPV6 Client instance */ 
-/*    received_buffer                   Pointer to server reply           */
-/*    length                            Size of server reply buffer       */
+/*    option_data                       Pointer to option data            */
+/*    option_length                     Size of option data               */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -5571,12 +5628,15 @@ USHORT  temp;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_dhcpv6_process_server_duid(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length)
+UINT _nx_dhcpv6_process_server_duid(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length)
 {
 
-UINT    index;
+UINT    index = 0;
 ULONG   temp_type;
 ULONG   temp_hardware_type;
 ULONG   temp_time = 0;
@@ -5586,19 +5646,22 @@ ULONG   temp_lsw = 0;
 
     /* Set the DHCPv6 option header fields for a Server DUID. */
     dhcpv6_ptr -> nx_dhcpv6_server_duid.nx_op_code = NX_DHCPV6_OP_SERVER_ID;
-    dhcpv6_ptr -> nx_dhcpv6_server_duid.nx_option_length = (USHORT)length;
+    dhcpv6_ptr -> nx_dhcpv6_server_duid.nx_option_length = (USHORT)option_length;
 
-    /* Set the index past the option code and length. */
-    index = 4;
+    /* Check option length for DUID type and hardware type.  */
+    if (option_length < 4)
+    {
+        return(NX_DHCPV6_INVALID_SERVER_DUID);
+    }
 
     /* Extract the DUID type which should be the next 2 bytes.  */
-    _nx_dhcpv6_utility_get_data((received_buffer + index), 2, &temp_type); 
+    _nx_dhcpv6_utility_get_data((option_data + index), 2, &temp_type); 
 
     /* Update the index for moving the buffer pointer forward. */
     index += 2;
 
     /* Extract the hardware type which should be the next 2 bytes.  */
-    _nx_dhcpv6_utility_get_data((received_buffer + index), 2, &temp_hardware_type);
+    _nx_dhcpv6_utility_get_data((option_data + index), 2, &temp_hardware_type);
 
     /* Update the index for moving the buffer pointer forward. */
     index += 2;
@@ -5606,9 +5669,15 @@ ULONG   temp_lsw = 0;
     /* Is this a link layer plus time DUID type? */
     if (temp_type == NX_DHCPV6_DUID_TYPE_LINK_TIME)
     {
-    
+
+        /* Check option length for time.  */
+        if (index + 4 > option_length)
+        {
+            return(NX_DHCPV6_INVALID_SERVER_DUID);
+        }
+
         /* Yes; Extract the time which should be the next 4 bytes.  */
-        _nx_dhcpv6_utility_get_data((received_buffer + index), 4,  &temp_time);
+        _nx_dhcpv6_utility_get_data((option_data + index), 4,  &temp_time);
 
         /* Update the index for moving the buffer pointer forward. */
         index += 4;
@@ -5620,8 +5689,14 @@ ULONG   temp_lsw = 0;
   
         /* The length of link layer address is 48 bits.  */
 
+        /* Check option length for 48 bits mac address.  */
+        if (index + 6 > option_length)
+        {
+            return(NX_DHCPV6_INVALID_SERVER_DUID);
+        }
+
         /* Yes; Extract the link local address msw which should be the next 2 bytes.  */
-        _nx_dhcpv6_utility_get_data((received_buffer + index), 2, &temp_msw); 
+        _nx_dhcpv6_utility_get_data((option_data + index), 2, &temp_msw); 
 
         /* Update the index for moving the buffer pointer forward. */
         index += 2;
@@ -5631,22 +5706,27 @@ ULONG   temp_lsw = 0;
 
         /* The length of link layer address is 64 bits.  */
 
+        /* Check option length for 64 bits mac address.  */
+        if (index + 8 > option_length)
+        {
+            return(NX_DHCPV6_INVALID_SERVER_DUID);
+        }
+
         /* Yes; Extract the link local address msw which should be the next 4 bytes.  */
-        _nx_dhcpv6_utility_get_data((received_buffer + index), 4, &temp_msw); 
+        _nx_dhcpv6_utility_get_data((option_data + index), 4, &temp_msw); 
 
         /* Update the index for moving the buffer pointer forward. */
         index += 4;
     }
 
     /* Yes; Extract the link local address lsw which should be the next 4 bytes.  */
-    _nx_dhcpv6_utility_get_data((received_buffer + index), 4, &temp_lsw);
+    _nx_dhcpv6_utility_get_data((option_data + index), 4, &temp_lsw);
 
     /* Update the index for moving the buffer pointer forward. */
     index += 4;
 
-    /* Check if we are past the end of the buffer, subtracting for the toplevel opcode and 
-       length of the IANA option. */
-    if (((index - 4) > length) || ((index - 4) < length))
+    /* Check if we are past the end of the buffer. */
+    if (index != option_length)
     {
 
         /* Yes, return the error status to reject the packet. */
@@ -5699,7 +5779,7 @@ ULONG   temp_lsw = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_status                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5713,8 +5793,8 @@ ULONG   temp_lsw = 0;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dhcpv6_ptr                        Pointer to DHCPV6 Client instance */ 
-/*    buffer_ptr                        Pointer to request packet buffer  */
-/*    length                            Location into buffer to read data*/
+/*    option_data                       Pointer to option data            */
+/*    option_length                     Size of option data               */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -5735,30 +5815,36 @@ ULONG   temp_lsw = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_dhcpv6_process_status(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length)
+UINT _nx_dhcpv6_process_status(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length)
 {
 
-UINT  index;
+UINT  index = 0;
 UINT  message_length;
 ULONG status_code;
 
-    
-    /* Set the location for the buffer read pointer. */
-    index = 4; 
+
+    /* Check option length for status code.  */
+    if (option_length < 2)
+    {
+        return(NX_DHCPV6_INVALID_OPTION_DATA);
+    }
 
     /* Get the status field itself. */  
-    _nx_dhcpv6_utility_get_data((received_buffer + index), sizeof(USHORT), &status_code); 
-    
+    _nx_dhcpv6_utility_get_data((option_data + index), sizeof(USHORT), &status_code); 
+
     /* Update the index for moving the buffer pointer forward. */
-    index += (ULONG)sizeof(USHORT);  
-    
+    index += 2;  
+
     /* Set the status code.  */
     dhcpv6_ptr -> nx_status_code = (USHORT)status_code;
 
     /* Now figure out how much of the message we can save, if not all of it. */
-    if ((length - sizeof(USHORT)) > NX_DHCPV6_MAX_MESSAGE_SIZE)
+    if ((option_length - 2) > NX_DHCPV6_MAX_MESSAGE_SIZE)
     {
 
         /* Store up to this much, message is truncated but possibly still useful. */
@@ -5768,11 +5854,11 @@ ULONG status_code;
     {
 
         /* Store all of it. */
-        message_length = length - (ULONG)sizeof(USHORT);
+        message_length = option_length - 2;
     }
 
     /* Copy the status into the Client record. */
-    memcpy(dhcpv6_ptr -> nx_status_message, (received_buffer + index), message_length);
+    memcpy(dhcpv6_ptr -> nx_status_message, (option_data + index), message_length);
 
     return NX_SUCCESS;
 }
@@ -5783,7 +5869,7 @@ ULONG status_code;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_time_zone                        PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5797,8 +5883,8 @@ ULONG status_code;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dhcpv6_ptr                        Pointer to DHCPV6 Client instance */ 
-/*    buffer_ptr                        Pointer to request packet buffer  */
-/*    length                            Location into buffer to read data */
+/*    option_data                       Pointer to option data            */
+/*    option_length                     Size of option data               */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -5819,39 +5905,30 @@ ULONG status_code;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_dhcpv6_process_time_zone(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length)
+UINT _nx_dhcpv6_process_time_zone(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length)
 {
 
 UINT i;
-UINT index;
 
-
-    /* Set the location of the read pointer into the buffer. */
-    index = 4; 
 
     /* Make sure the time zone fits in the client buffer. */
-    if (length > NX_DHCPV6_TIME_ZONE_BUFFER_SIZE)
+    if (option_length > NX_DHCPV6_TIME_ZONE_BUFFER_SIZE)
     {
 
         /* It doesn't.  Fit what we can. */
-        length = NX_DHCPV6_TIME_ZONE_BUFFER_SIZE;
+        option_length = NX_DHCPV6_TIME_ZONE_BUFFER_SIZE;
     }
 
     /* Copy the time zone from the buffer to the Client record. */
-    for (i = 0; i < length; i++)
+    for (i = 0; i < option_length; i++)
     {
 
-        dhcpv6_ptr -> nx_dhcpv6_time_zone[i] = *(received_buffer + 4 + i);
-    }
-
-    /* Is there any more data in this option? */
-    if (((index - 4 + i) > length) || ((index - 4 + i) < length))
-    {
-
-        /* Yes, treat as in improperly formatted packet. */
-        return NX_DHCPV6_INVALID_OPTION_DATA;
+        dhcpv6_ptr -> nx_dhcpv6_time_zone[i] = *(option_data + i);
     }
 
     /* Return completion status. */
@@ -5864,7 +5941,7 @@ UINT index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_time_server                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5878,8 +5955,8 @@ UINT index;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dhcpv6_ptr                        Pointer to DHCPV6 Client instance */ 
-/*    buffer_ptr                        Pointer to request packet buffer  */
-/*    length                            Location into buffer to read data*/
+/*    option_data                       Pointer to option data            */
+/*    option_length                     Size of option data               */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -5900,55 +5977,58 @@ UINT index;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_dhcpv6_process_time_server(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length)
+UINT _nx_dhcpv6_process_time_server(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length)
 {
 
-UINT   index;
-UINT   w, j;
+UINT   index = 0;
+UINT   w, j = 0;
 
-
-    /* Set the location of the read pointer into the buffer. */
-    index = 4; 
-    j = 0;
 
     /* Loop through the length of the buffer to parse. */
-    while ((index - 4) < length)
+    while (index + 16 <= option_length)
     {
 
-        /* Set the IP version. */
-        dhcpv6_ptr -> nx_dhcpv6_time_server_address[j].nxd_ip_version = NX_IP_VERSION_V6;
-
-        /* Get the next IPv6 time server address. */
-        for (w = 0; w <= 3; w++)
+        /* Check that the DHCPv6 Client configured to store this time server address e.g. it may
+            only store one address, but the server could be sending two or more. */
+        if (j < NX_DHCPV6_NUM_TIME_SERVERS)
         {
 
-            /* Check that the DHCPv6 Client configured to store this time server address e.g. it may
-               only store one address, but the server could be sending two or more. */
-            if (j < NX_DHCPV6_NUM_TIME_SERVERS)
+            /* Set the IP version. */
+            dhcpv6_ptr -> nx_dhcpv6_time_server_address[j].nxd_ip_version = NX_IP_VERSION_V6;
+
+            /* Get the next IPv6 time server address. */
+            for (w = 0; w <= 3; w++)
             {
 
                 /* Yes; copy each IPv6 address word into the time server address. */
                 memcpy(&(dhcpv6_ptr -> nx_dhcpv6_time_server_address[j].nxd_ip_address.v6[w]), 
-                       (received_buffer + index), sizeof(ULONG));
+                       (option_data + index), sizeof(ULONG));
 
                 /* Adjust for endianness. */
                 NX_CHANGE_ULONG_ENDIAN(dhcpv6_ptr -> nx_dhcpv6_time_server_address[j].nxd_ip_address.v6[w]);
+
+                /* Move to the next IPv6 address word. */
+                index += 4;
             }
 
-            /* Move to the next IPv6 address word. */
-            index += 4;
+            /* Start parsing the next time server address, if there is one.  */
+            j++;
         }
+        else
+        {
 
-        dhcpv6_ptr -> nx_dhcpv6_time_server_address[j].nxd_ip_version = NX_IP_VERSION_V6;
-
-        /* Start parsing the next time server address, if there is one*/
-        j++;
+            /* Move to the next timer server address. */
+            index += 16;
+        }
     }
 
     /* Is there any more data in this option? */
-    if (((index - 4) > length) || ((index - 4) < length))
+    if (index != option_length)
     {
 
         /* Yes, treat as in improperly formatted packet. */
@@ -10801,7 +10881,7 @@ UINT        ia_count = 0;
     dhcpv6_option_ptr = (packet_ptr -> nx_packet_prepend_ptr + 4);
 
     /* Initialize local variables. */
-    index = 0;
+    index = 4;
     dhcpv6_ptr -> nx_dhcpv6_reply_option_flags = 0;
     dhcpv6_ptr -> nx_dhcpv6_reply_option_current_pref_value = 0;
         
@@ -10814,7 +10894,7 @@ UINT        ia_count = 0;
 
     /* Now parse all the DHCPv6 option blocks in the packet buffer. */
     /* 4 bytes is data pointer offset, and 4 bytes for option code and option length. */
-    while (index <= (packet_ptr -> nx_packet_length - 4 - 4))
+    while (index + 4 <= packet_ptr -> nx_packet_length)
     {
 
         /* Get the option code and length of data of the current option block. */
@@ -10855,18 +10935,24 @@ UINT        ia_count = 0;
                 break;
             }
             case NX_DHCPV6_OP_IA_NA:
-            {            
-                
+            {
+
+                /* The minimum length of IANA option field is 12 bytes.  */
+                if (option_length < 12)
+                {
+                    return(NX_DHCPV6_INCOMPLETE_OPTION_BLOCK);
+                }
+
                 /* Yes, The message includes the Server DUID option.  */
                 dhcpv6_ptr -> nx_dhcpv6_reply_option_flags |= NX_DHCPV6_INCLUDE_IA_NA_OPTION;
 
-                /* Skip the IA_NA header data.  */
-                dhcpv6_iana_option_ptr = dhcpv6_option_ptr + 16;
+                /* Skip the IA_NA header data (4 bytes for IANA option code and option length, 12 bytes for IANA option field).  */
+                dhcpv6_iana_option_ptr = dhcpv6_option_ptr + 4 + 12;
                 iana_index = 0;
 
                 /* Process the IA and status options embedded in the IANA option.  */
-                /* 12 bytes is IA_NA header, 4 bytes for iana option code and option length.  */
-                while(iana_index <= (option_length - 12 - 4))
+                /* 12 bytes is IA_NA header, 4 bytes for iana sub option code and option length.  */
+                while(iana_index + 4 <= (option_length - 12))
                 {
 
                     /* Get the next option code and length. */
@@ -11084,24 +11170,30 @@ UINT        ia_count = 0;
 
             case NX_DHCPV6_OP_PREFERENCE:
             {
-                USHORT temp; 
+
+                /* The preference option length must be 1 byte.  */
+                if (option_length != 1)
+                {
+                    return(NX_DHCPV6_INCOMPLETE_OPTION_BLOCK);
+                }
 
                 /* Yes, The message includes the preference option.  */
                 dhcpv6_ptr -> nx_dhcpv6_reply_option_flags |= NX_DHCPV6_INCLUDE_PREFERENCE_OPTION; 
 
-                /* Set the pointer.  */
-                temp = *(dhcpv6_option_ptr + 4);
-
                 /* Record the preference option value of current advetise message.  */
-                dhcpv6_ptr -> nx_dhcpv6_reply_option_current_pref_value = temp;
-              
-                /* Adjust the endianness.  */
-                NX_CHANGE_USHORT_ENDIAN(dhcpv6_ptr -> nx_dhcpv6_reply_option_current_pref_value);
+                dhcpv6_ptr -> nx_dhcpv6_reply_option_current_pref_value = (USHORT)(*(dhcpv6_option_ptr + 4));
+
                 break;
             }
 
             case NX_DHCPV6_OP_STATUS_CODE:
-            {              
+            {
+
+                /* The minimum length of status option is 2 bytes.  */
+                if (option_length < 2)
+                {
+                    return(NX_DHCPV6_INCOMPLETE_OPTION_BLOCK);
+                }
 
                 /* Yes, the message includes the STATUS option, get the code.  */
                 memcpy(&status_code, (dhcpv6_option_ptr + 4), sizeof(USHORT));
@@ -11399,7 +11491,7 @@ ULONG       returned_xid;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_extract_packet_information               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11451,13 +11543,16 @@ ULONG       returned_xid;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_extract_packet_information(NX_DHCPV6 *dhcpv6_ptr, NX_PACKET *packet_ptr)
 {
 
 UINT        status;
-ULONG       op_code;
+ULONG       option_code;
 ULONG       option_length;
 UCHAR       *buffer_ptr;
 UINT        index;
@@ -11466,15 +11561,15 @@ UINT        index;
     /* Set a pointer to the options of DHCPv6. */
     buffer_ptr = packet_ptr -> nx_packet_prepend_ptr + 4;
 
-    /* Initialize local variables. */
-    index = 0;
+    /* Update index to the options. */
+    index = 4;
 
     /* Now parse all the DHCPv6 option blocks in the packet buffer. */
-    while (index < (packet_ptr -> nx_packet_length - 4))
+    while (index + 4 <= packet_ptr -> nx_packet_length)
     {
 
         /* Get the option code and length of data of the current option block. */
-        status = _nx_dhcpv6_utility_get_block_option_length(buffer_ptr, &op_code, &option_length);
+        status = _nx_dhcpv6_utility_get_block_option_length(buffer_ptr, &option_code, &option_length);
 
         /* Check that the block data is valid. */
         if (status != NX_SUCCESS)
@@ -11484,14 +11579,27 @@ UINT        index;
             return status;
         }
 
-        /* Process the option code with an option specific API. */
-        switch (op_code)
+        /* Keep track of how far into the packet we have parsed. */
+        index += option_length + 4; 
+
+        /* This is a double check to verify we haven't gone off the end of the packet buffer. */
+        if (index > packet_ptr -> nx_packet_length)
         {
+            return(NX_DHCPV6_INVALID_DATA_SIZE);
+        }
+
+        /* Update buffer pointer to option data.  */
+        buffer_ptr += 4;
+
+        /* Process the option code with an option specific API. */
+        switch (option_code)
+        {
+
             /* Note - these 'process' functions will not move the buffer pointer. */
              
             case NX_DHCPV6_OP_CLIENT_ID:
             {
-                
+
                 /* Process the Client DUID.  */
                 status = _nx_dhcpv6_process_client_duid(dhcpv6_ptr, buffer_ptr, option_length);
                 
@@ -11499,16 +11607,16 @@ UINT        index;
             }
 
             case NX_DHCPV6_OP_SERVER_ID:
-            {           
-                
+            {
+
                 /* Process the Server DUID.  */
                 status = _nx_dhcpv6_process_server_duid(dhcpv6_ptr, buffer_ptr, option_length);
-                
+
                 break;
             }
             case NX_DHCPV6_OP_IA_NA:
             {
-            
+
                 status = _nx_dhcpv6_process_iana(dhcpv6_ptr, buffer_ptr, option_length);
 
                 /* Note: this API directly handles any server error codes received. */
@@ -11519,10 +11627,10 @@ UINT        index;
             /* This should not happen. The IA address option must be embedded in the IANA option. */
             case NX_DHCPV6_OP_IA_ADDRESS:
             {
-            
+
                 /* Don't process an IA address option outside of an address association (IANA). */
                 status = NX_DHCPV6_MISSING_IANA_OPTION;
-                
+
                 break;
             }
 
@@ -11552,7 +11660,7 @@ UINT        index;
             /* Process the preference option.  */
             case NX_DHCPV6_OP_PREFERENCE:
             {
-            
+
                 status = _nx_dhcpv6_process_preference(dhcpv6_ptr, buffer_ptr, option_length);
                 break;
             }
@@ -11562,7 +11670,7 @@ UINT        index;
 
             case NX_DHCPV6_OP_DNS_SERVER:
             {
-            
+
                 status = _nx_dhcpv6_process_DNS_server(dhcpv6_ptr, buffer_ptr, option_length);
 
                 break;
@@ -11601,17 +11709,13 @@ UINT        index;
         }
 
         /* Move to the next top level option. */
-        buffer_ptr += option_length + 4;
-
-        /* Keep track of how far into the packet we have parsed. */
-        index += option_length + 4;
-
+        buffer_ptr += option_length;
     }
 
     /* Now, the index should be the packet length.  */
-    if(index != (packet_ptr -> nx_packet_length - 4))
+    if(index != packet_ptr -> nx_packet_length)
     {
-        return NX_DHCPV6_INVALID_DATA_SIZE; 
+        return(NX_DHCPV6_INVALID_DATA_SIZE);
     }
 
     /* Yes, the packet data processing is completed.  */

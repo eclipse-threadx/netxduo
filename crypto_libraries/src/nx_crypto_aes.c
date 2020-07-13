@@ -981,7 +981,7 @@ ULONG  val;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_aes_encrypt                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1027,13 +1027,16 @@ ULONG  val;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), disabled */
+/*                                            unaligned access by default,*/
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_aes_encrypt(NX_CRYPTO_AES *aes_ptr, UCHAR *input, UCHAR *output, UINT length)
 {
 UINT  num_rounds;
 UINT *w;
-#ifdef NX_CRYPTO_DISABLE_UNALIGNED_ACCESS
+#ifndef NX_CRYPTO_ENABLE_UNALIGNED_ACCESS
 UCHAR *aes_state;
 #else
 UINT *buf;
@@ -1051,7 +1054,7 @@ UINT *buf;
         return(NX_INVALID_PARAMETERS);
     }
 
-#ifdef NX_CRYPTO_DISABLE_UNALIGNED_ACCESS
+#ifndef NX_CRYPTO_ENABLE_UNALIGNED_ACCESS
     aes_state = (UCHAR *)aes_ptr -> nx_crypto_aes_state;
     aes_state[0] = input[0];
     aes_state[1] = input[1];
@@ -1084,7 +1087,7 @@ UINT *buf;
     _nx_crypto_aes_sub_shift_roundkey(aes_ptr, &w[num_rounds * 4]);
 
 
-#ifdef NX_CRYPTO_DISABLE_UNALIGNED_ACCESS
+#ifndef NX_CRYPTO_ENABLE_UNALIGNED_ACCESS
     output[0] = aes_state[0];
     output[1] = aes_state[1];
     output[2] = aes_state[2];
@@ -1476,7 +1479,7 @@ UINT  num_rounds;
 UINT  round;
 UINT *w;
 UINT *v;
-#ifdef NX_CRYPTO_DISABLE_UNALIGNED_ACCESS
+#ifndef NX_CRYPTO_ENABLE_UNALIGNED_ACCESS
 UCHAR *aes_state;
 #else
 UINT *buf;
@@ -1488,7 +1491,7 @@ UINT *buf;
     w = aes_ptr -> nx_crypto_aes_decrypt_key_schedule;
     v = aes_ptr -> nx_crypto_aes_key_schedule;
 
-#ifdef NX_CRYPTO_DISABLE_UNALIGNED_ACCESS
+#ifndef NX_CRYPTO_ENABLE_UNALIGNED_ACCESS
     aes_state = (UCHAR *)aes_ptr -> nx_crypto_aes_state;
     aes_state[0] = input[0];
     aes_state[1] = input[1];
@@ -1533,7 +1536,7 @@ UINT *buf;
     _nx_crypto_aes_inv_sub_shift_roundkey(aes_ptr, &w[0]);
 
     /* Extract the output encrypted block. */
-#ifdef NX_CRYPTO_DISABLE_UNALIGNED_ACCESS
+#ifndef NX_CRYPTO_ENABLE_UNALIGNED_ACCESS
     output[0] = aes_state[0];
     output[1] = aes_state[1];
     output[2] = aes_state[2];

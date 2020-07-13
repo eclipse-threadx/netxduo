@@ -28,7 +28,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_xor                                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -62,11 +62,14 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), disabled */
+/*                                            unaligned access by default,*/
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_xor(UCHAR *plaintext, UCHAR *key, UCHAR *ciphertext)
 {
-#ifndef NX_CRYPTO_DISABLE_UNALIGNED_ACCESS
+#ifdef NX_CRYPTO_ENABLE_UNALIGNED_ACCESS
 UINT *p = (UINT *)plaintext;
 UINT *c = (UINT *)ciphertext;
 UINT *k = (UINT *)key;
@@ -200,7 +203,7 @@ UCHAR lsb;
 UCHAR mask;
 
     NX_CRYPTO_MEMSET(output, 0, NX_CRYPTO_GCM_BLOCK_SIZE);
-    NX_CRYPTO_MEMCPY(v, y, NX_CRYPTO_GCM_BLOCK_SIZE);
+    NX_CRYPTO_MEMCPY(v, y, NX_CRYPTO_GCM_BLOCK_SIZE); 
 
     mask = 0x80;
     for (i = 0; i < NX_CRYPTO_GCM_BLOCK_SIZE_BITS; i++)
@@ -301,7 +304,7 @@ UINT i, n;
 
         /* Pad the block with zeros when the input length is not
             multiple of the block size. */
-        NX_CRYPTO_MEMCPY(tmp_block, input, input_length);
+        NX_CRYPTO_MEMCPY(tmp_block, input, input_length); 
         NX_CRYPTO_MEMSET(&tmp_block[input_length], 0, sizeof(tmp_block) - input_length);
         _nx_crypto_gcm_xor(output, tmp_block, tmp_block);
         _nx_crypto_gcm_multi(tmp_block, hkey, output);
@@ -385,7 +388,7 @@ UINT i, n;
         /* Perform XOR operation on local buffer when
             remaining input length is smaller than block size. */
         _nx_crypto_gcm_xor(input, aes_output, aes_output);
-        NX_CRYPTO_MEMCPY(output, aes_output, length);
+        NX_CRYPTO_MEMCPY(output, aes_output, length); 
     }
 
 }
@@ -468,7 +471,7 @@ UCHAR iv_len;
 
         /* When the length of IV is 12 then 1 is appended to IV to form j0. */
         /* j0 in increased before GCTR. */
-        NX_CRYPTO_MEMCPY(j0, iv, iv_len);
+        NX_CRYPTO_MEMCPY(j0, iv, iv_len); 
         j0[12] = 0;
         j0[13] = 0;
         j0[14] = 0;
@@ -493,7 +496,7 @@ UCHAR iv_len;
     _nx_crypto_gcm_ghash_update(hkey, additional_data, additional_len, s);
 
     /* Initial counter block for GCTR is j0 + 1. */
-    NX_CRYPTO_MEMCPY(counter, j0, NX_CRYPTO_GCM_BLOCK_SIZE);
+    NX_CRYPTO_MEMCPY(counter, j0, NX_CRYPTO_GCM_BLOCK_SIZE); 
     _nx_crypto_gcm_inc32(counter);
 
     gcm_metadata -> nx_crypto_gcm_additional_data_len = additional_len;
@@ -661,7 +664,7 @@ UINT length;
     _nx_crypto_gcm_gctr(crypto_metadata, crypto_function, s, s, NX_CRYPTO_GCM_BLOCK_SIZE, j0);
 
     /* Append authentication tag to the end of the cipher text. */
-    NX_CRYPTO_MEMCPY(output, s, icv_len);
+    NX_CRYPTO_MEMCPY(output, s, icv_len); 
 
 #ifdef NX_SECURE_KEY_CLEAR
     NX_CRYPTO_MEMSET(tmp_block, 0, sizeof(tmp_block));

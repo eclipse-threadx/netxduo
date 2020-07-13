@@ -199,7 +199,7 @@ NX_SECURE_TLS_PSK_STORE *ticket_psk;
     packet_buffer = &packet_buffer[ticket_len];
 
     /* Copy ticket to PSK store - the ticket is the PSK ID used to identify the PSK in the future. */
-    NX_SECURE_MEMCPY(ticket_psk->nx_secure_tls_psk_id, ticket, ticket_len);
+    NX_SECURE_MEMCPY(ticket_psk->nx_secure_tls_psk_id, ticket, ticket_len); 
     ticket_psk->nx_secure_tls_psk_id_size = ticket_len;
 
     /* Add in extensions if available. */

@@ -727,7 +727,7 @@ INT    compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_serverhello_keyshare_extension  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -761,6 +761,9 @@ INT    compare_value;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), update   */
+/*                                            ECC find curve method,      */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -865,7 +868,7 @@ NX_SECURE_TLS_ECC *ecc_info;
         pubkey = &packet_buffer[offset];
 
         /* Get the curve method to initialize the remote public key data. */
-        _nx_secure_tls_find_curve_method(tls_session, key_group, &curve_method);
+        _nx_secure_tls_find_curve_method(tls_session, key_group, &curve_method, NX_NULL);
 
         if (curve_method == NX_NULL)
         {

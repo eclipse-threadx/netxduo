@@ -35,7 +35,7 @@ static UCHAR decrypted_signature[512]; /* This needs to hold the entire decrypte
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_verify                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -75,6 +75,9 @@ static UCHAR decrypted_signature[512]; /* This needs to hold the entire decrypte
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), update   */
+/*                                            ECC find curve method,      */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
@@ -306,7 +309,7 @@ const NX_CRYPTO_METHOD  *curve_method;
         ec_pubkey = &issuer_certificate -> nx_secure_x509_public_key.ec_public_key;
 
         /* Find out which named curve the remote certificate is using. */
-        status = _nx_secure_tls_find_curve_method(NX_NULL, (USHORT)(ec_pubkey -> nx_secure_ec_named_curve), &curve_method);
+        status = _nx_secure_tls_find_curve_method(NX_NULL, (USHORT)(ec_pubkey -> nx_secure_ec_named_curve), &curve_method, NX_NULL);
 
 #ifdef NX_SECURE_KEY_CLEAR
         if(status != NX_SUCCESS || curve_method == NX_NULL)

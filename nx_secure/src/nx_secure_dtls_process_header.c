@@ -157,8 +157,8 @@ NX_SECURE_TLS_SESSION *tls_session;
 
 
     /* Get epoch and sequence number from header. */
-    NX_SECURE_MEMCPY((UCHAR *)&remote_sequence_number[0], &header_data[3], 4);
-    NX_SECURE_MEMCPY((UCHAR *)&remote_sequence_number[1], &header_data[7], 4);
+    NX_SECURE_MEMCPY((UCHAR *)&remote_sequence_number[0], &header_data[3], 4); 
+    NX_SECURE_MEMCPY((UCHAR *)&remote_sequence_number[1], &header_data[7], 4); 
 
     /* Swap endianness for comparisons. */
     NX_CHANGE_ULONG_ENDIAN(remote_sequence_number[0]);

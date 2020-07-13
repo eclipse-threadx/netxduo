@@ -43,7 +43,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_dispatch_process                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -95,6 +95,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            destination header check,   */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ip_dispatch_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT protocol)
@@ -174,12 +177,13 @@ NX_ICMPV6_HEADER *icmp_header_ptr;
         case NX_PROTOCOL_NEXT_HEADER_DESTINATION:
 
             /* Invalid header option if we have already processed 1 destination option. */
-            if (packet_ptr -> nx_packet_destination_header == 1)
+            if (packet_ptr -> nx_packet_destination_header >= 1)
             {
 
                 /* If we already have processed one destination option, we expect this
                    to be the second one. */
-                if (packet_ptr -> nx_packet_option_state < (UCHAR)DESTINATION_HEADER_1)
+                if ((packet_ptr -> nx_packet_option_state < (UCHAR)DESTINATION_HEADER_1) ||
+                    (packet_ptr -> nx_packet_destination_header > 1))
                 {
                     drop_packet = 1;
                 }

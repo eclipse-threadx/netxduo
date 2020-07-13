@@ -4137,3 +4137,136 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
 
     return(NX_CRYPTO_SUCCESS);
 }
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_ec_validate_public_key                   PORTABLE C      */
+/*                                                           6.0.1        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Timothy Stapko, Microsoft Corporation                               */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function validates the public key by ensuring that the point   */
+/*    is a valid point on the elliptic curve. This function supports prime*/
+/*    field curves only.                                                  */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    public_key                            Public key to be verified     */
+/*    chosen_curve                          Curve used by the key         */
+/*    partial                               Perform partial validation    */
+/*    scratch                               Pointer to scratch buffer.    */
+/*                                            This scratch buffer can be  */
+/*                                            reused after this function  */
+/*                                            returns.                    */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_crypto_huge_number_compare        Compare huge number           */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  06-30-2020     Timothy Stapko           Initial Version 6.0.1         */
+/*                                                                        */
+/**************************************************************************/
+#ifndef NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION
+UINT _nx_crypto_ec_validate_public_key(NX_CRYPTO_EC_POINT *public_key,
+                                       NX_CRYPTO_EC *chosen_curve,
+                                       UINT partial,
+                                       HN_UBASE *scratch)
+{
+NX_CRYPTO_HUGE_NUMBER temp;
+NX_CRYPTO_HUGE_NUMBER right;
+UINT                  compare_value;
+UINT                  buffer_size = chosen_curve -> nx_crypto_ec_n.nx_crypto_huge_buffer_size;
+NX_CRYPTO_EC_POINT    pt;
+HN_UBASE             *scratch2 = scratch;
+
+    /* 1. Verify Q is not the point at infinity. */ 
+    if(_nx_crypto_ec_point_is_infinite(public_key))
+    {
+        return(NX_CRYPTO_INVALID_KEY);
+    }
+
+    /* 2. Verify that xQ and yQ are integers in the interval [0, p−1].
+         (Ensures that each coordinate of the public key has the unique correct representation of
+         an element in the underlying field.) */
+    compare_value = _nx_crypto_huge_number_compare(&public_key -> nx_crypto_ec_point_x, &chosen_curve -> nx_crypto_ec_field.fp);
+    if (compare_value != NX_CRYPTO_HUGE_NUMBER_LESS)
+    {
+        return(NX_CRYPTO_INVALID_KEY);
+    }
+
+    compare_value = _nx_crypto_huge_number_compare(&public_key -> nx_crypto_ec_point_y, &chosen_curve -> nx_crypto_ec_field.fp);
+    if (compare_value != NX_CRYPTO_HUGE_NUMBER_LESS)
+    {
+        return(NX_CRYPTO_INVALID_KEY);
+    }
+
+    if (public_key -> nx_crypto_ec_point_x.nx_crypto_huge_number_is_negative ||
+        public_key -> nx_crypto_ec_point_y.nx_crypto_huge_number_is_negative)
+    {
+        return(NX_CRYPTO_INVALID_KEY);
+    }
+
+    /* 3. Verify that (yQ)^2 = (xQ)^3 + axQ + b in GF(p) , where the arithmetic is
+          performed modulo p.
+          (xQ)^3 + axQ + b = ((xQ)^2 + a)xQ + b
+          (This step is to ensure that the public key is on the correct elliptic curve.)
+    */
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch2, buffer_size * 2);
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&right, scratch2, buffer_size * 2);
+
+    _nx_crypto_huge_number_multiply(&public_key -> nx_crypto_ec_point_x, &public_key -> nx_crypto_ec_point_x, &temp);
+    _nx_crypto_huge_number_modulus(&temp, &chosen_curve -> nx_crypto_ec_field.fp);
+    _nx_crypto_huge_number_add_unsigned(&temp, &chosen_curve -> nx_crypto_ec_a);
+    _nx_crypto_huge_number_modulus(&temp, &chosen_curve -> nx_crypto_ec_field.fp);
+
+    _nx_crypto_huge_number_multiply(&temp, &public_key -> nx_crypto_ec_point_x, &right);
+    _nx_crypto_huge_number_modulus(&right, &chosen_curve -> nx_crypto_ec_field.fp);
+
+    _nx_crypto_huge_number_add_unsigned(&right, &chosen_curve -> nx_crypto_ec_b);
+    _nx_crypto_huge_number_modulus(&right, &chosen_curve -> nx_crypto_ec_field.fp);
+
+    _nx_crypto_huge_number_multiply(&public_key -> nx_crypto_ec_point_y, &public_key -> nx_crypto_ec_point_y, &temp);
+    _nx_crypto_huge_number_modulus(&temp, &chosen_curve -> nx_crypto_ec_field.fp);
+
+    compare_value = _nx_crypto_huge_number_compare(&temp, &right);
+    if (compare_value != NX_CRYPTO_HUGE_NUMBER_EQUAL)
+    {
+        return(NX_CRYPTO_INVALID_KEY);
+    }
+
+    /*  4. Verify that nQ = Ø.
+        (This step is to ensure that the public key has the correct order. Along with the
+        verification in step 1, ensures that the public key is in the correct range in the correct EC
+        subgroup; that is, it is in the correct EC subgroup and is not the identity element Ø.)
+    */
+    if (!partial)
+    {
+        NX_CRYPTO_EC_POINT_INITIALIZE(&pt, NX_CRYPTO_EC_POINT_AFFINE, scratch, buffer_size);
+        chosen_curve -> nx_crypto_ec_multiple(chosen_curve, public_key, &chosen_curve -> nx_crypto_ec_n, &pt, scratch);
+        if (!_nx_crypto_ec_point_is_infinite(&pt))
+        {
+            return(NX_CRYPTO_INVALID_KEY);
+        }
+    }
+
+    return(NX_CRYPTO_SUCCESS);
+}
+#endif /* NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION */

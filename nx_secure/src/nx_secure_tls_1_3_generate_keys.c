@@ -1385,9 +1385,9 @@ const NX_CRYPTO_METHOD                     *session_hmac_method = NX_NULL;
     data_len = data_len + 1;
     
     /* Now copy in label with TLS 1.3 prefix. */
-    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], "tls13 ", 6);
+    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], "tls13 ", 6); 
     data_len += 6;
-    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], label, label_len);
+    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], label, label_len); 
     data_len += label_len;
 
     /* Add the length of the context (single octet). */
@@ -1395,7 +1395,7 @@ const NX_CRYPTO_METHOD                     *session_hmac_method = NX_NULL;
     data_len = data_len + 1;    
     
     /* Now copy in context. */
-    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], context, context_len);
+    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], context, context_len); 
     data_len += context_len;
 
 

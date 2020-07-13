@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_dns_name_initialize                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -66,14 +66,23 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_dns_name_initialize(NX_SECURE_X509_DNS_NAME *dns_name,
                                          const UCHAR *name_string, USHORT length)
 {
 
+    /* Make sure we don't copy over the end of the buffer. */
+    if (dns_name -> nx_secure_x509_dns_name_length > NX_SECURE_X509_DNS_NAME_MAX)
+    {
+        dns_name -> nx_secure_x509_dns_name_length = NX_SECURE_X509_DNS_NAME_MAX;
+    }
+
     /* Copy the name string into the entry structure. */
-    NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, name_string, length);
+    NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, name_string, length); 
 
     dns_name -> nx_secure_x509_dns_name_length = length;
 

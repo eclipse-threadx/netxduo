@@ -23,10 +23,10 @@
 
 /**************************************************************************/ 
 /*                                                                        */ 
-/*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
+/*  APPLICATION INTERFACE DEFINITION                       RELEASE        */  
 /*                                                                        */   
 /*    nxd_dhcp_server.h                                   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -43,6 +43,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            modified the type of        */
+/*                                            nx_dhcp_user_options,       */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -444,7 +448,7 @@ typedef struct NX_DHCP_CLIENT_STRUCT
     UINT            nx_dhcp_client_hwtype;       /* Client interface hardware type e.g. Ethernet. */
     ULONG           nx_dhcp_broadcast_flag_set;  /* Parse broadcast flags from DHCP messages. */
     UINT            nx_dhcp_client_option_count; /* Number of user options in client request */ 
-    UINT            nx_dhcp_user_options[NX_DHCP_CLIENT_OPTIONS_MAX];   
+    UCHAR           nx_dhcp_user_options[NX_DHCP_CLIENT_OPTIONS_MAX];   
     ULONG           nx_dhcp_session_timeout;     /* Time out on waiting for client's next response */
     UINT            nx_dhcp_response_type_to_client; 
                                                  /* DHCP code for response to send back to client. */

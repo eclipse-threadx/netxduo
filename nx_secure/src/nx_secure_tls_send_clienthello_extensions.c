@@ -204,7 +204,7 @@ UINT   status;
             length += 2;
 
             /* Add Cookie. */
-            NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_cookie, tls_session -> nx_secure_tls_cookie_length);
+            NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_cookie, tls_session -> nx_secure_tls_cookie_length); 
             length += (tls_session -> nx_secure_tls_cookie_length);
 
             /* Update total extensions length and reset the stored cookie length. */
@@ -780,7 +780,7 @@ USHORT named_curve;
     offset += 2;
 
     /* Set the key data from our already-generated ECC keys. */
-    NX_SECURE_MEMCPY(&packet_buffer[offset], &tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[entry_index].nx_secure_tls_ecdhe_public_key[0], key_length);
+    NX_SECURE_MEMCPY(&packet_buffer[offset], &tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[entry_index].nx_secure_tls_ecdhe_public_key[0], key_length); 
     offset += (key_length);
 
     /* Get the length of the entire extension. */
@@ -983,7 +983,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
         offset += 2;
 
         /* Put the ID data into our packet. */
-        NX_SECURE_MEMCPY(&packet_buffer[offset], id, id_len);
+        NX_SECURE_MEMCPY(&packet_buffer[offset], id, id_len); 
         offset += (UINT)(id_len);
 
         /* Set the obfuscated PSK age. */
@@ -1059,7 +1059,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
         /* Save the handshake hash state. */
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
                          tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
-                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size);
+                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); 
     }
 
     /* Hash the ClientHello up to its current point. */
@@ -1083,7 +1083,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
     {
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
                          tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
-                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size);
+                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); 
     }
 
     /* Loop through all IDs and set the binders accordingly. */
@@ -1122,7 +1122,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
         offset += (UINT)(1);
 
         /* Put the binder data into the packet. */
-        NX_SECURE_MEMCPY(&packet_buffer[offset], binder, binder_len);
+        NX_SECURE_MEMCPY(&packet_buffer[offset], binder, binder_len); 
         offset += (UINT)(binder_len);
 
         /* Update our total with the binder length (binder_len) and length field(1). */
@@ -1386,7 +1386,7 @@ UINT   data_length;
     offset += 2;
 
     /* Write the name into the packet. */
-    NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_sni_extension_server_name -> nx_secure_x509_dns_name, data_length);
+    NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_sni_extension_server_name -> nx_secure_x509_dns_name, data_length); 
     offset += data_length;
 
     /* Return the amount of data we wrote. */
@@ -1557,7 +1557,7 @@ UINT   data_length;
         offset++;
 
         /* Copy the verify data into the packet. */
-        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_local_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE);
+        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_local_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); 
         offset += NX_SECURE_TLS_FINISHED_HASH_SIZE;
     }
 

@@ -1552,7 +1552,7 @@ UINT status;
     }                                                     
     
 
-    NX_CRYPTO_MEMCPY(key_encryption_key, buffer, 16);
+    NX_CRYPTO_MEMCPY(key_encryption_key, buffer, 16); 
 
     if (hash_method -> nx_crypto_cleanup)
     {

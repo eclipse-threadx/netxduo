@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_ciphersuite_lookup                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -46,6 +46,8 @@
 /*    ciphersuite                           Ciphersuite value             */
 /*    info                                  Pointer to ciphersuite info   */
 /*                                            structure (output)          */
+/*    priority                              Priority index of ciphersuite */
+/*                                            in the ciphersuite table    */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
@@ -66,10 +68,13 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), return   */
+/*                                            priority of selected suite, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_ciphersuite_lookup(NX_SECURE_TLS_SESSION *tls_session, UINT ciphersuite,
-                                       NX_SECURE_TLS_CIPHERSUITE_INFO const **info)
+                                       NX_SECURE_TLS_CIPHERSUITE_INFO const **info, USHORT *priority)
 {
 USHORT                          index;
 NX_SECURE_TLS_CIPHERSUITE_INFO *cipher_table;
@@ -84,7 +89,11 @@ USHORT                          cipher_table_size;
         /* See if the ciphersuite is supported. */
         if (cipher_table[index].nx_secure_tls_ciphersuite == ciphersuite)
         {
+            /* Return the ciphersuite information. */
             *info = &cipher_table[index];
+
+            /* Return the priority index (lower number == higher priority). */
+            *priority = index;
             return(NX_SUCCESS);
         }
     }

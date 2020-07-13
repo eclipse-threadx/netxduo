@@ -4271,7 +4271,7 @@ ULONG *buffer;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_convert_seconds_to_date     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4313,6 +4313,9 @@ ULONG *buffer;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed leap year calculation,*/
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_sntp_client_utility_convert_seconds_to_date(NX_SNTP_TIME *current_NTP_time_ptr, UINT current_year, 
@@ -4330,6 +4333,7 @@ UINT seconds_diff;
 UINT years_diff;
 UINT leapyears_diff;
 UINT leaps;
+UINT seconds_of_year;
 UINT seconds_into_currentyear;
 UINT seconds_into_currentmonth;
 UINT seconds_into_currentday;
@@ -4356,13 +4360,15 @@ UINT seconds_into_currenthour;
         if (leaps == 0 )
         {
             /* It is! */
-            current_date_time_ptr -> leap_year = NX_TRUE;        
+            current_date_time_ptr -> leap_year = NX_TRUE;      
+            seconds_of_year = SECONDS_PER_LEAPYEAR;
         }
         else
         {
 
             /* Not a leap year. Clear the leap year flag. */
             current_date_time_ptr -> leap_year = NX_FALSE;
+            seconds_of_year = SECONDS_PER_NONLEAPYEAR;
         }
 
         /* Compute number of seconds into the current year e.g. as of 01/01 at midnite by subtracting
@@ -4373,7 +4379,7 @@ UINT seconds_into_currenthour;
 
         current_year++;
 
-    }while(seconds_into_currentyear > SECONDS_PER_NONLEAPYEAR);
+    }while(seconds_into_currentyear > seconds_of_year);
 
     /* Initialize month to January till we find out what the month is. */
     current_date_time_ptr -> month = JANUARY;

@@ -24,7 +24,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_tcpserver.h                                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -39,6 +39,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed packet leak issue,    */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -92,6 +95,9 @@ typedef struct NX_TCP_SESSION_STRUCT
 
     /* Expiration timeout for this socket. */
     ULONG                   nx_tcp_session_expiration;
+
+    /* Connection flag. */
+    UINT                    nx_tcp_session_connected;
 
     /* Reserved value for passing data to/from individual sessions. */
     ULONG                   nx_tcp_session_reserved;

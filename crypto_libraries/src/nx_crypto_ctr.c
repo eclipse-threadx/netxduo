@@ -27,7 +27,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ctr_xor                                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -59,11 +59,14 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), disabled */
+/*                                            unaligned access by default,*/
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_ctr_xor(UCHAR *plaintext, UCHAR *key, UCHAR *ciphertext)
 {
-#ifndef NX_CRYPTO_DISABLE_UNALIGNED_ACCESS
+#ifdef NX_CRYPTO_ENABLE_UNALIGNED_ACCESS
 UINT *p = (UINT *)plaintext;
 UINT *c = (UINT *)ciphertext;
 UINT *k = (UINT *)key;
@@ -229,7 +232,7 @@ UINT   i;
     {
         crypto_function(crypto_metadata, control_block, aes_output, block_size);
         _nx_crypto_ctr_xor(&input[i], aes_output, aes_output);
-        NX_CRYPTO_MEMCPY(&output[i], aes_output, length - i);
+        NX_CRYPTO_MEMCPY(&output[i], aes_output, length - i); 
     }
 
 #ifdef NX_SECURE_KEY_CLEAR
@@ -297,8 +300,8 @@ UCHAR  *control_block = ctr_metadata -> nx_crypto_ctr_counter_block;
      */
     NX_CRYPTO_MEMSET(control_block, 0x0, 16);
     control_block[15] = 1;
-    NX_CRYPTO_MEMCPY(&control_block[4], iv, 8);
-    NX_CRYPTO_MEMCPY(&control_block[0], nonce, 4);
+    NX_CRYPTO_MEMCPY(&control_block[4], iv, 8); 
+    NX_CRYPTO_MEMCPY(&control_block[0], nonce, 4); 
 
     return(NX_CRYPTO_SUCCESS);
 }

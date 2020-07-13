@@ -142,7 +142,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
         length = (USHORT)(length + 2);
 
         /* Extract the identity hint and put it into the packet buffer. */
-        NX_SECURE_MEMCPY(&packet_buffer[length], identity, identity_length);
+        NX_SECURE_MEMCPY(&packet_buffer[length], identity, identity_length); 
 
         /* Advance our total length. */
         length = (USHORT)(length + identity_length);

@@ -209,7 +209,7 @@ UCHAR                  epoch_seq_num[8];
         }
 
         /* Append the hash to the plaintext data before encryption. */
-        NX_SECURE_MEMCPY(&data[length], record_hash, hash_length);
+        NX_SECURE_MEMCPY(&data[length], record_hash, hash_length); 
 
 #ifdef NX_SECURE_KEY_CLEAR
         NX_SECURE_MEMSET(record_hash, 0, hash_length);

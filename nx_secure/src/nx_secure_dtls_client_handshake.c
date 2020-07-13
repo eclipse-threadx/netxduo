@@ -181,7 +181,7 @@ NX_SECURE_TLS_SESSION *tls_session;
             dtls_session -> nx_secure_dtls_fragment_length -= fragment_length;
 
             /* Copy the fragment data (minus the header) into the reassembly buffer. */
-            NX_SECURE_MEMCPY(&fragment_buffer[fragment_offset], &packet_buffer[header_bytes], fragment_length);
+            NX_SECURE_MEMCPY(&fragment_buffer[fragment_offset], &packet_buffer[header_bytes], fragment_length); 
 
             /* If we still have fragments to add, just return success. */
             if (dtls_session -> nx_secure_dtls_fragment_length > 0)

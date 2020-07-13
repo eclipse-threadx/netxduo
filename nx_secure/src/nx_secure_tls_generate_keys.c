@@ -142,9 +142,9 @@ VOID                                 *handler = NX_NULL;
 
         /* Concatenate random values to feed into PRF. */
         NX_SECURE_MEMCPY(_nx_secure_tls_gen_keys_random, tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random,
-                         NX_SECURE_TLS_RANDOM_SIZE);
+                         NX_SECURE_TLS_RANDOM_SIZE); 
         NX_SECURE_MEMCPY(&_nx_secure_tls_gen_keys_random[NX_SECURE_TLS_RANDOM_SIZE],
-                         tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random, NX_SECURE_TLS_RANDOM_SIZE);
+                         tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random, NX_SECURE_TLS_RANDOM_SIZE); 
 
         /* Generate the master secret using the pre-master secret, the defined TLS label, and the concatenated
            random values. */
@@ -290,9 +290,9 @@ VOID                                 *handler = NX_NULL;
     /* The order of the randoms is reversed from that used for the master secret
        when generating the key block.  */
     NX_SECURE_MEMCPY(_nx_secure_tls_gen_keys_random, tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random,
-                     NX_SECURE_TLS_RANDOM_SIZE);
+                     NX_SECURE_TLS_RANDOM_SIZE); 
     NX_SECURE_MEMCPY(&_nx_secure_tls_gen_keys_random[NX_SECURE_TLS_RANDOM_SIZE],
-                     tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, NX_SECURE_TLS_RANDOM_SIZE);
+                     tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, NX_SECURE_TLS_RANDOM_SIZE); 
 
     /* Key expansion uses the PRF to generate a block of key material from the master secret (generated
        above) and the client and server random values transmitted during the initial hello negotiation. */

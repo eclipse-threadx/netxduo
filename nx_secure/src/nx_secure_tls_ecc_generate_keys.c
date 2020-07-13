@@ -47,7 +47,7 @@ static const UCHAR _NX_CRYPTO_DER_OID_SHA_512[]     =  {0x30, 0x51, 0x30, 0x0d, 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_ecc_generate_keys                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -92,6 +92,9 @@ static const UCHAR _NX_CRYPTO_DER_OID_SHA_512[]     =  {0x30, 0x51, 0x30, 0x0d, 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), update   */
+/*                                            ECC find curve method,      */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_ecc_generate_keys(NX_SECURE_TLS_SESSION *tls_session, UINT ecc_named_curve, USHORT sign_key,
@@ -148,7 +151,7 @@ USHORT                                signature_algorithm_id;
     ecc_data->nx_secure_tls_ecdhe_named_curve = ecc_named_curve;
 
     /* Find out which named curve the we are using. */
-    status = _nx_secure_tls_find_curve_method(tls_session, (USHORT)ecc_named_curve, &curve_method);
+    status = _nx_secure_tls_find_curve_method(tls_session, (USHORT)ecc_named_curve, &curve_method, NX_NULL);
     if(status != NX_SUCCESS)
     {
         return(status);
@@ -726,10 +729,10 @@ USHORT                                signature_algorithm_id;
             _nx_secure_padded_signature[signature_offset - 1] = 0x0;
             if (der_encoding_length > 0)
             {
-                NX_CRYPTO_MEMCPY(&_nx_secure_padded_signature[signature_offset], der_encoding, der_encoding_length);
+                NX_CRYPTO_MEMCPY(&_nx_secure_padded_signature[signature_offset], der_encoding, der_encoding_length); 
                 signature_offset += der_encoding_length;
             }
-            NX_CRYPTO_MEMCPY(&_nx_secure_padded_signature[signature_offset], hash, hash_length);
+            NX_CRYPTO_MEMCPY(&_nx_secure_padded_signature[signature_offset], hash, hash_length); 
 
             if (auth_method -> nx_crypto_init != NX_NULL)
             {
@@ -787,7 +790,7 @@ USHORT                                signature_algorithm_id;
             ec_pubkey = &certificate -> nx_secure_x509_public_key.ec_public_key;
 
             /* Find out which named curve the local certificate is using. */
-            status = _nx_secure_tls_find_curve_method(tls_session, (USHORT)(ec_privkey -> nx_secure_ec_named_curve), &curve_method_cert);
+            status = _nx_secure_tls_find_curve_method(tls_session, (USHORT)(ec_privkey -> nx_secure_ec_named_curve), &curve_method_cert, NX_NULL);
             if(status != NX_SUCCESS)
             {
                 return(status);

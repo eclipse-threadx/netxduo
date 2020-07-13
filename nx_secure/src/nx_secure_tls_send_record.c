@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_record                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,6 +80,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            fixed race condition for    */
+/*                                            multithread transmission,   */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
@@ -100,6 +104,29 @@ NX_PACKET *current_packet;
     /* Length of the data in the packet. */
     length = send_packet -> nx_packet_length;
 
+    if ((tls_session -> nx_secure_tls_tcp_socket) &&
+        (tls_session -> nx_secure_tls_tcp_socket -> nx_tcp_socket_ip_ptr) &&
+        (tx_thread_identify() == &(tls_session -> nx_secure_tls_tcp_socket -> nx_tcp_socket_ip_ptr -> nx_ip_thread)))
+    {
+
+        /* No wait is allowed for IP thread to avoid dead lock. */
+        wait_option = 0;
+    }
+
+    tx_mutex_put(&_nx_secure_tls_protection);
+
+    /* Get transmit mutex first. */
+    status = tx_mutex_get(&(tls_session -> nx_secure_tls_session_transmit_mutex), wait_option);
+
+    tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
+
+    if (status)
+    {
+
+        /* Unable to send due to another thread is still transmitting. */
+        return(NX_SECURE_TLS_TRANSMIT_LOCKED);
+    }
+
     /* See if this is an active session, we need to account for the IV if the session cipher
        uses one. TLS 1.3 does not use an explicit IV so don't add it.*/
     if (tls_session -> nx_secure_tls_local_session_active
@@ -114,6 +141,7 @@ NX_PACKET *current_packet;
 
         if (status != NX_SUCCESS)
         {
+            tx_mutex_put(&(tls_session -> nx_secure_tls_session_transmit_mutex));
             return(status);
         }
 
@@ -122,6 +150,7 @@ NX_PACKET *current_packet;
         {
 
             /* Return an invalid packet error.  */
+            tx_mutex_put(&(tls_session -> nx_secure_tls_session_transmit_mutex));
             return(NX_SECURE_TLS_INVALID_PACKET);
         }
 
@@ -140,6 +169,7 @@ NX_PACKET *current_packet;
     {
 
         /* Return an invalid packet error.  */
+        tx_mutex_put(&(tls_session -> nx_secure_tls_session_transmit_mutex));
         return(NX_SECURE_TLS_INVALID_PACKET);
     }
 
@@ -171,6 +201,7 @@ NX_PACKET *current_packet;
         {
 
             /* Likely internal error since at this point ciphersuite negotiation was theoretically completed. */
+            tx_mutex_put(&(tls_session -> nx_secure_tls_session_transmit_mutex));
             return(NX_SECURE_TLS_UNKNOWN_CIPHERSUITE);
         }
 
@@ -184,6 +215,7 @@ NX_PACKET *current_packet;
 
             if(status != NX_SUCCESS)
             {
+                tx_mutex_put(&(tls_session -> nx_secure_tls_session_transmit_mutex));
                 return(status);
             }
 
@@ -227,6 +259,7 @@ NX_PACKET *current_packet;
             /* Check return from hash routine initialization. */
             if (status != NX_SUCCESS)
             {
+                tx_mutex_put(&(tls_session -> nx_secure_tls_session_transmit_mutex));
                 return(status);
             }
 
@@ -276,6 +309,7 @@ NX_PACKET *current_packet;
 
         if (status != NX_SUCCESS)
         {
+            tx_mutex_put(&(tls_session -> nx_secure_tls_session_transmit_mutex));
             return(status);
         }
 
@@ -326,6 +360,9 @@ NX_PACKET *current_packet;
 
     /* Get the protection after nx_tcp_socket_send. */
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
+
+    /* Release transmit mutex. */
+    tx_mutex_put(&(tls_session -> nx_secure_tls_session_transmit_mutex));
 
     return(status);
 }

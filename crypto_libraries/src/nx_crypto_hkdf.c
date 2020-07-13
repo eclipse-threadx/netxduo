@@ -190,7 +190,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hkdf_operation                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -235,6 +235,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hkdf_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -307,8 +310,13 @@ UINT                 status;
             return(NX_CRYPTO_POINTER_ERROR);
         }
 
+        if ((key_size_in_bits >> 3) > sizeof(hkdf->nx_crypto_hkdf_prk))
+        {
+            return(NX_CRYPTO_SIZE_ERROR);
+        }
+
         /* Set the PRK and return. */
-        NX_CRYPTO_MEMCPY(hkdf->nx_crypto_hkdf_prk, key, (key_size_in_bits >> 3));
+        NX_CRYPTO_MEMCPY(hkdf->nx_crypto_hkdf_prk, key, (key_size_in_bits >> 3)); 
         hkdf->nx_crypto_hkdf_prk_size = (key_size_in_bits >> 3);
 
         break;
@@ -338,8 +346,13 @@ UINT                 status;
 
         if(status == NX_CRYPTO_SUCCESS)
         {
+            if (output_length_in_byte < hkdf->nx_crypto_hkdf_prk_size)
+            {
+                return(NX_CRYPTO_SIZE_ERROR);
+            }
+
             /* Copy the PRK into output. */
-            NX_CRYPTO_MEMCPY(output, hkdf->nx_crypto_hkdf_prk, hkdf->nx_crypto_hkdf_prk_size);
+            NX_CRYPTO_MEMCPY(output, hkdf->nx_crypto_hkdf_prk, hkdf->nx_crypto_hkdf_prk_size); 
         }
 
         break;
@@ -515,7 +528,7 @@ NX_CRYPTO_METHOD *hmac_method = hkdf -> nx_crypto_hmac_method;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hkdf_expand                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -547,6 +560,9 @@ NX_CRYPTO_METHOD *hmac_method = hkdf -> nx_crypto_hmac_method;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_hkdf_expand(NX_CRYPTO_HKDF *hkdf, UCHAR *output, UINT desired_length)
@@ -644,8 +660,13 @@ NX_CRYPTO_METHOD *hmac_method = hkdf -> nx_crypto_hmac_method;
      * to N_count to get the full amount of data. */
     for (i = 1; i < N_count + 1; ++i)
     {
+        if ((T_len + info_len + 1) > temp_T_size)
+        {
+            return(NX_CRYPTO_SIZE_ERROR);
+        }
+
         /* Concatenate T(i-1) (in temp_T after the hash above), info, and counter octet to feed into digest. */
-        NX_CRYPTO_MEMCPY(&temp_T[T_len], info, info_len);
+        NX_CRYPTO_MEMCPY(&temp_T[T_len], info, info_len); 
 
         /* Concatenate counter octet. */
         temp_T[T_len + info_len] = (UCHAR)(i & 0xFF);
@@ -715,7 +736,7 @@ NX_CRYPTO_METHOD *hmac_method = hkdf -> nx_crypto_hmac_method;
         }        
         
         /* Copy T(i) into output. */
-        NX_CRYPTO_MEMCPY(&output[offset], temp_T, output_len);
+        NX_CRYPTO_MEMCPY(&output[offset], temp_T, output_len); 
 
     }
 

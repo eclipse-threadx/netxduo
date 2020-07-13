@@ -111,7 +111,7 @@ USHORT protocol_version;
         random_value = (UINT)NX_RAND();
         NX_CHANGE_ULONG_ENDIAN(random_value);
         NX_SECURE_MEMCPY(&dtls_session -> nx_secure_dtls_cookie[i],
-               (UCHAR *)&random_value, sizeof(random_value));
+               (UCHAR *)&random_value, sizeof(random_value)); 
     }
 
     if (dtls_session -> nx_secure_dtls_cookie_length > sizeof(dtls_session -> nx_secure_dtls_cookie))
@@ -122,7 +122,7 @@ USHORT protocol_version;
     }
 
     /* Copy the cookie into the packet. */
-    NX_SECURE_MEMCPY(&packet_buffer[length], dtls_session -> nx_secure_dtls_cookie, dtls_session -> nx_secure_dtls_cookie_length);
+    NX_SECURE_MEMCPY(&packet_buffer[length], dtls_session -> nx_secure_dtls_cookie, dtls_session -> nx_secure_dtls_cookie_length); 
     length += dtls_session -> nx_secure_dtls_cookie_length;
 
     /* Save off and return the number of bytes we wrote and need to send. */

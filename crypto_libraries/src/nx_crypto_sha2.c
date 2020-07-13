@@ -223,7 +223,7 @@ ULONG needed_fill_bytes;
 
         /* Copy the appropriate portion of the input buffer into the internal
            buffer of the context.  */
-        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha256_buffer[current_bytes]), (void *)input_ptr, needed_fill_bytes);
+        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha256_buffer[current_bytes]), (void *)input_ptr, needed_fill_bytes); 
 
         /* Process the 64-byte (512 bit) buffer.  */
         _nx_crypto_sha256_process_buffer(context, context -> nx_sha256_buffer);
@@ -253,7 +253,7 @@ ULONG needed_fill_bytes;
     {
         /* Save the remaining bytes in the internal buffer after any remaining bytes
            so that it is processed later.  */
-        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha256_buffer[current_bytes]), (void *)input_ptr, input_length);
+        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha256_buffer[current_bytes]), (void *)input_ptr, input_length); 
     }
 
     /* Return success.  */

@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_delete                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -63,6 +63,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            fixed race condition for    */
+/*                                            multithread transmission,   */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_session_delete(NX_SECURE_TLS_SESSION *tls_session)
@@ -108,6 +112,9 @@ UINT status;
 
     /* Make sure the session is completely reset - set ID to zero for error checking. */
     tls_session -> nx_secure_tls_id = 0;
+
+    /* Delete the mutex used for TLS session while transmitting packets. */
+    tx_mutex_delete(&(tls_session -> nx_secure_tls_session_transmit_mutex));
 
     /* Release the protection. */
     tx_mutex_put(&_nx_secure_tls_protection);

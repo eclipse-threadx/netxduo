@@ -123,7 +123,7 @@ NX_SECURE_TLS_SESSION                *tls_session;
     {
         return(NX_SECURE_TLS_HASH_MAC_VERIFY_FAILURE);
     }
-    NX_SECURE_MEMCPY(header, header_data, header_length);
+    NX_SECURE_MEMCPY(header, header_data, header_length); 
 
     /* Adjust the length in the header to match data without hash. */
 

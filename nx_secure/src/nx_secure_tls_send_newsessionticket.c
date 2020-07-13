@@ -205,7 +205,7 @@ UCHAR            *packet_buffer;
     length += 2;
 
     /* Copy in ticket. */
-    NX_SECURE_MEMCPY(&packet_buffer[length], ticket, ticket_len);
+    NX_SECURE_MEMCPY(&packet_buffer[length], ticket, ticket_len); 
     length += ticket_len;
 
     /* Add in extensions if available. */

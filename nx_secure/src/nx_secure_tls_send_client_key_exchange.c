@@ -123,7 +123,7 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
             return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
         }
 
-        NX_SECURE_MEMCPY(packet_buffer, tls_session -> nx_secure_tls_key_material.nx_secure_tls_new_key_material_data, data_size);
+        NX_SECURE_MEMCPY(packet_buffer, tls_session -> nx_secure_tls_key_material.nx_secure_tls_new_key_material_data, data_size); 
     }
     else
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
@@ -148,7 +148,7 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
 
             /* Send the PSK Identity string to the remote server along with its length. */
             NX_SECURE_MEMCPY(encrypted_data_ptr, tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_id,
-                   tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_id_size);
+                   tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_id_size); 
 
             /* Make sure our size is correct. */
             data_size = tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_id_size;
@@ -237,7 +237,7 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
 
             /* Now put the pre-master data into the padded buffer - must be at the end. */
             NX_SECURE_MEMCPY(&_nx_secure_client_padded_pre_master[data_size - NX_SECURE_TLS_RSA_PREMASTER_SIZE],
-                   tls_session -> nx_secure_tls_key_material.nx_secure_tls_pre_master_secret, NX_SECURE_TLS_RSA_PREMASTER_SIZE);
+                   tls_session -> nx_secure_tls_key_material.nx_secure_tls_pre_master_secret, NX_SECURE_TLS_RSA_PREMASTER_SIZE); 
 
             if (public_cipher_method -> nx_crypto_init != NX_NULL)
             {

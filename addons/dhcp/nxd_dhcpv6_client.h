@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */ 
 /*    nxd_dhcpv6_client.h                                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -43,6 +43,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -1025,16 +1028,16 @@ UINT        _nx_dhcpv6_scan_packet_options(NX_DHCPV6 *dhcpv6_ptr, NX_PACKET *pac
 UINT        _nx_dhcpv6_preprocess_packet_information(NX_DHCPV6 *dhcpv6_ptr, NX_PACKET *packet_ptr);
 UINT        _nx_dhcpv6_extract_packet_information(NX_DHCPV6 *dhcpv6_ptr, NX_PACKET *packet_ptr);       
 VOID        _nx_dhcpv6_flush_queue_packets(NX_DHCPV6 *dhcpv6_ptr);
-UINT        _nx_dhcpv6_process_client_duid(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length);
-UINT        _nx_dhcpv6_process_DNS_server(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length);
-UINT        _nx_dhcpv6_process_domain_name(NX_DHCPV6 *dhcpv6_ptr, UCHAR *packet_start, UCHAR *received_buffer, UINT length);
-UINT        _nx_dhcpv6_process_ia(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length, UINT ia_index);
-UINT        _nx_dhcpv6_process_iana(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length);
-UINT        _nx_dhcpv6_process_preference(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length);
-UINT        _nx_dhcpv6_process_server_duid(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length);
-UINT        _nx_dhcpv6_process_status(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length);
-UINT        _nx_dhcpv6_process_time_zone(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length);
-UINT        _nx_dhcpv6_process_time_server(NX_DHCPV6 *dhcpv6_ptr, UCHAR *received_buffer, UINT length);
+UINT        _nx_dhcpv6_process_client_duid(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length);
+UINT        _nx_dhcpv6_process_DNS_server(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length);
+UINT        _nx_dhcpv6_process_domain_name(NX_DHCPV6 *dhcpv6_ptr, UCHAR *packet_start, UCHAR *option_data, UINT option_length);
+UINT        _nx_dhcpv6_process_ia(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length, UINT ia_index);
+UINT        _nx_dhcpv6_process_iana(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length);
+UINT        _nx_dhcpv6_process_preference(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length);
+UINT        _nx_dhcpv6_process_server_duid(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length);
+UINT        _nx_dhcpv6_process_status(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length);
+UINT        _nx_dhcpv6_process_time_zone(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length);
+UINT        _nx_dhcpv6_process_time_server(NX_DHCPV6 *dhcpv6_ptr, UCHAR *option_data, UINT option_length);
 VOID        _nx_dhcpv6_IP_lifetime_timeout_entry(ULONG dhcpv6_ptr_value);
 VOID        _nx_dhcpv6_session_timeout_entry(ULONG dhcpv6_ptr_value);
 UINT        _nx_dhcpv6_utility_get_block_option_length(UCHAR *buffer_ptr, ULONG *option, ULONG *length);

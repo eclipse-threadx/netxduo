@@ -82,7 +82,7 @@ UINT status;
     {
 
         /* If the IP Address and port are uninitialized, set them now (possibly an error?). */
-        NX_SECURE_MEMCPY(&dtls_session -> nx_secure_dtls_remote_ip_address, ip_address, sizeof(NXD_ADDRESS));
+        NX_SECURE_MEMCPY(&dtls_session -> nx_secure_dtls_remote_ip_address, ip_address, sizeof(NXD_ADDRESS)); 
         dtls_session -> nx_secure_dtls_local_port = port;
     }
     else if ((dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_version != ip_address -> nxd_ip_version) ||

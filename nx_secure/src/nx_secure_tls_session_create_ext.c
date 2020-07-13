@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_create_ext                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -76,6 +76,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            fixed race condition for    */
+/*                                            multithread transmission,   */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -493,7 +497,7 @@ const NX_CRYPTO_METHOD *crypto_method_sha256;
     /* Get a working pointer to the metadata buffer. */
     metadata_area = (CHAR*)metadata_buffer;
 
-    if(tls_session->nx_secure_tls_crypto_table != NX_NULL)
+    if((crypto_array == NX_NULL) || (cipher_map == NX_NULL))
     {
 
         /* Coming from the old-style API. Don't allocate crypto table. */
@@ -814,6 +818,9 @@ const NX_CRYPTO_METHOD *crypto_method_sha256;
 
     /* Set ID to check initialization status. */
     tls_session -> nx_secure_tls_id = NX_SECURE_TLS_ID;
+
+    /* Create the mutex used for TLS session while transmitting packets. */
+    tx_mutex_create(&(tls_session -> nx_secure_tls_session_transmit_mutex), "TLS transmit mutex", TX_NO_INHERIT);
 
     /* Release the protection. */
     tx_mutex_put(&_nx_secure_tls_protection);

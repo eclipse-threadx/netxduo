@@ -55,7 +55,7 @@ static VOID        _nx_dhcp_fast_periodic_timer_entry(ULONG info);
 static UINT        _nx_dhcp_server_packet_process(NX_DHCP_SERVER *dhcp_ptr, NX_PACKET *packet_ptr);
 static UINT        _nx_dhcp_respond_to_client_message(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT *dhcp_client_ptr);
 static UINT        _nx_dhcp_server_extract_information(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT **dhcp_client_ptr, NX_PACKET *packet_ptr, UINT iface_index);
-static UINT        _nx_dhcp_process_option_data(NX_DHCP_CLIENT *dhcp_ptr, CHAR *buffer, ULONG value, UINT get_option_data, UINT size);
+static UINT        _nx_dhcp_process_option_data(NX_DHCP_CLIENT *dhcp_ptr, CHAR *buffer, UCHAR value, UINT get_option_data, UINT size);
 static UINT        _nx_dhcp_add_option(UCHAR *bootp_message, UINT option, UINT size, ULONG value, UINT *index);
 static UINT        _nx_dhcp_add_requested_option(NX_DHCP_SERVER *dhcp_ptr, UINT iface_index, UCHAR *buffer, UINT option, UINT *index);
 static UINT        _nx_dhcp_set_server_options(NX_DHCP_SERVER *dhcp_ptr, CHAR *buffer, UINT buffer_length);
@@ -4744,7 +4744,7 @@ UINT                            lease_time;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_server_extract_information                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4792,6 +4792,10 @@ UINT                            lease_time;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed the issue of read     */
+/*                                            and write overflow,         */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_server_extract_information(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT **dhcp_client_ptr, 
@@ -4975,7 +4979,7 @@ NX_DHCP_CLIENT  *temp_client_rec_ptr;
         {
 
             /* Guard against a missing "END" marker by checking if we are at the end of the DHCP packet data. */
-            if (work_ptr >= packet_ptr -> nx_packet_append_ptr)
+            if (work_ptr + 2 > packet_ptr -> nx_packet_append_ptr)
             {
 
                 /* Yes, Client must have sent a DHCP message with improperly terminated option 
@@ -4995,30 +4999,27 @@ NX_DHCP_CLIENT  *temp_client_rec_ptr;
             /* Move up the buffer pointer to the next option. */
             work_ptr++;
 
+            /* Validate the size. */
+            if (work_ptr + size > packet_ptr -> nx_packet_append_ptr)
+            {
+                return(NX_DHCP_IMPROPERLY_TERMINATED_OPTION);
+            }
 
             /* Is this the client ID option? */
             if (value != NX_DHCP_SERVER_OPTION_CLIENT_ID)
             {
 
-                /* No, process as any other option. */
-                _nx_dhcp_process_option_data(temp_client_rec_ptr, (CHAR *)work_ptr, value, NX_TRUE, size);
+                /* Check if there is enough space to store client requested options. */
+                if (temp_client_rec_ptr -> nx_dhcp_client_option_count < NX_DHCP_CLIENT_OPTIONS_MAX)
+                {
 
-                /* Move up the buffer pointer past the current option data size to the next option. */
-                work_ptr += size;
-            }
-            else
-            {
-
-                 work_ptr += size;
+                    /* Process as any other option. */
+                    _nx_dhcp_process_option_data(temp_client_rec_ptr, (CHAR *)work_ptr, (UCHAR)value, NX_TRUE, size);
+                }
             }
 
-            /* Check that we haven't exceeded the limit on Client option requests. */
-            if (temp_client_rec_ptr -> nx_dhcp_client_option_count >= NX_DHCP_CLIENT_OPTIONS_MAX)
-            {
-
-                /* We have. This is all we have room to process. */
-                break;
-            }
+            /* Move up the buffer pointer past the current option data size to the next option. */
+            work_ptr += size;
         }
     }
 
@@ -5034,7 +5035,7 @@ NX_DHCP_CLIENT  *temp_client_rec_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_get_option_data                            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5067,24 +5068,25 @@ NX_DHCP_CLIENT  *temp_client_rec_ptr;
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_dhcp_server_extract_information   Extract DHCP data from packet  */ 
+/*    _nx_dhcp_server_extract_information   Extract DHCP data from packet */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed the issue of infinite */
+/*                                            recursion,                  */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
-static UINT  _nx_dhcp_process_option_data(NX_DHCP_CLIENT *dhcp_client_ptr, CHAR *buffer, ULONG option, UINT get_option_data, UINT size)
+static UINT  _nx_dhcp_process_option_data(NX_DHCP_CLIENT *dhcp_client_ptr, CHAR *buffer, UCHAR option, UINT get_option_data, UINT size)
 {
 
-CHAR  *temp_ptr;
 UINT  status;
 ULONG option_value = 0;
 
-
-    
     /* Do we parse option data for this option? */
     if (get_option_data)
     {
@@ -5173,7 +5175,7 @@ ULONG option_value = 0;
 
         case 53:
             /* Message type */
-            dhcp_client_ptr -> nx_dhcp_user_options[dhcp_client_ptr -> nx_dhcp_client_option_count] = (UCHAR)option;
+            dhcp_client_ptr -> nx_dhcp_user_options[dhcp_client_ptr -> nx_dhcp_client_option_count] = option;
             dhcp_client_ptr -> nx_dhcp_message_type = (UCHAR)option_value;
             dhcp_client_ptr -> nx_dhcp_client_option_count++;
             break;
@@ -5192,25 +5194,16 @@ ULONG option_value = 0;
             break;
 
         case 55:
-            /* Option parameter list */
-            temp_ptr = buffer ;
 
-            /* Call this function to handle options within the option 55. */
-            while (size)
+            /* Check if there is enough space to store all the client requested options. */
+            if (dhcp_client_ptr -> nx_dhcp_client_option_count + size > NX_DHCP_CLIENT_OPTIONS_MAX)
             {
-
-                /* Get the next option in the Option parameter list. */
-                _nx_dhcp_server_get_data((UCHAR *)temp_ptr, 1, &option);
-
-                /* Update the client record with that option. */
-                _nx_dhcp_process_option_data(dhcp_client_ptr, temp_ptr, option, NX_FALSE, 1);
-
-                /* Move down the buffer containing the option parameter list data. */
-                temp_ptr++;
-
-                /* Update the amount of option data left for option 55. */
-                size--;
+                size = NX_DHCP_CLIENT_OPTIONS_MAX - dhcp_client_ptr -> nx_dhcp_client_option_count;
             }
+
+            /* Update the client record with that option. */
+            memcpy(&(dhcp_client_ptr -> nx_dhcp_user_options[dhcp_client_ptr -> nx_dhcp_client_option_count]), buffer, size);
+            dhcp_client_ptr -> nx_dhcp_client_option_count += size;
             break;
 
         case 61:    

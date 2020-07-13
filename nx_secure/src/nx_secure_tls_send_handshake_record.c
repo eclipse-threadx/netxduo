@@ -135,7 +135,7 @@ UINT       buffer_offset;
 #endif /* (NX_SECURE_TLS_TLS_1_3_ENABLED) */
             {
                 NX_SECURE_MEMCPY(&tls_session->nx_secure_tls_key_material.nx_secure_tls_handshake_cache[buffer_offset],
-                                 current_packet -> nx_packet_prepend_ptr, (UINT)length);
+                                 current_packet -> nx_packet_prepend_ptr, (UINT)length); 
 
                 /* Advance the length. */
                 buffer_offset += (UINT)length;

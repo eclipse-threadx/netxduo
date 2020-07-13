@@ -187,7 +187,7 @@ UINT i;
         if (session_array[i].nx_secure_dtls_session_in_use == NX_FALSE)
         {
             /* Set the IP and port to the passed-in values. */
-            NX_SECURE_MEMCPY(&session_array[i].nx_secure_dtls_remote_ip_address, ip_address, sizeof(NXD_ADDRESS));
+            NX_SECURE_MEMCPY(&session_array[i].nx_secure_dtls_remote_ip_address, ip_address, sizeof(NXD_ADDRESS)); 
             session_array[i].nx_secure_dtls_local_port = local_port;
             session_array[i].nx_secure_dtls_remote_port = remote_port;
             session_array[i].nx_secure_dtls_session_in_use = NX_TRUE;

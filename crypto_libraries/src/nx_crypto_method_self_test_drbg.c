@@ -188,17 +188,17 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_pr(UCHAR *entropy, UINT *entrop
 
     if (drbg_test_entropy_count_pr == 0)
     {
-        NX_CRYPTO_MEMCPY(entropy, entropy_input_aes128, entropy_input_len_aes128);
+        NX_CRYPTO_MEMCPY(entropy, entropy_input_aes128, entropy_input_len_aes128); 
         *entropy_len = entropy_input_len_aes128;
     }
     else if (drbg_test_entropy_count_pr == 1)
     {
-        NX_CRYPTO_MEMCPY(entropy, entropy_input_pr_0_aes128, entropy_input_len_aes128);
+        NX_CRYPTO_MEMCPY(entropy, entropy_input_pr_0_aes128, entropy_input_len_aes128); 
         *entropy_len = entropy_input_len_aes128;
     }
     else if (drbg_test_entropy_count_pr == 2)
     {
-        NX_CRYPTO_MEMCPY(entropy, entropy_input_pr_1_aes128, entropy_input_len_aes128);
+        NX_CRYPTO_MEMCPY(entropy, entropy_input_pr_1_aes128, entropy_input_len_aes128); 
         *entropy_len = entropy_input_len_aes128;
     }
     else
@@ -266,12 +266,12 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_npr(UCHAR *entropy, UINT *entro
 
     if (drbg_test_entropy_count_npr == 0)
     {
-        NX_CRYPTO_MEMCPY(entropy, entropy_input_npr_aes128, entropy_input_len_npr_aes128);
+        NX_CRYPTO_MEMCPY(entropy, entropy_input_npr_aes128, entropy_input_len_npr_aes128); 
         *entropy_len = entropy_input_len_npr_aes128;
     }
     else if (drbg_test_entropy_count_npr == 1)
     {
-        NX_CRYPTO_MEMCPY(entropy, entropy_input_reseed_npr_aes128, entropy_input_len_npr_aes128);
+        NX_CRYPTO_MEMCPY(entropy, entropy_input_reseed_npr_aes128, entropy_input_len_npr_aes128); 
         *entropy_len = entropy_input_len_npr_aes128;
     }
     else

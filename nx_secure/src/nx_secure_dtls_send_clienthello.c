@@ -172,7 +172,7 @@ USHORT                      protocol_version;
 
         /* Set cookie. */
         NX_SECURE_MEMCPY(packet_buffer, dtls_session -> nx_secure_dtls_cookie,
-               dtls_session -> nx_secure_dtls_cookie_length);
+               dtls_session -> nx_secure_dtls_cookie_length); 
         length += dtls_session -> nx_secure_dtls_cookie_length;
 
         /* Finally, we have a complete length and can put it into the buffer. Before that,
@@ -197,7 +197,7 @@ USHORT                      protocol_version;
         gmt_time = tls_session -> nx_secure_tls_session_time_function();
     }
     NX_CHANGE_ULONG_ENDIAN(gmt_time);
-    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, (UCHAR *)&gmt_time, sizeof(gmt_time));
+    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, (UCHAR *)&gmt_time, sizeof(gmt_time)); 
 
     /* Next 28 bytes is random data. */
     for (i = 0; i < 28; i += (UINT)sizeof(random_value))
@@ -212,7 +212,7 @@ USHORT                      protocol_version;
 
     /* Copy the random data into the packet. */
     NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random,
-                     sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random));
+                     sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random)); 
     length += sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random);
 
     /* Session ID length is one byte. */
@@ -222,7 +222,7 @@ USHORT                      protocol_version;
     /* Session ID follows. */
     if (tls_session -> nx_secure_tls_session_id_length > 0)
     {
-        NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_session_id, tls_session -> nx_secure_tls_session_id_length);
+        NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_session_id, tls_session -> nx_secure_tls_session_id_length); 
         length += tls_session -> nx_secure_tls_session_id_length;
     }
 

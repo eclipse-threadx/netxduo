@@ -171,13 +171,13 @@ ULONG                      extension_length, total_extensions_length;
         gmt_time = tls_session -> nx_secure_tls_session_time_function();
     }
     NX_CHANGE_ULONG_ENDIAN(gmt_time);
-    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, (UCHAR *)&gmt_time, sizeof(gmt_time));
+    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, (UCHAR *)&gmt_time, sizeof(gmt_time)); 
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
     if (tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HELLO_RETRY)
     {
         NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random,
-                         sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random));
+                         sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random)); 
     }
     else
 #endif
@@ -195,7 +195,7 @@ ULONG                      extension_length, total_extensions_length;
 
         /* Copy the random data into the packet. */
         NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random,
-                         sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random));
+                         sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random)); 
     }
     length += sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random);
 
@@ -207,7 +207,7 @@ ULONG                      extension_length, total_extensions_length;
     /* Session ID follows. */
     if (tls_session -> nx_secure_tls_session_id_length > 0)
     {
-        NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_session_id, tls_session -> nx_secure_tls_session_id_length);
+        NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_session_id, tls_session -> nx_secure_tls_session_id_length); 
         length += tls_session -> nx_secure_tls_session_id_length;
     }
 

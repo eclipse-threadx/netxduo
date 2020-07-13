@@ -212,7 +212,7 @@ UINT   status = NX_SUCCESS;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello_sec_reneg_extension PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -249,6 +249,9 @@ UINT   status = NX_SUCCESS;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION
@@ -333,7 +336,7 @@ UINT   data_length;
     else
     {
         /* Fill in the length of current extension. */
-        if (available_size < (offset + 3u + NX_SECURE_TLS_FINISHED_HASH_SIZE))
+        if (available_size < (offset + 3u + 2 * NX_SECURE_TLS_FINISHED_HASH_SIZE))
         {
 
             /* Packet buffer too small. */
@@ -351,9 +354,9 @@ UINT   data_length;
         offset++;
 
         /* Copy the verify data into the packet. */
-        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_remote_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE);
+        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_remote_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); 
         offset += NX_SECURE_TLS_FINISHED_HASH_SIZE;
-        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_local_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE);
+        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_local_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); 
         offset += NX_SECURE_TLS_FINISHED_HASH_SIZE;
     }
 
@@ -681,7 +684,7 @@ USHORT named_curve;
     offset += 2;
 
     /* Set the key data from our already-generated ECC keys. */
-    NX_SECURE_MEMCPY(&packet_buffer[offset], &ecdhe_data->nx_secure_tls_ecdhe_public_key[0], key_length);
+    NX_SECURE_MEMCPY(&packet_buffer[offset], &ecdhe_data->nx_secure_tls_ecdhe_public_key[0], key_length); 
     offset += (key_length);
 
     /* Get the length of the entire extension. */

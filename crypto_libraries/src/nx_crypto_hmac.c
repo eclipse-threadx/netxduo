@@ -168,9 +168,9 @@ UINT  i;
 
     NX_CRYPTO_MEMSET(hmac_metadata -> k_opad, 0, hmac_metadata -> block_size);
 
-    NX_CRYPTO_MEMCPY(hmac_metadata -> k_ipad, key_ptr, key_length);
+    NX_CRYPTO_MEMCPY(hmac_metadata -> k_ipad, key_ptr, key_length); 
 
-    NX_CRYPTO_MEMCPY(hmac_metadata -> k_opad, key_ptr, key_length);
+    NX_CRYPTO_MEMCPY(hmac_metadata -> k_opad, key_ptr, key_length); 
 
 
     /* XOR key with ipad and opad values. */
@@ -302,7 +302,7 @@ UCHAR icv_ptr[64];
 
     hmac_metadata -> crypto_digest_calculate(hmac_metadata -> context, icv_ptr, hmac_metadata -> algorithm);
 
-    NX_CRYPTO_MEMCPY(digest_ptr, icv_ptr,  (digest_length > hmac_metadata -> output_length ? hmac_metadata -> output_length : digest_length));
+    NX_CRYPTO_MEMCPY(digest_ptr, icv_ptr,  (digest_length > hmac_metadata -> output_length ? hmac_metadata -> output_length : digest_length)); 
 
 #ifdef NX_SECURE_KEY_CLEAR
     NX_CRYPTO_MEMSET(icv_ptr, 0, sizeof(icv_ptr));

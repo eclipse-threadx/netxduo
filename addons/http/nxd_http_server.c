@@ -6873,7 +6873,7 @@ UINT  _nxe_http_server_get_entity_header(NX_HTTP_SERVER *server_ptr, NX_PACKET *
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_get_entity_header                   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6912,6 +6912,9 @@ UINT  _nxe_http_server_get_entity_header(NX_HTTP_SERVER *server_ptr, NX_PACKET *
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed write underflow,      */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_get_entity_header(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, UCHAR *entity_header_buffer, ULONG buffer_size)
@@ -7181,7 +7184,16 @@ UINT                        index;
 
         /* Set terminal 0. */
         if(entity_header_buffer)
-            entity_header_buffer[index - 4] = 0;
+        {
+            if (index >= 4)
+            {
+                entity_header_buffer[index - 4] = 0;
+            }
+            else
+            {
+                entity_header_buffer[0] = 0;
+            }
+        }
         return NX_SUCCESS;
     }
     else

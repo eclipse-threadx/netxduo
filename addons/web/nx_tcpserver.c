@@ -45,7 +45,7 @@ static VOID _nx_tcpserver_thread_entry(ULONG tcpserver_address);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_session_allocate                       PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -79,6 +79,9 @@ static VOID _nx_tcpserver_thread_entry(ULONG tcpserver_address);
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed packet leak issue,    */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_tcpserver_session_allocate(NX_TCPSERVER *server_ptr, NX_TCP_SESSION **session_pptr)
@@ -107,6 +110,9 @@ NX_TCP_SOCKET  *socket_ptr;
 
             /* Reset expiration to zero. */
             server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_expiration = 0;
+
+            /* Set connection flag to false. */
+            server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_connected = NX_FALSE;
 
             /* Return the socket. */
             *session_pptr = &server_ptr -> nx_tcpserver_sessions[i];
@@ -810,7 +816,7 @@ NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_connect_process                        PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -847,6 +853,9 @@ NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed packet leak issue,    */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_connect_process(NX_TCPSERVER *server_ptr)
@@ -894,14 +903,17 @@ NX_TCP_SESSION *session_ptr = NX_NULL;
         }
     }
 
+    /* If session is connected, just return. */
+    if (server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_connected)
+    {
+        return;
+    }
+
     /* Accept connection. */
     status = nx_tcp_server_socket_accept(&server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_socket, server_ptr -> nx_tcpserver_accept_wait_option);
 
     if(status == NX_SUCCESS)
     {
-
-        /* Set default expiration. */
-        server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_expiration = server_ptr -> nx_tcpserver_timeout;
         
 #ifdef NX_TCPSERVER_ENABLE_TLS
         /* If TLS, start the TLS handshake. */
@@ -912,6 +924,7 @@ NX_TCP_SESSION *session_ptr = NX_NULL;
             
             if(status != NX_SUCCESS)
             {
+                nx_secure_tls_session_end(&server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_tls_session, NX_WAIT_FOREVER);
                 nx_tcp_server_socket_unaccept(&server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_socket);
             }
         }
@@ -919,12 +932,19 @@ NX_TCP_SESSION *session_ptr = NX_NULL;
         if (status == NX_SUCCESS)
 #endif
         {
+
+            /* Set default expiration. */
+            server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_expiration = server_ptr -> nx_tcpserver_timeout;
+
             if(server_ptr -> nx_tcpserver_new_connection)
             {
 
                 /* Invoke new connection callback. */
                 server_ptr -> nx_tcpserver_new_connection(server_ptr, server_ptr -> nx_tcpserver_listen_session);
             }
+
+            /* Set connection flag to true. */
+            server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_connected = NX_TRUE;
 
             /* Clear listen socket. */
             server_ptr -> nx_tcpserver_listen_session = NX_NULL;
@@ -1014,7 +1034,7 @@ NX_TCP_SOCKET  *socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_disconnect_process                     PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1047,6 +1067,9 @@ NX_TCP_SOCKET  *socket_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed packet leak issue,    */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_disconnect_process(NX_TCPSERVER *server_ptr)
@@ -1076,6 +1099,9 @@ NX_TCP_SOCKET  *socket_ptr;
             /* Reset epiration of session. */
             server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_expiration = 0; 
 
+            /* Set connection flag to false. */
+            server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_connected = NX_FALSE;
+
             /* Relisten */
             _nx_tcpserver_relisten(server_ptr);
         }
@@ -1087,7 +1113,7 @@ NX_TCP_SOCKET  *socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_timeout_process                        PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1121,6 +1147,9 @@ NX_TCP_SOCKET  *socket_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed packet leak issue,    */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_timeout_process(NX_TCPSERVER *server_ptr)
@@ -1161,6 +1190,9 @@ NX_TCP_SESSION *session_ptr;
 
             /* Invoke timeout callback. */
             server_ptr -> nx_tcpserver_connection_timeout(server_ptr, &server_ptr -> nx_tcpserver_sessions[i]);
+
+            /* Set connection flag to false. */
+            session_ptr -> nx_tcp_session_connected = NX_FALSE;
 
             /* Relisten */
             _nx_tcpserver_relisten(server_ptr);

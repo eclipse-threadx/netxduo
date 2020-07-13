@@ -305,7 +305,7 @@ NX_CRYPTO_EC_POINT    public_key;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecdh_compute_secret                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -349,6 +349,9 @@ NX_CRYPTO_EC_POINT    public_key;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            added public key validation,*/
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_compute_secret(NX_CRYPTO_ECDH  *ecdh_ptr,
@@ -402,6 +405,14 @@ NX_CRYPTO_EC_POINT    public_key, shared_secret;
     {
         return(status);
     }
+
+#ifndef NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION
+    status = _nx_crypto_ec_validate_public_key(&public_key, curve, NX_CRYPTO_TRUE, scratch_buf_ptr);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+#endif /* NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION */
 
     /* Private key buffer - note that no scratch is required for the private key, but we set it in case
        it is needed in the future. */

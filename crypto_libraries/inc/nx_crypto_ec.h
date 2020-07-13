@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_crypto_ec.h                                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -41,6 +41,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            added public key validation,*/
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -301,6 +304,12 @@ NX_CRYPTO_KEEP UINT _nx_crypto_ec_key_pair_stream_generate(NX_CRYPTO_EC *curve,
                                                            ULONG output_length_in_byte,
                                                            ULONG *actual_output_length,
                                                            HN_UBASE *scratch);
+#ifndef NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION
+UINT _nx_crypto_ec_validate_public_key(NX_CRYPTO_EC_POINT *public_key,
+                                       NX_CRYPTO_EC *chosen_curve,
+                                       UINT partial,
+                                       HN_UBASE *scratch);
+#endif /* NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION */
 
 UINT _nx_crypto_method_ec_secp192r1_operation(UINT op,
                                               VOID *handle,

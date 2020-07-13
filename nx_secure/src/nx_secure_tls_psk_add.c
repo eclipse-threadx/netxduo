@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_psk_add                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -68,6 +68,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 #if defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE)
@@ -86,18 +89,19 @@ UINT current_index;
     /* Make sure we have space to add the PSK and its identity data. */
     if ((current_index + 1) < NX_SECURE_TLS_MAX_PSK_KEYS &&
         psk_length < NX_SECURE_TLS_MAX_PSK_SIZE &&
-        identity_length < NX_SECURE_TLS_MAX_PSK_ID_SIZE)
+        identity_length < NX_SECURE_TLS_MAX_PSK_ID_SIZE &&
+        hint_length <= NX_SECURE_TLS_MAX_PSK_ID_SIZE)
     {
         /* Save off the PSK and its length. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[current_index].nx_secure_tls_psk_data, pre_shared_key, psk_length);
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[current_index].nx_secure_tls_psk_data, pre_shared_key, psk_length); 
         tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[current_index].nx_secure_tls_psk_data_size = psk_length;
 
         /* Save off the identity and its length. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[current_index].nx_secure_tls_psk_id, psk_identity, identity_length);
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[current_index].nx_secure_tls_psk_id, psk_identity, identity_length); 
         tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[current_index].nx_secure_tls_psk_id_size = identity_length;
 
         /* Save off the identity and its length. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[current_index].nx_secure_tls_psk_id_hint, hint, hint_length);
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[current_index].nx_secure_tls_psk_id_hint, hint, hint_length); 
         tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[current_index].nx_secure_tls_psk_id_hint_size = hint_length;
 
         /* Increment the session counter. */

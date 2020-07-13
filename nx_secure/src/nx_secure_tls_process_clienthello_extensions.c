@@ -426,7 +426,7 @@ INT    compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_clienthello_sec_sa_extension    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -465,6 +465,9 @@ INT    compare_value;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), added    */
+/*                                            curve priority logic,       */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
@@ -482,6 +485,8 @@ const UCHAR *groups;
 USHORT group;
 USHORT groups_len;
 const NX_CRYPTO_METHOD *curve_method;
+UINT curve_priority;
+UINT new_curve_priority = 0;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 NX_SECURE_TLS_ECC *ecc_info;
 UINT   signature_algorithm_exist = NX_FALSE;
@@ -502,7 +507,7 @@ UCHAR expected_signature = 0;
 
     if (cert_curve)
     {
-        status = _nx_secure_tls_find_curve_method(tls_session, cert_curve, &curve_method);
+        status = _nx_secure_tls_find_curve_method(tls_session, cert_curve, &curve_method, NX_NULL);
         if (status == NX_SUCCESS && curve_method != NX_NULL)
         {
             *cert_curve_supported = NX_TRUE;
@@ -536,23 +541,30 @@ UCHAR expected_signature = 0;
         case NX_SECURE_TLS_EXTENSION_EC_GROUPS:
             groups = exts[i].nx_secure_tls_extension_data;
             groups_len = exts[i].nx_secure_tls_extension_data_length;
+
+            /* Set our start priority to the size of our supported curves list (lowest priority). */
+            curve_priority = tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups_count;
+
+            /* Loop through curves sent by client. */
             for (j = 0; j < groups_len; j += 2)
             {
                 group = (USHORT)((groups[j] << 8) + groups[j + 1]);
 
-                status = _nx_secure_tls_find_curve_method(tls_session, group, &curve_method);
+                status = _nx_secure_tls_find_curve_method(tls_session, group, &curve_method, &new_curve_priority);
 
-                if (status == NX_CRYTPO_MISSING_ECC_CURVE)
+                if ((status == NX_CRYTPO_MISSING_ECC_CURVE) || (new_curve_priority > curve_priority))
                 {
 
                     /* Keep searching list. */
                     continue;
                 }
 
+                /* Found a higher-priority curve. */
                 if (status == NX_SUCCESS)
                 {
                     /* Found shared named curve. */
                     *selected_curve = group;
+                    curve_priority = new_curve_priority;
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
                     if (tls_session -> nx_secure_tls_1_3 &&
@@ -572,12 +584,10 @@ UCHAR expected_signature = 0;
                                 /* Store selected ECDHE key data index. */
                                 tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data_selected = k;
 
-                                break;
                             }
                         }
                     }
 #endif
-                    break;
                 }
                 else
                 {
@@ -585,6 +595,7 @@ UCHAR expected_signature = 0;
                     /* status is not NX_CRYTPO_MISSING_ECC_CURVE or NX_SUCCESS, return error. */
                     return(status);
                 }
+                /* Continue searching our supported curves list until we find the highest-priority curve. */
             }
 
             /* Reset status as we do not return NX_CRYTPO_MISSING_ECC_CURVE. */
@@ -847,7 +858,7 @@ NX_SECURE_TLS_ECC *ecc_info;
     }
 
     /* Get the curve method to initialize the remote public key data. */
-    _nx_secure_tls_find_curve_method(tls_session, key_group, &curve_method);
+    _nx_secure_tls_find_curve_method(tls_session, key_group, &curve_method, NX_NULL);
 
     if (curve_method == NX_NULL)
     {
@@ -1532,7 +1543,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
         /* Save the handshake hash state. */
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
                          tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
-                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size);
+                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); 
     }
 
     /* Hash the ClientHello, adding the TLS record header. */
@@ -1554,7 +1565,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
     {
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
                          tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
-                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size);
+                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); 
     }
 
     /* Generate the binder for our selected PSK. */
@@ -1577,7 +1588,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
     }
 
     /* Make sure the Client PSK is initialized for later key generation. */
-    NX_SECURE_MEMCPY(tls_session->nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_data, psk_data, psk_length);
+    NX_SECURE_MEMCPY(tls_session->nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_data, psk_data, psk_length); 
     tls_session->nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_data_size = psk_length;
 
     return(NX_SUCCESS);

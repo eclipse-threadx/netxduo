@@ -135,12 +135,12 @@ const NX_CRYPTO_METHOD                     *session_cipher_method = NX_NULL;
         if (is_client)
         {
             NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_write_key,
-                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_next_write_key, key_size);
+                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_next_write_key, key_size); 
         }
         else
         {
             NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_write_key,
-                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_next_write_key, key_size);
+                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_next_write_key, key_size); 
         }
     }
 
@@ -151,12 +151,12 @@ const NX_CRYPTO_METHOD                     *session_cipher_method = NX_NULL;
         if (is_client)
         {
             NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_iv,
-                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_next_iv, iv_size);
+                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_next_iv, iv_size); 
         }
         else
         {
             NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_iv,
-                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_next_iv, iv_size);
+                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_next_iv, iv_size); 
 
         }
     }

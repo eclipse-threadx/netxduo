@@ -16836,7 +16836,7 @@ ULONG   temp;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_version_1_process                          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16888,6 +16888,9 @@ ULONG   temp;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            variable len verification,  */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_version_1_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr)
@@ -17433,8 +17436,9 @@ INT         buffer_length;
         total_variable_length =  variable_length + length;
 
         /* Determine if this variable will fit in the remaining length of the 
-           variable list.  */
-        if ((length == 0) || (total_variable_length > variable_list_length))
+           variable list, buffer length, and if there is integer overflow.  */
+        if ((length == 0) || (total_variable_length > variable_list_length) ||
+            (total_variable_length < variable_length) || (total_variable_length > (UINT)buffer_length))
         {
 
             /* Increment the invalid packet error counter.  */
@@ -17847,7 +17851,7 @@ INT         buffer_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_version_2_process                          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -17899,6 +17903,9 @@ INT         buffer_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            variable len verification,  */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_version_2_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr)
@@ -18449,8 +18456,9 @@ INT         buffer_length;
             total_variable_length =  variable_length + length;
 
             /* Determine if this variable will fit in the remaining length of the 
-               variable list.  */
-            if ((length == 0) || (total_variable_length > variable_list_length))
+               variable list, buffer length, and if there is integer overflow.  */
+            if ((length == 0) || (total_variable_length > variable_list_length) ||
+                (total_variable_length < variable_length) || (total_variable_length > (UINT)buffer_length))
             {
 
                 /* Increment the invalid packet error counter.  */
@@ -23583,7 +23591,7 @@ VOID _nx_snmp_agent_security_response_status(NX_SNMP_AGENT *agent_ptr, UINT *aut
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_snmp_asn1_tlv_block_parse                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -23620,6 +23628,9 @@ VOID _nx_snmp_agent_security_response_status(NX_SNMP_AGENT *agent_ptr, UINT *aut
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_utility_tlv_block_parse(UCHAR *buffer, INT buffer_length, USHORT *tlv_type,
@@ -23715,7 +23726,7 @@ ULONG  length_bytes;
         *header_length = *header_length + length_bytes;
 
         /* Check the buffer length.  */
-        if ((INT)(current_index + length_bytes) > buffer_length)
+        if ((current_index + length_bytes) < current_index || (current_index + length_bytes) > (UINT)buffer_length)
         {
             return(NX_SNMP_ERROR_WRONGLENGTH);
         }
@@ -23742,7 +23753,8 @@ ULONG  length_bytes;
     *tlv_length = length;
 
     /* Check the buffer length.  */
-    if ((INT)current_index >= buffer_length)
+    if (current_index >= (UINT)buffer_length || (length + current_index) < current_index ||
+        (length + current_index) >  (UINT)buffer_length)
     {
         return(NX_SNMP_ERROR_WRONGLENGTH);
     }

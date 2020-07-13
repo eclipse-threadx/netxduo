@@ -2190,7 +2190,7 @@ UINT                  buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_inverse_modulus              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2241,6 +2241,9 @@ UINT                  buffer_size;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  06-30-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            fixed input validation,     */
+/*                                            resulting in version 6.0.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_inverse_modulus(NX_CRYPTO_HUGE_NUMBER *a,
@@ -2256,6 +2259,13 @@ UINT                  buffer_size;
 
         /* gcd(m, a) <> 1.
          * a is not invertible modulo m. */
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    if(_nx_crypto_huge_number_is_zero(a))
+    {
+
+        /* zero is not invertible */
         return(NX_CRYPTO_NOT_SUCCESSFUL);
     }
 

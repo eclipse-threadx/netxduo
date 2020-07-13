@@ -116,7 +116,7 @@ NX_SECURE_TLS_SESSION                *tls_session;
     hash_size = tls_session -> nx_secure_tls_session_ciphersuite -> nx_secure_tls_hash_size;
 
     /* In DTLS, use the sequence number + epoch from the header. */
-    NX_SECURE_MEMCPY(adjusted_sequence_num, &header[3], 8);
+    NX_SECURE_MEMCPY(adjusted_sequence_num, &header[3], 8); 
 
     /* We need to extract the type, version, and length from the DTLS header. */
     adjusted_header[0] = header[0];  /* Type. */
