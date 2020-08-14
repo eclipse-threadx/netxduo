@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_protocol_version_override    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -66,6 +66,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_session_protocol_version_override(NX_SECURE_TLS_SESSION *tls_session,
@@ -91,7 +94,9 @@ UINT  _nx_secure_tls_session_protocol_version_override(NX_SECURE_TLS_SESSION *tl
         tls_session -> nx_secure_tls_protocol_version_override = protocol_version;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
         tls_session -> nx_secure_tls_1_3 = NX_FALSE;
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
         tls_session -> nx_secure_tls_renegotation_enabled = NX_TRUE;
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 #endif
     }
 

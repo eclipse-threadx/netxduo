@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_end                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -57,7 +57,7 @@
 /*    _nx_secure_dtls_send_record           Send the CloseNotify          */
 /*    _nx_secure_dtls_session_reset         Clear out the session         */
 /*    _nx_secure_dtls_session_receive       Receive DTLS data             */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
 /*                                                                        */
@@ -70,6 +70,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            released packet securely,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_dtls_session_end(NX_SECURE_DTLS_SESSION *dtls_session, UINT wait_option)
@@ -94,19 +97,11 @@ NX_SECURE_TLS_SESSION  *tls_session;
         tmp_ptr = tls_session -> nx_secure_record_queue_header;
         tls_session -> nx_secure_record_queue_header = tmp_ptr -> nx_packet_queue_next;
         tmp_ptr -> nx_packet_queue_next = NX_NULL;
-#ifdef NX_SECURE_KEY_CLEAR
-        NX_SECURE_MEMSET(tmp_ptr -> nx_packet_prepend_ptr, 0, ((ULONG)(tmp_ptr -> nx_packet_append_ptr) - (ULONG)(tmp_ptr -> nx_packet_prepend_ptr)));
-#endif /* NX_SECURE_KEY_CLEAR  */
-        nx_packet_release(tmp_ptr);
+        nx_secure_tls_packet_release(tmp_ptr);
     }
     if (tls_session -> nx_secure_record_decrypted_packet)
     {
-#ifdef NX_SECURE_KEY_CLEAR
-        NX_SECURE_MEMSET((tls_session -> nx_secure_record_decrypted_packet) -> nx_packet_prepend_ptr, 0,
-                         ((ULONG)(tls_session -> nx_secure_record_decrypted_packet -> nx_packet_append_ptr) -
-                          (ULONG)(tls_session -> nx_secure_record_decrypted_packet -> nx_packet_prepend_ptr)));
-#endif /* NX_SECURE_KEY_CLEAR  */
-        nx_packet_release(tls_session -> nx_secure_record_decrypted_packet);
+        nx_secure_tls_packet_release(tls_session -> nx_secure_record_decrypted_packet);
         tls_session -> nx_secure_record_decrypted_packet = NX_NULL;
     }
 
@@ -152,12 +147,8 @@ NX_SECURE_TLS_SESSION  *tls_session;
         if (status == NX_SUCCESS)
         {
 
-#ifdef NX_SECURE_KEY_CLEAR
-            NX_SECURE_MEMSET(incoming_packet -> nx_packet_prepend_ptr, 0, ((ULONG)(incoming_packet -> nx_packet_append_ptr) - (ULONG)(incoming_packet -> nx_packet_prepend_ptr)));
-#endif /* NX_SECURE_KEY_CLEAR  */
-
             /* Release the alert packet. */
-            nx_packet_release(incoming_packet);
+            nx_secure_tls_packet_release(incoming_packet);
         }
         else if ((status == NX_NO_PACKET) || (status == NX_SECURE_TLS_SESSION_UNINITIALIZED))
         {

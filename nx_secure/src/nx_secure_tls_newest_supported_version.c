@@ -105,3 +105,128 @@ INT i;
     return;
 }
 
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_secure_tls_highest_supported_version_negotiate     PORTABLE C   */
+/*                                                           6.0.2        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Timothy Stapko, Microsoft Corporation                               */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    Negotiate the highested supported and enabled TLS/DTLS protocol     */
+/*    version, if the protocol version in clientHello is not supported    */
+/*    by the server.                                                      */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    session_ptr                           TLS session                   */
+/*    protocol_version                      Pointer to version variable   */
+/*    id                                    TLS or DTLS                   */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_secure_dtls_process_clienthello   Send ClientHello              */
+/*    _nx_secure_tls_process_clienthello    Process ClientHello           */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  08-14-2020     Timothy Stapko           Initial Version 6.0.2         */
+/*                                                                        */
+/**************************************************************************/
+void _nx_secure_tls_highest_supported_version_negotiate(NX_SECURE_TLS_SESSION *session_ptr,
+                                                        USHORT *protocol_version, UINT id)
+{
+INT i;
+USHORT highest_version = 0;
+USHORT lowest_version = 0xFF;
+USHORT highest_version_not_greater_than_client_version = 0;
+
+    NX_PARAMETER_NOT_USED(session_ptr);
+
+#ifndef NX_SECURE_TLS_SERVER_DISABLED
+    if(session_ptr -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_SERVER &&
+       session_ptr -> nx_secure_tls_negotiated_highest_protocol_version != 0)
+    {
+        /* If this is a server and the user has the negotiated highest version,
+           return it directly. */
+        (*protocol_version) = session_ptr -> nx_secure_tls_negotiated_highest_protocol_version;
+        return;
+    }
+#endif
+
+    /* Find the highest and the lowest supported server version. */
+
+    for (i = (INT)(nx_secure_supported_versions_list[id].nx_secure_versions_list_count - 1); i >= 0; --i)
+    {
+        /* If the version is supported, return it. */
+        if (nx_secure_supported_versions_list[id].nx_secure_versions_list[i].nx_secure_tls_is_supported)
+        {
+            if (highest_version < nx_secure_supported_versions_list[id].nx_secure_versions_list[i].nx_secure_tls_protocol_version)
+            {
+                highest_version = nx_secure_supported_versions_list[id].nx_secure_versions_list[i].nx_secure_tls_protocol_version;
+            }
+
+            if (lowest_version > nx_secure_supported_versions_list[id].nx_secure_versions_list[i].nx_secure_tls_protocol_version)
+            {
+                lowest_version = nx_secure_supported_versions_list[id].nx_secure_versions_list[i].nx_secure_tls_protocol_version;
+            }
+
+            if (!highest_version_not_greater_than_client_version &&
+                (*protocol_version) >= nx_secure_supported_versions_list[id].nx_secure_versions_list[i].nx_secure_tls_protocol_version)
+            {
+                highest_version_not_greater_than_client_version = nx_secure_supported_versions_list[id].nx_secure_versions_list[i].nx_secure_tls_protocol_version;
+            }
+
+        }
+    }
+
+	/* No versions of TLS have been enabled. Set protocol to 0 to indicate failure. */
+    if (highest_version == 0)
+    {
+        (*protocol_version) = 0;
+        session_ptr -> nx_secure_tls_negotiated_highest_protocol_version = 0;
+        return;
+    }
+
+    /* According to RFC 5246 E.1,
+       if protocol_version > highest_version, set protocol_version to highest_version to indicate to send "server_hello" with highest_version;
+       if lowest_version < protocol_version < highest_version, set protocol_version to the highest server version not greater than protocol_version;
+       if protocol_version < lowest_version, set protocol_version to 0 to indicate to send a "protocol_version" alert message.
+    */
+
+    if ((*protocol_version) > highest_version)
+    {
+        (*protocol_version) = highest_version;
+    }
+    else
+    {
+        if ((*protocol_version) < highest_version && (*protocol_version) > lowest_version)
+        {
+            (*protocol_version) = highest_version_not_greater_than_client_version;
+	    }
+        else
+        {
+            (*protocol_version) = 0;
+        }
+    }
+
+	session_ptr -> nx_secure_tls_negotiated_highest_protocol_version = (*protocol_version);
+    return;
+}
+
+
+

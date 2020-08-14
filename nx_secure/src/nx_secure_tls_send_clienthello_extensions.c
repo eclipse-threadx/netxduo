@@ -68,7 +68,7 @@ UINT _nx_secure_tls_send_clienthello_psk_extension(NX_SECURE_TLS_SESSION *tls_se
                                                           ULONG available_size);
 #endif
 
-#ifdef NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                                 UCHAR *packet_buffer,
                                                                 ULONG *packet_offset,
@@ -82,7 +82,7 @@ static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SE
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -127,6 +127,9 @@ static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SE
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_clienthello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -149,7 +152,7 @@ UINT   status;
     total_extensions_length = (USHORT)(total_extensions_length + extension_length);
 #endif
 
-#ifdef NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
     /* We have to add renegotiation extensions in both initial sessions and renegotiating sessions. */
     if (tls_session -> nx_secure_tls_renegotation_enabled == NX_TRUE)
     {
@@ -1405,7 +1408,7 @@ UINT   data_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_sec_reneg_extension PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1443,9 +1446,12 @@ UINT   data_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
-#ifdef NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                                 UCHAR *packet_buffer,
                                                                 ULONG *packet_offset,

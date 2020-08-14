@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_create_ext                   PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,6 +80,10 @@
 /*                                            fixed race condition for    */
 /*                                            multithread transmission,   */
 /*                                            resulting in version 6.0.1  */
+/*  08-14-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            added ECC initialization,   */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -485,6 +489,13 @@ USHORT                          ciphersuite_table_size;
 NX_SECURE_X509_CRYPTO           *cert_crypto;
 USHORT                          cert_crypto_size;
 
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+NX_CRYPTO_METHOD              **curve_crypto_list = NX_NULL;
+USHORT                         *supported_groups = NX_NULL;
+USHORT                          ecc_curves_count = 0;
+UINT                            supported_groups_bytes;
+#endif
+
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
 const NX_CRYPTO_METHOD *crypto_method_md5;
 const NX_CRYPTO_METHOD *crypto_method_sha1;
@@ -562,6 +573,59 @@ const NX_CRYPTO_METHOD *crypto_method_sha256;
         /* Advance the metadata area past the end of the crypto table. */
         metadata_area += cipher_table_bytes;
         metadata_size -= cipher_table_bytes;
+
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+        curve_crypto_list = (NX_CRYPTO_METHOD **)(&metadata_area[0]);
+
+        /* Find ECC curves in the crypto array. */
+        for (i = 0; i < crypto_array_size; i++)
+        {
+            if ((crypto_array[i] -> nx_crypto_algorithm & 0xFFFF0000) == NX_CRYPTO_EC_MASK)
+            {
+                if (metadata_size < sizeof(NX_CRYPTO_METHOD *))
+                {
+                    return(NX_SECURE_TLS_INSUFFICIENT_METADATA_SPACE);
+                }
+                curve_crypto_list[ecc_curves_count] = (NX_CRYPTO_METHOD *)crypto_array[i];
+                ecc_curves_count++;
+                metadata_size -= sizeof(NX_CRYPTO_METHOD *);
+            }
+        }
+
+        if (ecc_curves_count > 0)
+        {
+            metadata_area += ecc_curves_count * sizeof(NX_CRYPTO_METHOD *);
+            supported_groups = (USHORT *)(&metadata_area[0]);
+
+            supported_groups_bytes = ecc_curves_count * sizeof(USHORT);
+
+            /* Align length to 4 bytes. */
+            if (supported_groups_bytes & 0x3)
+            {
+                supported_groups_bytes += 4 - (supported_groups_bytes & 0x3);
+            }
+
+            if (metadata_size < supported_groups_bytes)
+            {
+                return(NX_SECURE_TLS_INSUFFICIENT_METADATA_SPACE);
+            }
+
+            metadata_area += supported_groups_bytes;
+            metadata_size -= supported_groups_bytes;
+
+            for (i = 0; i < ecc_curves_count; i++)
+            {
+                supported_groups[i] = (USHORT)(curve_crypto_list[i] -> nx_crypto_algorithm & 0xFFFF);
+            }
+
+            status = _nx_secure_tls_ecc_initialize(tls_session, supported_groups, ecc_curves_count, (const NX_CRYPTO_METHOD **)curve_crypto_list);
+            if (status != NX_SUCCESS)
+            {
+                return(status);
+            }
+        }
+#endif
+
     }
 
     /* Get working pointers to our crypto methods. */
@@ -804,6 +868,7 @@ const NX_CRYPTO_METHOD *crypto_method_sha256;
     }
     _nx_secure_tls_created_count++;
 
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
     /* Flag to indicate when a session renegotiation is enabled. Enabled by default. */
     if(tls_session->nx_secure_tls_1_3)
@@ -815,6 +880,7 @@ const NX_CRYPTO_METHOD *crypto_method_sha256;
     {
         tls_session -> nx_secure_tls_renegotation_enabled = NX_TRUE;
     }
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 
     /* Set ID to check initialization status. */
     tls_session -> nx_secure_tls_id = NX_SECURE_TLS_ID;

@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_receive                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -58,7 +58,7 @@
 /*    _nx_secure_dtls_send_record           Send the DTLS record          */
 /*    _nx_secure_tls_map_error_to_alert     Map internal error to alert   */
 /*    _nx_secure_tls_send_alert             Send TLS alert                */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    nx_udp_socket_receive                 Receive UDP data              */
 /*    nxd_udp_source_extract                Extract UDP information       */
 /*    tx_mutex_get                          Get protection mutex          */
@@ -77,6 +77,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            released packet securely,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_receive(NX_SECURE_DTLS_SESSION *dtls_session,
@@ -253,7 +256,7 @@ UINT                   source_port;
             {
 
                 /* This packet is from unkown address or port. Ignore it.  */
-                nx_packet_release(packet_ptr);
+                nx_secure_tls_packet_release(packet_ptr);
                 status = NX_CONTINUE;
                 continue;
             }
@@ -326,12 +329,8 @@ UINT                   source_port;
         if (status != NX_SUCCESS)
         {
 
-#ifdef NX_SECURE_KEY_CLEAR
-            NX_SECURE_MEMSET(packet_ptr -> nx_packet_prepend_ptr, 0, ((ULONG)(packet_ptr -> nx_packet_append_ptr) - (ULONG)(packet_ptr -> nx_packet_prepend_ptr)));
-#endif /* NX_SECURE_KEY_CLEAR  */
-
             /* Clear out the packet, we don't want any of the data in it. */
-            nx_packet_release(packet_ptr);
+            nx_secure_tls_packet_release(packet_ptr);
 
             if (status != NX_CONTINUE)
             {

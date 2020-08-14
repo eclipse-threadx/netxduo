@@ -98,6 +98,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_metadata_size_calculate.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_newest_supported_version.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_packet_allocate.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_packet_release.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_process_certificate_request.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_process_certificate_verify.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_process_changecipherspec.c

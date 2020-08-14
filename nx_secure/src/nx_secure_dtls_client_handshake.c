@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_client_handshake                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -90,7 +90,7 @@
 /*                                          Send ClientKeyExchange        */
 /*    _nx_secure_tls_send_finished          Send Finished message         */
 /*    _nx_secure_tls_session_keys_set       Set session keys              */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
 /*                                                                        */
@@ -103,6 +103,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            supported chained packet,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_client_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
@@ -516,7 +519,7 @@ NX_SECURE_TLS_SESSION *tls_session;
             if (status != NX_SUCCESS)
             {
                 /* Release packet on send error. */
-                nx_packet_release(send_packet);
+                nx_secure_tls_packet_release(send_packet);
                 break;
             }
             /* The local session is now active since we sent the changecipherspec message.

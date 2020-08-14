@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_free              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s), fixed    */
+/*                                            certificate allocation bug, */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_remote_certificate_free(NX_SECURE_TLS_SESSION *tls_session,
@@ -98,12 +101,17 @@ NX_SECURE_X509_CERT              *certificate;
     /* Remove the certificate from the remote store. */
     _nx_secure_x509_store_certificate_remove(store, name, NX_SECURE_X509_CERT_LOCATION_REMOTE, 0);
 
-    /* Add the certificate back to the free store. */
-    status = _nx_secure_x509_store_certificate_add(certificate, store, NX_SECURE_X509_CERT_LOCATION_FREE);
-
-    if (status != NX_SUCCESS)
+    /* Only user allocated certificate is added back to the free store. */
+    if (certificate -> nx_secure_x509_user_allocated_cert)
     {
-        return(status);
+
+        /* Add the certificate back to the free store. */
+        status = _nx_secure_x509_store_certificate_add(certificate, store, NX_SECURE_X509_CERT_LOCATION_FREE);
+
+        if (status != NX_SUCCESS)
+        {
+            return(status);
+        }
     }
 
     /* Return completion status.  */

@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_start                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -61,7 +61,7 @@
 /*    _nx_secure_tls_handshake_process      Process TLS handshake         */
 /*    _nx_secure_tls_send_clienthello       Send ClientHello              */
 /*    _nx_secure_tls_send_handshake_record  Send TLS handshake record     */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
 /*                                                                        */
@@ -74,6 +74,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            supported chained packet,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_start(NX_SECURE_TLS_SESSION *tls_session, NX_TCP_SOCKET *tcp_socket,
@@ -96,9 +99,7 @@ NX_PACKET *send_packet;
 
     /* Reset the record queue. */
     tls_session -> nx_secure_record_queue_header = NX_NULL;
-    tls_session -> nx_secure_record_queue_tail = NX_NULL;
     tls_session -> nx_secure_record_decrypted_packet = NX_NULL;
-    tls_session -> nx_secure_record_queue_length = 0;
 
     /* Make sure we are starting with a fresh session. */
     tls_session -> nx_secure_tls_local_session_active = 0;
@@ -170,7 +171,7 @@ NX_PACKET *send_packet;
 
             /* Release the protection. */
             tx_mutex_put(&_nx_secure_tls_protection);
-            nx_packet_release(send_packet);
+            nx_secure_tls_packet_release(send_packet);
             return(status);
         }
     }

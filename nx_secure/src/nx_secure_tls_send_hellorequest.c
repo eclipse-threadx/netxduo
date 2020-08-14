@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_hellorequest                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -64,8 +64,12 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 UINT _nx_secure_tls_send_hellorequest(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet)
 {
     NX_PARAMETER_NOT_USED(tls_session);
@@ -78,4 +82,4 @@ UINT _nx_secure_tls_send_hellorequest(NX_SECURE_TLS_SESSION *tls_session, NX_PAC
 
     return(NX_SECURE_TLS_SUCCESS);
 }
-
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */

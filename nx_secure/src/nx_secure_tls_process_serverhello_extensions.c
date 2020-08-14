@@ -24,7 +24,7 @@
 
 #include "nx_secure_tls.h"
 
-#ifdef NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 static UINT _nx_secure_tls_proc_serverhello_sec_reneg_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                                 UCHAR *packet_buffer,
                                                                 USHORT *extension_length, UINT message_length);
@@ -56,7 +56,7 @@ static UINT _nx_secure_tls_proc_serverhello_ecjpake_key_kp_pair(NX_SECURE_TLS_SE
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello_extensions       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -99,6 +99,9 @@ static UINT _nx_secure_tls_proc_serverhello_ecjpake_key_kp_pair(NX_SECURE_TLS_SE
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_serverhello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -118,7 +121,7 @@ USHORT                                extension_length;
 USHORT                                supported_version = tls_session -> nx_secure_tls_protocol_version;
 #endif
 
-#ifndef NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION
+#ifdef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 #ifndef NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE
     NX_PARAMETER_NOT_USED(tls_session);
 #endif
@@ -158,7 +161,7 @@ USHORT                                supported_version = tls_session -> nx_secu
         /* Parse the extension. */
         switch (extension_id)
         {
-#ifdef NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
         case NX_SECURE_TLS_EXTENSION_SECURE_RENEGOTIATION:
             status = _nx_secure_tls_proc_serverhello_sec_reneg_extension(tls_session, &packet_buffer[offset], &extension_length, message_length - offset);
 
@@ -167,7 +170,7 @@ USHORT                                supported_version = tls_session -> nx_secu
                 return(status);
             }
             break;
-#endif /* NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION */
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
         case NX_SECURE_TLS_EXTENSION_KEY_SHARE:
@@ -336,7 +339,9 @@ USHORT                                supported_version = tls_session -> nx_secu
             if (tls_session -> nx_secure_tls_protocol_version_override == 0)
             {
                 tls_session -> nx_secure_tls_1_3 = NX_FALSE;
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
                 tls_session -> nx_secure_tls_renegotation_enabled = NX_TRUE;
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
             }
             else
             {
@@ -557,7 +562,7 @@ NX_CRYPTO_METHOD                     *crypto_method;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_serverhello_sec_reneg_extension PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -593,9 +598,12 @@ NX_CRYPTO_METHOD                     *crypto_method;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
-#ifdef NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 static UINT _nx_secure_tls_proc_serverhello_sec_reneg_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                                 UCHAR *packet_buffer,
                                                                 USHORT *extension_length, UINT message_length)
@@ -703,6 +711,7 @@ INT    compare_value;
         }
 
         /* If we get here, the verification data is good! */
+        tls_session -> nx_secure_tls_secure_renegotiation_verified = NX_TRUE;
     }
     else
     {

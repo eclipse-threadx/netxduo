@@ -36,6 +36,13 @@ set(SOURCES
     # {{END_TARGET_SOURCES}}
 )
 
+# Append BSD file if the user wants it
+if(NXD_ENABLE_FILE_BSD)
+    list(APPEND SOURCES
+         ${CMAKE_CURRENT_LIST_DIR}/BSD/nxd_bsd.c
+    )
+endif()
+
 # Remove the file server files if the user doesn't want them
 if(NOT NXD_ENABLE_FILE_SERVERS)
     list(REMOVE_ITEM SOURCES     

@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_crypto_huge_number.h                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -41,6 +41,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            fixed number initialization,*/
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -146,7 +149,7 @@ typedef struct NX_CRYPTO_HUGE_NUMBER_STRUCT
 /* Initialize the buffer of huge number to variable between 0 and (HN_RADIX - 1). */
 #define NX_CRYPTO_HUGE_NUMBER_INITIALIZE_DIGIT(hn, buff, val) \
     (hn) -> nx_crypto_huge_number_data = (HN_UBASE *)(buff);  \
-    (hn) -> nx_crypto_huge_buffer_size = sizeof(buff);        \
+    (hn) -> nx_crypto_huge_buffer_size = sizeof(HN_UBASE);        \
     NX_CRYPTO_HUGE_NUMBER_SET_DIGIT(hn, val)
 
 /* Copy huge number from src to dst. */

@@ -25,13 +25,14 @@
 #include "nx_secure_tls.h"
 
 static UCHAR _generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
+static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_verify_mac                           PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -49,7 +50,8 @@ static UCHAR _generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*    tls_session                           TLS control block             */
 /*    header_data                           TLS record header data        */
 /*    header_length                         Length of header data         */
-/*    data                                  TLS record payload data       */
+/*    packet_ptr                            TLS record packet             */
+/*    offset                                Offset to TLS record in packet*/
 /*    length                                Length of payload data        */
 /*                                                                        */
 /*  OUTPUT                                                                */
@@ -72,18 +74,21 @@ static UCHAR _generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  06-30-2020     Timothy Stapko           Modified comment(s), fixed    */
 /*                                            AES-CBC padding oracle,     */
 /*                                            resulting in version 6.0.1  */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            supported chained packet,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_verify_mac(NX_SECURE_TLS_SESSION *tls_session, UCHAR *header_data,
-                               USHORT header_length, UCHAR *data, UINT *length)
+                               USHORT header_length, NX_PACKET *packet_ptr, ULONG offset, UINT *length)
 {
-UCHAR                                *mac_secret;
-USHORT                                hash_size;
-INT                                   compare_result;
-USHORT                                data_length;
-UCHAR                                *received_hash;
-UINT                                  hash_length;
-UCHAR                                 header[6];
+UCHAR *mac_secret;
+USHORT hash_size;
+INT    compare_result;
+USHORT data_length;
+UINT   hash_length;
+UCHAR  header[6];
+ULONG  bytes_copied;
 
     if (tls_session -> nx_secure_tls_session_ciphersuite == NX_NULL)
     {
@@ -151,7 +156,7 @@ UCHAR                                 header[6];
 
     /* Generate the hash on the plaintext data. */
     _nx_secure_tls_hash_record(tls_session, tls_session -> nx_secure_tls_remote_sequence_number, header, header_length,
-                               data, (USHORT)(data_length), _generated_hash, &hash_length, mac_secret);
+                               packet_ptr, offset, data_length, _generated_hash, &hash_length, mac_secret);
 
     /* Increment the sequence number. */
     if ((tls_session -> nx_secure_tls_remote_sequence_number[0] + 1) == 0)
@@ -161,9 +166,24 @@ UCHAR                                 header[6];
     }
     tls_session -> nx_secure_tls_remote_sequence_number[0]++;
 
+    if (hash_size == 0)
+    {
+
+        /* For ciphersuite without explict hash, just return success. */
+        return(NX_SECURE_TLS_SUCCESS);
+    }
+
     /* Now, compare the hash we generated to the one we received. */
-    received_hash = &data[data_length];
-    compare_result = NX_SECURE_MEMCMP(received_hash, _generated_hash, hash_size);
+    if (nx_packet_data_extract_offset(packet_ptr,
+                                      offset + data_length,
+                                      _received_hash, hash_size, &bytes_copied) ||
+                                      (bytes_copied != hash_size))
+    {
+
+        /* The record data was smaller than the selected hash... Error. */
+        return(NX_SECURE_TLS_PADDING_CHECK_FAILED);
+    }
+    compare_result = NX_SECURE_MEMCMP(_received_hash, _generated_hash, hash_size);
 
 #ifdef NX_SECURE_KEY_CLEAR
     NX_SECURE_MEMSET(_generated_hash, 0, sizeof(_generated_hash));

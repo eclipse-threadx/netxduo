@@ -38,7 +38,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ipv6_process_routing_option                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -70,6 +70,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  08-14-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ipv6_process_routing_option(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -83,6 +86,12 @@ UINT                           base_offset;
 
     /* Add debug information. */
     NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
+
+    /* Check packet length is at least sizeof(NX_IPV6_HEADER_ROUTING_OPTION). */
+    if (packet_ptr -> nx_packet_length < sizeof(NX_IPV6_HEADER_ROUTING_OPTION))
+    {
+        return(NX_OPTION_HEADER_ERROR);
+    }
 
     /* Set a pointer to the routing header. */
     /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */

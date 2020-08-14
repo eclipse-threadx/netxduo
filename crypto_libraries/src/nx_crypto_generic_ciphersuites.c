@@ -28,7 +28,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_generic_ciphersuites                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -61,6 +61,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s), added    */
+/*                                            curves in the crypto array, */
+/*                                            added TLS ciphersuite entry,*/
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -336,6 +340,24 @@ const NX_CRYPTO_CIPHERSUITE nx_crypto_tls_rsa_with_aes_128_cbc_sha256 =
     (NX_SECURE_TLS_BITFIELD_VERSIONS_PRE_1_3 | NX_SECURE_DTLS_BITFIELD_VERSIONS_PRE_1_3)
 };
 
+const NX_CRYPTO_CIPHERSUITE nx_crypto_tls_ecdhe_rsa_with_aes_128_cbc_sha256 =
+/* TLS ciphersuite entry. */
+{   TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,   /* Ciphersuite ID. */
+    NX_SECURE_APPLICATION_TLS,               /* Internal application label. */
+    16,                                      /* Symmetric key size. */
+    {   /* Cipher role array. */
+        {NX_CRYPTO_KEY_EXCHANGE_ECDHE,           NX_CRYPTO_ROLE_KEY_EXCHANGE},
+        {NX_CRYPTO_KEY_EXCHANGE_RSA,             NX_CRYPTO_ROLE_SIGNATURE_CRYPTO},
+        {NX_CRYPTO_ENCRYPTION_AES_CBC,           NX_CRYPTO_ROLE_SYMMETRIC},
+        {NX_CRYPTO_AUTHENTICATION_HMAC_SHA2_256, NX_CRYPTO_ROLE_MAC_HASH},
+        {NX_CRYPTO_HASH_SHA256,                  NX_CRYPTO_ROLE_RAW_HASH},
+        {NX_CRYPTO_HASH_HMAC,                    NX_CRYPTO_ROLE_HMAC},
+        {NX_CRYPTO_PRF_HMAC_SHA2_256,            NX_CRYPTO_ROLE_PRF},
+        {NX_CRYPTO_NONE,                         NX_CRYPTO_ROLE_NONE}
+    },
+    /* TLS/DTLS Versions supported. */
+    (NX_SECURE_TLS_BITFIELD_VERSIONS_PRE_1_3 | NX_SECURE_DTLS_BITFIELD_VERSIONS_PRE_1_3)
+};
 
 const NX_CRYPTO_CIPHERSUITE nx_crypto_tls_ecdhe_rsa_with_aes_128_gcm_sha256 =
 /* TLS ciphersuite entry. */
@@ -554,17 +576,17 @@ const NX_CRYPTO_METHOD *supported_crypto[] =
     &crypto_method_none,
     &crypto_method_rsa,
     &crypto_method_pkcs1,
-    &crypto_method_ecdhe,     
+    &crypto_method_ecdhe,
     &crypto_method_ecdsa,
-    &crypto_method_aes_ccm_8,     
-    &crypto_method_aes_cbc_128,     
-    &crypto_method_aes_cbc_256,     
-    &crypto_method_aes_128_gcm_16,     
-    &crypto_method_aes_256_gcm_16,     
+    &crypto_method_aes_ccm_8,
+    &crypto_method_aes_cbc_128,
+    &crypto_method_aes_cbc_256,
+    &crypto_method_aes_128_gcm_16,
+    &crypto_method_aes_256_gcm_16,
     &crypto_method_hmac,
-    &crypto_method_hmac_md5,     
-    &crypto_method_hmac_sha1,     
-    &crypto_method_hmac_sha256,     
+    &crypto_method_hmac_md5,
+    &crypto_method_hmac_sha1,
+    &crypto_method_hmac_sha256,
     &crypto_method_md5,
     &crypto_method_sha1,
     &crypto_method_sha224,
@@ -574,6 +596,9 @@ const NX_CRYPTO_METHOD *supported_crypto[] =
     &crypto_method_tls_prf_1,
     &crypto_method_tls_prf_sha256,
     &crypto_method_hkdf,
+    &crypto_method_ec_secp256,
+    &crypto_method_ec_secp384,
+    &crypto_method_ec_secp521,
 };
 
 const UINT supported_crypto_size = sizeof(supported_crypto) / sizeof(NX_CRYPTO_METHOD*);

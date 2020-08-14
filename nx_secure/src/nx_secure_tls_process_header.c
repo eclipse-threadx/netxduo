@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_header                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -38,7 +38,7 @@
 /*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This function processes an NX_PACKET data structure, extracting     */
-/*    and parsing a TLS header recevied from a remote host.               */
+/*    and parsing a TLS header received from a remote host.               */
 /*                                                                        */
 /*  INPUT                                                                 */
 /*                                                                        */
@@ -68,6 +68,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            supported chained packet,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_header(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
@@ -77,38 +80,33 @@ UINT _nx_secure_tls_process_header(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET
 ULONG  bytes_copied;
 UINT   status;
 USHORT protocol_version;
-ULONG  remaining_bytes = 5;
 
 
-    *header_length = 5;
-
-    while (remaining_bytes)
+    /* Check the packet. */
+    if (packet_ptr == NX_NULL)
     {
 
-        /* Check the packet. */
-        if (packet_ptr == NX_NULL)
-        {
+        /* There was an error in extracting the header from the supplied packet. */
+        return(NX_SECURE_TLS_INVALID_PACKET);
+    }
 
-            /* There was an error in extracting the header from the supplied packet. */
-            return(NX_SECURE_TLS_INVALID_PACKET);
-        }
+    /* Process the TLS record header, which will set the state. */
+    status = nx_packet_data_extract_offset(packet_ptr, record_offset, header_data,
+                                           NX_SECURE_TLS_RECORD_HEADER_SIZE, &bytes_copied);
 
-        /* Process the TLS record header, which will set the state. */
-        status = nx_packet_data_extract_offset(packet_ptr, record_offset, &header_data[5 - remaining_bytes],
-                                               remaining_bytes, &bytes_copied);
+    /* Make sure we actually got a header. */
+    if (status != NX_SUCCESS)
+    {
 
-        /* Make sure we actually got a header. */
-        if (status != NX_SUCCESS)
-        {
+        /* There was an error in extracting the header from the supplied packet. */
+        return(NX_SECURE_TLS_INVALID_PACKET);
+    }
 
-            /* There was an error in extracting the header from the supplied packet. */
-            return(NX_SECURE_TLS_INVALID_PACKET);
-        }
+    if (bytes_copied != NX_SECURE_TLS_RECORD_HEADER_SIZE)
+    {
 
-        record_offset = 0;
-        remaining_bytes -= bytes_copied;
-
-        packet_ptr = packet_ptr -> nx_packet_queue_next;
+        /* Wait more TCP packets for this one record. */
+        return(NX_CONTINUE);
     }
 
     /* Extract message type from packet/record. */
@@ -119,6 +117,9 @@ ULONG  remaining_bytes = 5;
 
     /* Get the length of the TLS data. */
     *length = (UINT)(((UINT)header_data[3] << 8) + header_data[4]);
+
+    /* Set header length. */
+    *header_length = NX_SECURE_TLS_RECORD_HEADER_SIZE;
 
     /* Check the protocol version, except when we haven't established a version yet */
     if (tls_session -> nx_secure_tls_protocol_version != 0)

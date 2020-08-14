@@ -40,7 +40,7 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_clienthello                 PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -87,6 +87,10 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 /*                                            that would result in        */
 /*                                            compiler error,             */
 /*                                            resulting in version 6.0.1  */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved negotiation logic, */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_clienthello(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
@@ -145,6 +149,14 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
     /* Get a reference to TLS state. */
     tls_session = &dtls_session -> nx_secure_dtls_tls_session;
 
+    /* If we are currently in a session, we have a renegotiation handshake. */
+    if (tls_session -> nx_secure_tls_local_session_active)
+    {
+
+        /* Session renegotiation is disabled, send a "no_renegotiation" alert! */
+        return(NX_SECURE_TLS_NO_RENEGOTIATION_ERROR);
+    }
+
     /* Client is establishing a TLS session with our server. */
     /* Extract the protocol version - only part of the ClientHello message. */
     protocol_version = (USHORT)(((USHORT)packet_buffer[0] << 8) | packet_buffer[1]);
@@ -161,9 +173,9 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
         if (status == NX_SECURE_TLS_UNSUPPORTED_TLS_VERSION || tls_session -> nx_secure_tls_local_session_active)
         {
             /* If the version isn't supported, it's not an issue - TLS is backward-compatible,
-             * so pick the highest version we do support. If the version isn't recognized,
+             * so negotiate the highest supported version. If the version isn't recognized,
              * flag an error. */
-            _nx_secure_tls_newest_supported_version(tls_session, &protocol_version, NX_SECURE_DTLS);
+            _nx_secure_tls_highest_supported_version_negotiate(tls_session, &protocol_version, NX_SECURE_DTLS);
 
             if (protocol_version == 0x0)
             {

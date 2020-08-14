@@ -1310,7 +1310,7 @@ UINT      i, j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_modulus                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1377,6 +1377,9 @@ UINT      i, j;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s), and      */
+/*                                            fixed variable type issue,  */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_modulus(NX_CRYPTO_HUGE_NUMBER *dividend, NX_CRYPTO_HUGE_NUMBER *divisor)
@@ -1476,7 +1479,7 @@ NX_CRYPTO_HUGE_NUMBER *result;
             }
             else
             {
-                scale = (dividend_msb / divisor_msb) << (HN_SHIFT >> 1);
+                scale = ((HN_UBASE2)(dividend_msb / divisor_msb)) << (HN_SHIFT >> 1);
             }
         }
         else if (shift)

@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_client_handshake                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -88,7 +88,7 @@
 /*    _nx_secure_tls_send_handshake_record  Send TLS handshake record     */
 /*    _nx_secure_tls_send_record            Send TLS records              */
 /*    _nx_secure_tls_session_keys_set       Set session keys              */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    [nx_secure_tls_session_renegotiation_callback]                      */
 /*                                          Renegotiation callback        */
 /*    tx_mutex_get                          Get protection mutex          */
@@ -103,6 +103,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            released packet securely,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -381,7 +384,7 @@ const UCHAR    *server_random;
 
                 if (status != NX_SUCCESS)
                 {
-                    nx_packet_release(send_packet);
+                    nx_secure_tls_packet_release(send_packet);
                 }
             }
             return(error_number);
@@ -448,7 +451,7 @@ const UCHAR    *server_random;
             {
 
                 /* Release the protection. */
-                nx_packet_release(send_packet);
+                nx_secure_tls_packet_release(send_packet);
                 return(status);
             }
             break;
@@ -685,7 +688,7 @@ const UCHAR    *server_random;
 
                 if (status != NX_SUCCESS)
                 {
-                    nx_packet_release(send_packet);
+                    nx_secure_tls_packet_release(send_packet);
                 }
             }
 

@@ -349,4 +349,4 @@ VOID    _nx_pppoe_client_packet_deferred_receive(NX_PACKET *packet_ptr);
         }
 #endif
 
-#endif /* NX_PPP_CLIENT_H */ 
+#endif /* NX_PPPOE_CLIENT_H */ 

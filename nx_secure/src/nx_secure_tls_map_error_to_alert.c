@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_map_error_to_alert                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -68,6 +68,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_secure_tls_map_error_to_alert(UINT error_number, UINT *alert_number, UINT *alert_level)
@@ -115,7 +118,9 @@ VOID _nx_secure_tls_map_error_to_alert(UINT error_number, UINT *alert_number, UI
     case NX_SECURE_TLS_SNI_EXTENSION_INVALID:
     case NX_SECURE_TLS_EMPTY_EC_GROUP:
     case NX_SECURE_TLS_EMPTY_EC_POINT_FORMAT:
-    case NX_SECURE_TLS_UNSUPPORTED_SIGNATURE_ALGORITHM: /* Deliberate fall-through. */
+    case NX_SECURE_TLS_UNSUPPORTED_SIGNATURE_ALGORITHM:
+    case NX_SECURE_TLS_RENEGOTIATION_SESSION_INACTIVE:
+    case NX_SECURE_TLS_RENEGOTIATION_EXTENSION_ERROR: /* Deliberate fall-through. */
         *alert_number = NX_SECURE_TLS_ALERT_HANDSHAKE_FAILURE;
         *alert_level = NX_SECURE_TLS_ALERT_LEVEL_FATAL;
         break;
@@ -201,7 +206,6 @@ VOID _nx_secure_tls_map_error_to_alert(UINT error_number, UINT *alert_number, UI
 
     /* Re-negotiation issues - the client may opt to decline a Hello Request message. */
     case NX_SECURE_TLS_NO_RENEGOTIATION_ERROR:
-    case NX_SECURE_TLS_RENEGOTIATION_SESSION_INACTIVE:
     case NX_SECURE_TLS_RENEGOTIATION_FAILURE:
         *alert_number = NX_SECURE_TLS_ALERT_NO_RENEGOTIATION;
         *alert_level = NX_SECURE_TLS_ALERT_LEVEL_WARNING;

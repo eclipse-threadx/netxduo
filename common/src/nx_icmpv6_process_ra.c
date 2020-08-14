@@ -37,7 +37,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_process_ra                               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -76,6 +76,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  08-14-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            option length verification, */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_icmpv6_process_ra(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -236,6 +239,19 @@ UINT                          interface_index;
         /* Is the current option a prefix option? */
         if (option_ptr -> nx_icmpv6_option_type == ICMPV6_OPTION_TYPE_PREFIX_INFO)
         {
+
+            /* Validate packet length before cast to avoid OOB access. */
+            if (packet_length < (INT)sizeof(NX_ICMPV6_OPTION_PREFIX))
+            {
+#ifndef NX_DISABLE_ICMP_INFO
+
+                /* Increment the ICMP invalid packet error. */
+                ip_ptr -> nx_ip_icmp_invalid_packets++;
+#endif /* NX_DISABLE_ICMP_INFO */
+
+                _nx_packet_release(packet_ptr);
+                return;
+            }
 
             /* Yes, set a local pointer to the option. */
             /*lint -e{929} -e{826} -e{740} suppress cast of pointer to pointer, since it is necessary  */

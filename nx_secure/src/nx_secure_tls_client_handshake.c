@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_client_handshake                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -86,7 +86,7 @@
 /*    _nx_secure_tls_send_handshake_record  Send TLS handshake record     */
 /*    _nx_secure_tls_send_record            Send TLS records              */
 /*    _nx_secure_tls_session_keys_set       Set session keys              */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    [nx_secure_tls_session_renegotiation_callback]                      */
 /*                                          Renegotiation callback        */
 /*    tx_mutex_get                          Get protection mutex          */
@@ -101,6 +101,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            released packet securely,   */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_client_handshake(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -240,10 +244,11 @@ const NX_CRYPTO_METHOD
              * send a ClientHello (start the handshake again) or send a no_renegotiation alert. */
             if (tls_session -> nx_secure_tls_local_session_active)
             {
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
                 /* A HelloRequest does not contain any data - it simply changes state. */
                 tls_session -> nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_HELLO_REQUEST;
 
-                if (tls_session -> nx_secure_tls_renegotation_enabled)
+                if (tls_session -> nx_secure_tls_renegotation_enabled && tls_session -> nx_secure_tls_secure_renegotiation)
                 {
                     tls_session -> nx_secure_tls_renegotiation_handshake = NX_TRUE;
 
@@ -258,6 +263,7 @@ const NX_CRYPTO_METHOD
                     }
                 }
                 else
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
                 {
                     /* Session renegotiation is disabled, so this is an error! */
                     return(NX_SECURE_TLS_NO_RENEGOTIATION_ERROR);
@@ -299,7 +305,7 @@ const NX_CRYPTO_METHOD
 
                 if (status != NX_SUCCESS)
                 {
-                    nx_packet_release(send_packet);
+                    nx_secure_tls_packet_release(send_packet);
                 }
             }
             return(error_number);
@@ -318,12 +324,13 @@ const NX_CRYPTO_METHOD
                the alert was sent, so just return a status indicating as much. */
             return(NX_SECURE_TLS_HANDSHAKE_FAILURE);
             break;
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
         case NX_SECURE_TLS_CLIENT_STATE_HELLO_REQUEST:
             /* Server sent a hello request, indicating it wants to restart the handshake process with a new ClientHello. */
             if (tls_session -> nx_secure_tls_local_session_active)
             {
                 /* See if renegotiation is enabled. */
-                if (tls_session -> nx_secure_tls_renegotation_enabled)
+                if (tls_session -> nx_secure_tls_renegotation_enabled && tls_session -> nx_secure_tls_secure_renegotiation)
                 {
                     /* Invoke user callback to notify application of renegotiation request. */
                     if (tls_session -> nx_secure_tls_session_renegotiation_callback != NX_NULL)
@@ -366,6 +373,7 @@ const NX_CRYPTO_METHOD
             }
             /* If we are still in a handshake (session is not active) then ignore the message. */
             break;
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
         case NX_SECURE_TLS_CLIENT_STATE_SERVERHELLO:
             /* We received a serverhello above. It is time to update the hash for the handshake. */
 
@@ -522,7 +530,7 @@ const NX_CRYPTO_METHOD
             if (status != NX_SUCCESS)
             {
                 /* Release packet on send error. */
-                nx_packet_release(send_packet);
+                nx_secure_tls_packet_release(send_packet);
                 break;
             }
 
@@ -585,7 +593,7 @@ const NX_CRYPTO_METHOD
 
                 if (status != NX_SUCCESS)
                 {
-                    nx_packet_release(send_packet);
+                    nx_secure_tls_packet_release(send_packet);
                 }
             }
 

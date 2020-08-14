@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_receive_callback                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -60,7 +60,7 @@
 /*    _nx_udp_socket_port_get               Get local port                */
 /*    nx_secure_dtls_session_cache_find     Check DTLS session cache      */
 /*    nx_secure_dtls_session_cache_get_new  Get new DTLS session          */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    nx_packet_allocate                    Allocate packet               */
 /*    _nxd_udp_socket_send                  Send UDP packet               */
 /*    nx_udp_socket_receive                 Receive packet                */
@@ -80,6 +80,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            released packet securely,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_secure_dtls_receive_callback(NX_UDP_SOCKET *socket_ptr)
@@ -127,7 +130,7 @@ NX_SECURE_DTLS_SESSION *dtls_session;
     /* Check session cache for existing DTLS session. */
     status = nx_secure_dtls_session_cache_find(dtls_server, &dtls_session, &ip_address, remote_port, local_port);
 
-    /* Do we have an establised session? */
+    /* Do we have an established session? */
     if(status == NX_SECURE_DTLS_SESSION_NOT_FOUND)
     {
 
@@ -157,7 +160,7 @@ NX_SECURE_DTLS_SESSION *dtls_session;
             TX_RESTORE
 
             /* Release the packet.  */
-            nx_packet_release(packet_ptr);
+            nx_secure_tls_packet_release(packet_ptr);
 
             return;
         }
@@ -194,7 +197,7 @@ NX_SECURE_DTLS_SESSION *dtls_session;
             TX_RESTORE
 
             /* Release the packet.  */
-            nx_packet_release(packet_ptr);
+            nx_secure_tls_packet_release(packet_ptr);
 
             /* Get a packet to send the alert to the client. */
             if (ip_address.nxd_ip_version == NX_IP_VERSION_V4)
@@ -217,7 +220,7 @@ NX_SECURE_DTLS_SESSION *dtls_session;
             {
 
                 /* Packet buffer too small. */
-                nx_packet_release(packet_ptr);
+                nx_secure_tls_packet_release(packet_ptr);
                 return;
             }
 

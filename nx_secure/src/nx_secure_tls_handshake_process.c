@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_handshake_process                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -55,7 +55,7 @@
 /*                                                                        */
 /*    _nx_secure_tls_session_receive_records                              */
 /*                                          Receive TLS records           */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -67,15 +67,16 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            released packet securely,   */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_handshake_process(NX_SECURE_TLS_SESSION *tls_session, UINT wait_option)
 {
 UINT       status = NX_NOT_SUCCESSFUL;
-NX_PACKET *incoming_packet;
-#ifdef NX_SECURE_KEY_CLEAR
-NX_PACKET *current_packet;
-#endif /* NX_SECURE_KEY_CLEAR */
+NX_PACKET *incoming_packet = NX_NULL;
 
     /* Process the handshake depending on the TLS session type. */
 #ifndef NX_SECURE_TLS_CLIENT_DISABLED
@@ -93,21 +94,13 @@ NX_PACKET *current_packet;
             {
                 break;
             }
+        }
 
-#ifdef NX_SECURE_KEY_CLEAR
-            /* Clear all data in chained packet. */
-            current_packet = incoming_packet;
-            while (current_packet)
-            {
-                NX_SECURE_MEMSET(current_packet -> nx_packet_prepend_ptr, 0,
-                       (ULONG)current_packet -> nx_packet_append_ptr -
-                       (ULONG)current_packet -> nx_packet_prepend_ptr);
-                current_packet = current_packet -> nx_packet_next;
-            }
-#endif /* NX_SECURE_KEY_CLEAR  */
+        if (tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HANDSHAKE_FINISHED)
+        {
 
             /* Release the incoming packet if we do receive it. */
-            nx_packet_release(incoming_packet);
+            nx_secure_tls_packet_release(incoming_packet);
         }
     }
 #endif
@@ -129,21 +122,13 @@ NX_PACKET *current_packet;
             {
                 break;
             }
+        }
 
-#ifdef NX_SECURE_KEY_CLEAR
-            /* Clear all data in chained packet. */
-            current_packet = incoming_packet;
-            while (current_packet)
-            {
-                NX_SECURE_MEMSET(current_packet -> nx_packet_prepend_ptr, 0,
-                       (ULONG)current_packet -> nx_packet_append_ptr -
-                       (ULONG)current_packet -> nx_packet_prepend_ptr);
-                current_packet = current_packet -> nx_packet_next;
-            }
-#endif /* NX_SECURE_KEY_CLEAR  */
+        if (tls_session -> nx_secure_tls_server_state == NX_SECURE_TLS_SERVER_STATE_HANDSHAKE_FINISHED)
+        {
 
             /* Release the incoming packet if we do receive it. */
-            nx_packet_release(incoming_packet);
+            nx_secure_tls_packet_release(incoming_packet);
         }
     }
 #endif

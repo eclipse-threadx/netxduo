@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_receive_records              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -58,7 +58,7 @@
 /*    _nx_secure_tls_process_record         Process TLS record data       */
 /*    _nx_secure_tls_send_alert             Send TLS alert                */
 /*    _nx_secure_tls_send_record            Send the TLS record           */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    nx_tcp_socket_receive                 Receive TCP data              */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
@@ -74,6 +74,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            supported chained packet,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_session_receive_records(NX_SECURE_TLS_SESSION *tls_session,
@@ -84,12 +87,13 @@ NX_PACKET     *packet_ptr;
 NX_TCP_SOCKET *tcp_socket;
 ULONG          bytes_processed = 0;
 ULONG          packet_fragment_length;
-NX_PACKET     *tmp_ptr;
 NX_PACKET     *send_packet = NX_NULL;
 UINT           error_number;
 UINT           alert_number;
 UINT           alert_level;
 NX_PACKET     *current_packet;
+NX_PACKET     *previous_packet;
+UCHAR          handshake_finished = NX_FALSE;
 
     /* Get the protection. */
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
@@ -145,73 +149,51 @@ NX_PACKET     *current_packet;
     if (status == NX_SUCCESS || status == NX_SECURE_TLS_POST_HANDSHAKE_RECEIVED)
     {
 
-        /* Remove processed packets. */
-        tls_session -> nx_secure_record_queue_length -= bytes_processed;
-        tmp_ptr = tls_session -> nx_secure_record_queue_header;
-        while (tmp_ptr)
+        /* Remove processed packets. Data in released packet will be cleared by nx_secure_tls_packet_release. */
+        tls_session -> nx_secure_record_queue_header -> nx_packet_length -= bytes_processed;
+        current_packet = tls_session -> nx_secure_record_queue_header;
+        previous_packet = NX_NULL;
+        while (current_packet)
         {
-            if (bytes_processed >= tmp_ptr -> nx_packet_length)
-            {
+            packet_fragment_length = (ULONG)(current_packet -> nx_packet_append_ptr) - (ULONG)(current_packet -> nx_packet_prepend_ptr);
 
-                /* Remove entire packet. */
-                bytes_processed -= tmp_ptr -> nx_packet_length;
-                tls_session -> nx_secure_record_queue_header = tmp_ptr -> nx_packet_queue_next;
-#ifdef NX_SECURE_KEY_CLEAR
-                /* Clear all data in chained packet. */
-                current_packet = tmp_ptr;
-                while (current_packet)
-                {
-                    NX_SECURE_MEMSET(current_packet -> nx_packet_prepend_ptr, 0,
-                           (ULONG)current_packet -> nx_packet_append_ptr -
-                           (ULONG)current_packet -> nx_packet_prepend_ptr);
-                    current_packet = current_packet -> nx_packet_next;
-                }
-#endif /* NX_SECURE_KEY_CLEAR  */
-                nx_packet_release(tmp_ptr);
-                tmp_ptr = tls_session -> nx_secure_record_queue_header;
+            /* Determine if all data in the current fragment have been processed. */
+            if (packet_fragment_length <= bytes_processed)
+            {
+                bytes_processed -= packet_fragment_length;
             }
             else
             {
-
-                /* Only partial data been processed. */
-                current_packet = tmp_ptr;
-                while (current_packet)
-                {
-                    packet_fragment_length = (ULONG)(current_packet -> nx_packet_append_ptr) - (ULONG)(current_packet -> nx_packet_prepend_ptr);
-
-                    /* Determine if all data in the current fragment have been processed. */
-                    if (packet_fragment_length < bytes_processed)
-                    {
-#ifdef NX_SECURE_KEY_CLEAR
-                        /* Remove all data of this fragment. */
-                        NX_SECURE_MEMSET(current_packet -> nx_packet_prepend_ptr, 0,
-                                         packet_fragment_length);
-#endif /* NX_SECURE_KEY_CLEAR  */
-                        current_packet -> nx_packet_prepend_ptr = current_packet -> nx_packet_append_ptr;
-                        tmp_ptr -> nx_packet_length -= packet_fragment_length;
-                        bytes_processed -= packet_fragment_length;
-                    }
-                    else
-                    {
-#ifdef NX_SECURE_KEY_CLEAR
-                        /* Remove partial data of this fragment. */
-                        NX_SECURE_MEMSET(current_packet -> nx_packet_prepend_ptr, 0,
-                                         bytes_processed);
-#endif /* NX_SECURE_KEY_CLEAR  */
-                        current_packet -> nx_packet_prepend_ptr += bytes_processed;
-                        tmp_ptr -> nx_packet_length -= bytes_processed;
-                        bytes_processed = 0;
-                        break;
-                    }
-                    current_packet = current_packet -> nx_packet_next;
-                }
+                current_packet -> nx_packet_prepend_ptr += bytes_processed;
+                bytes_processed = 0;
                 break;
             }
+            previous_packet = current_packet;
+            current_packet = current_packet -> nx_packet_next;
         }
 
-        if (!tmp_ptr)
+        if (!current_packet)
         {
-            tls_session -> nx_secure_record_queue_tail = NX_NULL;
+            nx_secure_tls_packet_release(tls_session -> nx_secure_record_queue_header);
+            tls_session -> nx_secure_record_queue_header = NX_NULL;
+        }
+        else if (previous_packet)
+        {
+
+            /* Release trimmed packets. */
+            /* Packets from tls_session -> nx_secure_record_queue_header till previous_packet can be trimmed. */
+            previous_packet -> nx_packet_next = NX_NULL;
+
+            /* Update the length and last packet of remaining packets. */
+            current_packet -> nx_packet_length = tls_session -> nx_secure_record_queue_header -> nx_packet_length;
+            current_packet -> nx_packet_last = tls_session -> nx_secure_record_queue_header -> nx_packet_last;
+
+            /* Correct the last packet to be trimmed. */
+            tls_session -> nx_secure_record_queue_header -> nx_packet_last = previous_packet;
+            nx_secure_tls_packet_release(tls_session -> nx_secure_record_queue_header);
+
+            /* Update the remaining packets. */
+            tls_session -> nx_secure_record_queue_header = current_packet;
         }
 
         if (bytes_processed)
@@ -223,16 +205,35 @@ NX_PACKET     *current_packet;
             return(NX_SECURE_TLS_INVALID_PACKET);
         }
 
-        if (tls_session -> nx_secure_record_decrypted_packet == NX_NULL)
+#ifndef NX_SECURE_TLS_CLIENT_DISABLED
+        if ((tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_CLIENT) &&
+            (tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HANDSHAKE_FINISHED))
         {
-            /* Release the protection. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-
-            return(NX_SECURE_TLS_INVALID_PACKET);
+            handshake_finished = NX_TRUE;
         }
+#endif /* NX_SECURE_TLS_CLIENT_DISABLED */
 
-        *packet_ptr_ptr = tls_session -> nx_secure_record_decrypted_packet;
-        tls_session -> nx_secure_record_decrypted_packet = NX_NULL;
+#ifndef NX_SECURE_TLS_SERVER_DISABLED
+        if ((tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_SERVER) &&
+            (tls_session -> nx_secure_tls_server_state == NX_SECURE_TLS_SERVER_STATE_HANDSHAKE_FINISHED))
+        {
+            handshake_finished = NX_TRUE;
+        }
+#endif /* NX_SECURE_TLS_CLIENT_DISABLED */
+
+        if (handshake_finished)
+        {
+            if (tls_session -> nx_secure_record_decrypted_packet == NX_NULL)
+            {
+                /* Release the protection. */
+                tx_mutex_put(&_nx_secure_tls_protection);
+
+                return(NX_SECURE_TLS_INVALID_PACKET);
+            }
+
+            *packet_ptr_ptr = tls_session -> nx_secure_record_decrypted_packet;
+            tls_session -> nx_secure_record_decrypted_packet = NX_NULL;
+        }
     }
     else
     {
@@ -275,7 +276,7 @@ NX_PACKET     *current_packet;
                 /* If we didn't send the alert successfully, we need to release the packet. */
                 if (status != NX_SUCCESS)
                 {
-                    nx_packet_release(send_packet);
+                    nx_secure_tls_packet_release(send_packet);
                 }
             }
 

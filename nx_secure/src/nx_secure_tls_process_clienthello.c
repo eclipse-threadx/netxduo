@@ -36,7 +36,7 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_clienthello                  PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -88,6 +88,10 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*  06-30-2020     Timothy Stapko           Modified comment(s), added    */
 /*                                            priority ciphersuite logic, */
 /*                                            resulting in version 6.0.1  */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved negotiation logic, */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_clienthello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -139,7 +143,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
     if (tls_session -> nx_secure_tls_local_session_active)
     {
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-        if(tls_session->nx_secure_tls_1_3 == NX_TRUE)
+        if (tls_session->nx_secure_tls_1_3 == NX_TRUE)
         {
 
             /* RFC 8446, section 4.1.2, page 27.
@@ -148,7 +152,9 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
             return(NX_SECURE_TLS_UNEXPECTED_CLIENTHELLO);
         }
 #endif
-        if (tls_session -> nx_secure_tls_renegotation_enabled)
+
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
+        if (tls_session -> nx_secure_tls_renegotation_enabled && tls_session -> nx_secure_tls_secure_renegotiation)
         {
             tls_session -> nx_secure_tls_renegotiation_handshake = NX_TRUE;
 
@@ -174,6 +180,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
             }
         }
         else
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
         {
             /* Session renegotiation is disabled, so this is an error! */
             return(NX_SECURE_TLS_NO_RENEGOTIATION_ERROR);
@@ -186,7 +193,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
     length += 2;
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-    if(tls_session->nx_secure_tls_1_3 == NX_FALSE)
+    if (tls_session->nx_secure_tls_1_3 == NX_FALSE)
 #endif
     {
 
@@ -200,9 +207,9 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
             if (status == NX_SECURE_TLS_UNSUPPORTED_TLS_VERSION || tls_session -> nx_secure_tls_local_session_active)
             {
                 /* If the version isn't supported, it's not an issue - TLS is backward-compatible,
-                 * so pick the highest version we do support. If the version isn't recognized,
+                 * so negotiate the highest supported version. If the version isn't recognized,
                  * flag an error. */
-                _nx_secure_tls_newest_supported_version(tls_session, &protocol_version, NX_SECURE_TLS);
+                _nx_secure_tls_highest_supported_version_negotiate(tls_session, &protocol_version, NX_SECURE_TLS);
 
                 if (protocol_version == 0x0)
                 {
@@ -334,6 +341,17 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
         }
     }
 
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
+    if ((tls_session -> nx_secure_tls_renegotiation_handshake) && (!tls_session -> nx_secure_tls_secure_renegotiation_verified))
+    {
+
+        /* The server did not receive the "renegotiation_info" extension, the handshake must be aborted. */
+        return(NX_SECURE_TLS_RENEGOTIATION_EXTENSION_ERROR);
+    }
+
+    tls_session -> nx_secure_tls_secure_renegotiation_verified = NX_FALSE;
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
+
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
 
     /* Get the local certificate. */
@@ -393,7 +411,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
     /* Set our initial priority to the maximum value - the size of our ciphersuite crypto table. */
-    ciphersuite_priority = (USHORT)(0xFFFFFFFF); 
+    ciphersuite_priority = (USHORT)(0xFFFFFFFF);
 
     for (i = 0; i < ciphersuite_list_length; i += 2)
     {
@@ -401,7 +419,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
         cipher_entry = (USHORT)((ciphersuite_list[i] << 8) + ciphersuite_list[i + 1]);
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-         if ((tls_session -> nx_secure_tls_1_3 == NX_TRUE) ^ (ciphersuite_list[i] == 0x13))
+        if ((tls_session -> nx_secure_tls_1_3 == NX_TRUE) ^ (ciphersuite_list[i] == 0x13))
         {
 
             /* Ciphersuites for TLS 1.3 can not be used by TLS 1.2. */
@@ -426,23 +444,34 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
             }
         }
 
-#ifdef NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
         if (cipher_entry == TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
         {
-            /* Secure Renegotiation signalling ciphersuite value was encountered.
-               This indicates that the Client supports secure renegotiation. */
-            tls_session -> nx_secure_tls_secure_renegotiation = NX_TRUE;
+            if (tls_session -> nx_secure_tls_renegotiation_handshake)
+            {
+
+                /* When secure renegotiating, the server MUST verify that it
+                   does not contain the TLS_EMPTY_RENEGOTIATION_INFO_SCSV SCSV. */
+                return(NX_SECURE_TLS_RENEGOTIATION_EXTENSION_ERROR);
+            }
+            else
+            {
+
+                /* Secure Renegotiation signalling ciphersuite value was encountered.
+                   This indicates that the Client supports secure renegotiation. */
+                tls_session -> nx_secure_tls_secure_renegotiation = NX_TRUE;
+            }
         }
-#endif /* NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION */
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 
 
         /* Check for the fallback notification SCSV. */
-        if(cipher_entry == TLS_FALLBACK_NOTIFY_SCSV)
+        if (cipher_entry == TLS_FALLBACK_NOTIFY_SCSV)
         {
 
             /* A fallback is indicated by the Client, check the TLS version. */
             _nx_secure_tls_newest_supported_version(tls_session, &newest_version, NX_SECURE_TLS);
-            
+
             if (protocol_version != newest_version)
             {
                 return(NX_SECURE_TLS_INAPPROPRIATE_FALLBACK);
@@ -450,6 +479,20 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
         }
         /* Continue searching client ciphersuite list to get highest-priority selection. */
     }
+
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) && defined(NX_SECURE_TLS_REQUIRE_RENEGOTIATION_EXT)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    if (!tls_session -> nx_secure_tls_1_3)
+#endif /* NX_SECURE_TLS_TLS_1_3_ENABLED */
+    {
+        if ((tls_session -> nx_secure_tls_renegotation_enabled) && (!tls_session -> nx_secure_tls_secure_renegotiation))
+        {
+
+            /* No "renegotiation_info" extension present, some servers may want to terminate the handshake. */
+            return(NX_SECURE_TLS_RENEGOTIATION_EXTENSION_ERROR);
+        }
+    }
+#endif /* !NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION && NX_SECURE_TLS_REQUIRE_RENEGOTIATION_EXT */
 
     /* See if we found an acceptable ciphersuite. */
     if (tls_session -> nx_secure_tls_session_ciphersuite == NX_NULL)

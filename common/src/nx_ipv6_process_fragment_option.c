@@ -41,7 +41,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ipv6_process_fragment_option                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -77,6 +77,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  08-14-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ipv6_process_fragment_option(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -99,6 +102,12 @@ NX_IPV6_HEADER_FRAGMENT_OPTION *fragment_option;
 
     /* If fragmentation is not enabled, we drop this packet. */
     if (!ip_ptr -> nx_ip_fragment_assembly)
+    {
+        return(NX_OPTION_HEADER_ERROR);
+    }
+
+    /* Check packet length is at least sizeof(NX_IPV6_HEADER_FRAGMENT_OPTION). */
+    if (packet_ptr -> nx_packet_length < sizeof(NX_IPV6_HEADER_FRAGMENT_OPTION))
     {
         return(NX_OPTION_HEADER_ERROR);
     }

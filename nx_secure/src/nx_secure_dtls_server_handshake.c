@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_server_handshake                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -103,6 +103,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_server_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
@@ -255,12 +258,6 @@ UCHAR                                 *fragment_buffer;
     {
         /* Initialize the handshake hashes used for the Finished message. */
         _nx_secure_tls_handshake_hash_init(tls_session);
-
-        /* At this point, the remote session is not active - that is, incoming records are not encrypted. */
-        tls_session -> nx_secure_tls_remote_session_active = 0;
-
-        /* Since we are establishing a new session, we start in non-encrypted mode. */
-        tls_session -> nx_secure_tls_local_session_active = 0;
     }
 
     /* Process the message itself information from the header. */

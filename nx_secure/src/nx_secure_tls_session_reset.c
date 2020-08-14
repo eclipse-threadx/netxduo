@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_reset                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -68,6 +68,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_reset(NX_SECURE_TLS_SESSION *session_ptr)
@@ -147,15 +150,16 @@ UINT temp_status;
     session_ptr -> nx_secure_tls_credentials.nx_secure_tls_active_certificate = NX_NULL;
 
 
-#ifdef NX_SECURE_TLS_ENABLE_SECURE_RENEGOTIATION
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
     session_ptr -> nx_secure_tls_secure_renegotiation = NX_FALSE;
 
     NX_SECURE_MEMSET(session_ptr -> nx_secure_tls_remote_verify_data, 0, NX_SECURE_TLS_FINISHED_HASH_SIZE);
     NX_SECURE_MEMSET(session_ptr -> nx_secure_tls_local_verify_data, 0, NX_SECURE_TLS_FINISHED_HASH_SIZE);
-#endif
 
     /* Flag to indicate when a session renegotiation is taking place. */
     session_ptr -> nx_secure_tls_renegotiation_handshake = NX_FALSE;
+    session_ptr -> nx_secure_tls_secure_renegotiation_verified = NX_FALSE;
+#endif
 
     /* Flag to indicate when credentials have been received from the remote host. */
     session_ptr -> nx_secure_tls_received_remote_credentials = NX_FALSE;

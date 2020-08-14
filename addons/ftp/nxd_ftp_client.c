@@ -4832,7 +4832,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ftp_client_active_transfer_setup                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4877,6 +4877,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  08-14-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed packet leak,          */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_client_active_transfer_setup(NX_FTP_CLIENT *ftp_client_ptr, ULONG wait_option)
@@ -5131,6 +5134,9 @@ UINT        ipduo_size;
         /* Unable to open file with FTP server. */
         return(NX_FTP_EXPECTED_2XX_CODE);
     }
+
+    /* Release the packet.  */
+    nx_packet_release(packet_ptr);
 
     return(NX_SUCCESS);
 }

@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_handshake_record                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -56,7 +56,7 @@
 /*                                                                        */
 /*    _nx_secure_tls_handshake_hash_update  Update Finished message hash  */
 /*    _nx_secure_tls_send_record            Send the TLS record           */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -70,6 +70,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            released packet securely,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_handshake_record(NX_SECURE_TLS_SESSION *tls_session,
@@ -159,7 +162,7 @@ UINT       buffer_offset;
     if (status != NX_SUCCESS)
     {
         /* Release packet on send error. */
-        nx_packet_release(send_packet);
+        nx_secure_tls_packet_release(send_packet);
     }
 
     return(status);

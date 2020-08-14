@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_end                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -56,7 +56,7 @@
 /*    _nx_secure_tls_send_alert             Generate the CloseNotify      */
 /*    _nx_secure_tls_send_record            Send the CloseNotify          */
 /*    _nx_secure_tls_session_reset          Clear out the session         */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
 /*                                                                        */
@@ -69,6 +69,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            supported chained packet,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_session_end(NX_SECURE_TLS_SESSION *tls_session, UINT wait_option)
@@ -78,9 +81,6 @@ UINT       error_return;
 UINT       send_close_notify;
 NX_PACKET *send_packet;
 NX_PACKET *tmp_ptr;
-#ifdef NX_SECURE_KEY_CLEAR
-NX_PACKET *current_packet;
-#endif /* NX_SECURE_KEY_CLEAR */
 
     /* Get the protection. */
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
@@ -91,33 +91,11 @@ NX_PACKET *current_packet;
         tmp_ptr = tls_session -> nx_secure_record_queue_header;
         tls_session -> nx_secure_record_queue_header = tmp_ptr -> nx_packet_queue_next;
         tmp_ptr -> nx_packet_queue_next = NX_NULL;
-#ifdef NX_SECURE_KEY_CLEAR
-        /* Clear all data in chained packet. */
-        current_packet = tmp_ptr;
-        while (current_packet)
-        {
-            NX_SECURE_MEMSET(current_packet -> nx_packet_prepend_ptr, 0,
-                   (ULONG)current_packet -> nx_packet_append_ptr -
-                   (ULONG)current_packet -> nx_packet_prepend_ptr);
-            current_packet = current_packet -> nx_packet_next;
-        }
-#endif /* NX_SECURE_KEY_CLEAR  */
-        nx_packet_release(tmp_ptr);
+        nx_secure_tls_packet_release(tmp_ptr);
     }
     if (tls_session -> nx_secure_record_decrypted_packet)
     {
-#ifdef NX_SECURE_KEY_CLEAR
-        /* Clear all data in chained packet. */
-        current_packet = tls_session -> nx_secure_record_decrypted_packet;
-        while (current_packet)
-        {
-            NX_SECURE_MEMSET(current_packet -> nx_packet_prepend_ptr, 0,
-                   (ULONG)current_packet -> nx_packet_append_ptr -
-                   (ULONG)current_packet -> nx_packet_prepend_ptr);
-            current_packet = current_packet -> nx_packet_next;
-        }
-#endif /* NX_SECURE_KEY_CLEAR  */
-        nx_packet_release(tls_session -> nx_secure_record_decrypted_packet);
+        nx_secure_tls_packet_release(tls_session -> nx_secure_record_decrypted_packet);
         tls_session -> nx_secure_record_decrypted_packet = NX_NULL;
     }
 
@@ -178,7 +156,7 @@ NX_PACKET *current_packet;
         if (status)
         {
             /* Release the packet on send errors. */
-            nx_packet_release(send_packet);
+            nx_secure_tls_packet_release(send_packet);
 
             /* Release the protection. */
             tx_mutex_put(&_nx_secure_tls_protection);

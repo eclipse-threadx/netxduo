@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_renegotiate                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,7 +70,7 @@
 /*    _nx_secure_tls_send_hellorequest      Send HelloRequest             */
 /*    _nx_secure_tls_session_receive_records                              */
 /*                                          Receive TLS records           */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
 /*                                                                        */
@@ -83,25 +83,25 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            supported chained packet,   */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 UINT _nx_secure_tls_session_renegotiate(NX_SECURE_TLS_SESSION *tls_session, UINT wait_option)
 {
 UINT       status = NX_NOT_SUCCESSFUL;
 NX_PACKET *incoming_packet;
 NX_PACKET *send_packet;
-#ifdef NX_SECURE_KEY_CLEAR
-NX_PACKET *current_packet;
-#endif /* NX_SECURE_KEY_CLEAR */
 
     /* Get the protection. */
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 
     /* Reset the record queue. */
     tls_session -> nx_secure_record_queue_header = NX_NULL;
-    tls_session -> nx_secure_record_queue_tail = NX_NULL;
     tls_session -> nx_secure_record_decrypted_packet = NX_NULL;
-    tls_session -> nx_secure_record_queue_length = 0;
 
     /* If the session isn't active, trying to renegotiate is an error! */
     if (tls_session -> nx_secure_tls_remote_session_active != NX_TRUE || tls_session -> nx_secure_tls_local_session_active != NX_TRUE)
@@ -110,6 +110,14 @@ NX_PACKET *current_packet;
         tx_mutex_put(&_nx_secure_tls_protection);
         return(NX_SECURE_TLS_RENEGOTIATION_SESSION_INACTIVE);
     }
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    if (tls_session -> nx_secure_tls_1_3)
+    {
+
+        return(NX_SECURE_TLS_NO_RENEGOTIATION_ERROR);
+    }
+#endif
 
     /* Make sure the remote host supports renegotiation. */
     if(!tls_session -> nx_secure_tls_secure_renegotiation)
@@ -165,7 +173,7 @@ NX_PACKET *current_packet;
 
             /* Release the protection. */
             tx_mutex_put(&_nx_secure_tls_protection);
-            nx_packet_release(send_packet);
+            nx_secure_tls_packet_release(send_packet);
             return(status);
         }
 
@@ -176,6 +184,7 @@ NX_PACKET *current_packet;
             /* Release the protection. */
             tx_mutex_put(&_nx_secure_tls_protection);
 
+            /* Before handshake finished, incoming packet will not be set. */
             status = _nx_secure_tls_session_receive_records(tls_session, &incoming_packet, wait_option);
 
             /* Get the protection. */
@@ -186,21 +195,6 @@ NX_PACKET *current_packet;
             {
                 break;
             }
-
-#ifdef NX_SECURE_KEY_CLEAR
-            /* Clear all data in chained packet. */
-            current_packet = incoming_packet;
-            while (current_packet)
-            {
-                NX_SECURE_MEMSET(current_packet -> nx_packet_prepend_ptr, 0,
-                       (ULONG)current_packet -> nx_packet_append_ptr -
-                       (ULONG)current_packet -> nx_packet_prepend_ptr);
-                current_packet = current_packet -> nx_packet_next;
-            }
-#endif /* NX_SECURE_KEY_CLEAR  */
-
-            /* On any error, the handshake has failed so break out of our processing loop and return. */
-            nx_packet_release(incoming_packet);
         }
     }
 #endif
@@ -238,7 +232,7 @@ NX_PACKET *current_packet;
 
             /* Release the protection. */
             tx_mutex_put(&_nx_secure_tls_protection);
-            nx_packet_release(send_packet);
+            nx_secure_tls_packet_release(send_packet);
             return(status);
         }
 
@@ -251,6 +245,7 @@ NX_PACKET *current_packet;
             /* Release the protection. */
             tx_mutex_put(&_nx_secure_tls_protection);
 
+            /* Before handshake finished, incoming packet will not be set. */
             status = _nx_secure_tls_session_receive_records(tls_session, &incoming_packet, wait_option);
 
             /* Get the protection. */
@@ -261,21 +256,6 @@ NX_PACKET *current_packet;
             {
                 break;
             }
-
-#ifdef NX_SECURE_KEY_CLEAR
-            /* Clear all data in chained packet. */
-            current_packet = incoming_packet;
-            while (current_packet)
-            {
-                NX_SECURE_MEMSET(current_packet -> nx_packet_prepend_ptr, 0,
-                       (ULONG)current_packet -> nx_packet_append_ptr -
-                       (ULONG)current_packet -> nx_packet_prepend_ptr);
-                current_packet = current_packet -> nx_packet_next;
-            }
-#endif /* NX_SECURE_KEY_CLEAR  */
-
-            /* On any error, the handshake has failed so break out of our processing loop and return. */
-            nx_packet_release(incoming_packet);
         }
     }
 #endif
@@ -285,4 +265,4 @@ NX_PACKET *current_packet;
 
     return(status);
 }
-
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */

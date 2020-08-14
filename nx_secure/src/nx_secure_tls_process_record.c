@@ -24,12 +24,14 @@
 
 #include "nx_secure_tls.h"
 
+static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_record                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -64,6 +66,7 @@
 /*    nx_packet_allocate                    NetX Packet allocation call   */
 /*    nx_packet_data_append                 Append data to packet         */
 /*    nx_packet_data_extract_offset         Extract data from NX_PACKET   */
+/*    _nx_secure_tls_packet_trim            Trim TLS packet               */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
 /*                                                                        */
@@ -77,6 +80,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            supported chained packet,   */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
@@ -85,15 +92,14 @@ UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET
 UINT       status;
 UINT       error_status;
 USHORT     header_length;
-UCHAR      header_data[NX_SECURE_TLS_RECORD_HEADER_SIZE]; /* DTLS record header is larger than TLS. Allocate enough space for both. */
+UCHAR      header_data[NX_SECURE_TLS_RECORD_HEADER_SIZE] = {0}; /* DTLS record header is larger than TLS. Allocate enough space for both. */
 USHORT     message_type;
 UINT       message_length;
-UINT       total_bytes;
 ULONG      bytes_copied;
-NX_PACKET *tmp_ptr;
-UCHAR     *packet_data;
-UINT       skip_bytes;
+UCHAR     *packet_data = NX_NULL;
 ULONG      record_offset = 0;
+ULONG      record_offset_next = 0;
+NX_PACKET *decrypted_packet;
 
     /* Basic state machine:
      * 1. Process header, which will set the state and return some data.
@@ -123,37 +129,42 @@ ULONG      record_offset = 0;
     /* Process the packet. */
     if (packet_ptr != NX_NULL)
     {
+        if (packet_ptr -> nx_packet_last == NX_NULL)
+        {
+
+            /* The logic below requires nx_packet_last is set which is always TRUE
+               for chained packets coming from NetX. However, this packet is not chained
+               so set the nx_packet_last pointer to itself. */
+            packet_ptr -> nx_packet_last = packet_ptr;
+        }
 
         /* Chain the packet. */
-        if (tls_session -> nx_secure_record_queue_tail == NX_NULL)
+        if (tls_session -> nx_secure_record_queue_header == NX_NULL)
         {
             tls_session -> nx_secure_record_queue_header = packet_ptr;
         }
         else
         {
-            tls_session -> nx_secure_record_queue_tail -> nx_packet_queue_next = packet_ptr;
+
+            /* Link current packet. */
+            tls_session -> nx_secure_record_queue_header -> nx_packet_last -> nx_packet_next = packet_ptr;
+            tls_session -> nx_secure_record_queue_header -> nx_packet_last = packet_ptr -> nx_packet_last;
+            tls_session -> nx_secure_record_queue_header -> nx_packet_length += packet_ptr -> nx_packet_length;
         }
-
-        /* Place the new packet at the end of the session record queue - we have to process everything in order. */
-        tls_session -> nx_secure_record_queue_tail = packet_ptr;
-
-        packet_ptr -> nx_packet_queue_next = NX_NULL;
-        tls_session -> nx_secure_record_queue_length += packet_ptr -> nx_packet_length;
-    }
-
-    header_length = NX_SECURE_TLS_RECORD_HEADER_SIZE;
-
-    /* Is the header of one record received? */
-    if (tls_session -> nx_secure_record_queue_length < header_length)
-    {
-
-        /* Wait more TCP packets for this one record. */
-        return(NX_CONTINUE);
     }
 
     /* Process multiple records per packet. */
     while (status == NX_CONTINUE)
     {
+
+        /* Make sure the decrypted packet is NULL. */
+        if (tls_session -> nx_secure_record_decrypted_packet)
+        {
+            nx_secure_tls_packet_release(tls_session -> nx_secure_record_decrypted_packet);
+            tls_session -> nx_secure_record_decrypted_packet = NX_NULL;
+        }
+        decrypted_packet = NX_NULL;
+
         /* Get packet from record queue. */
         packet_ptr = tls_session -> nx_secure_record_queue_header;
 
@@ -170,49 +181,22 @@ ULONG      record_offset = 0;
         {
 
             /* Update the number of bytes we processed. */
-            *bytes_processed = (ULONG)header_length + message_length;
+            *bytes_processed += (ULONG)header_length;
             return(NX_SUCCESS);
         }
 
         /* Is the entire payload of the current record received? */
-        if ((header_length + record_offset + message_length) > tls_session -> nx_secure_record_queue_length)
+        if ((header_length + record_offset + message_length) > packet_ptr -> nx_packet_length)
         {
 
             /* Wait more TCP packets for this one record. */
             return(NX_CONTINUE);
         }
 
-        /* Check available area of buffer. */
-        if (message_length > tls_session -> nx_secure_tls_packet_buffer_size)
-        {
-            return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
-        }
-
-        /* Now extract the the record payload into the TLS packet buffer. */
-        total_bytes = 0;
-        skip_bytes = header_length + record_offset; /* Make sure we account for previous records. */
-        tmp_ptr = packet_ptr;
-        packet_data = tls_session -> nx_secure_tls_packet_buffer;
-        while (total_bytes < message_length)
-        {
-            if (nx_packet_data_extract_offset(tmp_ptr, skip_bytes, packet_data + total_bytes,
-                                              (message_length - total_bytes), &bytes_copied))
-            {
-
-                /* Skip the whole packet. */
-                skip_bytes -= tmp_ptr -> nx_packet_length;
-            }
-            else
-            {
-                total_bytes += bytes_copied;
-                skip_bytes = 0;
-            }
-            tmp_ptr = tmp_ptr -> nx_packet_queue_next;
-        }
-
         /* Update the number of bytes we processed. */
         *bytes_processed += (ULONG)header_length + message_length;
-        record_offset += *bytes_processed;
+        record_offset += (ULONG)header_length;
+        record_offset_next = record_offset + message_length;
 
         /* Check for active encryption of incoming records. If encrypted, decrypt before further processing. */
         if (tls_session -> nx_secure_tls_remote_session_active
@@ -241,9 +225,11 @@ ULONG      record_offset = 0;
             }
 
             /* Decrypt the record data. */
-            status = _nx_secure_tls_record_payload_decrypt(tls_session, packet_data, &message_length,
-                                                           tls_session -> nx_secure_tls_remote_sequence_number, (UCHAR)message_type);
-    
+            status = _nx_secure_tls_record_payload_decrypt(tls_session, packet_ptr, record_offset,
+                                                           message_length, &decrypted_packet,
+                                                           tls_session -> nx_secure_tls_remote_sequence_number,
+                                                           (UCHAR)message_type, wait_option);
+
             /* Set the error status to something appropriate. */
             error_status = NX_SECURE_TLS_SUCCESS;
 
@@ -253,47 +239,84 @@ ULONG      record_offset = 0;
                 /* Save off the error status so we can return it after the mac check. */
                 error_status = status;
             }
+            else
+            {
+
+                /* Record it so it can be release in case it is not returned to user application. */
+                tls_session -> nx_secure_record_decrypted_packet = decrypted_packet;
+                message_length = decrypted_packet -> nx_packet_length;
+            }
+
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
             /* TLS 1.3 uses AEAD for all authentication and encryption. Therefore
                the MAC verification is only needed for older TLS versions. */
             if(tls_session->nx_secure_tls_1_3)
             {
-                /* In TLS 1.3, encrypted records have a single byte at the 
-                   record that contains the message type (e.g. application data,
-                   ect.), which is now the ACTUAL message type. */
-                message_type = packet_data[message_length - 1];
-                                 
-                /* Remove the content type byte from the data length to process. */
-                message_length = message_length - 1;
-                 
-                /* Increment the sequence number. This is done in the MAC verify
-                   step for 1.2 and eariler, but AEAD includes the MAC so we don't
-                   check the MAC and need to increment here. */
-                if ((tls_session -> nx_secure_tls_remote_sequence_number[0] + 1) == 0)
+
+                if (status == NX_SECURE_TLS_SUCCESS)
                 {
-                    /* Check for overflow of the 32-bit unsigned number. */
-                    tls_session -> nx_secure_tls_remote_sequence_number[1]++;
+
+                    /* In TLS 1.3, encrypted records have a single byte at the
+                    record that contains the message type (e.g. application data,
+                    ect.), which is now the ACTUAL message type. */
+                    status = nx_packet_data_extract_offset(decrypted_packet,
+                                                           decrypted_packet -> nx_packet_length - 1,
+                                                           &message_type, 1, &bytes_copied);
+                    if (status || (bytes_copied != 1))
+                    {
+                        error_status = NX_SECURE_TLS_INVALID_PACKET;
+                    }
+
+                    /* Remove the content type byte from the data length to process. */
+                    message_length = message_length - 1;
+
+                    /* Adjust packet length. */
+                    decrypted_packet -> nx_packet_length = message_length;
+
+                    /* Increment the sequence number. This is done in the MAC verify
+                    step for 1.2 and earlier, but AEAD includes the MAC so we don't
+                    check the MAC and need to increment here. */
+                    if ((tls_session -> nx_secure_tls_remote_sequence_number[0] + 1) == 0)
+                    {
+                        /* Check for overflow of the 32-bit unsigned number. */
+                        tls_session -> nx_secure_tls_remote_sequence_number[1]++;
+                    }
+                    tls_session -> nx_secure_tls_remote_sequence_number[0]++;
                 }
-                tls_session -> nx_secure_tls_remote_sequence_number[0]++;
             }
             else
 #endif
             {
-                /* Verify the hash MAC in the decrypted record.
-                   !!! NOTE - the MAC check MUST always be performed regardless of the error state of
-                              the payload decryption operation. Skipping the MAC check on padding failures
-                              could enable a timing-based attack allowing an attacker to determine whether
-                              padding was valid or not, causing an information leak. */
-                status = _nx_secure_tls_verify_mac(tls_session, header_data, header_length, packet_data, &message_length);
+                /* Verify the hash MAC in the decrypted record. */
+                if (status)
+                {
+
+                    /* !!! NOTE - the MAC check MUST always be performed regardless of the error state of
+                                  the payload decryption operation. Skipping the MAC check on padding failures
+                                  could enable a timing-based attack allowing an attacker to determine whether
+                                  padding was valid or not, causing an information leak. */
+                    status = _nx_secure_tls_verify_mac(tls_session, header_data, header_length, packet_ptr, record_offset, &message_length);
+                }
+                else
+                {
+                    status = _nx_secure_tls_verify_mac(tls_session, header_data, header_length, decrypted_packet, 0, &message_length);
+
+                    if (status == NX_SECURE_TLS_SUCCESS)
+                    {
+
+                        /* Adjust packet length. */
+                        decrypted_packet -> nx_packet_length = message_length;
+                    }
+                }
             }
-              
+
             /* Check to see if decryption or verification failed. */
             if(error_status != NX_SECURE_TLS_SUCCESS)
             {
                 /* Decryption failed. */
                 return(error_status);
             }
-            
+
             if (status != NX_SECURE_TLS_SUCCESS)
             {
                 /* MAC verification failed. */
@@ -304,25 +327,38 @@ ULONG      record_offset = 0;
             {
                 return(NX_SECURE_TLS_RECORD_OVERFLOW);
             }
+
+            /* Trim packet. */
+            _nx_secure_tls_packet_trim(decrypted_packet);
         }
 
-        /* Make sure we have a buffer packet. */
-        if (tls_session -> nx_secure_record_decrypted_packet == NX_NULL)
+        if (message_type != NX_SECURE_TLS_APPLICATION_DATA)
         {
 
-            /* Release the protection before suspending on nx_packet_allocate. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-
-            status = nx_packet_allocate(tls_session -> nx_secure_tls_packet_pool,
-                                        &tls_session -> nx_secure_record_decrypted_packet,
-                                        0, wait_option);
-
-            /* Get the protection after nx_packet_allocate. */
-            tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-            if (status)
+            /* For message other than application data, extract to packet buffer to make sure all data are in contiguous memory. */
+            /* Check available area of buffer. */
+            packet_data = tls_session -> nx_secure_tls_packet_buffer;
+            if (message_length > tls_session -> nx_secure_tls_packet_buffer_size)
             {
-                return(status);
+                return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
+            }
+
+            if (decrypted_packet == NX_NULL)
+            {
+                status = nx_packet_data_extract_offset(packet_ptr, record_offset,
+                                                       tls_session -> nx_secure_tls_packet_buffer,
+                                                       message_length, &bytes_copied);
+            }
+            else
+            {
+                status = nx_packet_data_extract_offset(decrypted_packet, 0,
+                                                       tls_session -> nx_secure_tls_packet_buffer,
+                                                       message_length, &bytes_copied);
+            }
+
+            if (status || (bytes_copied != message_length))
+            {
+                return(NX_SECURE_TLS_INVALID_PACKET);
             }
         }
 
@@ -425,26 +461,12 @@ ULONG      record_offset = 0;
                mitigation by some TLS implementations (notably OpenSSL). */
             if (message_length == 0)
             {
+                record_offset = record_offset_next;
                 status = NX_CONTINUE;
             }
             else
             {
-
-                /* Handshake is complete, send message to application. */
-                /* Release the protection before suspending on nx_packet_data_append. */
-                tx_mutex_put(&_nx_secure_tls_protection);
-
-                status = nx_packet_data_append(tls_session -> nx_secure_record_decrypted_packet, packet_data, message_length,
-                                               tls_session -> nx_secure_tls_packet_pool, wait_option);
-
-                /* Get the protection after nx_packet_data_append. */
-                tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-#ifdef NX_SECURE_KEY_CLEAR
-                tx_mutex_put(&_nx_secure_tls_protection);
-                NX_SECURE_MEMSET(packet_data, 0, message_length);
-                tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-#endif /* NX_SECURE_KEY_CLEAR  */
+                status = NX_SECURE_TLS_SUCCESS;
             }
             break;
         default:
@@ -452,8 +474,96 @@ ULONG      record_offset = 0;
             status = NX_SECURE_TLS_UNRECOGNIZED_MESSAGE_TYPE;
             break;
         }
+
+#ifdef NX_SECURE_KEY_CLEAR
+        if (message_type != NX_SECURE_TLS_APPLICATION_DATA)
+        {
+            NX_SECURE_MEMSET(packet_data, 0, message_length);
+        }
+#endif /* NX_SECURE_KEY_CLEAR  */
     }
 
     return(status);
 }
 
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_secure_tls_packet_trim                          PORTABLE C      */
+/*                                                           6.0.2        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Timothy Stapko, Microsoft Corporation                               */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function trims TLS packet after decryption and hash verify.    */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    packet_ptr                            NX_PACKET containing a record */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_secure_tls_packet_release          Release packet                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_secure_tls_process_record         Process TLS records           */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  08-14-2020     Timothy Stapko           Initial Version 6.0.2         */
+/*                                                                        */
+/**************************************************************************/
+static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr)
+{
+ULONG payload_length;
+ULONG message_length = packet_ptr -> nx_packet_length;
+NX_PACKET *current_ptr;
+
+    if (message_length == 0)
+    {
+
+        /* Make sure the head packet is not released when the length is zero. */
+        if (packet_ptr -> nx_packet_next)
+        {
+
+            /* Release packet if remaining data are in chained packet. */
+            nx_secure_tls_packet_release(packet_ptr -> nx_packet_next);
+            packet_ptr -> nx_packet_next = NX_NULL;
+            packet_ptr -> nx_packet_last = packet_ptr;
+        }
+        packet_ptr -> nx_packet_prepend_ptr = packet_ptr -> nx_packet_data_start;
+        packet_ptr -> nx_packet_append_ptr = packet_ptr -> nx_packet_data_start;
+        return;
+    }
+
+    for (current_ptr = packet_ptr; current_ptr; current_ptr = current_ptr -> nx_packet_next)
+    {
+        payload_length = (ULONG)(current_ptr -> nx_packet_append_ptr - current_ptr -> nx_packet_prepend_ptr);
+        if (message_length < payload_length)
+        {
+
+            /* Trim data from this packet. */
+            current_ptr -> nx_packet_append_ptr = current_ptr -> nx_packet_prepend_ptr + message_length;
+            if (current_ptr -> nx_packet_next)
+            {
+
+                /* Release packet if remaining data are in chained packet. */
+                nx_secure_tls_packet_release(current_ptr -> nx_packet_next);
+                current_ptr -> nx_packet_next = NX_NULL;
+                packet_ptr -> nx_packet_last = current_ptr;
+            }
+            break;
+        }
+        message_length -= (ULONG)(current_ptr -> nx_packet_append_ptr - current_ptr -> nx_packet_prepend_ptr);
+    }
+}

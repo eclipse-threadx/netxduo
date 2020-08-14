@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_record                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -63,6 +63,7 @@
 /*    _nx_secure_tls_process_changecipherspec                             */
 /*                                          Process ChangeCipherSpec      */
 /*    _nx_secure_tls_record_payload_decrypt Decrypt record data           */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
 /*                                                                        */
@@ -75,12 +76,17 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            adjusted logic for TLS      */
+/*                                            modifications,              */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_record(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *packet_ptr,
                                     ULONG record_offset, ULONG *bytes_processed, ULONG wait_option)
 {
 UINT                   status;
+UINT                   error_status;
 USHORT                 header_length;
 UCHAR                  header_data[NX_SECURE_DTLS_RECORD_HEADER_SIZE]; /* DTLS record header is larger than TLS. Allocate enough space for both. */
 USHORT                 message_type;
@@ -88,6 +94,7 @@ UINT                   message_length;
 UCHAR                 *packet_data;
 NX_SECURE_TLS_SESSION *tls_session;
 UCHAR                  epoch_seq_num[8];
+NX_PACKET             *decrypted_packet;
 
     /* Basic state machine:
      * 1. Process header, which will set the state and return some data.
@@ -156,14 +163,55 @@ UCHAR                  epoch_seq_num[8];
         epoch_seq_num[7] = header_data[3];
 
         /* Decrypt the record data. */
-        status = _nx_secure_tls_record_payload_decrypt(tls_session, packet_data, &message_length, (ULONG *)epoch_seq_num, (UCHAR)message_type);
+        status = _nx_secure_tls_record_payload_decrypt(tls_session, packet_ptr, header_length, message_length,
+                                                       &decrypted_packet, (ULONG *)epoch_seq_num, (UCHAR)message_type,
+                                                       wait_option);
 
-        /* Check the MAC hash if we were able to decrypt the record. */
+        /* Check the MAC hash. */
         if (status == NX_SECURE_TLS_SUCCESS)
         {
+
             /* Verify the hash MAC in the decrypted record. */
-            status = _nx_secure_dtls_verify_mac(dtls_session, header_data, header_length, packet_data, &message_length);
+            packet_data = decrypted_packet -> nx_packet_prepend_ptr;
+            message_length = (UINT)decrypted_packet -> nx_packet_length;
+            error_status = NX_SECURE_TLS_SUCCESS;
         }
+        else
+        {
+            
+            /* Save off the error status so we can return it after the mac check. */
+            error_status = status;
+        }
+
+        /* !!! NOTE - the MAC check MUST always be performed regardless of the error state of
+                      the payload decryption operation. Skipping the MAC check on padding failures
+                      could enable a timing-based attack allowing an attacker to determine whether
+                      padding was valid or not, causing an information leak. */
+        status = _nx_secure_dtls_verify_mac(dtls_session, header_data, header_length, packet_data, &message_length);
+
+        /* Check to see if decryption or verification failed. */
+        if(error_status != NX_SECURE_TLS_SUCCESS)
+        {
+            /* Decryption failed. */
+            return(error_status);
+        }
+
+        /* Check to see if decryption or verification failed. */
+        if (status == NX_SECURE_TLS_SUCCESS)
+        {
+            
+            /* Copy data to original packet to keep IP header available. */
+            /* Note: At the point of this memcpy the plaintext should never be larger than the cipher.
+               Assertion check is to protect against future changes inadvertently causing an overflow. */
+            NX_ASSERT((ULONG)(packet_ptr -> nx_packet_data_end - packet_ptr -> nx_packet_prepend_ptr) >= message_length);
+            NX_SECURE_MEMCPY(packet_ptr -> nx_packet_prepend_ptr, packet_data, message_length); /* Use case of memcpy is verified. */
+            packet_data = packet_ptr -> nx_packet_prepend_ptr;
+            packet_ptr -> nx_packet_append_ptr = packet_ptr -> nx_packet_prepend_ptr + message_length;
+            packet_ptr -> nx_packet_length = message_length;
+        }
+
+        /* Release decrypted packet. */
+        nx_secure_tls_packet_release(decrypted_packet);
 
         /* Check to see if decryption or verification failed. */
         if (status != NX_SECURE_TLS_SUCCESS)
@@ -219,19 +267,6 @@ UCHAR                  epoch_seq_num[8];
         if (message_length == 0)
         {
             status = NX_CONTINUE;
-        }
-        else
-        {
-
-            /* Release the protection before suspending on nx_packet_data_append. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-
-            packet_ptr -> nx_packet_append_ptr = packet_ptr -> nx_packet_prepend_ptr;
-            packet_ptr -> nx_packet_length = message_length;
-            NX_SECURE_MEMMOVE(packet_ptr -> nx_packet_append_ptr, packet_data, message_length);
-            packet_ptr -> nx_packet_append_ptr += message_length;
-            /* Get the protection after nx_packet_data_append. */
-            tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
         }
         break;
     default:

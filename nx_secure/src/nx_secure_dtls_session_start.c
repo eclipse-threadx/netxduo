@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_start                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -59,7 +59,7 @@
 /*    _nx_secure_dtls_send_clienthello      Send ClientHello              */
 /*    _nx_secure_dtls_send_handshake_record Send DTLS handshake record    */
 /*    _nx_secure_dtls_session_receive       Receive DTLS data             */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
 /*                                                                        */
@@ -74,6 +74,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            released packet securely,   */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_start(NX_SECURE_DTLS_SESSION *dtls_session, NX_UDP_SOCKET *udp_socket,
@@ -103,14 +107,18 @@ NX_PACKET *send_packet;
     /* Make sure we are starting with a fresh session. */
     tls_session -> nx_secure_tls_received_remote_credentials = NX_FALSE;
 
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
+
+    /* Renegotiation is not enabled in DTLS session. */
+    tls_session -> nx_secure_tls_renegotation_enabled = NX_FALSE;
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
+
     /* Assign the TCP socket to the TLS session. */
     dtls_session -> nx_secure_dtls_udp_socket = udp_socket;
 
     /* Reset the record queue. */
     tls_session -> nx_secure_record_queue_header = NX_NULL;
-    tls_session -> nx_secure_record_queue_tail = NX_NULL;
     tls_session -> nx_secure_record_decrypted_packet = NX_NULL;
-    tls_session -> nx_secure_record_queue_length = 0;
 
     /* See if this is a TCP server started with listen/accept, or a TCP client started with connect. */
     if (is_client)
@@ -159,7 +167,7 @@ NX_PACKET *send_packet;
 
             /* Release the protection. */
             tx_mutex_put(&_nx_secure_tls_protection);
-            nx_packet_release(send_packet);
+            nx_secure_tls_packet_release(send_packet);
             return(status);
         }
     }
@@ -235,12 +243,8 @@ NX_PACKET *send_packet;
         else
         {
 
-#ifdef NX_SECURE_KEY_CLEAR
-            NX_SECURE_MEMSET(incoming_packet -> nx_packet_prepend_ptr, 0, ((ULONG)(incoming_packet -> nx_packet_append_ptr) - (ULONG)(incoming_packet -> nx_packet_prepend_ptr)));
-#endif /* NX_SECURE_KEY_CLEAR  */
-
             /* On any error, the handshake has failed so break out of our processing loop and return. */
-            nx_packet_release(incoming_packet);
+            nx_secure_tls_packet_release(incoming_packet);
         }
     }
 

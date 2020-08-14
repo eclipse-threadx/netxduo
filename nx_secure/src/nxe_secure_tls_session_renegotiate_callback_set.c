@@ -34,7 +34,7 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_secure_tls_session_renegotiate_callback_set    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -67,8 +67,12 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed renegotiation bug,    */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 UINT _nxe_secure_tls_session_renegotiate_callback_set(NX_SECURE_TLS_SESSION *tls_session,
                                                       ULONG (*func_ptr)(NX_SECURE_TLS_SESSION *session))
 {
@@ -94,4 +98,5 @@ UINT status;
 
     return(status);
 }
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 

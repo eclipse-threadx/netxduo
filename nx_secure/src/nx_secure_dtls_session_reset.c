@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_reset                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.0.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -53,7 +53,7 @@
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
 /*    _nx_secure_tls_session_reset          Clear out the session         */
-/*    nx_packet_release                     Release packet                */
+/*    nx_secure_tls_packet_release          Release packet                */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -68,6 +68,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            released packet securely,   */
+/*                                            resulting in version 6.0.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_reset(NX_SECURE_DTLS_SESSION *dtls_session)
@@ -132,7 +135,7 @@ NX_PACKET *next_packet_ptr;
     while (packet_ptr)
     {
         next_packet_ptr = packet_ptr -> nx_packet_queue_next;
-        nx_packet_release(packet_ptr);
+        nx_secure_tls_packet_release(packet_ptr);
         packet_ptr = next_packet_ptr;
     }
 
