@@ -87,6 +87,10 @@ Each official release (preview or GA) will be tagged to mark the commit and push
 
 Azure RTOS provides OEMs with components to secure communication and to create code and data isolation using underlying MCU/MPU hardware protection mechanisms. It is ultimately the responsibility of the device builder to ensure the device fully meets the evolving security requirements associated with its specific use case.
 
+## Azure Security Center for IoT - RTOS
+
+The Azure Security Center for IoT - RTOS security module provides a comprehensive security solution for Azure RTOS devices. Azure RTOS now ships with the ASC for IoT security module built-in and provides coverage for common threats and potential malicious activities.
+
 # Licensing
 
 License terms for using Azure RTOS are defined in the LICENSE.txt file of this repo. Please refer to this file for all definitive licensing information. No additional license fees are required for deploying Azure RTOS on hardware defined in the LICENSED-HARDWARE.txt file. If you are using hardware not defined in the LICENSED-HARDWARE.txt file or have licensing questions in general, please contact Microsoft directly at https://azure-rtos.ms-iot-contact.com/
