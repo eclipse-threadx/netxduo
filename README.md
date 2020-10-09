@@ -6,41 +6,13 @@ This advanced, industrial-grade TCP/IP network stack is designed specifically fo
 
 Documentation for this library can be found here: http://docs.microsoft.com/azure/rtos/netx-duo
 
-# Understanding inter-component dependencies
-
-The main components of Azure RTOS are each provided in their own repository, but there are dependencies between them--shown in the following graph--that are important to understand when setting up your builds.
-
-![dependency graph](docs/deps.png)
-
-# Building and using the library
-
-## Prerequisites
-
-Install the following tools:
-
-* [CMake](https://cmake.org/download/) version 3.0 or later
-* [GCC compilers for arm-none-eabi](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
-* [Ninja](https://ninja-build.org/)
 
 ## Cloning the repo
 
 ```bash
 $ git clone https://github.com/azure-rtos/netxduo.git
+$ git submodule update --init
 ```
-
-## Building as a static library
-
-Each component of Azure RTOS comes with a composible CMake-based build system that supports many different MCUs and host systems. Integrating any of these components into your device app code is as simple as adding a git submodule and then including it in your build using the CMake command `add_subdirectory()`.
-
-While the typical usage pattern is to include threadx into your device code source tree to be built & linked with your code, you can compile this project as a standalone static library to confirm your build is set up correctly.
-
-```bash
-$ cmake -Bbuild -DCMAKE_TOOLCHAIN_FILE=cmake/cortex_m4.cmake -GNinja .
-
-$ cmake --build ./build
-```
-
-NOTE: You will have to take the dependency graph above into account when building anything other than threadx itself.
 
 # Repository Structure and Usage
 
@@ -50,13 +22,13 @@ The master branch has the most recent code with all new features and bug fixes. 
 
 ## Releases
 
-Each official release (preview or GA) will be tagged to mark the commit and push it into the Github releases tab, e.g. `v6.0-rel`.
+Each official release (preview or GA) will be tagged to mark the commit and push it into the Github releases tab, e.g. `v6.1-rel`.
 
 ## Directory layout
 
 ```
 - addons
-  - auto_ip, BSD, dhcp, dns, ftp, http, mdns, mqtt, nat, pop3, ppp, pppoe, smtp, sntp, telnet, tftp, web
+  - auto_ip, BSD, azure_iot, dhcp, cloud, dns, ftp, http, mdns, mqtt, nat, pop3, ppp, pppoe, smtp, sntp, telnet, tftp, web
 - cmake
 - common
   - inc
@@ -85,19 +57,31 @@ Each official release (preview or GA) will be tagged to mark the commit and push
 
 # Security
 
-Azure RTOS provides OEMs with components to secure communication and to create code and data isolation using underlying MCU/MPU hardware protection mechanisms. It is ultimately the responsibility of the device builder to ensure the device fully meets the evolving security requirements associated with its specific use case.
+Azure RTOS provides OEMs with components to secure communication and to create code and data isolation using underlying 
+MCU/MPU hardware protection mechanisms. It is ultimately the responsibility of the device builder to ensure the device 
+fully meets the evolving security requirements associated with its specific use case.
 
 ## Azure Security Center for IoT - RTOS
 
-The Azure Security Center for IoT - RTOS security module provides a comprehensive security solution for Azure RTOS devices. Azure RTOS now ships with the ASC for IoT security module built-in and provides coverage for common threats and potential malicious activities.
+The Azure Security Center for IoT - RTOS security module provides a comprehensive security solution for Azure RTOS 
+devices. Azure RTOS now ships with the ASC for IoT security module built-in and provides coverage for common threats
+and potential malicious activities.  The ASC module is part of the Azure IoT SDK (addons/azure_iot/).  As the device
+connects to Azure IoT hub, ASC collectors gather network connectivity information and sends it to ASC service for
+analysis.  For details on how ASC works, the type of informaiton it collects, refer to [Azure Security Center for IoT
+module](https://github.com/azure-rtos/netxduo/tree/v6.1_rel/addons/azure_iot/docs#azure-security-center-for-iot-module) 
+section in the Azure IoT document.
 
 # Licensing
 
-License terms for using Azure RTOS are defined in the LICENSE.txt file of this repo. Please refer to this file for all definitive licensing information. No additional license fees are required for deploying Azure RTOS on hardware defined in the LICENSED-HARDWARE.txt file. If you are using hardware not defined in the LICENSED-HARDWARE.txt file or have licensing questions in general, please contact Microsoft directly at https://azure-rtos.ms-iot-contact.com/
+License terms for using Azure RTOS are defined in the LICENSE.txt file of this repo. Please refer to this file for all 
+definitive licensing information. No additional license fees are required for deploying Azure RTOS on hardware defined 
+in the LICENSED-HARDWARE.txt file. If you are using hardware not defined in the LICENSED-HARDWARE.txt file or have 
+licensing questions in general, please contact Microsoft directly at https://azure-rtos.ms-iot-contact.com/
 
 # Contribution, feedback, issues, and professional support
 
-If you encounter any bugs, have suggestions for new features, or if you would like to become an active contributor to this project, please follow the instructions provided in the contribution guideline for the corresponding repo.
+If you encounter any bugs, have suggestions for new features, or if you would like to become an active contributor to 
+this project, please follow the instructions provided in the contribution guideline for the corresponding repo.
 
 For basic support, click Issues in the command bar or post a question to [Stack Overflow](http://stackoverflow.com/questions/tagged/azure-rtos+threadx) using the `threadx` and `azure-rtos` tags.
 
