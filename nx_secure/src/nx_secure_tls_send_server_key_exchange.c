@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_server_key_exchange             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -65,6 +65,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_server_key_exchange(NX_SECURE_TLS_SESSION *tls_session,
@@ -142,7 +145,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
         length = (USHORT)(length + 2);
 
         /* Extract the identity hint and put it into the packet buffer. */
-        NX_SECURE_MEMCPY(&packet_buffer[length], identity, identity_length); 
+        NX_SECURE_MEMCPY(&packet_buffer[length], identity, identity_length); /* Use case of memcpy is verified. */
 
         /* Advance our total length. */
         length = (USHORT)(length + identity_length);

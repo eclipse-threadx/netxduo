@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_newsessionticket             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -63,6 +63,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -70,14 +74,11 @@ UINT _nx_secure_tls_process_newsessionticket(NX_SECURE_TLS_SESSION *tls_session,
                                              UINT message_length)
 {
 UINT             status = NX_SUCCESS;
-UINT             length;
 UINT             lifetime;
-UINT             age_add;
 UINT             nonce;
 UINT             nonce_len;
 UINT             ticket_len;
 UCHAR            *ticket;
-UINT             extensions_len;
 UINT             psk_count;
 NX_SECURE_TLS_PSK_STORE *ticket_psk;
 
@@ -144,10 +145,6 @@ NX_SECURE_TLS_PSK_STORE *ticket_psk;
 
     */
 
-    NX_PARAMETER_NOT_USED(tls_session);
-
-    length = 0;
-
     /* Get a PSK entry into which we can copy the ticket data we received. */
     psk_count = tls_session->nx_secure_tls_credentials.nx_secure_tls_psk_count;
     psk_count++;
@@ -170,8 +167,7 @@ NX_SECURE_TLS_PSK_STORE *ticket_psk;
     /* Save the lifetime of the ticket. */
     ticket_psk->nx_secure_tls_psk_ticket_lifetime = lifetime;
 
-    /* Get the age add value. */
-    age_add = (UINT)((packet_buffer[0] << 24) + (packet_buffer[1] << 16) + (packet_buffer[2] << 8) + packet_buffer[3]);;
+    /* Skip the age add value. */
     packet_buffer = &packet_buffer[4];
 
     /* Get the nonce length. */
@@ -199,11 +195,8 @@ NX_SECURE_TLS_PSK_STORE *ticket_psk;
     packet_buffer = &packet_buffer[ticket_len];
 
     /* Copy ticket to PSK store - the ticket is the PSK ID used to identify the PSK in the future. */
-    NX_SECURE_MEMCPY(ticket_psk->nx_secure_tls_psk_id, ticket, ticket_len); 
+    NX_SECURE_MEMCPY(ticket_psk->nx_secure_tls_psk_id, ticket, ticket_len); /* Use case of memcpy is verified. */
     ticket_psk->nx_secure_tls_psk_id_size = ticket_len;
-
-    /* Add in extensions if available. */
-    extensions_len = (USHORT)((packet_buffer[0] << 8) + packet_buffer[1]);
 
     /* We can now generate the PSK for this session using our ticket nonce and the cryptographic
        secrets we created earlier in the handshake. */

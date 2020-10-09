@@ -78,7 +78,7 @@ const UCHAR   _nx_crypto_sha1_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha1_initialize                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -110,11 +110,14 @@ const UCHAR   _nx_crypto_sha1_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            updated constants,          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_sha1_initialize(NX_CRYPTO_SHA1 *context, UINT algorithm)
 {
-    NX_PARAMETER_NOT_USED(algorithm);
+    NX_CRYPTO_PARAMETER_NOT_USED(algorithm);
 
     /* Determine if the context is non-null.  */
     if (context == NX_CRYPTO_NULL)
@@ -143,7 +146,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_sha1_initialize(NX_CRYPTO_SHA1 *context, UINT al
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha1_update                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -178,6 +181,9 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_sha1_initialize(NX_CRYPTO_SHA1 *context, UINT al
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_sha1_update(NX_CRYPTO_SHA1 *context, UCHAR *input_ptr, UINT input_length)
@@ -228,7 +234,7 @@ ULONG needed_fill_bytes;
 
         /* Copy the appropriate portion of the input buffer into the internal
            buffer of the context.  */
-        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha1_buffer[current_bytes]), (void *)input_ptr, needed_fill_bytes); 
+        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha1_buffer[current_bytes]), (void *)input_ptr, needed_fill_bytes); /* Use case of memcpy is verified. */
 
         /* Process the 64-byte (512 bit) buffer.  */
         _nx_crypto_sha1_process_buffer(context, context -> nx_sha1_buffer);
@@ -259,7 +265,7 @@ ULONG needed_fill_bytes;
 
         /* Save the remaining bytes in the internal buffer after any remaining bytes
            that it is processed later.  */
-        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha1_buffer[current_bytes]), (void *)input_ptr, input_length); 
+        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha1_buffer[current_bytes]), (void *)input_ptr, input_length); /* Use case of memcpy is verified. */
     }
 
     /* Return success.  */
@@ -272,7 +278,7 @@ ULONG needed_fill_bytes;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha1_digest_calculate                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -307,6 +313,9 @@ ULONG needed_fill_bytes;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            updated constants,          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_sha1_digest_calculate(NX_CRYPTO_SHA1 *context, UCHAR digest[20], UINT algorithm)
@@ -316,7 +325,7 @@ UCHAR bit_count_string[8];
 ULONG current_byte_count;
 ULONG padding_bytes;
 
-    NX_PARAMETER_NOT_USED(algorithm);
+    NX_CRYPTO_PARAMETER_NOT_USED(algorithm);
 
     /* Move the lower portion of the bit count into the array.  */
     bit_count_string[0] =  (UCHAR)(context -> nx_sha1_bit_count[1] >> 24);
@@ -376,7 +385,7 @@ ULONG padding_bytes;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha1_process_buffer                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -409,6 +418,8 @@ ULONG padding_bytes;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID  _nx_crypto_sha1_process_buffer(NX_CRYPTO_SHA1 *context, UCHAR buffer[64])
@@ -518,7 +529,7 @@ ULONG  a, b, c, d, e;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha1_init                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -554,6 +565,8 @@ ULONG  a, b, c, d, e;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha1_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -596,7 +609,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha1_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha1_cleanup                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -626,6 +639,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha1_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha1_cleanup(VOID *crypto_metadata)
@@ -652,7 +667,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha1_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha1_operation                   PORTABLE C       */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -699,6 +714,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha1_cleanup(VOID *crypto_metadata)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha1_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */

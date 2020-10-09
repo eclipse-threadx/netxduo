@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */ 
 /*                                                                        */ 
 /*    nx_port.h                                         Cortex-M4/GNU     */ 
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -43,10 +43,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  08-14-2020     Yuxin Zhou               Modified comment(s),  and     */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),  and     */
 /*                                            corrected the code of       */
 /*                                            getting system state,       */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -194,7 +194,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M4/GNU Version 6.0 *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M4/GNU Version 6.1 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

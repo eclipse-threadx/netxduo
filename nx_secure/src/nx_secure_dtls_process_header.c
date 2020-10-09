@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_header                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -69,6 +69,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_header(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *packet_ptr,
@@ -157,8 +160,8 @@ NX_SECURE_TLS_SESSION *tls_session;
 
 
     /* Get epoch and sequence number from header. */
-    NX_SECURE_MEMCPY((UCHAR *)&remote_sequence_number[0], &header_data[3], 4); 
-    NX_SECURE_MEMCPY((UCHAR *)&remote_sequence_number[1], &header_data[7], 4); 
+    NX_SECURE_MEMCPY((UCHAR *)&remote_sequence_number[0], &header_data[3], 4); /* Use case of memcpy is verified. */
+    NX_SECURE_MEMCPY((UCHAR *)&remote_sequence_number[1], &header_data[7], 4); /* Use case of memcpy is verified. */
 
     /* Swap endianness for comparisons. */
     NX_CHANGE_ULONG_ENDIAN(remote_sequence_number[0]);

@@ -34,7 +34,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_fips_memcpy                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -69,6 +69,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memcpy(void *dest, const void *src, size_t size)
@@ -92,7 +94,7 @@ NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memcpy(void *dest, const void *src, size_t 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_fips_memset                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -127,6 +129,8 @@ NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memcpy(void *dest, const void *src, size_t 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memset(void *dest, int value, size_t size)
@@ -150,7 +154,7 @@ NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memset(void *dest, int value, size_t size)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_fips_memcmp                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -187,6 +191,8 @@ NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memset(void *dest, int value, size_t size)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP int _nx_crypto_fips_memcmp(const void *str1, const void *str2, size_t size)
@@ -211,7 +217,7 @@ NX_CRYPTO_KEEP int _nx_crypto_fips_memcmp(const void *str1, const void *str2, si
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_fips_memmove                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -245,6 +251,8 @@ NX_CRYPTO_KEEP int _nx_crypto_fips_memcmp(const void *str1, const void *str2, si
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP void* _nx_crypto_fips_memmove(void *dest, const void *src, size_t size)
@@ -277,7 +285,7 @@ NX_CRYPTO_KEEP void* _nx_crypto_fips_memmove(void *dest, const void *src, size_t
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_module_state_get                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -311,6 +319,8 @@ NX_CRYPTO_KEEP void* _nx_crypto_fips_memmove(void *dest, const void *src, size_t
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_module_state_get(VOID)
@@ -327,7 +337,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_module_state_get(VOID)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_initialize                               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -356,6 +366,8 @@ NX_CRYPTO_KEEP UINT _nx_crypto_module_state_get(VOID)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_initialize(VOID)

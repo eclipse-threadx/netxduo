@@ -38,7 +38,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ipv6_process_routing_option                     PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -70,9 +70,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  08-14-2020     Yuxin Zhou               Modified comment(s), improved */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ipv6_process_routing_option(NX_IP *ip_ptr, NX_PACKET *packet_ptr)

@@ -35,7 +35,7 @@ extern VOID _tx_trace_object_register(UCHAR, VOID *, CHAR *, ULONG, ULONG);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_trace_object_register                           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -69,6 +69,8 @@ extern VOID _tx_trace_object_register(UCHAR, VOID *, CHAR *, ULONG, ULONG);
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_trace_object_register(UCHAR object_type, VOID *object_ptr, CHAR *object_name, ULONG parameter_1, ULONG parameter_2)

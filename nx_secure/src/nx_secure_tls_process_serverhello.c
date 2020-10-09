@@ -32,7 +32,7 @@ extern const UCHAR _nx_secure_tls_hello_retry_request_random[32];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello                  PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,12 +73,11 @@ extern const UCHAR _nx_secure_tls_hello_retry_request_random[32];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), added    */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), added    */
 /*                                            priority ciphersuite logic, */
-/*                                            resulting in version 6.0.1  */
-/*  08-14-2020     Timothy Stapko           Modified comment(s), added    */
+/*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_serverhello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -160,7 +159,7 @@ NX_SECURE_TLS_SERVER_STATE            old_client_state = tls_session -> nx_secur
     {
             
         /* Set the Server random data, used in key generation. First 4 bytes is GMT time. */
-        NX_SECURE_MEMCPY(&tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random[0], &packet_buffer[length], NX_SECURE_TLS_RANDOM_SIZE); 
+        NX_SECURE_MEMCPY(&tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random[0], &packet_buffer[length], NX_SECURE_TLS_RANDOM_SIZE); /* Use case of memcpy is verified. */
     }
     length += NX_SECURE_TLS_RANDOM_SIZE;
 
@@ -176,7 +175,7 @@ NX_SECURE_TLS_SERVER_STATE            old_client_state = tls_session -> nx_secur
     /* Session ID follows. */
     if (tls_session -> nx_secure_tls_session_id_length > 0)
     {
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_session_id, &packet_buffer[length], tls_session -> nx_secure_tls_session_id_length); 
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_session_id, &packet_buffer[length], tls_session -> nx_secure_tls_session_id_length); /* Use case of memcpy is verified. */
         length += tls_session -> nx_secure_tls_session_id_length;
     }
 

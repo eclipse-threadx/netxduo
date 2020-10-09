@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_remote_certificate           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -49,6 +49,7 @@
 /*    tls_session                           TLS control block             */
 /*    packet_buffer                         Pointer to message data       */
 /*    message_length                        Length of message data (bytes)*/
+/*    data_length                           Length of packet buffer       */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
@@ -75,10 +76,16 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            fixed certificate buffer    */
+/*                                            allocation,                 */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_remote_certificate(NX_SECURE_TLS_SESSION *tls_session,
-                                               UCHAR *packet_buffer, UINT message_length)
+                                               UCHAR *packet_buffer, UINT message_length,
+                                               UINT data_length)
 {
 UINT                 length;
 UINT                 total_length;
@@ -92,7 +99,7 @@ UINT                 bytes_processed;
 UINT                 extensions_length;
 #endif
 UCHAR               *cert_buffer;
-ULONG               cert_buf_size;
+ULONG                cert_buf_size;
 
 
     /* Structure:
@@ -120,11 +127,17 @@ ULONG               cert_buf_size;
         |                      Packet buffer                     |    Certificate buffer    | 
         |<-----------data------------------>|-->  free space  <--| Endpoint Cert 1 | X.509  | 
     */
+
+    if (data_length > tls_session -> nx_secure_tls_packet_buffer_size)
+    {
+        return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
+    }
+
     /* Certificate buffer is at the end of the record in the record assembly buffer. */
-    cert_buffer = &tls_session->nx_secure_tls_packet_buffer[message_length];
+    cert_buffer = &tls_session->nx_secure_tls_packet_buffer[data_length];
 
     /* The size of the buffer is the remaining space in the record assembly buffer. */
-    cert_buf_size = tls_session -> nx_secure_tls_packet_buffer_size - message_length;
+    cert_buf_size = tls_session -> nx_secure_tls_packet_buffer_size - data_length;
 
     /* Use our length as an index into the buffer. */
     length = 0;
@@ -191,6 +204,7 @@ ULONG               cert_buf_size;
             /* Get space for the parsing structure. */
             cert_buf_size -= sizeof(NX_SECURE_X509_CERT);
             certificate = (NX_SECURE_X509_CERT*)(&cert_buffer[cert_buf_size]);
+            NX_SECURE_MEMSET(certificate, 0, sizeof(NX_SECURE_X509_CERT));
 
             /* Point structure to certificate being parsed. Note that the certificate 
                structure points directly into the packet buffer where the certificate
@@ -210,7 +224,7 @@ ULONG               cert_buf_size;
 
             /* Copy the certificate from the packet buffer into our allocated certificate space. */
             certificate -> nx_secure_x509_certificate_raw_data_length = cert_length;
-            NX_SECURE_MEMCPY(certificate -> nx_secure_x509_certificate_raw_data, &packet_buffer[length], cert_length); 
+            NX_SECURE_MEMCPY(certificate -> nx_secure_x509_certificate_raw_data, &packet_buffer[length], cert_length); /* Use case of memcpy is verified. */
         }
         length += cert_length;
         
@@ -317,23 +331,26 @@ ULONG               cert_buf_size;
         if (status != NX_SUCCESS)
         {
             /* No remote certificates added. Instead try extracting space from packet buffer. */
-            cert_buffer = &tls_session->nx_secure_tls_packet_buffer[message_length];
-            cert_buf_size = tls_session->nx_secure_tls_packet_buffer_size - message_length;
+            cert_buffer = &tls_session -> nx_secure_tls_packet_buffer[data_length];
+            cert_buf_size = tls_session -> nx_secure_tls_packet_buffer_size - data_length;
 
-            if(cert_buf_size < sizeof(NX_SECURE_X509_CERT))
+            if (cert_buf_size < sizeof(NX_SECURE_X509_CERT))
             {
+
                 /* Not enough space to allocate the X.509 structure. */
-                return(NX_SECURE_TLS_INSUFFICIENT_CERT_SPACE);                
+                return(NX_SECURE_TLS_INSUFFICIENT_CERT_SPACE);
             }
 
             /* Get space for the parsing structure. */
             cert_buf_size -= sizeof(NX_SECURE_X509_CERT);
             certificate = (NX_SECURE_X509_CERT*)(&cert_buffer[cert_buf_size]);
+            NX_SECURE_MEMSET(certificate, 0, sizeof(NX_SECURE_X509_CERT));
 
             if(cert_buf_size < endpoint_length)
             {
+
                 /* Not enough space to allocate the raw certificate data. */
-                return(NX_SECURE_TLS_INSUFFICIENT_CERT_SPACE);                
+                return(NX_SECURE_TLS_INSUFFICIENT_CERT_SPACE);
             }
 
             /* Allocate space for the endpoint certificate. */
@@ -344,12 +361,12 @@ ULONG               cert_buf_size;
             certificate -> nx_secure_x509_certificate_raw_buffer_size = endpoint_length;
 
             /* Update total remaining size. */
-            tls_session->nx_secure_tls_packet_buffer_size -= cert_buf_size;
+            tls_session -> nx_secure_tls_packet_buffer_size -= (sizeof(NX_SECURE_X509_CERT) + endpoint_length);
         }
 
         /* Copy the certificate data to the end of the certificate buffer or use an allocated certificate. */
         certificate -> nx_secure_x509_certificate_raw_data_length = endpoint_length;
-        NX_SECURE_MEMCPY(certificate->nx_secure_x509_certificate_raw_data, endpoint_raw_ptr, endpoint_length); 
+        NX_SECURE_MEMCPY(certificate->nx_secure_x509_certificate_raw_data, endpoint_raw_ptr, endpoint_length); /* Use case of memcpy is verified. */
         
         /* Release the protection. */
         tx_mutex_put(&_nx_secure_tls_protection);

@@ -56,7 +56,7 @@ const UCHAR   _nx_crypto_sha256_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha256_initialize                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -88,6 +88,8 @@ const UCHAR   _nx_crypto_sha256_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_sha256_initialize(NX_CRYPTO_SHA256 *context, UINT algorithm )
@@ -140,7 +142,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_sha256_initialize(NX_CRYPTO_SHA256 *context, UIN
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha256_update                            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -176,6 +178,9 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_sha256_initialize(NX_CRYPTO_SHA256 *context, UIN
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_sha256_update(NX_CRYPTO_SHA256 *context, UCHAR *input_ptr, UINT input_length)
@@ -223,7 +228,7 @@ ULONG needed_fill_bytes;
 
         /* Copy the appropriate portion of the input buffer into the internal
            buffer of the context.  */
-        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha256_buffer[current_bytes]), (void *)input_ptr, needed_fill_bytes); 
+        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha256_buffer[current_bytes]), (void *)input_ptr, needed_fill_bytes); /* Use case of memcpy is verified. */
 
         /* Process the 64-byte (512 bit) buffer.  */
         _nx_crypto_sha256_process_buffer(context, context -> nx_sha256_buffer);
@@ -253,7 +258,7 @@ ULONG needed_fill_bytes;
     {
         /* Save the remaining bytes in the internal buffer after any remaining bytes
            so that it is processed later.  */
-        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha256_buffer[current_bytes]), (void *)input_ptr, input_length); 
+        NX_CRYPTO_MEMCPY((void *)&(context -> nx_sha256_buffer[current_bytes]), (void *)input_ptr, input_length); /* Use case of memcpy is verified. */
     }
 
     /* Return success.  */
@@ -266,7 +271,7 @@ ULONG needed_fill_bytes;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha256_digest_calculate                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -301,6 +306,8 @@ ULONG needed_fill_bytes;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_sha256_digest_calculate(NX_CRYPTO_SHA256 *context, UCHAR *digest, UINT algorithm)
@@ -384,7 +391,7 @@ ULONG padding_bytes;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha256_process_buffer                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -418,6 +425,8 @@ ULONG padding_bytes;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_sha256_process_buffer(NX_CRYPTO_SHA256 *context, UCHAR buffer[64])
@@ -494,7 +503,7 @@ ULONG  a, b, c, d, e, f, g, h;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha256_init                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -530,6 +539,8 @@ ULONG  a, b, c, d, e, f, g, h;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -570,7 +581,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_init(struct  NX_CRYPTO_METHOD_STRU
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha256_cleanup                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -600,6 +611,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_init(struct  NX_CRYPTO_METHOD_STRU
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_cleanup(VOID *crypto_metadata)
@@ -626,7 +639,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha256_operation                 PORTABLE C       */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -673,6 +686,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_cleanup(VOID *crypto_metadata)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */

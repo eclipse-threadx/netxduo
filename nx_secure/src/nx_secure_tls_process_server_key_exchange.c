@@ -38,7 +38,7 @@ static UCHAR decrypted_signature[512];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_server_key_exchange           PORTABLE C     */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,9 +80,10 @@ static UCHAR decrypted_signature[512];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), update   */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), update   */
 /*                                            ECC find curve method,      */
-/*                                            resulting in version 6.0.1  */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_server_key_exchange(NX_SECURE_TLS_SESSION *tls_session,
@@ -159,7 +160,7 @@ UINT                                  i;
 
         /* Extract the identity hint and save in the TLS Session. Then when pre-master is generated
            in client_handshake, we can do the right thing... */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_remote_psk_id, &packet_buffer[0], length); 
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_remote_psk_id, &packet_buffer[0], length); /* Use case of memcpy is verified. */
         tls_session -> nx_secure_tls_credentials.nx_secure_tls_remote_psk_id_size = length;
 
         return(NX_SECURE_TLS_SUCCESS);

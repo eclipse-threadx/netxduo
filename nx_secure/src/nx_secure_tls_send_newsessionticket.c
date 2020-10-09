@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_newsessionticket                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -63,6 +63,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -205,7 +208,7 @@ UCHAR            *packet_buffer;
     length += 2;
 
     /* Copy in ticket. */
-    NX_SECURE_MEMCPY(&packet_buffer[length], ticket, ticket_len); 
+    NX_SECURE_MEMCPY(&packet_buffer[length], ticket, ticket_len); /* Use case of memcpy is verified. */
     length += ticket_len;
 
     /* Add in extensions if available. */

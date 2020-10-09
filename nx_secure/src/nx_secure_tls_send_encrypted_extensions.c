@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_encrypted_extensions            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -63,8 +63,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), update   */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), update   */
 /*                                           ciphersuite lookup method.   */
+/*                                           resulting in version 6.1     */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_encrypted_extensions(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet)

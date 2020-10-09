@@ -412,7 +412,7 @@ static UCHAR output[512];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_secure_crypto_method_self_test_rsa               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -443,6 +443,8 @@ static UCHAR output[512];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_crypto_method_self_test_rsa(NX_CRYPTO_METHOD *crypto_method,

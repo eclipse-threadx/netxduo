@@ -20,6 +20,7 @@
 /**************************************************************************/
 /**************************************************************************/
 
+#ifndef NX_CRYPTO_STANDALONE_ENABLE
 #include "nx_secure_tls.h"
 
 
@@ -28,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_generic_ciphersuites                      PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -61,10 +62,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  08-14-2020     Timothy Stapko           Modified comment(s), added    */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), added    */
 /*                                            curves in the crypto array, */
 /*                                            added TLS ciphersuite entry,*/
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -628,6 +629,7 @@ const NX_CRYPTO_CIPHERSUITE *ciphersuite_map[] =
 
 const UINT ciphersuite_map_size = sizeof(ciphersuite_map) / sizeof(NX_CRYPTO_CIPHERSUITE*);
 
+#endif /* NX_CRYPTO_STANDALONE_ENABLE */
 
 
 

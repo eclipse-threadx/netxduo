@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_send_record                         PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -82,9 +82,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
 /*                                            released packet securely,   */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_send_record(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *send_packet,
@@ -212,7 +213,7 @@ UCHAR                  epoch_seq_num[8];
         }
 
         /* Append the hash to the plaintext data before encryption. */
-        NX_SECURE_MEMCPY(&data[length], record_hash, hash_length); 
+        NX_SECURE_MEMCPY(&data[length], record_hash, hash_length); /* Use case of memcpy is verified. */
 
 #ifdef NX_SECURE_KEY_CLEAR
         NX_SECURE_MEMSET(record_hash, 0, hash_length);

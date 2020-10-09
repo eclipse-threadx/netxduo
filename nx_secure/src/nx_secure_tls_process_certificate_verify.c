@@ -39,7 +39,7 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_certificate_verify           PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -81,9 +81,10 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), update   */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), update   */
 /*                                            ECC find curve method,      */
-/*                                            resulting in version 6.0.1  */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_certificate_verify(NX_SECURE_TLS_SESSION *tls_session,
@@ -218,16 +219,16 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
          if (tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_CLIENT)
          {
              /* Copy in context string and 0-byte separator. */
-             NX_SECURE_MEMCPY(&handshake_hash[64], server_context, 34); 
+             NX_SECURE_MEMCPY(&handshake_hash[64], server_context, 34); /* Use case of memcpy is verified. */
          }
          else
          {
              /* Copy in context string and 0-byte separator. */
-             NX_SECURE_MEMCPY(&handshake_hash[64], client_context, 34); 
+             NX_SECURE_MEMCPY(&handshake_hash[64], client_context, 34); /* Use case of memcpy is verified. */
          }
 
          /* Copy in transcript hash. */
-         NX_SECURE_MEMCPY(&handshake_hash[64 + 34], transcript_hash, 32); 
+         NX_SECURE_MEMCPY(&handshake_hash[64 + 34], transcript_hash, 32); /* Use case of memcpy is verified. */
 
          handshake_hash_length = 130;
 
@@ -347,7 +348,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
         /* Copy over the handshake hash state into a local structure to do the intermediate calculation. */
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); 
+               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
 
         /* Use SHA-256 for now... */
         hash_method = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_sha256_method;
@@ -396,11 +397,11 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
            first, then MD5. */
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size); 
+               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size); /* Use case of memcpy is verified. */
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch +
                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size,
                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size); 
+               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size); /* Use case of memcpy is verified. */
 
         /* Finalize the handshake message hashes that we started at the beginning of the handshake. */
         hash_method = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_md5_method;

@@ -45,7 +45,7 @@ static VOID _nx_tcpserver_thread_entry(ULONG tcpserver_address);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_session_allocate                       PORTABLE C     */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -79,9 +79,9 @@ static VOID _nx_tcpserver_thread_entry(ULONG tcpserver_address);
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed packet leak issue,    */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_tcpserver_session_allocate(NX_TCPSERVER *server_ptr, NX_TCP_SESSION **session_pptr)
@@ -128,7 +128,7 @@ NX_TCP_SOCKET  *socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_relisten                               PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -162,6 +162,8 @@ NX_TCP_SOCKET  *socket_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_tcpserver_relisten(NX_TCPSERVER *server_ptr)
@@ -213,7 +215,7 @@ NX_TCP_SESSION *session_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_tcpserver_create                                  PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -280,6 +282,8 @@ NX_TCP_SESSION *session_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_tcpserver_create(NX_IP *ip_ptr, NX_TCPSERVER *server_ptr, CHAR *name, 
@@ -347,7 +351,7 @@ UINT            status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_tls_setup                              PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -429,6 +433,8 @@ UINT            status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -548,7 +554,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_start                                  PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -586,6 +592,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_tcpserver_start(NX_TCPSERVER *server_ptr, UINT port, UINT listen_queue_size)
@@ -625,7 +633,7 @@ NX_TCP_SESSION *session_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_connect_present                        PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -658,6 +666,8 @@ NX_TCP_SESSION *session_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_connect_present(NX_TCP_SOCKET *socket_ptr, UINT port)
@@ -676,7 +686,7 @@ NX_TCPSERVER *server_ptr = socket_ptr -> nx_tcp_socket_reserved_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_data_present                           PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -708,6 +718,8 @@ NX_TCPSERVER *server_ptr = socket_ptr -> nx_tcp_socket_reserved_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_data_present(NX_TCP_SOCKET *socket_ptr)
@@ -723,7 +735,7 @@ NX_TCPSERVER *server_ptr = socket_ptr -> nx_tcp_socket_reserved_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_disconnect_present                     PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -755,6 +767,8 @@ NX_TCPSERVER *server_ptr = socket_ptr -> nx_tcp_socket_reserved_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_disconnect_present(NX_TCP_SOCKET *socket_ptr)
@@ -770,7 +784,7 @@ NX_TCPSERVER *server_ptr = socket_ptr -> nx_tcp_socket_reserved_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_timeout                                PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -801,6 +815,8 @@ NX_TCPSERVER *server_ptr = socket_ptr -> nx_tcp_socket_reserved_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_timeout(ULONG tcpserver_address)
@@ -816,7 +832,7 @@ NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_connect_process                        PORTABLE C     */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -853,9 +869,9 @@ NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed packet leak issue,    */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_connect_process(NX_TCPSERVER *server_ptr)
@@ -964,7 +980,7 @@ NX_TCP_SESSION *session_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_data_process                           PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -996,6 +1012,8 @@ NX_TCP_SESSION *session_ptr = NX_NULL;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_data_process(NX_TCPSERVER *server_ptr)
@@ -1034,7 +1052,7 @@ NX_TCP_SOCKET  *socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_disconnect_process                     PORTABLE C     */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1067,9 +1085,9 @@ NX_TCP_SOCKET  *socket_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed packet leak issue,    */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_disconnect_process(NX_TCPSERVER *server_ptr)
@@ -1113,7 +1131,7 @@ NX_TCP_SOCKET  *socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_timeout_process                        PORTABLE C     */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1147,9 +1165,9 @@ NX_TCP_SOCKET  *socket_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed packet leak issue,    */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_timeout_process(NX_TCPSERVER *server_ptr)
@@ -1205,7 +1223,7 @@ NX_TCP_SESSION *session_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_thread_entry                           PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1240,6 +1258,8 @@ NX_TCP_SESSION *session_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_thread_entry(ULONG tcpserver_address)
@@ -1308,7 +1328,7 @@ NX_TCPSERVER   *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_stop                                   PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1342,6 +1362,8 @@ NX_TCPSERVER   *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_tcpserver_stop(NX_TCPSERVER *server_ptr)
@@ -1377,7 +1399,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_delete                                 PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1416,6 +1438,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_tcpserver_delete(NX_TCPSERVER *server_ptr)

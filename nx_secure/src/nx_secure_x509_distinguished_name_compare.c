@@ -33,7 +33,7 @@ static INT _nx_secure_x509_distinguished_name_field_compare(const UCHAR *field1,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_distinguished_name_compare          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -86,6 +86,8 @@ static INT _nx_secure_x509_distinguished_name_field_compare(const UCHAR *field1,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 INT _nx_secure_x509_distinguished_name_compare(NX_SECURE_X509_DISTINGUISHED_NAME *name,
@@ -229,7 +231,7 @@ INT status = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_distinguished_name_field_compare    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -266,6 +268,8 @@ INT status = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static INT _nx_secure_x509_distinguished_name_field_compare(const UCHAR *field1, const UINT length1,

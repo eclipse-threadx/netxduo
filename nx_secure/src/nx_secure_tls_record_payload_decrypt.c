@@ -49,7 +49,7 @@ extern UCHAR _nx_secure_tls_record_block_buffer[NX_SECURE_TLS_MAX_CIPHER_BLOCK_S
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_payload_decrypt               PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -96,12 +96,11 @@ extern UCHAR _nx_secure_tls_record_block_buffer[NX_SECURE_TLS_MAX_CIPHER_BLOCK_S
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), fixed    */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), fixed    */
 /*                                            AES-CBC padding oracle,     */
-/*                                            resulting in version 6.0.1  */
-/*  08-14-2020     Timothy Stapko           Modified comment(s), fixed    */
+/*                                            verified memcpy use cases,  */
 /*                                            supported chained packet,   */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_record_payload_decrypt(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *encrypted_packet,
@@ -195,7 +194,7 @@ UCHAR                                 nonce[13];
             nonce[0] = 12;
 
             /* Copy client_write_IV or server_write_IV.  */
-            NX_SECURE_MEMCPY(&nonce[1], iv, 12); 
+            NX_SECURE_MEMCPY(&nonce[1], iv, 12); /* Use case of memcpy is verified. */
 
             /* Correct the endianness of our sequence number and XOR with
              * the IV. Pad to the left with zeroes. */
@@ -265,7 +264,7 @@ UCHAR                                 nonce[13];
             nonce[0] = 12;
 
             /* Copy client_write_IV or server_write_IV.  */
-            NX_SECURE_MEMCPY(&nonce[1], iv, 4); 
+            NX_SECURE_MEMCPY(&nonce[1], iv, 4); /* Use case of memcpy is verified. */
 
             /* Correct the endianness of our sequence number before hashing. */
             additional_data[0] = (UCHAR)(sequence_num[1] >> 24);
@@ -487,7 +486,7 @@ UCHAR                                 nonce[13];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_chained_packet_decrypt        PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -532,7 +531,7 @@ UCHAR                                 nonce[13];
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  08-14-2020     Timothy Stapko           Initial Version 6.0.2         */
+/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_record_chained_packet_decrypt(NX_SECURE_TLS_SESSION *tls_session,
@@ -691,7 +690,7 @@ const NX_CRYPTO_METHOD *session_cipher_method;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_packet_decrypt                PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -735,7 +734,7 @@ const NX_CRYPTO_METHOD *session_cipher_method;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  08-14-2020     Timothy Stapko           Initial Version 6.0.2         */
+/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_record_packet_decrypt(NX_SECURE_TLS_SESSION *tls_session,
@@ -876,7 +875,7 @@ UINT original_offset = offset;
 
     if (session_cipher_method -> nx_crypto_operation == NX_NULL)
     {
-        NX_SECURE_MEMCPY(output, input, length); 
+        NX_SECURE_MEMCPY(output, input, length); /* Use case of memcpy is verified. */
     }
     else
     {
@@ -918,7 +917,7 @@ UINT original_offset = offset;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_data_decrypt                         PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -952,7 +951,7 @@ UINT original_offset = offset;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  08-14-2020     Timothy Stapko           Initial Version 6.0.2         */
+/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_data_decrypt(NX_SECURE_TLS_SESSION *tls_session,

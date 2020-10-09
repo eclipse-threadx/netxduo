@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_api.h                                            PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -45,13 +45,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), fixed    */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), fixed    */
 /*                                            ThreadX version check,      */
 /*                                            updated product constants,  */
-/*                                            resulting in version 6.0.1  */
-/*  08-14-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -458,8 +455,8 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 /* Define basic constants for the NetX TCP/IP Stack.  */
 #define AZURE_RTOS_NETXDUO
 #define NETXDUO_MAJOR_VERSION                    6
-#define NETXDUO_MINOR_VERSION                    0
-#define NETXDUO_PATCH_VERSION                    2
+#define NETXDUO_MINOR_VERSION                    1
+#define NETXDUO_PATCH_VERSION                    0
 
 /* Define the following symbols for backward compatibility */
 #define EL_PRODUCT_NETXDUO

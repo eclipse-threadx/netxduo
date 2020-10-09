@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_initialize              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -96,6 +96,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_initialize(NX_SECURE_X509_CERT *certificate,
@@ -136,7 +139,7 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
         /* Use the caller-supplied buffer for the certificate. */
         certificate -> nx_secure_x509_certificate_raw_buffer_size = buffer_size;
         certificate -> nx_secure_x509_certificate_raw_data = raw_data_buffer;
-        NX_SECURE_MEMCPY(certificate -> nx_secure_x509_certificate_raw_data, certificate_data, length); 
+        NX_SECURE_MEMCPY(certificate -> nx_secure_x509_certificate_raw_data, certificate_data, length); /* Use case of memcpy is verified. */
     }
 
     /* Parse the DER-encoded X509 certificate to extract the public key data.

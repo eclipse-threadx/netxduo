@@ -110,7 +110,7 @@ static _nx_ram_network_driver_instance_type nx_ram_driver[NX_MAX_RAM_INTERFACES]
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -144,6 +144,8 @@ static _nx_ram_network_driver_instance_type nx_ram_driver[NX_MAX_RAM_INTERFACES]
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr)
@@ -611,7 +613,7 @@ UINT          interface_index;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver_output                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -647,6 +649,8 @@ UINT          interface_index;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ram_network_driver_output(NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -802,7 +806,7 @@ UINT   j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver_receive                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -843,6 +847,8 @@ UINT   j;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ram_network_driver_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)

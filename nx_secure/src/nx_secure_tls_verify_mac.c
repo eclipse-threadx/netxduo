@@ -32,7 +32,7 @@ static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_verify_mac                           PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,12 +71,11 @@ static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), fixed    */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), fixed    */
 /*                                            AES-CBC padding oracle,     */
-/*                                            resulting in version 6.0.1  */
-/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
 /*                                            supported chained packet,   */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_verify_mac(NX_SECURE_TLS_SESSION *tls_session, UCHAR *header_data,
@@ -148,7 +147,7 @@ ULONG  bytes_copied;
     {
         return(NX_SECURE_TLS_HASH_MAC_VERIFY_FAILURE);
     }
-    NX_SECURE_MEMCPY(header, header_data, header_length); 
+    NX_SECURE_MEMCPY(header, header_data, header_length); /* Use case of memcpy is verified. */
 
     /* Adjust the length in the header to match the length of the data before the hash was added. */
     header[3] = (UCHAR)((data_length >> 8) & 0x00FF);

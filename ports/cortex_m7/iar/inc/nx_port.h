@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */ 
 /*                                                                        */ 
 /*    nx_port.h                                          Cortex-M7/IAR    */ 
-/*                                                          6.0.2         */
+/*                                                          6.1           */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -42,11 +42,7 @@
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  06-30-2020     Yuxin Zhou               Initial Version 6.0.1         */
-/*  08-14-2020     Yuxin Zhou               Modified comment(s),  and     */
-/*                                            corrected the code of       */
-/*                                            getting system state,       */
-/*                                            resulting in version 6.0.2  */
+/*  09-30-2020     Yuxin Zhou               Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 
@@ -87,45 +83,25 @@
 
 
 /* Define macros that swap the endian for little endian ports.  */
+
 #ifdef NX_LITTLE_ENDIAN
-#define NX_CHANGE_ULONG_ENDIAN(arg)                         \
-    {                                                       \
-        ULONG i;                                            \
-        ULONG tmp;                                          \
-        i = (UINT)arg;                                      \
-        /* i = A, B, C, D */                                \
-        tmp = i ^ (((i) >> 16) | (i << 16));                \
-        /* tmp = i ^ (i ROR 16) = A^C, B^D, C^A, D^B */     \
-        tmp &= 0xff00ffff;                                  \
-        /* tmp = A^C, 0, C^A, D^B */                        \
-        i = ((i) >> 8) | (i<<24);                           \
-        /* i = D, A, B, C */                                \
-        i = i ^ ((tmp) >> 8);                               \
-        /* i = D, C, B, A */                                \
-        arg = i;                                            \
-    }
-#define NX_CHANGE_USHORT_ENDIAN(a)      a = (((a >> 8) | (a << 8)) & 0xFFFF)
-
-
-#define __SWAP32__(val) ((((val) & 0xFF000000) >> 24 ) | (((val) & 0x00FF0000) >> 8) \
-			 | (((val) & 0x0000FF00) << 8) | (((val) & 0x000000FF) << 24))
-
-#define __SWAP16__(val) ((((val) & 0xFF00) >> 8) | (((val) & 0x00FF) << 8))
+#define NX_CHANGE_ULONG_ENDIAN(arg) arg = __REV(arg)
+#define NX_CHANGE_USHORT_ENDIAN(arg) arg = __REV16(arg)
 
 
 #ifndef htonl
-#define htonl(val)  __SWAP32__(val)
+#define htonl(val)  __REV(val)
 #endif /* htonl */
 #ifndef ntohl
-#define ntohl(val)  __SWAP32__(val)
+#define ntohl(val)  __REV(val)
 #endif /* htonl */
 
 #ifndef htons
-#define htons(val)  __SWAP16__(val)
+#define htons(val)  __REV16(val)
 #endif /*htons */
 
 #ifndef ntohs
-#define ntohs(val)  __SWAP16__(val)
+#define ntohs(val)  __REV16(val)
 #endif /*htons */
 
 
@@ -205,7 +181,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M7/IAR Version 6.0.1 *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M7/IAR Version 6.1 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

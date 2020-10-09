@@ -234,7 +234,7 @@ static const UINT _nx_secure_x509_oid_map_size = sizeof(_nx_secure_x509_oid_map)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_oid_parse                           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -281,6 +281,8 @@ static const UINT _nx_secure_x509_oid_map_size = sizeof(_nx_secure_x509_oid_map)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_secure_x509_oid_parse(const UCHAR *oid, ULONG length, UINT *oid_value)

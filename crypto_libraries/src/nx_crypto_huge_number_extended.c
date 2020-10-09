@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_add_digit                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_add_digit(NX_CRYPTO_HUGE_NUMBER *value, HN_UBASE digit)
@@ -107,7 +109,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_add_digit(NX_CRYPTO_HUGE_NUMBER *valu
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_subtract_digit               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -145,6 +147,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_add_digit(NX_CRYPTO_HUGE_NUMBER *valu
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_subtract_digit(NX_CRYPTO_HUGE_NUMBER *value, HN_UBASE digit)
@@ -181,7 +185,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_subtract_digit(NX_CRYPTO_HUGE_NUMBER 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_power_modulus                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -232,6 +236,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_subtract_digit(NX_CRYPTO_HUGE_NUMBER 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_power_modulus(NX_CRYPTO_HUGE_NUMBER *number,

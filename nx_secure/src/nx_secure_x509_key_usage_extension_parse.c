@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_key_usage_extension_parse           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -65,6 +65,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed parsing issue,        */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_key_usage_extension_parse(NX_SECURE_X509_CERT *certificate, USHORT *bitfield)
@@ -134,8 +137,8 @@ NX_SECURE_X509_EXTENSION key_usage_extension;
 
     /* DER-encoding of a BIT STRING with flag values uses the top octet of the 2 byte string
        to encode the number of 0 bits at the end of the lower octet. Thus, we need to extract
-       the top byte and right-shift the bottom byte to get the actual bitfield value. */
-    *bitfield = (USHORT)(tlv_data[1] >> tlv_data[0]);
+       the top byte and shift the bottom byte to get the actual bitfield value. */
+    *bitfield = (USHORT)((tlv_data[1] << 8) + tlv_data[0]);
 
 
     return(NX_SUCCESS);

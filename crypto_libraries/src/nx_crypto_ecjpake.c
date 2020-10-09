@@ -28,7 +28,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_init                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -65,6 +65,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ecjpake_init(NX_CRYPTO_ECJPAKE *ecjpake,
@@ -109,7 +111,7 @@ UINT      buffer_size = curve -> nx_crypto_ec_n.nx_crypto_huge_buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_hello_generate                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -156,6 +158,8 @@ UINT      buffer_size = curve -> nx_crypto_ec_n.nx_crypto_huge_buffer_size;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_hello_generate(NX_CRYPTO_ECJPAKE *ecjpake,
@@ -283,7 +287,7 @@ UINT                  status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_hello_process                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -324,6 +328,8 @@ UINT                  status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_hello_process(NX_CRYPTO_ECJPAKE *ecjpake,
@@ -427,7 +433,7 @@ UINT                  total_length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_key_exchange_generate            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -478,6 +484,8 @@ UINT                  total_length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_key_exchange_generate(NX_CRYPTO_ECJPAKE *ecjpake,
@@ -566,7 +574,7 @@ UINT                  status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_key_exchange_process             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -614,6 +622,8 @@ UINT                  status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_key_exchange_process(NX_CRYPTO_ECJPAKE *ecjpake,
@@ -713,7 +723,7 @@ UINT                  total_length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_schnorr_zkp_hash                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -760,6 +770,8 @@ UINT                  total_length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_schnorr_zkp_hash(NX_CRYPTO_METHOD *hash_method,
@@ -1035,7 +1047,7 @@ VOID *handler;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_schnorr_zkp_generate             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1087,6 +1099,8 @@ VOID *handler;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_schnorr_zkp_generate(NX_CRYPTO_METHOD *hash_method,
@@ -1140,7 +1154,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_schnorr_zkp_verify               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1188,6 +1202,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_schnorr_zkp_verify(NX_CRYPTO_METHOD *hash_method,
@@ -1246,7 +1262,7 @@ NX_CRYPTO_EC_POINT    temp1, temp2;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_public_key_generate              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1292,6 +1308,8 @@ NX_CRYPTO_EC_POINT    temp1, temp2;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ecjpake_public_key_generate(NX_CRYPTO_EC *curve,
@@ -1329,7 +1347,7 @@ NX_CRYPTO_HUGE_NUMBER temp1;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_pre_master_secret_generate       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1374,6 +1392,8 @@ NX_CRYPTO_HUGE_NUMBER temp1;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_pre_master_secret_generate(NX_CRYPTO_METHOD *hash_method,
@@ -1468,7 +1488,7 @@ UINT               status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_key_encryption_key_generate      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1502,6 +1522,9 @@ UINT               status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_FIPS
@@ -1552,7 +1575,7 @@ UINT status;
     }                                                     
     
 
-    NX_CRYPTO_MEMCPY(key_encryption_key, buffer, 16); 
+    NX_CRYPTO_MEMCPY(key_encryption_key, buffer, 16); /* Use case of memcpy is verified. */
 
     if (hash_method -> nx_crypto_cleanup)
     {
@@ -1567,7 +1590,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ecjpake_init                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1602,6 +1625,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecjpake_init(struct NX_CRYPTO_METHOD_STRUCT *method,
@@ -1664,7 +1689,7 @@ UINT               i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ecjpake_cleanup                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1694,6 +1719,8 @@ UINT               i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecjpake_cleanup(VOID *crypto_metadata)
@@ -1720,7 +1747,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecjpake_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ecjpake_operation                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1769,6 +1796,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecjpake_cleanup(VOID *crypto_metadata)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ecjpake_operation(UINT op,

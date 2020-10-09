@@ -194,7 +194,7 @@ static ULONG output[16];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_method_self_test_sha                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -225,6 +225,8 @@ static ULONG output[16];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_self_test_sha(NX_CRYPTO_METHOD *crypto_method_sha,

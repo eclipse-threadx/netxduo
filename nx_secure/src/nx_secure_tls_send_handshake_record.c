@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_handshake_record                PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,9 +70,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
 /*                                            released packet securely,   */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_handshake_record(NX_SECURE_TLS_SESSION *tls_session,
@@ -138,7 +139,7 @@ UINT       buffer_offset;
 #endif /* (NX_SECURE_TLS_TLS_1_3_ENABLED) */
             {
                 NX_SECURE_MEMCPY(&tls_session->nx_secure_tls_key_material.nx_secure_tls_handshake_cache[buffer_offset],
-                                 current_packet -> nx_packet_prepend_ptr, (UINT)length); 
+                                 current_packet -> nx_packet_prepend_ptr, (UINT)length); /* Use case of memcpy is verified. */
 
                 /* Advance the length. */
                 buffer_offset += (UINT)length;

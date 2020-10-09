@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -41,19 +41,17 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), and      */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), and      */
 /*                                            fixed race condition for    */
 /*                                            multithread transmission,   */
+/*                                            supported chained packet,   */
 /*                                            priority ciphersuite and ECC*/
 /*                                            curve logic, updated product*/
-/*                                            constants,                  */
-/*                                            resulting in version 6.0.1  */
-/*  08-14-2020     Timothy Stapko           Modified comment(s), and      */
-/*                                            supported chained packet,   */
-/*                                            fixed renegotiation bug,    */
-/*                                            added new API on tls        */
-/*                                            protocol version negotiation*/
-/*                                            resulting in version 6.0.2  */
+/*                                            constants, fixed compiler   */
+/*                                            warning, fixed renegotiation*/
+/*                                            bug, fixed certificate      */
+/*                                            buffer allocation,          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -113,8 +111,8 @@ extern   "C" {
 
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
-#define NETX_SECURE_MINOR_VERSION                       0
-#define NETX_SECURE_PATCH_VERSION                       2
+#define NETX_SECURE_MINOR_VERSION                       1
+#define NETX_SECURE_PATCH_VERSION                       0
 
 /* The following symbols are defined for backward compatibility reasons. */
 #define EL_PRODUCT_NETX_SECURE
@@ -1331,6 +1329,8 @@ UINT _nx_secure_tls_1_3_generate_psk_secret(NX_SECURE_TLS_SESSION *tls_session,
                                             NX_SECURE_TLS_PSK_STORE *psk_entry,
                                             const NX_CRYPTO_METHOD *hash_method);
 UINT _nx_secure_tls_send_newsessionticket(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet);
+UINT _nx_secure_tls_process_newsessionticket(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
+                                             UINT message_length);
 UINT _nx_secure_tls_process_encrypted_extensions(NX_SECURE_TLS_SESSION *tls_session,
                                                  UCHAR *packet_buffer, UINT message_length);
 UINT _nx_secure_tls_send_encrypted_extensions(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet);
@@ -1395,7 +1395,8 @@ UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET
                                    ULONG *bytes_processed, ULONG wait_option);
 UINT _nx_secure_tls_process_remote_certificate(NX_SECURE_TLS_SESSION *tls_session,
                                                UCHAR *packet_buffer,
-                                               UINT message_length);
+                                               UINT message_length,
+                                               UINT data_length);
 UINT _nx_secure_tls_process_server_key_exchange(NX_SECURE_TLS_SESSION *tls_session,
                                                 UCHAR *packet_buffer, UINT message_length);
 UINT _nx_secure_tls_process_serverhello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,

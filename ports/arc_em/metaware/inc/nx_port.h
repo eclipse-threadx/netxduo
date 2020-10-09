@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */ 
 /*                                                                        */ 
 /*    nx_port.h                                       ARCv2_EM/MetaWare   */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -42,7 +42,7 @@
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  06-30-2020     Yuxin Zhou               Initial Version 6.0.1         */
+/*  09-30-2020     Yuxin Zhou               Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 
@@ -201,7 +201,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo ARCv2_EM/MetaWare Version 6.0.1 *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo ARCv2_EM/MetaWare Version 6.1 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

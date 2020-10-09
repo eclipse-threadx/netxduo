@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_send_serverhello                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -66,6 +66,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_send_serverhello(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *send_packet)
@@ -128,7 +131,7 @@ USHORT                                protocol_version;
     }
     NX_CHANGE_ULONG_ENDIAN(gmt_time);
 
-    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random, (UCHAR *)&gmt_time, sizeof(gmt_time)); 
+    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random, (UCHAR *)&gmt_time, sizeof(gmt_time)); /* Use case of memcpy is verified. */
 
     /* Next 28 bytes is random data. */
     for (i = 0; i < 28; i += (UINT)sizeof(random_value))
@@ -142,7 +145,7 @@ USHORT                                protocol_version;
 
     /* Copy the random data into the packet. */
     NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random,
-                     sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random)); 
+                     sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random)); /* Use case of memcpy is verified. */
     length += sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random);
 
     /* Session ID length is one byte. */
@@ -152,7 +155,7 @@ USHORT                                protocol_version;
     /* Session ID follows. */
     if (tls_session -> nx_secure_tls_session_id_length > 0)
     {
-        NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_session_id, tls_session -> nx_secure_tls_session_id_length); 
+        NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_session_id, tls_session -> nx_secure_tls_session_id_length); /* Use case of memcpy is verified. */
         length += tls_session -> nx_secure_tls_session_id_length;
     }
 

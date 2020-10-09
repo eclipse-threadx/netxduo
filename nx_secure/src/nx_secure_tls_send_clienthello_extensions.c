@@ -82,7 +82,7 @@ static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SE
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions          PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -127,9 +127,10 @@ static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SE
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_clienthello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -207,7 +208,7 @@ UINT   status;
             length += 2;
 
             /* Add Cookie. */
-            NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_cookie, tls_session -> nx_secure_tls_cookie_length); 
+            NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_cookie, tls_session -> nx_secure_tls_cookie_length); /* Use case of memcpy is verified. */
             length += (tls_session -> nx_secure_tls_cookie_length);
 
             /* Update total extensions length and reset the stored cookie length. */
@@ -268,7 +269,7 @@ UINT   status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_sig_extension       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -304,6 +305,8 @@ UINT   status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_send_clienthello_sig_extension(NX_SECURE_TLS_SESSION *tls_session,
@@ -485,7 +488,7 @@ UCHAR sig_algo = 0;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_supported_versions_extension        */
 /*                                                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -521,6 +524,8 @@ UCHAR sig_algo = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -618,7 +623,7 @@ INT    i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_key_share_extension PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -654,6 +659,9 @@ INT    i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -783,7 +791,7 @@ USHORT named_curve;
     offset += 2;
 
     /* Set the key data from our already-generated ECC keys. */
-    NX_SECURE_MEMCPY(&packet_buffer[offset], &tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[entry_index].nx_secure_tls_ecdhe_public_key[0], key_length); 
+    NX_SECURE_MEMCPY(&packet_buffer[offset], &tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[entry_index].nx_secure_tls_ecdhe_public_key[0], key_length); /* Use case of memcpy is verified. */
     offset += (key_length);
 
     /* Get the length of the entire extension. */
@@ -818,7 +826,7 @@ USHORT named_curve;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_psk_extension       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -854,6 +862,9 @@ USHORT named_curve;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -986,7 +997,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
         offset += 2;
 
         /* Put the ID data into our packet. */
-        NX_SECURE_MEMCPY(&packet_buffer[offset], id, id_len); 
+        NX_SECURE_MEMCPY(&packet_buffer[offset], id, id_len); /* Use case of memcpy is verified. */
         offset += (UINT)(id_len);
 
         /* Set the obfuscated PSK age. */
@@ -1062,7 +1073,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
         /* Save the handshake hash state. */
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
                          tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
-                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); 
+                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
     }
 
     /* Hash the ClientHello up to its current point. */
@@ -1086,7 +1097,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
     {
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
                          tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
-                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); 
+                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
     }
 
     /* Loop through all IDs and set the binders accordingly. */
@@ -1125,7 +1136,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
         offset += (UINT)(1);
 
         /* Put the binder data into the packet. */
-        NX_SECURE_MEMCPY(&packet_buffer[offset], binder, binder_len); 
+        NX_SECURE_MEMCPY(&packet_buffer[offset], binder, binder_len); /* Use case of memcpy is verified. */
         offset += (UINT)(binder_len);
 
         /* Update our total with the binder length (binder_len) and length field(1). */
@@ -1156,7 +1167,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_psk_kem_extension   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1191,6 +1202,8 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -1259,7 +1272,7 @@ USHORT length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_sni_extension       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1296,6 +1309,9 @@ USHORT length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_SNI_EXTENSION_DISABLED
@@ -1389,7 +1405,7 @@ UINT   data_length;
     offset += 2;
 
     /* Write the name into the packet. */
-    NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_sni_extension_server_name -> nx_secure_x509_dns_name, data_length); 
+    NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_sni_extension_server_name -> nx_secure_x509_dns_name, data_length); /* Use case of memcpy is verified. */
     offset += data_length;
 
     /* Return the amount of data we wrote. */
@@ -1408,7 +1424,7 @@ UINT   data_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_sec_reneg_extension PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1446,9 +1462,10 @@ UINT   data_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
@@ -1563,7 +1580,7 @@ UINT   data_length;
         offset++;
 
         /* Copy the verify data into the packet. */
-        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_local_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); 
+        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_local_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. */
         offset += NX_SECURE_TLS_FINISHED_HASH_SIZE;
     }
 
@@ -1583,7 +1600,7 @@ UINT   data_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_sec_spf_extensions  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1620,6 +1637,8 @@ UINT   data_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE

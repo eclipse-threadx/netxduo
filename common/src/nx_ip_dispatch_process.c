@@ -43,7 +43,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_dispatch_process                             PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -95,9 +95,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), fixed    */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), fixed    */
 /*                                            destination header check,   */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ip_dispatch_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT protocol)

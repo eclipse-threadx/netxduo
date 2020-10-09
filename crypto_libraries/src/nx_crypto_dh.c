@@ -57,7 +57,7 @@ static const HN_UBASE _nx_dh_group_2_modulus[] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_dh_setup                                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -106,6 +106,8 @@ static const HN_UBASE _nx_dh_group_2_modulus[] =
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_dh_setup(NX_CRYPTO_DH  *dh_ptr,
@@ -189,7 +191,7 @@ HN_UBASE              generator_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_dh_compute_secret                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -239,6 +241,8 @@ HN_UBASE              generator_value;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_dh_compute_secret(NX_CRYPTO_DH  *dh_ptr,

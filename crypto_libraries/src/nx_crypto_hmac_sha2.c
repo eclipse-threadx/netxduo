@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_sha256_init                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -66,6 +66,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -106,7 +108,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_init(struct  NX_CRYPTO_METHOD
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_sha256_cleanup               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -136,6 +138,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_init(struct  NX_CRYPTO_METHOD
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_cleanup(VOID *crypto_metadata)
@@ -162,7 +166,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_cleanup(VOID *crypto_metadata
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_sha256_operation             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -209,6 +213,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_cleanup(VOID *crypto_metadata
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */

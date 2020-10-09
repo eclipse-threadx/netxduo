@@ -535,8 +535,8 @@ CHAR value[100];
     memset(name, 0, sizeof(name));
     memset(value, 0, sizeof(value));
 
-    memcpy(name, field_name, field_name_length);
-    memcpy(value, field_value, field_value_length);
+    memcpy(name, field_name, field_name_length); /* Use case of memcpy is verified. */
+    memcpy(value, field_value, field_value_length); /* Use case of memcpy is verified. */
 
     printf("Received header: \n\tField name: %s (%d bytes)\n\tValue: %s (%d bytes)\n--------------\n",
             name, field_name_length, value, field_value_length);

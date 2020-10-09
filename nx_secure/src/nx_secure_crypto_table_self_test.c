@@ -67,7 +67,7 @@ UINT _nx_secure_crypto_method_self_test(const NX_CRYPTO_METHOD *crypto_method,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_crypto_table_self_test                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -103,6 +103,8 @@ UINT _nx_secure_crypto_method_self_test(const NX_CRYPTO_METHOD *crypto_method,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_crypto_table_self_test(const NX_SECURE_TLS_CRYPTO *crypto_table,

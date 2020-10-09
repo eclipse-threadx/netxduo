@@ -190,7 +190,7 @@ static UCHAR output[INPUT_OUTPUT_LENGTH * 2];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_secure_crypto_method_self_test_aes               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -221,6 +221,8 @@ static UCHAR output[INPUT_OUTPUT_LENGTH * 2];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_crypto_method_self_test_aes(NX_CRYPTO_METHOD *crypto_method_aes,

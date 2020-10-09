@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */
 /*                                                                        */
 /*    nx_secure_port.h                                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -41,6 +41,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -67,7 +69,7 @@
 
 #ifdef NX_SECURE_SYSTEM_INIT
 CHAR                            _nx_secure_version_id[] =
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Secure Generic Version G6.0 *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Secure Generic Version G6.1 *";
 #else
 extern  CHAR                    _nx_secure_version_id[];
 #endif

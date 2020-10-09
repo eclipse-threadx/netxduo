@@ -47,7 +47,7 @@ static const UCHAR _NX_CRYPTO_DER_OID_SHA_512[]     =  {0x30, 0x51, 0x30, 0x0d, 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_ecc_generate_keys                    PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -92,9 +92,10 @@ static const UCHAR _NX_CRYPTO_DER_OID_SHA_512[]     =  {0x30, 0x51, 0x30, 0x0d, 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), update   */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), update   */
 /*                                            ECC find curve method,      */
-/*                                            resulting in version 6.0.1  */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_ecc_generate_keys(NX_SECURE_TLS_SESSION *tls_session, UINT ecc_named_curve, USHORT sign_key,
@@ -729,10 +730,10 @@ USHORT                                signature_algorithm_id;
             _nx_secure_padded_signature[signature_offset - 1] = 0x0;
             if (der_encoding_length > 0)
             {
-                NX_CRYPTO_MEMCPY(&_nx_secure_padded_signature[signature_offset], der_encoding, der_encoding_length); 
+                NX_CRYPTO_MEMCPY(&_nx_secure_padded_signature[signature_offset], der_encoding, der_encoding_length); /* Use case of memcpy is verified. */
                 signature_offset += der_encoding_length;
             }
-            NX_CRYPTO_MEMCPY(&_nx_secure_padded_signature[signature_offset], hash, hash_length); 
+            NX_CRYPTO_MEMCPY(&_nx_secure_padded_signature[signature_offset], hash, hash_length); /* Use case of memcpy is verified. */
 
             if (auth_method -> nx_crypto_init != NX_NULL)
             {

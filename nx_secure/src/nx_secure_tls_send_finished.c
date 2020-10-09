@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_finished                        PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -66,9 +66,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_finished(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet)
@@ -118,7 +119,7 @@ UINT             is_server;
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
         /* If we are doing secure renegotiation as per RFC 5746, we need to save off the generated
            verify data now. For TLS 1.0-1.2 this is 12 bytes. If SSLv3 is ever used, it will be 36 bytes. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_local_verify_data, send_packet -> nx_packet_append_ptr, NX_SECURE_TLS_FINISHED_HASH_SIZE); 
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_local_verify_data, send_packet -> nx_packet_append_ptr, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. */
 #endif
 
         /* The finished verify data is always 12 bytes for TLS 1.2 and earlier. */

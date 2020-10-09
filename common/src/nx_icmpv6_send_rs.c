@@ -37,7 +37,7 @@ static const ULONG _nx_ipv6_all_router_address[4] = {0xff020000, 0, 0, 2};
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_send_rs                                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -74,6 +74,8 @@ static const ULONG _nx_ipv6_all_router_address[4] = {0xff020000, 0, 0, 2};
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_icmpv6_send_rs(NX_IP *ip_ptr, UINT if_index)

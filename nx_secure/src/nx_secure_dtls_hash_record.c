@@ -33,7 +33,7 @@ static UCHAR adjusted_header[5];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_hash_record                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,6 +74,9 @@ static UCHAR adjusted_header[5];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_hash_record(NX_SECURE_DTLS_SESSION *dtls_session,
@@ -116,7 +119,7 @@ NX_SECURE_TLS_SESSION                *tls_session;
     hash_size = tls_session -> nx_secure_tls_session_ciphersuite -> nx_secure_tls_hash_size;
 
     /* In DTLS, use the sequence number + epoch from the header. */
-    NX_SECURE_MEMCPY(adjusted_sequence_num, &header[3], 8); 
+    NX_SECURE_MEMCPY(adjusted_sequence_num, &header[3], 8); /* Use case of memcpy is verified. */
 
     /* We need to extract the type, version, and length from the DTLS header. */
     adjusted_header[0] = header[0];  /* Type. */

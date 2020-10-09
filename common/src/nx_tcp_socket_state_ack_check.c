@@ -40,7 +40,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_ack_check                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -77,6 +77,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the calculation of*/
+/*                                            ending packet sequence,     */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_state_ack_check(NX_TCP_SOCKET *socket_ptr, NX_TCP_HEADER *tcp_header_ptr)
@@ -141,12 +145,10 @@ UINT           wrapped_flag = NX_FALSE;
 
             /* Determine the size of the TCP header.  */
             temp =  search_header_ptr -> nx_tcp_header_word_3;
-            NX_CHANGE_ULONG_ENDIAN(temp);
             header_length =  (temp >> NX_TCP_HEADER_SHIFT) * (ULONG)sizeof(ULONG);
 
             /* Determine the sequence number in the TCP header.  */
             search_sequence =  search_header_ptr -> nx_tcp_sequence_number;
-            NX_CHANGE_ULONG_ENDIAN(search_sequence);
 
             /* Calculate the payload length of TCP. */
             tcp_payload_length = (search_ptr -> nx_packet_length -

@@ -20,7 +20,6 @@
 /**************************************************************************/
 /**************************************************************************/
 
-#include "nx_api.h"
 #include "nx_crypto_hkdf.h"
 #include "nx_crypto_hmac.h"
 
@@ -29,7 +28,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hkdf_init                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -66,6 +65,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hkdf_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -116,7 +117,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hkdf_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hkdf_cleanup                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -146,6 +147,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hkdf_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hkdf_cleanup(VOID *crypto_metadata)
@@ -190,7 +193,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hkdf_operation                    PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -235,9 +238,10 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), improved */
 /*                                            buffer length verification, */
-/*                                            resulting in version 6.0.1  */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hkdf_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -316,7 +320,7 @@ UINT                 status;
         }
 
         /* Set the PRK and return. */
-        NX_CRYPTO_MEMCPY(hkdf->nx_crypto_hkdf_prk, key, (key_size_in_bits >> 3)); 
+        NX_CRYPTO_MEMCPY(hkdf->nx_crypto_hkdf_prk, key, (key_size_in_bits >> 3)); /* Use case of memcpy is verified. */
         hkdf->nx_crypto_hkdf_prk_size = (key_size_in_bits >> 3);
 
         break;
@@ -352,7 +356,7 @@ UINT                 status;
             }
 
             /* Copy the PRK into output. */
-            NX_CRYPTO_MEMCPY(output, hkdf->nx_crypto_hkdf_prk, hkdf->nx_crypto_hkdf_prk_size); 
+            NX_CRYPTO_MEMCPY(output, hkdf->nx_crypto_hkdf_prk, hkdf->nx_crypto_hkdf_prk_size); /* Use case of memcpy is verified. */
         }
 
         break;
@@ -387,7 +391,7 @@ UINT                 status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hkdf_extract                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -418,6 +422,8 @@ UINT                 status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_hkdf_extract(NX_CRYPTO_HKDF *hkdf)
@@ -528,7 +534,7 @@ NX_CRYPTO_METHOD *hmac_method = hkdf -> nx_crypto_hmac_method;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hkdf_expand                       PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -560,9 +566,10 @@ NX_CRYPTO_METHOD *hmac_method = hkdf -> nx_crypto_hmac_method;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), improved */
 /*                                            buffer length verification, */
-/*                                            resulting in version 6.0.1  */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_hkdf_expand(NX_CRYPTO_HKDF *hkdf, UCHAR *output, UINT desired_length)
@@ -666,7 +673,7 @@ NX_CRYPTO_METHOD *hmac_method = hkdf -> nx_crypto_hmac_method;
         }
 
         /* Concatenate T(i-1) (in temp_T after the hash above), info, and counter octet to feed into digest. */
-        NX_CRYPTO_MEMCPY(&temp_T[T_len], info, info_len); 
+        NX_CRYPTO_MEMCPY(&temp_T[T_len], info, info_len); /* Use case of memcpy is verified. */
 
         /* Concatenate counter octet. */
         temp_T[T_len + info_len] = (UCHAR)(i & 0xFF);
@@ -736,7 +743,7 @@ NX_CRYPTO_METHOD *hmac_method = hkdf -> nx_crypto_hmac_method;
         }        
         
         /* Copy T(i) into output. */
-        NX_CRYPTO_MEMCPY(&output[offset], temp_T, output_len); 
+        NX_CRYPTO_MEMCPY(&output[offset], temp_T, output_len); /* Use case of memcpy is verified. */
 
     }
 

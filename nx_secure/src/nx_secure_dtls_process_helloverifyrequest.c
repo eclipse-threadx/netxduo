@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_helloverifyrequest          PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -62,9 +62,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), improved */
 /*                                            buffer length verification, */
-/*                                            resulting in version 6.0.1  */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_helloverifyrequest(NX_SECURE_DTLS_SESSION *dtls_session,
@@ -100,7 +101,7 @@ UINT length;
     }
 
     /* Save off the cookie. */
-    NX_SECURE_MEMCPY(dtls_session -> nx_secure_dtls_cookie, &packet_buffer[length], dtls_session -> nx_secure_dtls_cookie_length); 
+    NX_SECURE_MEMCPY(dtls_session -> nx_secure_dtls_cookie, &packet_buffer[length], dtls_session -> nx_secure_dtls_cookie_length); /* Use case of memcpy is verified. */
 
     /* Set our state to indicate we sucessfully parsed the HelloVerifyRequest. */
     dtls_session -> nx_secure_dtls_tls_session.nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_HELLO_VERIFY;

@@ -24,7 +24,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_sntp_client.c                                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -41,6 +41,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
                
@@ -85,7 +87,7 @@ static ULONG process_timerticks = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_create                             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -124,6 +126,8 @@ static ULONG process_timerticks = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_create(NX_SNTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT iface_index, NX_PACKET_POOL *packet_pool_ptr,   
@@ -164,7 +168,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_create                              PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -212,6 +216,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_create(NX_SNTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT iface_index, NX_PACKET_POOL *packet_pool_ptr,    
@@ -380,7 +386,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_delete                             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -411,6 +417,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_delete(NX_SNTP_CLIENT *client_ptr)
@@ -443,7 +451,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_delete                              PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -481,6 +489,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_delete(NX_SNTP_CLIENT *client_ptr)
@@ -523,7 +533,7 @@ UINT  _nx_sntp_client_delete(NX_SNTP_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_update_timeout_entry                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -554,6 +564,8 @@ UINT  _nx_sntp_client_delete(NX_SNTP_CLIENT *client_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_sntp_client_update_timeout_entry(ULONG info)
@@ -605,7 +617,7 @@ NX_SNTP_CLIENT *client_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_create_time_request_packet          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -638,6 +650,8 @@ NX_SNTP_CLIENT *client_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_create_time_request_packet(NX_SNTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, 
@@ -684,7 +698,7 @@ UINT  _nx_sntp_client_create_time_request_packet(NX_SNTP_CLIENT *client_ptr, NX_
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_sntp_client_initialize_unicast                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -717,6 +731,8 @@ UINT  _nx_sntp_client_create_time_request_packet(NX_SNTP_CLIENT *client_ptr, NX_
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxde_sntp_client_initialize_unicast(NX_SNTP_CLIENT *client_ptr, NXD_ADDRESS *unicast_time_server)
@@ -749,7 +765,7 @@ UINT  status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_sntp_client_initialize_unicast                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -786,6 +802,8 @@ UINT  status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_sntp_client_initialize_unicast(NX_SNTP_CLIENT *client_ptr, NXD_ADDRESS *unicast_time_server)
@@ -837,7 +855,7 @@ UINT  _nxd_sntp_client_initialize_unicast(NX_SNTP_CLIENT *client_ptr, NXD_ADDRES
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_initialize_unicast                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -871,6 +889,8 @@ UINT  _nxd_sntp_client_initialize_unicast(NX_SNTP_CLIENT *client_ptr, NXD_ADDRES
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_initialize_unicast(NX_SNTP_CLIENT *client_ptr, ULONG unicast_time_server)
@@ -915,7 +935,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_initialize_unicast                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -948,6 +968,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_initialize_unicast(NX_SNTP_CLIENT *client_ptr, ULONG unicast_time_server)
@@ -979,7 +1001,7 @@ NXD_ADDRESS duo_unicast_time_server;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_run_unicast                        PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1009,6 +1031,8 @@ NXD_ADDRESS duo_unicast_time_server;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_run_unicast(NX_SNTP_CLIENT *client_ptr)
@@ -1040,7 +1064,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_run_unicast                         PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1076,6 +1100,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_run_unicast(NX_SNTP_CLIENT *client_ptr)
@@ -1203,7 +1229,7 @@ ULONG   startup_ticks;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_run_unicast                         PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1247,6 +1273,8 @@ ULONG   startup_ticks;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_sntp_client_process_unicast(NX_SNTP_CLIENT *client_ptr)
@@ -1350,7 +1378,7 @@ ULONG   sntp_events;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_sntp_client_initialize_broadcast              PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1384,6 +1412,8 @@ ULONG   sntp_events;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxde_sntp_client_initialize_broadcast(NX_SNTP_CLIENT *client_ptr, NXD_ADDRESS *multicast_server_address, NXD_ADDRESS *broadcast_server_address)
@@ -1430,7 +1460,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_sntp_client_initialize_broadcast               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1462,6 +1492,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_sntp_client_initialize_broadcast(NX_SNTP_CLIENT *client_ptr, NXD_ADDRESS *multicast_server_address, NXD_ADDRESS *broadcast_server_address)
@@ -1536,7 +1568,7 @@ UINT  _nxd_sntp_client_initialize_broadcast(NX_SNTP_CLIENT *client_ptr, NXD_ADDR
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_initialize_broadcast               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1572,6 +1604,8 @@ UINT  _nxd_sntp_client_initialize_broadcast(NX_SNTP_CLIENT *client_ptr, NXD_ADDR
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_initialize_broadcast(NX_SNTP_CLIENT *client_ptr, ULONG multicast_server_address, ULONG broadcast_server_address)
@@ -1618,7 +1652,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_initialize_broadcast                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1653,6 +1687,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_initialize_broadcast(NX_SNTP_CLIENT *client_ptr, ULONG multicast_server_address, ULONG broadcast_server_address)
@@ -1699,7 +1735,7 @@ NXD_ADDRESS server_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_stop                               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1730,6 +1766,8 @@ NXD_ADDRESS server_address;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_stop(NX_SNTP_CLIENT *client_ptr)
@@ -1757,7 +1795,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_stop                                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1793,6 +1831,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_stop(NX_SNTP_CLIENT *client_ptr)
@@ -1877,7 +1917,7 @@ UINT    current_preemption;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_run_broadcast                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1908,6 +1948,8 @@ UINT    current_preemption;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_run_broadcast(NX_SNTP_CLIENT *client_ptr)
@@ -1940,7 +1982,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_run_broadcast                       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1976,6 +2018,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_run_broadcast(NX_SNTP_CLIENT *client_ptr)
@@ -2077,7 +2121,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_process_broadcast                   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2119,6 +2163,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_sntp_client_process_broadcast(NX_SNTP_CLIENT *client_ptr)
@@ -2194,7 +2240,7 @@ ULONG sntp_events;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_send_unicast_request                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2235,6 +2281,8 @@ ULONG sntp_events;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_send_unicast_request(NX_SNTP_CLIENT *client_ptr)
@@ -2386,7 +2434,7 @@ NX_SNTP_TIME local_time;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_receive_time_update                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2430,6 +2478,10 @@ NX_SNTP_TIME local_time;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added support for disabling */
+/*                                            message check,              */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_receive_time_update(NX_SNTP_CLIENT *client_ptr, ULONG timeout)
@@ -2438,9 +2490,11 @@ UINT  _nx_sntp_client_receive_time_update(NX_SNTP_CLIENT *client_ptr, ULONG time
 UINT            status;
 UINT            length;
 NX_PACKET       *receive_packet;
+#ifndef NX_SNTP_CLIENT_MESSAGE_CHECK_DISABLE
 UINT            sender_port;
 NX_UDP_HEADER   *udp_header_ptr;
 NXD_ADDRESS     source_ip_address, destination_ip_address;
+#endif /* NX_SNTP_CLIENT_MESSAGE_CHECK_DISABLE */
 
     /* Loop to receive packets. */
     for(;;)
@@ -2462,6 +2516,8 @@ NXD_ADDRESS     source_ip_address, destination_ip_address;
             /* Return error status.  */
             return status;
         }
+
+#ifndef NX_SNTP_CLIENT_MESSAGE_CHECK_DISABLE
         /* Check the sender port in the UDP packet header.  */  
         udp_header_ptr = (NX_UDP_HEADER *)(receive_packet -> nx_packet_prepend_ptr - sizeof(NX_UDP_HEADER));
         sender_port = (UINT)udp_header_ptr -> nx_udp_header_word_0 >> NX_SHIFT_BY_16; 
@@ -2637,6 +2693,8 @@ NXD_ADDRESS     source_ip_address, destination_ip_address;
             continue;
         }
 
+#endif /* NX_SNTP_CLIENT_MESSAGE_CHECK_DISABLE */
+
         /* Check that the packet has the proper length for an NTP message.  */
         length = receive_packet -> nx_packet_length;
 
@@ -2670,7 +2728,7 @@ NXD_ADDRESS     source_ip_address, destination_ip_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_extract_time_message_from_packet    PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2691,7 +2749,7 @@ NXD_ADDRESS     source_ip_address, destination_ip_address;
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
-/*    memcmp                              Copy data to area of memory     */ 
+/*    memcpy                              Copy data to area of memory     */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -2702,6 +2760,9 @@ NXD_ADDRESS     source_ip_address, destination_ip_address;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_extract_time_message_from_packet(NX_SNTP_CLIENT *client_ptr, NX_PACKET *packet_ptr) 
@@ -2745,7 +2806,7 @@ NX_SNTP_TIME_MESSAGE *time_message_ptr;
     /* Advance to the next 32 bit field and extract the reference clock ID field.  */
     ntp_word_0++;
     NX_CHANGE_ULONG_ENDIAN(*ntp_word_0);
-    memcpy(time_message_ptr -> reference_clock_id, ntp_word_0, 4);
+    memcpy(time_message_ptr -> reference_clock_id, ntp_word_0, 4); /* Use case of memcpy is verified. */
 
     /* Advance to the next field (64 bit field) and extract the reference time stamp field.  */
     ntp_word_0++;
@@ -2833,7 +2894,7 @@ NX_SNTP_TIME_MESSAGE *time_message_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_reset_current_time_message          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2855,6 +2916,7 @@ NX_SNTP_TIME_MESSAGE *time_message_ptr;
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
 /*    memset                              Clear specified area of memory  */ 
+/*    memcpy                              Copy data to area of memory     */
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -2865,6 +2927,9 @@ NX_SNTP_TIME_MESSAGE *time_message_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_reset_current_time_message(NX_SNTP_CLIENT *client_ptr)
@@ -2875,7 +2940,7 @@ UINT  _nx_sntp_client_reset_current_time_message(NX_SNTP_CLIENT *client_ptr)
     {
 
         /* Yes, copy to the previous time update.  */
-        memcpy(&client_ptr -> nx_sntp_previous_server_time_message, &client_ptr -> nx_sntp_current_server_time_message, sizeof(NX_SNTP_TIME_MESSAGE));
+        memcpy(&client_ptr -> nx_sntp_previous_server_time_message, &client_ptr -> nx_sntp_current_server_time_message, sizeof(NX_SNTP_TIME_MESSAGE)); /* Use case of memcpy is verified. */
 
         /* Clear the current time update data.  */
         memset(&(client_ptr -> nx_sntp_current_server_time_message), 0, sizeof(NX_SNTP_TIME_MESSAGE));
@@ -2894,7 +2959,7 @@ UINT  _nx_sntp_client_reset_current_time_message(NX_SNTP_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_process_update_packet               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2935,6 +3000,8 @@ UINT  _nx_sntp_client_reset_current_time_message(NX_SNTP_CLIENT *client_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_process_update_packet(NX_SNTP_CLIENT *client_ptr)
@@ -3005,7 +3072,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_duplicate_update_check              PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3039,6 +3106,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_duplicate_update_check(NX_SNTP_TIME_MESSAGE *timeA_msg_ptr, 
@@ -3075,7 +3144,7 @@ UINT  _nx_sntp_client_duplicate_update_check(NX_SNTP_TIME_MESSAGE *timeA_msg_ptr
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_apply_sanity_checks                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3117,6 +3186,8 @@ UINT  _nx_sntp_client_duplicate_update_check(NX_SNTP_TIME_MESSAGE *timeA_msg_ptr
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_apply_sanity_checks(NX_SNTP_CLIENT *client_ptr)
@@ -3339,7 +3410,7 @@ NX_SNTP_TIME_MESSAGE *server_time_msg_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_check_server_clock_dispersion       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3377,6 +3448,8 @@ NX_SNTP_TIME_MESSAGE *server_time_msg_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -3449,7 +3522,7 @@ ULONG   dispersion_usecs;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_thread_entry                        PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3486,6 +3559,8 @@ ULONG   dispersion_usecs;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_sntp_client_thread_entry(ULONG sntp_instance)
@@ -3543,7 +3618,7 @@ UINT    current_preemption;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_receive_notify                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3575,6 +3650,8 @@ UINT    current_preemption;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_sntp_client_receive_notify(NX_UDP_SOCKET *socket_ptr)
@@ -3595,7 +3672,7 @@ VOID  _nx_sntp_client_receive_notify(NX_UDP_SOCKET *socket_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_process                             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3628,6 +3705,8 @@ VOID  _nx_sntp_client_receive_notify(NX_UDP_SOCKET *socket_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_sntp_client_process(NX_SNTP_CLIENT *client_ptr)
@@ -3656,7 +3735,7 @@ VOID  _nx_sntp_client_process(NX_SNTP_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_process_time_data                   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3699,6 +3778,9 @@ VOID  _nx_sntp_client_process(NX_SNTP_CLIENT *client_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_process_time_data(NX_SNTP_CLIENT *client_ptr)
@@ -3712,7 +3794,7 @@ NX_SNTP_TIME    local_time;
 
 
     /* Copy the received time update to the update time just received from the server. */
-    memcpy(&client_ptr -> nx_sntp_server_update_time, &client_ptr -> nx_sntp_current_server_time_message.transmit_time, sizeof(NX_SNTP_TIME));
+    memcpy(&client_ptr -> nx_sntp_server_update_time, &client_ptr -> nx_sntp_current_server_time_message.transmit_time, sizeof(NX_SNTP_TIME)); /* Use case of memcpy is verified. */
 
     /* Check if the client is configured for round trip time calculation.  */
     if (NX_SNTP_CLIENT_RTT_REQUIRED == NX_TRUE)
@@ -3788,7 +3870,7 @@ NX_SNTP_TIME    local_time;
     }
 
     /* Ok to update client local time. */
-    memcpy(&client_ptr -> nx_sntp_client_local_ntp_time, &client_ptr -> nx_sntp_current_server_time_message.transmit_time, sizeof(NX_SNTP_TIME));
+    memcpy(&client_ptr -> nx_sntp_client_local_ntp_time, &client_ptr -> nx_sntp_current_server_time_message.transmit_time, sizeof(NX_SNTP_TIME)); /* Use case of memcpy is verified. */
     client_ptr -> nx_sntp_client_local_ntp_time_elapsed = 0;
 
      /* Apply a correction to server's time for internal SNTP Client delays e.g. periodic task intervals. */
@@ -3806,7 +3888,7 @@ NX_SNTP_TIME    local_time;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_calculate_roundtrip                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3838,6 +3920,8 @@ NX_SNTP_TIME    local_time;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_calculate_roundtrip(LONG *roundtrip_time)
@@ -3877,7 +3961,7 @@ ULONG x;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_get_local_time                      PORTABLE C     */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3910,6 +3994,8 @@ ULONG x;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_get_local_time(NX_SNTP_CLIENT *client_ptr, ULONG *seconds, ULONG *fraction, CHAR *buffer)
@@ -3942,7 +4028,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_get_local_time                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3979,6 +4065,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_get_local_time(NX_SNTP_CLIENT *client_ptr, ULONG *seconds, ULONG *fraction, CHAR *buffer) 
@@ -3996,7 +4084,7 @@ UINT  status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_get_local_time_extended             PORTABLE C     */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4032,6 +4120,8 @@ UINT  status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_get_local_time_extended(NX_SNTP_CLIENT *client_ptr, ULONG *seconds, ULONG *fraction, CHAR *buffer, UINT buffer_size)
@@ -4064,7 +4154,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_get_local_time_extended             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4102,6 +4192,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memmove use cases, */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_get_local_time_extended(NX_SNTP_CLIENT *client_ptr, ULONG *seconds, ULONG *fraction, CHAR *buffer, UINT buffer_size) 
@@ -4157,7 +4250,7 @@ UINT length = 0;
         {
 
             /* Append zeroes. */
-            memmove(&buffer[offset + (6 - length)], &buffer[offset], length);
+            memmove(&buffer[offset + (6 - length)], &buffer[offset], length); /* Use case of memmove is verified.  */
             memset(&buffer[offset], '0', (6 - length));
         }
         buffer[offset++] = ' ';
@@ -4179,7 +4272,7 @@ UINT length = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_convert_time_to_UCHAR       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4206,7 +4299,6 @@ UINT length = 0;
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
 /*    memset                         Clear specified area of memory       */ 
-/*    memcpy                         Copy data to specified area of memory*/ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -4218,6 +4310,8 @@ UINT length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_utility_convert_time_to_UCHAR(NX_SNTP_TIME *time_ptr, 
@@ -4271,7 +4365,7 @@ ULONG *buffer;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_convert_seconds_to_date     PORTABLE C      */ 
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4313,9 +4407,9 @@ ULONG *buffer;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed leap year calculation,*/
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_sntp_client_utility_convert_seconds_to_date(NX_SNTP_TIME *current_NTP_time_ptr, UINT current_year, 
@@ -4533,7 +4627,7 @@ UINT seconds_into_currenthour;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_utility_display_date_time          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4569,6 +4663,8 @@ UINT seconds_into_currenthour;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_sntp_client_utility_display_date_time(NX_SNTP_CLIENT *client_ptr, CHAR *buffer, UINT length)
@@ -4607,7 +4703,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_request_unicast_time               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4636,6 +4732,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_sntp_client_request_unicast_time(NX_SNTP_CLIENT *client_ptr, UINT wait_option)
@@ -4660,7 +4758,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_request_unicast_time                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4697,6 +4795,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_sntp_client_request_unicast_time(NX_SNTP_CLIENT *client_ptr, UINT wait_option)
@@ -4740,7 +4840,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_display_date_time           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4781,6 +4881,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_sntp_client_utility_display_date_time(NX_SNTP_CLIENT *client_ptr, CHAR *buffer, UINT length)
@@ -4893,7 +4995,7 @@ const CHAR         *months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_add_msecs_to_ntp_time       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4933,6 +5035,8 @@ const CHAR         *months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -5021,7 +5125,7 @@ LONG  usecs;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_receiving_updates                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5055,6 +5159,8 @@ LONG  usecs;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_sntp_client_receiving_updates(NX_SNTP_CLIENT *client_ptr, UINT *receive_status)
@@ -5080,7 +5186,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_receiving_updates                   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5121,6 +5227,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_sntp_client_receiving_updates(NX_SNTP_CLIENT *client_ptr, UINT *receive_status)
@@ -5147,7 +5255,7 @@ UINT _nx_sntp_client_receiving_updates(NX_SNTP_CLIENT *client_ptr, UINT *receive
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_set_local_time                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5181,6 +5289,8 @@ UINT _nx_sntp_client_receiving_updates(NX_SNTP_CLIENT *client_ptr, UINT *receive
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_set_local_time(NX_SNTP_CLIENT *client_ptr, ULONG seconds, ULONG fraction) 
@@ -5208,7 +5318,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_set_local_time                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5257,6 +5367,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_set_local_time(NX_SNTP_CLIENT *client_ptr, ULONG seconds, ULONG fraction) 
@@ -5277,7 +5389,7 @@ UINT  _nx_sntp_client_set_local_time(NX_SNTP_CLIENT *client_ptr, ULONG seconds, 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_set_time_update_notify             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5311,6 +5423,8 @@ UINT  _nx_sntp_client_set_local_time(NX_SNTP_CLIENT *client_ptr, ULONG seconds, 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT    _nxe_sntp_client_set_time_update_notify(NX_SNTP_CLIENT *client_ptr, 
@@ -5336,7 +5450,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_set_time_update_notify              PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5368,6 +5482,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT    _nx_sntp_client_set_time_update_notify(NX_SNTP_CLIENT *client_ptr, 
@@ -5388,7 +5504,7 @@ UINT    _nx_sntp_client_set_time_update_notify(NX_SNTP_CLIENT *client_ptr,
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_get_msec_diff               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5442,6 +5558,8 @@ UINT    _nx_sntp_client_set_time_update_notify(NX_SNTP_CLIENT *client_ptr,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_utility_get_msec_diff(NX_SNTP_TIME *timeReceived_ptr, NX_SNTP_TIME *timeTransmit_ptr, ULONG *total_difference_msecs, UINT *pos_diff)
@@ -5565,7 +5683,7 @@ ULONG    temp;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_is_zero_data                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5598,6 +5716,8 @@ ULONG    temp;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_sntp_client_utility_is_zero_data(UCHAR *data, UINT size)
@@ -5634,7 +5754,7 @@ UINT is_zero;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_convert_fraction_to_msecs   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5667,6 +5787,8 @@ UINT is_zero;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_utility_convert_fraction_to_msecs(ULONG *milliseconds, NX_SNTP_TIME *time_ptr)
@@ -5698,7 +5820,7 @@ ULONG usecs;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_utility_usecs_to_fraction          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5732,6 +5854,8 @@ ULONG usecs;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT    _nxe_sntp_client_utility_usecs_to_fraction(ULONG usecs, ULONG *fraction)
@@ -5757,7 +5881,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_usecs_to_fraction           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5794,6 +5918,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_utility_usecs_to_fraction(ULONG usecs, ULONG *fraction)
@@ -5817,7 +5943,7 @@ ULONG _frac = usecs * 3962;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_utility_msecs_to_fraction          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5851,6 +5977,8 @@ ULONG _frac = usecs * 3962;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT    _nxe_sntp_client_utility_msecs_to_fraction(ULONG msecs, ULONG *fraction)
@@ -5876,7 +6004,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_msecs_to_fraction           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5915,6 +6043,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_utility_msecs_to_fraction(ULONG msecs, ULONG *fraction)
@@ -5956,7 +6086,7 @@ ULONG   usecs;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_utility_fraction_to_usecs          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5989,6 +6119,8 @@ ULONG   usecs;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT    _nxe_sntp_client_utility_fraction_to_usecs(ULONG fraction, ULONG *usecs)
@@ -6013,7 +6145,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_fraction_to_usecs           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6049,6 +6181,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_utility_fraction_to_usecs(ULONG fraction, ULONG *usecs) 
@@ -6079,7 +6213,7 @@ int i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_convert_refID_KOD_code      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6114,6 +6248,8 @@ int i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_utility_convert_refID_KOD_code(UCHAR *reference_id, UINT *code_id)
@@ -6195,7 +6331,7 @@ UINT  _nx_sntp_client_utility_convert_refID_KOD_code(UCHAR *reference_id, UINT *
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_addition_overflow_check     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6231,6 +6367,8 @@ UINT  _nx_sntp_client_utility_convert_refID_KOD_code(UCHAR *reference_id, UINT *
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_utility_addition_overflow_check(ULONG temp1, ULONG temp2)
@@ -6274,7 +6412,7 @@ UINT  carry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_number_to_ascii                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6307,6 +6445,8 @@ UINT  carry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_sntp_client_number_to_ascii(CHAR *buffer_ptr, UINT buffer_size, UINT number)

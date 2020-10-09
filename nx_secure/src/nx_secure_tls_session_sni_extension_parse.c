@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_sni_extension_parse          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,6 +73,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_sni_extension_parse(NX_SECURE_TLS_SESSION *tls_session,
@@ -129,7 +132,7 @@ UINT         offset;
             }
 
             /* Name and lengths check out, save off the name data. */
-            NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, &data_ptr[offset], dns_name -> nx_secure_x509_dns_name_length); 
+            NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, &data_ptr[offset], dns_name -> nx_secure_x509_dns_name_length); /* Use case of memcpy is verified. */
 
             /* Success! */
             return(NX_SUCCESS);

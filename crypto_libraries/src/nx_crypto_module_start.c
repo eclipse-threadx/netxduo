@@ -99,7 +99,7 @@ static NX_CRYPTO_SHA256_HMAC nx_crypto_fips_hmac;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hardware_rand_initialize                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -138,6 +138,8 @@ static NX_CRYPTO_SHA256_HMAC nx_crypto_fips_hmac;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP void _nx_crypto_hardware_rand_initialize_stm32f4(void)
@@ -180,7 +182,7 @@ NX_CRYPTO_KEEP INT nx_crypto_hardware_rand(VOID)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    __aeabi_memcpy                                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -215,6 +217,8 @@ NX_CRYPTO_KEEP INT nx_crypto_hardware_rand(VOID)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP __nounwind __interwork __softfp __aapcs_core void __aeabi_memcpy (void *dest, const void *src, size_t size)
@@ -237,7 +241,7 @@ NX_CRYPTO_KEEP __nounwind __interwork __softfp __aapcs_core void __aeabi_memcpy 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    __aeabi_memcpy4                                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -272,6 +276,8 @@ NX_CRYPTO_KEEP __nounwind __interwork __softfp __aapcs_core void __aeabi_memcpy 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP __nounwind __interwork __softfp __aapcs_core void __aeabi_memcpy4 (void *dest, const void *src, size_t size)
@@ -294,7 +300,7 @@ NX_CRYPTO_KEEP __nounwind __interwork __softfp __aapcs_core void __aeabi_memcpy4
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    __aeabi_memcpy8                                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -329,6 +335,8 @@ NX_CRYPTO_KEEP __nounwind __interwork __softfp __aapcs_core void __aeabi_memcpy4
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP __nounwind __interwork __softfp __aapcs_core void __aeabi_memcpy8 (void *dest, const void *src, size_t size)

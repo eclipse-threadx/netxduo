@@ -28,7 +28,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_xor                                  PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -62,9 +62,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), disabled */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), disabled */
 /*                                            unaligned access by default,*/
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_xor(UCHAR *plaintext, UCHAR *key, UCHAR *ciphertext)
@@ -105,7 +105,7 @@ UINT *k = (UINT *)key;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_inc32                                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -136,6 +136,8 @@ UINT *k = (UINT *)key;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_inc32(UCHAR *counter_block)
@@ -160,7 +162,7 @@ USHORT result;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_multi                                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -192,6 +194,9 @@ USHORT result;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_multi(UCHAR *x, UCHAR *y, UCHAR *output)
@@ -203,7 +208,7 @@ UCHAR lsb;
 UCHAR mask;
 
     NX_CRYPTO_MEMSET(output, 0, NX_CRYPTO_GCM_BLOCK_SIZE);
-    NX_CRYPTO_MEMCPY(v, y, NX_CRYPTO_GCM_BLOCK_SIZE); 
+    NX_CRYPTO_MEMCPY(v, y, NX_CRYPTO_GCM_BLOCK_SIZE); /* Use case of memcpy is verified. */
 
     mask = 0x80;
     for (i = 0; i < NX_CRYPTO_GCM_BLOCK_SIZE_BITS; i++)
@@ -246,7 +251,7 @@ UCHAR mask;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_ghash_update                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -281,6 +286,9 @@ UCHAR mask;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_ghash_update(UCHAR *hkey, UCHAR *input, UINT input_length, UCHAR *output)
@@ -304,7 +312,7 @@ UINT i, n;
 
         /* Pad the block with zeros when the input length is not
             multiple of the block size. */
-        NX_CRYPTO_MEMCPY(tmp_block, input, input_length); 
+        NX_CRYPTO_MEMCPY(tmp_block, input, input_length); /* Use case of memcpy is verified. */
         NX_CRYPTO_MEMSET(&tmp_block[input_length], 0, sizeof(tmp_block) - input_length);
         _nx_crypto_gcm_xor(output, tmp_block, tmp_block);
         _nx_crypto_gcm_multi(tmp_block, hkey, output);
@@ -316,7 +324,7 @@ UINT i, n;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_gctr                                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -353,6 +361,9 @@ UINT i, n;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_gctr(VOID *crypto_metadata,
@@ -388,7 +399,7 @@ UINT i, n;
         /* Perform XOR operation on local buffer when
             remaining input length is smaller than block size. */
         _nx_crypto_gcm_xor(input, aes_output, aes_output);
-        NX_CRYPTO_MEMCPY(output, aes_output, length); 
+        NX_CRYPTO_MEMCPY(output, aes_output, length); /* Use case of memcpy is verified. */
     }
 
 }
@@ -398,7 +409,7 @@ UINT i, n;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_encrypt_init                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -439,6 +450,9 @@ UINT i, n;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_gcm_encrypt_init(VOID *crypto_metadata, NX_CRYPTO_GCM *gcm_metadata,
@@ -471,7 +485,7 @@ UCHAR iv_len;
 
         /* When the length of IV is 12 then 1 is appended to IV to form j0. */
         /* j0 in increased before GCTR. */
-        NX_CRYPTO_MEMCPY(j0, iv, iv_len); 
+        NX_CRYPTO_MEMCPY(j0, iv, iv_len); /* Use case of memcpy is verified. */
         j0[12] = 0;
         j0[13] = 0;
         j0[14] = 0;
@@ -496,7 +510,7 @@ UCHAR iv_len;
     _nx_crypto_gcm_ghash_update(hkey, additional_data, additional_len, s);
 
     /* Initial counter block for GCTR is j0 + 1. */
-    NX_CRYPTO_MEMCPY(counter, j0, NX_CRYPTO_GCM_BLOCK_SIZE); 
+    NX_CRYPTO_MEMCPY(counter, j0, NX_CRYPTO_GCM_BLOCK_SIZE); /* Use case of memcpy is verified. */
     _nx_crypto_gcm_inc32(counter);
 
     gcm_metadata -> nx_crypto_gcm_additional_data_len = additional_len;
@@ -514,7 +528,7 @@ UCHAR iv_len;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_encrypt_update                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -551,6 +565,8 @@ UCHAR iv_len;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_gcm_encrypt_update(VOID *crypto_metadata, NX_CRYPTO_GCM *gcm_metadata,
@@ -584,7 +600,7 @@ UCHAR *counter = gcm_metadata -> nx_crypto_gcm_counter;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_encrypt_calculate                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -620,6 +636,9 @@ UCHAR *counter = gcm_metadata -> nx_crypto_gcm_counter;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_gcm_encrypt_calculate(VOID *crypto_metadata, NX_CRYPTO_GCM *gcm_metadata,
@@ -664,7 +683,7 @@ UINT length;
     _nx_crypto_gcm_gctr(crypto_metadata, crypto_function, s, s, NX_CRYPTO_GCM_BLOCK_SIZE, j0);
 
     /* Append authentication tag to the end of the cipher text. */
-    NX_CRYPTO_MEMCPY(output, s, icv_len); 
+    NX_CRYPTO_MEMCPY(output, s, icv_len); /* Use case of memcpy is verified. */
 
 #ifdef NX_SECURE_KEY_CLEAR
     NX_CRYPTO_MEMSET(tmp_block, 0, sizeof(tmp_block));
@@ -678,7 +697,7 @@ UINT length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_decrypt_update                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -715,6 +734,8 @@ UINT length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_gcm_decrypt_update(VOID *crypto_metadata, NX_CRYPTO_GCM *gcm_metadata,
@@ -748,7 +769,7 @@ UCHAR *counter = gcm_metadata -> nx_crypto_gcm_counter;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_gcm_decrypt_calculate                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -784,6 +805,8 @@ UCHAR *counter = gcm_metadata -> nx_crypto_gcm_counter;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_gcm_decrypt_calculate(VOID *crypto_metadata, NX_CRYPTO_GCM *gcm_metadata,

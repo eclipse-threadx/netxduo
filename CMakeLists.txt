@@ -27,6 +27,14 @@ if(NXD_ENABLE_FILE_SERVERS)
     target_link_libraries(${PROJECT_NAME} PUBLIC "azrtos::filex")
 endif()
 
+if(NXD_ENABLE_AZURE_IOT)
+    message(STATUS "NXD_ENABLE_AZURE_IOT - defined")
+    target_link_libraries(${PROJECT_NAME} PUBLIC az_iot_hub az_iot_provisioning)
+    if(NOT ${NX_AZURE_DISABLE_IOT_SECURITY_MODULE})
+        target_link_libraries(${PROJECT_NAME} PUBLIC iot_security_module)
+    endif()
+endif()
+
 # A place for generated/copied include files (no need to change)
 set(CUSTOM_INC_DIR ${CMAKE_CURRENT_BINARY_DIR}/custom_inc)
 
@@ -48,7 +56,7 @@ if (NOT NX_USER_FILE)
     message(STATUS "Using default nx_user.h file")
     set(NX_USER_FILE ${CMAKE_CURRENT_LIST_DIR}/common/inc/nx_user_sample.h)
 else()
-    message(STATUS "Using custom nx_user.h file from ${UX_USER_FILE}")
+    message(STATUS "Using custom nx_user.h file from ${NX_USER_FILE}")
 endif()
 configure_file(${NX_USER_FILE} ${CUSTOM_INC_DIR}/nx_user.h COPYONLY)
 target_include_directories(${PROJECT_NAME} 

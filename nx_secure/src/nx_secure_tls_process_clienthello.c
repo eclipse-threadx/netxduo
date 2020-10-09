@@ -36,7 +36,7 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_clienthello                  PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -85,13 +85,12 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), added    */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), added    */
 /*                                            priority ciphersuite logic, */
-/*                                            resulting in version 6.0.1  */
-/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            improved negotiation logic, */
+/*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.0.2  */
+/*                                            improved negotiation logic, */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_clienthello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -230,7 +229,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
     tls_session -> nx_secure_tls_protocol_version = protocol_version;
 
     /* Save off the random value for key generation later. */
-    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, &packet_buffer[length], NX_SECURE_TLS_RANDOM_SIZE); 
+    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, &packet_buffer[length], NX_SECURE_TLS_RANDOM_SIZE); /* Use case of memcpy is verified. */
     length += NX_SECURE_TLS_RANDOM_SIZE;
 
     /* Extract the session ID if there is one. */
@@ -246,7 +245,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
     tls_session -> nx_secure_tls_session_id_length = session_id_length;
     if (session_id_length > 0)
     {
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_session_id, &packet_buffer[length], session_id_length); 
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_session_id, &packet_buffer[length], session_id_length); /* Use case of memcpy is verified. */
         length += session_id_length;
     }
 
@@ -516,7 +515,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_check_ciphersuite                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -551,6 +550,8 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE

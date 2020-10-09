@@ -24,7 +24,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_pop3_client.c                                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -41,6 +41,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -67,7 +69,7 @@
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pop3_client_create                             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -109,6 +111,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pop3_client_create(NX_POP3_CLIENT *client_ptr, UINT APOP_authentication, NX_IP *ip_ptr, 
@@ -164,7 +168,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_client_create                              PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -204,6 +208,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_pop3_client_create(NX_POP3_CLIENT *client_ptr, UINT APOP_authentication, NX_IP *ip_ptr, 
@@ -245,7 +251,7 @@ NXD_ADDRESS server_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_pop3_client_create                            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -287,6 +293,8 @@ NXD_ADDRESS server_address;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxde_pop3_client_create(NX_POP3_CLIENT *client_ptr, UINT APOP_authentication, NX_IP *ip_ptr, 
@@ -330,7 +338,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_pop3_client_create                             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -372,6 +380,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_pop3_client_create(NX_POP3_CLIENT *client_ptr, UINT APOP_authentication, NX_IP *ip_ptr, 
@@ -399,9 +410,9 @@ UINT client_password_length;
 
     /* Configure Client identification.  */
     memset(client_ptr -> nx_pop3_client_name, 0, NX_POP3_MAX_USERNAME);
-    memcpy(client_ptr -> nx_pop3_client_name, client_name, client_name_length);
+    memcpy(client_ptr -> nx_pop3_client_name, client_name, client_name_length); /* Use case of memcpy is verified. */
     memset(client_ptr -> nx_pop3_client_password, 0, NX_POP3_MAX_PASSWORD);
-    memcpy(client_ptr -> nx_pop3_client_password, client_password, client_password_length);
+    memcpy(client_ptr -> nx_pop3_client_password, client_password, client_password_length); /* Use case of memcpy is verified. */
 
    /* Configure Client POP3 authentication options.  */
     client_ptr -> nx_pop3_client_enable_APOP_authentication = APOP_authentication;
@@ -436,7 +447,7 @@ UINT client_password_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pop3_client_delete                             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -468,6 +479,8 @@ UINT client_password_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pop3_client_delete(NX_POP3_CLIENT *client_ptr)
@@ -497,7 +510,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_client_delete                              PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -530,6 +543,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_pop3_client_delete(NX_POP3_CLIENT *client_ptr)
@@ -562,7 +577,7 @@ UINT  _nx_pop3_client_delete(NX_POP3_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pop3_client_mail_items_get                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -596,6 +611,8 @@ UINT  _nx_pop3_client_delete(NX_POP3_CLIENT *client_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_mail_items_get(NX_POP3_CLIENT *client_ptr, UINT *number_mail_items, ULONG *maildrop_total_size)
@@ -622,7 +639,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_client_mail_items_get                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -662,6 +679,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_mail_items_get(NX_POP3_CLIENT *client_ptr, UINT *number_mail_items, ULONG *maildrop_total_size)
@@ -704,12 +724,12 @@ UINT         packet_type;
     /* Send the STAT command. */
     buffer = (CHAR *)(packet_ptr -> nx_packet_prepend_ptr);
 
-    memcpy(buffer, NX_POP3_COMMAND_STAT, (sizeof(NX_POP3_COMMAND_STAT) - 1));
+    memcpy(buffer, NX_POP3_COMMAND_STAT, (sizeof(NX_POP3_COMMAND_STAT) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length = (sizeof(NX_POP3_COMMAND_STAT) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_STAT) - 1);
     buffer += (sizeof(NX_POP3_COMMAND_STAT) - 1);
 
-    memcpy(buffer, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1));
+    memcpy(buffer, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     buffer += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
@@ -812,7 +832,7 @@ UINT         packet_type;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pop3_client_get_mail_item                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -847,6 +867,8 @@ UINT         packet_type;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_mail_item_size_get(NX_POP3_CLIENT *client_ptr, UINT mail_item, ULONG *size)
@@ -879,7 +901,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_client_mail_item_size_get                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -924,6 +946,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_mail_item_size_get(NX_POP3_CLIENT *client_ptr, UINT mail_item, ULONG *size)
@@ -980,22 +1005,22 @@ UINT      packet_type;
     buffer_ptr = (CHAR *)packet_ptr -> nx_packet_prepend_ptr;
 
     /* Send LIST mail_item query to server */
-    memcpy(buffer_ptr, NX_POP3_COMMAND_LIST, (sizeof(NX_POP3_COMMAND_LIST) - 1));
+    memcpy(buffer_ptr, NX_POP3_COMMAND_LIST, (sizeof(NX_POP3_COMMAND_LIST) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length = (sizeof(NX_POP3_COMMAND_LIST) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_LIST) - 1);
     buffer_ptr += (sizeof(NX_POP3_COMMAND_LIST) - 1);
 
-    memcpy(buffer_ptr, " ", 1);
+    memcpy(buffer_ptr, " ", 1); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length++;
     packet_ptr -> nx_packet_append_ptr++;
     buffer_ptr++;
 
-    memcpy(buffer_ptr,  &argument[0], num_size);
+    memcpy(buffer_ptr,  &argument[0], num_size); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += num_size;
     packet_ptr -> nx_packet_append_ptr += num_size;
     buffer_ptr += num_size;
 
-    memcpy(buffer_ptr, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1));
+    memcpy(buffer_ptr, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     buffer_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
@@ -1090,7 +1115,7 @@ UINT      packet_type;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pop3_client_mail_item_get                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1124,6 +1149,8 @@ UINT      packet_type;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_mail_item_get(NX_POP3_CLIENT *client_ptr, UINT mail_item, ULONG *item_size)
@@ -1154,7 +1181,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_client_mail_item_get                       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1197,6 +1224,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_mail_item_get(NX_POP3_CLIENT *client_ptr, UINT mail_item, ULONG *item_size)
@@ -1249,12 +1279,12 @@ UINT         packet_type;
     buffer = (CHAR *)(packet_ptr -> nx_packet_prepend_ptr);
 
     /* Send a RETR command to the server. */ 
-    memcpy(packet_ptr -> nx_packet_prepend_ptr, NX_POP3_COMMAND_RETR, (sizeof(NX_POP3_COMMAND_RETR) - 1));
+    memcpy(packet_ptr -> nx_packet_prepend_ptr, NX_POP3_COMMAND_RETR, (sizeof(NX_POP3_COMMAND_RETR) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_RETR) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_RETR) - 1);
     buffer += (sizeof(NX_POP3_COMMAND_RETR) - 1);
 
-    memcpy(buffer, " ", 1);
+    memcpy(buffer, " ", 1); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length++;
     packet_ptr -> nx_packet_append_ptr++;
     buffer++;
@@ -1270,12 +1300,12 @@ UINT         packet_type;
         return NX_POP3_INSUFFICIENT_PACKET_PAYLOAD;
     }
 
-    memcpy(buffer,  &argument[0], size);
+    memcpy(buffer,  &argument[0], size); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += size;
     packet_ptr -> nx_packet_append_ptr += size;
     buffer += size;
 
-    memcpy(buffer, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1));
+    memcpy(buffer, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     buffer += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
@@ -1380,7 +1410,7 @@ UINT         packet_type;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pop3_client_mail_item_message_get              PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1418,6 +1448,8 @@ UINT         packet_type;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_mail_item_message_get(NX_POP3_CLIENT *client_ptr, NX_PACKET **recv_packet_ptr, ULONG *bytes_retrieved, UINT *final_packet)
@@ -1443,7 +1475,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_client_mail_item_message_get               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1488,6 +1520,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_mail_item_message_get(NX_POP3_CLIENT *client_ptr, NX_PACKET **recv_packet_ptr, ULONG *bytes_retrieved, UINT *final_packet)
@@ -1574,7 +1608,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pop3_client_mail_item_delete                   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1608,6 +1642,8 @@ CHAR    *buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_mail_item_delete(NX_POP3_CLIENT *client_ptr, UINT mail_index)
@@ -1640,7 +1676,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_client_mail_item_delete                    PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1683,6 +1719,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_mail_item_delete(NX_POP3_CLIENT *client_ptr, UINT mail_index)
@@ -1731,23 +1770,23 @@ UINT         packet_type;
     }
 
     /* Send the DELE command. */
-    memcpy(buffer_ptr, NX_POP3_COMMAND_DELE, (sizeof(NX_POP3_COMMAND_DELE) - 1));
+    memcpy(buffer_ptr, NX_POP3_COMMAND_DELE, (sizeof(NX_POP3_COMMAND_DELE) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_DELE) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_DELE) - 1);
     buffer_ptr += (sizeof(NX_POP3_COMMAND_DELE) - 1);
 
 
-    memcpy(buffer_ptr, " ", 1);
+    memcpy(buffer_ptr, " ", 1); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length++;
     packet_ptr -> nx_packet_append_ptr++;  
     buffer_ptr++;
 
-    memcpy(buffer_ptr,  &argument[0], size);
+    memcpy(buffer_ptr,  &argument[0], size); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += size;
     packet_ptr -> nx_packet_append_ptr += size;
     buffer_ptr += size;
 
-    memcpy(buffer_ptr, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1));
+    memcpy(buffer_ptr, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1); 
     buffer_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
@@ -1814,7 +1853,7 @@ UINT         packet_type;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pop3_client_quit                               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1846,6 +1885,8 @@ UINT         packet_type;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_quit(NX_POP3_CLIENT *client_ptr)
@@ -1869,7 +1910,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_client_quit                                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1904,6 +1945,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_pop3_client_quit(NX_POP3_CLIENT *client_ptr)
@@ -1947,12 +1991,12 @@ UINT         packet_type;
         return NX_POP3_INSUFFICIENT_PACKET_PAYLOAD;
     }
 
-    memcpy(buffer_ptr, NX_POP3_COMMAND_QUIT, (sizeof(NX_POP3_COMMAND_QUIT) - 1));
+    memcpy(buffer_ptr, NX_POP3_COMMAND_QUIT, (sizeof(NX_POP3_COMMAND_QUIT) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_QUIT) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_QUIT) - 1);
     buffer_ptr += (sizeof(NX_POP3_COMMAND_QUIT) - 1);
 
-    memcpy(buffer_ptr, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1));
+    memcpy(buffer_ptr, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1); 
     buffer_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
@@ -2020,7 +2064,7 @@ UINT         packet_type;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_pop3_digest_authenticate                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2059,6 +2103,8 @@ UINT         packet_type;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_pop3_digest_authenticate(NX_POP3_CLIENT *client_ptr, CHAR *process_ID_ptr, UINT process_ID_length, CHAR *result)
@@ -2087,7 +2133,7 @@ CHAR    md5_binary[NX_POP3_MAX_BINARY_MD5];
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_parse_process_id                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2122,6 +2168,8 @@ CHAR    md5_binary[NX_POP3_MAX_BINARY_MD5];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_pop3_parse_process_id(NX_POP3_CLIENT *client_ptr, CHAR *buffer, UINT buffer_length)
@@ -2181,7 +2229,7 @@ UINT pid_index;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_pop3_parse_response                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2225,6 +2273,8 @@ UINT pid_index;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_pop3_parse_response(CHAR *buffer, UINT argument_index, UINT buffer_length, CHAR *argument, UINT argument_length, 
@@ -2376,7 +2426,7 @@ UINT argument_char_count;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_pop3_hex_ascii_convert                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2409,6 +2459,8 @@ UINT argument_char_count;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_pop3_hex_ascii_convert(CHAR *source, UINT source_length, CHAR *destination)
@@ -2456,7 +2508,7 @@ CHAR    digit;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_pop3_server_number_convert                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2489,6 +2541,8 @@ CHAR    digit;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_pop3_server_number_convert(UINT number, CHAR *string_to_convert)
@@ -2553,7 +2607,7 @@ UINT    size;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_pop3_client_connect                            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2599,6 +2653,8 @@ UINT    size;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_pop3_client_connect(NX_POP3_CLIENT *client_ptr, NXD_ADDRESS *server_ip_address, ULONG server_port)
@@ -2715,7 +2771,7 @@ CHAR      argument[10];
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_client_apop                                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2755,6 +2811,9 @@ CHAR      argument[10];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_apop(NX_POP3_CLIENT *client_ptr)
@@ -2807,9 +2866,9 @@ UINT         md5_digest_buffer_length;
         return(NX_POP3_INSUFFICIENT_PACKET_PAYLOAD);
     }
         
-    memcpy(&userid_buffer[0], &client_ptr -> nx_pop3_server_process_id[0], server_process_id_length);
+    memcpy(&userid_buffer[0], &client_ptr -> nx_pop3_server_process_id[0], server_process_id_length); /* Use case of memcpy is verified. */
     index = server_process_id_length;
-    memcpy(&userid_buffer[index], &client_ptr -> nx_pop3_client_password[0], client_password_length);
+    memcpy(&userid_buffer[index], &client_ptr -> nx_pop3_client_password[0], client_password_length); /* Use case of memcpy is verified. */
     status = _nx_pop3_digest_authenticate(client_ptr, &userid_buffer[0], (server_process_id_length + client_password_length), &md5_digest_buffer[0]);
 
     /* Check for error.  */
@@ -2848,32 +2907,32 @@ UINT         md5_digest_buffer_length;
     buffer = (CHAR *)packet_ptr -> nx_packet_prepend_ptr;
 
     /* Create the APOP command. */
-    memcpy(buffer, NX_POP3_COMMAND_APOP, (sizeof(NX_POP3_COMMAND_APOP) - 1));
+    memcpy(buffer, NX_POP3_COMMAND_APOP, (sizeof(NX_POP3_COMMAND_APOP) - 1)); /* Use case of memcpy is verified. */
     buffer += (sizeof(NX_POP3_COMMAND_APOP) - 1);
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_APOP) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_APOP) - 1);
 
-    memcpy(buffer, " ", 1);
+    memcpy(buffer, " ", 1); /* Use case of memcpy is verified. */
     buffer++;
     packet_ptr -> nx_packet_append_ptr++;
     packet_ptr -> nx_packet_length++;
 
-    memcpy(buffer,  client_ptr -> nx_pop3_client_name, client_name_length);
+    memcpy(buffer,  client_ptr -> nx_pop3_client_name, client_name_length); /* Use case of memcpy is verified. */
     buffer += client_name_length; 
     packet_ptr -> nx_packet_length += client_name_length; 
     packet_ptr -> nx_packet_append_ptr += client_name_length; 
 
-    memcpy(buffer, " ", 1);
+    memcpy(buffer, " ", 1); /* Use case of memcpy is verified. */
     buffer++;
     packet_ptr -> nx_packet_append_ptr++;
     packet_ptr -> nx_packet_length++;
 
-    memcpy(buffer,  &md5_digest_buffer[0], md5_digest_buffer_length);
+    memcpy(buffer,  &md5_digest_buffer[0], md5_digest_buffer_length); /* Use case of memcpy is verified. */
     buffer += md5_digest_buffer_length;
     packet_ptr -> nx_packet_length += md5_digest_buffer_length;
     packet_ptr -> nx_packet_append_ptr += md5_digest_buffer_length;
 
-    memcpy(buffer,  NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1));
+    memcpy(buffer,  NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
 
@@ -2940,7 +2999,7 @@ UINT         md5_digest_buffer_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pop3_client_user_pass                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2979,6 +3038,9 @@ UINT         md5_digest_buffer_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_user_pass(NX_POP3_CLIENT *client_ptr)
@@ -3034,22 +3096,22 @@ UINT         client_password_length;
     buffer = (CHAR *)(packet_ptr -> nx_packet_prepend_ptr);
 
 
-    memcpy(buffer, NX_POP3_COMMAND_USER, (sizeof(NX_POP3_COMMAND_USER) - 1));
+    memcpy(buffer, NX_POP3_COMMAND_USER, (sizeof(NX_POP3_COMMAND_USER) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length = (sizeof(NX_POP3_COMMAND_USER) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_USER) - 1);
     buffer += (sizeof(NX_POP3_COMMAND_USER) - 1);
 
-    memcpy(buffer, " ", 1);
+    memcpy(buffer, " ", 1); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length++;
     packet_ptr -> nx_packet_append_ptr++;
     buffer++;
 
-    memcpy(buffer, client_ptr -> nx_pop3_client_name, client_name_length);
+    memcpy(buffer, client_ptr -> nx_pop3_client_name, client_name_length); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += client_name_length; 
     packet_ptr -> nx_packet_append_ptr += client_name_length;
     buffer += client_name_length; 
 
-    memcpy(buffer, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1));
+    memcpy(buffer, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1)); /* Use case of memcpy is verified. */
     packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
     buffer += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
@@ -3144,22 +3206,22 @@ UINT         client_password_length;
         }
 
         buffer = (CHAR *)packet_ptr -> nx_packet_prepend_ptr;
-        memcpy(buffer, NX_POP3_COMMAND_PASS, (sizeof(NX_POP3_COMMAND_PASS) - 1));
+        memcpy(buffer, NX_POP3_COMMAND_PASS, (sizeof(NX_POP3_COMMAND_PASS) - 1)); /* Use case of memcpy is verified. */
         buffer += (sizeof(NX_POP3_COMMAND_PASS) - 1);
         packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_PASS) - 1);
         packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_PASS) - 1);
 
-        memcpy(buffer, " ", 1);
+        memcpy(buffer, " ", 1); /* Use case of memcpy is verified. */
         buffer++;
         packet_ptr -> nx_packet_length++;
         packet_ptr -> nx_packet_append_ptr++;
 
-        memcpy(buffer, client_ptr -> nx_pop3_client_password, client_password_length);
+        memcpy(buffer, client_ptr -> nx_pop3_client_password, client_password_length); /* Use case of memcpy is verified. */
         buffer += client_password_length;
         packet_ptr -> nx_packet_length += client_password_length;
         packet_ptr -> nx_packet_append_ptr += client_password_length;
 
-        memcpy(buffer, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1));
+        memcpy(buffer, NX_POP3_COMMAND_TERMINATION, (sizeof(NX_POP3_COMMAND_TERMINATION) - 1)); /* Use case of memcpy is verified. */
         buffer += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
         packet_ptr -> nx_packet_length += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);
         packet_ptr -> nx_packet_append_ptr += (sizeof(NX_POP3_COMMAND_TERMINATION) - 1);

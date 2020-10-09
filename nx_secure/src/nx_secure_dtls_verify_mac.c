@@ -32,7 +32,7 @@ static UCHAR _generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_verify_mac                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +70,9 @@ static UCHAR _generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_verify_mac(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *header_data,
@@ -123,7 +126,7 @@ NX_SECURE_TLS_SESSION                *tls_session;
     {
         return(NX_SECURE_TLS_HASH_MAC_VERIFY_FAILURE);
     }
-    NX_SECURE_MEMCPY(header, header_data, header_length); 
+    NX_SECURE_MEMCPY(header, header_data, header_length); /* Use case of memcpy is verified. */
 
     /* Adjust the length in the header to match data without hash. */
 

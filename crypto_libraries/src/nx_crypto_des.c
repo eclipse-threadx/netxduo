@@ -158,7 +158,7 @@ static const ULONG right_half_bit_swap[16] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_des_key_set                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -193,6 +193,8 @@ static const ULONG right_half_bit_swap[16] =
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_des_key_set(NX_CRYPTO_DES *context, UCHAR key[8])
@@ -314,7 +316,7 @@ UINT   round;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_des_encrypt                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -350,11 +352,14 @@ UINT   round;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            updated constants,          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_des_encrypt(NX_CRYPTO_DES *context, UCHAR source[8], UCHAR destination[8], UINT length)
 {
-    NX_PARAMETER_NOT_USED(length);
+    NX_CRYPTO_PARAMETER_NOT_USED(length);
 
     /* Encrypt the block by supplying the encryption key set.  */
     _nx_crypto_des_process_block(source, destination, context -> nx_des_encryption_keys);
@@ -369,7 +374,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_des_encrypt(NX_CRYPTO_DES *context, UCHAR source
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_des_decrypt                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -405,11 +410,14 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_des_encrypt(NX_CRYPTO_DES *context, UCHAR source
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            updated constants,          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_des_decrypt(NX_CRYPTO_DES *context, UCHAR source[8], UCHAR destination[8], UINT length)
 {
-    NX_PARAMETER_NOT_USED(length);
+    NX_CRYPTO_PARAMETER_NOT_USED(length);
 
     /* Decrypt the block by supplying the decryption key set.  */
     _nx_crypto_des_process_block(source, destination, context -> nx_des_decryption_keys);
@@ -424,7 +432,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_des_decrypt(NX_CRYPTO_DES *context, UCHAR source
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_des_process_block                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -460,6 +468,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_des_decrypt(NX_CRYPTO_DES *context, UCHAR source
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID  _nx_crypto_des_process_block(UCHAR source[8], UCHAR destination[8], ULONG keys[32])
@@ -556,7 +566,7 @@ UINT   round;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_des_init                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -592,6 +602,8 @@ UINT   round;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_des_init(struct NX_CRYPTO_METHOD_STRUCT *method,
@@ -635,7 +647,7 @@ NX_CRYPTO_DES *des_context_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_des_cleanup                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -665,6 +677,8 @@ NX_CRYPTO_DES *des_context_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_des_cleanup(VOID *crypto_metadata)
@@ -691,7 +705,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_des_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_des_operation                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -736,6 +750,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_des_cleanup(VOID *crypto_metadata)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_des_operation(UINT op,       /* Encrypt, Decrypt, Authenticate */

@@ -31,7 +31,7 @@ VOID _nx_secure_dtls_receive_callback(NX_UDP_SOCKET *socket_ptr);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_server_start                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -65,6 +65,8 @@ VOID _nx_secure_dtls_receive_callback(NX_UDP_SOCKET *socket_ptr);
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_server_start(NX_SECURE_DTLS_SERVER *server_ptr)

@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_crypto_const.h                                  PORTABLE C       */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -40,6 +40,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), added    */
+/*                                            new constants,              */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -307,6 +310,7 @@ typedef UINT NX_CRYPTO_KEY_SIZE;
 #define NX_CRYPTO_METADATA_UNALIGNED             0x2000D       /* Crypto metadata must be 4-byte aligned. */
 #define NX_CRYPTO_POINTER_ERROR                  0x2000E       /* An invalid (NULL?) pointer was passed into a crypto method. */
 #define NX_CRYTPO_MISSING_ECC_CURVE              0x2000F       /* ECC curve lookup failed to return a matching curve. */
+#define NX_CRYPTO_FORMAT_NOT_SUPPORTED           0x20010       /* Unsupported Format */
 
 #define NX_CRYPTO_NULL                           0
 #define NX_CRYPTO_FALSE                          0

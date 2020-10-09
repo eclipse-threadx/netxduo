@@ -36,7 +36,7 @@ static UINT _nx_secure_x509_crl_parse_entry(const UCHAR *buffer, ULONG length, U
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_crl_revocation_check                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -86,6 +86,8 @@ static UINT _nx_secure_x509_crl_parse_entry(const UCHAR *buffer, ULONG length, U
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_crl_revocation_check(const UCHAR *crl_data, UINT crl_length,
@@ -216,7 +218,7 @@ UINT                 serial_number_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_crl_parse_entry                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -254,6 +256,8 @@ UINT                 serial_number_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_parse_entry(const UCHAR *buffer, ULONG length, UINT *bytes_processed,

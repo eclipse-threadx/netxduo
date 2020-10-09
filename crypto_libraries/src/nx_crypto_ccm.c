@@ -27,7 +27,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ccm_xor                                  PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -60,9 +60,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), disabled */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), disabled */
 /*                                            unaligned access by default,*/
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_ccm_xor(UCHAR *plaintext, UCHAR *key, UCHAR *ciphertext)
@@ -101,7 +101,7 @@ UINT *k = (UINT *)key;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ccm_cbc_pad                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -139,6 +139,9 @@ UINT *k = (UINT *)key;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_ccm_cbc_pad(VOID *crypto_metadata,
@@ -148,7 +151,7 @@ NX_CRYPTO_KEEP static VOID _nx_crypto_ccm_cbc_pad(VOID *crypto_metadata,
 UINT  i = 0;
 UCHAR last_cipher[NX_CRYPTO_CCM_BLOCK_SIZE];
 
-    NX_CRYPTO_MEMCPY(last_cipher, iv, block_size); 
+    NX_CRYPTO_MEMCPY(last_cipher, iv, block_size); /* Use case of memcpy is verified. */
     for (i = 0; i < length; i += block_size)
     {
 
@@ -157,7 +160,7 @@ UCHAR last_cipher[NX_CRYPTO_CCM_BLOCK_SIZE];
         {
 
             /* If the length of this block is less than block size, pad it with zero.  */
-            NX_CRYPTO_MEMCPY(output, input + i, length - i); 
+            NX_CRYPTO_MEMCPY(output, input + i, length - i); /* Use case of memcpy is verified. */
             NX_CRYPTO_MEMSET(output + length - i, 0, block_size - (length - i));
             _nx_crypto_ccm_xor(output, last_cipher, output);
         }
@@ -171,7 +174,7 @@ UCHAR last_cipher[NX_CRYPTO_CCM_BLOCK_SIZE];
     }
 
     /* Return last block of the cipher.  */
-    NX_CRYPTO_MEMCPY(output, last_cipher, block_size); 
+    NX_CRYPTO_MEMCPY(output, last_cipher, block_size); /* Use case of memcpy is verified. */
 
 #ifdef NX_SECURE_KEY_CLEAR
     NX_CRYPTO_MEMSET(last_cipher, 0, sizeof(last_cipher));
@@ -213,7 +216,7 @@ UCHAR temp_len = 0;
 
     /* B(0) = Flags||Nonce||l(m)  */
     B[0] = Flags;
-    NX_CRYPTO_MEMCPY(B + 1, Nonce, (UINT)15 - L); 
+    NX_CRYPTO_MEMCPY(B + 1, Nonce, (UINT)15 - L); /* Use case of memcpy is verified. */
     B[14] = (UCHAR)(m_len >> 8);
     B[15] = (UCHAR)(m_len);
 
@@ -226,7 +229,7 @@ UCHAR temp_len = 0;
 
     /* If the length of string a is less than 14, pad B(1) with 0.  */
     temp_len = (UCHAR)((a_len > (block_size - 2)) ? (block_size - 2) : a_len);
-    NX_CRYPTO_MEMCPY(B + 2, a_data, (UINT)temp_len); 
+    NX_CRYPTO_MEMCPY(B + 2, a_data, (UINT)temp_len); /* Use case of memcpy is verified. */
 
     /* Get the CBC-MAC value X(2).  */
     _nx_crypto_ccm_cbc_pad(crypto_metadata, crypto_function, B, X, (UINT)(temp_len + 2), X, block_size);
@@ -247,7 +250,7 @@ UCHAR temp_len = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ccm_encrypt_init                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -289,6 +292,9 @@ UCHAR temp_len = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ccm_encrypt_init(VOID *crypto_metadata, NX_CRYPTO_CCM *ccm_metadata,
@@ -327,7 +333,7 @@ UCHAR *A = ccm_metadata -> nx_crypto_ccm_A;
     /* Create A(i) = Flags||Nonce||Counter i, for i = 0, 1, 2,....  */
     Flags = (UCHAR)(L - 1);
     A[0] = Flags;
-    NX_CRYPTO_MEMCPY(A + 1, Nonce, (UINT)(15 - L)); 
+    NX_CRYPTO_MEMCPY(A + 1, Nonce, (UINT)(15 - L)); /* Use case of memcpy is verified. */
 
     return(NX_CRYPTO_SUCCESS);
 }
@@ -337,7 +343,7 @@ UCHAR *A = ccm_metadata -> nx_crypto_ccm_A;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ccm_encrypt_update                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -373,6 +379,8 @@ UCHAR *A = ccm_metadata -> nx_crypto_ccm_A;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ccm_encrypt_update(UINT op, VOID *crypto_metadata, NX_CRYPTO_CCM *ccm_metadata,
@@ -447,7 +455,7 @@ UINT   i = 0, k = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ccm_encrypt_calculate                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -481,6 +489,9 @@ UINT   i = 0, k = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ccm_encrypt_calculate(VOID *crypto_metadata, NX_CRYPTO_CCM *ccm_metadata,
@@ -501,7 +512,7 @@ UINT i;
     {
 
         /* The authentication tag T is the leftmost M bytes of the CBC-MAC value X(t + 1).  */
-        NX_CRYPTO_MEMCPY(icv, ccm_metadata -> nx_crypto_ccm_X, ccm_metadata -> nx_crypto_ccm_icv_length); 
+        NX_CRYPTO_MEMCPY(icv, ccm_metadata -> nx_crypto_ccm_X, ccm_metadata -> nx_crypto_ccm_icv_length); /* Use case of memcpy is verified. */
 
         /* Get encryption block X.  */
         A[15] = 0;
@@ -526,7 +537,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ccm_decrypt_calculate                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -560,6 +571,9 @@ UINT i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ccm_decrypt_calculate(VOID *crypto_metadata, NX_CRYPTO_CCM *ccm_metadata,
@@ -579,7 +593,7 @@ UINT i;
     if (ccm_metadata -> nx_crypto_ccm_icv_length > 0)
     {
 
-        NX_CRYPTO_MEMCPY(temp, ccm_metadata -> nx_crypto_ccm_A, block_size); 
+        NX_CRYPTO_MEMCPY(temp, ccm_metadata -> nx_crypto_ccm_A, block_size); /* Use case of memcpy is verified. */
         temp[15] = 0;
         crypto_function(crypto_metadata, temp, temp, block_size);
 

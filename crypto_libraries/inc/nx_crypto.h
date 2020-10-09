@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_crypto.h                                         PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -40,9 +40,11 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s),disabled  */
-/*                                            unaligned access by default */
-/*                                            resulting in version 6.0.1  */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            disabled unaligned access   */
+/*                                            by default, and added       */
+/*                                            crypto standalone support,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -58,8 +60,25 @@ extern   "C" {
 
 #endif
 
+/* Default to disabling standalone use of nx_crypto. To use nx_crypto in 
+   standalone define NX_CRYPTO_STANDALONE_ENABLE*/
+/*
+#define NX_CRYPTO_STANDALONE_ENABLE
+*/
+
+#ifndef NX_CRYPTO_STANDALONE_ENABLE
 #include "nx_api.h"
+#else
+#include "nx_crypto_port.h"
+#endif
+
+#ifdef NX_LITTLE_ENDIAN
+#define NX_CRYPTO_LITTLE_ENDIAN           1
+#endif
+
 #include "nx_crypto_const.h"
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef NX_CRYPTO_FIPS
 
@@ -140,8 +159,22 @@ extern VOID *(*volatile _nx_crypto_memcpy_ptr)(void *dest, const void *src, size
 #define NX_CRYPTO_INTEGRITY_TEST
 #endif
 
+
 #ifndef NX_CRYPTO_RAND
-#define NX_CRYPTO_RAND      NX_RAND
+#ifndef NX_CRYPTO_STANDALONE_ENABLE
+#define NX_CRYPTO_RAND                            NX_RAND
+#else
+#define NX_CRYPTO_RAND                            rand
+#endif
+#endif
+
+
+#ifndef NX_CRYPTO_SRAND
+#ifndef NX_CRYPTO_STANDALONE_ENABLE
+#define NX_CRYPTO_SRAND                           NX_SRAND
+#else
+#define NX_CRYPTO_SRAND                           srand
+#endif
 #endif
 
 #ifdef NX_CRYPTO_FIPS

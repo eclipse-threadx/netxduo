@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_session_keys_set                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #define NX_SECURE_SOURCE_CODE
@@ -135,12 +138,12 @@ const NX_CRYPTO_METHOD                     *session_cipher_method = NX_NULL;
         if (is_client)
         {
             NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_write_key,
-                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_next_write_key, key_size); 
+                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_next_write_key, key_size); /* Use case of memcpy is verified. */
         }
         else
         {
             NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_write_key,
-                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_next_write_key, key_size); 
+                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_next_write_key, key_size); /* Use case of memcpy is verified. */
         }
     }
 
@@ -151,12 +154,12 @@ const NX_CRYPTO_METHOD                     *session_cipher_method = NX_NULL;
         if (is_client)
         {
             NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_iv,
-                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_next_iv, iv_size); 
+                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_next_iv, iv_size); /* Use case of memcpy is verified. */
         }
         else
         {
             NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_iv,
-                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_next_iv, iv_size); 
+                             tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_next_iv, iv_size); /* Use case of memcpy is verified. */
 
         }
     }

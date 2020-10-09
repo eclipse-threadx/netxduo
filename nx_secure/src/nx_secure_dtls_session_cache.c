@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_secure_dtls_session_cache_delete                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -64,6 +64,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID nx_secure_dtls_session_cache_delete(NX_SECURE_DTLS_SERVER *dtls_server, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port)
@@ -129,7 +131,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_secure_dtls_session_cache_get_new                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -165,6 +167,9 @@ UINT i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_secure_dtls_session_cache_get_new(NX_SECURE_DTLS_SERVER *dtls_server, NX_SECURE_DTLS_SESSION **dtls_session, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port)
@@ -187,7 +192,7 @@ UINT i;
         if (session_array[i].nx_secure_dtls_session_in_use == NX_FALSE)
         {
             /* Set the IP and port to the passed-in values. */
-            NX_SECURE_MEMCPY(&session_array[i].nx_secure_dtls_remote_ip_address, ip_address, sizeof(NXD_ADDRESS)); 
+            NX_SECURE_MEMCPY(&session_array[i].nx_secure_dtls_remote_ip_address, ip_address, sizeof(NXD_ADDRESS)); /* Use case of memcpy is verified. */
             session_array[i].nx_secure_dtls_local_port = local_port;
             session_array[i].nx_secure_dtls_remote_port = remote_port;
             session_array[i].nx_secure_dtls_session_in_use = NX_TRUE;
@@ -220,7 +225,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_secure_dtls_session_cache_find                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -256,6 +261,8 @@ UINT i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  nx_secure_dtls_session_cache_find(NX_SECURE_DTLS_SERVER *dtls_server, NX_SECURE_DTLS_SESSION **dtls_session, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port)

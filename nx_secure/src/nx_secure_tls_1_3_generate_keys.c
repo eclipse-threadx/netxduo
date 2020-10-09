@@ -58,7 +58,7 @@ static UINT _nx_secure_tls_hkdf_extract(NX_SECURE_TLS_SESSION *tls_session, UCHA
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_psk_secrets             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -91,6 +91,8 @@ static UINT _nx_secure_tls_hkdf_extract(NX_SECURE_TLS_SESSION *tls_session, UCHA
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -167,7 +169,7 @@ UINT is_resumption_psk = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_handshake_keys          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -196,6 +198,8 @@ UINT is_resumption_psk = NX_FALSE;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -406,7 +410,7 @@ UINT                                  hash_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_session_keys            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -435,6 +439,8 @@ UINT                                  hash_size;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -590,7 +596,7 @@ UINT                                  key_offset;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_generate_session_psk                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -623,6 +629,8 @@ UINT                                  key_offset;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -671,7 +679,7 @@ const NX_CRYPTO_METHOD *hash_method;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_handshake_secrets       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -699,6 +707,8 @@ const NX_CRYPTO_METHOD *hash_method;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -980,7 +990,7 @@ UINT is_resumption_psk = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_session_secrets         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1008,6 +1018,8 @@ UINT is_resumption_psk = NX_FALSE;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -1137,7 +1149,7 @@ UCHAR (*transcript_hashes)[NX_SECURE_TLS_MAX_HASH_SIZE] = tls_session->nx_secure
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_derive_secret                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1165,6 +1177,8 @@ UCHAR (*transcript_hashes)[NX_SECURE_TLS_MAX_HASH_SIZE] = tls_session->nx_secure
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -1304,7 +1318,7 @@ UINT hash_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_hkdf_expand_label                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1332,6 +1346,9 @@ UINT hash_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -1385,9 +1402,9 @@ const NX_CRYPTO_METHOD                     *session_hmac_method = NX_NULL;
     data_len = data_len + 1;
     
     /* Now copy in label with TLS 1.3 prefix. */
-    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], "tls13 ", 6); 
+    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], "tls13 ", 6); /* Use case of memcpy is verified. */
     data_len += 6;
-    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], label, label_len); 
+    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], label, label_len); /* Use case of memcpy is verified. */
     data_len += label_len;
 
     /* Add the length of the context (single octet). */
@@ -1395,7 +1412,7 @@ const NX_CRYPTO_METHOD                     *session_hmac_method = NX_NULL;
     data_len = data_len + 1;    
     
     /* Now copy in context. */
-    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], context, context_len); 
+    NX_CRYPTO_MEMCPY(&_nx_secure_tls_hkdf_temp_output[data_len], context, context_len); /* Use case of memcpy is verified. */
     data_len += context_len;
 
 
@@ -1478,7 +1495,7 @@ const NX_CRYPTO_METHOD                     *session_hmac_method = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_hkdf_extract                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1513,6 +1530,8 @@ const NX_CRYPTO_METHOD                     *session_hmac_method = NX_NULL;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)

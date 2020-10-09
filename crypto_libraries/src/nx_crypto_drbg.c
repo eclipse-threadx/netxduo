@@ -51,7 +51,7 @@ static UINT _nx_crypto_drbg_block_cipher_df(NX_CRYPTO_DRBG *drbg_ptr, UINT input
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_ctr_add_one                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -81,6 +81,8 @@ static UINT _nx_crypto_drbg_block_cipher_df(NX_CRYPTO_DRBG *drbg_ptr, UINT input
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_drbg_ctr_add_one(UCHAR *ctr)
@@ -105,7 +107,7 @@ INT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_update                              PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -134,9 +136,10 @@ INT i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), disabled */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), verified */
+/*                                            memcpy use cases, disabled  */
 /*                                            unaligned access by default,*/
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static UINT _nx_crypto_drbg_update(NX_CRYPTO_DRBG *drbg_ptr, UCHAR *provided_data)
@@ -219,8 +222,8 @@ VOID *handler = NX_CRYPTO_NULL;
 
     key_len = crypto_method -> nx_crypto_key_size_in_bits >> 3;
 
-    NX_CRYPTO_MEMCPY(drbg_ptr -> nx_crypto_drbg_key, temp, key_len); 
-    NX_CRYPTO_MEMCPY(drbg_ptr -> nx_crypto_drbg_v, &temp[key_len], NX_CRYPTO_DRBG_BLOCK_LENGTH_AES); 
+    NX_CRYPTO_MEMCPY(drbg_ptr -> nx_crypto_drbg_key, temp, key_len); /* Use case of memcpy is verified. */
+    NX_CRYPTO_MEMCPY(drbg_ptr -> nx_crypto_drbg_v, &temp[key_len], NX_CRYPTO_DRBG_BLOCK_LENGTH_AES); /* Use case of memcpy is verified. */
 
 #ifdef NX_SECURE_KEY_CLEAR
     NX_CRYPTO_MEMSET(temp, 0, sizeof(temp));
@@ -235,7 +238,7 @@ VOID *handler = NX_CRYPTO_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_instantiate                         PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -264,9 +267,10 @@ VOID *handler = NX_CRYPTO_NULL;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), disabled */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), verified */
+/*                                            memcpy use cases, disabled  */
 /*                                            unaligned access by default,*/
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_drbg_instantiate(NX_CRYPTO_DRBG *drbg_ptr,
@@ -307,9 +311,9 @@ UINT entropy_len;
         }
 
         df_input += entropy_len;
-        NX_CRYPTO_MEMCPY(df_input, nonce, nonce_len); 
+        NX_CRYPTO_MEMCPY(df_input, nonce, nonce_len); /* Use case of memcpy is verified. */
         df_input += nonce_len;
-        NX_CRYPTO_MEMCPY(df_input, personalization_string, personalization_string_len); 
+        NX_CRYPTO_MEMCPY(df_input, personalization_string, personalization_string_len); /* Use case of memcpy is verified. */
 
         /* seed_material = Block_Cipher_df (seed_material, seedlen). */
         _nx_crypto_drbg_block_cipher_df(drbg_ptr, entropy_len + nonce_len + personalization_string_len, seed_material, drbg_ptr -> nx_crypto_drbg_seedlen);
@@ -323,7 +327,7 @@ UINT entropy_len;
 
         if (personalization_string != NX_CRYPTO_NULL && personalization_string_len > 0)
         {
-            NX_CRYPTO_MEMCPY(seed_material, personalization_string, personalization_string_len); 
+            NX_CRYPTO_MEMCPY(seed_material, personalization_string, personalization_string_len); /* Use case of memcpy is verified. */
         }
 
         /* Ensure that the length of the personalization_string is exactly seedlen bits. */
@@ -375,7 +379,7 @@ UINT entropy_len;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_reseed                              PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -404,9 +408,10 @@ UINT entropy_len;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), disabled */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), verified */
+/*                                            memcpy use cases, disabled  */
 /*                                            unaligned access by default,*/
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_drbg_reseed(NX_CRYPTO_DRBG *drbg_ptr,
@@ -443,7 +448,7 @@ UINT status;
         }
 
         df_input += entropy_len;
-        NX_CRYPTO_MEMCPY(df_input, additional_input, additional_input_len); 
+        NX_CRYPTO_MEMCPY(df_input, additional_input, additional_input_len); /* Use case of memcpy is verified. */
 
         /* seed_material = Block_Cipher_df (seed_material, seedlen). */
         _nx_crypto_drbg_block_cipher_df(drbg_ptr, entropy_len + additional_input_len, seed_material, drbg_ptr -> nx_crypto_drbg_seedlen);
@@ -456,7 +461,7 @@ UINT status;
         }
 
         /* Ensure that the length of the additional_input is exactly seedlen bits. */
-        NX_CRYPTO_MEMCPY(seed_material, additional_input, additional_input_len); 
+        NX_CRYPTO_MEMCPY(seed_material, additional_input, additional_input_len); /* Use case of memcpy is verified. */
         if (additional_input_len < drbg_ptr -> nx_crypto_drbg_seedlen)
         {
             NX_CRYPTO_MEMSET(&seed_material[additional_input_len], 0,
@@ -501,7 +506,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_generate                            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -530,6 +535,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_drbg_generate(NX_CRYPTO_DRBG *drbg_ptr,
@@ -571,7 +579,7 @@ VOID *handler = NX_CRYPTO_NULL;
         if (additional_input_len > 0 && additional_input != NX_CRYPTO_NULL)
         {
             /* additional_input = Block_Cipher_df (additional_input, 256). */
-            NX_CRYPTO_MEMCPY(drbg_ptr -> nx_crypto_drbg_buffer + NX_CRYPTO_DRBG_DF_INPUT_OFFSET, additional_input, additional_input_len); 
+            NX_CRYPTO_MEMCPY(drbg_ptr -> nx_crypto_drbg_buffer + NX_CRYPTO_DRBG_DF_INPUT_OFFSET, additional_input, additional_input_len); /* Use case of memcpy is verified. */
 
             _nx_crypto_drbg_block_cipher_df(drbg_ptr, additional_input_len, addition, drbg_ptr -> nx_crypto_drbg_seedlen);
 
@@ -592,7 +600,7 @@ VOID *handler = NX_CRYPTO_NULL;
         else if (additional_input_len > 0 && additional_input != NX_CRYPTO_NULL)
         {
             /* Ensure that the length of the additional_input is exactly seedlen bits. */
-            NX_CRYPTO_MEMCPY(addition, additional_input, additional_input_len); 
+            NX_CRYPTO_MEMCPY(addition, additional_input, additional_input_len); /* Use case of memcpy is verified. */
             if (additional_input_len < drbg_ptr -> nx_crypto_drbg_seedlen)
             {
                 NX_CRYPTO_MEMSET(&addition[additional_input_len], 0,
@@ -659,7 +667,7 @@ VOID *handler = NX_CRYPTO_NULL;
 
         if (output_length_in_byte - temp_len < NX_CRYPTO_DRBG_BLOCK_LENGTH_AES)
         {
-            NX_CRYPTO_MEMCPY(&output[temp_len], temp, output_length_in_byte - temp_len); 
+            NX_CRYPTO_MEMCPY(&output[temp_len], temp, output_length_in_byte - temp_len); /* Use case of memcpy is verified. */
         }
 
         temp_len += NX_CRYPTO_DRBG_BLOCK_LENGTH_AES;
@@ -698,7 +706,7 @@ VOID *handler = NX_CRYPTO_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_block_cipher_df                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -727,6 +735,10 @@ VOID *handler = NX_CRYPTO_NULL;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            and updated constants,      */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static UINT _nx_crypto_drbg_block_cipher_df(NX_CRYPTO_DRBG *drbg_ptr, UINT input_len,
@@ -742,7 +754,7 @@ UCHAR bcc_chain[NX_CRYPTO_DRBG_BLOCK_LENGTH];
 UCHAR *iv;
 UCHAR *s;
 UCHAR *out_ptr;
-VOID *handler = NX_NULL;
+VOID *handler = NX_CRYPTO_NULL;
 
 
     crypto_method = drbg_ptr -> nx_crypto_drbg_crypto_method;
@@ -814,7 +826,7 @@ VOID *handler = NX_NULL;
 
         }
 
-        NX_CRYPTO_MEMCPY(&temp[temp_len], bcc_chain, NX_CRYPTO_DRBG_BLOCK_LENGTH); 
+        NX_CRYPTO_MEMCPY(&temp[temp_len], bcc_chain, NX_CRYPTO_DRBG_BLOCK_LENGTH); /* Use case of memcpy is verified. */
         temp_len += NX_CRYPTO_DRBG_BLOCK_LENGTH;
 
         iv[3]++;
@@ -880,7 +892,7 @@ VOID *handler = NX_NULL;
 
         if (output_len - temp_len < NX_CRYPTO_DRBG_BLOCK_LENGTH_AES)
         {
-            NX_CRYPTO_MEMCPY(&output[temp_len], bcc_chain, output_len - temp_len); 
+            NX_CRYPTO_MEMCPY(&output[temp_len], bcc_chain, output_len - temp_len); /* Use case of memcpy is verified. */
         }
 
         temp_len += NX_CRYPTO_DRBG_BLOCK_LENGTH;
@@ -909,7 +921,7 @@ VOID *handler = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_drbg_init                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -945,6 +957,8 @@ VOID *handler = NX_NULL;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -985,7 +999,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_drbg_cleanup                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1015,6 +1029,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_cleanup(VOID *crypto_metadata)
@@ -1041,7 +1057,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_drbg_operation                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1083,6 +1099,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_cleanup(VOID *crypto_metadata)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_drbg_operation(UINT op,

@@ -34,7 +34,7 @@ static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, US
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_expiration_check                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -68,6 +68,8 @@ static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, US
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_expiration_check(NX_SECURE_X509_CERT *certificate, ULONG current_time)
@@ -125,7 +127,7 @@ static const UINT days_before_month[12] = {0, 31, 59, 90, 120, 151, 181, 212, 24
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_asn1_time_to_unix_convert           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -159,6 +161,8 @@ static const UINT days_before_month[12] = {0, 31, 59, 90, 120, 151, 181, 212, 24
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, USHORT asn1_length,

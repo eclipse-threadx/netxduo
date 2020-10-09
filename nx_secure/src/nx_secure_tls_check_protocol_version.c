@@ -61,7 +61,7 @@ NX_SECURE_VERSIONS_LIST nx_secure_supported_versions_list[] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_check_protocol_version               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -102,6 +102,8 @@ NX_SECURE_VERSIONS_LIST nx_secure_supported_versions_list[] =
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_check_protocol_version(NX_SECURE_TLS_SESSION *tls_session,

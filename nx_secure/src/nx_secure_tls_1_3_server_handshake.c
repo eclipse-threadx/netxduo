@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_server_handshake                     PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -94,9 +94,11 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            released packet securely,   */
-/*                                            resulting in version 6.0.2  */
+/*                                            fixed certificate buffer    */
+/*                                            allocation,                 */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -227,7 +229,7 @@ NX_SECURE_TLS_SERVER_STATE            old_server_state;
 #ifdef NX_SECURE_ENABLE_CLIENT_CERTIFICATE_VERIFY
     case NX_SECURE_TLS_CERTIFICATE_MSG:
         /* Client sent certificate message (in response to a request from us. Process it now. */
-        status = _nx_secure_tls_process_remote_certificate(tls_session, packet_buffer, message_length);
+        status = _nx_secure_tls_process_remote_certificate(tls_session, packet_buffer, message_length, data_length);
 
         /* If client sends an empty Certificate message, server should abort the handshake with a "certificate_required" alert. */
         if (status == NX_SECURE_TLS_EMPTY_REMOTE_CERTIFICATE_RECEIVED)

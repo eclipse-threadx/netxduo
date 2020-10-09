@@ -35,7 +35,7 @@ static UCHAR decrypted_signature[512]; /* This needs to hold the entire decrypte
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_verify                  PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -75,9 +75,10 @@ static UCHAR decrypted_signature[512]; /* This needs to hold the entire decrypte
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), update   */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), update   */
 /*                                            ECC find curve method,      */
-/*                                            resulting in version 6.0.1  */
+/*                                            add KeyUsage check,         */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
@@ -99,12 +100,30 @@ const NX_CRYPTO_METHOD *hash_method;
 const NX_CRYPTO_METHOD *public_cipher_method;
 NX_SECURE_X509_CRYPTO  *crypto_methods;
 VOID                   *handler = NX_NULL;
+#ifndef NX_SECURE_X509_DISABLE_KEY_USAGE_CHECK
+USHORT                  key_usage_bitfield = 0;
+#endif
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
 NX_SECURE_EC_PUBLIC_KEY *ec_pubkey;
 const NX_CRYPTO_METHOD  *curve_method;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
     NX_PARAMETER_NOT_USED(store);
+
+#ifndef NX_SECURE_X509_DISABLE_KEY_USAGE_CHECK
+    /* Before we do any crypto verification, we need to check the KeyUsage extension. */
+    status = _nx_secure_x509_key_usage_extension_parse(issuer_certificate, &key_usage_bitfield);
+
+    /* If extension is not present, we don't need to verify per RFC 5280. */
+    if(NX_SUCCESS == status)
+    {
+        /* The issuer cert has a KeyUsage extension - check the KeyCertSign bit. */
+        if(!(key_usage_bitfield & NX_SECURE_X509_KEY_USAGE_KEY_CERT_SIGN))
+        {
+            return(NX_SECURE_X509_KEY_USAGE_ERROR);
+        }
+    }
+#endif
 
     /* Get working pointers to relevant data. */
     certificate_verify_data = certificate -> nx_secure_x509_certificate_data;

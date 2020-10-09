@@ -33,7 +33,7 @@ static VOID _nx_secure_asn1_parse_unsigned_integer(const UCHAR *data, ULONG leng
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_pkcs1_rsa_private_key_parse         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +70,8 @@ static VOID _nx_secure_asn1_parse_unsigned_integer(const UCHAR *data, ULONG leng
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_pkcs1_rsa_private_key_parse(const UCHAR *buffer, UINT length,
@@ -307,7 +309,7 @@ USHORT       version;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_asn1_parse_unsigned_integer              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -341,6 +343,8 @@ USHORT       version;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_secure_asn1_parse_unsigned_integer(const UCHAR *data, ULONG length,

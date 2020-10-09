@@ -40,7 +40,7 @@ static const ULONG _nx_ipv6_unspecified_address[4] = {0, 0, 0, 0};
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_send_ns                                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -85,6 +85,8 @@ static const ULONG _nx_ipv6_unspecified_address[4] = {0, 0, 0, 0};
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_icmpv6_send_ns(NX_IP                 *ip_ptr,

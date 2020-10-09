@@ -84,7 +84,7 @@ NX_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_content_get                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -120,6 +120,8 @@ NX_CALLER_CHECKING_EXTERNS
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_content_get(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, ULONG byte_offset, CHAR *destination_ptr, UINT destination_size, UINT *actual_size)
@@ -149,7 +151,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_content_get                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -190,6 +192,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_content_get(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, ULONG byte_offset, CHAR *destination_ptr, UINT destination_size, UINT *actual_size)
@@ -355,7 +359,7 @@ CHAR        *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_packet_content_find                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -392,6 +396,8 @@ CHAR        *buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_packet_content_find(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_ptr, ULONG *content_length)
@@ -413,7 +419,7 @@ UINT  _nxe_http_server_packet_content_find(NX_HTTP_SERVER *server_ptr, NX_PACKET
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_packet_content_find                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -454,6 +460,8 @@ UINT  _nxe_http_server_packet_content_find(NX_HTTP_SERVER *server_ptr, NX_PACKET
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_packet_content_find(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_ptr, ULONG *content_length)
@@ -500,7 +508,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_packet_get                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -533,6 +541,8 @@ UINT        status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_packet_get(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_ptr)
@@ -555,7 +565,7 @@ UINT  _nxe_http_server_packet_get(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_packet_get                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -589,6 +599,8 @@ UINT  _nxe_http_server_packet_get(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_http_server_packet_get(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_ptr)
@@ -618,7 +630,7 @@ UINT       status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_content_length_get                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -651,6 +663,8 @@ UINT       status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_content_length_get(NX_PACKET *packet_ptr)
@@ -675,7 +689,7 @@ UINT    length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_content_length_get                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -708,6 +722,8 @@ UINT    length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_content_length_get(NX_PACKET *packet_ptr)
@@ -783,7 +799,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_content_get_extended               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -821,6 +837,8 @@ CHAR    *buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_content_get_extended(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, ULONG byte_offset, 
@@ -851,7 +869,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_content_get_extended                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -902,6 +920,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_content_get_extended(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, ULONG byte_offset, 
@@ -1080,7 +1100,7 @@ CHAR        *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_content_length_get_extended        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1116,6 +1136,8 @@ CHAR        *buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -1141,7 +1163,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_content_length_get_extended         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1178,6 +1200,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_content_length_get_extended(NX_PACKET *packet_ptr, ULONG *length)
@@ -1254,7 +1278,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_create                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1296,6 +1320,8 @@ CHAR    *buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_create(NX_HTTP_SERVER *http_server_ptr, CHAR *http_server_name, NX_IP *ip_ptr, FX_MEDIA *media_ptr, VOID *stack_ptr, ULONG stack_size, NX_PACKET_POOL *pool_ptr,
@@ -1337,7 +1363,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_create                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1382,6 +1408,8 @@ UINT        status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_create(NX_HTTP_SERVER *http_server_ptr, CHAR *http_server_name, NX_IP *ip_ptr, FX_MEDIA *media_ptr, VOID *stack_ptr, ULONG stack_size, NX_PACKET_POOL *pool_ptr,
@@ -1457,7 +1485,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_delete                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1488,6 +1516,8 @@ UINT        status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_delete(NX_HTTP_SERVER *http_server_ptr)
@@ -1516,7 +1546,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_delete                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1555,6 +1585,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_delete(NX_HTTP_SERVER *http_server_ptr)
@@ -1595,7 +1627,7 @@ UINT  _nx_http_server_delete(NX_HTTP_SERVER *http_server_ptr)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_param_get                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1630,6 +1662,8 @@ UINT  _nx_http_server_delete(NX_HTTP_SERVER *http_server_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_param_get(NX_PACKET *packet_ptr, UINT param_number, CHAR *param_ptr, UINT max_param_size)
@@ -1658,7 +1692,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_param_get                           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1694,6 +1728,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_param_get(NX_PACKET *packet_ptr, UINT param_number, CHAR *param_ptr, UINT max_param_size)
@@ -1810,7 +1846,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_query_get                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1845,6 +1881,8 @@ CHAR    *buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_query_get(NX_PACKET *packet_ptr, UINT query_number, CHAR *query_ptr, UINT max_query_size)
@@ -1873,7 +1911,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_query_get                           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1909,6 +1947,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_query_get(NX_PACKET *packet_ptr, UINT query_number, CHAR *query_ptr, UINT max_query_size)
@@ -2025,7 +2065,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_start                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2056,6 +2096,8 @@ CHAR    *buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_start(NX_HTTP_SERVER *http_server_ptr)
@@ -2081,7 +2123,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_start                               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2114,6 +2156,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_start(NX_HTTP_SERVER *http_server_ptr)
@@ -2149,7 +2193,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_stop                               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2180,6 +2224,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_stop(NX_HTTP_SERVER *http_server_ptr)
@@ -2208,7 +2254,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_stop                                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2240,6 +2286,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_stop(NX_HTTP_SERVER *http_server_ptr)
@@ -2264,7 +2312,7 @@ UINT  _nx_http_server_stop(NX_HTTP_SERVER *http_server_ptr)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_callback_data_send                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2297,6 +2345,8 @@ UINT  _nx_http_server_stop(NX_HTTP_SERVER *http_server_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_callback_data_send(NX_HTTP_SERVER *server_ptr, VOID *data_ptr, ULONG data_length)
@@ -2324,7 +2374,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_callback_data_send                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2362,6 +2412,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_callback_data_send(NX_HTTP_SERVER *server_ptr, VOID *data_ptr, ULONG data_length)
@@ -2427,7 +2479,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_callback_response_send             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2463,6 +2515,8 @@ UINT        status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_callback_response_send(NX_HTTP_SERVER *server_ptr, CHAR *header, CHAR *information, CHAR *additional_info)
@@ -2490,7 +2544,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_callback_response_send              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2529,6 +2583,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_callback_response_send(NX_HTTP_SERVER *server_ptr, CHAR *header, CHAR *information, CHAR *additional_info)
@@ -2560,7 +2616,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_callback_response_send_extended    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2600,6 +2656,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_callback_response_send_extended(NX_HTTP_SERVER *server_ptr, CHAR *header, UINT header_length, CHAR *information,
@@ -2629,7 +2687,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_callback_response_send_extended     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2676,6 +2734,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_callback_response_send_extended(NX_HTTP_SERVER *server_ptr, CHAR *header, UINT header_length, CHAR *information, 
@@ -2715,7 +2775,7 @@ UINT temp_additional_info_length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_connection_present                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2749,6 +2809,8 @@ UINT temp_additional_info_length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_http_server_connection_present(NX_TCP_SOCKET *socket_ptr, UINT port)
@@ -2774,7 +2836,7 @@ NX_HTTP_SERVER *server_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_thread_entry                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2818,6 +2880,8 @@ NX_HTTP_SERVER *server_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_http_server_thread_entry(ULONG http_server)
@@ -3049,7 +3113,7 @@ UINT                    loop_endlessly = NX_TRUE;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_get_client_request                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3087,6 +3151,8 @@ UINT                    loop_endlessly = NX_TRUE;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_get_client_request(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_ptr)
@@ -3283,7 +3349,7 @@ NX_PACKET   *tmp_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_get_process                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3332,6 +3398,8 @@ NX_PACKET   *tmp_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_http_server_get_process(NX_HTTP_SERVER *server_ptr, UINT request_type, NX_PACKET *packet_ptr)
@@ -3736,7 +3804,7 @@ UINT        temp_realm_length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_put_process                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3784,6 +3852,8 @@ UINT        temp_realm_length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_http_server_put_process(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr)
@@ -4161,7 +4231,7 @@ UINT        temp_realm_length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_delete_process                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4201,6 +4271,8 @@ UINT        temp_realm_length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_http_server_delete_process(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr)
@@ -4387,7 +4459,7 @@ UINT        temp_realm_length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_invalid_userpassword_notify_set     PORTABLE C     */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4418,6 +4490,8 @@ UINT        temp_realm_length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_http_server_invalid_userpassword_notify_set(NX_HTTP_SERVER *http_server_ptr, 
@@ -4443,7 +4517,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_http_server_invalid_userpassword_notify_set      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4477,6 +4551,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_http_server_invalid_userpassword_notify_set(NX_HTTP_SERVER *http_server_ptr, 
@@ -4494,7 +4570,7 @@ UINT _nx_http_server_invalid_userpassword_notify_set(NX_HTTP_SERVER *http_server
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_response_send                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4543,6 +4619,8 @@ UINT _nx_http_server_invalid_userpassword_notify_set(NX_HTTP_SERVER *http_server
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_response_send(NX_HTTP_SERVER *server_ptr, CHAR *status_code, UINT status_code_length, CHAR *information, 
@@ -4630,7 +4708,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_basic_authenticate                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4677,6 +4755,8 @@ NX_PACKET   *packet_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_basic_authenticate(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *name_ptr, CHAR *password_ptr, CHAR *realm_ptr, UINT realm_length, UINT *auth_request_present)
@@ -4846,7 +4926,7 @@ UINT        length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_retrieve_basic_authorization        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4880,6 +4960,8 @@ UINT        length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_retrieve_basic_authorization(NX_PACKET *packet_ptr, CHAR *authorization_request_ptr)
@@ -5013,7 +5095,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_retrieve_resource                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5049,6 +5131,8 @@ CHAR    *buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_retrieve_resource(NX_PACKET *packet_ptr, CHAR *destination, UINT max_size)
@@ -5197,7 +5281,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_calculate_content_offset            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5232,6 +5316,8 @@ CHAR    *buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_calculate_content_offset(NX_PACKET *packet_ptr)
@@ -5281,7 +5367,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_number_convert                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5314,6 +5400,8 @@ CHAR    *buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_number_convert(UINT number, CHAR *string)
@@ -5378,7 +5466,7 @@ UINT    size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_type_get                           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5410,6 +5498,8 @@ UINT    size;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_type_get(NX_HTTP_SERVER *server_ptr, CHAR *name, CHAR *http_type_string)
@@ -5428,7 +5518,7 @@ UINT  _nxe_http_server_type_get(NX_HTTP_SERVER *server_ptr, CHAR *name, CHAR *ht
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_type_get                            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5462,6 +5552,8 @@ UINT  _nxe_http_server_type_get(NX_HTTP_SERVER *server_ptr, CHAR *name, CHAR *ht
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_type_get(NX_HTTP_SERVER *server_ptr, CHAR *name, CHAR *http_type_string)
@@ -5482,7 +5574,7 @@ UINT name_length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_type_get_extended                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5518,6 +5610,8 @@ UINT name_length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_type_get_extended(NX_HTTP_SERVER *server_ptr, CHAR *name, UINT name_length, CHAR *http_type_string, UINT http_type_string_max_size)
@@ -5539,7 +5633,7 @@ UINT  _nxe_http_server_type_get_extended(NX_HTTP_SERVER *server_ptr, CHAR *name,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_type_get_extended                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5582,6 +5676,9 @@ UINT  _nxe_http_server_type_get_extended(NX_HTTP_SERVER *server_ptr, CHAR *name,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_type_get_extended(NX_HTTP_SERVER *server_ptr, CHAR *name, UINT name_length, CHAR *http_type_string, UINT http_type_string_max_size)
@@ -5630,7 +5727,7 @@ UINT    temp_name_length;
         }
 
         /* return the default MIME type. */
-        memcpy(http_type_string, NX_HTTP_SERVER_DEFAULT_MIME, sizeof(NX_HTTP_SERVER_DEFAULT_MIME));
+        memcpy(http_type_string, NX_HTTP_SERVER_DEFAULT_MIME, sizeof(NX_HTTP_SERVER_DEFAULT_MIME)); /* Use case of memcpy is verified. */
         return(sizeof(NX_HTTP_SERVER_DEFAULT_MIME) - 1);
     }
 
@@ -5660,7 +5757,7 @@ UINT    temp_name_length;
             {
 
                 /* Find the extension. Return the mapped MIME type. */
-                memcpy(http_type_string, server_ptr -> nx_http_server_mime_maps_additional[i].nx_http_server_mime_map_type, map_type_length + 1);
+                memcpy(http_type_string, server_ptr -> nx_http_server_mime_maps_additional[i].nx_http_server_mime_map_type, map_type_length + 1); /* Use case of memcpy is verified. */
                 return(map_type_length);
             }
         }
@@ -5685,7 +5782,7 @@ UINT    temp_name_length;
         {
 
             /* Find the extension. Return the mapped MIME type. */
-            memcpy(http_type_string, _nx_http_server_mime_maps[i].nx_http_server_mime_map_type, map_type_length + 1);
+            memcpy(http_type_string, _nx_http_server_mime_maps[i].nx_http_server_mime_map_type, map_type_length + 1); /* Use case of memcpy is verified. */
             return(map_type_length);
         }
     }
@@ -5699,7 +5796,7 @@ UINT    temp_name_length;
     }
 
     /* return the default MIME type. */
-    memcpy(http_type_string, NX_HTTP_SERVER_DEFAULT_MIME, sizeof(NX_HTTP_SERVER_DEFAULT_MIME));
+    memcpy(http_type_string, NX_HTTP_SERVER_DEFAULT_MIME, sizeof(NX_HTTP_SERVER_DEFAULT_MIME)); /* Use case of memcpy is verified. */
     return(sizeof(NX_HTTP_SERVER_DEFAULT_MIME) - 1);
 }
 
@@ -5709,7 +5806,7 @@ UINT    temp_name_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_base64_encode                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5742,6 +5839,8 @@ UINT    temp_name_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_http_base64_encode(CHAR *name, UINT length, CHAR *base64name)
@@ -5838,7 +5937,7 @@ UINT    step;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_base64_decode                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5871,6 +5970,8 @@ UINT    step;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_http_base64_decode(CHAR *base64name, UINT length, CHAR *name)
@@ -5960,7 +6061,7 @@ UINT    step;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_digest_authenticate                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6009,6 +6110,8 @@ UINT    step;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_digest_authenticate(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *name_ptr, UINT name_length, CHAR *password_ptr, UINT password_length, CHAR *realm_ptr, UINT realm_length, UINT *auth_request_present)
@@ -6216,7 +6319,7 @@ CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_digest_response_calculate           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6260,6 +6363,8 @@ CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_http_server_digest_response_calculate(NX_HTTP_SERVER *server_ptr, CHAR *username, UINT username_length, CHAR *realm, UINT realm_length, CHAR *password, UINT password_length, CHAR *nonce, CHAR *method, CHAR *uri, CHAR *nc, CHAR *cnonce, CHAR *result)
@@ -6336,7 +6441,7 @@ UINT    cnonce_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_retrieve_digest_authorization       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6373,6 +6478,8 @@ UINT    cnonce_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_retrieve_digest_authorization(NX_PACKET *packet_ptr, CHAR *response, CHAR *uri, CHAR *nc, CHAR *cnonce)
@@ -6731,7 +6838,7 @@ CHAR    *saved_buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_hex_ascii_convert                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6763,6 +6870,8 @@ CHAR    *saved_buffer_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_http_server_hex_ascii_convert(CHAR *source, UINT source_length, CHAR *destination)
@@ -6809,7 +6918,7 @@ CHAR    digit;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_http_server_get_entity_header                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6842,6 +6951,8 @@ CHAR    digit;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_get_entity_header(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, UCHAR *entity_header_buffer, ULONG buffer_size)
@@ -6873,7 +6984,7 @@ UINT  _nxe_http_server_get_entity_header(NX_HTTP_SERVER *server_ptr, NX_PACKET *
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_get_entity_header                   PORTABLE C      */ 
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6912,9 +7023,9 @@ UINT  _nxe_http_server_get_entity_header(NX_HTTP_SERVER *server_ptr, NX_PACKET *
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed write underflow,      */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_get_entity_header(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, UCHAR *entity_header_buffer, ULONG buffer_size)
@@ -7214,7 +7325,7 @@ UINT                        index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_http_server_get_entity_content                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7247,6 +7358,8 @@ UINT                        index;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_get_entity_content(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, ULONG *available_offset, ULONG *available_length)
@@ -7279,7 +7392,7 @@ UINT  _nxe_http_server_get_entity_content(NX_HTTP_SERVER *server_ptr, NX_PACKET 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_get_entity_content                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7312,6 +7425,8 @@ UINT  _nxe_http_server_get_entity_content(NX_HTTP_SERVER *server_ptr, NX_PACKET 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_get_entity_content(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, ULONG *available_offset, ULONG *available_length)
@@ -7350,7 +7465,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_boundary_find                       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7385,6 +7500,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_boundary_find(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr)
@@ -7604,7 +7721,7 @@ UINT                        boundary_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_match_string                        PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7640,6 +7757,8 @@ UINT                        boundary_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_match_string(UCHAR *src_start, UCHAR *src_end, UCHAR *target, ULONG target_length, ULONG *match_count, UCHAR **match_end_ptr)
@@ -7731,7 +7850,7 @@ ULONG   remain_match;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_field_value_get                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7767,6 +7886,8 @@ ULONG   remain_match;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_field_value_get(NX_PACKET *packet_ptr, UCHAR *field_name, ULONG name_length, UCHAR *field_value, ULONG field_value_size)
@@ -7848,7 +7969,7 @@ UINT    index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_memicmp                             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7881,6 +8002,8 @@ UINT    index;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_memicmp(UCHAR *src, ULONG src_length, UCHAR *dest, ULONG dest_length)
@@ -7923,7 +8046,7 @@ UCHAR   ch;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_generate_response_header            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7975,6 +8098,8 @@ UCHAR   ch;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_generate_response_header(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, CHAR *status_code, 
@@ -8176,7 +8301,7 @@ CHAR        status_code_not_modified;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_http_server_callback_generate_response_header  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8211,6 +8336,8 @@ CHAR        status_code_not_modified;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_callback_generate_response_header(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, 
@@ -8236,7 +8363,7 @@ UINT  _nxe_http_server_callback_generate_response_header(NX_HTTP_SERVER *server_
 /*                                                                        */ 
 /*    _nxe_http_server_callback_generate_response_header_extended         */ 
 /*                                                        PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8276,6 +8403,8 @@ UINT  _nxe_http_server_callback_generate_response_header(NX_HTTP_SERVER *server_
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_callback_generate_response_header_extended(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, CHAR *status_code, 
@@ -8301,7 +8430,7 @@ UINT  _nxe_http_server_callback_generate_response_header_extended(NX_HTTP_SERVER
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_callback_generate_response_header   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8340,6 +8469,8 @@ UINT  _nxe_http_server_callback_generate_response_header_extended(NX_HTTP_SERVER
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_callback_generate_response_header(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, 
@@ -8370,7 +8501,7 @@ UINT additional_header_length = 0;
 /*                                                                        */ 
 /*    _nx_http_server_callback_generate_response_header_extended          */ 
 /*                                                        PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8416,6 +8547,8 @@ UINT additional_header_length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_callback_generate_response_header_extended(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, CHAR *status_code, 
@@ -8454,7 +8587,7 @@ UINT temp_add_header_length = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_http_server_callback_packet_send               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8485,6 +8618,8 @@ UINT temp_add_header_length = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_callback_packet_send(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr)
@@ -8503,7 +8638,7 @@ UINT  _nxe_http_server_callback_packet_send(NX_HTTP_SERVER *server_ptr, NX_PACKE
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_callback_packet_send                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8534,6 +8669,8 @@ UINT  _nxe_http_server_callback_packet_send(NX_HTTP_SERVER *server_ptr, NX_PACKE
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_callback_packet_send(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr)
@@ -8549,7 +8686,7 @@ UINT  _nx_http_server_callback_packet_send(NX_HTTP_SERVER *server_ptr, NX_PACKET
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_http_server_gmt_callback_set                   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8581,6 +8718,8 @@ UINT  _nx_http_server_callback_packet_send(NX_HTTP_SERVER *server_ptr, NX_PACKET
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_gmt_callback_set(NX_HTTP_SERVER *server_ptr, VOID (*gmt_get)(NX_HTTP_SERVER_DATE *))
@@ -8600,7 +8739,7 @@ UINT  _nxe_http_server_gmt_callback_set(NX_HTTP_SERVER *server_ptr, VOID (*gmt_g
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_gmt_callback_set                    PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8631,6 +8770,8 @@ UINT  _nxe_http_server_gmt_callback_set(NX_HTTP_SERVER *server_ptr, VOID (*gmt_g
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_gmt_callback_set(NX_HTTP_SERVER *server_ptr, VOID (*gmt_get)(NX_HTTP_SERVER_DATE *))
@@ -8656,7 +8797,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_http_server_cache_info_callback_set            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8688,6 +8829,8 @@ TX_INTERRUPT_SAVE_AREA
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_cache_info_callback_set(NX_HTTP_SERVER *server_ptr, UINT (*cache_info_get)(CHAR *, UINT *, NX_HTTP_SERVER_DATE *))
@@ -8707,7 +8850,7 @@ UINT  _nxe_http_server_cache_info_callback_set(NX_HTTP_SERVER *server_ptr, UINT 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_cache_info_callback_set             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8741,6 +8884,8 @@ UINT  _nxe_http_server_cache_info_callback_set(NX_HTTP_SERVER *server_ptr, UINT 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_cache_info_callback_set(NX_HTTP_SERVER *server_ptr, UINT (*cache_info_get)(CHAR *, UINT *, NX_HTTP_SERVER_DATE *))
@@ -8766,7 +8911,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_date_to_string                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8798,6 +8943,8 @@ TX_INTERRUPT_SAVE_AREA
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_date_to_string(NX_HTTP_SERVER_DATE *date, CHAR *string)
@@ -8856,7 +9003,7 @@ UINT index = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_date_convert                        PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8887,6 +9034,8 @@ UINT index = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_http_server_date_convert(UINT date, UINT count, CHAR *string)
@@ -8920,7 +9069,7 @@ UINT    digit;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_http_server_mime_maps_additional_set           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8952,6 +9101,8 @@ UINT    digit;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_mime_maps_additional_set(NX_HTTP_SERVER *server_ptr, NX_HTTP_SERVER_MIME_MAP *mime_maps, UINT mime_maps_num)
@@ -8971,7 +9122,7 @@ UINT  _nxe_http_server_mime_maps_additional_set(NX_HTTP_SERVER *server_ptr, NX_H
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_mime_maps_additional_set            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9002,6 +9153,8 @@ UINT  _nxe_http_server_mime_maps_additional_set(NX_HTTP_SERVER *server_ptr, NX_H
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_mime_maps_additional_set(NX_HTTP_SERVER *server_ptr, NX_HTTP_SERVER_MIME_MAP *mime_maps, UINT mime_maps_num)
@@ -9028,7 +9181,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_http_server_digest_authenticate_notify_set     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9062,6 +9215,8 @@ TX_INTERRUPT_SAVE_AREA
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_http_server_digest_authenticate_notify_set(NX_HTTP_SERVER *http_server_ptr,
@@ -9086,7 +9241,7 @@ UINT _nxe_http_server_digest_authenticate_notify_set(NX_HTTP_SERVER *http_server
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_digest_authenticate_notify_set      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9123,6 +9278,8 @@ UINT _nxe_http_server_digest_authenticate_notify_set(NX_HTTP_SERVER *http_server
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_http_server_digest_authenticate_notify_set(NX_HTTP_SERVER *http_server_ptr,
@@ -9150,7 +9307,7 @@ UINT _nx_http_server_digest_authenticate_notify_set(NX_HTTP_SERVER *http_server_
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_http_server_authentication_check_set           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9184,6 +9341,8 @@ UINT _nx_http_server_digest_authenticate_notify_set(NX_HTTP_SERVER *http_server_
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_http_server_authentication_check_set(NX_HTTP_SERVER *http_server_ptr,
@@ -9213,7 +9372,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_authentication_check_set            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9250,6 +9409,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_authentication_check_set(NX_HTTP_SERVER *http_server_ptr,

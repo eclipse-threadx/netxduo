@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_client_handshake                     PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -101,10 +101,12 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            released packet securely,   */
 /*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.0.2  */
+/*                                            fixed certificate buffer    */
+/*                                            allocation,                 */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_client_handshake(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -116,6 +118,7 @@ UINT            temp_status;
 USHORT          message_type = NX_SECURE_TLS_INVALID_MESSAGE;
 USHORT          header_bytes;
 UINT            message_length;
+UINT            packet_buffer_length = data_length;
 UCHAR          *packet_start;
 NX_PACKET      *send_packet = NX_NULL;
 NX_PACKET_POOL *packet_pool;
@@ -177,7 +180,7 @@ const NX_CRYPTO_METHOD
             break;
         case NX_SECURE_TLS_CERTIFICATE_MSG:
             /* Server has sent its certificate message. */
-            status = _nx_secure_tls_process_remote_certificate(tls_session, packet_buffer, message_length);
+            status = _nx_secure_tls_process_remote_certificate(tls_session, packet_buffer, message_length, packet_buffer_length);
             break;
         case NX_SECURE_TLS_SERVER_HELLO_DONE:
             /* Server has responded to our ClientHello. */

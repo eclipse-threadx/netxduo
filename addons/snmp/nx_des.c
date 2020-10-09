@@ -162,7 +162,7 @@ static ULONG right_half_bit_swap[16] =
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_des_key_set                                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -196,6 +196,8 @@ static ULONG right_half_bit_swap[16] =
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_des_key_set(NX_DES *context, UCHAR key[8])
@@ -311,7 +313,7 @@ UINT    round;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_des_encrypt                                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -345,6 +347,8 @@ UINT    round;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_des_encrypt(NX_DES *context, UCHAR source[8], UCHAR destination[8])
@@ -367,7 +371,7 @@ UINT  _nx_des_encrypt(NX_DES *context, UCHAR source[8], UCHAR destination[8])
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_des_decrypt                                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -401,6 +405,8 @@ UINT  _nx_des_encrypt(NX_DES *context, UCHAR source[8], UCHAR destination[8])
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_des_decrypt(NX_DES *context, UCHAR source[8], UCHAR destination[8])
@@ -423,7 +429,7 @@ UINT  _nx_des_decrypt(NX_DES *context, UCHAR source[8], UCHAR destination[8])
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_des_process_block                               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -458,6 +464,8 @@ UINT  _nx_des_decrypt(NX_DES *context, UCHAR source[8], UCHAR destination[8])
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_des_process_block(UCHAR source[8], UCHAR destination[8], ULONG keys[32])

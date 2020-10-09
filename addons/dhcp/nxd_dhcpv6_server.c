@@ -52,7 +52,7 @@ NX_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_server_create                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -92,6 +92,8 @@ NX_CALLER_CHECKING_EXTERNS
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_create(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_IP *ip_ptr, CHAR *name_ptr, 
@@ -131,7 +133,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_create                            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -184,6 +186,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_create(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_IP *ip_ptr, CHAR *name_ptr, 
@@ -362,7 +366,7 @@ NX_DHCPV6_CLIENT    *dhcpv6_client_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_server_option_request_handler_set       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -397,6 +401,8 @@ NX_DHCPV6_CLIENT    *dhcpv6_client_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_option_request_handler_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
@@ -426,7 +432,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_option_request_handler_set        PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -459,6 +465,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_option_request_handler_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
@@ -480,7 +488,7 @@ UINT  _nx_dhcpv6_server_option_request_handler_set(NX_DHCPV6_SERVER *dhcpv6_serv
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_add_client_record                       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -527,6 +535,8 @@ UINT  _nx_dhcpv6_server_option_request_handler_set(NX_DHCPV6_SERVER *dhcpv6_serv
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcpv6_add_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, ULONG message_xid, NXD_ADDRESS *client_address, UINT client_state, 
@@ -593,7 +603,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_add_client_record                        PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -646,6 +656,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_add_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, ULONG message_xid, NXD_ADDRESS *client_address, UINT client_state, 
@@ -714,7 +727,7 @@ NX_DHCPV6_CLIENT *dhcpv6_client_ptr;
     dhcpv6_client_ptr -> nx_dhcpv6_message_xid = message_xid;
     dhcpv6_client_ptr -> nx_dhcpv6_state = (UCHAR)client_state;
     dhcpv6_client_ptr -> nx_dhcpv6_IP_lease_time_accrued  = IP_lease_time_accrued;
-    memcpy(&(dhcpv6_client_ptr -> nx_dhcpv6_server_duid), &(dhcpv6_server_ptr -> nx_dhcpv6_server_duid), sizeof(NX_DHCPV6_SVR_DUID));
+    memcpy(&(dhcpv6_client_ptr -> nx_dhcpv6_server_duid), &(dhcpv6_server_ptr -> nx_dhcpv6_server_duid), sizeof(NX_DHCPV6_SVR_DUID)); /* Use case of memcpy is verified. */
 
     /*Fill in the Client DUID information. */
     dhcpv6_client_ptr -> nx_dhcpv6_client_duid.nx_op_code = NX_DHCPV6_OP_DUID_CLIENT;
@@ -732,7 +745,7 @@ NX_DHCPV6_CLIENT *dhcpv6_client_ptr;
         }
 
         dhcpv6_client_ptr -> nx_dhcpv6_client_duid.nx_duid_enterprise_number = duid_vendor_number;
-        memcpy(&(dhcpv6_client_ptr -> nx_dhcpv6_client_duid.nx_duid_private_identifier[0]), duid_vendor_private, duid_private_length);
+        memcpy(&(dhcpv6_client_ptr -> nx_dhcpv6_client_duid.nx_duid_private_identifier[0]), duid_vendor_private, duid_private_length); /* Use case of memcpy is verified. */
         dhcpv6_client_ptr -> nx_dhcpv6_client_duid.nx_option_length = (USHORT)(duid_private_length + 6);
     }
     else 
@@ -796,7 +809,7 @@ NX_DHCPV6_CLIENT *dhcpv6_client_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_retrieve_client_record                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -843,6 +856,8 @@ NX_DHCPV6_CLIENT *dhcpv6_client_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcpv6_retrieve_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, ULONG *message_xid, NXD_ADDRESS *client_address, UINT *client_state, 
@@ -882,7 +897,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_retrieve_client_record                   PORTABLE C      */ 
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -938,9 +953,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), corrected*/
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), corrected*/
 /*                                            the length of identifier,   */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_retrieve_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, ULONG *message_xid, NXD_ADDRESS *client_address, UINT *client_state, 
@@ -1034,8 +1049,8 @@ INT              length;
            return NX_DHCPV6_INVALID_DUID;
        }
 
-       /* NOTE: The size of duid vendor private must be equal to or greater than NX_DHCPV6_SERVER_DUID_VENDOR_ASSIGNED_LENGTH.  */
-       memcpy(duid_vendor_private, &(client_ptr -> nx_dhcpv6_client_duid.nx_duid_private_identifier[0]), (UINT)length);
+       /* NOTE: The duid_vendor_private buffer is provided by user, and the buffer size must be not less than NX_DHCPV6_SERVER_DUID_VENDOR_ASSIGNED_LENGTH.  */
+       memcpy(duid_vendor_private, &(client_ptr -> nx_dhcpv6_client_duid.nx_duid_private_identifier[0]), (UINT)length); /* Use case of memcpy is verified. The buffer is provided by user.  */
        *duid_private_length = (UINT)length;
     }
 
@@ -1048,7 +1063,7 @@ INT              length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_add_ip_address_lease                    PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1088,6 +1103,8 @@ INT              length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcpv6_add_ip_address_lease(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, NXD_ADDRESS *lease_IP_address, 
@@ -1131,7 +1148,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_add_ip_address_lease                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1168,7 +1185,7 @@ UINT status;
 /*                                         DHCPv6 network interface       */
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
-/*    memcpy                             Copy memory to specified area    */ 
+/*    None                                                                */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -1179,6 +1196,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_add_ip_address_lease(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, NXD_ADDRESS *lease_IP_address, 
@@ -1263,7 +1282,7 @@ UINT                    prefix_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_retrieve_ip_address_lease               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1306,6 +1325,8 @@ UINT                    prefix_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcpv6_retrieve_ip_address_lease(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, NXD_ADDRESS *lease_IP_address, 
@@ -1335,7 +1356,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_retrieve_ip_address_lease                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1367,7 +1388,7 @@ UINT status;
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
-/*    memcpy                             Copy memory to specified area    */ 
+/*    None                                                                */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -1378,6 +1399,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_retrieve_ip_address_lease(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, NXD_ADDRESS *lease_IP_address, 
@@ -1414,7 +1437,7 @@ NX_DHCPV6_ADDRESS_LEASE *lease_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_server_delete                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1449,6 +1472,8 @@ NX_DHCPV6_ADDRESS_LEASE *lease_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_delete(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
@@ -1477,7 +1502,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_client_delete                            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1514,6 +1539,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_delete(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
@@ -1554,7 +1581,7 @@ UINT  _nx_dhcpv6_server_delete(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_create_ip_address_range                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1588,6 +1615,8 @@ UINT  _nx_dhcpv6_server_delete(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_create_ip_address_range(NX_DHCPV6_SERVER *dhcpv6_server_ptr,  
@@ -1632,7 +1661,7 @@ UINT     status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_create_ip_address_range                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1672,6 +1701,8 @@ UINT     status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_create_ip_address_range(NX_DHCPV6_SERVER *dhcpv6_server_ptr,  
@@ -1765,7 +1796,7 @@ UINT                         ga_address_index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_reserve_ip_address_range                PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1800,6 +1831,8 @@ UINT                         ga_address_index;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_reserve_ip_address_range(NX_DHCPV6_SERVER *dhcpv6_server_ptr,  
@@ -1842,7 +1875,7 @@ UINT                        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_reserve_ip_address_range                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1883,6 +1916,8 @@ UINT                        status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_reserve_ip_address_range(NX_DHCPV6_SERVER *dhcpv6_server_ptr,  
@@ -1995,7 +2030,7 @@ UINT                         ga_address_index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_create_dns_address                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2027,6 +2062,8 @@ UINT                         ga_address_index;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_create_dns_address(NX_DHCPV6_SERVER *dhcpv6_server_ptr,  NXD_ADDRESS *dns_ipv6_address)
@@ -2060,7 +2097,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_create_dns_address                       PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2094,6 +2131,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_create_dns_address(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NXD_ADDRESS *dns_ipv6_address)
@@ -2131,7 +2170,7 @@ UINT                         ga_address_index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_set_server_duid                         PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2168,6 +2207,8 @@ UINT                         ga_address_index;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT    _nxe_dhcpv6_set_server_duid(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT duid_type, UINT hardware_type, 
@@ -2210,7 +2251,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_set_server_duid                          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2249,6 +2290,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT    _nx_dhcpv6_set_server_duid(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT duid_type, UINT hardware_type, 
@@ -2292,7 +2336,7 @@ NX_DHCPV6_SVR_DUID  *duid_ptr;
             return NX_DHCPV6_INVALID_VENDOR_DATA;
         }
 
-        memcpy(&duid_ptr -> nx_duid_private_identifier[0], NX_DHCPV6_SERVER_DUID_VENDOR_ASSIGNED_ID, sizeof(NX_DHCPV6_SERVER_DUID_VENDOR_ASSIGNED_ID));
+        memcpy(&duid_ptr -> nx_duid_private_identifier[0], NX_DHCPV6_SERVER_DUID_VENDOR_ASSIGNED_ID, sizeof(NX_DHCPV6_SERVER_DUID_VENDOR_ASSIGNED_ID)); /* Use case of memcpy is verified. */
     }
 
     /* Now set the server DUID length. This will depend on DUID type. */
@@ -2335,7 +2379,7 @@ NX_DHCPV6_SVR_DUID  *duid_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_prepare_iana_status                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2369,6 +2413,9 @@ NX_DHCPV6_SVR_DUID  *duid_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_status_ptr, UINT flag)
@@ -2403,7 +2450,7 @@ UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_stat
          case NX_DHCPV6_STATUS_SUCCESS:
 
              /* Copy the standard server reply to message buffer. */
-             memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_SUCCESS, sizeof(NX_DHCPV6_STATUS_MESSAGE_SUCCESS));
+             memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_SUCCESS, sizeof(NX_DHCPV6_STATUS_MESSAGE_SUCCESS)); /* Use case of memcpy is verified. */
 
              /* Update the option length. */
              dhcpv6_status_ptr -> nx_option_length = (USHORT)(dhcpv6_status_ptr -> nx_option_length + sizeof(NX_DHCPV6_STATUS_MESSAGE_SUCCESS));
@@ -2414,7 +2461,7 @@ UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_stat
          case NX_DHCPV6_STATUS_UNSPECIFIED:
 
              /* Copy the standard server reply to message buffer. */
-             memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_UNSPECIFIED, sizeof(NX_DHCPV6_STATUS_MESSAGE_UNSPECIFIED));
+             memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_UNSPECIFIED, sizeof(NX_DHCPV6_STATUS_MESSAGE_UNSPECIFIED)); /* Use case of memcpy is verified. */
 
              /* Update the option length. */
              dhcpv6_status_ptr -> nx_option_length = (USHORT)(dhcpv6_status_ptr -> nx_option_length + sizeof(NX_DHCPV6_STATUS_MESSAGE_UNSPECIFIED));
@@ -2425,7 +2472,7 @@ UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_stat
          case NX_DHCPV6_STATUS_NO_ADDRS_AVAILABLE:
 
              /* Copy the standard server reply to message buffer. */
-             memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_NO_ADDRS_AVAILABLE, sizeof(NX_DHCPV6_STATUS_MESSAGE_NO_ADDRS_AVAILABLE));
+             memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_NO_ADDRS_AVAILABLE, sizeof(NX_DHCPV6_STATUS_MESSAGE_NO_ADDRS_AVAILABLE)); /* Use case of memcpy is verified. */
 
              /* Update the option length. */
              dhcpv6_status_ptr -> nx_option_length = (USHORT)(dhcpv6_status_ptr -> nx_option_length + sizeof(NX_DHCPV6_STATUS_MESSAGE_NO_ADDRS_AVAILABLE));
@@ -2436,7 +2483,7 @@ UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_stat
          case NX_DHCPV6_STATUS_NO_BINDING:
              
              /* Copy the standard server reply to message buffer. */
-             memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_NO_BINDING, sizeof(NX_DHCPV6_STATUS_MESSAGE_NO_BINDING));
+             memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_NO_BINDING, sizeof(NX_DHCPV6_STATUS_MESSAGE_NO_BINDING)); /* Use case of memcpy is verified. */
 
              /* Update the option length. */
              dhcpv6_status_ptr -> nx_option_length = (USHORT)(dhcpv6_status_ptr -> nx_option_length + sizeof(NX_DHCPV6_STATUS_MESSAGE_NO_BINDING));
@@ -2447,7 +2494,7 @@ UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_stat
          case NX_DHCPV6_STATUS_NOT_ON_LINK:
              
              /* Copy the standard server reply to message buffer. */
-             memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_NOT_ON_LINK, sizeof(NX_DHCPV6_STATUS_MESSAGE_NOT_ON_LINK));
+             memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_NOT_ON_LINK, sizeof(NX_DHCPV6_STATUS_MESSAGE_NOT_ON_LINK)); /* Use case of memcpy is verified. */
 
              /* Update the option length. */
              dhcpv6_status_ptr -> nx_option_length = (USHORT)(dhcpv6_status_ptr -> nx_option_length + sizeof(NX_DHCPV6_STATUS_MESSAGE_NOT_ON_LINK));
@@ -2458,7 +2505,7 @@ UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_stat
          case NX_DHCPV6_STATUS_USE_MULTICAST:
              
                  /* Copy the standard server reply to message buffer. */
-                 memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_USE_MULTICAST, sizeof(NX_DHCPV6_STATUS_MESSAGE_USE_MULTICAST));
+                 memcpy(&dhcpv6_status_ptr -> nx_status_message[0], NX_DHCPV6_STATUS_MESSAGE_USE_MULTICAST, sizeof(NX_DHCPV6_STATUS_MESSAGE_USE_MULTICAST)); /* Use case of memcpy is verified. */
 
                  /* Update the option length. */
                  dhcpv6_status_ptr -> nx_option_length = (USHORT)(dhcpv6_status_ptr -> nx_option_length + sizeof(NX_DHCPV6_STATUS_MESSAGE_USE_MULTICAST));
@@ -2480,7 +2527,7 @@ UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_stat
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_add_preference                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2515,6 +2562,9 @@ UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_stat
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT    _nx_dhcpv6_add_preference(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr, UCHAR *buffer_ptr, UINT *index)
@@ -2549,7 +2599,7 @@ ULONG   message_word;
     NX_CHANGE_ULONG_ENDIAN(message_word);
 
     /* Copy first half of the DUID option to packet buffer. */
-    memcpy(buffer_ptr + *index, &message_word, sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &message_word, sizeof(ULONG)); /* Use case of memcpy is verified. */
 
     *index += (ULONG)sizeof(ULONG);
 
@@ -2567,7 +2617,7 @@ ULONG   message_word;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_add_option_requests                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2606,6 +2656,9 @@ ULONG   message_word;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_add_option_requests(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr, 
@@ -2659,7 +2712,7 @@ NX_DHCPV6_SERVER_OPTIONREQUEST *dhcpv6_option_ptr;
             NX_CHANGE_ULONG_ENDIAN(message_word);
 
             /* Copy the option request option header to the packet. */
-            memcpy(buffer_ptr + *index, &message_word, sizeof(ULONG));
+            memcpy(buffer_ptr + *index, &message_word, sizeof(ULONG)); /* Use case of memcpy is verified. */
             *index += (ULONG)sizeof(ULONG);
 
             dns_server_address = &dhcpv6_server_ptr -> nx_dhcpv6_dns_ip_address;
@@ -2670,7 +2723,7 @@ NX_DHCPV6_SERVER_OPTIONREQUEST *dhcpv6_option_ptr;
 
                 NX_CHANGE_ULONG_ENDIAN(message_word);
 
-                memcpy(buffer_ptr + *index, &message_word, sizeof(ULONG));
+                memcpy(buffer_ptr + *index, &message_word, sizeof(ULONG)); /* Use case of memcpy is verified. */
 
                 *index += (ULONG)sizeof(ULONG); 
             }
@@ -2738,7 +2791,7 @@ NX_DHCPV6_SERVER_OPTIONREQUEST *dhcpv6_option_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_server_interface_set                    PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2774,6 +2827,8 @@ NX_DHCPV6_SERVER_OPTIONREQUEST *dhcpv6_option_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcpv6_server_interface_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT iface_index, UINT ga_address_index)
@@ -2812,7 +2867,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_interface_set                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2847,6 +2902,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_server_interface_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT iface_index, UINT ga_address_index)
@@ -2863,7 +2920,7 @@ UINT _nx_dhcpv6_server_interface_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT i
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_lease_timeout_entry               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2894,6 +2951,8 @@ UINT _nx_dhcpv6_server_interface_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT i
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcpv6_server_lease_timeout_entry(ULONG dhcpv6_server_ptr_value)
@@ -2918,7 +2977,7 @@ NX_DHCPV6_SERVER *dhcpv6_server_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_server_resume                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2952,6 +3011,8 @@ NX_DHCPV6_SERVER *dhcpv6_server_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_resume(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
@@ -2980,7 +3041,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_resume                            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3015,6 +3076,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_resume(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
@@ -3076,7 +3139,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_session_timeout_entry             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3109,6 +3172,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcpv6_server_session_timeout_entry(ULONG dhcpv6_server_ptr_value)
@@ -3132,7 +3197,7 @@ NX_DHCPV6_SERVER *dhcpv6_server_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_server_start                            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3165,6 +3230,8 @@ NX_DHCPV6_SERVER *dhcpv6_server_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_start(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
@@ -3193,7 +3260,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_start                             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3233,6 +3300,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_start(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
@@ -3378,7 +3447,7 @@ UINT        if_index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_socket_receive_notify             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3410,6 +3479,8 @@ UINT        if_index;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcpv6_server_socket_receive_notify(NX_UDP_SOCKET *socket_ptr)
@@ -3433,7 +3504,7 @@ NX_DHCPV6_SERVER *dhcpv6_server_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcpv6_server_suspend                          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3465,6 +3536,8 @@ NX_DHCPV6_SERVER *dhcpv6_server_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_suspend(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
@@ -3493,7 +3566,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_suspend                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3528,6 +3601,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_suspend(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
@@ -3561,7 +3636,7 @@ UINT  _nx_dhcpv6_server_suspend(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_thread_entry                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3609,6 +3684,8 @@ UINT  _nx_dhcpv6_server_suspend(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcpv6_server_thread_entry(ULONG info)
@@ -3733,7 +3810,7 @@ NXD_ADDRESS             client_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_extract_packet_information        PORTABLE C      */ 
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3770,6 +3847,7 @@ NXD_ADDRESS             client_address;
 /*                                        Extract option header data      */
 /*    _nx_dhcpv6_process_duid             Extract DUID from Client message*/ 
 /*    _nx_dhcpv6_process_DNS_server       Extract DNS server from message */
+/*    memcpy                              Copies specified area of memory */
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -3780,9 +3858,10 @@ NXD_ADDRESS             client_address;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
-/*                                            resulting in version 6.0.1  */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_extract_packet_information(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT **dhcpv6_client_ptr, NX_PACKET *packet_ptr, 
@@ -3923,7 +4002,7 @@ UINT                matching;
                 }
 
                 /*  Copy to the temporary client record. */
-                memcpy(&temp_client_rec.nx_dhcpv6_client_duid, &client_duid, sizeof(NX_DHCPV6_SVR_DUID));
+                memcpy(&temp_client_rec.nx_dhcpv6_client_duid, &client_duid, sizeof(NX_DHCPV6_SVR_DUID)); /* Use case of memcpy is verified. */
 
                 /* Indicate the message contained the required Client DUID. */
                 client_duid_received = NX_TRUE;
@@ -3944,7 +4023,7 @@ UINT                matching;
                 }
 
                 /*  Copy to the temporary client record. */
-                memcpy(&temp_client_rec.nx_dhcpv6_server_duid, &server_duid, sizeof(NX_DHCPV6_SVR_DUID));
+                memcpy(&temp_client_rec.nx_dhcpv6_server_duid, &server_duid, sizeof(NX_DHCPV6_SVR_DUID)); /* Use case of memcpy is verified. */
 
                 /* Indicate the message contained the required Server DUID. */
                 server_duid_received = NX_TRUE;
@@ -4151,7 +4230,7 @@ UINT                matching;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_validate_client_message                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4186,6 +4265,8 @@ UINT                matching;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_validate_client_message(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr)
@@ -4556,7 +4637,7 @@ UINT                prefix_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_utility_get_block_option_length   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4598,6 +4679,8 @@ UINT                prefix_length;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_utility_get_block_option_length(UCHAR *buffer_ptr, ULONG *option, ULONG *length)
@@ -4635,7 +4718,7 @@ UINT  _nx_dhcpv6_server_utility_get_block_option_length(UCHAR *buffer_ptr, ULONG
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_utility_get_data                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4677,6 +4760,8 @@ UINT  _nx_dhcpv6_server_utility_get_block_option_length(UCHAR *buffer_ptr, ULONG
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_utility_get_data(UCHAR *buffer, UINT size, ULONG *value)
@@ -4709,7 +4794,7 @@ UINT  _nx_dhcpv6_server_utility_get_data(UCHAR *buffer, UINT size, ULONG *value)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_utility_time_randomize            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4741,6 +4826,8 @@ UINT  _nx_dhcpv6_server_utility_get_data(UCHAR *buffer, UINT size, ULONG *value)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 INT  _nx_dhcpv6_server_utility_time_randomize(void)
@@ -4768,7 +4855,7 @@ UINT sign;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_listen_for_messages                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4810,6 +4897,8 @@ UINT sign;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_listen_for_messages(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
@@ -5115,7 +5204,7 @@ ULONG                   bytes_copied = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_send_response_to_client                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5139,6 +5228,7 @@ ULONG                   bytes_copied = 0;
 /*    nx_packet_allocate                    Allocate a DHCPv6 packet      */ 
 /*    nx_packet_release                     Release DHCPv6 packet         */ 
 /*    nxd_udp_socket_send                   Send DHCPv6 packets           */ 
+/*    memcpy                                Copy specified area of memory */
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -5149,6 +5239,10 @@ ULONG                   bytes_copied = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_send_response_to_client(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr)
@@ -5170,6 +5264,13 @@ ULONG         message_word;
 
         /* Return status.  */
         return(status);
+    }
+
+    /* Verify packet payload. */
+    if ((packet_ptr -> nx_packet_data_end - packet_ptr -> nx_packet_prepend_ptr) < 4)
+    {
+        nx_packet_release(packet_ptr);
+        return(NX_DHCPV6_INSUFFICIENT_PACKET_PAYLOAD);
     }
 
     /* Indicate this is an IPv6 packet. */
@@ -5195,7 +5296,7 @@ ULONG         message_word;
     NX_CHANGE_ULONG_ENDIAN(message_word);
 
     /* Copy the message header to the packet buffer. */
-    memcpy(buffer, &message_word, sizeof(ULONG));
+    memcpy(buffer, &message_word, sizeof(ULONG)); /* Use case of memcpy is verified. */
 
     /* Update the buffer 'pointer'. */
     buffer_index = sizeof(ULONG);
@@ -5358,7 +5459,7 @@ ULONG         message_word;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpc6_server_assign_ip_address                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5399,6 +5500,8 @@ ULONG         message_word;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_assign_ip_address(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr,
@@ -5569,7 +5672,7 @@ UINT                            matching;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_find_client_record_by_chaddr               PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5609,6 +5712,8 @@ UINT                            matching;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_find_client_record_by_duid(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_SVR_DUID *duid_ptr, 
@@ -5707,7 +5812,7 @@ NX_DHCPV6_CLIENT    *client_record_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_find_ip_address                          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5742,6 +5847,8 @@ NX_DHCPV6_CLIENT    *client_record_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_find_ip_address(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr, 
@@ -5782,7 +5889,7 @@ NXD_ADDRESS server_table_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_clear_client_record                      PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5818,6 +5925,8 @@ NXD_ADDRESS server_table_address;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_clear_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr)
@@ -5893,7 +6002,7 @@ UINT   i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_update_client_record                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5917,6 +6026,7 @@ UINT   i;
 /*                                                                        */
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
+/*    memcpy                               Copy specified area of memory  */
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -5928,6 +6038,9 @@ UINT   i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, 
@@ -5942,12 +6055,12 @@ UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
     {
 
         /* Ok to copy the whole record over. */
-        memcpy(to_client_data_on_record_ptr, from_extracted_client_data_ptr, sizeof(NX_DHCPV6_CLIENT));
+        memcpy(to_client_data_on_record_ptr, from_extracted_client_data_ptr, sizeof(NX_DHCPV6_CLIENT)); /* Use case of memcpy is verified. */
 
         /* Update various fields now that the client is in a DHCPv6 session with the server. */
         to_client_data_on_record_ptr -> nx_dhcpv6_client_session_time = 1;
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_client_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_client_duid, sizeof(NX_DHCPV6_SVR_DUID));
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_server_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_server_duid, sizeof(NX_DHCPV6_SVR_DUID));
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_client_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_client_duid, sizeof(NX_DHCPV6_SVR_DUID)); /* Use case of memcpy is verified. */
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_server_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_server_duid, sizeof(NX_DHCPV6_SVR_DUID)); /* Use case of memcpy is verified. */
     }
     else if (from_extracted_client_data_ptr -> nx_dhcpv6_message_type == NX_DHCPV6_MESSAGE_TYPE_INFORM_REQUEST)
     {
@@ -5966,9 +6079,9 @@ UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
                           &to_client_data_on_record_ptr -> nx_dhcp_destination_ip_address.nxd_ip_address.v6[0]);
         to_client_data_on_record_ptr -> nx_dhcp_destination_ip_address.nxd_ip_version = NX_IP_VERSION_V6;
 
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_option_request, &from_extracted_client_data_ptr -> nx_dhcpv6_option_request, sizeof(NX_DHCPV6_SERVER_OPTIONREQUEST));
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_client_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_client_duid, sizeof(NX_DHCPV6_SVR_DUID));
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_server_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_server_duid, sizeof(NX_DHCPV6_SVR_DUID));
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_option_request, &from_extracted_client_data_ptr -> nx_dhcpv6_option_request, sizeof(NX_DHCPV6_SERVER_OPTIONREQUEST)); /* Use case of memcpy is verified. */
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_client_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_client_duid, sizeof(NX_DHCPV6_SVR_DUID)); /* Use case of memcpy is verified. */
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_server_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_server_duid, sizeof(NX_DHCPV6_SVR_DUID)); /* Use case of memcpy is verified. */
 
     }
     /* If this is not a solicit message, update the selected fields into the specified record. */
@@ -5990,11 +6103,11 @@ UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
         to_client_data_on_record_ptr -> nx_dhcpv6_message_type = from_extracted_client_data_ptr -> nx_dhcpv6_message_type;            
         to_client_data_on_record_ptr -> nx_dhcpv6_response_back_from_server = from_extracted_client_data_ptr -> nx_dhcpv6_response_back_from_server;        
      
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_client_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_client_duid, sizeof(NX_DHCPV6_SVR_DUID));
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_server_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_server_duid, sizeof(NX_DHCPV6_SVR_DUID));
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_elapsed_time, &from_extracted_client_data_ptr -> nx_dhcpv6_elapsed_time, sizeof(NX_DHCPV6_SERVER_ELAPSED_TIME));
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_iana, &from_extracted_client_data_ptr -> nx_dhcpv6_iana, sizeof(NX_DHCPV6_SERVER_IA_NA));
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_ia, &from_extracted_client_data_ptr -> nx_dhcpv6_ia, sizeof(NX_DHCPV6_SERVER_IA_ADDRESS));
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_client_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_client_duid, sizeof(NX_DHCPV6_SVR_DUID)); /* Use case of memcpy is verified. */
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_server_duid, &from_extracted_client_data_ptr -> nx_dhcpv6_server_duid, sizeof(NX_DHCPV6_SVR_DUID)); /* Use case of memcpy is verified. */
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_elapsed_time, &from_extracted_client_data_ptr -> nx_dhcpv6_elapsed_time, sizeof(NX_DHCPV6_SERVER_ELAPSED_TIME)); /* Use case of memcpy is verified. */
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_iana, &from_extracted_client_data_ptr -> nx_dhcpv6_iana, sizeof(NX_DHCPV6_SERVER_IA_NA)); /* Use case of memcpy is verified. */
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_ia, &from_extracted_client_data_ptr -> nx_dhcpv6_ia, sizeof(NX_DHCPV6_SERVER_IA_ADDRESS)); /* Use case of memcpy is verified. */
 
         /* Update the IANA status option code, length and status message. The DHCPv6 server 
             will figure out the actual lenght with the status message text added in later. */
@@ -6011,7 +6124,7 @@ UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
 
         to_client_data_on_record_ptr -> nx_dhcp_destination_ip_address.nxd_ip_version = NX_IP_VERSION_V6;
 
-        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_option_request, &from_extracted_client_data_ptr -> nx_dhcpv6_option_request, sizeof(NX_DHCPV6_SERVER_OPTIONREQUEST));
+        memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_option_request, &from_extracted_client_data_ptr -> nx_dhcpv6_option_request, sizeof(NX_DHCPV6_SERVER_OPTIONREQUEST)); /* Use case of memcpy is verified. */
 
         /* Update fields based on the state of the client. At this point the client is bound to a 
            valid IP address to the session is 'over'.  Set timeout fields to stop the session timer
@@ -6043,7 +6156,7 @@ UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_process_iana                      PORTABLE C      */ 
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6081,9 +6194,9 @@ UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_server_process_iana(NX_DHCPV6_CLIENT *dhcpv6_client_ptr, ULONG option_code, UINT option_length, UCHAR *option_data)
@@ -6217,7 +6330,7 @@ UINT  process_ia_option;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_option_request                   PORTABLE C      */ 
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6252,9 +6365,9 @@ UINT  process_ia_option;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_process_option_request(NX_DHCPV6_CLIENT *dhcpv6_client_ptr, ULONG option_code, UINT option_length, UCHAR *option_data)
@@ -6292,7 +6405,7 @@ UINT            index = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_elapsed_time                     PORTABLE C      */ 
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6327,9 +6440,9 @@ UINT            index = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_process_elapsed_time(NX_DHCPV6_CLIENT *dhcpv6_client_ptr, ULONG option_code, UINT option_length, UCHAR *option_data)
@@ -6361,7 +6474,7 @@ ULONG           data;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_process_ia                        PORTABLE C      */ 
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6387,7 +6500,8 @@ ULONG           data;
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */
-/*    memcpy                            Copies specified area of memory   */
+/*    _nx_dhcpv6_server_utility_get_data                                  */
+/*                                      Extract bytes from a DHCPv6 packet*/
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -6398,9 +6512,9 @@ ULONG           data;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_server_process_ia(NX_DHCPV6_CLIENT *dhcpv6_client_ptr, ULONG option_code, UINT option_length, UCHAR *option_data, UINT process_ia)
@@ -6473,7 +6587,7 @@ ULONG data;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_process_duid                             PORTABLE C      */ 
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6509,11 +6623,11 @@ ULONG data;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
 /*                                            corrected the logic of      */
 /*                                            processing DUID type,       */
-/*                                            resulting in version 6.0.1  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_process_duid(NX_DHCPV6_SVR_DUID *duid_ptr, ULONG option_code, UINT option_length, UCHAR *option_data)
@@ -6638,7 +6752,7 @@ UINT            index = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_check_duids_same                         PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6675,6 +6789,8 @@ UINT            index = 0;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_check_duids_same(NX_DHCPV6_SVR_DUID *dhcpv6_duid1_ptr, NX_DHCPV6_SVR_DUID *dhcpv6_duid2_ptr, UINT *matching)
@@ -6756,7 +6872,7 @@ UINT  _nx_dhcpv6_check_duids_same(NX_DHCPV6_SVR_DUID *dhcpv6_duid1_ptr, NX_DHCPV
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_add_duid                                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6794,6 +6910,9 @@ UINT  _nx_dhcpv6_check_duids_same(NX_DHCPV6_SVR_DUID *dhcpv6_duid1_ptr, NX_DHCPV
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_add_duid(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_SVR_DUID *dhcpv6_duid_ptr, UCHAR *buffer_ptr, UINT *index, UINT duid_type)
@@ -6827,7 +6946,7 @@ UINT  available_payload;
     NX_CHANGE_ULONG_ENDIAN(message_word);
 
     /* Copy first half of the DUID option to packet buffer. */
-    memcpy(buffer_ptr + *index, &message_word, sizeof(UINT));
+    memcpy(buffer_ptr + *index, &message_word, sizeof(UINT)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(UINT);
 
     memset(&message_word, 0, sizeof(ULONG));
@@ -6840,7 +6959,7 @@ UINT  available_payload;
     NX_CHANGE_ULONG_ENDIAN(message_word);
 
     /* Set up the DUID option. */
-    memcpy(buffer_ptr + *index, &message_word, sizeof(UINT));
+    memcpy(buffer_ptr + *index, &message_word, sizeof(UINT)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(UINT);
 
     /* Adjust for endianness. */
@@ -6852,15 +6971,15 @@ UINT  available_payload;
     if (dhcpv6_duid_ptr -> nx_duid_type == NX_DHCPV6_SERVER_DUID_TYPE_LINK_TIME)
     {
 
-        memcpy(buffer_ptr + *index, &(dhcpv6_duid_ptr -> nx_duid_time), sizeof(ULONG));
+        memcpy(buffer_ptr + *index, &(dhcpv6_duid_ptr -> nx_duid_time), sizeof(ULONG)); /* Use case of memcpy is verified. */
         *index += (ULONG)sizeof(ULONG);
     }
    
     /* Copy the rest of the DUID header. */
-    memcpy(buffer_ptr + *index, &(dhcpv6_duid_ptr -> nx_link_layer_address_msw), sizeof(USHORT));
+    memcpy(buffer_ptr + *index, &(dhcpv6_duid_ptr -> nx_link_layer_address_msw), sizeof(USHORT)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(USHORT);
 
-    memcpy(buffer_ptr + *index, &(dhcpv6_duid_ptr -> nx_link_layer_address_lsw), sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &(dhcpv6_duid_ptr -> nx_link_layer_address_lsw), sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
     /* Swap bytes back to original endianness. */
@@ -6877,7 +6996,7 @@ UINT  available_payload;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_add_iana                          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6915,6 +7034,9 @@ UINT  available_payload;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_server_add_iana(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr, UCHAR *buffer_ptr, UINT *index)
@@ -6978,7 +7100,7 @@ NX_DHCPV6_SERVER_IA_NA *iana_ptr;
     NX_CHANGE_ULONG_ENDIAN(message_word);
 
     /* Copy the word into the packet buffer going to the server. */
-    memcpy(buffer_ptr + *index, &message_word, sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &message_word, sizeof(ULONG)); /* Use case of memcpy is verified. */
 
     /* Update the buffer pointer. */
     *index += (ULONG)sizeof(ULONG);
@@ -6988,13 +7110,13 @@ NX_DHCPV6_SERVER_IA_NA *iana_ptr;
     NX_CHANGE_ULONG_ENDIAN(iana_ptr -> nx_T1);
     NX_CHANGE_ULONG_ENDIAN(iana_ptr -> nx_T2);
 
-    memcpy(buffer_ptr + *index, &(iana_ptr -> nx_IA_NA_id), sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &(iana_ptr -> nx_IA_NA_id), sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
-    memcpy(buffer_ptr + *index, &(iana_ptr -> nx_T1), sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &(iana_ptr -> nx_T1), sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
-    memcpy(buffer_ptr + *index, &(iana_ptr -> nx_T2), sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &(iana_ptr -> nx_T2), sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
     /* Swap bytes back. */
@@ -7109,7 +7231,7 @@ NX_DHCPV6_SERVER_IA_NA *iana_ptr;
     NX_CHANGE_ULONG_ENDIAN(message_word);
 
     /* Copy the updated word into the packet buffer at the saved location. */
-    memcpy(buffer_ptr + temp_index, &message_word, sizeof(ULONG));
+    memcpy(buffer_ptr + temp_index, &message_word, sizeof(ULONG)); /* Use case of memcpy is verified. */
 
     /* Erase the IANA status message. We will add another message on the next (if any) IANA option for the client. */
     status = _nx_dhcpv6_prepare_iana_status(&dhcpv6_client_ptr -> nx_dhcpv6_iana_status, NX_FALSE);
@@ -7123,7 +7245,7 @@ NX_DHCPV6_SERVER_IA_NA *iana_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_add_ia                                   PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7152,13 +7274,16 @@ NX_DHCPV6_SERVER_IA_NA *iana_ptr;
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_dhcpv6_server_add_iana         Adds the IANA to server response  */
+/*    _nx_dhcpv6_server_add_iana         Adds the IANA to server response */
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_add_ia(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_SERVER_IA_ADDRESS *dhcpv6_ia_ptr, UCHAR *buffer_ptr, UINT *index)
@@ -7193,7 +7318,7 @@ UINT    available_payload;
     NX_CHANGE_ULONG_ENDIAN(message_word);
 
     /* Copy option header into the packet and update the index into the buffer. */
-    memcpy(buffer_ptr + *index, &message_word, sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &message_word, sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
     /* Adjust for endianness. */
@@ -7205,23 +7330,23 @@ UINT    available_payload;
     NX_CHANGE_ULONG_ENDIAN(dhcpv6_ia_ptr -> nx_valid_lifetime);
 
     /* Copy the IPv6 address to the packet. */
-    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_global_address.nxd_ip_address.v6[0]), sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_global_address.nxd_ip_address.v6[0]), sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
-    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_global_address.nxd_ip_address.v6[1]), sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_global_address.nxd_ip_address.v6[1]), sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
-    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_global_address.nxd_ip_address.v6[2]), sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_global_address.nxd_ip_address.v6[2]), sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
-    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_global_address.nxd_ip_address.v6[3]), sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_global_address.nxd_ip_address.v6[3]), sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
     /* Copy the Client's preference for lifetimes to packet. */
-    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_preferred_lifetime), sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_preferred_lifetime), sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
-    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_valid_lifetime), sizeof(ULONG));
+    memcpy(buffer_ptr + *index, &(dhcpv6_ia_ptr -> nx_valid_lifetime), sizeof(ULONG)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(ULONG);
 
     /* Swap bytes back. */
@@ -7241,7 +7366,7 @@ UINT    available_payload;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_add_iana_status                          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7277,6 +7402,9 @@ UINT    available_payload;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_add_iana_status(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_SERVER_IANA_STATUS *iana_status_ptr, UCHAR *buffer_ptr, UINT *index)
@@ -7311,7 +7439,7 @@ UINT    message_length;
     NX_CHANGE_ULONG_ENDIAN(message_word);
 
     /* Copy the word to packet buffer. */
-    memcpy(buffer_ptr + *index, &message_word, sizeof(UINT));
+    memcpy(buffer_ptr + *index, &message_word, sizeof(UINT)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(UINT);
 
     memset(&message_word, 0, sizeof(ULONG));
@@ -7323,11 +7451,11 @@ UINT    message_length;
     NX_CHANGE_USHORT_ENDIAN(message_short);
 
     /* Set up the DUID option. */
-    memcpy(buffer_ptr + *index, &message_short, sizeof(USHORT));
+    memcpy(buffer_ptr + *index, &message_short, sizeof(USHORT)); /* Use case of memcpy is verified. */
     *index += (ULONG)sizeof(USHORT);
 
     message_length = iana_status_ptr -> nx_option_length - (ULONG)(sizeof(USHORT));
-    memcpy(buffer_ptr + *index, &iana_status_ptr -> nx_status_message[0], message_length);
+    memcpy(buffer_ptr + *index, &iana_status_ptr -> nx_status_message[0], message_length); /* Use case of memcpy is verified. */
 
     *index += message_length;
 

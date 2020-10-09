@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_dns_name_initialize                 PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -66,9 +66,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  06-30-2020     Timothy Stapko           Modified comment(s), improved */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), improved */
 /*                                            buffer length verification, */
-/*                                            resulting in version 6.0.1  */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_dns_name_initialize(NX_SECURE_X509_DNS_NAME *dns_name,
@@ -82,7 +83,7 @@ UINT _nx_secure_x509_dns_name_initialize(NX_SECURE_X509_DNS_NAME *dns_name,
     }
 
     /* Copy the name string into the entry structure. */
-    NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, name_string, length); 
+    NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, name_string, length); /* Use case of memcpy is verified. */
 
     dns_name -> nx_secure_x509_dns_name_length = length;
 

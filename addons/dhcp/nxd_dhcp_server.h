@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */  
 /*                                                                        */   
 /*    nxd_dhcp_server.h                                   PORTABLE C      */ 
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -43,10 +43,12 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  06-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            modified the type of        */
 /*                                            nx_dhcp_user_options,       */
-/*                                            resulting in version 6.0.1  */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -490,9 +492,8 @@ typedef struct NX_DHCP_INTERFACE_TABLE_STRUCT
 
 typedef struct NX_DHCP_SERVER_STRUCT 
 {
-    ULONG           nx_dhcp_id;                     /* DHCP thread ID    */
-    CHAR            nx_dhcp_name[NX_DHCP_SERVER_HOSTNAME_MAX];
-                                                    /* DHCP server name buffer */ 
+    ULONG           nx_dhcp_id;                     /* DHCP thread ID */
+    CHAR           *nx_dhcp_name;                   /* DHCP server name */
     NX_PACKET_POOL *nx_dhcp_packet_pool_ptr;        /* Pointer to DHCP server packet pool */
     TX_TIMER        nx_dhcp_slow_periodic_timer;    /* Timer for watching IP lease time outs. */
     TX_TIMER        nx_dhcp_fast_periodic_timer;    /* Timer for watching session time outs. */

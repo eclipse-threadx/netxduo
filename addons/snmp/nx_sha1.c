@@ -79,7 +79,7 @@ static UCHAR   _nx_sha1_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sha1_initialize                                 PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -110,6 +110,8 @@ static UCHAR   _nx_sha1_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sha1_initialize(NX_SHA1 *context)
@@ -140,7 +142,7 @@ UINT  _nx_sha1_initialize(NX_SHA1 *context)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sha1_update                                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -174,6 +176,9 @@ UINT  _nx_sha1_initialize(NX_SHA1 *context)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sha1_update(NX_SHA1 *context, UCHAR *input_ptr, UINT input_length)
@@ -220,7 +225,7 @@ ULONG   needed_fill_bytes;
 
         /* Copy the appropriate portion of the input buffer into the internal 
            buffer of the context.  */
-        memcpy((void *) &(context -> nx_sha1_buffer[current_bytes]), (void *) input_ptr, needed_fill_bytes);
+        memcpy((void *) &(context -> nx_sha1_buffer[current_bytes]), (void *) input_ptr, needed_fill_bytes); /* Use case of memcpy is verified. */
 
         /* Process the 64-byte (512 bit) buffer.  */
         _nx_sha1_process_buffer(context, context -> nx_sha1_buffer);
@@ -251,7 +256,7 @@ ULONG   needed_fill_bytes;
 
         /* Save the remaining bytes in the internal buffer after any remaining bytes
            that it is processed later.  */
-        memcpy((void *) &(context -> nx_sha1_buffer[current_bytes]), (void *) input_ptr, input_length);
+        memcpy((void *) &(context -> nx_sha1_buffer[current_bytes]), (void *) input_ptr, input_length); /* Use case of memcpy is verified. */
     }
 
     /* Return success.  */
@@ -264,7 +269,7 @@ ULONG   needed_fill_bytes;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sha1_digest_calculate                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -298,6 +303,8 @@ ULONG   needed_fill_bytes;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sha1_digest_calculate(NX_SHA1 *context, UCHAR digest[20])
@@ -362,7 +369,7 @@ ULONG   padding_bytes;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sha1_process_buffer                             PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -394,6 +401,8 @@ ULONG   padding_bytes;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_sha1_process_buffer(NX_SHA1 *context, UCHAR buffer[64])

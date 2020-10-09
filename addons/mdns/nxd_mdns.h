@@ -25,7 +25,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_mdns.h                                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -42,6 +42,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -177,11 +180,15 @@ extern   "C" {
 #define NX_MDNS_DOMAIN_NAME_MAX                 16
 #endif /* NX_MDNS_DOMAIN_NAME_MAX  */
 
-/* NX_MDNS_DOMAIN_NAME_MAX must be at leat 5 bytes to hold "local". */
+/* NX_MDNS_DOMAIN_NAME_MAX must be at least 5 bytes to hold "local". */
 #if (NX_MDNS_DOMAIN_NAME_MAX < 5)
 #error "NX_MDNS_DOMAIN_NAME_MAX must be at least 5 bytes!"
 #endif /* (NX_MDNS_DOMAIN_NAME_MAX < 5) */
 
+/* (NX_MDNS_HOST_NAME_MAX + "."(1) + NX_MDNS_DOMAIN_NAME_MAX) must be no more than NX_MDNS_NAME_MAX. */
+#if ((NX_MDNS_HOST_NAME_MAX + 1 + NX_MDNS_DOMAIN_NAME_MAX) > NX_MDNS_NAME_MAX)
+#error "(NX_MDNS_HOST_NAME_MAX + 1 + NX_MDNS_DOMAIN_NAME_MAX) must be no more than NX_MDNS_NAME_MAX!"
+#endif
 
 /* Define the conflict count of service name or host name.   */
 /* Note: the confilict count should be less than 8, since we just append " (x)" 

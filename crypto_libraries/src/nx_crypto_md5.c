@@ -98,7 +98,7 @@ const UCHAR _nx_crypto_md5_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_md5_initialize                           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -130,11 +130,14 @@ const UCHAR _nx_crypto_md5_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            updated constants,          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_md5_initialize(NX_CRYPTO_MD5 *context, UINT algorithm)
 {
-    NX_PARAMETER_NOT_USED(algorithm);
+    NX_CRYPTO_PARAMETER_NOT_USED(algorithm);
 
     /* Determine if the context is non-null.  */
     if (context == NX_CRYPTO_NULL)
@@ -162,7 +165,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_md5_initialize(NX_CRYPTO_MD5 *context, UINT algo
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_md5_update                               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -198,6 +201,9 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_md5_initialize(NX_CRYPTO_MD5 *context, UINT algo
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_md5_update(NX_CRYPTO_MD5 *context, UCHAR *input_ptr, UINT input_length)
@@ -246,7 +252,7 @@ ULONG needed_fill_bytes;
 
         /* Copy the appropriate portion of the input buffer into the internal
            buffer of the context.  */
-        NX_CRYPTO_MEMCPY((void *)&(context -> nx_md5_buffer[current_bytes]), (void *)input_ptr, needed_fill_bytes); 
+        NX_CRYPTO_MEMCPY((void *)&(context -> nx_md5_buffer[current_bytes]), (void *)input_ptr, needed_fill_bytes); /* Use case of memcpy is verified. */
 
         /* Process the 64-byte (512 bit) buffer.  */
         _nx_crypto_md5_process_buffer(context, context -> nx_md5_buffer);
@@ -277,7 +283,7 @@ ULONG needed_fill_bytes;
 
         /* Save the remaining bytes in the internal buffer after any remaining bytes
            that it is processed later.  */
-        NX_CRYPTO_MEMCPY((void *)&(context -> nx_md5_buffer[current_bytes]), (void *)input_ptr, input_length); 
+        NX_CRYPTO_MEMCPY((void *)&(context -> nx_md5_buffer[current_bytes]), (void *)input_ptr, input_length); /* Use case of memcpy is verified. */
     }
 
     /* Return success.  */
@@ -290,7 +296,7 @@ ULONG needed_fill_bytes;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_md5_digest_calculate                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -325,6 +331,9 @@ ULONG needed_fill_bytes;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            updated constants,          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_md5_digest_calculate(NX_CRYPTO_MD5 *context, UCHAR digest[16], UINT algorithm)
@@ -334,7 +343,7 @@ UCHAR bit_count_string[8];
 ULONG current_byte_count;
 ULONG padding_bytes;
 
-    NX_PARAMETER_NOT_USED(algorithm);
+    NX_CRYPTO_PARAMETER_NOT_USED(algorithm);
 
     /* Move the lower portion of the bit count into the array.  */
     bit_count_string[0] =  (UCHAR)context -> nx_md5_bit_count[0];
@@ -390,7 +399,7 @@ ULONG padding_bytes;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_md5_process_buffer                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -423,6 +432,8 @@ ULONG padding_bytes;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID  _nx_crypto_md5_process_buffer(NX_CRYPTO_MD5 *context, UCHAR buffer[64])
@@ -541,7 +552,7 @@ ULONG x[16];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_md5_init                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -577,6 +588,8 @@ ULONG x[16];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_md5_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -619,7 +632,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_md5_init(struct  NX_CRYPTO_METHOD_STRUCT 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_md5_cleanup                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -649,6 +662,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_md5_init(struct  NX_CRYPTO_METHOD_STRUCT 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_md5_cleanup(VOID *crypto_metadata)
@@ -675,7 +690,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_md5_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_md5_operation                    PORTABLE C       */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -723,6 +738,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_md5_cleanup(VOID *crypto_metadata)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_md5_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */

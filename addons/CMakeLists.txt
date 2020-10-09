@@ -4,6 +4,7 @@
 set(SOURCES 
     # {{BEGIN_TARGET_SOURCES}}
 	${CMAKE_CURRENT_LIST_DIR}/auto_ip/nx_auto_ip.c
+	${CMAKE_CURRENT_LIST_DIR}/cloud/nx_cloud.c
 	${CMAKE_CURRENT_LIST_DIR}/dhcp/nxd_dhcp_client.c
 	${CMAKE_CURRENT_LIST_DIR}/dhcp/nxd_dhcp_server.c
 	${CMAKE_CURRENT_LIST_DIR}/dhcp/nxd_dhcpv6_client.c
@@ -37,10 +38,29 @@ set(SOURCES
 )
 
 # Append BSD file if the user wants it
-if(NXD_ENABLE_FILE_BSD)
+if(NXD_ENABLE_BSD)
     list(APPEND SOURCES
          ${CMAKE_CURRENT_LIST_DIR}/BSD/nxd_bsd.c
     )
+endif()
+
+# Append Azure IoT file if the user wants it
+if(NXD_ENABLE_AZURE_IOT)
+    list(APPEND SOURCES
+         ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot.c
+         ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_hub_client.c
+         ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_json_reader.c
+         ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_json_writer.c
+         ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_provisioning_client.c
+    )
+    set(ENV{AZ_SDK_C_NO_SAMPLES} TRUE)
+    set(NX_AZURE_DISABLE_IOT_SECURITY_MODULE OFF CACHE BOOL "Disable Azure IoT Security Module (default is OFF)")
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/azure_iot/azure-sdk-for-c)
+    if(${NX_AZURE_DISABLE_IOT_SECURITY_MODULE})
+        target_compile_definitions(${PROJECT_NAME} PUBLIC -DNX_AZURE_DISABLE_IOT_SECURITY_MODULE)
+    else()
+        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/azure_iot/azure_iot_security_module)
+    endif()
 endif()
 
 # Remove the file server files if the user doesn't want them
@@ -57,7 +77,9 @@ target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/auto_ip
+    ${CMAKE_CURRENT_LIST_DIR}/azure_iot
     ${CMAKE_CURRENT_LIST_DIR}/BSD
+    ${CMAKE_CURRENT_LIST_DIR}/cloud
     ${CMAKE_CURRENT_LIST_DIR}/dhcp
     ${CMAKE_CURRENT_LIST_DIR}/dns
     ${CMAKE_CURRENT_LIST_DIR}/ftp

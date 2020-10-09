@@ -37,7 +37,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_fragment_assembly                            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -72,6 +72,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed duplicated code,    */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -623,39 +626,6 @@ UINT                            packet_consumed;
 #ifndef NX_DISABLE_IPV4
             if (ip_version == NX_IP_VERSION_V4)
             {
-
-                /* The packet is now reassembled. */
-
-                /* Check if this IP interface has a NAT forwarding service. If so, let NAT get the
-                   packet first and if it is not a packet that should be forwarded by NAT, then
-                   let NetX process the packet in the normal way.  */
-
-#ifdef NX_NAT_ENABLE
-
-                /* Check if this IP interface has a NAT forwarding service. */
-                if (ip_ptr -> nx_ip_nat_packet_process)
-                {
-
-                    /* Yes, so forward this packet to the NAT handler.  If NAT does not 'consume' this
-                       packet, allow NetX to process the packet.  */
-                    packet_consumed = (ip_ptr -> nx_ip_nat_packet_process)(ip_ptr, fragment_head, NX_TRUE);
-
-                    /* Check to see if the packet has been consumed by NAT.  */
-                    if (packet_consumed)
-                    {
-
-#ifndef NX_DISABLE_IP_INFO
-
-                        /* Increment the IP packets forwarded counter.  */
-                        ip_ptr -> nx_ip_packets_forwarded++;
-#endif /* NX_DISABLE_IP_INFO */
-
-                        continue;
-                    }
-
-                    /* (NetX will process all packets that drop through here.) */
-                }
-#endif
 
                 /* The packet is now reassembled. */
 

@@ -700,7 +700,7 @@ static NX_CRYPTO_CONST NX_CRYPTO_EC *_nx_crypto_ec_named_curves[] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_is_infinite                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -737,6 +737,8 @@ static NX_CRYPTO_CONST NX_CRYPTO_EC *_nx_crypto_ec_named_curves[] =
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_point_is_infinite(NX_CRYPTO_EC_POINT *point)
@@ -762,7 +764,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_ec_point_is_infinite(NX_CRYPTO_EC_POINT *point)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_set_infinite                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -799,6 +801,8 @@ NX_CRYPTO_KEEP UINT _nx_crypto_ec_point_is_infinite(NX_CRYPTO_EC_POINT *point)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_set_infinite(NX_CRYPTO_EC_POINT *point)
@@ -819,7 +823,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_set_infinite(NX_CRYPTO_EC_POINT *point)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_setup                           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -855,6 +859,9 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_set_infinite(NX_CRYPTO_EC_POINT *point)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), updated  */
+/*                                            constants, resulting        */
+/*                                            in version 6.1              */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_point_setup(NX_CRYPTO_EC_POINT *point, UCHAR *byte_stream, UINT byte_stream_size)
@@ -866,7 +873,7 @@ UINT status;
     {
 
         /* Only uncompressed format is supported. */
-        return(NX_NOT_SUPPORTED);
+        return(NX_CRYPTO_FORMAT_NOT_SUPPORTED);
     }
 
     byte_stream++;
@@ -889,7 +896,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_extract_uncompressed            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -927,6 +934,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_extract_uncompressed(NX_CRYPTO_EC *curve, NX_CRYPTO_EC_POINT *point,
@@ -976,7 +985,7 @@ UINT clen;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_fp_affine_to_projective         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1009,6 +1018,8 @@ UINT clen;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_fp_affine_to_projective(NX_CRYPTO_EC_POINT *point)
@@ -1023,7 +1034,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_fp_affine_to_projective(NX_CRYPTO_EC_POI
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_fp_projective_to_affine         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1067,6 +1078,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_fp_affine_to_projective(NX_CRYPTO_EC_POI
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_fp_projective_to_affine(NX_CRYPTO_EC *curve,
@@ -1113,7 +1126,7 @@ UINT                   buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp192r1_reduce                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1160,6 +1173,9 @@ UINT                   buffer_size;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memmove use cases, */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp192r1_reduce(NX_CRYPTO_EC *curve,
@@ -1193,7 +1209,7 @@ UINT                  compare_value;
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 48, &size);
     if (size < 48)
     {
-        NX_CRYPTO_MEMMOVE((UCHAR *)data + (48 - size), data, size);
+        NX_CRYPTO_MEMMOVE((UCHAR *)data + (48 - size), data, size); /* Use case of memmove is verified. */
         NX_CRYPTO_MEMSET(data, 0, (48 - size));
     }
 
@@ -1243,7 +1259,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp224r1_reduce                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1293,6 +1309,9 @@ UINT                  compare_value;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memmove use cases, */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp224r1_reduce(NX_CRYPTO_EC *curve,
@@ -1326,7 +1345,7 @@ UINT                  compare_value;
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 56, &size);
     if (size < 56)
     {
-        NX_CRYPTO_MEMMOVE((UCHAR *)data + (56 - size), data, size);
+        NX_CRYPTO_MEMMOVE((UCHAR *)data + (56 - size), data, size); /* Use case of memmove is verified. */
         NX_CRYPTO_MEMSET(data, 0, (56 - size));
     }
 
@@ -1382,7 +1401,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp256r1_reduce                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1432,6 +1451,9 @@ UINT                  compare_value;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memmove use cases, */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp256r1_reduce(NX_CRYPTO_EC *curve,
@@ -1465,7 +1487,7 @@ UINT                  compare_value;
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 64, &size);
     if (size < 64)
     {
-        NX_CRYPTO_MEMMOVE((UCHAR *)data + (64 - size), data, size);
+        NX_CRYPTO_MEMMOVE((UCHAR *)data + (64 - size), data, size); /* Use case of memmove is verified. */
         NX_CRYPTO_MEMSET(data, 0, (64 - size));
     }
 
@@ -1547,7 +1569,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp384r1_reduce                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1594,6 +1616,9 @@ UINT                  compare_value;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memmove use cases, */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp384r1_reduce(NX_CRYPTO_EC *curve,
@@ -1620,14 +1645,14 @@ UINT                  compare_value;
     NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 48);
 
     data = (UINT *)(((ULONG)scratch + 3) & (ULONG) ~3);
-    scratch += (64 >> HN_SIZE_SHIFT);
+    scratch += (96 >> HN_SIZE_SHIFT);
     buffer = (UINT *)scratch;
 
     /* c= (c23,...,c2,c1,c0), ci is a 32-bit word */
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 96, &size);
     if (size < 96)
     {
-        NX_CRYPTO_MEMMOVE((UCHAR *)data + (96 - size), data, size);
+        NX_CRYPTO_MEMMOVE((UCHAR *)data + (96 - size), data, size); /* Use case of memmove is verified. */
         NX_CRYPTO_MEMSET(data, 0, (96 - size));
     }
 
@@ -1717,7 +1742,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp521r1_reduce                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1766,6 +1791,9 @@ UINT                  compare_value;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memmove use cases, */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp521r1_reduce(NX_CRYPTO_EC *curve,
@@ -1797,7 +1825,7 @@ UINT                  compare_value;
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 132, &size);
     if (size < 132)
     {
-        NX_CRYPTO_MEMMOVE(data + (132 - size), data, size);
+        NX_CRYPTO_MEMMOVE(data + (132 - size), data, size); /* Use case of memmove is verified. */
         NX_CRYPTO_MEMSET(data, 0, (132 - size));
     }
 
@@ -1835,7 +1863,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_add_digit_reduce                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1877,6 +1905,8 @@ UINT                  compare_value;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_FIPS
@@ -1901,7 +1931,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_digit_reduce(NX_CRYPTO_EC *curve,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_subtract_digit_reduce                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1940,6 +1970,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_digit_reduce(NX_CRYPTO_EC *curve,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_digit_reduce(NX_CRYPTO_EC *curve,
@@ -1962,7 +1994,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_digit_reduce(NX_CRYPTO_EC *curve,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_reduce                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1994,6 +2026,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_digit_reduce(NX_CRYPTO_EC *curve,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_FIPS
@@ -2011,7 +2045,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_reduce(NX_CRYPTO_EC *curve,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_add_reduce                            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2055,6 +2089,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_reduce(NX_CRYPTO_EC *curve,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_reduce(NX_CRYPTO_EC *curve,
@@ -2077,7 +2113,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_reduce(NX_CRYPTO_EC *curve,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_subtract_reduce                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2127,6 +2163,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_reduce(NX_CRYPTO_EC *curve,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_reduce(NX_CRYPTO_EC *curve,
@@ -2148,7 +2186,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_reduce(NX_CRYPTO_EC *curve,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_projective_add                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2198,6 +2236,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_reduce(NX_CRYPTO_EC *curve,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_projective_add(NX_CRYPTO_EC *curve,
@@ -2298,7 +2338,7 @@ UINT                  buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_projective_double                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2346,6 +2386,8 @@ UINT                  buffer_size;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_projective_double(NX_CRYPTO_EC *curve,
@@ -2431,7 +2473,7 @@ UINT                  buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_affine_add                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2481,6 +2523,8 @@ UINT                  buffer_size;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_affine_add(NX_CRYPTO_EC *curve,
@@ -2562,7 +2606,7 @@ UINT                   buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_affine_subtract                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2601,6 +2645,8 @@ UINT                   buffer_size;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_affine_subtract(NX_CRYPTO_EC *curve,
@@ -2625,7 +2671,7 @@ NX_CRYPTO_EC_POINT point;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_naf_compute                           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2659,6 +2705,8 @@ NX_CRYPTO_EC_POINT point;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_naf_compute(NX_CRYPTO_HUGE_NUMBER *d, HN_UBASE *naf_data, UINT *naf_size)
@@ -2751,7 +2799,7 @@ UINT      i, j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_projective_multiple                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2801,6 +2849,8 @@ UINT      i, j;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_projective_multiple(NX_CRYPTO_EC *curve,
@@ -2885,7 +2935,7 @@ UINT               bit;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_fixed_multiple                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2932,6 +2982,8 @@ UINT               bit;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_fixed_multiple(NX_CRYPTO_EC *curve,
@@ -3028,7 +3080,7 @@ UINT                       j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_key_pair_generation_extra             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3077,6 +3129,8 @@ UINT                       j;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_key_pair_generation_extra(NX_CRYPTO_EC *curve,
@@ -3129,7 +3183,7 @@ NX_CRYPTO_HUGE_NUMBER modulus;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_key_pair_stream_generate              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3168,6 +3222,8 @@ NX_CRYPTO_HUGE_NUMBER modulus;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_key_pair_stream_generate(NX_CRYPTO_EC *curve,
@@ -3232,7 +3288,7 @@ NX_CRYPTO_EC_POINT    public_key;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_precomputation                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3272,6 +3328,8 @@ NX_CRYPTO_EC_POINT    public_key;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_FIPS
@@ -3416,7 +3474,7 @@ UINT                       i, j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fixed_output                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3450,6 +3508,8 @@ UINT                       i, j;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_FIPS
@@ -3661,7 +3721,7 @@ const CHAR                *array_name[] = {"", "_2e"};
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_get_named_curve                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3692,6 +3752,9 @@ const CHAR                *array_name[] = {"", "_2e"};
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s), updated  */
+/*                                            constants, resulting        */
+/*                                            in version 6.1              */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_FIPS
@@ -3709,7 +3772,7 @@ UINT i;
     }
 
     *curve = NX_CRYPTO_NULL;
-    return(NX_NOT_FOUND);
+    return(NX_CRYTPO_MISSING_ECC_CURVE);
 }
 #endif
 /**************************************************************************/
@@ -3717,7 +3780,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ec_secp192r1_operation            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3760,6 +3823,8 @@ UINT i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp192r1_operation(UINT op,
@@ -3803,7 +3868,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp192r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ec_secp224r1_operation            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3846,6 +3911,8 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp192r1_operation(UINT op,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp224r1_operation(UINT op,
@@ -3888,7 +3955,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp224r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ec_secp256r1_operation            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3931,6 +3998,8 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp224r1_operation(UINT op,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp256r1_operation(UINT op,
@@ -3973,7 +4042,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp256r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ec_secp384r1_operation            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -4016,6 +4085,8 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp256r1_operation(UINT op,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp384r1_operation(UINT op,
@@ -4058,7 +4129,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp384r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ec_secp521r1_operation            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -4101,6 +4172,8 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp384r1_operation(UINT op,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
@@ -4144,7 +4217,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_validate_public_key                   PORTABLE C      */
-/*                                                           6.0.1        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -4181,7 +4254,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  06-30-2020     Timothy Stapko           Initial Version 6.0.1         */
+/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION
@@ -4203,7 +4276,7 @@ HN_UBASE             *scratch2 = scratch;
         return(NX_CRYPTO_INVALID_KEY);
     }
 
-    /* 2. Verify that xQ and yQ are integers in the interval [0, p−1].
+    /* 2. Verify that xQ and yQ are integers in the interval [0, p-1].
          (Ensures that each coordinate of the public key has the unique correct representation of
          an element in the underlying field.) */
     compare_value = _nx_crypto_huge_number_compare(&public_key -> nx_crypto_ec_point_x, &chosen_curve -> nx_crypto_ec_field.fp);
@@ -4252,10 +4325,10 @@ HN_UBASE             *scratch2 = scratch;
         return(NX_CRYPTO_INVALID_KEY);
     }
 
-    /*  4. Verify that nQ = Ø.
+    /*  4. Verify that nQ = O.
         (This step is to ensure that the public key has the correct order. Along with the
         verification in step 1, ensures that the public key is in the correct range in the correct EC
-        subgroup; that is, it is in the correct EC subgroup and is not the identity element Ø.)
+        subgroup; that is, it is in the correct EC subgroup and is not the identity element O.)
     */
     if (!partial)
     {

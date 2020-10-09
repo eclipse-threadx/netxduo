@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_server_handshake                    PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -103,9 +103,13 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  08-14-2020     Timothy Stapko           Modified comment(s),          */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            verified memmove use cases, */
 /*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.0.2  */
+/*                                            fixed certificate buffer    */
+/*                                            allocation,                 */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_server_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
@@ -175,7 +179,8 @@ UCHAR                                 *fragment_buffer;
         }
 
         /* Check available area of buffer. */
-        if ((fragment_offset + fragment_length) > tls_session -> nx_secure_tls_packet_buffer_size)
+        if ((fragment_offset + fragment_length) > tls_session -> nx_secure_tls_packet_buffer_size ||
+            (header_bytes + message_length) > tls_session -> nx_secure_tls_packet_buffer_size)
         {
             return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
         }
@@ -183,7 +188,7 @@ UCHAR                                 *fragment_buffer;
         dtls_session -> nx_secure_dtls_fragment_length -= fragment_length;
 
         /* Copy the fragment data (minus the header) into the reassembly buffer. */
-        NX_SECURE_MEMCPY(&fragment_buffer[fragment_offset], &packet_buffer[header_bytes], fragment_length); 
+        NX_SECURE_MEMCPY(&fragment_buffer[fragment_offset], &packet_buffer[header_bytes], fragment_length); /* Use case of memcpy is verified. */
 
         /* If we still have fragments to add, just return success. */
         if (dtls_session -> nx_secure_dtls_fragment_length > 0)
@@ -210,7 +215,7 @@ UCHAR                                 *fragment_buffer;
 
             /* Put the header into the packet buffer, adjusting the fields to create a seam-less
              * DTLS record. */
-            NX_SECURE_MEMMOVE(&fragment_buffer[header_bytes], fragment_buffer, message_length);
+            NX_SECURE_MEMMOVE(&fragment_buffer[header_bytes], fragment_buffer, message_length); /* Use case of memmove is verified. */
 
             /* Reconstruct the header in the fragment buffer so we can hash the
                reconstructed record as if it were never fragmented. */
@@ -273,7 +278,7 @@ UCHAR                                 *fragment_buffer;
 #ifdef NX_SECURE_ENABLE_CLIENT_CERTIFICATE_VERIFY
     case NX_SECURE_TLS_CERTIFICATE_MSG:
         /* Client sent certificate message (in response to a request from us. Process it now. */
-        status = _nx_secure_tls_process_remote_certificate(tls_session, packet_buffer, message_length);
+        status = _nx_secure_tls_process_remote_certificate(tls_session, packet_buffer, message_length, message_length);
         tls_session -> nx_secure_tls_server_state = NX_SECURE_TLS_SERVER_STATE_CLIENT_CERTIFICATE;
         break;
     case NX_SECURE_TLS_CERTIFICATE_VERIFY:

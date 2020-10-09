@@ -27,7 +27,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hmac                                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -68,6 +68,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_hmac(NX_CRYPTO_HMAC *hmac_metadata,
@@ -91,7 +93,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_hmac(NX_CRYPTO_HMAC *hmac_metadata,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hmac_initialize                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -131,6 +133,9 @@ NX_CRYPTO_KEEP UINT _nx_crypto_hmac(NX_CRYPTO_HMAC *hmac_metadata,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_hmac_initialize(NX_CRYPTO_HMAC *hmac_metadata, UCHAR *key_ptr, UINT key_length)
@@ -168,9 +173,9 @@ UINT  i;
 
     NX_CRYPTO_MEMSET(hmac_metadata -> k_opad, 0, hmac_metadata -> block_size);
 
-    NX_CRYPTO_MEMCPY(hmac_metadata -> k_ipad, key_ptr, key_length); 
+    NX_CRYPTO_MEMCPY(hmac_metadata -> k_ipad, key_ptr, key_length); /* Use case of memcpy is verified. */
 
-    NX_CRYPTO_MEMCPY(hmac_metadata -> k_opad, key_ptr, key_length); 
+    NX_CRYPTO_MEMCPY(hmac_metadata -> k_opad, key_ptr, key_length); /* Use case of memcpy is verified. */
 
 
     /* XOR key with ipad and opad values. */
@@ -197,7 +202,7 @@ UINT  i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hmac_update                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -231,6 +236,8 @@ UINT  i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_hmac_update(NX_CRYPTO_HMAC *hmac_metadata, UCHAR *input_ptr, UINT input_length)
@@ -249,7 +256,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_hmac_update(NX_CRYPTO_HMAC *hmac_metadata, UCHAR 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hmac_digest_calculate                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -284,6 +291,9 @@ NX_CRYPTO_KEEP UINT _nx_crypto_hmac_update(NX_CRYPTO_HMAC *hmac_metadata, UCHAR 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_hmac_digest_calculate(NX_CRYPTO_HMAC *hmac_metadata, UCHAR *digest_ptr, UINT digest_length)
@@ -302,7 +312,7 @@ UCHAR icv_ptr[64];
 
     hmac_metadata -> crypto_digest_calculate(hmac_metadata -> context, icv_ptr, hmac_metadata -> algorithm);
 
-    NX_CRYPTO_MEMCPY(digest_ptr, icv_ptr,  (digest_length > hmac_metadata -> output_length ? hmac_metadata -> output_length : digest_length)); 
+    NX_CRYPTO_MEMCPY(digest_ptr, icv_ptr,  (digest_length > hmac_metadata -> output_length ? hmac_metadata -> output_length : digest_length)); /* Use case of memcpy is verified. */
 
 #ifdef NX_SECURE_KEY_CLEAR
     NX_CRYPTO_MEMSET(icv_ptr, 0, sizeof(icv_ptr));
@@ -318,7 +328,7 @@ UCHAR icv_ptr[64];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hmac_metadata_set                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -362,6 +372,8 @@ UCHAR icv_ptr[64];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_hmac_metadata_set(NX_CRYPTO_HMAC *hmac_metadata,
@@ -386,7 +398,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_hmac_metadata_set(NX_CRYPTO_HMAC *hmac_metadata,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hmac_hash_initialize                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -418,6 +430,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_hmac_metadata_set(NX_CRYPTO_HMAC *hmac_metadata,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_hmac_hash_initialize(VOID *context, UINT algorithm)
@@ -461,7 +475,7 @@ UINT   status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hmac_hash_update                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -494,6 +508,8 @@ UINT   status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT   _nx_crypto_hmac_hash_update(VOID *context, UCHAR *input, UINT input_length)
@@ -535,7 +551,7 @@ UINT   status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hmac_hash_digest_calculate               PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -568,6 +584,8 @@ UINT   status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT   _nx_crypto_hmac_hash_digest_calculate(VOID *context, UCHAR *digest, UINT algorithm)
@@ -611,7 +629,7 @@ UINT   status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_init                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -648,6 +666,8 @@ UINT   status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -695,7 +715,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_cleanup                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -725,6 +745,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_cleanup(VOID *crypto_metadata)
@@ -754,7 +776,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_operation                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -797,6 +819,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_cleanup(VOID *crypto_metadata)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_hmac_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */

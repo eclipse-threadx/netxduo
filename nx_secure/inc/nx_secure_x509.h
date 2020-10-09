@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_x509.h                                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -41,6 +41,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed key usage bit order,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -214,15 +217,15 @@ extern   "C" {
 #define NX_SECURE_X509_CRL_TAG_EXTENSIONS                         (0x00) /* In CRL ASN.1, extensions field tag. */
 
 /* X.509 KeyUsage extension bit field values. */
-#define NX_SECURE_X509_KEY_USAGE_DIGITAL_SIGNATURE                (0x0001)
-#define NX_SECURE_X509_KEY_USAGE_NON_REPUDIATION                  (0x0002)
-#define NX_SECURE_X509_KEY_USAGE_KEY_ENCIPHERMENT                 (0x0004)
-#define NX_SECURE_X509_KEY_USAGE_DATA_ENCIPHERMENT                (0X0008)
-#define NX_SECURE_X509_KEY_USAGE_KEY_AGREEMENT                    (0X0010)
-#define NX_SECURE_X509_KEY_USAGE_KEY_CERT_SIGN                    (0X0020)
-#define NX_SECURE_X509_KEY_USAGE_CRL_SIGN                         (0X0040)
-#define NX_SECURE_X509_KEY_USAGE_ENCIPHER_ONLY                    (0X0080)
-#define NX_SECURE_X509_KEY_USAGE_DECIPHER_ONLY                    (0X0100)
+#define NX_SECURE_X509_KEY_USAGE_DIGITAL_SIGNATURE                (0x8000)
+#define NX_SECURE_X509_KEY_USAGE_NON_REPUDIATION                  (0x4000)
+#define NX_SECURE_X509_KEY_USAGE_KEY_ENCIPHERMENT                 (0x2000)
+#define NX_SECURE_X509_KEY_USAGE_DATA_ENCIPHERMENT                (0X1000)
+#define NX_SECURE_X509_KEY_USAGE_KEY_AGREEMENT                    (0X0800)
+#define NX_SECURE_X509_KEY_USAGE_KEY_CERT_SIGN                    (0X0400)
+#define NX_SECURE_X509_KEY_USAGE_CRL_SIGN                         (0X0200)
+#define NX_SECURE_X509_KEY_USAGE_ENCIPHER_ONLY                    (0X0100)
+#define NX_SECURE_X509_KEY_USAGE_DECIPHER_ONLY                    (0X0080)
 
 
 /* Internal NetX Secure identifiers for X.509 OID values. The OIDs are variable-length multi-byte

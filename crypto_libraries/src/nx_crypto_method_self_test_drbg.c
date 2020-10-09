@@ -138,7 +138,7 @@ static UCHAR drbg_test_entropy_count_npr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    drbg_test_get_entropy_pr                            PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -172,6 +172,9 @@ static UCHAR drbg_test_entropy_count_npr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_pr(UCHAR *entropy, UINT *entropy_len, UINT entropy_max_len)
@@ -188,17 +191,17 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_pr(UCHAR *entropy, UINT *entrop
 
     if (drbg_test_entropy_count_pr == 0)
     {
-        NX_CRYPTO_MEMCPY(entropy, entropy_input_aes128, entropy_input_len_aes128); 
+        NX_CRYPTO_MEMCPY(entropy, entropy_input_aes128, entropy_input_len_aes128); /* Use case of memcpy is verified. */
         *entropy_len = entropy_input_len_aes128;
     }
     else if (drbg_test_entropy_count_pr == 1)
     {
-        NX_CRYPTO_MEMCPY(entropy, entropy_input_pr_0_aes128, entropy_input_len_aes128); 
+        NX_CRYPTO_MEMCPY(entropy, entropy_input_pr_0_aes128, entropy_input_len_aes128); /* Use case of memcpy is verified. */
         *entropy_len = entropy_input_len_aes128;
     }
     else if (drbg_test_entropy_count_pr == 2)
     {
-        NX_CRYPTO_MEMCPY(entropy, entropy_input_pr_1_aes128, entropy_input_len_aes128); 
+        NX_CRYPTO_MEMCPY(entropy, entropy_input_pr_1_aes128, entropy_input_len_aes128); /* Use case of memcpy is verified. */
         *entropy_len = entropy_input_len_aes128;
     }
     else
@@ -216,7 +219,7 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_pr(UCHAR *entropy, UINT *entrop
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    drbg_test_get_entropy_npr                           PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -250,6 +253,9 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_pr(UCHAR *entropy, UINT *entrop
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_npr(UCHAR *entropy, UINT *entropy_len, UINT entropy_max_len)
@@ -266,12 +272,12 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_npr(UCHAR *entropy, UINT *entro
 
     if (drbg_test_entropy_count_npr == 0)
     {
-        NX_CRYPTO_MEMCPY(entropy, entropy_input_npr_aes128, entropy_input_len_npr_aes128); 
+        NX_CRYPTO_MEMCPY(entropy, entropy_input_npr_aes128, entropy_input_len_npr_aes128); /* Use case of memcpy is verified. */
         *entropy_len = entropy_input_len_npr_aes128;
     }
     else if (drbg_test_entropy_count_npr == 1)
     {
-        NX_CRYPTO_MEMCPY(entropy, entropy_input_reseed_npr_aes128, entropy_input_len_npr_aes128); 
+        NX_CRYPTO_MEMCPY(entropy, entropy_input_reseed_npr_aes128, entropy_input_len_npr_aes128); /* Use case of memcpy is verified. */
         *entropy_len = entropy_input_len_npr_aes128;
     }
     else
@@ -289,7 +295,7 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_npr(UCHAR *entropy, UINT *entro
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_method_self_test_drbg                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -325,6 +331,8 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_npr(UCHAR *entropy, UINT *entro
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_self_test_drbg(NX_CRYPTO_METHOD *crypto_method_drbg,

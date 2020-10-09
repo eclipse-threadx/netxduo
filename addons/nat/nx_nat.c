@@ -83,7 +83,7 @@ static VOID    _nx_nat_checksum_adjust(UCHAR *checksum, UCHAR *old_data, INT old
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_nat_create                                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -119,6 +119,8 @@ static VOID    _nx_nat_checksum_adjust(UCHAR *checksum, UCHAR *old_data, INT old
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_create(NX_NAT_DEVICE *nat_ptr, NX_IP *ip_ptr, UINT global_interface_index, VOID *dynamic_cache_memory, UINT dynamic_cache_size)                        
@@ -181,7 +183,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_create                                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -219,6 +221,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_create(NX_NAT_DEVICE *nat_ptr, NX_IP *ip_ptr, UINT global_interface_index, VOID *dynamic_cache_memory, UINT dynamic_cache_size)  
@@ -279,7 +283,7 @@ NX_NAT_TRANSLATION_ENTRY      *entry_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_nat_delete                                     PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -310,6 +314,8 @@ NX_NAT_TRANSLATION_ENTRY      *entry_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_delete(NX_NAT_DEVICE *nat_ptr) 
@@ -338,7 +344,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_delete                                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -368,6 +374,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_delete(NX_NAT_DEVICE *nat_ptr) 
@@ -385,7 +393,7 @@ UINT  _nx_nat_delete(NX_NAT_DEVICE *nat_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_nat_enable                                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -417,6 +425,8 @@ UINT  _nx_nat_delete(NX_NAT_DEVICE *nat_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_enable(NX_NAT_DEVICE *nat_ptr)
@@ -441,7 +451,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_enable                                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -472,6 +482,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_enable(NX_NAT_DEVICE *nat_ptr)
@@ -500,7 +512,7 @@ UINT  _nx_nat_enable(NX_NAT_DEVICE *nat_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_nat_disable                                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -530,6 +542,8 @@ UINT  _nx_nat_enable(NX_NAT_DEVICE *nat_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_disable(NX_NAT_DEVICE *nat_ptr)
@@ -555,7 +569,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_disable                                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -586,6 +600,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_disable(NX_NAT_DEVICE *nat_ptr)
@@ -610,7 +626,7 @@ UINT  _nx_nat_disable(NX_NAT_DEVICE *nat_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_nat_cache_notify_set                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -642,6 +658,8 @@ UINT  _nx_nat_disable(NX_NAT_DEVICE *nat_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_nat_cache_notify_set(NX_NAT_DEVICE *nat_ptr, VOID (*cache_full_notify_cb)(NX_NAT_DEVICE *nat_ptr))
@@ -675,7 +693,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_cache_notify_set                            PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -707,6 +725,8 @@ UINT    status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_nat_cache_notify_set(NX_NAT_DEVICE *nat_ptr, VOID (*cache_full_notify_cb)(NX_NAT_DEVICE *nat_ptr))
@@ -730,7 +750,7 @@ UINT _nx_nat_cache_notify_set(NX_NAT_DEVICE *nat_ptr, VOID (*cache_full_notify_c
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_nat_inbound_entry_create                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -768,6 +788,8 @@ UINT _nx_nat_cache_notify_set(NX_NAT_DEVICE *nat_ptr, VOID (*cache_full_notify_c
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_inbound_entry_create(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr,   
@@ -804,7 +826,7 @@ UINT  status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_inbound_entry_create                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -847,6 +869,8 @@ UINT  status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_inbound_entry_create(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr,   
@@ -914,7 +938,7 @@ UINT                     bound;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_nat_inbound_entry_delete                       PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -947,6 +971,8 @@ UINT                     bound;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_inbound_entry_delete( NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *delete_entry_ptr)
@@ -983,7 +1009,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_inbound_entry_delete                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1015,6 +1041,8 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_inbound_entry_delete(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *delete_entry_ptr)
@@ -1091,7 +1119,7 @@ NX_NAT_TRANSLATION_ENTRY *next_entry_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_process_packet                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1134,6 +1162,8 @@ NX_NAT_TRANSLATION_ENTRY *next_entry_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_packet(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT packet_process)
@@ -1325,7 +1355,7 @@ NX_INTERFACE                    *interface_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_process_inbound_packet                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1366,6 +1396,8 @@ NX_INTERFACE                    *interface_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_inbound_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr)
@@ -1416,7 +1448,7 @@ NX_NAT_TRANSLATION_ENTRY    translation_entry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_process_inbound_TCP_packet                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1458,6 +1490,8 @@ NX_NAT_TRANSLATION_ENTRY    translation_entry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_inbound_TCP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
@@ -1617,7 +1651,7 @@ NX_NAT_TRANSLATION_ENTRY        *record_entry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_process_inbound_UDP_packet                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1659,6 +1693,8 @@ NX_NAT_TRANSLATION_ENTRY        *record_entry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_inbound_UDP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
@@ -1819,7 +1855,7 @@ NX_NAT_TRANSLATION_ENTRY        *record_entry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_process_inbound_ICMP_packet                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1861,6 +1897,8 @@ NX_NAT_TRANSLATION_ENTRY        *record_entry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_inbound_ICMP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
@@ -2022,7 +2060,7 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_process_outbound_packet                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2066,6 +2104,8 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_outbound_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr)
@@ -2132,7 +2172,7 @@ NX_NAT_TRANSLATION_ENTRY translation_entry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_process_outbound_TCP_packet                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2170,6 +2210,8 @@ NX_NAT_TRANSLATION_ENTRY translation_entry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_outbound_TCP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
@@ -2298,7 +2340,7 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_process_outbound_UDP_packet                 PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2338,6 +2380,8 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_outbound_UDP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
@@ -2470,7 +2514,7 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_process_outbound_ICMP_packet                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2510,6 +2554,8 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_outbound_ICMP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
@@ -2649,7 +2695,7 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_ip_packet_send                              PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2698,6 +2744,8 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID  _nx_nat_ip_packet_send(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr, UCHAR packet_type, ULONG next_hop_address) 
@@ -2842,7 +2890,7 @@ NX_IPV4_HEADER      *ip_header_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_inbound_entry_find                          PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2885,6 +2933,8 @@ NX_IPV4_HEADER      *ip_header_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_inbound_entry_find(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr, 
@@ -3013,7 +3063,7 @@ NX_NAT_TRANSLATION_ENTRY       *record_entry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_outbound_entry_find                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3056,6 +3106,8 @@ NX_NAT_TRANSLATION_ENTRY       *record_entry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_outbound_entry_find(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr, 
@@ -3157,7 +3209,7 @@ NX_NAT_TRANSLATION_ENTRY   *record_entry;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_entry_create                                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3201,6 +3253,8 @@ NX_NAT_TRANSLATION_ENTRY   *record_entry;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_entry_create(NX_NAT_DEVICE *nat_ptr, UCHAR protocol, 
@@ -3368,7 +3422,7 @@ NX_NAT_TRANSLATION_ENTRY *previous_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_entry_add                                   PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3402,6 +3456,8 @@ NX_NAT_TRANSLATION_ENTRY *previous_ptr = NX_NULL;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_entry_add(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
@@ -3433,7 +3489,7 @@ static UINT  _nx_nat_entry_add(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_entry_find                                  PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3474,6 +3530,8 @@ static UINT  _nx_nat_entry_add(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID  _nx_nat_entry_find(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *entry_to_match, NX_NAT_TRANSLATION_ENTRY **match_entry_ptr, 
@@ -3648,7 +3706,7 @@ NX_NAT_TRANSLATION_ENTRY    *previous_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_entry_timeout_check                         PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3680,6 +3738,8 @@ NX_NAT_TRANSLATION_ENTRY    *previous_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID  _nx_nat_entry_timeout_check(NX_NAT_DEVICE *nat_ptr)
@@ -3770,7 +3830,7 @@ NX_NAT_TRANSLATION_ENTRY    *next_entry_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_utility_get_destination_port                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3807,6 +3867,8 @@ NX_NAT_TRANSLATION_ENTRY    *next_entry_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_utility_get_destination_port(NX_PACKET *packet_ptr, UCHAR protocol, USHORT *peer_port)
@@ -3878,7 +3940,7 @@ UINT                    is_icmp_error_msg;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_utility_get_source_port                     PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3915,6 +3977,8 @@ UINT                    is_icmp_error_msg;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_utility_get_source_port(NX_PACKET *packet_ptr, UCHAR protocol, USHORT *source_port)
@@ -3979,7 +4043,7 @@ UINT                    is_icmp_error_msg;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_find_available_port                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4016,6 +4080,8 @@ UINT                    is_icmp_error_msg;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_find_available_port(NX_NAT_DEVICE *nat_ptr, UCHAR protocol, USHORT *port)
@@ -4112,7 +4178,7 @@ NX_NAT_TRANSLATION_ENTRY *entry_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_entry_port_verify                           PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4148,6 +4214,8 @@ NX_NAT_TRANSLATION_ENTRY *entry_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_entry_port_verify(NX_IP *ip_ptr, UINT protocol, UINT port)
@@ -4196,7 +4264,7 @@ NX_NAT_TRANSLATION_ENTRY *entry_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_socket_port_verify                          PORTABLE C      */ 
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4232,6 +4300,8 @@ NX_NAT_TRANSLATION_ENTRY *entry_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_socket_port_verify(NX_IP *ip_ptr, UINT protocol, UINT port)
@@ -4326,7 +4396,7 @@ NX_UDP_SOCKET       *udp_end_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_packet_is_icmp_error_message                PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4362,6 +4432,8 @@ NX_UDP_SOCKET       *udp_end_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_packet_is_icmp_error_message(NX_PACKET *packet_ptr, UINT *is_icmp_error_msg)
@@ -4413,7 +4485,7 @@ NX_ICMP_HEADER  *icmp_header_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_checksum_adjust                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4455,6 +4527,8 @@ NX_ICMP_HEADER  *icmp_header_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID  _nx_nat_checksum_adjust(UCHAR *checksum, UCHAR *old_data, INT old_data_length, UCHAR *new_data, INT new_data_length)

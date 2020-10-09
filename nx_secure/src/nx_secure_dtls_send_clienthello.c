@@ -39,7 +39,7 @@ static UINT _nx_secure_dtls_send_clienthello_sec_spf_extensions(NX_SECURE_TLS_SE
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_send_clienthello                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -78,6 +78,9 @@ static UINT _nx_secure_dtls_send_clienthello_sec_spf_extensions(NX_SECURE_TLS_SE
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_send_clienthello(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *send_packet)
@@ -172,7 +175,7 @@ USHORT                      protocol_version;
 
         /* Set cookie. */
         NX_SECURE_MEMCPY(packet_buffer, dtls_session -> nx_secure_dtls_cookie,
-               dtls_session -> nx_secure_dtls_cookie_length); 
+               dtls_session -> nx_secure_dtls_cookie_length); /* Use case of memcpy is verified. */
         length += dtls_session -> nx_secure_dtls_cookie_length;
 
         /* Finally, we have a complete length and can put it into the buffer. Before that,
@@ -197,7 +200,7 @@ USHORT                      protocol_version;
         gmt_time = tls_session -> nx_secure_tls_session_time_function();
     }
     NX_CHANGE_ULONG_ENDIAN(gmt_time);
-    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, (UCHAR *)&gmt_time, sizeof(gmt_time)); 
+    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, (UCHAR *)&gmt_time, sizeof(gmt_time)); /* Use case of memcpy is verified. */
 
     /* Next 28 bytes is random data. */
     for (i = 0; i < 28; i += (UINT)sizeof(random_value))
@@ -212,7 +215,7 @@ USHORT                      protocol_version;
 
     /* Copy the random data into the packet. */
     NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random,
-                     sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random)); 
+                     sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random)); /* Use case of memcpy is verified. */
     length += sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random);
 
     /* Session ID length is one byte. */
@@ -222,7 +225,7 @@ USHORT                      protocol_version;
     /* Session ID follows. */
     if (tls_session -> nx_secure_tls_session_id_length > 0)
     {
-        NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_session_id, tls_session -> nx_secure_tls_session_id_length); 
+        NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_session_id, tls_session -> nx_secure_tls_session_id_length); /* Use case of memcpy is verified. */
         length += tls_session -> nx_secure_tls_session_id_length;
     }
 
@@ -470,7 +473,7 @@ USHORT                      protocol_version;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_send_clienthello_sec_spf_extensions PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -506,6 +509,8 @@ USHORT                      protocol_version;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE

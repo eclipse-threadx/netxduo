@@ -28,7 +28,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_3des_key_set                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -61,6 +61,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_3des_key_set(NX_CRYPTO_3DES *context, UCHAR key[24])
@@ -81,7 +83,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_key_set(NX_CRYPTO_3DES *context, UCHAR key[
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_3des_encrypt                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -117,6 +119,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_key_set(NX_CRYPTO_3DES *context, UCHAR key[
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_3des_encrypt(NX_CRYPTO_3DES *context, UCHAR source[8],
@@ -141,7 +145,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_encrypt(NX_CRYPTO_3DES *context, UCHAR sour
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_3des_decrypt                             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -177,6 +181,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_encrypt(NX_CRYPTO_3DES *context, UCHAR sour
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_3des_decrypt(NX_CRYPTO_3DES *context, UCHAR source[8],
@@ -205,7 +211,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_decrypt(NX_CRYPTO_3DES *context, UCHAR sour
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_3des_init                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -241,6 +247,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_decrypt(NX_CRYPTO_3DES *context, UCHAR sour
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -292,7 +300,7 @@ NX_CRYPTO_3DES *triple_des_context_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_3des_cleanup                      PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -322,6 +330,8 @@ NX_CRYPTO_3DES *triple_des_context_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_cleanup(VOID *crypto_metadata)
@@ -348,7 +358,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_3des_operation                    PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -393,6 +403,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_cleanup(VOID *crypto_metadata)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_operation(UINT op,       /* Encrypt, Decrypt, Authenticate */

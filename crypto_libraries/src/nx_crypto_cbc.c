@@ -27,7 +27,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_cbc_xor                                  PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -60,7 +60,7 @@
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_cbc_xor(UCHAR *plaintext, UCHAR *key, UCHAR *ciphertext, UCHAR block_size)
@@ -78,7 +78,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_cbc_encrypt                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -119,6 +119,10 @@ UINT i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            and updated constants,      */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_cbc_encrypt(VOID *crypto_metadata, NX_CRYPTO_CBC *cbc_metadata,
@@ -130,7 +134,7 @@ UINT   i;
 
     if (block_size == 0)
     {
-        return(NX_INVALID_PARAMETERS);
+        return(NX_CRYPTO_INVALID_PARAMETER);
     }
 
     /* Determine if data length is multiple of block size. */
@@ -164,7 +168,7 @@ UINT   i;
     }
 
     /* Store the last cipher for next round. */
-    NX_CRYPTO_MEMCPY(cbc_metadata -> nx_crypto_cbc_last_block, last_cipher, block_size); 
+    NX_CRYPTO_MEMCPY(cbc_metadata -> nx_crypto_cbc_last_block, last_cipher, block_size); /* Use case of memcpy is verified. */
 
     return(NX_CRYPTO_SUCCESS);
 }
@@ -175,7 +179,7 @@ UINT   i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_cbc_decrypt                              PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -216,6 +220,10 @@ UINT   i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            and updated constants,      */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_cbc_decrypt(VOID *crypto_metadata, NX_CRYPTO_CBC *cbc_metadata,
@@ -228,7 +236,7 @@ UINT  i;
 
     if (block_size == 0)
     {
-        return(NX_INVALID_PARAMETERS);
+        return(NX_CRYPTO_INVALID_PARAMETER);
     }
 
     /* Determine if data length is multiple of block size. */
@@ -249,7 +257,7 @@ UINT  i;
     {
         /* If input == output, the xor clobbers the input buffer so we need to save off our last ciphertext
            before doing the xor. */
-        NX_CRYPTO_MEMCPY(save_input, &input[i], block_size); 
+        NX_CRYPTO_MEMCPY(save_input, &input[i], block_size); /* Use case of memcpy is verified. */
 
         /* Decrypt the block.  */
         crypto_function(crypto_metadata, &input[i], &output[i], block_size);
@@ -257,7 +265,7 @@ UINT  i;
         /* XOR.  */
         _nx_crypto_cbc_xor(&output[i], last_cipher, &output[i], block_size);
 
-        NX_CRYPTO_MEMCPY(last_cipher, save_input, block_size); 
+        NX_CRYPTO_MEMCPY(last_cipher, save_input, block_size); /* Use case of memcpy is verified. */
     }
 
 #ifdef NX_SECURE_KEY_CLEAR
@@ -273,7 +281,7 @@ UINT  i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_cbc_encrypt_init                         PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -307,6 +315,9 @@ UINT  i;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_cbc_encrypt_init(NX_CRYPTO_CBC *cbc_metadata, UCHAR *iv, UINT iv_len)
@@ -319,7 +330,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_cbc_encrypt_init(NX_CRYPTO_CBC *cbc_metadata, UCH
     }
 
     /* Copy IV to last cipher. */
-    NX_CRYPTO_MEMCPY(cbc_metadata -> nx_crypto_cbc_last_block, iv, iv_len); 
+    NX_CRYPTO_MEMCPY(cbc_metadata -> nx_crypto_cbc_last_block, iv, iv_len); /* Use case of memcpy is verified. */
 
     return(NX_CRYPTO_SUCCESS);
 }

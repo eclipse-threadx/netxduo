@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_packet_release                       PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -81,7 +81,7 @@
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  08-14-2020     Timothy Stapko           Initial Version 6.0.2         */
+/*  05-19-2020     Timothy Stapko           Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_packet_release(NX_PACKET *packet_ptr)

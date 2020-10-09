@@ -37,7 +37,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_process_ra                               PORTABLE C      */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -76,9 +76,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  08-14-2020     Yuxin Zhou               Modified comment(s), improved */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            option length verification, */
-/*                                            resulting in version 6.0.2  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_icmpv6_process_ra(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -240,8 +240,8 @@ UINT                          interface_index;
         if (option_ptr -> nx_icmpv6_option_type == ICMPV6_OPTION_TYPE_PREFIX_INFO)
         {
 
-            /* Validate packet length before cast to avoid OOB access. */
-            if (packet_length < (INT)sizeof(NX_ICMPV6_OPTION_PREFIX))
+            /* Validate option length before cast to avoid OOB access. */
+            if ((UINT)(option_ptr -> nx_icmpv6_option_length << 3) < sizeof(NX_ICMPV6_OPTION_PREFIX))
             {
 #ifndef NX_DISABLE_ICMP_INFO
 

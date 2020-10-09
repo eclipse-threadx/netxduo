@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_send                        PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -66,6 +66,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_send(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *packet_ptr,
@@ -82,7 +85,7 @@ UINT status;
     {
 
         /* If the IP Address and port are uninitialized, set them now (possibly an error?). */
-        NX_SECURE_MEMCPY(&dtls_session -> nx_secure_dtls_remote_ip_address, ip_address, sizeof(NXD_ADDRESS)); 
+        NX_SECURE_MEMCPY(&dtls_session -> nx_secure_dtls_remote_ip_address, ip_address, sizeof(NXD_ADDRESS)); /* Use case of memcpy is verified. */
         dtls_session -> nx_secure_dtls_local_port = port;
     }
     else if ((dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_version != ip_address -> nxd_ip_version) ||

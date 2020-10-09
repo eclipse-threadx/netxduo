@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_send_helloverifyrequest             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -62,6 +62,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_send_helloverifyrequest(NX_SECURE_DTLS_SESSION *dtls_session,
@@ -111,7 +114,7 @@ USHORT protocol_version;
         random_value = (UINT)NX_RAND();
         NX_CHANGE_ULONG_ENDIAN(random_value);
         NX_SECURE_MEMCPY(&dtls_session -> nx_secure_dtls_cookie[i],
-               (UCHAR *)&random_value, sizeof(random_value)); 
+               (UCHAR *)&random_value, sizeof(random_value)); /* Use case of memcpy is verified. */
     }
 
     if (dtls_session -> nx_secure_dtls_cookie_length > sizeof(dtls_session -> nx_secure_dtls_cookie))
@@ -122,7 +125,7 @@ USHORT protocol_version;
     }
 
     /* Copy the cookie into the packet. */
-    NX_SECURE_MEMCPY(&packet_buffer[length], dtls_session -> nx_secure_dtls_cookie, dtls_session -> nx_secure_dtls_cookie_length); 
+    NX_SECURE_MEMCPY(&packet_buffer[length], dtls_session -> nx_secure_dtls_cookie, dtls_session -> nx_secure_dtls_cookie_length); /* Use case of memcpy is verified. */
     length += dtls_session -> nx_secure_dtls_cookie_length;
 
     /* Save off and return the number of bytes we wrote and need to send. */

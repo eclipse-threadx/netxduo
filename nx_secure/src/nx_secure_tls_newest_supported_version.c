@@ -32,7 +32,7 @@ extern const NX_SECURE_VERSIONS_LIST nx_secure_supported_versions_list[];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_newest_supported_version             PORTABLE C      */
-/*                                                           6.0          */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -69,6 +69,8 @@ extern const NX_SECURE_VERSIONS_LIST nx_secure_supported_versions_list[];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
+/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_secure_tls_newest_supported_version(NX_SECURE_TLS_SESSION *session_ptr,
@@ -110,7 +112,7 @@ INT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_highest_supported_version_negotiate     PORTABLE C   */
-/*                                                           6.0.2        */
+/*                                                           6.1          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -144,11 +146,11 @@ INT i;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  08-14-2020     Timothy Stapko           Initial Version 6.0.2         */
+/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 void _nx_secure_tls_highest_supported_version_negotiate(NX_SECURE_TLS_SESSION *session_ptr,
-                                                        USHORT *protocol_version, UINT id)
+                                             USHORT *protocol_version, UINT id)
 {
 INT i;
 USHORT highest_version = 0;
