@@ -6,7 +6,6 @@ This advanced, industrial-grade TCP/IP network stack is designed specifically fo
 
 Documentation for this library can be found here: http://docs.microsoft.com/azure/rtos/netx-duo
 
-
 ## Cloning the repo
 
 ```bash
@@ -61,15 +60,9 @@ Azure RTOS provides OEMs with components to secure communication and to create c
 MCU/MPU hardware protection mechanisms. It is ultimately the responsibility of the device builder to ensure the device 
 fully meets the evolving security requirements associated with its specific use case.
 
-## Azure Security Center for IoT - RTOS
+## Azure Defender for IoT - RTOS
 
-The Azure Security Center for IoT - RTOS security module provides a comprehensive security solution for Azure RTOS 
-devices. Azure RTOS now ships with the ASC for IoT security module built-in and provides coverage for common threats
-and potential malicious activities.  The ASC module is part of the Azure IoT SDK (addons/azure_iot/).  As the device
-connects to Azure IoT hub, ASC collectors gather network connectivity information and sends it to ASC service for
-analysis.  For details on how ASC works, the type of informaiton it collects, refer to [Azure Security Center for IoT
-module](https://github.com/azure-rtos/netxduo/tree/v6.1_rel/addons/azure_iot/docs#azure-security-center-for-iot-module) 
-section in the Azure IoT document.
+The Azure Defender for IoT - RTOS security module provides a comprehensive security solution for Azure RTOS devices. Azure RTOS now ships with the Defender for IoT security module built-in and provides coverage for common threats and potential malicious activities.  The security module is part of the Azure IoT SDK (addons/azure_iot/).  As the device connects to Azure IoT hub, Defender for IoT collectors gather network connectivity information and sends it to the Defender for IoT service for analysis. For details on how the security module works and the type of information it collects, refer to [Azure Defender for IoT security module](https://github.com/azure-rtos/netxduo/tree/v6.1_rel/addons/azure_iot/docs#azure-defender-for-iot-module) section in the Azure IoT document.
 
 # Licensing
 

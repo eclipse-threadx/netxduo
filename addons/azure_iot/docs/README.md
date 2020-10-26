@@ -23,9 +23,9 @@ The Azure IoT Middleware for Azure RTOS is built as part of the NetXDuo. Make su
 Module | Marcos |
 | --- | --- |
 | Azure IoT Middleware for Azure RTOS | `NX_ENABLE_EXTENDED_NOTIFY_SUPPORT`<br> `NX_SECURE_ENABLE`<br> `NXD_MQTT_CLOUD_ENABLE`
-| Azure Security Center for IoT Module | `NX_ENABLE_IP_PACKET_FILTER`
+| Azure Defender for IoT Module | `NX_ENABLE_IP_PACKET_FILTER`
 
-**NOTE:** Azure Security Center for IoT Module is enabled by default. You can define `NX_AZURE_DISABLE_IOT_SECURITY_MODULE` to disable it. [Learn more](#azure-security-center-for-iot-module).
+**NOTE:** Azure Defender for IoT Module is enabled by default. You can define `NX_AZURE_DISABLE_IOT_SECURITY_MODULE` to disable it. [Learn more](#azure-defender-for-iot-module).
 
 Follow [this example](/ports/cortex_m7/iar/inc/nx_port.h) to see how to define these *marcos* in the header file.
 
@@ -56,9 +56,9 @@ Enhanced features provided in middleware:
 * Device Provisioning Service.
 * JSON parser.
 
-## Azure Security Center for IoT Module
+## Azure Defender for IoT Module
 
-The [Azure Security Center (ASC) for IoT - RTOS security module](https://docs.microsoft.com/azure/asc-for-iot/iot-security-azure-rtos) provides a comprehensive security solution for Azure RTOS devices. The middleware ships with the ASC for IoT Security Module built-in and enabled by default to detect common threats and potential malicious activities.
+The [Azure Defender for IoT - RTOS security module](https://docs.microsoft.com/azure/asc-for-iot/iot-security-azure-rtos) provides a comprehensive security solution for Azure RTOS devices. The middleware ships with the ASC for IoT Security Module built-in and enabled by default to detect common threats and potential malicious activities.
 
 ### Opt-out
 
@@ -100,7 +100,7 @@ Connection Type | RAM | Network |
 So the total additional connection traffic will be:
 *Total (in bytes) = Metadata (e.g. 300 bytes) + IPv4 Connections * 36 + IPv6 Connections * 60*
 
-Learn [here](https://docs.microsoft.com/en-us/azure/defender-for-iot) for more information about Azure Security Center for IoT.
+Learn [here](https://docs.microsoft.com/en-us/azure/defender-for-iot) for more information about Azure Defender for IoT.
 
 ## APIs
 
