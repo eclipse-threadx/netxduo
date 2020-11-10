@@ -36,7 +36,7 @@ function(setTargetCompileOptions target)
       /wd5031
       /wd5045
     )
-  else()
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
       # Make warning as error
       target_compile_options(${target}
         PRIVATE

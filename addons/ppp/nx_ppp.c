@@ -1401,7 +1401,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_process                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1440,6 +1440,10 @@ UINT        status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved packet length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.2  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_receive_packet_process(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -1448,6 +1452,7 @@ void  _nx_ppp_receive_packet_process(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 UINT        protocol;
 UINT        ppp_ipcp_state;
 UINT        code;
+UINT        length;
 
 
 #ifndef NX_PPP_DISABLE_INFO
@@ -1490,6 +1495,20 @@ UINT        code;
 
         /* Other Protocols must also have Code:1 byte, Identifier:1 bytes, Length: 2 bytes.  */
         if (packet_ptr -> nx_packet_length < 6)
+        {
+
+            /* Release the packet. */
+            nx_packet_release(packet_ptr);
+
+            /* Return.  */
+            return;
+        }
+
+        /* Get the message length.  */
+        length = (((UINT) packet_ptr -> nx_packet_prepend_ptr[4]) << 8) | ((UINT) packet_ptr -> nx_packet_prepend_ptr[5]);
+
+        /* Check if the packet length is equal to message length plus 2 bytes protocal type.  */
+        if ((length + 2) != packet_ptr -> nx_packet_length)
         {
 
             /* Release the packet. */
@@ -2191,7 +2210,7 @@ NX_PACKET       *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2234,6 +2253,10 @@ NX_PACKET       *packet_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved packet length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.2  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_state_machine_update(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -2242,6 +2265,7 @@ void  _nx_ppp_lcp_state_machine_update(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 UINT    configure_status;
 UCHAR   *lcp_message_ptr;
 UCHAR   code;
+UINT    status;
 
     /* Determine if a packet is present. If so, derive the event from the packet.  */
     if (packet_ptr)
@@ -2469,8 +2493,14 @@ UCHAR   code;
                 /* The peer has sent a configuration request.  */ 
             
                 /* Retrieve configuration.  */
-                configure_status = _nx_ppp_lcp_configuration_retrieve(ppp_ptr, packet_ptr, ppp_ptr -> nx_ppp_peer_naked_list, ppp_ptr -> nx_ppp_rejected_list); 
-                        
+                status = _nx_ppp_lcp_configuration_retrieve(ppp_ptr, packet_ptr, ppp_ptr -> nx_ppp_peer_naked_list, ppp_ptr -> nx_ppp_rejected_list, &configure_status); 
+ 
+                /* Discard invalid packet.  */
+                if (status)
+                {
+                    return;
+                }
+
                 /* Determine if the configuration request is fine or needs to be negotiated further.  */
                 if (configure_status == 0)
                 {
@@ -2540,7 +2570,13 @@ UCHAR   code;
                 /* The peer has sent a configuration request.  */ 
                 
                 /* Retrieve configuration.  */
-                configure_status = _nx_ppp_lcp_configuration_retrieve(ppp_ptr, packet_ptr, ppp_ptr -> nx_ppp_peer_naked_list, ppp_ptr -> nx_ppp_rejected_list); 
+                status = _nx_ppp_lcp_configuration_retrieve(ppp_ptr, packet_ptr, ppp_ptr -> nx_ppp_peer_naked_list, ppp_ptr -> nx_ppp_rejected_list, &configure_status); 
+ 
+                /* Discard invalid packet.  */
+                if (status)
+                {
+                    return;
+                }
                         
                 /* Determine if the configuration request is fine or needs to be negotiated further.  */
                 if (configure_status == 0)
@@ -2742,7 +2778,13 @@ UCHAR   code;
                 /* The peer has sent a configuration request.  */ 
 
                 /* Retrieve configuration.  */
-                configure_status = _nx_ppp_lcp_configuration_retrieve(ppp_ptr, packet_ptr, ppp_ptr -> nx_ppp_peer_naked_list, ppp_ptr -> nx_ppp_rejected_list); 
+                status = _nx_ppp_lcp_configuration_retrieve(ppp_ptr, packet_ptr, ppp_ptr -> nx_ppp_peer_naked_list, ppp_ptr -> nx_ppp_rejected_list, &configure_status); 
+ 
+                /* Discard invalid packet.  */
+                if (status)
+                {
+                    return;
+                }
                         
                 /* Determine if the configuration request is fine or needs to be negotiated further.  */
                 if (configure_status == 0)
@@ -3339,7 +3381,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_configuration_retrieve                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3354,12 +3396,14 @@ NX_PACKET   *packet_ptr;
 /*    ppp_ptr                               PPP instance pointer          */ 
 /*    naked_list                            List of NAKed options         */ 
 /*    rejected_list                         List of rejected options      */ 
+/*    configure_status                      Returned configration status: */
+/*                                            0 -> Success                */ 
+/*                                            1 -> NAKed options          */ 
+/*                                            2 -> Rejected options       */ 
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
-/*    0 ->                                  Success                       */ 
-/*    1 ->                                  NAKed one or more options     */ 
-/*    2 ->                                  Rejected on or more options   */ 
+/*    status                                Completion status             */ 
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
@@ -3376,18 +3420,25 @@ NX_PACKET   *packet_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved packet length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.2  */
 /*                                                                        */
 /**************************************************************************/
-UINT  _nx_ppp_lcp_configuration_retrieve(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr, UCHAR *naked_list, UCHAR *rejected_list)
+UINT  _nx_ppp_lcp_configuration_retrieve(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr, UCHAR *naked_list, UCHAR *rejected_list, UINT *configure_status)
 {
 
 UINT    option_index, nak_list_index, rejected_list_index;
-UINT    len, status =  0;
+UINT    len;
 UINT    type;
 UINT    counter;
 ULONG   authentication_protocol;
 UCHAR   *option_data;
 
+
+    /* Initialize the configure status.  */
+    *configure_status = 0;
 
     /* Clear both the NAKed and rejected list length.   */
     naked_list[0] =     0; 
@@ -3409,7 +3460,9 @@ UCHAR   *option_data;
 
         /* Check if the length is valid.  */
         if ((len < 2) || (len > (packet_ptr -> nx_packet_length - (option_index - 2))))
-            return(2);
+        {
+            return(NX_PPP_BAD_PACKET);
+        }
 
         /* Set a pointer to option data.  */
         option_data = &packet_ptr -> nx_packet_prepend_ptr[option_index];
@@ -3429,7 +3482,7 @@ UCHAR   *option_data;
             /* Determine if the MRU is too small.  */
             if (ppp_ptr -> nx_ppp_mru < NX_PPP_MINIMUM_MRU)
             {
-                status |=  1;
+                *configure_status |=  1;
 
                 /* Default the MRU.  */
                 ppp_ptr -> nx_ppp_mru =  NX_PPP_MRU;
@@ -3482,7 +3535,7 @@ UCHAR   *option_data;
                 /* Check to see if we don't have any authentication protocols enabled.  */
                 if (ppp_ptr -> nx_ppp_generate_authentication_protocol == 0)
                 {
-                    status |=  2; 
+                    *configure_status |=  2; 
 
                     /* Check if out of boundary.  */
                     if ((rejected_list_index + len) > NX_PPP_OPTION_MESSAGE_LENGTH)
@@ -3500,7 +3553,7 @@ UCHAR   *option_data;
                 /* Determine if this peer has PAP enabled.  */
                 if (ppp_ptr -> nx_ppp_generate_authentication_protocol == NX_PPP_PAP_PROTOCOL)
                 {
-                    status |=  1; 
+                    *configure_status |=  1; 
 
                     /* Check if out of boundary.  */
                     if ((nak_list_index + 4) > NX_PPP_OPTION_MESSAGE_LENGTH)
@@ -3520,7 +3573,7 @@ UCHAR   *option_data;
                 /* Determine if this peer has CHAP enabled.  */
                 if (ppp_ptr -> nx_ppp_generate_authentication_protocol == NX_PPP_CHAP_PROTOCOL)
                 {
-                    status |=  1;
+                    *configure_status |=  1;
 
                     /* Check if out of boundary.  */
                     if ((nak_list_index + 5) > NX_PPP_OPTION_MESSAGE_LENGTH)
@@ -3547,7 +3600,7 @@ UCHAR   *option_data;
                     /* Now determine if something other than CHAP MD5 was requested.  */
                     if (option_data[2] != 0x05)
                     {
-                        status |=  1; 
+                        *configure_status |=  1; 
 
                         /* Check if out of boundary.  */
                         if ((nak_list_index + 5) > NX_PPP_OPTION_MESSAGE_LENGTH)
@@ -3587,7 +3640,7 @@ UCHAR   *option_data;
             
         default: 
 
-            status |=  2; 
+            *configure_status |=  2; 
 
             /* Check if out of boundary.  */
             if ((rejected_list_index + len) > NX_PPP_OPTION_MESSAGE_LENGTH)
@@ -3602,9 +3655,15 @@ UCHAR   *option_data;
             break;
         }
     }
-    
+
+    /* Check if packet length is valid.  */
+    if (option_index != packet_ptr -> nx_packet_length)
+    {
+        return(NX_PPP_BAD_PACKET);
+    }
+
     /* Return status.  */
-    return(status);
+    return(NX_SUCCESS);
 }
 
 
@@ -6039,7 +6098,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_state_machine_update                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6080,6 +6139,10 @@ UINT        name_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            corrected the NAKed list    */
+/*                                            pointer,                    */
+/*                                            resulting in version 6.1.2  */
 /*                                                                        */
 /**************************************************************************/
 void _nx_ppp_ipcp_state_machine_update(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -6443,7 +6506,7 @@ UCHAR   code;
                         /* Yes, there are rejected options so send a new request.  */
                         _nx_ppp_ipcp_response_send(ppp_ptr, NX_PPP_IPCP_CONFIGURE_REJECT, &ppp_ptr -> nx_ppp_rejected_list[1], ppp_ptr -> nx_ppp_rejected_list[0], NX_NULL);
                     }
-                    else if (ppp_ptr -> nx_ppp_naked_list[0] != 0)
+                    else if (ppp_ptr -> nx_ppp_peer_naked_list[0] != 0)
                     {
 
                         /* Yes, there are naked options so send a new request.  */
@@ -6727,7 +6790,7 @@ UCHAR   code;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_configure_check                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6765,6 +6828,10 @@ UCHAR   code;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved packet length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_ipcp_configure_check(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr, UCHAR *naked_list, UCHAR *rejected_list, UCHAR *good_data)
@@ -6785,12 +6852,6 @@ UCHAR   option;
 
     /* Subtract 4 to remove the code, id, and length bytes from the length.  */
     length = length - 4;
-
-    /* Check for valid packet length.  */
-    if ((length + 6) > packet_ptr -> nx_packet_length)
-    {
-        return(NX_FALSE);
-    }
 
     /* Initialize the rejected and naked lists. */
     rejected_list[0] =  naked_list[0] =  good_data[0] =  0;
@@ -6832,7 +6893,7 @@ UCHAR   option;
             {
 
                 /* Check if out of boundary.  */
-                if ((good_index + 6) > NX_PPP_OPTION_MESSAGE_LENGTH)
+                if ((opt_length != 4) || ((good_index + 6) > NX_PPP_OPTION_MESSAGE_LENGTH))
                     return(NX_FALSE);
 
                 /* IP address option.  */
@@ -6851,7 +6912,7 @@ UCHAR   option;
                 }          
 
                 /* Adjust the main index.  */
-                w += (opt_length + good_index); 
+                w += 6; 
     
                 /* Check if we really have an IP address.  */
                 if (!ip_stat)
@@ -6906,8 +6967,8 @@ UCHAR   option;
              {
 
                 /* Check if out of boundary.  */
-                if ((good_index + 6) > NX_PPP_OPTION_MESSAGE_LENGTH)
-                    break;
+                if ((opt_length != 4) || ((good_index + 6) > NX_PPP_OPTION_MESSAGE_LENGTH))
+                    return(NX_FALSE);
 
                  /* Only request a hint if we don't have already have a dns address . */
                  good_data[good_index++] =  NX_PPP_DNS_SERVER_OPTION;
@@ -6924,7 +6985,7 @@ UCHAR   option;
                  }
     
                  /* Adjust the main index.  */
-                 w += (opt_length + 2); 
+                 w += 6; 
 
                  /* Check if we really have an primary DNS address.  */
                  if (!ip_stat)
@@ -6978,8 +7039,8 @@ UCHAR   option;
              {
 
                 /* Check if out of boundary.  */
-                if ((good_index + 6) > NX_PPP_OPTION_MESSAGE_LENGTH)
-                    break;
+                if ((opt_length != 4) || ((good_index + 6) > NX_PPP_OPTION_MESSAGE_LENGTH))
+                    return(NX_FALSE);
 
                  /* Only request a hint if we don't have already have a dns address . */
                  good_data[good_index++] =  NX_PPP_DNS_SECONDARY_SERVER_OPTION;
@@ -6996,7 +7057,7 @@ UCHAR   option;
                  }
     
                  /* Adjust the main index.  */
-                 w += (opt_length + 2); 
+                 w += 6; 
 
                  /* Check if we really have an primary DNS address.  */
                  if (!ip_stat)
@@ -7249,7 +7310,7 @@ UINT        index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_response_extract                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7283,6 +7344,10 @@ UINT        index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved packet length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.2  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_ipcp_response_extract(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -7303,12 +7368,6 @@ ULONG   length;
         length =  length - 4;
     else
         length =  0;
-
-    /* Check for valid packet length.  */
-    if ((length + 6) > packet_ptr -> nx_packet_length)
-    {
-        return;
-    }
 
     /* Loop to parse the options to look for primary DNS address.  */
     i =  6;

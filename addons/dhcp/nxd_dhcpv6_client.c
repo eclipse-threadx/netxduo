@@ -4900,7 +4900,7 @@ UINT    count =  1;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_name_string_unencode                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.2        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4937,6 +4937,9 @@ UINT    count =  1;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  11-09-2020     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            domain name labelSize issue,*/
+/*                                            resulting in version 6.1.2  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_name_string_unencode(UCHAR *data, UINT start, UCHAR *buffer, UINT size)
@@ -4953,7 +4956,7 @@ UINT    length = 0;
 
     UINT  labelSize =  *character++;
 
-        /* Is this a compression pointer or a count.  */
+        /* Check labelSize.  */
         if (labelSize <= NX_DHCPV6_LABEL_MAX)
         {
 
@@ -4970,16 +4973,11 @@ UINT    length = 0;
             *buffer++ =  '.';
             length++;
         }
-        else if ((labelSize & NX_DHCPV6_COMPRESS_MASK) == NX_DHCPV6_COMPRESS_VALUE)
-        {
-
-            /* This is a pointer, just adjust the source.  */
-            character =  data + ((labelSize & NX_DHCPV6_LABEL_MAX) << 8) + *character;
-        }
         else
         {
-
-            /* Not defined, just fail */
+            /* Not defined or in compressed form. Based on section 8 of RFC 3315, 
+                a domain name, or list of domain names, in DHCP MUST NOT be stored
+                in compressed form, so just fail */
             return(0);
         }
     }
