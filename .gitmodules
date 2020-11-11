@@ -1,0 +1,4 @@
+[submodule "addons/azure_iot/azure-sdk-for-c"]
+	path = addons/azure_iot/azure-sdk-for-c
+	url = https://github.com/Azure/azure-sdk-for-c.git
+	branch = 1.0.0
