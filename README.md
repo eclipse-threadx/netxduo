@@ -59,6 +59,8 @@ Each official release (preview or GA) will be tagged to mark the commit and push
 
 NetX Duo includes [Azure IoT Middleware for Azure RTOS](https://github.com/azure-rtos/netxduo/tree/master/addons/azure_iot), a platform specific library that acts as a binding layer between the Azure RTOS and the [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot).
 
+Additional APIs supporting Azure IoT Plug and Play are in [Beta](https://github.com/azure-rtos/netxduo/releases/tag/v6.1_beta.1).
+
 # Security
 
 Azure RTOS provides OEMs with components to secure communication and to create code and data isolation using underlying 
