@@ -29,7 +29,7 @@ endif()
 
 if(NXD_ENABLE_AZURE_IOT)
     message(STATUS "NXD_ENABLE_AZURE_IOT - defined")
-    target_link_libraries(${PROJECT_NAME} PUBLIC az_iot_hub az_iot_provisioning)
+    target_link_libraries(${PROJECT_NAME} PUBLIC az_iot_pnp az_iot_hub az_iot_provisioning)
     if(NOT NX_AZURE_DISABLE_IOT_SECURITY_MODULE)
         target_link_libraries(${PROJECT_NAME} PUBLIC iot_security_module)
     endif()

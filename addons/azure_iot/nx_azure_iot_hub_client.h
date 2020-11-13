@@ -9,7 +9,7 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* Version: 6.1 */
+/* Version: 6.1 PnP Preview 1 */
 
 /**
  * @file nx_azure_iot_hub_client.h
@@ -28,11 +28,10 @@ extern   "C" {
 #endif
 
 #include "azure/iot/az_iot_hub_client.h"
+#include "nx_azure_iot_hub_transport.h"
 #include "nx_azure_iot.h"
 #include "nx_api.h"
 #include "nx_cloud.h"
-#include "nxd_dns.h"
-#include "nxd_mqtt_client.h"
 
 /**< Value denoting a message is of "None" type */
 #define NX_AZURE_IOT_HUB_NONE                                       0x00000000
@@ -55,16 +54,6 @@ extern   "C" {
 /**< Value denoting a message is a device reported properties response */
 #define NX_AZURE_IOT_HUB_DEVICE_TWIN_REPORTED_PROPERTIES_RESPONSE   0x00000010
 
-/* Set the default timeout for DNS query.  */
-#ifndef NX_AZURE_IOT_HUB_CLIENT_DNS_TIMEOUT
-#define NX_AZURE_IOT_HUB_CLIENT_DNS_TIMEOUT                         (5 * NX_IP_PERIODIC_RATE)
-#endif /* NX_AZURE_IOT_HUB_CLIENT_DNS_TIMEOUT */
-
-/* Set the default token expiry in secs.  */
-#ifndef NX_AZURE_IOT_HUB_CLIENT_TOKEN_EXPIRY
-#define NX_AZURE_IOT_HUB_CLIENT_TOKEN_EXPIRY                        (3600)
-#endif /* NX_AZURE_IOT_HUB_CLIENT_TOKEN_EXPIRY */
-
 #ifndef NX_AZURE_IOT_HUB_CLIENT_MAX_BACKOFF_IN_SEC
 #define NX_AZURE_IOT_HUB_CLIENT_MAX_BACKOFF_IN_SEC                  (10 * 60)
 #endif /* NX_AZURE_IOT_HUB_CLIENT_MAX_BACKOFF_IN_SEC */
@@ -79,41 +68,18 @@ extern   "C" {
 
 /* Define AZ IoT Hub Client state.  */
 /**< The client is not connected */
-#define NX_AZURE_IOT_HUB_CLIENT_STATUS_NOT_CONNECTED                0
+#define NX_AZURE_IOT_HUB_CLIENT_STATUS_NOT_CONNECTED                NX_AZURE_IOT_HUB_TRANSPORT_STATUS_NOT_CONNECTED
 
 /**< The client is connecting */
-#define NX_AZURE_IOT_HUB_CLIENT_STATUS_CONNECTING                   1
+#define NX_AZURE_IOT_HUB_CLIENT_STATUS_CONNECTING                   NX_AZURE_IOT_HUB_TRANSPORT_STATUS_CONNECTING
 
 /**< The client is connected */
-#define NX_AZURE_IOT_HUB_CLIENT_STATUS_CONNECTED                    2
+#define NX_AZURE_IOT_HUB_CLIENT_STATUS_CONNECTED                    NX_AZURE_IOT_HUB_TRANSPORT_STATUS_CONNECTED
 
 /* Default TELEMETRY QoS is QoS1 */
 #ifndef NX_AZURE_IOT_HUB_CLIENT_TELEMETRY_QOS
 #define NX_AZURE_IOT_HUB_CLIENT_TELEMETRY_QOS                       NX_AZURE_IOT_MQTT_QOS_1
 #endif /* NX_AZURE_IOT_HUB_CLIENT_TELEMETRY_QOS */
-
-typedef struct NX_AZURE_IOT_THREAD_STRUCT
-{
-    TX_THREAD                           *thread_ptr;
-    struct NX_AZURE_IOT_THREAD_STRUCT   *thread_next;
-    UINT                                 thread_message_type;
-    UINT                                 thread_expected_id;     /* Used by device twin. */
-    NX_PACKET                           *thread_received_message;
-} NX_AZURE_IOT_THREAD;
-
-/* Forward declration*/
-struct NX_AZURE_IOT_HUB_CLIENT_STRUCT;
-
-typedef struct NX_AZURE_IOT_HUB_CLIENT_RECEIVE_MESSAGE_STRUCT
-{
-    NX_PACKET    *message_head;
-    NX_PACKET    *message_tail;
-    VOID        (*message_callback)(struct NX_AZURE_IOT_HUB_CLIENT_STRUCT *hub_client_ptr, VOID *args);
-    VOID         *message_callback_args;
-    UINT        (*message_process)(struct NX_AZURE_IOT_HUB_CLIENT_STRUCT *hub_client_ptr,
-                                   NX_PACKET *packet_ptr, ULONG topic_offset, USHORT topic_length);
-    UINT        (*message_enable)(struct NX_AZURE_IOT_HUB_CLIENT_STRUCT *hub_client_ptr);
-} NX_AZURE_IOT_HUB_CLIENT_RECEIVE_MESSAGE;
 
 /**
  * @brief Azure IoT Hub Client struct
@@ -121,38 +87,13 @@ typedef struct NX_AZURE_IOT_HUB_CLIENT_RECEIVE_MESSAGE_STRUCT
  */
 typedef struct NX_AZURE_IOT_HUB_CLIENT_STRUCT
 {
-    NX_AZURE_IOT                           *nx_azure_iot_ptr;
+    NX_AZURE_IOT_HUB_TRANSPORT                    nx_azure_iot_hub_client_transport;
 
-    UINT                                    nx_azure_iot_hub_client_state;
-    NX_AZURE_IOT_THREAD                    *nx_azure_iot_hub_client_thread_suspended;
-    NX_AZURE_IOT_HUB_CLIENT_RECEIVE_MESSAGE nx_azure_iot_hub_client_c2d_message;
-    NX_AZURE_IOT_HUB_CLIENT_RECEIVE_MESSAGE nx_azure_iot_hub_client_device_twin_message;
-    NX_AZURE_IOT_HUB_CLIENT_RECEIVE_MESSAGE nx_azure_iot_hub_client_device_twin_desired_properties_message;
-    NX_AZURE_IOT_HUB_CLIENT_RECEIVE_MESSAGE nx_azure_iot_hub_client_direct_method_message;
-    VOID                                  (*nx_azure_iot_hub_client_report_properties_response_callback)(
-                                           struct NX_AZURE_IOT_HUB_CLIENT_STRUCT *hub_client_ptr,
-                                           UINT request_id, UINT response_status, ULONG version, VOID *args);
-    VOID                                   *nx_azure_iot_hub_client_report_properties_response_callback_args;
+    UINT                                          nx_azure_iot_hub_client_request_id;
 
-    VOID                                  (*nx_azure_iot_hub_client_connection_status_callback)(
-                                           struct NX_AZURE_IOT_HUB_CLIENT_STRUCT *hub_client_ptr,
-                                           UINT status);
-    UINT                                  (*nx_azure_iot_hub_client_token_refresh)(
-                                           struct NX_AZURE_IOT_HUB_CLIENT_STRUCT *hub_client_ptr,
-                                           ULONG expiry_time_secs, const UCHAR *key, UINT key_len,
-                                           UCHAR *sas_buffer, UINT sas_buffer_len, UINT *sas_length);
-
-    UINT                                    nx_azure_iot_hub_client_request_id;
-    const UCHAR                            *nx_azure_iot_hub_client_symmetric_key;
-    UINT                                    nx_azure_iot_hub_client_symmetric_key_length;
-    NX_AZURE_IOT_RESOURCE                   nx_azure_iot_hub_client_resource;
-
-    volatile UCHAR                          nx_azure_iot_hub_client_device_twin_response_subscribe_ack;
-    UCHAR                                   reserved[3];
-
-    az_iot_hub_client                       iot_hub_client_core;
-    UINT                                    nx_azure_iot_hub_client_throttle_count;
-    ULONG                                   nx_azure_iot_hub_client_throttle_end_time;
+    az_iot_hub_client                             iot_hub_client_core;
+    UINT                                          nx_azure_iot_hub_client_throttle_count;
+    ULONG                                         nx_azure_iot_hub_client_throttle_end_time;
 } NX_AZURE_IOT_HUB_CLIENT;
 
 

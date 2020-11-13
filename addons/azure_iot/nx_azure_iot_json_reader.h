@@ -9,7 +9,7 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* Version: 6.1 */
+/* Version: 6.1 PnP Preview 1 */
 
 /**
  * @file nx_azure_iot_json_reader.h
@@ -54,6 +54,7 @@ typedef struct NX_AZURE_IOT_READER_STRUCT
       NX_PACKET *packet_ptr;
       az_json_reader json_reader;
       az_span span_list[NX_AZURE_IOT_READER_MAX_LIST];
+      ULONG json_length;
 } NX_AZURE_IOT_JSON_READER;
 
 /**
@@ -68,7 +69,6 @@ typedef struct NX_AZURE_IOT_READER_STRUCT
  * @retval #NX_AZURE_IOT_SUCCESS The #NX_AZURE_IOT_JSON_READER is initialized successfully.
  * @retval other Initialization failed.
  *
- * @remarks The provided json buffer must not be empty, as that is invalid JSON.
  */
 UINT nx_azure_iot_json_reader_with_buffer_init(NX_AZURE_IOT_JSON_READER *reader_ptr,
                                                const UCHAR *buffer_ptr, UINT buffer_len);
@@ -82,8 +82,6 @@ UINT nx_azure_iot_json_reader_with_buffer_init(NX_AZURE_IOT_JSON_READER *reader_
  * @return An `UINT` value indicating the result of the operation.
  * @retval #NX_AZURE_IOT_SUCCESS The #NX_AZURE_IOT_JSON_READER is initialized successfully.
  * @retval other Initialization failed.
- *
- * @remarks The provided json buffer must not be empty, as that is invalid JSON.
  *
  * @remarks Ownership of #NX_PACKET is taken by the reader.
  */

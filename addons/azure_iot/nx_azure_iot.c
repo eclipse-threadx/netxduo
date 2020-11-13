@@ -9,7 +9,7 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* Version: 6.1 */
+/* Version: 6.1 PnP Preview 1 */
 
 #include "nx_azure_iot.h"
 #ifndef NX_AZURE_DISABLE_IOT_SECURITY_MODULE
@@ -170,14 +170,6 @@ static VOID nx_azure_iot_log_listener(az_log_classification classification, az_s
 
 VOID nx_azure_iot_log_init(VOID(*log_callback)(az_log_classification classification, UCHAR *msg, UINT msg_len))
 {
-static az_log_classification const classifications[] = {AZ_LOG_IOT_AZURERTOS,
-                                                        AZ_LOG_MQTT_RECEIVED_TOPIC,
-                                                        AZ_LOG_MQTT_RECEIVED_PAYLOAD,
-                                                        AZ_LOG_IOT_RETRY,
-                                                        AZ_LOG_IOT_SAS_TOKEN,
-                                                        _az_LOG_END_OF_LIST};
-
-    _az_log_set_classifications(classifications);
     _nx_azure_iot_log_callback = log_callback;
     az_log_set_message_callback(nx_azure_iot_log_listener);
 }
@@ -1023,6 +1015,61 @@ UINT binary_key_buf_size;
 
     *output_pptr = (UCHAR *)(encoded_hash_buf);
     *output_len_ptr = strlen(encoded_hash_buf);
+
+    return(NX_AZURE_IOT_SUCCESS);
+}
+
+UINT nx_azure_iot_topic_property_append(NX_PACKET *packet_ptr,
+                                        const UCHAR *property_name, USHORT property_name_length,
+                                        const UCHAR *property_value, USHORT property_value_length,
+                                        UINT wait_option)
+{
+UINT status;
+
+    if ((packet_ptr == NX_NULL) ||
+        (property_name == NX_NULL) ||
+        (property_value == NX_NULL))
+    {
+        LogError(LogLiteralArgs("Property append failed: INVALID POINTER"));
+        return(NX_AZURE_IOT_INVALID_PARAMETER);
+    }
+
+    if (*(packet_ptr -> nx_packet_append_ptr - 1) != '/')
+    {
+        status = nx_packet_data_append(packet_ptr, "&", 1,
+                                       packet_ptr -> nx_packet_pool_owner,
+                                       wait_option);
+        if (status)
+        {
+            LogError(LogLiteralArgs("Property append of & failed"));
+            return(status);
+        }
+    }
+
+    status = nx_packet_data_append(packet_ptr, (VOID *)property_name, (UINT)property_name_length,
+                                   packet_ptr -> nx_packet_pool_owner, wait_option);
+    if (status)
+    {
+        LogError(LogLiteralArgs("Property name append failed"));
+        return(status);
+    }
+
+    status = nx_packet_data_append(packet_ptr, "=", 1,
+                                   packet_ptr -> nx_packet_pool_owner,
+                                   wait_option);
+    if (status)
+    {
+        LogError(LogLiteralArgs("Property append of = failed"));
+        return(status);
+    }
+
+    status = nx_packet_data_append(packet_ptr, (VOID *)property_value, (UINT)property_value_length,
+                                   packet_ptr -> nx_packet_pool_owner, wait_option);
+    if (status)
+    {
+        LogError(LogLiteralArgs("Property value append failed"));
+        return(status);
+    }
 
     return(NX_AZURE_IOT_SUCCESS);
 }

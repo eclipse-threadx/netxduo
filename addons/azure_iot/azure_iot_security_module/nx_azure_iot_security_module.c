@@ -346,7 +346,7 @@ NX_AZURE_IOT_RESOURCE *resource_ptr;
                 NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr = (NX_AZURE_IOT_HUB_CLIENT *)resource_ptr->resource_data_ptr;
 
                 /* Filter only connected IoT Hubs. */
-                if (hub_client_ptr->nx_azure_iot_hub_client_state == NX_AZURE_IOT_HUB_CLIENT_STATUS_CONNECTED)
+                if (hub_client_ptr->nx_azure_iot_hub_client_transport.nx_azure_iot_hub_transport_state == NX_AZURE_IOT_HUB_TRANSPORT_STATUS_CONNECTED)
                 {
                     exists_connected_iot_hub = true;
 
@@ -583,7 +583,7 @@ NX_AZURE_IOT_RESOURCE *resource_ptr;
             NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr = (NX_AZURE_IOT_HUB_CLIENT *)resource_ptr->resource_data_ptr;
 
             /* Check IoT Hub client connectivity. */
-            if (hub_client_ptr->nx_azure_iot_hub_client_state == NX_AZURE_IOT_HUB_CLIENT_STATUS_CONNECTED)
+            if (hub_client_ptr->nx_azure_iot_hub_client_transport.nx_azure_iot_hub_transport_state == NX_AZURE_IOT_HUB_TRANSPORT_STATUS_CONNECTED)
             {
                 return true;
             }

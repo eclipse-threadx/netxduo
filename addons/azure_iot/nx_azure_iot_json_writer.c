@@ -9,7 +9,7 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* Version: 6.1 */
+/* Version: 6.1 PnP Preview 1 */
 
 #include "nx_azure_iot_json_writer.h"
 
@@ -344,8 +344,6 @@ UINT nx_azure_iot_json_writer_append_begin_object(NX_AZURE_IOT_JSON_WRITER *json
         return(NX_AZURE_IOT_SDK_CORE_ERROR);
     }
 
-    json_writer_ptr -> object_depth++;
-
     nx_azure_iot_json_writer_packet_update(json_writer_ptr);
 
     return(NX_AZURE_IOT_SUCCESS);
@@ -381,8 +379,6 @@ UINT nx_azure_iot_json_writer_append_end_object(NX_AZURE_IOT_JSON_WRITER *json_w
     {
         return(NX_AZURE_IOT_SDK_CORE_ERROR);
     }
-
-    json_writer_ptr -> object_depth--;
 
     nx_azure_iot_json_writer_packet_update(json_writer_ptr);
 

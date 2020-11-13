@@ -9,7 +9,7 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* Version: 6.1 */
+/* Version: 6.1 PnP Preview 1 */
 
 #include "nx_azure_iot_provisioning_client.h"
 

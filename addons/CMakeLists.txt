@@ -52,6 +52,8 @@ if(NXD_ENABLE_AZURE_IOT)
          ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_json_reader.c
          ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_json_writer.c
          ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_provisioning_client.c
+         ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_pnp_client.c
+         ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_hub_transport.c
     )
     set(ENV{AZ_SDK_C_NO_SAMPLES} TRUE)
     set(NX_AZURE_DISABLE_IOT_SECURITY_MODULE OFF CACHE BOOL "Disable Azure IoT Security Module (default is OFF)")
