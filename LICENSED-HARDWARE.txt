@@ -17,6 +17,10 @@ STMicroelectronics:
     STM32 MCUs
     STM32 MPUs
 
+MediaTek:
+
+    MT3620 MCU (Azure Sphere)
+
 Microchip:
 
     PIC 32-bit MCUs
