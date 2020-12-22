@@ -187,7 +187,6 @@ NX_TCP_SESSION *session_ptr;
                                                &session_ptr -> nx_tcp_session_socket);
         if((status != NX_SUCCESS) && (status != NX_CONNECTION_PENDING))
         {
-            printf("%d, %d\n", status, __LINE__);
             return NX_TCPSERVER_FAIL;
         }
 
@@ -202,7 +201,6 @@ NX_TCP_SESSION *session_ptr;
                                                &server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_socket);
         if((status != NX_SUCCESS) && (status != NX_CONNECTION_PENDING))
         {
-            printf("%d, %d\n", status, __LINE__);
             return NX_TCPSERVER_FAIL;
         }
     }
