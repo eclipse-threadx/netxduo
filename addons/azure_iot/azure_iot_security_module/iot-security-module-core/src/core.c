@@ -123,7 +123,7 @@ asc_result_t core_collect(core_t *core_ptr)
                 current_collector=current_collector->next
             ) {
             uint32_t last_collected = collector_get_last_collected_timestamp(current_collector);
-            double interval = priority_collectors_get_interval(prioritized_collectors);
+            uint32_t interval = priority_collectors_get_interval(prioritized_collectors);
 
             if (current_snapshot - last_collected >= interval) {
                 time_passed = true;

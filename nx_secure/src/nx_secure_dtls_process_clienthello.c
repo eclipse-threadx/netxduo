@@ -40,7 +40,7 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_clienthello                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -90,6 +90,10 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 /*                                            renegotiation bug,          */
 /*                                            improved negotiation logic, */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_clienthello(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
@@ -242,6 +246,12 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
     /* Compression methods length - one byte. For now we only support the NULL method. */
     compression_methods_length = packet_buffer[0];
     packet_buffer += 1;
+
+    /* Message length overflow. */
+    if (((UINT)(packet_buffer - packet_buffer_start + compression_methods_length)) > message_length)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
 
     /* Make sure NULL compression method is supported. */
     status = NX_SECURE_TLS_BAD_COMPRESSION_METHOD;

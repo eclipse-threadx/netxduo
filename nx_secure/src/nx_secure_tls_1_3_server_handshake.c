@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_server_handshake                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -99,6 +99,10 @@
 /*                                            fixed certificate buffer    */
 /*                                            allocation,                 */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -108,7 +112,7 @@ UINT _nx_secure_tls_1_3_server_handshake(NX_SECURE_TLS_SESSION *tls_session, UCH
 #ifndef NX_SECURE_TLS_SERVER_DISABLED
 UINT                                  status;
 USHORT                                message_type;
-USHORT                                header_bytes;
+UINT                                  header_bytes;
 UINT                                  message_length;
 NX_PACKET                            *send_packet;
 NX_PACKET_POOL                       *packet_pool;
@@ -175,7 +179,14 @@ NX_SECURE_TLS_SERVER_STATE            old_server_state;
     /* Save a pointer to the start of our packet for the hash that happens below. */
     packet_start = packet_buffer;
 
-    _nx_secure_tls_process_handshake_header(packet_buffer, &message_type, &header_bytes, &message_length);
+    header_bytes = data_length;
+
+    status = _nx_secure_tls_process_handshake_header(packet_buffer, &message_type, &header_bytes, &message_length);
+
+    if (status != NX_SECURE_TLS_SUCCESS)
+    {
+        return(status);
+    }
 
     /* Check for fragmented records. */
     if((message_length + header_bytes) > data_length)

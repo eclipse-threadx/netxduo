@@ -302,7 +302,7 @@ az_result       core_result;
     /* Build client id.  */
     buffer_length = buffer_size;
     core_result = az_iot_hub_client_get_client_id(&(hub_client_ptr -> iot_hub_client_core),
-                                                  (CHAR *)buffer_ptr, buffer_length, &buffer_length);
+                                                  (CHAR *)buffer_ptr, buffer_length, (size_t *)&buffer_length);
     if (az_result_failed(core_result))
     {
 
@@ -322,7 +322,7 @@ az_result       core_result;
     /* Build user name.  */
     buffer_length = buffer_size;
     core_result = az_iot_hub_client_get_user_name(&hub_client_ptr -> iot_hub_client_core,
-                                                  (CHAR *)buffer_ptr, buffer_length, &buffer_length);
+                                                  (CHAR *)buffer_ptr, buffer_length, (size_t *)&buffer_length);
     if (az_result_failed(core_result))
     {
 
@@ -786,7 +786,7 @@ az_result core_result;
     topic_length = (UINT)(packet_ptr -> nx_packet_data_end - packet_ptr -> nx_packet_prepend_ptr);
     core_result = az_iot_hub_client_telemetry_get_publish_topic(&hub_client_ptr -> iot_hub_client_core,
                                                                 NULL, (CHAR *)packet_ptr -> nx_packet_prepend_ptr,
-                                                                topic_length, &topic_length);
+                                                                topic_length, (size_t *)&topic_length);
     if (az_result_failed(core_result))
     {
         LogError(LogLiteralArgs("IoTHub client telemetry message create fail with error status: %d"), core_result);
@@ -1569,7 +1569,7 @@ USHORT length;
 
     core_result = az_iot_hub_client_twin_patch_get_publish_topic(&(hub_client_ptr -> iot_hub_client_core),
                                                                  request_id_span, (CHAR *)packet_ptr -> nx_packet_prepend_ptr,
-                                                                 buffer_size, &topic_length);
+                                                                 buffer_size, (size_t *)&topic_length);
     if (az_result_failed(core_result))
     {
         LogError(LogLiteralArgs("IoTHub client reported state send fail: NX_AZURE_IOT_HUB_CLIENT_TOPIC_SIZE is too small."));
@@ -1741,7 +1741,7 @@ az_result core_result;
 
     core_result = az_iot_hub_client_twin_document_get_publish_topic(&(hub_client_ptr -> iot_hub_client_core),
                                                                     request_id_span, (CHAR *)packet_ptr -> nx_packet_prepend_ptr,
-                                                                    buffer_size, &topic_length);
+                                                                    buffer_size, (size_t *)&topic_length);
     if (az_result_failed(core_result))
     {
         LogError(LogLiteralArgs("IoTHub client device twin get topic fail."));
@@ -2429,7 +2429,7 @@ az_result core_result;
     buffer_span = az_span_create(output_ptr, (INT)output_len);
     core_result= az_iot_hub_client_sas_get_password(&(hub_client_ptr -> iot_hub_client_core),
                                                     expiry_time_secs, buffer_span, AZ_SPAN_EMPTY,
-                                                    (CHAR *)sas_buffer, sas_buffer_len, &sas_buffer_len);
+                                                    (CHAR *)sas_buffer, sas_buffer_len, (size_t *)&sas_buffer_len);
     if (az_result_failed(core_result))
     {
         LogError(LogLiteralArgs("IoTHub failed to generate token with error status: %d"), core_result);
@@ -2622,7 +2622,7 @@ az_result core_result;
     core_result = az_iot_hub_client_methods_response_get_publish_topic(&(hub_client_ptr -> iot_hub_client_core),
                                                                        request_id_span, (USHORT)status_code,
                                                                        (CHAR *)packet_ptr -> nx_packet_prepend_ptr,
-                                                                       topic_length, &topic_length);
+                                                                       topic_length, (size_t *)&topic_length);
     if (az_result_failed(core_result))
     {
         LogError(LogLiteralArgs("Failed to create the method response topic"));

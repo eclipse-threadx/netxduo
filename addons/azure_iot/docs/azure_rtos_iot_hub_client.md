@@ -167,7 +167,7 @@ UINT nx_azure_iot_hub_client_model_id_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_pt
 ```
 **Description**
 
-<p>This routine sets the Device Twin model id. Note: THIS FUNCTION IS TEMPORARY. IT IS SUBJECT TO CHANGE OR BE REMOVED IN THE FUTURE.</p>
+<p>This routine sets the Device Twin model id.</p>
 
 **Parameters**
 

@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -52,6 +52,11 @@
 /*                                            bug, fixed certificate      */
 /*                                            buffer allocation,          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            updated product constants,  */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -112,7 +117,7 @@ extern   "C" {
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
 #define NETX_SECURE_MINOR_VERSION                       1
-#define NETX_SECURE_PATCH_VERSION                       0
+#define NETX_SECURE_PATCH_VERSION                       3
 
 /* The following symbols are defined for backward compatibility reasons. */
 #define EL_PRODUCT_NETX_SECURE
@@ -1390,7 +1395,7 @@ UINT _nx_secure_tls_process_header(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET
                                    ULONG record_offset, USHORT *message_type, UINT *length,
                                    UCHAR *header_data, USHORT *header_length);
 UINT _nx_secure_tls_process_handshake_header(UCHAR *packet_buffer, USHORT *message_type,
-                                             USHORT *header_size, UINT *message_length);
+                                             UINT *header_size, UINT *message_length);
 UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
                                    ULONG *bytes_processed, ULONG wait_option);
 UINT _nx_secure_tls_process_remote_certificate(NX_SECURE_TLS_SESSION *tls_session,

@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_client_handshake                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -110,6 +110,11 @@
 /*                                            fixed certificate buffer    */
 /*                                            allocation,                 */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification, added null    */
+/*                                            pointer checking,           */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_client_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
@@ -118,7 +123,7 @@ UINT _nx_secure_dtls_client_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHA
 #ifndef NX_SECURE_TLS_CLIENT_DISABLED
 UINT                   status;
 USHORT                 message_type = NX_SECURE_TLS_INVALID_MESSAGE;
-USHORT                 header_bytes;
+UINT                   header_bytes;
 UINT                   message_length;
 UCHAR                 *data_start = NX_NULL;
 NX_PACKET             *send_packet = NX_NULL;
@@ -146,6 +151,7 @@ NX_SECURE_TLS_SESSION *tls_session;
 
     while (data_length > 0)
     {
+        header_bytes = data_length;
 
         /* First, process the handshake message to get our state and any data therein. */
         status = _nx_secure_dtls_process_handshake_header(packet_buffer, &message_type, &header_bytes,
@@ -167,6 +173,12 @@ NX_SECURE_TLS_SESSION *tls_session;
             {
                 /* Re-transmitted message. */
                 return(NX_SUCCESS);
+            }
+
+            /* Check the fragment_length with the lenght of packet buffer. */
+            if ((header_bytes + fragment_length) > data_length)
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
             }
 
             /* Check available area of buffer. */
@@ -381,7 +393,7 @@ NX_SECURE_TLS_SESSION *tls_session;
 
             /* Get ClientHello packet from header of transmit queue. */
             send_packet = dtls_session -> nx_secure_dtls_transmit_sent_head;
-            if (send_packet -> nx_packet_queue_next != ((NX_PACKET *)NX_DRIVER_TX_DONE))
+            if ((send_packet == NX_NULL) || (send_packet -> nx_packet_queue_next != ((NX_PACKET *)NX_DRIVER_TX_DONE)))
             {
 
                 /* Invalid packet. */
@@ -592,8 +604,8 @@ NX_SECURE_TLS_SESSION *tls_session;
             return(error_number);
         }
 
-        /* Advance the buffer pointer past the message. */
-        packet_buffer += (message_length + header_bytes);
+        /* Advance the buffer pointer past the fragment. */
+        packet_buffer += (fragment_length + header_bytes);
     } /* End while. */
     return(NX_SUCCESS);
 #else /* TLS Client disabled. */

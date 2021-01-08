@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_handshake_header             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -46,7 +46,8 @@
 /*                                                                        */
 /*    packet_buffer                         Pointer to incoming packet    */
 /*    message_type                          Return message type value     */
-/*    header_size                           Return size of header         */
+/*    header_size                           Input size of packet buffer   */
+/*                                            Return size of header       */
 /*    message_length                        Return length of message      */
 /*                                                                        */
 /*  OUTPUT                                                                */
@@ -69,11 +70,21 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_handshake_header(UCHAR *packet_buffer, USHORT *message_type,
-                                             USHORT *header_size, UINT *message_length)
+                                             UINT *header_size, UINT *message_length)
 {
+
+    /* Check buffer length. */
+    if (*header_size < 4)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
 
     /* The message being passed in to this function should already be stripped of the TLS header
        so the first byte in the packet/record is our handshake message type. */
