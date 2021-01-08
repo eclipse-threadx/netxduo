@@ -14,6 +14,7 @@ set(SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/ftp/nxd_ftp_server.c
 	${CMAKE_CURRENT_LIST_DIR}/http/nxd_http_client.c
 	${CMAKE_CURRENT_LIST_DIR}/http/nxd_http_server.c
+	${CMAKE_CURRENT_LIST_DIR}/lwm2m/nx_lwm2m_client.c
 	${CMAKE_CURRENT_LIST_DIR}/mdns/nxd_mdns.c
 	${CMAKE_CURRENT_LIST_DIR}/mqtt/nxd_mqtt_client.c
 	${CMAKE_CURRENT_LIST_DIR}/nat/nx_nat.c
@@ -21,6 +22,7 @@ set(SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/ppp/nx_ppp.c
 	${CMAKE_CURRENT_LIST_DIR}/pppoe/nx_pppoe_client.c
 	${CMAKE_CURRENT_LIST_DIR}/pppoe/nx_pppoe_server.c
+	${CMAKE_CURRENT_LIST_DIR}/ptp/nxd_ptp_client.c
 	${CMAKE_CURRENT_LIST_DIR}/smtp/nxd_smtp_client.c
 	${CMAKE_CURRENT_LIST_DIR}/snmp/nx_des.c
 	${CMAKE_CURRENT_LIST_DIR}/snmp/nx_sha1.c
@@ -84,12 +86,14 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/dns
     ${CMAKE_CURRENT_LIST_DIR}/ftp
     ${CMAKE_CURRENT_LIST_DIR}/http
+    ${CMAKE_CURRENT_LIST_DIR}/lwm2m
     ${CMAKE_CURRENT_LIST_DIR}/mdns
     ${CMAKE_CURRENT_LIST_DIR}/mqtt
     ${CMAKE_CURRENT_LIST_DIR}/nat
     ${CMAKE_CURRENT_LIST_DIR}/pop3
     ${CMAKE_CURRENT_LIST_DIR}/ppp
     ${CMAKE_CURRENT_LIST_DIR}/pppoe
+    ${CMAKE_CURRENT_LIST_DIR}/ptp
     ${CMAKE_CURRENT_LIST_DIR}/smtp
     ${CMAKE_CURRENT_LIST_DIR}/snmp
     ${CMAKE_CURRENT_LIST_DIR}/sntp

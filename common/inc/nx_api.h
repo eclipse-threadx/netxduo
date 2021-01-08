@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_api.h                                            PORTABLE C      */
-/*                                                           6.1.2        */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -52,6 +52,12 @@
 /*  11-09-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            updated product constants,  */
 /*                                            resulting in version 6.1.2  */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), added    */
+/*                                            PTP timestamp capability,   */
+/*                                            added function to convert   */
+/*                                            string to unsigned integer, */
+/*                                            updated product constants,  */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -459,7 +465,7 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 #define AZURE_RTOS_NETXDUO
 #define NETXDUO_MAJOR_VERSION                    6
 #define NETXDUO_MINOR_VERSION                    1
-#define NETXDUO_PATCH_VERSION                    2
+#define NETXDUO_PATCH_VERSION                    3
 
 /* Define the following symbols for backward compatibility */
 #define EL_PRODUCT_NETXDUO
@@ -1301,6 +1307,7 @@ typedef struct NX_IPV6_DEFAULT_ROUTER_ENTRY_STRUCT
 #define NX_INTERFACE_CAPABILITY_ICMPV6_TX_CHECKSUM 0x00000200
 #define NX_INTERFACE_CAPABILITY_IGMP_TX_CHECKSUM   0x00000400
 #define NX_INTERFACE_CAPABILITY_IGMP_RX_CHECKSUM   0x00000800
+#define NX_INTERFACE_CAPABILITY_PTP_TIMESTAMP      0x00001000
 #endif /* NX_ENABLE_INTERFACE_CAPABILITY */
 
 #define NX_IP_VERSION_V4                           0x4
@@ -3803,6 +3810,7 @@ VOID _nx_ip_driver_link_status_event(NX_IP *ip_ptr, UINT interface_index);
 
 /* Utility functions.  */
 UINT _nx_utility_string_length_check(CHAR *input_string, UINT *string_length, UINT max_string_length);
+UINT _nx_utility_string_to_uint(CHAR *input_string, UINT string_length, UINT *number);
 
 /* Determine if a C++ compiler is being used.  If so, complete the standard
    C conditional started above.  */

@@ -2558,7 +2558,7 @@ CHAR *work_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_parse_next_option                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2581,7 +2581,7 @@ CHAR *work_ptr;
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
-/*    atoi                                 Convert ascii number to integer*/ 
+/*    _nx_utility_string_to_uint           Convert ascii number to integer*/
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -2594,6 +2594,9 @@ CHAR *work_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            obsolescent functions,      */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_parse_next_option(CHAR **option_list, UINT *option, UINT length)
@@ -2656,10 +2659,8 @@ CHAR *buffer;
 
     *option_list += j;
 
-    /* Convert the number string to an actual integer. */
-    *option = (UINT) atoi(num_string);
-
-    return(NX_SUCCESS);
+    /* Convert the number string to an actual unsigned integer. */
+    return(_nx_utility_string_to_uint(num_string, buffer_index, option));
 }
 
 

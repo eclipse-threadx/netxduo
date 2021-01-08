@@ -227,8 +227,6 @@ UINT nx_azure_iot_hub_client_symmetric_key_set(NX_AZURE_IOT_HUB_CLIENT *hub_clie
 /**
  * @brief Set Device Twin model id in the IoT Hub client.
  *
- * @warning THIS FUNCTION IS TEMPORARY. IT IS SUBJECT TO CHANGE OR BE REMOVED IN THE FUTURE.
- *
  * @param[in] hub_client_ptr A pointer to a #NX_AZURE_IOT_HUB_CLIENT.
  * @param[in] model_id_ptr A pointer to a model id.
  * @param[in] model_id_length Length of `model id`.

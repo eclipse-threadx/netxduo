@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_server_handshake                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -48,6 +48,7 @@
 /*                                                                        */
 /*    dtls_session                          TLS control block             */
 /*    packet_buffer                         Pointer into record buffer    */
+/*    data_length                           Length of data                */
 /*    wait_option                           Controls timeout actions      */
 /*                                                                        */
 /*  OUTPUT                                                                */
@@ -110,15 +111,19 @@
 /*                                            fixed certificate buffer    */
 /*                                            allocation,                 */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_server_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
-                                      ULONG wait_option)
+                                      UINT data_length, ULONG wait_option)
 {
 #ifndef NX_SECURE_TLS_SERVER_DISABLED
 UINT                                  status;
 USHORT                                message_type;
-USHORT                                header_bytes;
+UINT                                  header_bytes;
 UINT                                  message_length;
 UINT                                  message_seq;
 UINT                                  fragment_offset;
@@ -150,6 +155,8 @@ UCHAR                                 *fragment_buffer;
     /* Use the TLS packet buffer for fragment processing. */
     fragment_buffer = tls_session->nx_secure_tls_packet_buffer;
 
+    header_bytes = data_length;
+
     /* First, process the handshake message to get our state and any data therein. */
     status = _nx_secure_dtls_process_handshake_header(packet_buffer, &message_type, &header_bytes,
                                                       &message_length, &message_seq, &fragment_offset, &fragment_length);
@@ -176,6 +183,12 @@ UCHAR                                 *fragment_buffer;
         if (fragment_length > dtls_session -> nx_secure_dtls_fragment_length)
         {
             return(1);
+        }
+
+        /* Check the fragment_length with the lenght of packet buffer. */
+        if ((header_bytes + fragment_length) > data_length)
+        {
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
         }
 
         /* Check available area of buffer. */

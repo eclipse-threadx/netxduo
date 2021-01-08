@@ -38,7 +38,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ipv6_process_hop_by_hop_option                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -73,6 +73,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer read overflow check, */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ipv6_process_hop_by_hop_option(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -86,6 +89,14 @@ NX_IPV6_HOP_BY_HOP_OPTION *option;
 
     /* Add debug information. */
     NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
+
+    /*  Make sure there's no OOB when reading Hdr Ext Len from the packet buffer. */
+    if ((UINT)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) < 2)
+    {
+
+        /* return an error code. */
+        return(NX_OPTION_HEADER_ERROR);
+    }
 
     /* Read the Hdr Ext Len field. */
     header_length = *(packet_ptr -> nx_packet_prepend_ptr + 1);

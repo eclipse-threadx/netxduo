@@ -1523,7 +1523,7 @@ ULONG                   events;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ftp_server_command_process                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1595,6 +1595,9 @@ ULONG                   events;
 /*                                            packet length verification, */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_command_process(NX_FTP_SERVER *ftp_server_ptr)
@@ -1942,6 +1945,18 @@ ULONG                   block_size;
                     break;
                 }
 
+                /* Check packet length.  */
+                if (packet_ptr -> nx_packet_length == 0)
+                {
+
+                    /* Empty message.  */
+
+                    /* Now send an error response to the client.  */
+                    _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
+                                NX_FTP_CODE_BAD_FILE, "File Open Fail");
+                    break;
+                }
+
                 /* Change to the default directory of this connection.  */
                 fx_directory_local_path_restore(ftp_server_ptr -> nx_ftp_server_media_ptr, &(client_req_ptr -> nx_ftp_client_local_path));
 
@@ -2223,6 +2238,18 @@ ULONG                   block_size;
                     break;
                 }
 
+                /* Check packet length.  */
+                if (packet_ptr -> nx_packet_length == 0)
+                {
+
+                    /* Empty message.  */
+
+                    /* Now send an error response to the client.  */
+                    _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
+                                NX_FTP_CODE_BAD_FILE, "File Open Failed");
+                    break;
+                }
+
                 /* Change to the default directory of this connection.  */
                 fx_directory_local_path_restore(ftp_server_ptr -> nx_ftp_server_media_ptr, &(client_req_ptr -> nx_ftp_client_local_path));
 
@@ -2401,6 +2428,18 @@ ULONG                   block_size;
 
             case NX_FTP_RNFR:
             {
+
+                /* Check packet length.  */
+                if (packet_ptr -> nx_packet_length == 0)
+                {
+
+                    /* Empty message.  */
+
+                    /* Now send an error response to the client.  */
+                    _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
+                                NX_FTP_CODE_BAD_FILE, "Rename File not found");
+                    break;
+                }
             
                 /* Change to the default directory of this connection.  */
                 fx_directory_local_path_restore(ftp_server_ptr -> nx_ftp_server_media_ptr, &(client_req_ptr -> nx_ftp_client_local_path));
@@ -2467,6 +2506,18 @@ ULONG                   block_size;
 
             case NX_FTP_RNTO:
             {
+
+                /* Check packet length.  */
+                if (packet_ptr -> nx_packet_length == 0)
+                {
+
+                    /* Empty message.  */
+
+                    /* Now send an error response to the client.  */
+                    _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
+                                NX_FTP_CODE_BAD_FILE, "Rename failed");
+                    break;
+                }
             
                 /* Change to the default directory of this connection.  */
                 fx_directory_local_path_restore(ftp_server_ptr -> nx_ftp_server_media_ptr, &(client_req_ptr -> nx_ftp_client_local_path));
@@ -2537,6 +2588,18 @@ ULONG                   block_size;
 
             case NX_FTP_DELE:
             {
+
+                /* Check packet length.  */
+                if (packet_ptr -> nx_packet_length == 0)
+                {
+
+                    /* Empty message.  */
+
+                    /* Now send an error response to the client.  */
+                    _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
+                                NX_FTP_CODE_BAD_FILE, "Delete Failed");
+                    break;
+                }
             
                 /* Change to the default directory of this connection.  */
                 fx_directory_local_path_restore(ftp_server_ptr -> nx_ftp_server_media_ptr, &(client_req_ptr -> nx_ftp_client_local_path));
@@ -2593,6 +2656,18 @@ ULONG                   block_size;
 
             case NX_FTP_RMD:
             {
+
+                /* Check packet length.  */
+                if (packet_ptr -> nx_packet_length == 0)
+                {
+
+                    /* Empty message.  */
+
+                    /* Now send an error response to the client.  */
+                    _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
+                                NX_FTP_CODE_BAD_FILE, "Delete Directory Fail");
+                    break;
+                }
             
                 /* Change to the default directory of this connection.  */
                 fx_directory_local_path_restore(ftp_server_ptr -> nx_ftp_server_media_ptr, &(client_req_ptr -> nx_ftp_client_local_path));
@@ -2655,6 +2730,18 @@ ULONG                   block_size;
 
             case NX_FTP_MKD:
             {
+
+                /* Check packet length.  */
+                if (packet_ptr -> nx_packet_length == 0)
+                {
+
+                    /* Empty message.  */
+
+                    /* Now send an error response to the client.  */
+                    _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
+                                NX_FTP_CODE_BAD_FILE, "Directory Create failed");
+                    break;
+                }
             
                 /* Change to the default directory of this connection.  */
                 fx_directory_local_path_restore(ftp_server_ptr -> nx_ftp_server_media_ptr, &(client_req_ptr -> nx_ftp_client_local_path));
@@ -2758,6 +2845,18 @@ ULONG                   block_size;
                                 NX_FTP_CODE_BAD_TYPE, "Only ASCII Listing allowed");
 
                     /* And we are done processing.  */
+                    break;
+                }
+
+                /* Check packet length.  */
+                if (packet_ptr -> nx_packet_length == 0)
+                {
+
+                    /* Empty message.  */
+
+                    /* Now send an error response to the client.  */
+                    _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
+                                NX_FTP_CODE_BAD_FILE, "List bad Directory");
                     break;
                 }
 
@@ -3131,6 +3230,18 @@ ULONG                   block_size;
                                 NX_FTP_CODE_BAD_TYPE, "Only ASCII Listing allowed");
 
                     /* And we are done processing.  */
+                    break;
+                }
+
+                /* Check packet length.  */
+                if (packet_ptr -> nx_packet_length == 0)
+                {
+
+                    /* Empty message.  */
+
+                    /* Now send an error response to the client.  */
+                    _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
+                                NX_FTP_CODE_BAD_FILE, "Bad Directory");
                     break;
                 }
 
@@ -4113,6 +4224,9 @@ ULONG                   block_size;
                 /* If CDUP command, create the "up one directory" pathname string.  */
                 if (ftp_command == NX_FTP_CDUP)
                 {
+
+                    /* Move the pointer to make sure there is enough memory to store the data.  */
+                    buffer_ptr -= 3;
                     buffer_ptr[0] = '.';
                     buffer_ptr[1] = '.';
                     buffer_ptr[2] = NX_NULL;
@@ -4121,6 +4235,18 @@ ULONG                   block_size;
                 /* Otherwise CWD command, parse the pathname string.  */
                 else
                 {
+
+                    /* Check packet length.  */
+                    if (packet_ptr -> nx_packet_length == 0)
+                    {
+
+                        /* Empty message.  */
+
+                        /* Now send an error response to the client.  */
+                        _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
+                                    NX_FTP_CODE_BAD_FILE, "Change Dir Fail");
+                        break;
+                    }
 
                     /* Find the end of the message.  */
                     j =  0;
@@ -4993,7 +5119,7 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ftp_server_parse_command                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5027,6 +5153,9 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_server_parse_command(NX_PACKET *packet_ptr)
@@ -5035,6 +5164,14 @@ UINT  _nx_ftp_server_parse_command(NX_PACKET *packet_ptr)
 UINT    i;
 char    *buffer_ptr;
 
+
+    /* Check packet length.  */
+    if (packet_ptr -> nx_packet_length == 0)
+    {
+
+        /* Empty message, just return INVALID.  */
+        return(NX_FTP_INVALID);
+    }
 
     /* Setup pointer to command buffer area.  */
     buffer_ptr =  (char *) packet_ptr -> nx_packet_prepend_ptr;
@@ -5719,7 +5856,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ftp_utility_parse_IPv6_address                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5763,6 +5900,9 @@ UINT status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            colons count verification,  */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ftp_utility_parse_IPv6_address(CHAR *buffer_ptr, UINT buffer_length, NXD_ADDRESS *ipduo_address)
@@ -5898,6 +6038,12 @@ ULONG  temp;
         else if (buffer_ptr[j] == ':')
         {
 
+            /* Check if colons is valid.  */
+            if (colons >= 7)
+            {
+                return NX_FTP_INVALID_ADDRESS;
+            }
+
             /* Increment the colon count. */
             colons++;
 
@@ -5963,6 +6109,12 @@ ULONG  temp;
                     m++;
                 }
                 
+                /* Check if colons is valid. */
+                if (actual_colons_left >= remaining_colons)
+                {
+                    return NX_FTP_INVALID_ADDRESS;
+                }
+
                 /* Compute the number of zeros to insert into the NXD_ADDRESS IPv6 ULONG array. */
                 number_consecutive_zeros_to_add = remaining_colons - actual_colons_left;
               

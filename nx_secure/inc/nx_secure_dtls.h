@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_dtls.h                                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -43,6 +43,10 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -437,7 +441,7 @@ UINT _nx_secure_dtls_client_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHA
 
 
 UINT _nx_secure_dtls_process_handshake_header(UCHAR *packet_buffer, USHORT *message_type,
-                                              USHORT *header_size, UINT *message_length,
+                                              UINT *header_size, UINT *message_length,
                                               UINT *message_seq, UINT *fragment_offset,
                                               UINT *fragment_length);
 
@@ -463,7 +467,7 @@ UINT _nx_secure_dtls_send_record(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET
                                  UCHAR record_type, ULONG wait_option);
 
 UINT _nx_secure_dtls_server_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
-                                      ULONG wait_option);
+                                      UINT data_length, ULONG wait_option);
 
 
 UINT _nx_secure_dtls_send_clienthello(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *send_packet);

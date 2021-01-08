@@ -638,13 +638,15 @@ az_result core_result;
     if (register_response == NULL)
     {
         core_result = az_iot_provisioning_client_register_get_publish_topic(&(prov_client_ptr -> nx_azure_iot_provisioning_client_core),
-                                                                            (CHAR *)buffer_ptr, buffer_size, &mqtt_topic_length);
+                                                                            (CHAR *)buffer_ptr, buffer_size,
+                                                                            (size_t *)&mqtt_topic_length);
     }
     else
     {
         core_result = az_iot_provisioning_client_query_status_get_publish_topic(&(prov_client_ptr -> nx_azure_iot_provisioning_client_core),
                                                                                 register_response -> operation_id, (CHAR *)buffer_ptr,
-                                                                                buffer_size, &mqtt_topic_length);
+                                                                                buffer_size,
+                                                                                (size_t *)&mqtt_topic_length);
     }
 
     if (az_result_failed(core_result))
@@ -772,7 +774,7 @@ az_span policy_name = AZ_SPAN_LITERAL_FROM_STR(NX_AZURE_IOT_PROVISIONING_CLIENT_
                                                               buffer_span, expiry_time_secs, policy_name,
                                                               (CHAR *)resource_ptr -> resource_mqtt_sas_token,
                                                               prov_client_ptr -> nx_azure_iot_provisioning_client_sas_token_buff_size,
-                                                              &(resource_ptr -> resource_mqtt_sas_token_length));
+                                                              (size_t *)&(resource_ptr -> resource_mqtt_sas_token_length));
     if (az_result_failed(core_result))
     {
         LogError(LogLiteralArgs("IoTProvisioning failed to generate token with error : %d"), core_result);
@@ -892,7 +894,8 @@ az_span registration_id_span = az_span_create((UCHAR *)registration_id, (INT)reg
 
     /* Build user name.  */
     if (az_result_failed(az_iot_provisioning_client_get_user_name(&(prov_client_ptr -> nx_azure_iot_provisioning_client_core),
-                                                                  (CHAR *)buffer_ptr, buffer_size, &mqtt_user_name_length)))
+                                                                  (CHAR *)buffer_ptr, buffer_size,
+                                                                  (size_t *)&mqtt_user_name_length)))
     {
         LogError(LogLiteralArgs("IoTProvisioning client connect fail: NX_AZURE_IOT_Provisioning_CLIENT_USERNAME_SIZE is too small."));
         nx_azure_iot_buffer_free(buffer_context);

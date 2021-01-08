@@ -25,7 +25,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_mdns.h                                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -45,6 +45,10 @@
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            buffer length verification, */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s),          */
+/*                                            prevented infinite loop in  */
+/*                                            name compression,           */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -377,6 +381,11 @@ extern   "C" {
 #ifndef NX_MDNS_RR_DELETE_DELAY_TIMER_COUNT
 #define NX_MDNS_RR_DELETE_DELAY_TIMER_COUNT     NX_IP_PERIODIC_RATE
 #endif /* NX_MDNS_RR_DELETE_DELAY_TIMER_COUNT  */
+
+/* Define the maximum number of pointers allowed in name compression.  */
+#ifndef NX_MDNS_MAX_COMPRESSION_POINTERS
+#define NX_MDNS_MAX_COMPRESSION_POINTERS        16
+#endif /* NX_MDNS_MAX_COMPRESSION_POINTERS  */
 
 
 /* Define the default mDNS's announcing value.  */

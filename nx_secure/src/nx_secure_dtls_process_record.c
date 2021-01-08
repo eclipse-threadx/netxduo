@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_record                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,6 +80,10 @@
 /*                                            adjusted logic for TLS      */
 /*                                            modifications,              */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_record(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *packet_ptr,
@@ -246,7 +250,7 @@ NX_PACKET             *decrypted_packet;
         /* The socket is a TLS server, so process incoming handshake messages in that context. */
         if (tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_SERVER)
         {
-            status = _nx_secure_dtls_server_handshake(dtls_session, packet_data, wait_option);
+            status = _nx_secure_dtls_server_handshake(dtls_session, packet_data, message_length, wait_option);
         }
 #endif
 #ifndef NX_SECURE_TLS_CLIENT_DISABLED
