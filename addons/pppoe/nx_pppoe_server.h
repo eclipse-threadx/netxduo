@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */ 
 /*    nx_pppoe_server.h                                   PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -44,6 +44,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the compiler errors,  */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -315,16 +318,6 @@ UINT    nx_pppoe_server_session_terminate(NX_PPPOE_SERVER *pppoe_server_ptr, UIN
 UINT    nx_pppoe_server_session_get(NX_PPPOE_SERVER *pppoe_server_ptr, UINT session_index, ULONG *client_mac_msw, ULONG *client_mac_lsw, ULONG *session_id);
 VOID    _nx_pppoe_server_packet_deferred_receive(NX_PACKET *packet_ptr);
 
-#ifdef NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE
-VOID    PppInitInd(UINT length, UCHAR *aData);
-VOID    PppDiscoverCnf(UINT length, UCHAR *aData, UINT interfaceHandle); 
-VOID    PppOpenCnf(UCHAR accept, UINT interfaceHandle);
-VOID    PppCloseInd(UINT interfaceHandle, UCHAR *causeCode);
-VOID    PppCloseCnf(UINT interfaceHandle);
-VOID    PppTransmitDataCnf(UINT interfaceHandle, UCHAR *aData, UINT packet_id); 
-VOID    PppReceiveDataInd(UINT interfaceHandle, UINT length, UCHAR *aData);
-#endif
-
 #else
                                                             
 UINT    _nxe_pppoe_server_create(NX_PPPOE_SERVER *pppoe_server_ptr, UCHAR *name, NX_IP *ip_ptr, UINT interface_index,
@@ -368,6 +361,16 @@ UINT    _nx_pppoe_server_session_get(NX_PPPOE_SERVER *pppoe_server_ptr, UINT ses
 VOID    _nx_pppoe_server_packet_deferred_receive(NX_PACKET *packet_ptr);
 
 #endif /* NX_PPPOE_SERVER_SOURCE_CODE */
+
+#ifdef NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE
+VOID    PppInitInd(UINT length, UCHAR *aData);
+VOID    PppDiscoverCnf(UINT length, UCHAR *aData, UINT interfaceHandle); 
+VOID    PppOpenCnf(UCHAR accept, UINT interfaceHandle);
+VOID    PppCloseInd(UINT interfaceHandle, UCHAR *causeCode);
+VOID    PppCloseCnf(UINT interfaceHandle);
+VOID    PppTransmitDataCnf(UINT interfaceHandle, UCHAR *aData, UINT packet_id); 
+VOID    PppReceiveDataInd(UINT interfaceHandle, UINT length, UCHAR *aData);
+#endif
 
 /* Determine if a C++ compiler is being used.  If so, complete the standard
    C conditional started above.  */

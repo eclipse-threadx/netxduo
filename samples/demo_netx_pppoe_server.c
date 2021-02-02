@@ -372,6 +372,8 @@ void    ppp_server_packet_send(NX_PACKET *packet_ptr)
 UINT    interfaceHandle = 0;  
 
 #ifdef NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE
+NX_PACKET *temp_packet = packet_ptr;
+
     while(packet_ptr)
     {
 
@@ -381,6 +383,8 @@ UINT    interfaceHandle = 0;
         /* Move to the next packet structure.  */
         packet_ptr =  packet_ptr -> nx_packet_next;
     }
+
+    nx_packet_transmit_release(temp_packet);
 #else
     /* Directly Call PPPoE send function to send out the data through PPPoE module.  */
     nx_pppoe_server_session_packet_send(&pppoe_server, interfaceHandle, packet_ptr);

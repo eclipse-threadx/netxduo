@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_server_handshake                     PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -103,6 +103,10 @@
 /*                                            improved buffer length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.3  */
+/*  02-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            support for fragmented TLS  */
+/*                                            Handshake messages,         */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -188,10 +192,14 @@ NX_SECURE_TLS_SERVER_STATE            old_server_state;
         return(status);
     }
 
-    /* Check for fragmented records. */
+    /* Check for fragmented message. */
     if((message_length + header_bytes) > data_length)
     {
-        /* Incomplete record! We need to obtain the next fragment. */
+        /* Incomplete message! A single message is fragmented across several records. We need to obtain the next fragment. */
+        tls_session -> nx_secure_tls_handshake_record_expected_length = message_length + header_bytes;
+
+        tls_session -> nx_secure_tls_handshake_record_fragment_state = NX_SECURE_TLS_HANDSHAKE_RECEIVED_FRAGMENT;
+
         return(NX_SECURE_TLS_HANDSHAKE_FRAGMENT_RECEIVED);
     }
 

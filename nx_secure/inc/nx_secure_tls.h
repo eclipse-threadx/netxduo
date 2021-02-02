@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -57,6 +57,10 @@
 /*                                            improved buffer length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.3  */
+/*  02-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            support for fragmented TLS  */
+/*                                            Handshake messages,         */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -117,7 +121,7 @@ extern   "C" {
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
 #define NETX_SECURE_MINOR_VERSION                       1
-#define NETX_SECURE_PATCH_VERSION                       3
+#define NETX_SECURE_PATCH_VERSION                       4
 
 /* The following symbols are defined for backward compatibility reasons. */
 #define EL_PRODUCT_NETX_SECURE
@@ -305,6 +309,9 @@ extern   "C" {
 #define NX_SECURE_TLS_CLIENT_STATE_RENEGOTIATING        11 /* Client is renegotiating a handshake. Only used to kick off a renegotiation. */
 #define NX_SECURE_TLS_CLIENT_STATE_ENCRYPTED_EXTENSIONS 12 /* Client received and processed an encrypted extensions handshake message. */
 #define NX_SECURE_TLS_CLIENT_STATE_HELLO_RETRY          13 /* A HelloRetryRequest has been received. We need to resend ClientHello. */
+
+#define NX_SECURE_TLS_HANDSHAKE_NO_FRAGMENT				0  /* There is no fragmented handshake message. */
+#define NX_SECURE_TLS_HANDSHAKE_RECEIVED_FRAGMENT		1  /* Received a fragmented handshake message. */
 
 /* TLS Alert message numbers from RFC 5246. */
 #define NX_SECURE_TLS_ALERT_CLOSE_NOTIFY                0
@@ -1078,6 +1085,21 @@ typedef struct NX_SECURE_TLS_SESSION_STRUCT
     UCHAR *nx_secure_tls_packet_buffer;
     ULONG  nx_secure_tls_packet_buffer_size;
     ULONG  nx_secure_tls_packet_buffer_original_size;
+
+    /* The number of bytes copied into packet/message buffer. */
+	ULONG  nx_secure_tls_packet_buffer_bytes_copied;
+
+	/* The exepected number of bytes for an incoming handshake record. */
+    ULONG  nx_secure_tls_handshake_record_expected_length;
+
+    /* Whether a handshake message is fragmented across several records. */
+    USHORT nx_secure_tls_handshake_record_fragment_state;
+
+    /* The offset of current record to be processed. */
+    ULONG  nx_secure_tls_record_offset;
+
+	/* The prcessed number of bytes in current tls record. */
+    ULONG  nx_secure_tls_bytes_processed;
 
     /* What type of socket is this? Client or server? */
     UINT nx_secure_tls_socket_type;
