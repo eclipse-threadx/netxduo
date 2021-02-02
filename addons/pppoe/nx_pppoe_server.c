@@ -2790,7 +2790,7 @@ NX_PPPOE_CLIENT_SESSION    *client_session_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_discovery_send                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2834,6 +2834,9 @@ NX_PPPOE_CLIENT_SESSION    *client_session_ptr = NX_NULL;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the compiler errors,  */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT    _nx_pppoe_server_discovery_send(NX_PPPOE_SERVER *pppoe_server_ptr, NX_PPPOE_CLIENT_SESSION *client_session_ptr, UINT code)
@@ -2919,7 +2922,7 @@ UCHAR          *service_name_ptr;
             {               
 
                 /* Get the service name.  */
-                if (_nx_utility_string_length_check((const char *)(service_name_ptr), &tag_length, NX_MAX_STRING_LENGTH))
+                if (_nx_utility_string_length_check((char *)(service_name_ptr), &tag_length, NX_MAX_STRING_LENGTH))
                 {
                     nx_packet_release(packet_ptr);
                     return(NX_PPPOE_SERVER_SERVICE_NAME_ERROR);
@@ -3057,7 +3060,7 @@ UCHAR          *service_name_ptr;
         {
 
             /* Calculate the Generic-Error string length.  */
-            if (_nx_utility_string_length_check((const char *)(client_session_ptr -> nx_pppoe_generic_error), &tag_length, NX_MAX_STRING_LENGTH))
+            if (_nx_utility_string_length_check((char *)(client_session_ptr -> nx_pppoe_generic_error), &tag_length, NX_MAX_STRING_LENGTH))
             {
                 nx_packet_release(packet_ptr);
                 return(NX_SIZE_ERROR);
@@ -3181,7 +3184,7 @@ NX_IP_DRIVER                driver_request;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_tag_process                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3220,6 +3223,10 @@ NX_IP_DRIVER                driver_request;
 /*                                            packet length verification, */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            string length verification, */
+/*                                            fixed the compiler errors,  */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_pppoe_server_tag_process(NX_PPPOE_SERVER *pppoe_server_ptr, NX_PPPOE_CLIENT_SESSION *client_session_ptr, UINT code, UCHAR *tag_ptr, ULONG length)
@@ -3231,9 +3238,9 @@ UINT            tag_index = 0;
 UINT            tag_service_name_count = 0; 
 UINT            tag_service_name_valid = NX_FALSE;
 UINT            service_name_index = 0;
+UINT            service_name_length;
 #ifdef NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE
 UCHAR          *service_name_ptr;
-UINT            service_name_length;
 #endif
 
     /* Initialize the value.  */
@@ -3303,11 +3310,21 @@ UINT            service_name_length;
                         while (service_name_index < pppoe_server_ptr -> nx_pppoe_service_name_count)
                         {
 
+                            /* Get the length of service name.  */
+                            if (_nx_utility_string_length_check((char *)(pppoe_server_ptr -> nx_pppoe_service_name[service_name_index]), 
+                                                                &service_name_length, tag_length))
+                            {
+                                service_name_index++;
+                                continue;
+                            }
+
                             /* Compare the same service name with PPPoE Service Name.  */
-                            if (!memcmp(tag_ptr + tag_index, (pppoe_server_ptr -> nx_pppoe_service_name[service_name_index]), tag_length))
+                            if ((service_name_length == tag_length) &&
+                                (!memcmp(tag_ptr + tag_index, (pppoe_server_ptr -> nx_pppoe_service_name[service_name_index]), tag_length)))
                             {
                                 tag_service_name_valid = NX_TRUE;
                                 client_session_ptr -> nx_pppoe_service_name = pppoe_server_ptr -> nx_pppoe_service_name[service_name_index];
+                                client_session_ptr -> nx_pppoe_service_name_length = service_name_length;
                                 break;
                             }
                             service_name_index ++;
@@ -3337,7 +3354,7 @@ UINT            service_name_length;
                     {
 
                         /* Get the service name.  */
-                        if (_nx_utility_string_length_check((const char *)(service_name_ptr), &service_name_length, NX_MAX_STRING_LENGTH))
+                        if (_nx_utility_string_length_check((char *)(service_name_ptr), &service_name_length, NX_MAX_STRING_LENGTH))
                         {
                             return(NX_PPPOE_SERVER_SERVICE_NAME_ERROR);
                         }
@@ -3347,7 +3364,7 @@ UINT            service_name_length;
                         {
                             tag_service_name_valid = NX_TRUE;
                         }
-                        else if ((tag_length != 0) && (service_name_length != 0))
+                        else if ((tag_length != 0) && (tag_length == service_name_length))
                         {
 
                             /* Compare the service name.  */
@@ -3383,8 +3400,17 @@ UINT            service_name_length;
                 while (service_name_index < pppoe_server_ptr -> nx_pppoe_service_name_count)
                 {
 
+                    /* Get the length of service name.  */
+                    if (_nx_utility_string_length_check((char *)(pppoe_server_ptr -> nx_pppoe_service_name[service_name_index]), 
+                                                        &service_name_length, tag_length))
+                    {
+                        service_name_index++;
+                        continue;
+                    }
+
                     /* Find the same service name.  */
-                    if (!memcmp(tag_ptr + tag_index, (pppoe_server_ptr -> nx_pppoe_service_name[service_name_index]), tag_length))
+                    if ((service_name_length == tag_length) &&
+                        (!memcmp(tag_ptr + tag_index, (pppoe_server_ptr -> nx_pppoe_service_name[service_name_index]), tag_length)))
                     {
 
                         /* Update the information.  */
@@ -3403,7 +3429,8 @@ UINT            service_name_length;
                 if (pppoe_server_ptr -> nx_pppoe_ac_name)
                 {
                     /* Check the access concentrator name.  */
-                    if (memcmp(tag_ptr + tag_index, (pppoe_server_ptr -> nx_pppoe_ac_name), tag_length))
+                    if ((pppoe_server_ptr -> nx_pppoe_ac_name_length != tag_length) ||
+                        (memcmp(tag_ptr + tag_index, (pppoe_server_ptr -> nx_pppoe_ac_name), tag_length)))
                     {                
 
                         return(NX_PPPOE_SERVER_AC_NAME_ERROR);
@@ -3412,7 +3439,8 @@ UINT            service_name_length;
                 else
                 {
                     /* If user does not separately set Access Concentrator name, will use PPPoE server name as Access Concentrator name.*/
-                    if (memcmp(tag_ptr + tag_index, (pppoe_server_ptr -> nx_pppoe_name), tag_length))
+                    if ((pppoe_server_ptr -> nx_pppoe_name_length != tag_length) ||
+                        (memcmp(tag_ptr + tag_index, (pppoe_server_ptr -> nx_pppoe_name), tag_length)))
                     {                
 
                         return(NX_PPPOE_SERVER_AC_NAME_ERROR);
@@ -3960,7 +3988,7 @@ NX_PACKET   *current_packet;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppInitInd                                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3981,7 +4009,7 @@ NX_PACKET   *current_packet;
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */
-/*    nx_pppoe_server_service_name_set      Set the service name          */
+/*    _nx_pppoe_server_service_name_set     Set the service name          */
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -3994,6 +4022,9 @@ NX_PACKET   *current_packet;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the compiler errors,  */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 VOID  PppInitInd(UINT length, UCHAR *aData)
@@ -4009,7 +4040,7 @@ VOID  PppInitInd(UINT length, UCHAR *aData)
     {
 
         /* Clean the default service name.  */  
-        nx_pppoe_server_service_name_set(_nx_pppoe_server_created_ptr, NX_NULL, 0); 
+        _nx_pppoe_server_service_name_set(_nx_pppoe_server_created_ptr, NX_NULL, 0); 
     }
     else
     {
@@ -4018,7 +4049,7 @@ VOID  PppInitInd(UINT length, UCHAR *aData)
         nx_pppoe_service_name[0] = aData;
 
         /* Set the default service name.  */
-        nx_pppoe_server_service_name_set(_nx_pppoe_server_created_ptr, nx_pppoe_service_name, 1);
+        _nx_pppoe_server_service_name_set(_nx_pppoe_server_created_ptr, nx_pppoe_service_name, 1);
     }
 }
 
@@ -4215,7 +4246,7 @@ NX_PPPOE_CLIENT_SESSION *client_session_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppCloseInd                                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4235,7 +4266,7 @@ NX_PPPOE_CLIENT_SESSION *client_session_ptr;
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
-/*    nx_pppoe_server_session_terminate     Terminate the PPPoE Session   */ 
+/*    _nx_pppoe_server_session_terminate    Terminate the PPPoE Session   */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -4248,6 +4279,9 @@ NX_PPPOE_CLIENT_SESSION *client_session_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the compiler errors,  */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 VOID PppCloseInd(UINT interfaceHandle, UCHAR *causeCode)
@@ -4278,7 +4312,7 @@ VOID PppCloseInd(UINT interfaceHandle, UCHAR *causeCode)
     _nx_pppoe_server_created_ptr -> nx_pppoe_client_session[interfaceHandle].nx_pppoe_generic_error = causeCode; 
 
     /* Send PADT to terminate the session.  */
-    nx_pppoe_server_session_terminate(_nx_pppoe_server_created_ptr, interfaceHandle);
+    _nx_pppoe_server_session_terminate(_nx_pppoe_server_created_ptr, interfaceHandle);
 
     /* Release the IP internal mutex.  */
     tx_mutex_put(&(_nx_pppoe_server_created_ptr -> nx_pppoe_ip_ptr -> nx_ip_protection));
@@ -4354,7 +4388,7 @@ VOID PppCloseCnf(UINT interfaceHandle)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppTransmitDataCnf                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4388,12 +4422,17 @@ VOID PppCloseCnf(UINT interfaceHandle)
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the compiler errors,  */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 VOID PppTransmitDataCnf(UINT interfaceHandle, UCHAR *data_ptr, UINT packet_id)
 {
 
 NX_PACKET   *packet_ptr;
+
+    NX_PARAMETER_NOT_USED(data_ptr);
 
     /* Check to see if PPPoE instance is created.  */
     if ((_nx_pppoe_server_created_ptr == NX_NULL) ||
@@ -4435,7 +4474,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppReceiveDataInd                                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4454,7 +4493,7 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */
-/*    nx_pppoe_server_session_send          Send PPPoE session data       */ 
+/*    _nx_pppoe_server_session_send         Send PPPoE session data       */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -4467,6 +4506,9 @@ NX_PACKET   *packet_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the compiler errors,  */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 VOID PppReceiveDataInd(UINT interfaceHandle, UINT data_length, UCHAR *data_ptr)
@@ -4491,7 +4533,7 @@ VOID PppReceiveDataInd(UINT interfaceHandle, UINT data_length, UCHAR *data_ptr)
         return;
 
     /* Send data.  */
-    nx_pppoe_server_session_send(_nx_pppoe_server_created_ptr, interfaceHandle, data_ptr, data_length);
+    _nx_pppoe_server_session_send(_nx_pppoe_server_created_ptr, interfaceHandle, data_ptr, data_length);
 }
 #endif
 #endif /* NX_DISABLE_IPV4 */

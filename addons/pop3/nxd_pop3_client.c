@@ -2229,7 +2229,7 @@ UINT pid_index;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_pop3_parse_response                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2275,6 +2275,9 @@ UINT pid_index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_pop3_parse_response(CHAR *buffer, UINT argument_index, UINT buffer_length, CHAR *argument, UINT argument_length, 
@@ -2343,7 +2346,7 @@ UINT argument_char_count;
         }
 
         /* Are we at the end of the buffer?  */
-        if (i == buffer_length)
+        if ((i == buffer_length) && (buffer_length >= 2))
         {       
 
             /* Yes, is there a line terminator?  */

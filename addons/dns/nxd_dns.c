@@ -45,7 +45,7 @@
 
 /* Internal DNS functions. */  
 static UINT        _nx_dns_header_create(UCHAR *buffer_ptr, USHORT id, USHORT flags);
-static UINT        _nx_dns_new_packet_create(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, USHORT id, UCHAR *name, USHORT type);
+static UINT        _nx_dns_new_packet_create(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *name, USHORT type);
 static UINT        _nx_dns_name_size_calculate(UCHAR *name, NX_PACKET *packet_ptr);
 static UINT        _nx_dns_name_string_encode(UCHAR *ptr, UCHAR *name);
 static UINT        _nx_dns_name_string_unencode(NX_PACKET *packet_ptr, UCHAR *data, UCHAR *buffer, UINT buffer_size);
@@ -62,6 +62,7 @@ static UINT        _nx_dns_number_to_ascii_convert(UINT number, CHAR *buffstring
 #endif /* NX_DISABLE_IPV4 */
 static UINT        _nx_dns_host_resource_data_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, UCHAR *record_buffer, UINT buffer_size, 
                                                           UINT *record_count, UINT lookup_type, ULONG wait_option);
+static UINT        _nx_dns_response_receive(NX_DNS *dns_ptr, NX_PACKET **packet_ptr, ULONG wait_option);
 static UINT        _nx_dns_response_process(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *record_buffer, UINT buffer_size, UINT *record_count);
 static UINT        _nx_dns_process_a_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, UCHAR **buffer_prepend_ptr, UCHAR **buffer_append_ptr, UINT *record_count, UINT rr_location);
 static UINT        _nx_dns_process_aaaa_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, UCHAR **buffer_prepend_ptr, UCHAR **buffer_append_ptr, UINT *record_count, UINT rr_location);
@@ -193,7 +194,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_create                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -218,8 +219,6 @@ UINT    status;
 /*                                                                        */ 
 /*    nx_udp_socket_create                  Create DNS UDP socket         */ 
 /*    nx_udp_socket_delete                  Delete DNS UDP socket         */ 
-/*    nx_udp_socket_bind                    Bind DNS UDP socket to port   */ 
-/*    nx_udp_socket_unbind                  Unbind DNS UDP socket         */ 
 /*    tx_mutex_create                       Create a ThreadX mutex        */
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
@@ -233,6 +232,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            randomized the source port, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dns_create(NX_DNS *dns_ptr, NX_IP *ip_ptr, UCHAR *domain_name)
@@ -278,26 +280,6 @@ UINT            status;
         return(status);
     }
 
-    /* Bind the UDP socket to the DNS Client port.  */
-    status =  nx_udp_socket_bind(&(dns_ptr -> nx_dns_socket), NX_ANY_PORT, TX_WAIT_FOREVER);
-    
-    /* Check status of socket bind.  */
-    if (status != NX_SUCCESS)
-    {
-
-#ifndef NX_DNS_CLIENT_USER_CREATE_PACKET_POOL
-
-        /* Delete the packet pool. */
-        nx_packet_pool_delete(dns_ptr -> nx_dns_packet_pool_ptr);
-#endif
-
-        /* Delete the socket.  */
-        nx_udp_socket_delete(&(dns_ptr -> nx_dns_socket));
-
-        /* Return the NetX error.  */
-        return(status);
-    }
-
     /* Create a DNS mutex for multi-thread access protection.  */
     status =  tx_mutex_create(&dns_ptr -> nx_dns_mutex, "DNS Mutex", TX_NO_INHERIT);
 
@@ -310,9 +292,6 @@ UINT            status;
        /* Delete the packet pool. */
         nx_packet_pool_delete(dns_ptr -> nx_dns_packet_pool_ptr);
 #endif
-
-        /* Unbind the socket.  */
-        nx_udp_socket_unbind(&(dns_ptr -> nx_dns_socket));
 
         /* Delete the socket.  */
         nx_udp_socket_delete(&(dns_ptr -> nx_dns_socket));
@@ -562,7 +541,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_delete                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -583,7 +562,6 @@ UINT    status;
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
 /*    nx_udp_socket_delete                  Delete DNS UDP socket         */ 
-/*    nx_udp_socket_unbind                  Unbind DNS UDP socket         */ 
 /*    tx_mutex_delete                       Delete DNS mutex              */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
@@ -597,6 +575,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            randomized the source port, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_delete(NX_DNS *dns_ptr)
@@ -605,14 +586,6 @@ UINT  _nx_dns_delete(NX_DNS *dns_ptr)
 UINT    status;
 
 
-    /* Unbind the UDP socket. */
-    status =  nx_udp_socket_unbind(&dns_ptr -> nx_dns_socket);
-
-    if (status != NX_SUCCESS)
-    {
-        /* Return the socket unbind error. */
-        return status;
-    }
     /* Delete the DNS UDP socket.  */
     status =  nx_udp_socket_delete(&dns_ptr -> nx_dns_socket);
 
@@ -3909,7 +3882,7 @@ UINT        record_count = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_host_resource_data_by_name_get               PORTABLE C     */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3943,6 +3916,8 @@ UINT        record_count = 0;
 /*                                            query on supplied host name */
 /*    tx_mutex_get                          Get DNS protection mutex      */ 
 /*    tx_mutex_put                          Release DNS protection mutex  */ 
+/*    nx_udp_socket_bind                    Bind DNS UDP socket to port   */ 
+/*    nx_udp_socket_unbind                  Unbind DNS UDP socket         */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -3955,6 +3930,9 @@ UINT        record_count = 0;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), corrected*/
 /*                                            the timeout of first query, */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            randomized the source port, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_host_resource_data_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, 
@@ -4009,6 +3987,18 @@ UINT        i;
         return(NX_DNS_NO_SERVER);
     }        
 
+    /* Bind the UDP socket to random port for each query.  */
+    status =  nx_udp_socket_bind(&(dns_ptr -> nx_dns_socket), NX_ANY_PORT, TX_WAIT_FOREVER);
+
+    /* Check status.  */
+    if (status != TX_SUCCESS)
+    {
+
+        /* Release the DNS Client lock.  */
+        tx_mutex_put(&dns_ptr -> nx_dns_mutex);
+        return(status);
+    }
+
     /* Limit the timeout to NX_DNS_MAX_RETRANS_TIMEOUT.  */
     if (wait_option > NX_DNS_MAX_RETRANS_TIMEOUT)
     {
@@ -4033,6 +4023,9 @@ UINT        i;
             if (status == NX_SUCCESS)
             {
 
+                /* Unbind the socket.  */
+                nx_udp_socket_unbind(&(dns_ptr -> nx_dns_socket));
+
                 /* Release the mutex */
                 tx_mutex_put(&dns_ptr -> nx_dns_mutex);
 
@@ -4048,6 +4041,9 @@ UINT        i;
             wait_option =  NX_DNS_MAX_RETRANS_TIMEOUT;
     }
 
+    /* Unbind the socket.  */
+    nx_udp_socket_unbind(&(dns_ptr -> nx_dns_socket));
+
     /* Release protection.  */
     tx_mutex_put(&dns_ptr -> nx_dns_mutex);
 
@@ -4061,7 +4057,7 @@ UINT        i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_send_query_by_address                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4114,6 +4110,12 @@ UINT        i;
 /*                                            status check to improve     */
 /*                                            buffer bound check,         */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            improved id generation,     */
+/*                                            improved the logic of       */
+/*                                            receiving dns response,     */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_send_query_by_address(NX_DNS *dns_ptr, NXD_ADDRESS *dns_server, UCHAR *ip_question, UCHAR *host_name_ptr, 
@@ -4124,18 +4126,11 @@ UINT        status;
 USHORT      answerCount;
 UCHAR       *data_ptr;
 NX_PACKET   *packet_ptr;
-NX_PACKET   *receive_packet_ptr;  
-USHORT      id;
+NX_PACKET   *receive_packet_ptr;
 UINT        ip_question_size;
 UINT        name_size;
 UINT        resource_type;
 UINT        resource_size;
-#ifdef NX_DNS_CLIENT_CLEAR_QUEUE
-ULONG       start_time;
-ULONG       current_time;
-ULONG       elapsed_time;
-ULONG       time_remaining;
-#endif
 #ifdef NX_DNS_CACHE_ENABLE 
 ULONG       rr_ttl;
 #endif /* NX_DNS_CACHE_ENABLE  */
@@ -4146,26 +4141,6 @@ ULONG       rr_ttl;
     if (_nx_utility_string_length_check((CHAR *)ip_question, &ip_question_size, NX_DNS_IP_LOOKUP_SIZE))
     {
         return(NX_DNS_SIZE_ERROR);
-    }
-
-    /* Create a random DNS query ID based on the first word of an IP address (or only
-       word for IPv4 addresses). */
-    if (dns_server -> nxd_ip_version == NX_IP_VERSION_V6)
-    {
-
-#ifdef FEATURE_NX_IPV6
-        id  =  (USHORT)(dns_server -> nxd_ip_address.v6[0] ^ tx_time_get()); 
-#else
-        return NX_DNS_IPV6_NOT_SUPPORTED;
-#endif
-    }
-    else
-    {
-#ifndef NX_DISABLE_IPV4
-        id =  (USHORT)(dns_server -> nxd_ip_address.v4 ^ tx_time_get());
-#else
-        return NX_DNS_BAD_ADDRESS_ERROR;
-#endif
     }
 
     /* Allocate a packet.  */
@@ -4180,7 +4155,7 @@ ULONG       rr_ttl;
     }
 
     /* Create a request */
-    status  =  _nx_dns_new_packet_create(dns_ptr, packet_ptr, id, ip_question, NX_DNS_RR_TYPE_PTR);
+    status  =  _nx_dns_new_packet_create(dns_ptr, packet_ptr, ip_question, NX_DNS_RR_TYPE_PTR);
 
     /* Check the DNS packet create status.  */
     if (status != NX_SUCCESS)
@@ -4192,25 +4167,16 @@ ULONG       rr_ttl;
         return(status);
     }
 
-    /* First clear off any 'old' DNS packets. */
-
-#ifdef NX_DNS_CLIENT_CLEAR_QUEUE  
-
     /* We will use the time spent sleeping to clear broadcast DNS packets from a previous query
-    from the DNS receive queue.  This will prevent ensure the most recent DNS response is
-    processed and avoid the situation of valid DNS response packets overflowing the DNS socket
-    queue. */
-
-    receive_packet_ptr = NX_NULL;
-
-
-    /* Remove all packets from the DNS Client receive queue.  */
-    status = NX_SUCCESS;;
+       from the DNS receive queue. This will prevent ensure the most recent DNS response is
+       processed and avoid the situation of valid DNS response packets overflowing the DNS socket
+       queue. */
+#ifdef NX_DNS_CLIENT_CLEAR_QUEUE
     do
     {
 
         /* Is there any packets on the queue?  */
-        status = nx_udp_socket_receive(&(dns_ptr -> nx_dns_socket), &receive_packet_ptr, 1 ); 
+        status = nx_udp_socket_receive(&(dns_ptr -> nx_dns_socket), &receive_packet_ptr, NX_NO_WAIT); 
 
         /* Yes, we received a packet on the DNS port! */
         if (status == NX_SUCCESS)
@@ -4221,14 +4187,11 @@ ULONG       rr_ttl;
         }
 
         /* Keep checking till the queue becomes empty. */
-
-    }  while(status == NX_SUCCESS);
-
-#endif
+    } while(status == NX_SUCCESS);
+#endif /* NX_DNS_CLIENT_CLEAR_QUEUE */
 
     /* Send the DNS packet out.  */
     status =  nxd_udp_socket_send(&dns_ptr -> nx_dns_socket, packet_ptr, dns_server, NX_DNS_PORT);
-
 
     /* Check the completion of the send.  */
     if (status != NX_SUCCESS)
@@ -4240,69 +4203,8 @@ ULONG       rr_ttl;
         return status;
     }
 
-#ifdef NX_DNS_CLIENT_CLEAR_QUEUE  
-
-    /* Initialize the value.  */
-    elapsed_time = 0;
-    time_remaining = wait_option;
-
-    /* If waiting for the DNS 'sleep' interval, check for packets arriving on the queue. */
-    while(time_remaining > 0)
-    {
-
-        start_time =  tx_time_get();
-
-        /* Check if some of these packet are intended for other hosts. */
-        status = nx_udp_socket_receive(&(dns_ptr -> nx_dns_socket), &receive_packet_ptr, time_remaining);
-
-        /* Determine if this one is for us. */
-        if (status == NX_SUCCESS)
-        {
-   
-            /* Check the ID from the Client query matches the ID in the received DNS packet.  */
-            if (_nx_dns_network_to_short_convert(receive_packet_ptr -> nx_packet_prepend_ptr + NX_DNS_ID_OFFSET) == id)
-            {
-                /* They do. We can stop receiving packets and process this one. */
-                break;
-            }
-            else
-            {
-                /* They do not. Discard the packet! */
-                nx_packet_release(receive_packet_ptr);
-            }
-        }
-
-        /* Get the current time. */
-        current_time =  tx_time_get();
-
-        /* Has the time wrapped? */
-        if (current_time >= start_time)
-        {
-            /* No, simply subtract to get the elapsed time.   */
-            elapsed_time =  current_time - start_time;
-        }
-        else
-        {
-            /* Yes it has. Time has rolled over the 32-bit boundary.  */
-            elapsed_time =  (((ULONG) 0xFFFFFFFF) - start_time) + current_time;
-        }
-
-        /* Update the time remaining by subtracting the elapsed time. */
-        if (time_remaining > elapsed_time)
-        {
-            time_remaining -= elapsed_time;
-        }
-        else
-        {
-            time_remaining = 0;
-        }
-    }
-
-#else
-
-    /* Otherwise, wait for a DNS response UDP packet.  */   
-    status = nx_udp_socket_receive(&(dns_ptr -> nx_dns_socket), &receive_packet_ptr, wait_option);
-#endif
+    /* Wait for a DNS response.  */
+    status = _nx_dns_response_receive(dns_ptr, &receive_packet_ptr, wait_option);
 
     /* Check status.  */
     if (status == NX_SUCCESS)
@@ -4329,7 +4231,7 @@ ULONG       rr_ttl;
         }
         
         /* Packet is long enough. Check the IDs in the DNS header match.  */
-        if (_nx_dns_network_to_short_convert(receive_packet_ptr -> nx_packet_prepend_ptr + NX_DNS_ID_OFFSET) != id)
+        if (_nx_dns_network_to_short_convert(receive_packet_ptr -> nx_packet_prepend_ptr + NX_DNS_ID_OFFSET) != dns_ptr -> nx_dns_transmit_id)
         {
 
             /* No; Release the packet.  */ 
@@ -4562,7 +4464,7 @@ ULONG       rr_ttl;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_send_query_get_rdata_by_name                 PORTABLE C     */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4592,7 +4494,7 @@ ULONG       rr_ttl;
 /*    _nx_dns_new_packet_create             Create new DNS packet         */
 /*    nx_packet_release                     Release packet                */ 
 /*    nxd_udp_socket_send                   Send DNS UDP packet           */ 
-/*    nx_udp_socket_receive                 Receive DNS UDP packet        */ 
+/*    _nx_dns_response_receive              Receive DNS response          */ 
 /*    _nx_dns_response_process              Process the DNS respondse     */
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
@@ -4607,6 +4509,11 @@ ULONG       rr_ttl;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            improved the logic of       */
+/*                                            receiving dns response,     */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_send_query_get_rdata_by_name(NX_DNS *dns_ptr, NXD_ADDRESS *dns_server_address, 
@@ -4617,17 +4524,7 @@ static UINT _nx_dns_send_query_get_rdata_by_name(NX_DNS *dns_ptr, NXD_ADDRESS *d
 UINT                status;
 NX_PACKET           *packet_ptr;
 NX_PACKET           *receive_packet_ptr;
-USHORT              id; 
-#ifdef NX_DNS_CLIENT_CLEAR_QUEUE
-ULONG               start_time;
-ULONG               current_time;
-ULONG               elapsed_time;
-ULONG               time_remaining;
-#endif
  
-    /* Generate a random ID based on host name. */
-    id =  (USHORT)((ALIGN_TYPE) host_name ^ tx_time_get());   
-
     /* Allocate a packet.  */
     status =  nx_packet_allocate(dns_ptr -> nx_dns_packet_pool_ptr, &packet_ptr, NX_UDP_PACKET, NX_DNS_PACKET_ALLOCATE_TIMEOUT);
 
@@ -4640,7 +4537,7 @@ ULONG               time_remaining;
     }
 
     /* Create a request */
-    status =  _nx_dns_new_packet_create(dns_ptr, packet_ptr, id, host_name, (USHORT)dns_record_type);
+    status =  _nx_dns_new_packet_create(dns_ptr, packet_ptr, host_name, (USHORT)dns_record_type);
 
     /* Check the DNS packet create status.  */
     if (status != NX_SUCCESS)
@@ -4652,21 +4549,16 @@ ULONG               time_remaining;
         return(status);
     }
 
-    /* First clear off any 'old' DNS packets. */
-#ifdef NX_DNS_CLIENT_CLEAR_QUEUE  
-
-    /* Initialize the value */
-    receive_packet_ptr = NX_NULL;
-
-    /* Remove all packets from the DNS Client receive queue.  */
-    status = NX_SUCCESS;;
+    /* We will use the time spent sleeping to clear broadcast DNS packets from a previous query
+       from the DNS receive queue. This will prevent ensure the most recent DNS response is
+       processed and avoid the situation of valid DNS response packets overflowing the DNS socket
+       queue. */
+#ifdef NX_DNS_CLIENT_CLEAR_QUEUE
     do
     {
 
-        start_time =  tx_time_get();
-
         /* Is there any packets on the queue?  */
-        status = nx_udp_socket_receive(&(dns_ptr -> nx_dns_socket), &receive_packet_ptr, 1 ); 
+        status = nx_udp_socket_receive(&(dns_ptr -> nx_dns_socket), &receive_packet_ptr, NX_NO_WAIT); 
 
         /* Yes, we received a packet on the DNS port! */
         if (status == NX_SUCCESS)
@@ -4677,9 +4569,8 @@ ULONG               time_remaining;
         }
 
         /* Keep checking till the queue becomes empty. */
-
-    }  while(status == NX_SUCCESS);
-#endif
+    } while(status == NX_SUCCESS);
+#endif /* NX_DNS_CLIENT_CLEAR_QUEUE */
 
     /* Send the DNS packet out.  */
     status =  nxd_udp_socket_send(&dns_ptr -> nx_dns_socket, packet_ptr, dns_server_address, NX_DNS_PORT);
@@ -4694,71 +4585,8 @@ ULONG               time_remaining;
         return status;
     }
 
-#ifdef NX_DNS_CLIENT_CLEAR_QUEUE  
-
-    /* Initialize the value.  */
-    elapsed_time = 0;
-    time_remaining = wait_option;
-
-    /* If waiting for the DNS 'sleep' interval, check for packets arriving on the queue. */
-    while(time_remaining > 0)
-    {
-
-        start_time =  tx_time_get();
-
-        /* Check if some of these packet are intended for other hosts. */
-        status = nx_udp_socket_receive(&(dns_ptr -> nx_dns_socket), &receive_packet_ptr, time_remaining);
-
-        /* Determine if this one is for us. */
-        if (status == NX_SUCCESS)
-        {
-   
-            /* Check the IDs in the DNS header match.  */
-            if (_nx_dns_network_to_short_convert(receive_packet_ptr -> nx_packet_prepend_ptr + NX_DNS_ID_OFFSET) == id)
-            {
-
-                /* They do. We can stop receiving packets and process this one. */
-                break;
-            }
-            else
-            {
-
-                /* They do not. Discard the packet! */
-                nx_packet_release(receive_packet_ptr);
-            }
-        }
-
-        /* Get the current time. */
-        current_time =  tx_time_get();
-
-        /* Has the time wrapped? */
-        if (current_time >= start_time)
-        {
-            /* No, simply subtract to get the elapsed time.   */
-            elapsed_time =  current_time - start_time;
-        }
-        else
-        {
-
-            /* Yes it has. Time has rolled over the 32-bit boundary.  */
-            elapsed_time =  (((ULONG) 0xFFFFFFFF) - start_time) + current_time;
-        }
-
-        /* Update the time remaining with the elapsed time. */
-        if (time_remaining > elapsed_time)
-        {
-            time_remaining -= elapsed_time;
-        }
-        else
-            time_remaining = 0;
-
-    }
-
-#else
-
-    /* Otherwise, wait for a DNS response UDP packet.  */
-    status =  nx_udp_socket_receive(&(dns_ptr -> nx_dns_socket), &receive_packet_ptr, wait_option);
-#endif
+    /* Wait for a DNS response.  */
+    status = _nx_dns_response_receive(dns_ptr, &receive_packet_ptr, wait_option);
 
     /* Check status.  */
     if (status == NX_SUCCESS)
@@ -4777,6 +4605,127 @@ ULONG               time_remaining;
         /* Call the function to process the DNS packet.  */
         status = _nx_dns_response_process(dns_ptr, receive_packet_ptr, record_buffer, buffer_size, record_count);
     }
+
+    /* Return completion status. */
+    return(status);
+}
+
+/**************************************************************************/ 
+/*                                                                        */ 
+/*  FUNCTION                                               RELEASE        */ 
+/*                                                                        */ 
+/*    _nx_dns_response_receive                             PORTABLE C     */ 
+/*                                                           6.1.4        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */ 
+/*                                                                        */ 
+/*    This function receives dns response.                                */
+/*                                                                        */ 
+/*  INPUT                                                                 */ 
+/*                                                                        */ 
+/*    dns_ptr                               Pointer to DNS instance       */
+/*    packet_ptr                            Pointer to UDP packet pointer */
+/*    wait_option                           Timeout value                 */ 
+/*                                                                        */ 
+/*  OUTPUT                                                                */ 
+/*                                                                        */ 
+/*    status                                Completion status             */ 
+/*                                                                        */ 
+/*  CALLS                                                                 */ 
+/*                                                                        */ 
+/*    tx_time_get                           Get the system time           */ 
+/*    nx_udp_socket_receive                 Receive DNS UDP packet        */ 
+/*    nx_packet_release                     Release packet                */ 
+/*                                                                        */ 
+/*  CALLED BY                                                             */ 
+/*                                                                        */ 
+/*    _nx_dns_send_query_get_rdata_by_name  Get the resource data by name */ 
+/*                                                                        */ 
+/*  RELEASE HISTORY                                                       */ 
+/*                                                                        */ 
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  02-02-2021     Yuxin Zhou               Initial Version 6.1.4         */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_dns_response_receive(NX_DNS *dns_ptr, NX_PACKET **packet_ptr, ULONG wait_option)
+{
+
+UINT                status;
+ULONG               start_time;
+ULONG               current_time;
+ULONG               elapsed_time;
+ULONG               time_remaining;
+
+
+    /* Initialize the value.  */
+    start_time =  tx_time_get();
+    elapsed_time = 0;
+    time_remaining = wait_option;
+
+    do
+    {
+
+        /* Receive udp packet. */
+        status = nx_udp_socket_receive(&(dns_ptr -> nx_dns_socket), packet_ptr, time_remaining);
+
+        /* Determine if this one is for us. */
+        if (status == NX_SUCCESS)
+        {
+   
+            /* Check the IDs in the DNS header match.  */
+            if (((*packet_ptr) -> nx_packet_length >= sizeof(USHORT)) &&
+                (_nx_dns_network_to_short_convert((*packet_ptr) -> nx_packet_prepend_ptr + NX_DNS_ID_OFFSET) == dns_ptr -> nx_dns_transmit_id))
+            {
+
+                /* They do. We can stop receiving packets and process this one. */
+                break;
+            }
+            else
+            {
+
+                /* They do not. Discard the packet! */
+                nx_packet_release((*packet_ptr));
+
+                /* Continue to receive next packet.  */
+                if (time_remaining == 0)
+                {
+                    continue;
+                }
+            }
+        }
+
+        /* Get the current time. */
+        current_time = tx_time_get();
+
+        /* Has the time wrapped? */
+        if (current_time >= start_time)
+        {
+
+            /* No, simply subtract to get the elapsed time.   */
+            elapsed_time = current_time - start_time;
+        }
+        else
+        {
+
+            /* Yes it has. Time has rolled over the 32-bit boundary.  */
+            elapsed_time = (((ULONG) 0xFFFFFFFF) - start_time) + current_time;
+        }
+
+        /* Update the time remaining with the elapsed time. */
+        if (time_remaining > elapsed_time)
+        {
+            time_remaining -= elapsed_time;
+        }
+        else
+        {
+            time_remaining = 0;
+        }
+
+    } while(time_remaining > 0);
 
     /* Return completion status. */
     return(status);
@@ -5096,7 +5045,7 @@ UINT                name_size;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_process_a_type                               PORTABLE C     */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5145,6 +5094,9 @@ UINT                name_size;
 /*                                            updated resource get APIs to*/
 /*                                            improve buffer bound check, */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_a_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
@@ -5233,7 +5185,7 @@ ULONG           rr_ttl;
 
             /* Get data address and check if it is valid. */ 
             data_ptr = _nx_dns_resource_data_address_get(data_ptr, packet_ptr);
-            if (!data_ptr)
+            if ((!data_ptr) || ((data_ptr + sizeof(ULONG)) > packet_ptr -> nx_packet_append_ptr))
             {
 
                 /* Return!  */
@@ -5346,7 +5298,12 @@ ULONG           rr_ttl;
                     continue;
                 }
 
-                if((memcmp(ns_entry -> nx_dns_ns_hostname_ptr, &temp_string_buffer[0], name_size)) == 0)
+                /* The nx_dns_ns_hostname_ptr is set internally with null termination. */
+                status = _nx_utility_string_length_check((CHAR *)(ns_entry -> nx_dns_ns_hostname_ptr), &data_length, name_size);
+
+                if((status == NX_SUCCESS) &&
+                   (data_length == name_size) &&
+                   ((memcmp(ns_entry -> nx_dns_ns_hostname_ptr, &temp_string_buffer[0], name_size)) == 0))
                 {
 
                     /* This A type record contains the IPv4 address for the NS entry.  */
@@ -5365,7 +5322,7 @@ ULONG           rr_ttl;
 
                         /* Get data address and check if it is valid. */ 
                         data_ptr = _nx_dns_resource_data_address_get(data_ptr, packet_ptr);
-                        if (!data_ptr)
+                        if ((!data_ptr) || ((data_ptr + sizeof(ULONG)) > packet_ptr -> nx_packet_append_ptr))
                         {
 
                             /* Return!  */
@@ -5432,7 +5389,12 @@ ULONG           rr_ttl;
                     continue;
                 }
 
-                if((memcmp(mx_entry -> nx_dns_mx_hostname_ptr, &temp_string_buffer[0], name_size)) == 0)
+                /* The nx_dns_mx_hostname_ptr is set internally with null termination. */
+                status = _nx_utility_string_length_check((CHAR *)(mx_entry -> nx_dns_mx_hostname_ptr), &data_length, name_size);
+
+                if((status == NX_SUCCESS) &&
+                   (data_length == name_size) &&
+                   ((memcmp(mx_entry -> nx_dns_mx_hostname_ptr, &temp_string_buffer[0], name_size)) == 0))
                 {
 
                     /* This A type record contains the IPv4 address for the MX entry.  */
@@ -5451,7 +5413,7 @@ ULONG           rr_ttl;
 
                         /* Get data address and check if it is valid. */ 
                         data_ptr = _nx_dns_resource_data_address_get(data_ptr, packet_ptr);
-                        if (!data_ptr)
+                        if ((!data_ptr) || ((data_ptr + sizeof(ULONG)) > packet_ptr -> nx_packet_append_ptr))
                         {
 
                             /* Return!  */
@@ -5517,7 +5479,12 @@ ULONG           rr_ttl;
                     continue;
                 }
 
-                if((memcmp(srv_entry -> nx_dns_srv_hostname_ptr, &temp_string_buffer[0], name_size)) == 0)
+                /* The nx_dns_srv_hostname_ptr is set internally with null termination. */
+                status = _nx_utility_string_length_check((CHAR *)(srv_entry -> nx_dns_srv_hostname_ptr), &data_length, name_size);
+
+                if((status == NX_SUCCESS) &&
+                   (data_length == name_size) &&
+                   ((memcmp(srv_entry -> nx_dns_srv_hostname_ptr, &temp_string_buffer[0], name_size)) == 0))
                 {
 
                     /* This A type record contains the IPv4 address for the MX entry.  */
@@ -5536,7 +5503,7 @@ ULONG           rr_ttl;
 
                         /* Get data address and check if it is valid. */ 
                         data_ptr = _nx_dns_resource_data_address_get(data_ptr, packet_ptr);
-                        if (!data_ptr)
+                        if ((!data_ptr) || ((data_ptr + sizeof(ULONG)) > packet_ptr -> nx_packet_append_ptr))
                         {
 
                             /* Return!  */
@@ -5574,7 +5541,7 @@ ULONG           rr_ttl;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_process_aaaa_type                            PORTABLE C     */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5620,6 +5587,9 @@ ULONG           rr_ttl;
 /*                                            updated resource get APIs to*/
 /*                                            improve buffer bound check, */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_aaaa_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, 
@@ -5716,7 +5686,7 @@ ULONG                   rr_ttl;
 
             /* Update the pointer to the ipv6 address.  */
             data_ptr = _nx_dns_resource_data_address_get(data_ptr, packet_ptr);
-            if (!data_ptr)
+            if ((!data_ptr) || ((data_ptr + (4 * sizeof(ULONG))) > packet_ptr -> nx_packet_append_ptr))
             {
 
                 /* Return!  */
@@ -5991,7 +5961,7 @@ ULONG           rr_ttl;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_process_txt_type                             PORTABLE C     */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6034,6 +6004,9 @@ ULONG           rr_ttl;
 /*                                            updated resource get APIs to*/
 /*                                            improve buffer bound check, */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_txt_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
@@ -6107,7 +6080,7 @@ ULONG           rr_ttl;
     text_data_length = (UINT) (*data_ptr++); 
 
     /* Judge the resource data buffer space.  */
-    if(text_data_length > buffer_size - 1)
+    if ((text_data_length > buffer_size - 1) || ((data_ptr + text_data_length) > packet_ptr -> nx_packet_append_ptr))
     {
 
         /* Return error, and release the packet in repsonse*/
@@ -6222,10 +6195,11 @@ ULONG           rr_ttl;
 /*                                            updated resource get APIs to*/
 /*                                            improve buffer bound check, */
 /*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Updated input parameter of the*/
-/*                                            API to get the real size of */
-/*                                            resource name, resulting in */
-/*                                            version 6.1.3               */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), updated  */
+/*                                            input parameter of the API  */
+/*                                            to get the real size of     */
+/*                                            resource name,              */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_ns_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
@@ -6382,7 +6356,7 @@ ULONG               rr_ttl;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_process_mx_type                              PORTABLE C     */ 
-/*                                                           6.1.3        */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6430,10 +6404,14 @@ ULONG               rr_ttl;
 /*                                            updated resource get APIs to*/
 /*                                            improve buffer bound check, */
 /*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Updated input parameter of the*/
-/*                                            API to get the real size of */
-/*                                            resource name, resulting in */
-/*                                            version 6.1.3               */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), updated  */
+/*                                            input parameter of the API  */
+/*                                            to get the real size of     */
+/*                                            resource name,              */
+/*                                            resulting in version 6.1.3  */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_mx_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
@@ -6498,7 +6476,7 @@ UINT                size;
 
     /* Update the pointer to point at the resource data.  */
     data_ptr = _nx_dns_resource_data_address_get(data_ptr, packet_ptr);
-    if (!data_ptr)
+    if ((!data_ptr) || ((data_ptr + sizeof(USHORT)) >= packet_ptr -> nx_packet_append_ptr))
     {
 
         /* Return!  */
@@ -6617,7 +6595,7 @@ UINT                size;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_process_srv_type                             PORTABLE C     */ 
-/*                                                           6.1.3        */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6665,10 +6643,14 @@ UINT                size;
 /*                                            updated resource get APIs to*/
 /*                                            improve buffer bound check, */
 /*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Updated input parameter of the*/
-/*                                            API to get the real size of */
-/*                                            resource name, resulting in */
-/*                                            version 6.1.3               */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), updated  */
+/*                                            input parameter of the API  */
+/*                                            to get the real size of     */
+/*                                            resource name,              */
+/*                                            resulting in version 6.1.3  */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_srv_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, UCHAR **buffer_prepend_ptr, 
@@ -6734,7 +6716,9 @@ UINT                size;
 
     /* Update the pointer to point at the resource data.  */
     data_ptr = _nx_dns_resource_data_address_get(data_ptr, packet_ptr);
-    if (!data_ptr)
+
+    /* Plus 6 for 2 bytes priority, 2 bytes weight and 2 bytes port. */
+    if ((!data_ptr) || ((data_ptr + 6) >= packet_ptr -> nx_packet_append_ptr))
     {
 
         /* Return!  */
@@ -6869,7 +6853,7 @@ UINT                size;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_process_soa_type                             PORTABLE C     */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6916,6 +6900,9 @@ UINT                size;
 /*                                            updated resource get APIs to*/
 /*                                            improve buffer bound check, */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_soa_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
@@ -7050,7 +7037,8 @@ ULONG               rr_ttl;
         /* Get name size */
         name_size = _nx_dns_name_size_calculate(data_ptr, packet_ptr);
 
-        if (!name_size)
+        /* 20 bytes for 4 bytes serial, 4 bytes refresh, 4 bytes retry, 4 bytes expire and 4 bytes minmum. */
+        if ((!name_size) || ((data_ptr + name_size + 20) > packet_ptr -> nx_packet_append_ptr))
         {
             /* Return!  */
             return(NX_DNS_MALFORMED_PACKET);
@@ -7445,7 +7433,7 @@ UINT  _nxd_dns_host_by_address_get(NX_DNS *dns_ptr, NXD_ADDRESS *host_address_pt
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_host_by_address_get_internal                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7475,6 +7463,8 @@ UINT  _nxd_dns_host_by_address_get(NX_DNS *dns_ptr, NXD_ADDRESS *host_address_pt
 /*                                             query packet               */
 /*    tx_mutex_get                          Get DNS protection mutex      */ 
 /*    tx_mutex_put                          Release DNS protection mutex  */ 
+/*    nx_udp_socket_bind                    Bind DNS UDP socket to port   */ 
+/*    nx_udp_socket_unbind                  Unbind DNS UDP socket         */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -7489,6 +7479,9 @@ UINT  _nxd_dns_host_by_address_get(NX_DNS *dns_ptr, NXD_ADDRESS *host_address_pt
 /*                                            the timeout of first query, */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            randomized the source port, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_host_by_address_get_internal(NX_DNS *dns_ptr, NXD_ADDRESS *host_address_ptr, UCHAR *host_name_ptr, 
@@ -7639,6 +7632,18 @@ UINT        length, index;
     }
 #endif /*NX_DNS_CACHE_ENABLE.  */  
 
+    /* Bind the UDP socket to random port for each query.  */
+    status =  nx_udp_socket_bind(&(dns_ptr -> nx_dns_socket), NX_ANY_PORT, TX_WAIT_FOREVER);
+
+    /* Check status.  */
+    if (status != TX_SUCCESS)
+    {
+
+        /* Release the DNS Client lock.  */
+        tx_mutex_put(&dns_ptr -> nx_dns_mutex);
+        return(status);
+    }
+
     /* Limit the timeout to NX_DNS_MAX_RETRANS_TIMEOUT.  */
     if (wait_option > NX_DNS_MAX_RETRANS_TIMEOUT)
     {
@@ -7663,6 +7668,9 @@ UINT        length, index;
             if (status == NX_SUCCESS)
             {
 
+                /* Unbind the socket.  */
+                nx_udp_socket_unbind(&(dns_ptr -> nx_dns_socket));
+
                 /* Release the mutex */
                 tx_mutex_put(&dns_ptr -> nx_dns_mutex);
 
@@ -7678,6 +7686,9 @@ UINT        length, index;
             wait_option = NX_DNS_MAX_RETRANS_TIMEOUT;
     }
 
+    /* Unbind the socket.  */
+    nx_udp_socket_unbind(&(dns_ptr -> nx_dns_socket));
+
     /* Release protection.  */
     tx_mutex_put(&(dns_ptr -> nx_dns_mutex));
                                                        
@@ -7691,7 +7702,7 @@ UINT        length, index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_new_packet_create                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7705,7 +7716,6 @@ UINT        length, index;
 /*                                                                        */ 
 /*    dns_ptr                               Pointer to DNS instance       */ 
 /*    packet_ptr                            Packet allocated for message  */
-/*    id                                    DNS Client Identification     */ 
 /*    name                                  Question e.g. host name       */ 
 /*    type                                  DNS message type e.g. A, AAAA */ 
 /*                                                                        */ 
@@ -7733,12 +7743,18 @@ UINT        length, index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved id generation,     */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
-static UINT _nx_dns_new_packet_create(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, USHORT id, UCHAR *name, USHORT type)
+static UINT _nx_dns_new_packet_create(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *name, USHORT type)
 {
+USHORT id;
+UINT size;
 
-UINT        size;
+    /* Generate a random ID based on name. */
+    id = (USHORT)NX_RAND();
 
     /* Add the DNS header.  */
     size =  _nx_dns_header_create(packet_ptr -> nx_packet_append_ptr, id, NX_DNS_QUERY_FLAGS);
@@ -8120,7 +8136,7 @@ UINT    count =  1;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_name_string_unencode                        PORTABLE C      */ 
-/*                                                           6.1.3        */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8162,6 +8178,9 @@ UINT    count =  1;
 /*                                            infinite loop in name       */
 /*                                            compression, resulting in   */
 /*                                            version 6.1.3               */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_name_string_unencode(NX_PACKET *packet_ptr, UCHAR *data, UCHAR *buffer, UINT buffer_size)
@@ -8181,8 +8200,18 @@ UINT    pointer_count = 0;
 
     /* As long as there is space in the buffer and we haven't 
        found a zero terminating label */
-    while (*character != '\0')
+    while (1)
     {
+
+        if (character >= packet_ptr -> nx_packet_append_ptr)
+        {
+            return(0);
+        }
+
+        if (*character == '\0')
+        {
+            break;
+        }
 
         /* Check the buffer size.  */
         if (buffer_size > length)
@@ -8199,6 +8228,11 @@ UINT    pointer_count = 0;
                 while ((buffer_size > length) && (label_size > 0))
                 {
 
+                    if ((character >= packet_ptr -> nx_packet_append_ptr) || (*character == '\0'))
+                    {
+                        return(0);
+                    }
+
                     *buffer++ =  *character++;
                     length++;
                     label_size--;
@@ -8212,6 +8246,10 @@ UINT    pointer_count = 0;
             {
 
                 /* Message compression.  */
+                if (character >= packet_ptr -> nx_packet_append_ptr)
+                {
+                    return(0);
+                }
 
                 /* Get the offset.  */
                 offset = ((label_size & NX_DNS_LABEL_MAX) << 8) + *character;
@@ -8379,7 +8417,7 @@ UINT size =  0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_resource_name_real_size_calculate           PORTABLE C      */ 
-/*                                                           6.1.3        */
+/*                                                           6.1.4        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8419,6 +8457,9 @@ UINT size =  0;
 /*                                            infinite loop in name       */
 /*                                            compression, resulting in   */
 /*                                            version 6.1.3               */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT    _nx_dns_resource_name_real_size_calculate(UCHAR *data, UINT start, UINT data_length)
@@ -8428,13 +8469,24 @@ UCHAR   *character =  data + start;
 UINT    length = 0;
 UINT    offset;
 UINT    pointer_count = 0;
+UINT    labelSize;
   
     /* As long as there is space in the buffer and we haven't 
        found a zero terminating label */
-    while (*character != '\0')
+    while (1)
     {
 
-    UINT  labelSize =  *character++;
+        if (character >= (data + data_length))
+        {
+            return(0);
+        }
+
+        if (*character == '\0')
+        {
+            break;
+        }
+
+        labelSize =  *character++;
 
         /* Is this a compression pointer or a count.  */
         if (labelSize <= NX_DNS_LABEL_MAX)
@@ -8443,6 +8495,12 @@ UINT    pointer_count = 0;
             /* Simple count, check for space and copy the label.  */
             while (labelSize > 0)
             {
+
+                if (character >= (data + data_length))
+                {
+                    return(0);
+                }
+
                 character++;
                 length++;
                 labelSize--;
@@ -8453,6 +8511,11 @@ UINT    pointer_count = 0;
         }
         else if ((labelSize & NX_DNS_COMPRESS_MASK) == NX_DNS_COMPRESS_VALUE)
         {
+
+            if (character >= (data + data_length))
+            {
+                return(0);
+            }
 
             /* Get the offset.  */
             offset = ((labelSize & NX_DNS_LABEL_MAX) << 8) + *character;
