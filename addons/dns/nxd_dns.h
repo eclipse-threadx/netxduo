@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */  
 /*    nxd_dns.h                                           PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -49,6 +49,10 @@
 /*                                            infinite loop in name       */
 /*                                            compression, resulting in   */
 /*                                            version 6.1.3               */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            receiving dns response,     */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
           
@@ -1012,6 +1016,10 @@ UINT        _nx_dns_cache_notify_clear(NX_DNS *dns_ptr);
 #endif /* NX_DNS_CACHE_ENABLE  */
 
 #endif
+
+/* Internal DNS response getting function.  */
+UINT        _nx_dns_response_get(NX_DNS *dns_ptr, UCHAR *host_name, UCHAR *record_buffer, UINT buffer_size, 
+                                 UINT *record_count, ULONG wait_option);
 
 /* Determine if a C++ compiler is being used.  If so, complete the standard
    C conditional started above.  */

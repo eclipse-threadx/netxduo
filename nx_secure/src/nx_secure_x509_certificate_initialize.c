@@ -30,14 +30,14 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_initialize              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
 /*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
-/*      This function initializes an NX_SECURE_X509_CERTI                 */
+/*      This function initializes an NX_SECURE_X509_CERT                  */
 /*      structure with a DER-encoded X509 digital certificate, and        */
 /*      in the case of a server or client local certificate, the          */
 /*      associated private key.                                           */
@@ -84,8 +84,6 @@
 /*    _nx_secure_x509_pkcs1_rsa_private_key_parse                         */
 /*                                          Parse RSA key (PKCS#1 format) */
 /*    _nx_secure_x509_ec_private_key_parse  Parse EC key                  */
-/*    tx_mutex_get                          Get protection mutex          */
-/*    tx_mutex_put                          Put protection mutex          */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -99,6 +97,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed unnecessary mutex,  */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_initialize(NX_SECURE_X509_CERT *certificate,
@@ -113,9 +114,6 @@ UINT bytes_processed;
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
 NX_SECURE_EC_PRIVATE_KEY *ec_key;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
-
-    /* Get the protection. */
-    tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 
     NX_SECURE_MEMSET(certificate, 0, sizeof(NX_SECURE_X509_CERT));
 
@@ -132,8 +130,6 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
         /* Make sure we have enough space in the buffer for the certificate. */
         if (length > buffer_size)
         {
-            /* Release the protection. */
-            tx_mutex_put(&_nx_secure_tls_protection);
             return(NX_SECURE_TLS_INSUFFICIENT_CERT_SPACE);
         }
         /* Use the caller-supplied buffer for the certificate. */
@@ -152,8 +148,6 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
 
     if (status != 0)
     {
-        /* Release the protection. */
-        tx_mutex_put(&_nx_secure_tls_protection);
         return(NX_SECURE_TLS_INVALID_CERTIFICATE);
     }
 
@@ -194,8 +188,6 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
             /* See if we had any issues in parsing. */
             if (status != 0)
             {
-                /* Release the protection. */
-                tx_mutex_put(&_nx_secure_tls_protection);
                 return(status);
             }
         }
@@ -211,8 +203,6 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
 
     certificate -> nx_secure_x509_next_certificate = NULL;
 
-    /* Release the protection. */
-    tx_mutex_put(&_nx_secure_tls_protection);
     return(NX_SUCCESS);
 }
 

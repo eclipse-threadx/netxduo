@@ -1,5 +1,6 @@
 #ifndef FLATCC_ASSERT_H
 #define FLATCC_ASSERT_H
+#include <asc_config.h>
 
 #ifdef __cplusplus
 extern "C" {

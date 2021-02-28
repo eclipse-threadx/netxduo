@@ -1,18 +1,21 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
 
 #ifndef IOTSECURITY_COLLECTOR_COLLECTION_H
 #define IOTSECURITY_COLLECTOR_COLLECTION_H
+#include <asc_config.h>
 
 #include <stdint.h>
+#include <time.h>
+
 #include "asc_security_core/asc_result.h"
 #include "asc_security_core/collector.h"
 #include "asc_security_core/utils/collection/linked_list.h"
@@ -26,7 +29,7 @@ typedef struct collector_collection collector_collection_t;
  *
  * @return A @c collector_collection_t* representing the newly created collector collection.
  */
-collector_collection_t *collector_collection_init();
+collector_collection_t *collector_collection_init(void);
 
 
 /**
@@ -36,6 +39,24 @@ collector_collection_t *collector_collection_init();
  */
 void collector_collection_deinit(collector_collection_t *collector_collection_ptr);
 
+/**
+ * @brief Register collector to collector_collection
+ *
+ * @param collector_collection_ptr  the collector colleciton
+ * @param collector_ptr             a @c collector_t* collector handle
+ * @param random_collect_offset     a random start collection offset
+ * 
+ * @return  ASC_RESULT_OK on success, corresponding error code otherwise.
+ */
+asc_result_t collector_collection_register(collector_collection_t *collector_collection_ptr, collector_t *collector_ptr, time_t collect_offset);
+
+/**
+ * @brief Unregister collector from collector_collection
+ *
+ * @param collector_collection_ptr  the collector colleciton
+ * @param collector_ptr             a @c collector_t* collector handle
+ */
+void collector_collection_unregister(collector_collection_t *collector_collection_ptr, collector_t *collector_ptr);
 
 /**
  * @brief Return CollectorCollection specific priority collection
@@ -76,7 +97,7 @@ priority_collectors_t *collector_collection_get_next_priority(collector_collecti
  *
  * @return A @c collector_t* collector handle with the same type
  */
-collector_t *collector_collection_get_collector_by_priority(collector_collection_t *collector_collection_ptr, collector_type_t type);
+collector_t *collector_collection_get_collector_by_priority(collector_collection_t *collector_collection_ptr, collector_enum_t type);
 
 
 /**
@@ -86,28 +107,6 @@ collector_t *collector_collection_get_collector_by_priority(collector_collection
  * @param context           caller context
  */
 void collector_collection_foreach(collector_collection_t *collector_collection_ptr, linked_list_collector_t_action action_function, void *context);
-
-
-/**
- * @brief returns the interval in seconds of the priority collection
- *
- * @param priority_collectors_ptr  the priority collection
- *
- * @return A @c uint32_t which stands for the interval in seconds of the priority collection
- */
-uint32_t priority_collectors_get_interval(priority_collectors_t *priority_collectors_ptr);
-
-
-/**
- * @brief priority collectors interval setter
- *
- * @param priority_collectors_ptr   priority collectors ptr
- * @param interval                  interval in seconds
- *
- * @return asc_result_t
- */
-asc_result_t priority_collectors_set_interval(priority_collectors_t *priority_collectors_ptr, uint32_t interval);
-
 
 /**
  * @brief returns the list of collectors of the priority collection

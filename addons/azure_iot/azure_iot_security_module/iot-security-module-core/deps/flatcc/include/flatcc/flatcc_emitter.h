@@ -1,10 +1,14 @@
 #ifndef FLATCC_EMITTER_H
 #define FLATCC_EMITTER_H
+#include <asc_config.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#ifdef ASC_SERIALIZER_USE_CUSTOM_ALLOCATOR
+#include "asc_security_core/serializer/page_allocator.h"
+#endif
 /*
  * Default implementation of a flatbuilder emitter.
  *

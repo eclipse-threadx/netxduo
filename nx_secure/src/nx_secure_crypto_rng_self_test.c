@@ -31,14 +31,14 @@
 #define NX_SECURE_RNG_CHECK_COUNT   3
 #endif /* NX_SECURE_RNG_CHECK_COUNT */
 
-UINT _nx_secure_crypto_rng_self_test();
+UINT _nx_secure_crypto_rng_self_test(VOID);
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_crypto_rng_self_test                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,9 +71,12 @@ UINT _nx_secure_crypto_rng_self_test();
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_secure_crypto_rng_self_test()
+UINT _nx_secure_crypto_rng_self_test(VOID)
 {
 #ifdef NX_SECURE_POWER_ON_SELF_TEST_MODULE_INTEGRITY_CHECK
 UINT results[NX_SECURE_RNG_CHECK_COUNT];

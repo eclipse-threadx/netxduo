@@ -1,15 +1,15 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
+#include <asc_config.h>
 
-#include "asc_security_core/configuration.h"
 #include "asc_security_core/logger.h"
 #include "asc_security_core/model/schema/event_builder.h"
 #include "asc_security_core/serializer.h"
@@ -24,10 +24,10 @@ static asc_result_t _serializer_network_activity_add_ipv4_activity(serializer_t 
 static asc_result_t _serializer_network_activity_add_ipv6_activity(serializer_t *serializer, network_activity_ipv6_t *ipv6_payload);
 static asc_result_t _serializer_network_activity_add_common(serializer_t *serializer, network_activity_common_t *common);
 
-asc_result_t serializer_event_add_network_activity(serializer_t *serializer, uint32_t timestamp, uint32_t collection_interval,
+asc_result_t serializer_event_add_network_activity(serializer_t *serializer, time_t timestamp, time_t collection_interval,
                                                          network_activity_ipv4_t *ipv4_payload, network_activity_ipv6_t *ipv6_payload)
 {
-    log_debug("serializer_event_add_network_activity, serializer=[%p], timestamp=[%u], collection_interval=[%u], ipv4_payload=[%p], ipv6_payload=[%p]",
+    log_debug("serializer_event_add_network_activity, serializer=[%p], timestamp=[%lu], collection_interval=[%lu], ipv4_payload=[%p], ipv6_payload=[%p]",
               (void*)serializer, timestamp, collection_interval, (void*)ipv4_payload, (void*)ipv6_payload);
 
 #ifndef ASC_COLLECTOR_NETWORK_ACTIVITY_SEND_EMPTY_EVENTS

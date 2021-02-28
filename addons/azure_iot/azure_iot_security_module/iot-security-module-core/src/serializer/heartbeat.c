@@ -1,13 +1,14 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
+#include <asc_config.h>
 
 #include "asc_security_core/logger.h"
 #include "asc_security_core/model/schema/message_builder.h"
@@ -15,9 +16,9 @@
 #include "asc_security_core/serializer.h"
 #include "serializer_private.h"
 
-asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, uint32_t timestamp, uint32_t collection_interval)
+asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, time_t timestamp, time_t collection_interval)
 {
-    log_debug("serializer_event_add_heartbeat, serializer=[%p], timestamp=[%u], collection_interval=[%u]",
+    log_debug("serializer_event_add_heartbeat, serializer=[%p], timestamp=[%lu], collection_interval=[%lu]",
               (void*)serializer, timestamp, collection_interval);
     
     if (serializer == NULL) {
@@ -40,7 +41,7 @@ asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, uint32_t t
         return ASC_RESULT_EXCEPTION;
     }
 
-    if (AzureIoTSecurity_Message_events_push_end(&serializer->builder) == NULL) {
+    if (AzureIoTSecurity_Event_vec_push_end(&serializer->builder) == NULL) {
         log_error("failed in AzureIoTSecurity_Event_vec_push_end");
         serializer->state = SERIALIZER_STATE_EXCEPTION;
         return ASC_RESULT_EXCEPTION;

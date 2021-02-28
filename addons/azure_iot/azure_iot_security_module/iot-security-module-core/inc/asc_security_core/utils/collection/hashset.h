@@ -1,16 +1,17 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
 
 #ifndef HASHSET_H
 #define HASHSET_H
+#include <asc_config.h>
 
 #include <string.h>
 
@@ -129,7 +130,26 @@ extern int hashset_##type##_equals(type *a, type *b);                           
  *                                                                                                                        \
  * @return  void                                                                                                          \
  */                                                                                                                       \
-extern void hashset_##type##_update(type *old_element, type *new_element);
+extern void hashset_##type##_update(type *old_element, type *new_element);                                                \
+                                                                                                                          \
+/**                                                                                                                       \
+ * @brief   Get depth of hash to exam the hash function!                                                                  \
+ *                                                                                                                        \
+ * @param   table             An initialized hashset                                                                      \
+ * @param   count             Count of non null or one element linked lists (out parameter)                               \
+ *                                                                                                                        \
+ * @return  zero if all hash elements have list with 0 or 1 length - otherwise the longest list length                    \
+ */                                                                                                                       \
+unsigned int hashset_##type##_get_depth(type *table[], unsigned int *count);                                              \
+                                                                                                                          \
+/**                                                                                                                       \
+ * @brief   Check if hash table is empty                                                                                  \
+ *                                                                                                                        \
+ * @param   table             An initialized hashset                                                                      \
+ *                                                                                                                        \
+ * @return  true if hash table is empty - otherwise false                                                                 \
+ */                                                                                                                       \
+ bool hashset_##type##_is_empty(type *table[]);
 
 #define HASHSET_DEFINITIONS(type, size)                                                                                   \
 void hashset_##type##_init(type *table[])                                                                                 \
@@ -189,12 +209,13 @@ extern void hashset_##type##_add_or_update(type *table[], type *element)        
 void hashset_##type##_for_each(type *table[], hashset_##type##_for_each_function for_each_funcion, void *context)         \
 {                                                                                                                         \
   if (table == NULL || for_each_funcion == NULL) return;                                                                  \
-  type *current_element = NULL;                                                                                           \
+  type *current_element = NULL, *tmp = NULL;                                                                                           \
   for (unsigned int i = 0; i < size; ++i) {                                                                               \
     current_element = table[i];                                                                                           \
     while (current_element != NULL) {                                                                                     \
+      tmp = current_element->next;                                                                                        \
       for_each_funcion(current_element, context);                                                                         \
-      current_element = current_element->next;                                                                            \
+      current_element = tmp;                                                                                              \
     }                                                                                                                     \
   }                                                                                                                       \
 }                                                                                                                         \
@@ -218,6 +239,47 @@ void hashset_##type##_clear(type *table[], hashset_##type##_for_each_function fo
       current_element = table[i];                                                                                         \
     }                                                                                                                     \
   }                                                                                                                       \
+}                                                                                                                         \
+                                                                                                                          \
+unsigned int hashset_##type##_get_depth(type *table[], unsigned int *count)                                               \
+{                                                                                                                         \
+  unsigned int max = 0;                                                                                                   \
+  *count = 0;                                                                                                             \
+  if (table == NULL) return max;                                                                                          \
+  type *current_element = NULL;                                                                                           \
+  for (unsigned int i = 0; i < size; ++i) {                                                                               \
+    unsigned int cnt = 0;                                                                                                 \
+    current_element = table[i];                                                                                           \
+    while (current_element != NULL) {                                                                                     \
+      cnt++;                                                                                                              \
+      current_element = current_element->next;                                                                            \
+    }                                                                                                                     \
+    if (cnt > 1) {                                                                                                        \
+      if (cnt > max) max = cnt;                                                                                           \
+      (*count)++;                                                                                                         \
+    }                                                                                                                     \
+  }                                                                                                                       \
+  return max;                                                                                                             \
+}                                                                                                                         \
+                                                                                                                          \
+bool hashset_##type##_is_empty(type *table[])                                                                             \
+{                                                                                                                         \
+  if (table == NULL) return true;                                                                                         \
+  for (unsigned int i = 0; i < size; ++i) {                                                                               \
+    if (table[i]) return false;                                                                                           \
+  }                                                                                                                       \
+  return true;                                                                                                            \
+}
+
+static inline unsigned int hashset_buffer2hash(const char *str, size_t len)
+{
+    unsigned int hash = 5381;
+
+    for (size_t i = 0 ; i < len; i++) {
+        hash = ((hash << 5) + hash) + (unsigned int)str[i];
+    }
+
+    return hash;
 }
 
 #endif /* HASHSET_H */

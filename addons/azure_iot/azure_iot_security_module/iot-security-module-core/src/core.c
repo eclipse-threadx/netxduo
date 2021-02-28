@@ -1,35 +1,114 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
+#include <asc_config.h>
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "asc_security_core/collector_collection.h"
-#include "asc_security_core/configuration.h"
+#include "asc_security_core/components_manager.h"
 #include "asc_security_core/logger.h"
-#include "asc_security_core/collector.h"
 #include "asc_security_core/object_pool.h"
 #include "asc_security_core/serializer.h"
+#include "asc_security_core/utils/ievent_loop.h"
 #include "asc_security_core/utils/itime.h"
+#include "asc_security_core/utils/irand.h"
+#include "asc_security_core/utils/notifier.h"
 #include "asc_security_core/utils/os_utils.h"
 
 #include "asc_security_core/core.h"
+#include "asc_security_core/version.h"
 
 #define CORE_OBJECT_POOL_COUNT 1
+#define CORE_RESTART_SLEEP 1
+
+typedef struct core {
+    COLLECTION_INTERFACE(struct core);
+
+    const char *security_module_id;
+    uint32_t security_module_version;
+    collector_collection_t *collector_collection_ptr;
+
+    uint8_t *message_buffer;
+    size_t message_buffer_size;
+#ifdef ASC_DYNAMIC_MEMORY_ENABLED
+    bool message_allocated;
+#endif
+    bool message_empty;
+
+    serializer_t *serializer;
+    time_t init_random_collect_offset;
+    time_t nearest_collect_time;
+    event_loop_timer_handler h_collect;
+    event_loop_timer_handler h_start;
+    notifier_t security_module_state_notifier;
+} core_t;
 
 OBJECT_POOL_DECLARATIONS(core_t)
 OBJECT_POOL_DEFINITIONS(core_t, CORE_OBJECT_POOL_COUNT)
 
-core_t *core_init()
+typedef struct {
+    time_t minimum;
+    time_t curr_time;
+    bool is_in_start;
+} calc_nearest_collect_t;
+
+static asc_result_t _init(component_id_t id);
+static asc_result_t _deinit(component_id_t id);
+static asc_result_t _start(component_id_t id);
+static asc_result_t _stop(component_id_t id);
+static component_ops_t _ops = {
+    .init = _init,
+    .deinit = _deinit,
+    .start = _start,
+    .stop = _stop,
+};
+
+COMPONENTS_FACTORY_DEFINITION(CollectorsCore, &_ops)
+
+static void _core_deinit(core_t *core_ptr, component_id_t id);
+static asc_result_t _set_next_collect_timer(core_t *core_ptr, time_t curr_time, bool is_in_start);
+static void _security_module_state_cb(notifier_t *notifier, int message_num, void *payload);
+
+static void _init_random_collect_offset(core_t *core_ptr)
+{
+#ifdef ASC_FIRST_FORCE_COLLECTION_INTERVAL
+    #if ASC_FIRST_FORCE_COLLECTION_INTERVAL < 0
+        core_ptr->init_random_collect_offset = itime_time(NULL);
+    #else
+        core_ptr->init_random_collect_offset = itime_time(NULL) + ASC_FIRST_FORCE_COLLECTION_INTERVAL;
+    #endif
+#else
+    core_ptr->init_random_collect_offset = itime_time(NULL) + (time_t)(irand_int() % (2 * ASC_FIRST_COLLECTION_INTERVAL) + ASC_FIRST_COLLECTION_INTERVAL);
+#endif
+}
+
+static time_t _calculate_collector_time_offset(core_t *core_ptr, collector_t *collector_ptr, component_state_enum_t state)
+{
+    time_t offset, base_collecting_time = core_ptr->init_random_collect_offset;
+
+    // TODO it breaks sequence of collections and cause to increasing of security messages - need to sync on init_random_collect_offset
+    if (state == COMPONENT_RUNNING) {
+        base_collecting_time = itime_time(NULL) + ASC_FIRST_COLLECTION_INTERVAL;
+    }
+    if (collector_ptr->internal.interval > core_ptr->init_random_collect_offset) {
+        // should never happens
+        offset = base_collecting_time;
+    } else {
+        offset = base_collecting_time - collector_ptr->internal.interval;
+    }
+    return offset;
+}
+
+static core_t *core_init(component_id_t id)
 {
     asc_result_t result = ASC_RESULT_OK;
     core_t *core_ptr = NULL;
@@ -41,6 +120,7 @@ core_t *core_init()
         goto cleanup;
     }
     memset(core_ptr, 0, sizeof(core_t));
+    core_ptr->nearest_collect_time = CORE_NEAREST_TIMER_UNSET_VAL;
 
     core_ptr->security_module_id = os_utils_get_security_module_id();
     if (core_ptr->security_module_id == NULL) {
@@ -67,29 +147,34 @@ core_t *core_init()
 
     result = serializer_message_begin(core_ptr->serializer, core_ptr->security_module_id, core_ptr->security_module_version);
 
-#ifdef DYNAMIC_MEMORY_ENABLED
+#ifdef ASC_DYNAMIC_MEMORY_ENABLED
     core_ptr->message_allocated = false;
 #endif
     core_ptr->message_empty = true;
+    _init_random_collect_offset(core_ptr);
+
+    core_ptr->security_module_state_notifier.notify = _security_module_state_cb;
+    result = notifier_subscribe(NOTIFY_TOPIC_SECURITY_MODULE_STATE, &core_ptr->security_module_state_notifier);
 
 cleanup:
     if (result != ASC_RESULT_OK) {
         log_error("Failed to init client core_t");
-        core_deinit(core_ptr);
+        _core_deinit(core_ptr, id);
         core_ptr = NULL;
     }
 
     return core_ptr;
 }
 
-void core_deinit(core_t *core_ptr)
+static void _core_deinit(core_t *core_ptr, component_id_t id)
 {
     if (core_ptr != NULL) {
+        notifier_unsubscribe(NOTIFY_TOPIC_SECURITY_MODULE_STATE, &core_ptr->security_module_state_notifier);
         if (core_ptr->collector_collection_ptr != NULL) {
             collector_collection_deinit(core_ptr->collector_collection_ptr);
         }
 
-#ifdef DYNAMIC_MEMORY_ENABLED
+#ifdef ASC_DYNAMIC_MEMORY_ENABLED
         if (core_ptr->message_allocated) {
             free(core_ptr->message_buffer);
             core_ptr->message_buffer = NULL;
@@ -103,14 +188,120 @@ void core_deinit(core_t *core_ptr)
         object_pool_free(core_t, core_ptr);
         core_ptr = NULL;
     }
+    components_manager_set_self_ctx(NULL);
 }
 
-asc_result_t core_collect(core_t *core_ptr)
+static void _start_stop_all_collectors(collector_t *collector_ptr, void *context)
+{
+    bool do_start = *(bool*)context;
+
+    component_id_t collector_id = components_manager_get_id(collector_ptr->internal.type);
+    component_id_t core_id = components_manager_get_self_id();
+
+    if (do_start) {
+        components_manager_start(collector_id, core_id);
+    } else {
+        components_manager_stop(collector_id, core_id, true, false);
+    }
+}
+
+#ifdef ASC_COMPONENT_CORE_SUPPORTS_RESTART
+static void _reset_last_collected_timestamp(collector_t *collector_ptr, void *context)
+{
+    core_t *core_ptr = context;
+
+    time_t offset = _calculate_collector_time_offset(core_ptr, collector_ptr, COMPONENT_STOPED);
+
+    collector_set_last_collected_timestamp(collector_ptr, offset);
+}
+
+static void cb_do_start(event_loop_timer_handler h, void *ctx)
+{
+    core_t *core_ptr = ctx;
+    ievent_loop_t *el = ievent_loop_get_instance();
+
+    el->timer_delete(h);
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return;
+    }
+    bool do_start = true;
+    component_id_t core_id = components_manager_get_self_id();
+    _init_random_collect_offset(core_ptr);
+    collector_collection_foreach(core_ptr->collector_collection_ptr, _reset_last_collected_timestamp, core_ptr);
+    collector_collection_foreach(core_ptr->collector_collection_ptr, _start_stop_all_collectors, &do_start);
+    components_manager_start(core_id, core_id);
+}
+#endif
+
+static void _start_stop_collection(bool do_start, bool restart)
+{
+    core_t *core_ptr = components_manager_get_self_ctx();
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return;
+    }
+    component_id_t core_id = components_manager_get_self_id();
+
+#ifdef ASC_COMPONENT_CORE_SUPPORTS_RESTART
+    if (restart) {
+        bool restart_do_start = false;
+        collector_collection_foreach(core_ptr->collector_collection_ptr, _start_stop_all_collectors, &restart_do_start);
+        components_manager_stop(core_id, core_id, false, false);
+        core_message_deinit();
+        ievent_loop_t *el = ievent_loop_get_instance();
+        el->timer_delete(core_ptr->h_start);
+        core_ptr->h_start = el->timer_create(cb_do_start, core_ptr, CORE_RESTART_SLEEP, 0, &core_ptr->h_start);
+    } else
+#endif
+    {
+        collector_collection_foreach(core_ptr->collector_collection_ptr, _start_stop_all_collectors, &do_start);
+
+        if (do_start) {
+            components_manager_start(core_id, core_id);
+        } else {
+            components_manager_stop(core_id, core_id, false, false);
+        }
+    }
+}
+
+static void _security_module_state_cb(notifier_t *notifier, int message_num, void *payload)
+{
+    switch (message_num)
+    {
+    case NOTIFY_SECURITY_MODULE_CONNECTED:
+        _start_stop_collection(true, false);
+        log_info("Security Module inserted to 'Connected' state");
+        break;
+#ifdef ASC_COMPONENT_CORE_SUPPORTS_RESTART
+    case NOTIFY_SECURITY_MODULE_RESTART:
+        _start_stop_collection(true, true);
+        log_info("Security Module inserted to 'Connected' state with restart");
+        break;
+#endif
+    case NOTIFY_SECURITY_MODULE_PENDING:
+        _start_stop_collection(true, false);
+        log_info("Security Module inserted to 'Pending' state");
+        break;
+    case NOTIFY_SECURITY_MODULE_SUSPENDED:
+        _start_stop_collection(false, false);
+        log_info("Security Module inserted to 'Suspended' state");
+        break;
+    default:
+        log_error("Unsupported Security Module state");
+        break;
+    }
+}
+
+static asc_result_t core_collect(core_t *core_ptr, time_t curr_time)
 {
     asc_result_t result = ASC_RESULT_OK;
-    uint32_t current_snapshot = itime_time(NULL);
     bool at_least_one_success = false;
     bool time_passed = false;
+
+    core_message_deinit();
 
     for (priority_collectors_t *prioritized_collectors = collector_collection_get_head_priority(core_ptr->collector_collection_ptr);
             prioritized_collectors != NULL;
@@ -121,13 +312,22 @@ asc_result_t core_collect(core_t *core_ptr)
         for (collector_t *current_collector=linked_list_collector_t_get_first(collector_list);
                 current_collector!=NULL;
                 current_collector=current_collector->next
-            ) {
-            uint32_t last_collected = collector_get_last_collected_timestamp(current_collector);
-            uint32_t interval = priority_collectors_get_interval(prioritized_collectors);
+            )
+        {
+            component_info_t *info = components_manager_get_info(components_manager_get_id(current_collector->internal.type));
+            if (!info || info->state != COMPONENT_RUNNING) {
+                continue;
+            }
 
-            if (current_snapshot - last_collected >= interval) {
+            time_t last_collected = collector_get_last_collected_timestamp(current_collector);
+            time_t interval = current_collector->internal.interval;
+            time_t delta = curr_time - last_collected;
+
+            if (delta >= interval) {
                 time_passed = true;
                 result = collector_serialize_events(current_collector, core_ptr->serializer);
+                // overwrite last collected time with common start value to store sequence of collections
+                collector_set_last_collected_timestamp(current_collector, curr_time);
                 if (result == ASC_RESULT_EMPTY) {
                     log_debug("empty, collector type=[%d]", current_collector->internal.type);
                     continue;
@@ -145,18 +345,105 @@ asc_result_t core_collect(core_t *core_ptr)
 
 error:
     // In case of serializer failure, it is unsafe to keep building the message
-    core_message_deinit(core_ptr);
+    core_message_deinit();
 
     return ASC_RESULT_EXCEPTION;
 }
 
+static void _collector_collection_calc_nearest_collect(collector_t *collector_ptr, void *context)
+{
+    calc_nearest_collect_t *ctx = (calc_nearest_collect_t *)context;
+    component_info_t *info = components_manager_get_info(components_manager_get_id(collector_ptr->internal.type));
 
-asc_result_t core_message_get(core_t* core_ptr, security_message_t* security_message_ptr) {
+    /* Exclude failed collectors from nearest collect time calculation */
+    if (!info) {
+        return;
+    }
+    if (!ctx->is_in_start) {
+        if (info->state != COMPONENT_RUNNING) {
+            return;
+        }
+    } else { /* If we are in core start function take in account also subscribed collectors */
+        if (info->state != COMPONENT_RUNNING && info->state != COMPONENT_SUBSCRIBED) {
+            return;
+        }
+    }
+    
+    time_t curr_time = ctx->curr_time;
+    time_t last_collected = collector_get_last_collected_timestamp(collector_ptr);
+    time_t interval = collector_ptr->internal.interval;
+    time_t next_time;
+
+    if (last_collected > curr_time) {
+        next_time = last_collected - curr_time + interval;
+    } else {
+        time_t delta = curr_time - last_collected;
+        if (interval <= delta) {
+            next_time = 0;
+        } else {
+            next_time = interval - delta;
+        }
+    }
+
+    if (next_time < ctx->minimum) {
+        ctx->minimum = next_time;
+    }
+}
+
+static void cb_collect(event_loop_timer_handler h, void *ctx)
+{
+    core_t *core_ptr = ctx;
+    ievent_loop_t *el = ievent_loop_get_instance();
+
+    el->timer_delete(h);
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return;
+    }
+    time_t curr_time = itime_time(NULL);
+
+    if (core_collect(core_ptr, curr_time) == ASC_RESULT_OK) {
+        notifier_notify(NOTIFY_TOPIC_COLLECT, NOTIFY_MESSAGE_READY, NULL);
+    }
+    _set_next_collect_timer(core_ptr, curr_time, false);
+}
+
+static asc_result_t _set_next_collect_timer(core_t *core_ptr, time_t curr_time, bool is_in_start)
+{
+    ievent_loop_t *el = ievent_loop_get_instance();
+    calc_nearest_collect_t ctx;
+
+    ctx.minimum = CORE_NEAREST_TIMER_UNSET_VAL;
+    ctx.curr_time = curr_time;
+    ctx.is_in_start = is_in_start;
+
+    // stop existing timer
+    el->timer_delete(core_ptr->h_collect);
+
+    collector_collection_foreach(core_ptr->collector_collection_ptr, _collector_collection_calc_nearest_collect, &ctx);
+
+    if (ctx.minimum == CORE_NEAREST_TIMER_UNSET_VAL) {
+        log_debug("the list of collectors is empty");
+    } else {
+        log_debug("the nearest collection interval=[%lu]", ctx.minimum);
+        core_ptr->h_collect = el->timer_create(cb_collect, core_ptr, ctx.minimum, 0, &core_ptr->h_collect);
+    }
+
+    core_ptr->nearest_collect_time = ctx.minimum;
+
+    return ASC_RESULT_OK;
+}
+
+/* API Functions */
+asc_result_t core_message_get(security_message_t* security_message_ptr)
+{
     asc_result_t result = ASC_RESULT_OK;
+    core_t *core_ptr = components_manager_get_self_ctx();
 
     if (core_ptr == NULL || security_message_ptr == NULL) {
-        result = ASC_RESULT_BAD_ARGUMENT;
-        log_error("bad argument");
+        result = ASC_RESULT_MEMORY_EXCEPTION;
+        log_error("core uninitialized");
         goto cleanup;
     }
 
@@ -181,11 +468,11 @@ asc_result_t core_message_get(core_t* core_ptr, security_message_t* security_mes
         }
 
         if (result == ASC_RESULT_IMPOSSIBLE) {
-#ifndef DYNAMIC_MEMORY_ENABLED
+#ifndef ASC_DYNAMIC_MEMORY_ENABLED
             log_error("failed in serializer_buffer_get, message too big");
             result = ASC_RESULT_EXCEPTION;
             goto cleanup;
-#else /* DYNAMIC_MEMORY_ENABLED */
+#else /* ASC_DYNAMIC_MEMORY_ENABLED */
             result = ASC_RESULT_OK;
             log_debug("failed in serializer_buffer_get on first attempt, re-allocating buffer...");
             if (serializer_buffer_get_size(core_ptr->serializer, &core_ptr->message_buffer_size) != ASC_RESULT_OK) {
@@ -209,7 +496,7 @@ asc_result_t core_message_get(core_t* core_ptr, security_message_t* security_mes
                 goto cleanup;
             }
             log_debug("re-allocating buffer done successfully");
-#endif /* DYNAMIC_MEMORY_ENABLED */
+#endif /* ASC_DYNAMIC_MEMORY_ENABLED */
         }
     }
 
@@ -219,20 +506,60 @@ asc_result_t core_message_get(core_t* core_ptr, security_message_t* security_mes
 
 cleanup:
     if (result == ASC_RESULT_EXCEPTION || result == ASC_RESULT_MEMORY_EXCEPTION) {
-        core_message_deinit(core_ptr);
+        core_message_deinit();
     }
 
     return result;
 }
 
-asc_result_t core_message_deinit(core_t *core_ptr)
+asc_result_t core_collector_register(collector_t *collector_ptr)
 {
+    core_t *core_ptr = components_manager_get_self_ctx();
+
     if (core_ptr == NULL) {
-        log_error("bad argument");
-        return ASC_RESULT_BAD_ARGUMENT;
+        log_error("core uninitialized");
+        return ASC_RESULT_MEMORY_EXCEPTION;
+    }
+    component_state_enum_t state = components_manager_get_info(components_manager_get_self_id())->state;
+    time_t offset = _calculate_collector_time_offset(core_ptr, collector_ptr, state);
+
+    asc_result_t result = collector_collection_register(core_ptr->collector_collection_ptr, collector_ptr, offset);
+
+    if (state == COMPONENT_RUNNING) {
+        _set_next_collect_timer(core_ptr, itime_time(NULL), false);
+    }
+    return result;
+}
+
+asc_result_t core_collector_unregister(collector_t *collector_ptr)
+{
+    core_t *core_ptr = components_manager_get_self_ctx();
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return ASC_RESULT_MEMORY_EXCEPTION;
     }
 
-#ifdef DYNAMIC_MEMORY_ENABLED
+    collector_collection_unregister(core_ptr->collector_collection_ptr, collector_ptr);
+
+    component_state_enum_t state = components_manager_get_info(components_manager_get_self_id())->state;
+
+    if (state == COMPONENT_RUNNING) {
+        _set_next_collect_timer(core_ptr, itime_time(NULL), false);
+    }
+    return ASC_RESULT_OK;
+}
+
+asc_result_t core_message_deinit(void)
+{
+    core_t *core_ptr = components_manager_get_self_ctx();
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return ASC_RESULT_MEMORY_EXCEPTION;
+    }
+
+#ifdef ASC_DYNAMIC_MEMORY_ENABLED
     if (core_ptr->message_allocated) {
         free(core_ptr->message_buffer);
         core_ptr->message_allocated = false;
@@ -254,4 +581,94 @@ asc_result_t core_message_deinit(core_t *core_ptr)
     core_ptr->message_empty = true;
 
     return ASC_RESULT_OK;
+}
+
+time_t core_get_init_random_collect_offset(void)
+{
+    core_t *core_ptr = components_manager_get_self_ctx();
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return 0;
+    }
+    return core_ptr->init_random_collect_offset;
+}
+
+time_t core_get_nearest_collect_time(void)
+{
+    core_t *core_ptr = components_manager_get_self_ctx();
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return 0;
+    }
+    return core_ptr->nearest_collect_time;
+}
+
+collector_collection_t *core_get_collector_collection(void)
+{
+    core_t *core_ptr = components_manager_get_self_ctx();
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return NULL;
+    }
+    return core_ptr->collector_collection_ptr;
+}
+
+/* OPS Functions */
+static asc_result_t _init(component_id_t id)
+{
+    core_t *ptr = core_init(id);
+
+    if (ptr == NULL) {
+        components_manager_set_self_ctx(NULL);
+        return ASC_RESULT_EXCEPTION;
+    }
+    components_manager_set_self_ctx(ptr);
+
+    return ASC_RESULT_OK;
+}
+
+static asc_result_t _deinit(component_id_t id)
+{
+    core_t *core_ptr = components_manager_get_self_ctx();
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return ASC_RESULT_MEMORY_EXCEPTION;
+    }
+
+    _core_deinit(core_ptr, id);
+    return ASC_RESULT_OK;
+}
+
+asc_result_t _stop(component_id_t id)
+{
+    core_t *core_ptr = components_manager_get_self_ctx();
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return ASC_RESULT_MEMORY_EXCEPTION;
+    }
+    ievent_loop_t *el = ievent_loop_get_instance();
+    el->timer_delete(core_ptr->h_start);
+    el->timer_delete(core_ptr->h_collect);
+    core_ptr->nearest_collect_time = CORE_NEAREST_TIMER_UNSET_VAL;
+
+    return ASC_RESULT_OK;
+}
+
+static asc_result_t _start(component_id_t id)
+{
+    core_t *core_ptr = components_manager_get_self_ctx();
+
+    if (core_ptr == NULL) {
+        log_error("core uninitialized");
+        return ASC_RESULT_MEMORY_EXCEPTION;
+    }
+    ievent_loop_t *el = ievent_loop_get_instance();
+    el->timer_delete(core_ptr->h_start);
+    /* Last parameter is 'true' because we do not want to base on sequence so we taking in account all registered collectors here */
+    return _set_next_collect_timer(core_ptr, itime_time(NULL), true);
 }

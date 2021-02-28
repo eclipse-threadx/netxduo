@@ -9,6 +9,12 @@
 #ifndef FLATBUFFERS_COMMON_BUILDER_H
 #include "flatbuffers_common_builder.h"
 #endif
+#ifndef LOG_BUILDER_H
+#include "log_builder.h"
+#endif
+#ifndef PROCESS_BUILDER_H
+#include "process_builder.h"
+#endif
 #ifndef BASELINE_BUILDER_H
 #include "baseline_builder.h"
 #endif
@@ -48,6 +54,10 @@ static inline AzureIoTSecurity_Payload_union_ref_t AzureIoTSecurity_Payload_as_H
 { AzureIoTSecurity_Payload_union_ref_t uref; uref.type = AzureIoTSecurity_Payload_Heartbeat; uref.value = ref; return uref; }
 static inline AzureIoTSecurity_Payload_union_ref_t AzureIoTSecurity_Payload_as_Baseline(AzureIoTSecurity_Baseline_ref_t ref)
 { AzureIoTSecurity_Payload_union_ref_t uref; uref.type = AzureIoTSecurity_Payload_Baseline; uref.value = ref; return uref; }
+static inline AzureIoTSecurity_Payload_union_ref_t AzureIoTSecurity_Payload_as_Process(AzureIoTSecurity_Process_ref_t ref)
+{ AzureIoTSecurity_Payload_union_ref_t uref; uref.type = AzureIoTSecurity_Payload_Process; uref.value = ref; return uref; }
+static inline AzureIoTSecurity_Payload_union_ref_t AzureIoTSecurity_Payload_as_Log(AzureIoTSecurity_Log_ref_t ref)
+{ AzureIoTSecurity_Payload_union_ref_t uref; uref.type = AzureIoTSecurity_Payload_Log; uref.value = ref; return uref; }
 __flatbuffers_build_union_vector(flatbuffers_, AzureIoTSecurity_Payload)
 
 static AzureIoTSecurity_Payload_union_ref_t AzureIoTSecurity_Payload_clone(flatbuffers_builder_t *B, AzureIoTSecurity_Payload_union_t u)
@@ -58,6 +68,8 @@ static AzureIoTSecurity_Payload_union_ref_t AzureIoTSecurity_Payload_clone(flatb
     case 3: return AzureIoTSecurity_Payload_as_ListeningPorts(AzureIoTSecurity_ListeningPorts_clone(B, (AzureIoTSecurity_ListeningPorts_table_t)u.value));
     case 4: return AzureIoTSecurity_Payload_as_Heartbeat(AzureIoTSecurity_Heartbeat_clone(B, (AzureIoTSecurity_Heartbeat_table_t)u.value));
     case 5: return AzureIoTSecurity_Payload_as_Baseline(AzureIoTSecurity_Baseline_clone(B, (AzureIoTSecurity_Baseline_table_t)u.value));
+    case 6: return AzureIoTSecurity_Payload_as_Process(AzureIoTSecurity_Process_clone(B, (AzureIoTSecurity_Process_table_t)u.value));
+    case 7: return AzureIoTSecurity_Payload_as_Log(AzureIoTSecurity_Log_clone(B, (AzureIoTSecurity_Log_table_t)u.value));
     default: return AzureIoTSecurity_Payload_as_NONE();
     }
 }

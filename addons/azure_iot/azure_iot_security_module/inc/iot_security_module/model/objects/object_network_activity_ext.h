@@ -12,11 +12,12 @@
 #ifndef OBJECT_NETWORK_ACTIVITY_EXT_H
 #define OBJECT_NETWORK_ACTIVITY_EXT_H
 
+#include <asc_config.h>
+
 #ifdef __cplusplus
 extern   "C" {
 #endif
 
-#include "asc_security_core/configuration.h"
 #include "asc_security_core/utils/collection/hashset.h"
 #include "asc_security_core/model/objects/network_activity.h"
 

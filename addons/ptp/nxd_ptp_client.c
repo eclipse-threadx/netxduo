@@ -898,7 +898,7 @@ static VOID _nx_ptp_client_sync_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_delay_resp_received                  PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -934,6 +934,9 @@ static VOID _nx_ptp_client_sync_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_delay_resp_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr)
@@ -1004,7 +1007,7 @@ NX_PTP_CLIENT_SYNC sync;
     _nx_ptp_client_clock_adjust(client_ptr, &a);
 
     /* set calibrated flag */
-    if (!(client_ptr -> nx_ptp_client_sync_flags) & NX_PTP_CLIENT_SYNC_CALIBRATED)
+    if (!(client_ptr -> nx_ptp_client_sync_flags & NX_PTP_CLIENT_SYNC_CALIBRATED))
     {
 
         client_ptr -> nx_ptp_client_sync_flags |= NX_PTP_CLIENT_SYNC_CALIBRATED;

@@ -1,14 +1,15 @@
 
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
+#include <asc_config.h>
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -24,16 +25,20 @@
 
 /** @brief An opaque structure representing a timer. */
 typedef struct event_timer event_timer_t;
-/** @brief A callback function called when the timer expires. */
-typedef void (*event_timer_cb_t)(event_timer_t *t, void *ctx);
+
+/** @brief Flag to know if we are in timer callback to avoid inserting to another timer callbacks that where created
+*          in current loop.
+*/
+static bool _in_timer_cb;
 
 struct event_timer {
     COLLECTION_INTERFACE(struct event_timer);
-    uint64_t delay;
-    uint64_t repeat;
-    event_timer_cb_t cb;
+    time_t delay;
+    time_t repeat;
+    event_loop_timer_cb_t cb;
     event_timer_t **self;
     void *ctx;
+    bool added_in_cb;
 };
 
 OBJECT_POOL_DECLARATIONS(event_timer_t)
@@ -47,8 +52,8 @@ static int _event_loop_initialized;
 static int _event_loop_is_stop;
 
 // #define DEBUG_BE 1
-#if (DEBUG_BE) && (LOG_LEVEL == LOG_LEVEL_DEBUG)
-static void _timers_list_debug_print()
+#if (DEBUG_BE) && (ASC_LOG_LEVEL == LOG_LEVEL_DEBUG)
+static void _timers_list_debug_print(void)
 {
     event_timer_t *iter = NULL;
 
@@ -80,7 +85,17 @@ static int _deinit(void)
     return (_event_loop_initialized = 0);
 }
 
-static void timer_del(event_timer_t *t)
+static void _reset_added_in_run_cb(event_timer_t *t, void *ctx)
+{
+    t->added_in_cb = false;
+}
+
+static void _timers_reset_added_in_run()
+{
+    linked_list_event_timer_t_foreach(_event_timer_linked_list_handler, _reset_added_in_run_cb, NULL);
+}
+
+static void _timer_del(event_timer_t *t)
 {
     log_debug("deleting timer=[%p]", (void *)t);
     if (t) {
@@ -98,11 +113,11 @@ static void timer_del(event_timer_t *t)
     _timers_list_debug_print();
 }
 
-static event_timer_t *timer_add(event_timer_t *t, event_timer_cb_t cb, void *ctx, uint64_t delay, uint64_t repeat, event_timer_t **self)
+static event_timer_t *_timer_add(event_timer_t *t, event_loop_timer_cb_t cb, void *ctx, time_t delay, time_t repeat, event_timer_t **self)
 {
     event_timer_t *iter = NULL, *new;
     bool is_periodic = !!t;
-    uint64_t current_time = itime_time(NULL);
+    time_t current_time = itime_time(NULL);
     linked_list_iterator_event_timer_t event_timer_iter = {0};
 
     log_debug("is_periodic=[%d]", is_periodic);
@@ -120,6 +135,7 @@ static event_timer_t *timer_add(event_timer_t *t, event_timer_cb_t cb, void *ctx
     new->ctx = ctx;
     new->self = self;
     new->cb = cb;
+    new->added_in_cb = _in_timer_cb;
 
     linked_list_iterator_event_timer_t_init(&event_timer_iter, _event_timer_linked_list_handler);
 
@@ -131,55 +147,69 @@ static event_timer_t *timer_add(event_timer_t *t, event_timer_cb_t cb, void *ctx
 
     if (linked_list_event_timer_t_insert(_event_timer_linked_list_handler, iter, new) != new) {
         log_error("Failed to insert timer to queue.");
-        timer_del(new);
+        _timer_del(new);
         new = NULL;
         goto cleanup;
     }
-    log_debug("added timer=[%p] delay=[%lu] repeat=[%lu] from preiodic=[%d]", (void *)new, new->delay, new->repeat, is_periodic);
+    log_debug("added timer=[%p] delay=[%lu] offset=[%lu] repeat=[%lu] from preiodic=[%d]", (void *)new, delay, new->delay, new->repeat, is_periodic);
     _timers_list_debug_print();
 
 cleanup:
     return new;
 }
 
-static void be_timer_wrapper(event_timer_t *t)
+static void _be_timer_wrapper(event_timer_t *t)
 {
-    uint64_t repeat = t->repeat;
+    time_t repeat = t->repeat;
 
     linked_list_event_timer_t_remove(_event_timer_linked_list_handler, t);
 
     // Add timer to next period so in parameter 'delay' we will set 'repeat' value
     if (repeat) {
-        timer_add(t, t->cb, t->ctx, t->repeat, t->repeat, t->self);
+        _timer_add(t, t->cb, t->ctx, t->repeat, t->repeat, t->self);
     }
     log_debug("calling timer=[%p] delay=[%lu] repeat=[%lu] ", (void *)t, t->delay, t->repeat);
 
-    t->cb(t, t->ctx);
+    t->cb((event_loop_timer_handler)t, t->ctx);
 }
 
 static bool _run_once(void)
 {
-    event_timer_t *iter;
-    uint64_t current_time = itime_time(NULL);
-    /* Get count to avoid dead loop */
-    uint32_t count = linked_list_event_timer_t_get_size(_event_timer_linked_list_handler);
+    event_timer_t *t;
+    time_t current_time = itime_time(NULL);
 
-    log_debug("calling timers total count=[%d]", count);
+    log_debug("calling timers total count=[%d]", linked_list_event_timer_t_get_size(_event_timer_linked_list_handler));
     _timers_list_debug_print();
 
     /* stop() might be called in one of callbacks, so need to check it on each iteration.
-     * _event_timer_linked_list is changing on each call, so always get first.
+     * _event_timer_linked_list might change on each call, so always get first.
      */
-    while(!_event_loop_is_stop && count-- && (iter = linked_list_event_timer_t_get_first(_event_timer_linked_list_handler))) {
-        if (iter->delay <= current_time) {
-            be_timer_wrapper(iter);
+    _in_timer_cb = true;
+    while(!_event_loop_is_stop && (t = linked_list_event_timer_t_get_first(_event_timer_linked_list_handler))) {
+        // we are adding timer to the end of same sorted sequence so if we met t->added_in_cb = true we can break
+        if (!t->added_in_cb && t->delay <= current_time) {
+            _be_timer_wrapper(t);
         } else {
             break;
         }
     }
+    _in_timer_cb = false;
+    _timers_reset_added_in_run();
     _timers_list_debug_print();
 
     return !_event_loop_is_stop;
+}
+
+static bool _run_until(int max_count)
+{
+    int cnt = 0;
+    while (cnt++ < max_count) {
+        _run_once();
+        if (!linked_list_event_timer_t_get_size(_event_timer_linked_list_handler)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 static void _stop(void)
@@ -190,32 +220,33 @@ static void _stop(void)
 
     _event_loop_is_stop = true;
     while((iter = linked_list_event_timer_t_get_first(_event_timer_linked_list_handler))) {
-        timer_del(iter);
+        _timer_del(iter);
     }
 }
 
-static event_loop_timer_handler _timer_create(event_loop_timer_cb_t cb, void *ctx, uint64_t delay, uint64_t repeat, event_loop_timer_handler *self)
+static event_loop_timer_handler _timer_create(event_loop_timer_cb_t cb, void *ctx, time_t delay, time_t repeat, event_loop_timer_handler *self)
 {
     if (!_event_loop_initialized) {
         return (event_loop_timer_handler)NULL;
     }
-    return (event_loop_timer_handler)timer_add(NULL, (event_timer_cb_t)cb, ctx, delay, repeat, (event_timer_t **)self);
+    return (event_loop_timer_handler)_timer_add(NULL, cb, ctx, delay, repeat, (event_timer_t **)self);
 }
 
 static void _timer_delete(event_loop_timer_handler handler)
 {
     if (handler) {
-        timer_del((event_timer_t *)handler);
+        _timer_del((event_timer_t *)handler);
     }
 }
 
-ievent_loop_t *event_loop_be_instance_attach()
+ievent_loop_t *event_loop_be_instance_attach(void)
 {
     static ievent_loop_t event_loop = {
         .init = _init,
         .deinit = _deinit,
         .run = NULL,
         .run_once = _run_once,
+        .run_until = _run_until,
         .stop = _stop,
         .signal_create = NULL,
         .signal_delete = NULL,

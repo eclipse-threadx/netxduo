@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_client_handshake                     PORTABLE C      */
-/*                                                           6.1.4        */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -115,6 +115,9 @@
 /*                                            support for fragmented TLS  */
 /*                                            Handshake messages,         */
 /*                                            resulting in version 6.1.4  */
+/*  03-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_client_handshake(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -345,7 +348,6 @@ const NX_CRYPTO_METHOD
             /* This means an error was encountered at some point in processing a valid message. At this point
                the alert was sent, so just return a status indicating as much. */
             return(NX_SECURE_TLS_HANDSHAKE_FAILURE);
-            break;
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
         case NX_SECURE_TLS_CLIENT_STATE_HELLO_REQUEST:
             /* Server sent a hello request, indicating it wants to restart the handshake process with a new ClientHello. */
