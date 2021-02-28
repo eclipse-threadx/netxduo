@@ -12084,7 +12084,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_ipv6_address_set                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12121,6 +12121,9 @@ UINT status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            optimized boundary check,   */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_ipv6_address_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
@@ -12137,6 +12140,12 @@ UCHAR           *string_ptr;
         return(NX_SNMP_ERROR_WRONGTYPE);
     }
 
+    /* Determine if the string is too big.  */
+    if (object_data -> nx_snmp_object_octet_string_size > NX_SNMP_MAX_OCTET_STRING) 
+    {
+        return NX_SNMP_ERROR_TOOBIG;
+    }
+
     /* Setup pointer to the value.  */
     string_ptr = destination_ptr;
 
@@ -12144,15 +12153,6 @@ UCHAR           *string_ptr;
     /* Copy this string into the destination.  */
     for (i = 0; i < object_data -> nx_snmp_object_octet_string_size; i++)
     {
-
-        /* Determine if the string is too big.  */
-        if (i >= NX_SNMP_MAX_OCTET_STRING)
-        {
-
-            /* Error, source string is too large.  */
-            string_ptr[0] =  NX_NULL;
-            return(NX_SNMP_ERROR);
-        }
 
         /* Copy character.  */
         string_ptr[i] =  object_data -> nx_snmp_object_octet_string[i];
@@ -12226,7 +12226,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_ipv6_address_get                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12262,6 +12262,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            optimized boundary check,   */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_ipv6_address_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
@@ -12270,7 +12273,13 @@ UINT  _nx_snmp_object_ipv6_address_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *ob
 UINT    i;
 UCHAR   *source_string;
 
-    
+
+    /* Determine if the string is too big.  */
+    if (object_data -> nx_snmp_object_octet_string_size > NX_SNMP_MAX_OCTET_STRING) 
+    {
+        return NX_SNMP_ERROR_TOOBIG;
+    }
+
     /* Setup pointer to source string.  */
     source_string =  (UCHAR *) source_ptr;
 
@@ -12980,7 +12989,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_octet_string_set                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13016,6 +13025,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            optimized boundary check,   */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_octet_string_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
@@ -13044,15 +13056,6 @@ UCHAR   *string_ptr;
     /* Copy this string into the destination.  */
     for (i = 0; i < object_data -> nx_snmp_object_octet_string_size; i++)
     {
-
-        /* Determine if the string is too big.  */
-        if (i >= NX_SNMP_MAX_OCTET_STRING)
-        {
-
-            /* Error, source string is too large.  */
-            string_ptr[0] =  NX_NULL;
-            return(NX_SNMP_ERROR);
-        }
 
         /* Copy character.  */
         string_ptr[i] =  object_data -> nx_snmp_object_octet_string[i];
@@ -13273,7 +13276,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_string_set                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13308,6 +13311,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            optimized boundary check,   */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_string_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
@@ -13325,20 +13331,18 @@ UCHAR   *string_ptr;
         return(NX_SNMP_ERROR_WRONGTYPE);
     }
 
+    /* Determine if the string is too big.  */
+    if (object_data -> nx_snmp_object_octet_string_size > NX_SNMP_MAX_OCTET_STRING) 
+    {
+        return NX_SNMP_ERROR_TOOBIG;
+    }
+
     /* Setup pointer to the destination string.  */
     string_ptr =  (UCHAR *) destination_ptr;
 
     /* Copy this string into the destination.  */    
     for (i = 0; i < object_data -> nx_snmp_object_octet_string_size; i++)
     {
-
-        /* Determine if the string is too big.  */
-        if (i >= NX_SNMP_MAX_OCTET_STRING)
-        {
-
-            /* Error, source string is too large.  */
-            return(NX_SNMP_ERROR);
-        }
 
         /* Copy character.  */
         string_ptr[i] =  object_data -> nx_snmp_object_octet_string[i];

@@ -1,17 +1,17 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
+#include <asc_config.h>
 
-#include "page_allocator.h"
+#include "asc_security_core/serializer/page_allocator.h"
 
-#include "asc_security_core/configuration.h"
 #include "asc_security_core/logger.h"
 #include "asc_security_core/object_pool.h"
 #include "asc_security_core/utils/collection/collection.h"
@@ -26,7 +26,7 @@ struct emitter_page {
 };
 
 OBJECT_POOL_DECLARATIONS(emitter_page_t)
-OBJECT_POOL_DEFINITIONS(emitter_page_t, EMITTER_PAGE_CACHE_SIZE)
+OBJECT_POOL_DEFINITIONS(emitter_page_t, ASC_EMITTER_PAGE_CACHE_SIZE)
 
 void *serializer_page_alloc(size_t size)
 {

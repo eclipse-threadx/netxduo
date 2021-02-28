@@ -6,6 +6,12 @@
 #ifndef FLATBUFFERS_COMMON_READER_H
 #include "flatbuffers_common_reader.h"
 #endif
+#ifndef LOG_READER_H
+#include "log_reader.h"
+#endif
+#ifndef PROCESS_READER_H
+#include "process_reader.h"
+#endif
 #ifndef BASELINE_READER_H
 #include "baseline_reader.h"
 #endif
@@ -45,6 +51,8 @@ __flatbuffers_define_union(flatbuffers_, AzureIoTSecurity_Payload)
 #define AzureIoTSecurity_Payload_ListeningPorts ((AzureIoTSecurity_Payload_union_type_t)UINT8_C(3))
 #define AzureIoTSecurity_Payload_Heartbeat ((AzureIoTSecurity_Payload_union_type_t)UINT8_C(4))
 #define AzureIoTSecurity_Payload_Baseline ((AzureIoTSecurity_Payload_union_type_t)UINT8_C(5))
+#define AzureIoTSecurity_Payload_Process ((AzureIoTSecurity_Payload_union_type_t)UINT8_C(6))
+#define AzureIoTSecurity_Payload_Log ((AzureIoTSecurity_Payload_union_type_t)UINT8_C(7))
 
 static inline const char *AzureIoTSecurity_Payload_type_name(AzureIoTSecurity_Payload_union_type_t type)
 {
@@ -55,6 +63,8 @@ static inline const char *AzureIoTSecurity_Payload_type_name(AzureIoTSecurity_Pa
     case AzureIoTSecurity_Payload_ListeningPorts: return "ListeningPorts";
     case AzureIoTSecurity_Payload_Heartbeat: return "Heartbeat";
     case AzureIoTSecurity_Payload_Baseline: return "Baseline";
+    case AzureIoTSecurity_Payload_Process: return "Process";
+    case AzureIoTSecurity_Payload_Log: return "Log";
     default: return "";
     }
 }
@@ -68,6 +78,8 @@ static inline int AzureIoTSecurity_Payload_is_known_type(AzureIoTSecurity_Payloa
     case AzureIoTSecurity_Payload_ListeningPorts: return 1;
     case AzureIoTSecurity_Payload_Heartbeat: return 1;
     case AzureIoTSecurity_Payload_Baseline: return 1;
+    case AzureIoTSecurity_Payload_Process: return 1;
+    case AzureIoTSecurity_Payload_Log: return 1;
     default: return 0;
     }
 }

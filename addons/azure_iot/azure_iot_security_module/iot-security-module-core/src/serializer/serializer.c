@@ -1,19 +1,19 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
+#include <asc_config.h>
 
-#include "asc_security_core/configuration.h"
 #include "asc_security_core/logger.h"
 #include "asc_security_core/model/schema/message_builder.h"
 #include "asc_security_core/object_pool.h"
-#include "asc_security_core/utils/iuuid.h"
+#include "asc_security_core/utils/uuid.h"
 
 #include "asc_security_core/serializer.h"
 #include "serializer_private.h"
@@ -22,13 +22,13 @@ OBJECT_POOL_DECLARATIONS(serializer_t)
 OBJECT_POOL_DEFINITIONS(serializer_t, 1)
 
 #ifdef ASC_SERIALIZER_USE_CUSTOM_ALLOCATOR
-#include "extensions/custom_builder_allocator.h"
+#include "asc_security_core/serializer/custom_builder_allocator.h"
 #define ASC_SERIALIZER_CUSTOM_ALLOCATOR serializer_custom_allocator
 #else
 #define ASC_SERIALIZER_CUSTOM_ALLOCATOR NULL
 #endif
 
-serializer_t *serializer_init()
+serializer_t *serializer_init(void)
 {
     log_debug("serializer_init");
 

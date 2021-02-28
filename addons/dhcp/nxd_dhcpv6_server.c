@@ -5204,7 +5204,7 @@ ULONG                   bytes_copied = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_send_response_to_client                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5243,6 +5243,9 @@ ULONG                   bytes_copied = 0;
 /*                                            packet length verification, */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_send_response_to_client(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr)
@@ -5412,8 +5415,7 @@ ULONG         message_word;
     
         /* It does. Did the Client ask for a requested option? Only provide information 
            if there are no status errors from the server. */
-        if ((dhcpv6_client_ptr -> nx_dhcpv6_option_request.nx_op_request) &&
-            (dhcpv6_client_ptr -> nx_dhcpv6_iana_status.nx_status_code == NX_DHCPV6_STATUS_SUCCESS))
+        if (dhcpv6_client_ptr -> nx_dhcpv6_iana_status.nx_status_code == NX_DHCPV6_STATUS_SUCCESS)
         {
     
             /* Add the option request. */

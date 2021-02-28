@@ -1,26 +1,25 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
 
 #ifndef _COLLECTORS_INFO_H_
 #define _COLLECTORS_INFO_H_
+#include <asc_config.h>
 
 #include <stdint.h>
+#include <time.h>
 
-#ifndef EXTRA_COLLECTORS_OBJECT_POOL_COUNT
-#define COLLECTORS_INFO_SIZE COLLECTOR_TYPE_COUNT
-#else
-#define COLLECTORS_INFO_SIZE (COLLECTOR_TYPE_COUNT + EXTRA_COLLECTORS_OBJECT_POOL_COUNT)
-#endif
+#define COLLECTORS_INFO_SIZE COLLECTORS_COUNT
+
 typedef struct {
-    uint32_t interval;
+    time_t interval;
 } collector_info_t;
 
 typedef intptr_t collectors_info_t;
@@ -29,7 +28,7 @@ typedef intptr_t collectors_info_t;
  *
  * @return                  Collectors info data struct handler
  */
-collectors_info_t *collectors_info_init();
+collectors_info_t *collectors_info_init(void);
 
 /**
  * @brief                   Deinitialize collectors info module

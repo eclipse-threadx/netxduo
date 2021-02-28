@@ -1729,7 +1729,6 @@ flatcc_builder_ref_t flatcc_builder_create_string(flatcc_builder_t *B, const cha
     uoffset_t s_pad;
     uoffset_t length_prefix;
     iov_state_t iov;
-    //int size_exceeded = (uint64_t)len > (uint64_t)max_string_len;
 
 #if max_string_len < UINT32_MAX
     if (len > max_string_len) {

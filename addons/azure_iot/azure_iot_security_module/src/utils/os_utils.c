@@ -9,7 +9,8 @@
 /*                                                                        */
 /**************************************************************************/
 
-#include "asc_security_core/configuration.h"
+#include <asc_config.h>
+
 #include "asc_security_core/utils/os_utils.h"
 
 const char *os_utils_get_security_module_id()

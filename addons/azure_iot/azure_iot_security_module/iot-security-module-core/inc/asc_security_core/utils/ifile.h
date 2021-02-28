@@ -1,16 +1,17 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
 
 #ifndef __IFILE_H__
 #define __IFILE_H__
+#include <asc_config.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -31,6 +32,17 @@
  * @return size_t The number of bytes read or 0 in case of an error.
  */
 size_t ifile_read(const char *path, const char *mode, char *buf, size_t size);
+
+/**
+ * @brief Read a file data with allocating buffer.
+ *
+ * @param path  The path of the file.
+ * @param mode  The mode of the file.
+ * @param size  The number of bytes read.
+ *
+ * @return char* The allocated buffer or NULL in case of an error.
+ */
+char *ifile_alloc_read(const char *path, const char *mode, size_t *size);
 
 /**
  * @brief Write a buffer into a file.

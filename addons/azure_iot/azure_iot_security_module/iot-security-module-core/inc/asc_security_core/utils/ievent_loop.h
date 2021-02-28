@@ -1,16 +1,21 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
 
 #ifndef _IEVENT_LOOP_H_
 #define _IEVENT_LOOP_H_
+#include <asc_config.h>
+
+#include <time.h>
+
+#define EVENT_LOOP_DEFAULT_MAX_COUNT_RUN_UNTIL 100
 
 /**
  * @file ievent_loop.h
@@ -50,6 +55,13 @@ typedef struct {
 /** @brief  Run only a single iteration of the loop. */
     bool (*run_once)(void);
 
+/**
+ * @brief  Run until there are no more active and referenced handles or requests. 
+ * @param  max_count maximum count of iterations
+ * @return true if there are no more active and referenced handles or requests.
+*/
+    bool (*run_until)(int max_count);
+
 /** @brief  Stop the even loop and return from @ref event_loop_run. */
     void (*stop)(void);
 
@@ -68,8 +80,8 @@ typedef struct {
  * 
  * @return An object representing the timer. Used later for destroying it
  */
-    event_loop_timer_handler (*timer_create)(event_loop_timer_cb_t cb, void *ctx, uint64_t delay,
-        uint64_t repeat, event_loop_timer_handler *self);
+    event_loop_timer_handler (*timer_create)(event_loop_timer_cb_t cb, void *ctx, time_t delay,
+        time_t repeat, event_loop_timer_handler *self);
 
 /**
  * @brief   Delete a timer.
@@ -113,6 +125,6 @@ typedef struct {
  *
  * @return  Global event loop object
  */
-extern ievent_loop_t *ievent_loop_get_instance();
+extern ievent_loop_t *ievent_loop_get_instance(void);
 
 #endif //_IEVENT_LOOP_H_

@@ -1,21 +1,22 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
 
 #ifndef SERIALIZER_H
 #define SERIALIZER_H
+#include <asc_config.h>
 
 #include <stddef.h>
 #include <stdint.h>
+#include <time.h>
 
-#include "asc_security_core/configuration.h"
 #include "asc_security_core/asc_result.h"
 #include "asc_security_core/model/objects/objects.h"
 
@@ -117,7 +118,7 @@ typedef struct serializer serializer_t;
  *          On success sets state to: SERIALIZER_STATE_INITIALIZED
  * @return  A new serializer
  */
-serializer_t *serializer_init();
+serializer_t *serializer_init(void);
 
 /**
  * @brief   Deinitialize a serializer
@@ -163,7 +164,7 @@ asc_result_t serializer_message_begin(serializer_t *serializer, const char *secu
  */
 asc_result_t serializer_message_end(serializer_t *serializer);
 
-#ifdef COLLECTOR_NETWORK_ACTIVITY_ENABLED
+#ifdef ASC_COLLECTOR_NETWORK_ACTIVITY_ENABLED
 /**
  * @brief   Adds a network activity event to current message.
  *          Callable from states:   SERIALIZER_STATE_INITIALIZED, SERIALIZER_STATE_MESSAGE_PROCESSING
@@ -179,12 +180,29 @@ asc_result_t serializer_message_end(serializer_t *serializer);
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_network_activity(serializer_t *serializer, uint32_t timestamp, uint32_t collection_interval,
+asc_result_t serializer_event_add_network_activity(serializer_t *serializer, time_t timestamp, time_t collection_interval,
                                                    network_activity_ipv4_t *ipv4_payload, network_activity_ipv6_t *ipv6_payload);
 #endif
 
+#ifdef ASC_COLLECTOR_PROCESS_ENABLED
+/**
+ * @brief   Adds a process event to the current message.
+ *          Callable from states:   SERIALIZER_STATE_INITIALIZED, SERIALIZER_STATE_MESSAGE_PROCESSING
+ *          On success sets state to: SERIALIZER_STATE_MESSAGE_PROCESSING
+ *
+ * @param serializer            The serializer
+ * @param timestamp             The event timestamp
+ * @param collection_interval   The collection interval
+ * @param payload               The process payload object
+ *
+ * @return  ASC_RESULT_OK on success,
+ *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
+ *          ASC_RESULT_EXCEPTION otherwise
+ */
+asc_result_t serializer_event_add_process(serializer_t *serializer, time_t timestamp, time_t collection_interval, process_t *payload);
+#endif
 
-#ifdef COLLECTOR_SYSTEM_INFORMATION_ENABLED
+#ifdef ASC_COLLECTOR_SYSTEM_INFORMATION_ENABLED
 /**
  * @brief   Adds a system information event to current message.
  *          Callable from states:   SERIALIZER_STATE_INITIALIZED, SERIALIZER_STATE_MESSAGE_PROCESSING
@@ -199,12 +217,12 @@ asc_result_t serializer_event_add_network_activity(serializer_t *serializer, uin
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_system_information(serializer_t *serializer, uint32_t timestamp, uint32_t collection_interval,
+asc_result_t serializer_event_add_system_information(serializer_t *serializer, time_t timestamp, time_t collection_interval,
                                                      system_information_t *payload);
 #endif
 
 
-#ifdef COLLECTOR_HEARTBEAT_ENABLED
+#ifdef ASC_COLLECTOR_HEARTBEAT_ENABLED
 /**
  * @brief   Adds a heartbeat event to current message.
  *          Callable from states:   SERIALIZER_STATE_MESSAGE_READY
@@ -217,11 +235,11 @@ asc_result_t serializer_event_add_system_information(serializer_t *serializer, u
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, uint32_t timestamp, uint32_t collection_interval);
+asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, time_t timestamp, time_t collection_interval);
 #endif
 
 
-#ifdef COLLECTOR_LISTENING_PORTS_ENABLED
+#ifdef ASC_COLLECTOR_LISTENING_PORTS_ENABLED
 /**
  * @brief   Adds a listening ports event to current message.
  *          Callable from states:   SERIALIZER_STATE_INITIALIZED, SERIALIZER_STATE_MESSAGE_PROCESSING
@@ -237,11 +255,11 @@ asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, uint32_t t
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_listening_ports(serializer_t *serializer, uint32_t timestamp, uint32_t collection_interval,
+asc_result_t serializer_event_add_listening_ports(serializer_t *serializer, time_t timestamp, time_t collection_interval,
                                                   listening_ports_ipv4_t *ipv4_payload, listening_ports_ipv6_t *ipv6_payload);
 #endif
 
-#ifdef COLLECTOR_BASELINE_ENABLED
+#ifdef ASC_COLLECTOR_BASELINE_ENABLED
 /**
  * @brief   Adds a Baseline event to current message.
  *          Callable from states:   SERIALIZER_STATE_INITIALIZED, SERIALIZER_STATE_MESSAGE_PROCESSING
@@ -256,7 +274,7 @@ asc_result_t serializer_event_add_listening_ports(serializer_t *serializer, uint
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_baseline(serializer_t *serializer, uint32_t timestamp, uint32_t collection_interval, linked_list_iterator_baseline_report_t *report_list_iter);
+asc_result_t serializer_event_add_baseline(serializer_t *serializer, time_t timestamp, time_t collection_interval, linked_list_iterator_baseline_report_t *report_list_iter);
 #endif
 
 /**

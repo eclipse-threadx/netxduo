@@ -6845,7 +6845,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_https_client_connect                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6892,6 +6892,9 @@ UINT status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            supported non-blocking mode,*/
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_web_http_client_connect(NX_WEB_HTTP_CLIENT *client_ptr, NXD_ADDRESS *server_ip, UINT server_port, ULONG wait_option)
@@ -6936,12 +6939,20 @@ UINT        status;
     status =  nx_tcp_client_socket_bind(&(client_ptr -> nx_web_http_client_socket), NX_ANY_PORT, wait_option);
 
     /* Check status of the bind.  */
-    if (status != NX_SUCCESS)
+    if ((status != NX_SUCCESS) && (status != NX_ALREADY_BOUND))
     {
 
         /* Error binding to a port, return to caller.  */
         return(status);
     }
+
+    /* Set the server IP and port. */
+#ifdef FEATURE_NX_IPV6
+    COPY_NXD_ADDRESS(server_ip, &(client_ptr -> nx_web_http_client_server_address));
+#else
+    client_ptr -> nx_web_http_client_server_address.nxd_ip_version = NX_IP_VERSION_V4;
+    client_ptr -> nx_web_http_client_server_address.nxd_ip_address.v4 = server_ip -> nxd_ip_address.v4;
+#endif
 
     client_ptr -> nx_web_http_client_connect_port = server_port;
 
@@ -6950,23 +6961,14 @@ UINT        status;
                                              client_ptr -> nx_web_http_client_connect_port, wait_option);
 
     /* Check for connection status.  */
-    if (status != NX_SUCCESS)
+    if ((status != NX_SUCCESS) && (status != NX_IN_PROGRESS))
     {
 
         /* Error, unbind the port and return an error.  */
         nx_tcp_client_socket_unbind(&(client_ptr -> nx_web_http_client_socket));
-        return(status);
     }
 
-    /* At this point, the TCP socket to the remote HTTP server is connected. */
-#ifdef FEATURE_NX_IPV6
-    COPY_NXD_ADDRESS(server_ip, &(client_ptr -> nx_web_http_client_server_address));
-#else
-    client_ptr -> nx_web_http_client_server_address.nxd_ip_version = NX_IP_VERSION_V4;
-    client_ptr -> nx_web_http_client_server_address.nxd_ip_address.v4 = server_ip -> nxd_ip_address.v4;
-#endif
-
-    return(NX_SUCCESS);
+    return(status);
 }
 
 #ifdef NX_WEB_HTTPS_ENABLE

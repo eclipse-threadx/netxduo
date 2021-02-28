@@ -12,9 +12,17 @@
 #ifndef NX_AZURE_IOT_SECURITY_MODULE_H
 #define NX_AZURE_IOT_SECURITY_MODULE_H
 
+#include <asc_config.h>
+
+#ifdef __ASC_CONFIG_EXCLUDE_PORT__H__
+#error Platform includes error
+#endif
+
 #ifdef __cplusplus
 extern   "C" {
 #endif
+
+#include <time.h>
 
 #include "nx_api.h"
 #include "nx_azure_iot.h"
@@ -26,11 +34,11 @@ extern   "C" {
 
 #include "asc_security_core/core.h"
 #include "asc_security_core/version.h"
-
+#include "asc_security_core/utils/notifier.h"
+#include "asc_security_core/utils/ievent_loop.h"
 
 /* Define AZ IoT ASC event flags. These events are processed by the Cloud thread.  */
 #define AZ_IOT_SECURITY_MODULE_SEND_EVENT   ((ULONG)0x00000001)       /* Security send event. */
-
 
 /**
  * @brief Azure IoT Security Module state enum
@@ -74,8 +82,6 @@ typedef enum security_module_state
     SECURITY_MODULE_STATE_SUSPENDED = 3
 } security_module_state_t;
 
-
-
 /**
  * @struct NX_AZURE_IOT_SECURITY_MODULE
  *
@@ -98,16 +104,14 @@ typedef enum security_module_state
 typedef struct NX_AZURE_IOT_SECURITY_MODULE_STRUCT
 {
     security_module_state_t state;
-    uint32_t state_timestamp;
-
-    core_t *core_ptr;
-    security_message_t security_message;
+    notifier_t message_ready;
+    time_t state_timestamp;
+    event_loop_timer_handler h_state_machine;
 
     NX_AZURE_IOT *nx_azure_iot_ptr;
 
     NX_CLOUD_MODULE nx_azure_iot_security_module_cloud;
 } NX_AZURE_IOT_SECURITY_MODULE;
-
 
 /**
  * @brief Enable Azure IoT Security Module

@@ -1,19 +1,20 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
+#include <asc_config.h>
 
 #include <string.h>
 
 #include "asc_security_core/logger.h"
 
-#include "custom_builder_allocator.h"
+#include "asc_security_core/serializer/custom_builder_allocator.h"
 
 #define VS_SIZE 64
 #define DS_SIZE 512
@@ -67,7 +68,7 @@ int serializer_custom_allocator(void *alloc_context, flatcc_iovec_t *b, size_t r
     return 0;
 }
 
-void serializer_custom_allocator_reset()
+void serializer_custom_allocator_reset(void)
 {
     for (int i = 0; i < FLATCC_BUILDER_ALLOC_BUFFER_COUNT; ++i) {
         if (buffers[i].iov_base != NULL) {

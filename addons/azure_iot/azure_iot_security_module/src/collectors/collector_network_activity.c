@@ -9,6 +9,8 @@
 /*                                                                        */
 /**************************************************************************/
 
+#include <asc_config.h>
+
 #include "nx_api.h"
 #include "nx_ip.h"
 #include "nx_ipv4.h"
@@ -20,11 +22,14 @@
 #include "nx_ipv6.h"
 #endif /* NX_DISABLE_IPV6 */
 
-#include "asc_security_core/configuration.h"
-#include "asc_security_core/collectors/network_activity.h"
 #include "asc_security_core/logger.h"
+#include "asc_security_core/collector.h"
+#include "asc_security_core/components_factory_declarations.h"
+#include "asc_security_core/components_manager.h"
+#include "asc_security_core/serializer.h"
 #include "asc_security_core/utils/itime.h"
 #include "asc_security_core/utils/notifier.h"
+#include "asc_security_core/serializer.h"
 
 #include "iot_security_module/model/objects/object_network_activity_ext.h"
 
@@ -145,13 +150,6 @@ static VOID _collector_network_activity_port_icmp_callback(struct NX_IP_STRUCT *
 static VOID _collector_network_activity_port_deinit();
 
 /**
- * @brief Function which used in order to free a specific collector.
- *
- * @param collector_internal_ptr   A handle to the collector internal to deinitialize.
- */
-static void _collector_network_activity_deinit(collector_internal_t *collector_internal_ptr);
-
-/**
  * @brief Serialize events from the collector
  *
  * @param collector_internal_ptr    A handle to the collector internal.
@@ -179,22 +177,22 @@ static nx_ip_transport_packet_receive_cb_t _udp_packet_receive_original = NULL;
 static nx_ip_transport_packet_receive_cb_t _icmp_packet_receive_original = NULL;
 #endif /* ASC_COLLECTOR_NETWORK_ACTIVITY_CAPTURE_UNICAST_ONLY */
 
-static collector_internal_t *_collector_internal_ptr = NULL;
+static asc_result_t _init(component_id_t id);
+static asc_result_t _start(component_id_t id);
+static asc_result_t _stop(component_id_t id);
 
+COLLECTOR_OPS_DEFINITIONS(_init, collector_default_deinit, collector_default_subscribe, collector_default_unsubscribe, _start, _stop);
 
-asc_result_t collector_network_activity_init(collector_internal_t *collector_internal_ptr)
+COMPONENTS_FACTORY_DEFINITION(NetworkActivity, &_ops)
+
+static asc_result_t _init(component_id_t id)
 {
-    if (_collector_internal_ptr != NULL)
-    {
-        return ASC_RESULT_OK;
-    }
+    return collector_default_create(id, NetworkActivity, COLLECTOR_PRIORITY_HIGH,
+        _collector_network_activity_serialize_events, ASC_HIGH_PRIORITY_INTERVAL, NULL);
+}
 
-    if (collector_internal_ptr == NULL)
-    {
-        log_error("Could not initialize collector_network_activity, bad argument");
-        return ASC_RESULT_BAD_ARGUMENT;
-    }
-
+static asc_result_t _start(component_id_t id)
+{
     hashset_network_activity_ipv4_t_init(_ipv4_hashtables[0]);
     hashset_network_activity_ipv4_t_init(_ipv4_hashtables[1]);
     _current_ipv4_hashtable_index = 0;
@@ -206,34 +204,11 @@ asc_result_t collector_network_activity_init(collector_internal_t *collector_int
     _current_ipv6_hashtable_index = 0;
     _current_ipv6_hashtable = _ipv6_hashtables[_current_ipv6_hashtable_index];
 #endif /* NX_DISABLE_IPV6 */
-
-    _collector_internal_ptr = collector_internal_ptr;
-
-    _collector_internal_ptr->collect_function = _collector_network_activity_serialize_events;
-    _collector_internal_ptr->deinit_function = _collector_network_activity_deinit;
-    _collector_internal_ptr->priority = COLLECTOR_PRIORITY_HIGH;
-    _collector_internal_ptr->state = NULL;
-    _collector_internal_ptr->type = COLLECTOR_TYPE_NETWORK_ACTIVITY;
-
-    if (_collector_network_activity_port_init() != ASC_RESULT_OK)
-    {
-        _collector_network_activity_deinit(_collector_internal_ptr);
-    }
-    else
-    {
-        notifier_notify(NOTIFY_TOPIC_SYSTEM, NOTIFY_MESSAGE_SYSTEM_CONFIGURATION, _collector_internal_ptr);
-    }
-
-    return ASC_RESULT_OK;
+    return _collector_network_activity_port_init();
 }
 
-static void _collector_network_activity_deinit(collector_internal_t *collector_internal_ptr)
+static asc_result_t _stop(component_id_t id)
 {
-    if (_collector_internal_ptr == NULL)
-    {
-        return;
-    }
-
     _collector_network_activity_port_deinit();
 
     _current_ipv4_hashtable = NULL;
@@ -246,7 +221,7 @@ static void _collector_network_activity_deinit(collector_internal_t *collector_i
     hashset_network_activity_ipv6_t_clear(_ipv6_hashtables[1], network_activity_ipv6_deinit, NULL);
 #endif /* NX_DISABLE_IPV6 */
 
-    _collector_internal_ptr = NULL;
+    return ASC_RESULT_OK;
 }
 
 static asc_result_t _collector_network_activity_serialize_events(collector_internal_t *collector_internal_ptr, serializer_t *serializer)
@@ -261,15 +236,7 @@ static asc_result_t _collector_network_activity_serialize_events(collector_inter
     network_activity_ipv6_t **previous_ipv6_hashtable = NULL;
 #endif /* NX_DISABLE_IPV6 */
 
-    uint32_t current_time;
-    uint32_t collection_interval;
-
-    if (_collector_internal_ptr == NULL)
-    {
-        log_error("collector uninitialized, cannot collect");
-        result = ASC_RESULT_UNINITIALIZED;
-        goto cleanup;
-    }
+    time_t current_time;
 
     if (serializer == NULL)
     {
@@ -279,7 +246,6 @@ static asc_result_t _collector_network_activity_serialize_events(collector_inter
     }
 
     current_time = itime_time(NULL);
-    collection_interval = g_collector_collections_intervals[collector_internal_ptr->priority];
 
     previous_ipv4_hashtable = _current_ipv4_hashtable;
 #ifndef NX_DISABLE_IPV6
@@ -293,7 +259,7 @@ static asc_result_t _collector_network_activity_serialize_events(collector_inter
     hashset_network_activity_ipv6_t_clear(previous_ipv6_hashtable, _append_ipv6_payload_to_list, &ipv6_list);
 #endif /* NX_DISABLE_IPV6 */
 
-    result = serializer_event_add_network_activity(serializer, current_time, collection_interval, ipv4_list, ipv6_list);
+    result = serializer_event_add_network_activity(serializer, current_time, collector_internal_ptr->interval, ipv4_list, ipv6_list);
 
     /* Release all IPv4 objects. */
     while (ipv4_list != NULL)

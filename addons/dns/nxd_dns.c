@@ -63,7 +63,7 @@ static UINT        _nx_dns_number_to_ascii_convert(UINT number, CHAR *buffstring
 static UINT        _nx_dns_host_resource_data_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, UCHAR *record_buffer, UINT buffer_size, 
                                                           UINT *record_count, UINT lookup_type, ULONG wait_option);
 static UINT        _nx_dns_response_receive(NX_DNS *dns_ptr, NX_PACKET **packet_ptr, ULONG wait_option);
-static UINT        _nx_dns_response_process(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *record_buffer, UINT buffer_size, UINT *record_count);
+static UINT        _nx_dns_response_process(NX_DNS *dns_ptr, UCHAR *host_name, NX_PACKET *packet_ptr, UCHAR *record_buffer, UINT buffer_size, UINT *record_count);
 static UINT        _nx_dns_process_a_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, UCHAR **buffer_prepend_ptr, UCHAR **buffer_append_ptr, UINT *record_count, UINT rr_location);
 static UINT        _nx_dns_process_aaaa_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, UCHAR **buffer_prepend_ptr, UCHAR **buffer_append_ptr, UINT *record_count, UINT rr_location);
    
@@ -115,10 +115,8 @@ UCHAR lookup_end[] =  "IN-ADDR.ARPA";
 #ifdef NX_DNS_CACHE_ENABLE  
 static NX_DNS_RR   temp_rr;
 #endif /* NX_DNS_CACHE_ENABLE  */
-                                 
-#if defined(NX_DNS_ENABLE_EXTENDED_RR_TYPES) || defined(NX_DNS_CACHE_ENABLE)
+
 static UCHAR       temp_string_buffer[NX_DNS_NAME_MAX + 1];
-#endif
 
 /* Record the temp host name,*/
 #ifdef NX_DNS_ENABLE_EXTENDED_RR_TYPES 
@@ -3882,7 +3880,7 @@ UINT        record_count = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_host_resource_data_by_name_get               PORTABLE C     */ 
-/*                                                           6.1.4        */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3933,6 +3931,10 @@ UINT        record_count = 0;
 /*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            randomized the source port, */
 /*                                            resulting in version 6.1.4  */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            receiving dns response,     */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_host_resource_data_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, 
@@ -4032,6 +4034,34 @@ UINT        i;
                 /* Yes, have done, just return success.  */
                 return NX_SUCCESS;
             }  
+            else
+            {
+
+                /* Let application controls query retransmission for non-blocking.  */
+                if (wait_option == NX_NO_WAIT)
+                {
+
+                    /* Check if the query is sent out.  */
+                    if (status == NX_IN_PROGRESS)
+                    {
+
+                        /* No need to release mutex and unbind the socket for non-blocking since
+                           _nx_dns_response_get will receive the response and release the resource.  */
+                        return(status);
+                    }
+                    else
+                    {
+
+                        /* Unbind the socket.  */
+                        nx_udp_socket_unbind(&(dns_ptr -> nx_dns_socket));
+
+                        /* Release the mutex */
+                        tx_mutex_put(&dns_ptr -> nx_dns_mutex);
+
+                        return(status);
+                    }
+                }
+            }
         }
 
         /* Timed out for querying all DNS servers in this cycle, double the timeout, limited to NX_DNS_MAX_RETRANS_TIMEOUT.  */
@@ -4464,7 +4494,7 @@ ULONG       rr_ttl;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_send_query_get_rdata_by_name                 PORTABLE C     */ 
-/*                                                           6.1.4        */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4479,6 +4509,7 @@ ULONG       rr_ttl;
 /*                                                                        */ 
 /*    dns_ptr                               Pointer to DNS instance       */
 /*    server_address                        The DNS server address        */
+/*    host_name                             Name of host to resolve       */ 
 /*    record_buffer                         Buffer for resource data      */ 
 /*    buffer_size                           Buffer size for resource data */
 /*    record_count                          The count of resource data    */ 
@@ -4494,8 +4525,7 @@ ULONG       rr_ttl;
 /*    _nx_dns_new_packet_create             Create new DNS packet         */
 /*    nx_packet_release                     Release packet                */ 
 /*    nxd_udp_socket_send                   Send DNS UDP packet           */ 
-/*    _nx_dns_response_receive              Receive DNS response          */ 
-/*    _nx_dns_response_process              Process the DNS respondse     */
+/*    _nx_dns_response_get                  Get DNS response              */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -4514,6 +4544,10 @@ ULONG       rr_ttl;
 /*                                            improved the logic of       */
 /*                                            receiving dns response,     */
 /*                                            resulting in version 6.1.4  */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            receiving dns response,     */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_send_query_get_rdata_by_name(NX_DNS *dns_ptr, NXD_ADDRESS *dns_server_address, 
@@ -4523,7 +4557,9 @@ static UINT _nx_dns_send_query_get_rdata_by_name(NX_DNS *dns_ptr, NXD_ADDRESS *d
 
 UINT                status;
 NX_PACKET           *packet_ptr;
+#ifdef NX_DNS_CLIENT_CLEAR_QUEUE
 NX_PACKET           *receive_packet_ptr;
+#endif /* NX_DNS_CLIENT_CLEAR_QUEUE */
  
     /* Allocate a packet.  */
     status =  nx_packet_allocate(dns_ptr -> nx_dns_packet_pool_ptr, &packet_ptr, NX_UDP_PACKET, NX_DNS_PACKET_ALLOCATE_TIMEOUT);
@@ -4585,28 +4621,110 @@ NX_PACKET           *receive_packet_ptr;
         return status;
     }
 
+    /* Check for non-blocking.  */
+    if (wait_option == NX_NO_WAIT)
+    {
+        return(NX_IN_PROGRESS);
+    }
+
     /* Wait for a DNS response.  */
-    status = _nx_dns_response_receive(dns_ptr, &receive_packet_ptr, wait_option);
+    status = _nx_dns_response_get(dns_ptr, host_name, record_buffer, buffer_size, record_count, wait_option);
+
+    /* Return completion status. */
+    return(status);
+}
+
+/**************************************************************************/ 
+/*                                                                        */ 
+/*  FUNCTION                                               RELEASE        */ 
+/*                                                                        */ 
+/*    _nx_dns_response_get                                 PORTABLE C     */ 
+/*                                                           6.1.5        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */ 
+/*                                                                        */ 
+/*    This function gets dns response.                                    */
+/*                                                                        */ 
+/*  INPUT                                                                 */ 
+/*                                                                        */ 
+/*    dns_ptr                               Pointer to DNS instance       */
+/*    host_name                             Name of host to resolve       */ 
+/*    record_buffer                         Buffer for resource data      */ 
+/*    buffer_size                           Buffer size for resource data */
+/*    record_count                          The count of resource data    */ 
+/*    wait_option                           Timeout value                 */ 
+/*                                                                        */ 
+/*  OUTPUT                                                                */ 
+/*                                                                        */ 
+/*    status                                Completion status             */ 
+/*                                                                        */ 
+/*  CALLS                                                                 */ 
+/*                                                                        */ 
+/*    _nx_dns_response_receive              Receive DNS response          */ 
+/*    _nx_dns_response_process              Process the DNS respondse     */
+/*    nx_packet_release                     Release packet                */ 
+/*                                                                        */ 
+/*  CALLED BY                                                             */ 
+/*                                                                        */ 
+/*    _nx_dns_send_query_get_rdata_by_name  Get the resource data by name */ 
+/*                                                                        */ 
+/*  RELEASE HISTORY                                                       */ 
+/*                                                                        */ 
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  03-02-2021     Yuxin Zhou               Initial Version 6.1.5         */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_dns_response_get(NX_DNS *dns_ptr, UCHAR *host_name, UCHAR *record_buffer, 
+                          UINT buffer_size, UINT *record_count, ULONG wait_option)
+{
+UINT        status;
+NX_PACKET  *packet_ptr;
+
+
+    /* Wait for a DNS response.  */
+    status = _nx_dns_response_receive(dns_ptr, &packet_ptr, wait_option);
 
     /* Check status.  */
     if (status == NX_SUCCESS)
     {
 
 #ifndef NX_DISABLE_PACKET_CHAIN
-        if (receive_packet_ptr -> nx_packet_next)
+        if (packet_ptr -> nx_packet_next)
         {
             
             /* Chained packet is not supported. */
-            nx_packet_release(receive_packet_ptr);
+            nx_packet_release(packet_ptr);
+
+            /* Release the resource obtained in _nx_dns_host_resource_data_by_name_get for non-blocking.  */
+            if (wait_option == NX_NO_WAIT)
+            {
+
+                /* Unbind the socket.  */
+                nx_udp_socket_unbind(&(dns_ptr -> nx_dns_socket));
+                tx_mutex_put(&dns_ptr -> nx_dns_mutex);
+            }
+
             return(NX_INVALID_PACKET);
         }
 #endif /* NX_DISABLE_PACKET_CHAIN */
 
         /* Call the function to process the DNS packet.  */
-        status = _nx_dns_response_process(dns_ptr, receive_packet_ptr, record_buffer, buffer_size, record_count);
+        status = _nx_dns_response_process(dns_ptr, host_name, packet_ptr, record_buffer, buffer_size, record_count);
     }
 
-    /* Return completion status. */
+    /* Release the resource obtained in _nx_dns_host_resource_data_by_name_get for non-blocking.  */
+    if (wait_option == NX_NO_WAIT)
+    {
+
+        /* Unbind the socket.  */
+        nx_udp_socket_unbind(&(dns_ptr -> nx_dns_socket));
+        tx_mutex_put(&dns_ptr -> nx_dns_mutex);
+    }
+
     return(status);
 }
 
@@ -4737,7 +4855,7 @@ ULONG               time_remaining;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_response_process                             PORTABLE C     */
-/*                                                           6.1          */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4751,6 +4869,7 @@ ULONG               time_remaining;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    dns_ptr                               Pointer to DNS instance       */
+/*    host_name                             Name of host to resolve       */ 
 /*    packet_ptr                            Pointer to received packet    */ 
 /*    record_buffer                         Buffer for resource data      */ 
 /*    buffer_size                           Buffer size for resource data */
@@ -4790,10 +4909,14 @@ ULONG               time_remaining;
 /*                                            updated resource get APIs to*/
 /*                                            improve buffer bound check, */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            receiving dns response,     */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
-static UINT _nx_dns_response_process(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *record_buffer, 
-                                     UINT buffer_size, UINT *record_count)
+static UINT _nx_dns_response_process(NX_DNS *dns_ptr, UCHAR *host_name, NX_PACKET *packet_ptr, 
+                                     UCHAR *record_buffer, UINT buffer_size, UINT *record_count)
 {
 
 UINT                status;
@@ -4810,6 +4933,7 @@ UINT                rr_location;
 UINT                answer_found = NX_FALSE;
 UINT                resource_size;
 UINT                name_size;
+UINT                host_name_size;
 
     /* Set the buffer pointer.  */
     buffer_prepend_ptr = record_buffer;
@@ -4879,7 +5003,7 @@ UINT                name_size;
         {
 
             /* Get name size */
-            name_size = _nx_dns_name_size_calculate(data_ptr, packet_ptr);
+            name_size = _nx_dns_name_string_unencode(packet_ptr, data_ptr, temp_string_buffer, NX_DNS_NAME_MAX);
 
             if (!name_size)
             {
@@ -4888,6 +5012,44 @@ UINT                name_size;
                 nx_packet_release(packet_ptr);
 
                 return NX_DNS_MALFORMED_PACKET;
+            }
+
+            /* Check for name.  */
+            if (_nx_utility_string_length_check((CHAR *)host_name, &host_name_size, name_size) ||
+                (name_size != host_name_size) ||
+                (memcmp(host_name, temp_string_buffer, name_size) != 0))
+            {
+                
+                /* Release the source packet.  */
+                nx_packet_release(packet_ptr);
+
+                /* This was not what the Client requested. Return error status.  */
+                return(NX_DNS_MISMATCHED_RESPONSE);
+            }
+
+            /* Get the length of name field.  */
+            name_size = _nx_dns_name_size_calculate(data_ptr, packet_ptr);
+
+            /* Check if the data pointer is valid.  */
+            if (data_ptr + name_size + 4 >= packet_ptr -> nx_packet_append_ptr)
+            {
+
+                /* Release the source packet.  */
+                nx_packet_release(packet_ptr);
+
+                return(NX_DNS_MALFORMED_PACKET);
+            }
+
+            /* Check the type and class.  */
+            if ((_nx_dns_network_to_short_convert(data_ptr + name_size) != dns_ptr -> nx_dns_lookup_type) || 
+                (_nx_dns_network_to_short_convert(data_ptr + name_size + 2) != NX_DNS_RR_CLASS_IN))
+            {
+
+                /* Release the source packet.  */
+                nx_packet_release(packet_ptr);
+
+                /* This was not what the Client requested. Return error status.  */
+                return(NX_DNS_MISMATCHED_RESPONSE);
             }
 
             /* Yes, the question is present in the response, skip it!  */

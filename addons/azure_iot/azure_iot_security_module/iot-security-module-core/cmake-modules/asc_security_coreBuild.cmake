@@ -51,12 +51,11 @@ function(setTargetCompileOptions target)
           "-Wfloat-equal"
           "-Wmissing-declarations"
           "-Wno-unused-parameter"
-          "-Wno-cast-function-type"
       )
       
       if(${build_pedantic})
           message(STATUS "Using '-Wpedantic' flag for compilation as warning only for target ${target}")
-          target_compile_options(${target} PRIVATE "-Wno-error=pedantic" "-Wpedantic" "-Wshadow")
+          target_compile_options(${target} PRIVATE "-Wpedantic" "-Wshadow")
           #Temopary hack
           target_compile_options(${target} PRIVATE "-Wno-error=overlength-strings")
       endif()

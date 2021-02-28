@@ -1,13 +1,14 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
+#include <asc_config.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -15,8 +16,8 @@
 #include "asc_security_core/logger.h"
 #include "asc_security_core/object_pool.h"
 #include "asc_security_core/collectors_info.h"
-#include "asc_security_core/collector_enums.h"
 #include "asc_security_core/collector.h"
+#include "asc_security_core/components_factory.h"
 #include "asc_security_core/utils/containerof.h"
 #include "asc_security_core/utils/notifier.h"
 
@@ -41,18 +42,17 @@ static void _collector_info_cb(notifier_t *notifier, int message_num, void *payl
         return;
     }
 
-    if (collector_internal_ptr->type >= COLLECTORS_INFO_SIZE ||
-        collector_internal_ptr->priority >= COLLECTOR_PRIORITY_COUNT) {
-        log_error("Wrong collector type=[%d] or priority=[%d]", collector_internal_ptr->type, collector_internal_ptr->priority);
+    if (collector_internal_ptr->type >= COLLECTORS_INFO_SIZE) {
+        log_error("Wrong collector type=[%d]", collector_internal_ptr->type);
     } else {
-        info[collector_internal_ptr->type].interval = g_collector_collections_intervals[collector_internal_ptr->priority];
-        log_debug("Updated configuration for collector=[%s] with interval=[%u]\n",
-            g_collector_names[collector_internal_ptr->type],
+        info[collector_internal_ptr->type].interval = collector_internal_ptr->interval;
+        log_debug("Updated configuration for collector=[%d] with interval=[%lu]\n",
+            collector_internal_ptr->type,
             info[collector_internal_ptr->type].interval);
     }
 }
 
-collectors_info_t *collectors_info_init()
+collectors_info_t *collectors_info_init(void)
 {
     notifier_container_t *container = object_pool_get(notifier_container_t);
 
@@ -62,7 +62,11 @@ collectors_info_t *collectors_info_init()
     }
     memset(container, 0, sizeof(notifier_container_t));
     container->notifier.notify = _collector_info_cb;
-    notifier_subscribe(NOTIFY_TOPIC_SYSTEM, &container->notifier);
+    if (notifier_subscribe(NOTIFY_TOPIC_SYSTEM, &container->notifier) != ASC_RESULT_OK) {
+        collectors_info_deinit((collectors_info_t *)container);
+        return NULL;
+    }
+
     return (collectors_info_t *)container;
 }
 
@@ -86,6 +90,8 @@ collector_info_t *collectors_info_get(collectors_info_t *collectors_info, uint32
         log_error("collectors_info_t *is NULL");
         return NULL;
     }
-    *size = COLLECTORS_INFO_SIZE;
+    if (size) {
+        *size = COLLECTORS_INFO_SIZE;
+    }
     return container->info;
 }

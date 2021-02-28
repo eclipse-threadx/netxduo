@@ -167,7 +167,7 @@ static const char *message_local_AzureIoTSecurity_json_parser_enum(flatcc_json_p
     uint64_t w;
 
     w = flatcc_json_parser_symbol_part(buf, end);
-    if (w < 0x50726f746f636f6c) { /* branch "Protocol" */
+    if (w < 0x50726f6365737345) { /* branch "ProcessE" */
         if ((w & 0xffffffffffffff00) == 0x5061796c6f616400) { /* "Payload" */
             buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 7);
             if (buf != mark) {
@@ -176,42 +176,70 @@ static const char *message_local_AzureIoTSecurity_json_parser_enum(flatcc_json_p
                 return unmatched;
             }
         } else { /* "Payload" */
-            return unmatched;
-        } /* "Payload" */
-    } else { /* branch "Protocol" */
-        if (w < 0x526573756c740000) { /* branch "Result" */
-            if (w == 0x50726f746f636f6c) { /* "Protocol" */
-                buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 8);
+            if ((w & 0xffffffffff000000) == 0x4c6576656c000000) { /* "Level" */
+                buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 5);
                 if (buf != mark) {
-                    buf = AzureIoTSecurity_Protocol_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
+                    buf = AzureIoTSecurity_Level_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
                 } else {
                     return unmatched;
                 }
-            } else { /* "Protocol" */
+            } else { /* "Level" */
                 return unmatched;
-            } /* "Protocol" */
-        } else { /* branch "Result" */
-            if (w == 0x5365766572697479) { /* "Severity" */
-                buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 8);
-                if (buf != mark) {
-                    buf = AzureIoTSecurity_Severity_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
-                } else {
-                    return unmatched;
-                }
-            } else { /* "Severity" */
-                if ((w & 0xffffffffffff0000) == 0x526573756c740000) { /* "Result" */
-                    buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 6);
+            } /* "Level" */
+        } /* "Payload" */
+    } else { /* branch "ProcessE" */
+        if (w < 0x50726f746f636f6c) { /* branch "Protocol" */
+            if (w == 0x50726f6365737345) { /* descend "ProcessE" */
+                buf += 8;
+                w = flatcc_json_parser_symbol_part(buf, end);
+                if (w == 0x76656e7454797065) { /* "ventType" */
+                    buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 8);
                     if (buf != mark) {
-                        buf = AzureIoTSecurity_Result_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
+                        buf = AzureIoTSecurity_ProcessEventType_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
                     } else {
                         return unmatched;
                     }
-                } else { /* "Result" */
+                } else { /* "ventType" */
                     return unmatched;
-                } /* "Result" */
-            } /* "Severity" */
-        } /* branch "Result" */
-    } /* branch "Protocol" */
+                } /* "ventType" */
+            } else { /* descend "ProcessE" */
+                return unmatched;
+            } /* descend "ProcessE" */
+        } else { /* branch "Protocol" */
+            if (w < 0x526573756c740000) { /* branch "Result" */
+                if (w == 0x50726f746f636f6c) { /* "Protocol" */
+                    buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 8);
+                    if (buf != mark) {
+                        buf = AzureIoTSecurity_Protocol_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
+                    } else {
+                        return unmatched;
+                    }
+                } else { /* "Protocol" */
+                    return unmatched;
+                } /* "Protocol" */
+            } else { /* branch "Result" */
+                if (w == 0x5365766572697479) { /* "Severity" */
+                    buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 8);
+                    if (buf != mark) {
+                        buf = AzureIoTSecurity_Severity_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
+                    } else {
+                        return unmatched;
+                    }
+                } else { /* "Severity" */
+                    if ((w & 0xffffffffffff0000) == 0x526573756c740000) { /* "Result" */
+                        buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 6);
+                        if (buf != mark) {
+                            buf = AzureIoTSecurity_Result_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
+                        } else {
+                            return unmatched;
+                        }
+                    } else { /* "Result" */
+                        return unmatched;
+                    } /* "Result" */
+                } /* "Severity" */
+            } /* branch "Result" */
+        } /* branch "Protocol" */
+    } /* branch "ProcessE" */
     return buf;
 }
 
@@ -229,7 +257,7 @@ static const char *message_global_json_parser_enum(flatcc_json_parser_t *ctx, co
         if (w == 0x5365637572697479) { /* descend "Security" */
             buf += 8;
             w = flatcc_json_parser_symbol_part(buf, end);
-            if (w < 0x2e50726f746f636f) { /* branch ".Protoco" */
+            if (w < 0x2e50726f63657373) { /* branch ".Process" */
                 if (w == 0x2e5061796c6f6164) { /* ".Payload" */
                     buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 8);
                     if (buf != mark) {
@@ -238,59 +266,93 @@ static const char *message_global_json_parser_enum(flatcc_json_parser_t *ctx, co
                         return unmatched;
                     }
                 } else { /* ".Payload" */
-                    return unmatched;
-                } /* ".Payload" */
-            } else { /* branch ".Protoco" */
-                if (w < 0x2e526573756c7400) { /* branch ".Result" */
-                    if (w == 0x2e50726f746f636f) { /* descend ".Protoco" */
-                        buf += 8;
-                        w = flatcc_json_parser_symbol_part(buf, end);
-                        if ((w & 0xff00000000000000) == 0x6c00000000000000) { /* "l" */
-                            buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 1);
-                            if (buf != mark) {
-                                buf = AzureIoTSecurity_Protocol_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
-                            } else {
-                                return unmatched;
-                            }
-                        } else { /* "l" */
-                            return unmatched;
-                        } /* "l" */
-                    } else { /* descend ".Protoco" */
-                        return unmatched;
-                    } /* descend ".Protoco" */
-                } else { /* branch ".Result" */
-                    if ((w & 0xffffffffffffff00) == 0x2e526573756c7400) { /* ".Result" */
-                        buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 7);
+                    if ((w & 0xffffffffffff0000) == 0x2e4c6576656c0000) { /* ".Level" */
+                        buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 6);
                         if (buf != mark) {
-                            buf = AzureIoTSecurity_Result_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
+                            buf = AzureIoTSecurity_Level_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
                         } else {
-                            goto pfguard1;
+                            return unmatched;
                         }
-                    } else { /* ".Result" */
-                        goto pfguard1;
-                    } /* ".Result" */
-                    goto endpfguard1;
-pfguard1:
-                    if (w == 0x2e53657665726974) { /* descend ".Severit" */
+                    } else { /* ".Level" */
+                        return unmatched;
+                    } /* ".Level" */
+                } /* ".Payload" */
+            } else { /* branch ".Process" */
+                if (w < 0x2e50726f746f636f) { /* branch ".Protoco" */
+                    if (w == 0x2e50726f63657373) { /* descend ".Process" */
                         buf += 8;
                         w = flatcc_json_parser_symbol_part(buf, end);
-                        if ((w & 0xff00000000000000) == 0x7900000000000000) { /* "y" */
-                            buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 1);
-                            if (buf != mark) {
-                                buf = AzureIoTSecurity_Severity_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
-                            } else {
+                        if (w == 0x4576656e74547970) { /* descend "EventTyp" */
+                            buf += 8;
+                            w = flatcc_json_parser_symbol_part(buf, end);
+                            if ((w & 0xff00000000000000) == 0x6500000000000000) { /* "e" */
+                                buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 1);
+                                if (buf != mark) {
+                                    buf = AzureIoTSecurity_ProcessEventType_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
+                                } else {
+                                    return unmatched;
+                                }
+                            } else { /* "e" */
                                 return unmatched;
-                            }
-                        } else { /* "y" */
+                            } /* "e" */
+                        } else { /* descend "EventTyp" */
                             return unmatched;
-                        } /* "y" */
-                    } else { /* descend ".Severit" */
+                        } /* descend "EventTyp" */
+                    } else { /* descend ".Process" */
                         return unmatched;
-                    } /* descend ".Severit" */
+                    } /* descend ".Process" */
+                } else { /* branch ".Protoco" */
+                    if (w < 0x2e526573756c7400) { /* branch ".Result" */
+                        if (w == 0x2e50726f746f636f) { /* descend ".Protoco" */
+                            buf += 8;
+                            w = flatcc_json_parser_symbol_part(buf, end);
+                            if ((w & 0xff00000000000000) == 0x6c00000000000000) { /* "l" */
+                                buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 1);
+                                if (buf != mark) {
+                                    buf = AzureIoTSecurity_Protocol_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
+                                } else {
+                                    return unmatched;
+                                }
+                            } else { /* "l" */
+                                return unmatched;
+                            } /* "l" */
+                        } else { /* descend ".Protoco" */
+                            return unmatched;
+                        } /* descend ".Protoco" */
+                    } else { /* branch ".Result" */
+                        if ((w & 0xffffffffffffff00) == 0x2e526573756c7400) { /* ".Result" */
+                            buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 7);
+                            if (buf != mark) {
+                                buf = AzureIoTSecurity_Result_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
+                            } else {
+                                goto pfguard1;
+                            }
+                        } else { /* ".Result" */
+                            goto pfguard1;
+                        } /* ".Result" */
+                        goto endpfguard1;
+pfguard1:
+                        if (w == 0x2e53657665726974) { /* descend ".Severit" */
+                            buf += 8;
+                            w = flatcc_json_parser_symbol_part(buf, end);
+                            if ((w & 0xff00000000000000) == 0x7900000000000000) { /* "y" */
+                                buf = flatcc_json_parser_match_scope(ctx, (mark = buf), end, 1);
+                                if (buf != mark) {
+                                    buf = AzureIoTSecurity_Severity_parse_json_enum(ctx, buf, end, value_type, value, aggregate);
+                                } else {
+                                    return unmatched;
+                                }
+                            } else { /* "y" */
+                                return unmatched;
+                            } /* "y" */
+                        } else { /* descend ".Severit" */
+                            return unmatched;
+                        } /* descend ".Severit" */
 endpfguard1:
-                    (void)0;
-                } /* branch ".Result" */
-            } /* branch ".Protoco" */
+                        (void)0;
+                    } /* branch ".Result" */
+                } /* branch ".Protoco" */
+            } /* branch ".Process" */
         } else { /* descend "Security" */
             return unmatched;
         } /* descend "Security" */

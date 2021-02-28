@@ -1,16 +1,17 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
 
 #ifndef ITIME_H
 #define ITIME_H
+#include <asc_config.h>
 
 #include <stdint.h>
 #include <time.h>
@@ -19,7 +20,7 @@
 #define SEC_HOUR (SEC_MIN * 60)
 #define SEC_DAY (SEC_HOUR * 24)
 
-typedef uint32_t (*unix_time_callback_t)(uint32_t *unix_time);
+typedef time_t (*unix_time_callback_t)(time_t *unix_time);
 
 void itime_init(unix_time_callback_t time_callback);
 
@@ -29,7 +30,7 @@ void itime_init(unix_time_callback_t time_callback);
  * @details This function provides the same functionality as the
  *          standard C @c time() function.
  */
-uint32_t itime_time(uint32_t *timer);
+time_t itime_time(time_t *timer);
 
 
 #endif /* ITIME_H */

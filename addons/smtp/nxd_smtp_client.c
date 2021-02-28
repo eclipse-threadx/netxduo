@@ -1767,7 +1767,7 @@ UINT            index;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_smtp_rsp_auth                                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.5        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1816,6 +1816,9 @@ UINT            index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.5  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_smtp_rsp_auth(NX_SMTP_CLIENT *client_ptr)
@@ -1823,12 +1826,9 @@ UINT  _nx_smtp_rsp_auth(NX_SMTP_CLIENT *client_ptr)
 
 UINT        status;
 UINT        server_reply_first_digit; 
-UCHAR       *carriage_return_linefeed_ptr;
+UCHAR       *carriage_return_linefeed_ptr = NX_NULL;
 UINT        auth_length;
 
-
-    /* Initialize authentication flags.  */
-    carriage_return_linefeed_ptr = (CHAR)0x0;
 
     /* Get the server response to the AUTH command.  */
     status   =  _nx_smtp_utility_read_server_code(client_ptr, NX_SMTP_ENVELOPE_TIMEOUT, NX_TRUE);

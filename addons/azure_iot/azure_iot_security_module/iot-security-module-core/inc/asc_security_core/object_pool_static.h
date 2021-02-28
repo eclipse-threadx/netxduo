@@ -1,17 +1,18 @@
 
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* Copyright (c) Microsoft Corporation. All rights reserved.                   */
+/*                                                                             */
+/* This software is licensed under the Microsoft Software License              */
+/* Terms for Microsoft Azure Defender for IoT. Full text of the license can be */
+/* found in the LICENSE file at https://aka.ms/AzureDefenderForIoT_EULA        */
+/* and in the root directory of this software.                                 */
+/*                                                                             */
+/*******************************************************************************/
 
 #ifndef OBJECT_POOL_STATIC_H
 #define OBJECT_POOL_STATIC_H
+#include <asc_config.h>
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -43,7 +44,7 @@ void object_pool_##type##_init() \
 \
     _##type##_is_pool_initialized = true;\
 }\
-type *object_pool_##type##_get() \
+type *object_pool_##type##_get(void) \
 {\
     object_pool_##type##_init();\
     if ((_##type##_current_pool_size) >= (_##type##_pool_size)) {\
@@ -70,8 +71,8 @@ void object_pool_##type##_free(type *obj) \
 
 #define OBJECT_POOL_DECLARATIONS(type)\
 STACK_DECLARATIONS(type)\
-void object_pool_##type##_init();\
-type *object_pool_##type##_get();\
+void object_pool_##type##_init(void);\
+type *object_pool_##type##_get(void);\
 void object_pool_##type##_free(type *obj);\
 
 #endif /* OBJECT_POOL_STATIC_H */
