@@ -108,6 +108,7 @@ Learn [here](https://docs.microsoft.com/en-us/azure/defender-for-iot) for more i
 * [nx_azure_iot_hub_client](./azure_rtos_iot_hub_client.md)
 * [nx_azure_iot_provisioning_client](./azure_rtos_iot_provisioning_client.md)
 * [nx_azure_iot_json](./azure_rtos_iot_json.md)
+* [nx_azure_iot_pnp_client](./azure_rtos_iot_pnp_client.md)
 * [nx_azure_iot_security_module](../azure_iot_security_module/docs/nx_azure_iot_security_module.md)
 
 ## Need Help?

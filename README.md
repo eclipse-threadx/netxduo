@@ -59,7 +59,7 @@ Each official release (preview or GA) will be tagged to mark the commit and push
 
 NetX Duo includes [Azure IoT Middleware for Azure RTOS](https://github.com/azure-rtos/netxduo/tree/master/addons/azure_iot), a platform specific library that acts as a binding layer between the Azure RTOS and the [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot).
 
-Additional APIs supporting Azure IoT Plug and Play can be found on the [feature/iot_pnp](https://github.com/azure-rtos/netxduo/tree/v6.1_beta.1) branch, with sample projects in the [Beta Release](https://github.com/azure-rtos/netxduo/releases/tag/v6.1_beta.1).
+Additional APIs supporting Azure IoT Plug and Play can be found on the [feature/iot_pnp](https://github.com/azure-rtos/netxduo/tree/feature/iot_pnp/addons/azure_iot) branch, with [sample projects](https://github.com/azure-rtos/samples/tree/PublicPreview/PnP) provided for it.
 
 # Security
 
