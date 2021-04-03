@@ -40,13 +40,6 @@
 #include   "nx_md5.h"
 #endif
 
-
-/* Define the Base64 array that is used to build username and passwords for Basic authentication. Indexing
-   into this array yields the base64 representation of the 6bit number.  */
-
-CHAR  _nx_http_server_base64_array[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-
 #ifdef  NX_HTTP_DIGEST_ENABLE
 /* Define the default nonce, used only for MD5 authentication.  For security reasons, this ASCII value should
    change over time.  */
@@ -4708,7 +4701,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_basic_authenticate                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4757,6 +4750,10 @@ NX_PACKET   *packet_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            parsing base64,             */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_basic_authenticate(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *name_ptr, CHAR *password_ptr, CHAR *realm_ptr, UINT realm_length, UINT *auth_request_present)
@@ -4768,6 +4765,7 @@ CHAR        quote[2] = {0x22, 0};
 CHAR        crlf[2] = {13,10};
 UINT        match;
 UINT        length;
+UINT        authorization_decoded_size;
 
     /* Default to no authentication request detected. */
     *auth_request_present = NX_FALSE;
@@ -4788,14 +4786,14 @@ UINT        length;
         *auth_request_present = NX_TRUE;
 
         /* Convert the request from Base64 representation to ASCII.  */
-        _nx_http_base64_decode(authorization_request, length, authorization_decoded);
+        _nx_utility_base64_decode((UCHAR *)authorization_request, length, (UCHAR *)authorization_decoded, sizeof(authorization_decoded), &authorization_decoded_size);
 
         /* See if it is valid.  */
 
         /* Compare the name.  */
         i =  0;
         match = NX_TRUE;
-        while (name_ptr[i] && (i < sizeof(authorization_decoded)))
+        while (name_ptr[i] && (i < authorization_decoded_size))
         {
 
             /* Is there a mismatch?  */
@@ -4811,7 +4809,7 @@ UINT        length;
         }
 
         /* Determine if everything matches.  */
-        if (match && (i < sizeof(authorization_decoded)) && (authorization_decoded[i] == ':'))
+        if (match && (i < authorization_decoded_size) && (authorization_decoded[i] == ':'))
         {
 
             /* Move the authorization index past the semicolon.  */
@@ -4820,7 +4818,7 @@ UINT        length;
             /* Now compare the passwords.  */
             j =  0;
             match = NX_TRUE;
-            while (password_ptr[j] && (i < sizeof(authorization_decoded)))
+            while (password_ptr[j] && (i < authorization_decoded_size))
             {
 
                 /* Is there a mismatch?  */
@@ -4837,7 +4835,7 @@ UINT        length;
             }
 
             /* Determine if we have a match.  */
-            if (match && (i < sizeof(authorization_decoded)) && (authorization_decoded[i] == (CHAR) NX_NULL))
+            if (match && (i == authorization_decoded_size) && (authorization_decoded[i] == (CHAR) NX_NULL))
             {
 
                 /* Yes, we have successful authorization!!  */
@@ -5799,261 +5797,6 @@ UINT    temp_name_length;
     memcpy(http_type_string, NX_HTTP_SERVER_DEFAULT_MIME, sizeof(NX_HTTP_SERVER_DEFAULT_MIME)); /* Use case of memcpy is verified. */
     return(sizeof(NX_HTTP_SERVER_DEFAULT_MIME) - 1);
 }
-
-
-/**************************************************************************/
-/*                                                                        */
-/*  FUNCTION                                               RELEASE        */
-/*                                                                        */
-/*    _nx_http_base64_encode                              PORTABLE C      */
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */
-/*                                                                        */
-/*    This function encodes the input string into a base64                */
-/*    representation.                                                     */
-/*                                                                        */
-/*  INPUT                                                                 */
-/*                                                                        */
-/*    name                                  Name string                   */
-/*    length                                Length of name                */
-/*    base64name                            Encoded base64 name string    */
-/*                                                                        */
-/*  OUTPUT                                                                */
-/*                                                                        */
-/*    None                                                                */
-/*                                                                        */
-/*  CALLS                                                                 */
-/*                                                                        */
-/*    _nx_utility_string_length_check       Check string length           */
-/*                                                                        */
-/*  CALLED BY                                                             */
-/*                                                                        */
-/*    None                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-VOID _nx_http_base64_encode(CHAR *name, UINT length, CHAR *base64name)
-{
-
-UINT    pad;
-UINT    i, j;
-UINT    step;
-
-
-    /* Adjust the length to represent the base64 name.  */
-    length =  ((length * 8) / 6);
-
-    /* Default padding to none.  */
-    pad =  0;
-
-    /* Determine if an extra conversion is needed.  */
-    if ((length * 6) % 24)
-    {
-
-        /* Some padding is needed.  */
-
-        /* Calculate the number of pad characters.  */
-        pad =  (length * 6) % 24;
-        pad =  (24 - pad) / 6;
-        pad =  pad - 1;
-
-        /* Adjust the length to pickup the character fraction.  */
-        length++;
-    }
-
-    /* Setup index into the base64name.  */
-    j =  0;
-
-    /* Compute the base64name.  */
-    step =  0;
-    i =     0;
-    while (j < length)
-    {
-
-        /* Determine which step we are in.  */
-        if (step == 0)
-        {
-
-            /* Use first 6 bits of name character for index.  */
-            base64name[j++] =  _nx_http_server_base64_array[((UINT) name[i]) >> 2];
-            step++;
-        }
-        else if (step == 1)
-        {
-
-            /* Use last 2 bits of name character and first 4 bits of next name character for index.  */
-            base64name[j++] =  _nx_http_server_base64_array[((((UINT) name[i]) & 0x3) << 4) | (((UINT) name[i+1]) >> 4)];
-            i++;
-            step++;
-        }
-        else if (step == 2)
-        {
-
-            /* Use last 4 bits of name character and first 2 bits of next name character for index.  */
-            base64name[j++] =  _nx_http_server_base64_array[((((UINT) name[i]) & 0xF) << 2) | (((UINT) name[i+1]) >> 6)];
-            i++;
-            step++;
-        }
-        else /* Step 3 */
-        {
-
-            /* Use last 6 bits of name character for index.  */
-            base64name[j++] =  _nx_http_server_base64_array[(((UINT) name[i]) & 0x3F)];
-            i++;
-            step = 0;
-        }
-    }
-
-    /* Determine if the index needs to be advanced.  */
-    if (step != 3)
-        i++;
-
-    /* Now add the PAD characters.  */
-    while ((pad--) && (j < NX_HTTP_MAX_STRING))
-    {
-
-        /* Pad base64name with '=' characters.  */
-        base64name[j++] = '=';
-    }
-
-    /* Put a NULL character in.  */
-    base64name[j] =  NX_NULL;
-}
-
-
-/**************************************************************************/
-/*                                                                        */
-/*  FUNCTION                                               RELEASE        */
-/*                                                                        */
-/*    _nx_http_base64_decode                              PORTABLE C      */
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */
-/*                                                                        */
-/*    This function decodes the input base64 ASCII string and converts    */
-/*    it into a standard ASCII representation.                            */
-/*                                                                        */
-/*  INPUT                                                                 */
-/*                                                                        */
-/*    base64name                            Encoded base64 name string    */
-/*    length                                Length of encoded base64 name */
-/*    name                                  Name string                   */
-/*                                                                        */
-/*  OUTPUT                                                                */
-/*                                                                        */
-/*    None                                                                */
-/*                                                                        */
-/*  CALLS                                                                 */
-/*                                                                        */
-/*    _nx_utility_string_length_check       Check string length           */
-/*                                                                        */
-/*  CALLED BY                                                             */
-/*                                                                        */
-/*    _nx_http_server_basic_authenticate    Basic authentication          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-VOID _nx_http_base64_decode(CHAR *base64name, UINT length, CHAR *name)
-{
-
-UINT    i, j;
-UINT    value1, value2;
-UINT    step;
-
-
-    /* Adjust the length to represent the ASCII name.  */
-    length =  ((length * 6) / 8);
-
-    /* Setup index into the ASCII name.  */
-    j =  0;
-
-    /* Compute the ASCII name.  */
-    step =  0;
-    i =     0;
-    while ((j < length) && (base64name[i]) && (base64name[i] != '='))
-    {
-
-        /* Derive values of the Base64 name.  */
-        if ((base64name[i] >= 'A') && (base64name[i] <= 'Z'))
-            value1 =  (UINT) (base64name[i] - 'A');
-        else if ((base64name[i] >= 'a') && (base64name[i] <= 'z'))
-            value1 =  (UINT) (base64name[i] - 'a') + 26;
-        else if ((base64name[i] >= '0') && (base64name[i] <= '9'))
-            value1 =  (UINT) (base64name[i] - '0') + 52;
-        else if (base64name[i] == '+')
-            value1 =  62;
-        else if (base64name[i] == '/')
-            value1 =  63;
-        else
-            value1 =  0;
-
-        /* Derive value for the next character.  */
-        if ((base64name[i+1] >= 'A') && (base64name[i+1] <= 'Z'))
-            value2 =  (UINT) (base64name[i+1] - 'A');
-        else if ((base64name[i+1] >= 'a') && (base64name[i+1] <= 'z'))
-            value2 =  (UINT) (base64name[i+1] - 'a') + 26;
-        else if ((base64name[i+1] >= '0') && (base64name[i+1] <= '9'))
-            value2 =  (UINT) (base64name[i+1] - '0') + 52;
-        else if (base64name[i+1] == '+')
-            value2 =  62;
-        else if (base64name[i+1] == '/')
-            value2 =  63;
-        else
-            value2 =  0;
-
-        /* Determine which step we are in.  */
-        if (step == 0)
-        {
-
-            /* Use first value and first 2 bits of second value.  */
-            name[j++] =    (CHAR) (((value1 & 0x3f) << 2) | ((value2 >> 4) & 3));
-            i++;
-            step++;
-        }
-        else if (step == 1)
-        {
-
-            /* Use last 4 bits of first value and first 4 bits of next value.  */
-            name[j++] =    (CHAR) (((value1 & 0xF) << 4) | (value2 >> 2));
-            i++;
-            step++;
-        }
-        else if (step == 2)
-        {
-
-            /* Use first 2 bits and following 6 bits of next value.  */
-            name[j++] =   (CHAR) (((value1 & 3) << 6) | (value2 & 0x3f));
-            i++;
-            i++;
-            step =  0;
-        }
-    }
-
-    /* Put a NULL character in.  */
-    name[j] =  NX_NULL;
-}
-
 
 #ifdef NX_HTTP_DIGEST_ENABLE
 /**************************************************************************/

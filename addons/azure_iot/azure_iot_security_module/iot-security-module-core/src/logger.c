@@ -61,12 +61,13 @@ static bool _conf_validate_level(conf_t *conf)
     return true;
 }
 
-static asc_result_t _conf_validate_or_apply(linked_list_iterator_conf_t *conf_list_iter, bool validate_only)
+static asc_result_t _conf_validate_or_apply(linked_list_t *conf_list, conf_origin_t origin, bool validate_only)
 {
     conf_t *conf;
     bool all_pass = true;
 
-    while ((conf = linked_list_iterator_conf_t_next(conf_list_iter)) != NULL) {
+    linked_list_foreach(conf_list, conf)
+    {
         char *token = NULL, *rest = NULL;
         size_t token_len = 0, rest_len = 0;
         component_id_t id;
@@ -87,6 +88,13 @@ static asc_result_t _conf_validate_or_apply(linked_list_iterator_conf_t *conf_li
 
             code = string2code(_log_levels, conf->value.value.string.string, conf->value.value.string.length);
             logger_set_system_log_level(code);
+            continue;
+        }
+
+        if (origin == CONF_ORIGIN_TWIN) {
+            all_pass = false;
+            log_error("Component=[%.*s] key=[%.*s] can't be configured via device twin",
+                conf->component.length, conf->component.string, conf->key.length, conf->key.string);
             continue;
         }
 
@@ -133,14 +141,14 @@ static asc_result_t _conf_validate_or_apply(linked_list_iterator_conf_t *conf_li
     return all_pass ? ASC_RESULT_OK : ASC_RESULT_BAD_ARGUMENT;
 }
 
-static asc_result_t _conf_validate(linked_list_iterator_conf_t *conf_list_iter)
+static asc_result_t _conf_validate(linked_list_t *conf_list, conf_origin_t origin)
 {
-    return _conf_validate_or_apply(conf_list_iter, true);
+    return _conf_validate_or_apply(conf_list, origin, true);
 }
 
-static asc_result_t _conf_apply(linked_list_iterator_conf_t *conf_list_iter)
+static asc_result_t _conf_apply(linked_list_t *conf_list, conf_origin_t origin)
 {
-    return _conf_validate_or_apply(conf_list_iter, false);
+    return _conf_validate_or_apply(conf_list, origin, false);
 }
 #endif
 

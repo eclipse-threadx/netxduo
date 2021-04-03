@@ -31,6 +31,7 @@
 #define CORE_RESTART_SLEEP 1
 
 typedef struct core {
+    /* This macro must be first in object */
     COLLECTION_INTERFACE(struct core);
 
     const char *security_module_id;
@@ -45,8 +46,8 @@ typedef struct core {
     bool message_empty;
 
     serializer_t *serializer;
-    time_t init_random_collect_offset;
-    time_t nearest_collect_time;
+    unsigned long init_random_collect_offset;
+    unsigned long nearest_collect_time;
     event_loop_timer_handler h_collect;
     event_loop_timer_handler h_start;
     notifier_t security_module_state_notifier;
@@ -56,8 +57,8 @@ OBJECT_POOL_DECLARATIONS(core_t)
 OBJECT_POOL_DEFINITIONS(core_t, CORE_OBJECT_POOL_COUNT)
 
 typedef struct {
-    time_t minimum;
-    time_t curr_time;
+    unsigned long minimum;
+    unsigned long curr_time;
     bool is_in_start;
 } calc_nearest_collect_t;
 
@@ -75,35 +76,50 @@ static component_ops_t _ops = {
 COMPONENTS_FACTORY_DEFINITION(CollectorsCore, &_ops)
 
 static void _core_deinit(core_t *core_ptr, component_id_t id);
-static asc_result_t _set_next_collect_timer(core_t *core_ptr, time_t curr_time, bool is_in_start);
+static asc_result_t _set_next_collect_timer(core_t *core_ptr, unsigned long curr_time, bool is_in_start);
 static void _security_module_state_cb(notifier_t *notifier, int message_num, void *payload);
 
 static void _init_random_collect_offset(core_t *core_ptr)
 {
+    unsigned long now = itime_time(NULL);
+    if (now == (unsigned long)(-1)) {
+        log_error("Error get current time");
+        now = 0;
+    }
 #ifdef ASC_FIRST_FORCE_COLLECTION_INTERVAL
     #if ASC_FIRST_FORCE_COLLECTION_INTERVAL < 0
-        core_ptr->init_random_collect_offset = itime_time(NULL);
+        core_ptr->init_random_collect_offset = now;
     #else
-        core_ptr->init_random_collect_offset = itime_time(NULL) + ASC_FIRST_FORCE_COLLECTION_INTERVAL;
+        core_ptr->init_random_collect_offset = now + ASC_FIRST_FORCE_COLLECTION_INTERVAL;
     #endif
 #else
-    core_ptr->init_random_collect_offset = itime_time(NULL) + (time_t)(irand_int() % (2 * ASC_FIRST_COLLECTION_INTERVAL) + ASC_FIRST_COLLECTION_INTERVAL);
+    core_ptr->init_random_collect_offset = now + (unsigned long)(irand_int() % (2 * ASC_FIRST_COLLECTION_INTERVAL) + ASC_FIRST_COLLECTION_INTERVAL);
 #endif
 }
 
-static time_t _calculate_collector_time_offset(core_t *core_ptr, collector_t *collector_ptr, component_state_enum_t state)
+static unsigned long _calculate_collector_time_offset(core_t *core_ptr, collector_t *collector_ptr, component_state_enum_t state)
 {
-    time_t offset, base_collecting_time = core_ptr->init_random_collect_offset;
+    unsigned long offset, base_collecting_time = core_ptr->init_random_collect_offset;
 
     // TODO it breaks sequence of collections and cause to increasing of security messages - need to sync on init_random_collect_offset
     if (state == COMPONENT_RUNNING) {
-        base_collecting_time = itime_time(NULL) + ASC_FIRST_COLLECTION_INTERVAL;
+        unsigned long now = itime_time(NULL);
+        if (now == (unsigned long)(-1)) {
+            log_error("Error get current time");
+            now = 0;
+        }
+        base_collecting_time = now + ASC_FIRST_COLLECTION_INTERVAL;
     }
     if (collector_ptr->internal.interval > core_ptr->init_random_collect_offset) {
         // should never happens
         offset = base_collecting_time;
     } else {
-        offset = base_collecting_time - collector_ptr->internal.interval;
+        if (base_collecting_time >= collector_ptr->internal.interval) {
+            offset = base_collecting_time - collector_ptr->internal.interval;
+        } else {
+            // should never happens
+            offset = base_collecting_time;
+        }
     }
     return offset;
 }
@@ -210,7 +226,7 @@ static void _reset_last_collected_timestamp(collector_t *collector_ptr, void *co
 {
     core_t *core_ptr = context;
 
-    time_t offset = _calculate_collector_time_offset(core_ptr, collector_ptr, COMPONENT_STOPED);
+    unsigned long offset = _calculate_collector_time_offset(core_ptr, collector_ptr, COMPONENT_STOPED);
 
     collector_set_last_collected_timestamp(collector_ptr, offset);
 }
@@ -295,11 +311,16 @@ static void _security_module_state_cb(notifier_t *notifier, int message_num, voi
     }
 }
 
-static asc_result_t core_collect(core_t *core_ptr, time_t curr_time)
+static asc_result_t core_collect(core_t *core_ptr, unsigned long now)
 {
     asc_result_t result = ASC_RESULT_OK;
     bool at_least_one_success = false;
     bool time_passed = false;
+
+    if (now == (unsigned long)(-1)) {
+        log_error("Error get current time");
+        return ASC_RESULT_IMPOSSIBLE;
+    }
 
     core_message_deinit();
 
@@ -307,27 +328,30 @@ static asc_result_t core_collect(core_t *core_ptr, time_t curr_time)
             prioritized_collectors != NULL;
             prioritized_collectors = collector_collection_get_next_priority(core_ptr->collector_collection_ptr, prioritized_collectors)
         ) {
-        linked_list_collector_t_handle collector_list = priority_collectors_get_list(prioritized_collectors);
-
-        for (collector_t *current_collector=linked_list_collector_t_get_first(collector_list);
-                current_collector!=NULL;
-                current_collector=current_collector->next
-            )
+        linked_list_t *collector_list = priority_collectors_get_list(prioritized_collectors);
+        collector_t *current_collector = NULL;
+        linked_list_foreach(collector_list, current_collector)
         {
             component_info_t *info = components_manager_get_info(components_manager_get_id(current_collector->internal.type));
             if (!info || info->state != COMPONENT_RUNNING) {
                 continue;
             }
 
-            time_t last_collected = collector_get_last_collected_timestamp(current_collector);
-            time_t interval = current_collector->internal.interval;
-            time_t delta = curr_time - last_collected;
+            unsigned long last_collected = collector_get_last_collected_timestamp(current_collector);
+            unsigned long interval = current_collector->internal.interval;
+            unsigned long delta;
+            if (now > last_collected) {
+                delta = now - last_collected;
+            } else {
+                log_error("Current time is less than last collected interval");
+                delta = interval;
+            }
 
             if (delta >= interval) {
                 time_passed = true;
                 result = collector_serialize_events(current_collector, core_ptr->serializer);
                 // overwrite last collected time with common start value to store sequence of collections
-                collector_set_last_collected_timestamp(current_collector, curr_time);
+                collector_set_last_collected_timestamp(current_collector, now);
                 if (result == ASC_RESULT_EMPTY) {
                     log_debug("empty, collector type=[%d]", current_collector->internal.type);
                     continue;
@@ -369,15 +393,15 @@ static void _collector_collection_calc_nearest_collect(collector_t *collector_pt
         }
     }
     
-    time_t curr_time = ctx->curr_time;
-    time_t last_collected = collector_get_last_collected_timestamp(collector_ptr);
-    time_t interval = collector_ptr->internal.interval;
-    time_t next_time;
+    unsigned long curr_time = ctx->curr_time;
+    unsigned long last_collected = collector_get_last_collected_timestamp(collector_ptr);
+    unsigned long interval = collector_ptr->internal.interval;
+    unsigned long next_time;
 
     if (last_collected > curr_time) {
         next_time = last_collected - curr_time + interval;
     } else {
-        time_t delta = curr_time - last_collected;
+        unsigned long delta = curr_time - last_collected;
         if (interval <= delta) {
             next_time = 0;
         } else {
@@ -401,7 +425,7 @@ static void cb_collect(event_loop_timer_handler h, void *ctx)
         log_error("core uninitialized");
         return;
     }
-    time_t curr_time = itime_time(NULL);
+    unsigned long curr_time = itime_time(NULL);
 
     if (core_collect(core_ptr, curr_time) == ASC_RESULT_OK) {
         notifier_notify(NOTIFY_TOPIC_COLLECT, NOTIFY_MESSAGE_READY, NULL);
@@ -409,22 +433,31 @@ static void cb_collect(event_loop_timer_handler h, void *ctx)
     _set_next_collect_timer(core_ptr, curr_time, false);
 }
 
-static asc_result_t _set_next_collect_timer(core_t *core_ptr, time_t curr_time, bool is_in_start)
+static asc_result_t _set_next_collect_timer(core_t *core_ptr, unsigned long now, bool is_in_start)
 {
     ievent_loop_t *el = ievent_loop_get_instance();
     calc_nearest_collect_t ctx;
 
-    ctx.minimum = CORE_NEAREST_TIMER_UNSET_VAL;
-    ctx.curr_time = curr_time;
-    ctx.is_in_start = is_in_start;
-
     // stop existing timer
     el->timer_delete(core_ptr->h_collect);
+
+    if (now == (unsigned long)(-1)) {
+        log_error("Error get current time");
+        core_ptr->h_collect = el->timer_create(cb_collect, core_ptr, ASC_HIGH_PRIORITY_INTERVAL, 0, &core_ptr->h_collect);
+        core_ptr->nearest_collect_time = ASC_HIGH_PRIORITY_INTERVAL;
+        return ASC_RESULT_OK;
+    }
+
+    ctx.minimum = CORE_NEAREST_TIMER_UNSET_VAL;
+    ctx.curr_time = now;
+    ctx.is_in_start = is_in_start;
 
     collector_collection_foreach(core_ptr->collector_collection_ptr, _collector_collection_calc_nearest_collect, &ctx);
 
     if (ctx.minimum == CORE_NEAREST_TIMER_UNSET_VAL) {
-        log_debug("the list of collectors is empty");
+        log_info("the list of collectors is empty");
+        ctx.minimum = ASC_HIGH_PRIORITY_INTERVAL;
+        core_ptr->h_collect = el->timer_create(cb_collect, core_ptr, ctx.minimum, 0, &core_ptr->h_collect);
     } else {
         log_debug("the nearest collection interval=[%lu]", ctx.minimum);
         core_ptr->h_collect = el->timer_create(cb_collect, core_ptr, ctx.minimum, 0, &core_ptr->h_collect);
@@ -521,7 +554,7 @@ asc_result_t core_collector_register(collector_t *collector_ptr)
         return ASC_RESULT_MEMORY_EXCEPTION;
     }
     component_state_enum_t state = components_manager_get_info(components_manager_get_self_id())->state;
-    time_t offset = _calculate_collector_time_offset(core_ptr, collector_ptr, state);
+    unsigned long offset = _calculate_collector_time_offset(core_ptr, collector_ptr, state);
 
     asc_result_t result = collector_collection_register(core_ptr->collector_collection_ptr, collector_ptr, offset);
 
@@ -583,7 +616,7 @@ asc_result_t core_message_deinit(void)
     return ASC_RESULT_OK;
 }
 
-time_t core_get_init_random_collect_offset(void)
+unsigned long core_get_init_random_collect_offset(void)
 {
     core_t *core_ptr = components_manager_get_self_ctx();
 
@@ -594,7 +627,7 @@ time_t core_get_init_random_collect_offset(void)
     return core_ptr->init_random_collect_offset;
 }
 
-time_t core_get_nearest_collect_time(void)
+unsigned long core_get_nearest_collect_time(void)
 {
     core_t *core_ptr = components_manager_get_self_ctx();
 

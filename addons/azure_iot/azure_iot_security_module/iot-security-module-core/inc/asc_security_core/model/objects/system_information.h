@@ -18,6 +18,7 @@
 #include "asc_security_core/utils/collection/collection.h"
 
 typedef struct system_information_t {
+    /* This macro must be first in object */
     COLLECTION_INTERFACE(struct system_information_t);
     
     char* os_info;

@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 
@@ -31,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_extension_find                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -75,6 +74,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_extension_find(NX_SECURE_X509_CERT *certificate,
@@ -91,7 +93,7 @@ const UCHAR *tlv_data;
 const UCHAR *current_buffer;
 ULONG        header_length;
 UINT         status;
-UINT         found_extension = NX_FALSE;
+UINT         found_extension = NX_CRYPTO_FALSE;
 
     /* Now, parse the extensions. */
     /* Extension ASN.1 format:
@@ -158,13 +160,13 @@ UINT         found_extension = NX_FALSE;
             current_buffer = tlv_data + tlv_length;
 
             /* We found a matching extension, break out and populate the return structure. */
-            found_extension = NX_TRUE;
+            found_extension = NX_CRYPTO_TRUE;
             break;
         }
     } /* End while loop. */
 
     /* Did we find the extension we were looking for? */
-    if (found_extension != NX_TRUE)
+    if (found_extension != NX_CRYPTO_TRUE)
     {
         return(NX_SECURE_X509_EXTENSION_NOT_FOUND);
     }
@@ -181,7 +183,7 @@ UINT         found_extension = NX_FALSE;
 
     /* Now check out what we got. Possibly a boolean for the critical flag, but
        if it isn't there, then it's default is FALSE. */
-    critical_flag = NX_FALSE;
+    critical_flag = NX_CRYPTO_FALSE;
     if (tlv_type == NX_SECURE_ASN_TAG_BOOLEAN)
     {
         /* The boolean is in the data we extracted. Convert ASN.1 boolean TRUE (all bits set) to integer 1. */

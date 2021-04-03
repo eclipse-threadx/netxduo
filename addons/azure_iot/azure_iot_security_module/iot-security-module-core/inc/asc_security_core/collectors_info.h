@@ -14,12 +14,11 @@
 #include <asc_config.h>
 
 #include <stdint.h>
-#include <time.h>
 
 #define COLLECTORS_INFO_SIZE COLLECTORS_COUNT
 
 typedef struct {
-    time_t interval;
+    unsigned long interval;
 } collector_info_t;
 
 typedef intptr_t collectors_info_t;

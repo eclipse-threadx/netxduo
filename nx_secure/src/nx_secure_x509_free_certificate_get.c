@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -30,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_free_certificate_get                 PORTABLE C     */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -67,6 +66,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_free_certificate_get(NX_SECURE_X509_CERTIFICATE_STORE *store,
@@ -77,10 +79,10 @@ NX_SECURE_X509_CERT *list_head;
     /* Get the first certificate in the remote store. */
     list_head = store -> nx_secure_x509_free_certificates;
 
-    if (list_head == NX_NULL)
+    if (list_head == NX_CRYPTO_NULL)
     {
         /* No certificates in this store! */
-        return(NX_SECURE_TLS_NO_CERT_SPACE_ALLOCATED);
+        return(NX_SECURE_X509_NO_CERT_SPACE_ALLOCATED);
     }
 
     /* Use first entry in store. */
@@ -88,8 +90,8 @@ NX_SECURE_X509_CERT *list_head;
 
     /* Remove the certificate from the store. */
     store -> nx_secure_x509_free_certificates = (*certificate) -> nx_secure_x509_next_certificate;
-    (*certificate) -> nx_secure_x509_next_certificate = NX_NULL;
+    (*certificate) -> nx_secure_x509_next_certificate = NX_CRYPTO_NULL;
 
-    return(NX_SUCCESS);
+    return(NX_SECURE_X509_SUCCESS);
 }
 

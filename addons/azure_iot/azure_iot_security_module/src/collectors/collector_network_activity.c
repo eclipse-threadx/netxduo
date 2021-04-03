@@ -236,7 +236,7 @@ static asc_result_t _collector_network_activity_serialize_events(collector_inter
     network_activity_ipv6_t **previous_ipv6_hashtable = NULL;
 #endif /* NX_DISABLE_IPV6 */
 
-    time_t current_time;
+    unsigned long current_time;
 
     if (serializer == NULL)
     {

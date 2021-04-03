@@ -16,7 +16,7 @@
 #include "asc_security_core/serializer.h"
 #include "serializer_private.h"
 
-asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, time_t timestamp, time_t collection_interval)
+asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval)
 {
     log_debug("serializer_event_add_heartbeat, serializer=[%p], timestamp=[%lu], collection_interval=[%lu]",
               (void*)serializer, timestamp, collection_interval);

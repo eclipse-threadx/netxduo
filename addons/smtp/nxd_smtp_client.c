@@ -20,33 +20,6 @@
 /**************************************************************************/
 /**************************************************************************/
 
-/**************************************************************************/
-/*                                                                        */
-/*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
-/*                                                                        */
-/*    nxd_smtp_client.c                                   PORTABLE C      */
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */
-/*                                                                        */
-/*    This file defines the NetX Simple Mail Transfer Protocol (SMTP)     */
-/*    Client component, including all data types and external references. */
-/*    It is assumed that tx_api.h, tx_port.h, nx_api.h, and nx_port.h,    */
-/*    have already been included.                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-               
 
 #define NX_SMTP_SOURCE_CODE
 
@@ -81,8 +54,6 @@ static CHAR     _nx_smtp_buffer[NX_SMTP_BUFFER_SIZE];
 /* Define internal SMTP Client functions.  */
 
 static VOID _nx_smtp_find_crlf(UCHAR *buffer, UINT length, UCHAR **CRLF, UINT reverse);
-static VOID _nx_smtp_base64_encode(UCHAR *name, UCHAR *base64name, UINT length);
-static VOID _nx_smtp_base64_decode(UCHAR *base64name, UCHAR *name);
 static UINT _nx_smtp_cmd_idle(NX_SMTP_CLIENT *client_ptr);
 static UINT _nx_smtp_rsp_idle(NX_SMTP_CLIENT *client_ptr);
 static UINT _nx_smtp_cmd_greeting(NX_SMTP_CLIENT *client_ptr);
@@ -115,7 +86,7 @@ static UINT _nx_smtp_utility_send_to_server(NX_SMTP_CLIENT *client_ptr, CHAR *bu
 static UINT _nx_smtp_utility_authentication_challenge(NX_SMTP_CLIENT *client_ptr, UCHAR *buffer_ptr, UINT length);  
 static UINT _nx_smtp_client_process(NX_SMTP_CLIENT *client_ptr);
 static UINT _nx_smtp_utility_send_header_to_server(NX_SMTP_CLIENT *client_ptr, ULONG timeout) ;
-static UINT _nx_smtp_utility_parse_server_services(NX_SMTP_CLIENT *client_ptr);
+static VOID _nx_smtp_utility_parse_server_services(NX_SMTP_CLIENT *client_ptr);
 static UINT _nx_smtp_parse_250_response(UCHAR *buffer_ptr, UINT buffer_length, UINT *is_last_code);
 static UINT _nx_smtp_parse_response(NX_SMTP_CLIENT *client_ptr, UCHAR *buffer, UINT arguement_index, 
                                     UINT buffer_length, UCHAR *arguement, UINT arguement_length, 
@@ -1987,7 +1958,7 @@ UINT        auth_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_smtp_cmd_auth_challenge                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2009,7 +1980,7 @@ UINT        auth_length;
 /*  CALLS                                                                 */
 /*                                                                        */
 /*    _nx_smtp_utility_send_to_server       Send data to server           */
-/*    _nx_smtp_base64_encode                Base64 encode specified text  */
+/*    _nx_utility_base64_encode             Base64 encode specified text  */
 /*    memcpy                                Copy data to area of memory   */
 /*                                                                        */
 /*  CALLED BY                                                             */
@@ -2025,6 +1996,10 @@ UINT        auth_length;
 /*                                            buffer length verification, */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            parsing base64,             */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_smtp_cmd_auth_challenge(NX_SMTP_CLIENT *client_ptr)
@@ -2032,7 +2007,8 @@ UINT  _nx_smtp_cmd_auth_challenge(NX_SMTP_CLIENT *client_ptr)
 
 UINT     status;
 UINT     index;
-UCHAR    auth_reply_encoded[NX_SMTP_CLIENT_AUTH_CHALLENGE_ENCODED_SIZE + 1];   
+UCHAR    auth_reply_encoded[NX_SMTP_CLIENT_AUTH_CHALLENGE_ENCODED_SIZE + 1];
+UINT     auth_reply_encoded_size;
 UINT     length;
 UINT     password_length;
 
@@ -2077,14 +2053,14 @@ UINT     password_length;
             length += password_length;
     
             /* Now encode the combined client username/password.  */
-            _nx_smtp_base64_encode(&plain_auth_buffer[0], auth_reply_encoded, length);
+            _nx_utility_base64_encode(&plain_auth_buffer[0], length, auth_reply_encoded, sizeof(auth_reply_encoded), &auth_reply_encoded_size);
 
         }
         else
         {
+
             /* Just encode the client username.  */
-            _nx_smtp_base64_encode((UCHAR *)client_ptr -> nx_smtp_username, auth_reply_encoded,
-                                   length); 
+            _nx_utility_base64_encode((UCHAR *)client_ptr -> nx_smtp_username, length, auth_reply_encoded, sizeof(auth_reply_encoded), &auth_reply_encoded_size);
         }
 
     }
@@ -2093,8 +2069,7 @@ UINT     password_length;
     {
 
         /* Encode the client password.  */
-        _nx_smtp_base64_encode((UCHAR *)client_ptr -> nx_smtp_password, auth_reply_encoded,
-                               password_length); 
+        _nx_utility_base64_encode((UCHAR *)client_ptr -> nx_smtp_password, password_length, auth_reply_encoded, sizeof(auth_reply_encoded), &auth_reply_encoded_size);
     }
 
     else 
@@ -2102,14 +2077,10 @@ UINT     password_length;
 
         /* Unknown prompt: Send the '*' to terminate the authentication process.  */
         memcpy(auth_reply_encoded, NX_SMTP_CANCEL_AUTHENTICATION,  sizeof(NX_SMTP_CANCEL_AUTHENTICATION)); /* Use case of memcpy is verified. */
+        auth_reply_encoded_size = sizeof(NX_SMTP_CANCEL_AUTHENTICATION) - 1;
     }
 
-    if (_nx_utility_string_length_check((CHAR *)auth_reply_encoded, &length, sizeof(auth_reply_encoded) - 1))
-    {
-        return(NX_SIZE_ERROR);
-    }
-
-    if (sizeof(_nx_smtp_buffer) < (length + sizeof(NX_SMTP_LINE_TERMINATOR) - 1))
+    if (sizeof(_nx_smtp_buffer) < (auth_reply_encoded_size + sizeof(NX_SMTP_LINE_TERMINATOR) - 1))
     {
 
         /* Buffer size too small. */
@@ -2117,8 +2088,8 @@ UINT     password_length;
     }
 
     /* Format the encoded response.  */
-    memcpy(&_nx_smtp_buffer[0],auth_reply_encoded, length); /* Use case of memcpy is verified. */
-    index = length;
+    memcpy(&_nx_smtp_buffer[0],auth_reply_encoded, auth_reply_encoded_size); /* Use case of memcpy is verified. */
+    index = auth_reply_encoded_size;
     memcpy(&_nx_smtp_buffer[index],  NX_SMTP_LINE_TERMINATOR, sizeof(NX_SMTP_LINE_TERMINATOR) - 1); /* Use case of memcpy is verified. */
     index += sizeof(NX_SMTP_LINE_TERMINATOR) - 1;
 
@@ -3858,7 +3829,7 @@ UINT                 subject_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_smtp_utility_authentication_challenge           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3883,7 +3854,7 @@ UINT                 subject_length;
 /*  CALLS                                                                 */
 /*                                                                        */
 /*    _nx_smtp_parse_response       Parses argument from buffer text      */
-/*    _nx_smtp_base64_decode        Decodes base64 text                   */
+/*    _nx_utility_base64_decode     Decodes base64 text                   */
 /*    memset                        Clears specified area of memory       */
 /*    memcmp                        Compares data between areas of memory */
 /*                                                                        */
@@ -3898,6 +3869,10 @@ UINT                 subject_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            parsing base64,             */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_smtp_utility_authentication_challenge(NX_SMTP_CLIENT *client_ptr, UCHAR *server_challenge, UINT length)
@@ -3905,6 +3880,8 @@ UINT  _nx_smtp_utility_authentication_challenge(NX_SMTP_CLIENT *client_ptr, UCHA
 
 UCHAR  encrypted_server_prompt[NX_SMTP_SERVER_CHALLENGE_MAX_STRING + 1];  
 UCHAR  decoded_server_prompt[NX_SMTP_SERVER_CHALLENGE_MAX_STRING + 1];  
+UINT   encrypted_server_prompt_size;
+UINT   decoded_server_prompt_size;
 
     if (client_ptr -> nx_smtp_client_authentication_type == NX_SMTP_CLIENT_AUTH_PLAIN)
     {
@@ -3933,11 +3910,18 @@ UCHAR  decoded_server_prompt[NX_SMTP_SERVER_CHALLENGE_MAX_STRING + 1];
         return NX_SMTP_INVALID_SERVER_REPLY;
     }
 
+    /* Calculate the name length.  */
+    if (_nx_utility_string_length_check((CHAR *)encrypted_server_prompt, &encrypted_server_prompt_size, NX_SMTP_SERVER_CHALLENGE_MAX_STRING))
+    {
+        return NX_SMTP_INVALID_SERVER_REPLY;
+    }
+
     /* Decode the parsed server challenge.  */
-    _nx_smtp_base64_decode(encrypted_server_prompt, decoded_server_prompt);
+    _nx_utility_base64_decode(encrypted_server_prompt, encrypted_server_prompt_size, decoded_server_prompt, sizeof(decoded_server_prompt), &decoded_server_prompt_size);
 
     /* Is this a username prompt?  */
-    if (((decoded_server_prompt[0] == 'U') || (decoded_server_prompt[0] == 'u')) &&
+    if ((decoded_server_prompt_size == 9) &&
+        ((decoded_server_prompt[0] == 'U') || (decoded_server_prompt[0] == 'u')) &&
         ((decoded_server_prompt[1] == 'S') || (decoded_server_prompt[1] == 's')) &&
         ((decoded_server_prompt[2] == 'E') || (decoded_server_prompt[2] == 'e')) &&
         ((decoded_server_prompt[3] == 'R') || (decoded_server_prompt[3] == 'r')) &&
@@ -3952,7 +3936,8 @@ UCHAR  decoded_server_prompt[NX_SMTP_SERVER_CHALLENGE_MAX_STRING + 1];
         client_ptr -> nx_smtp_client_authentication_reply = NX_SMTP_CLIENT_REPLY_TO_USERNAME_PROMPT;
     }
     /* Is this a password prompt?  */
-    else if (((decoded_server_prompt[0] == 'P') || (decoded_server_prompt[0] == 'p')) &&
+    else if ((decoded_server_prompt_size == 9) &&
+             ((decoded_server_prompt[0] == 'P') || (decoded_server_prompt[0] == 'p')) &&
              ((decoded_server_prompt[1] == 'A') || (decoded_server_prompt[1] == 'a')) &&
              ((decoded_server_prompt[2] == 'S') || (decoded_server_prompt[2] == 's')) &&
              ((decoded_server_prompt[3] == 'S') || (decoded_server_prompt[3] == 's')) &&
@@ -3983,7 +3968,7 @@ UCHAR  decoded_server_prompt[NX_SMTP_SERVER_CHALLENGE_MAX_STRING + 1];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_smtp_utility_parse_server_services              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4003,7 +3988,7 @@ UCHAR  decoded_server_prompt[NX_SMTP_SERVER_CHALLENGE_MAX_STRING + 1];
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
-/*    NX_SUCCESS                    Successful completion status          */
+/*    None                                                                */
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
@@ -4020,9 +4005,12 @@ UCHAR  decoded_server_prompt[NX_SMTP_SERVER_CHALLENGE_MAX_STRING + 1];
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved boundary check,    */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
-UINT  _nx_smtp_utility_parse_server_services(NX_SMTP_CLIENT *client_ptr)
+VOID  _nx_smtp_utility_parse_server_services(NX_SMTP_CLIENT *client_ptr)
 {
 
 UINT   plain_option = NX_FALSE;
@@ -4041,6 +4029,12 @@ UINT   found = NX_FALSE;
 
     /* Find the location of the AUTH command. */
     work_ptr = client_ptr -> nx_smtp_server_packet -> nx_packet_prepend_ptr;
+
+    /* Check length. */
+    if (length <= 4)
+    {
+        return;
+    }
 
     for (i = 0; i < length - 4; i++)
     {
@@ -4065,7 +4059,7 @@ UINT   found = NX_FALSE;
     {
 
         /* It does not. So leave the Client authentication type as is. */
-        return NX_SUCCESS;
+        return;
     }
 
     /* Check if the client prefers no authentication. */
@@ -4073,14 +4067,24 @@ UINT   found = NX_FALSE;
     {
 
         /* There is an AUTH keyword but the client prefers not to authenticate. */
-        return NX_SUCCESS;
+        return;
     }
 
     /* Save the location where the search stopped. */
     temp_ptr = work_ptr;
 
     found = NX_FALSE;
-    new_length = (length - 5) - (ULONG)(temp_ptr - client_ptr -> nx_smtp_server_packet -> nx_packet_prepend_ptr);
+    new_length = length - (ULONG)(temp_ptr - client_ptr -> nx_smtp_server_packet -> nx_packet_prepend_ptr);
+
+    /* Check length. */
+    if (new_length < 5)
+    {
+        return;
+    }
+    else
+    {
+        new_length -= 5;
+    }
 
     /* Search for supported authentication types. */
     for (i = 0; i < new_length; i++)
@@ -4146,14 +4150,14 @@ UINT   found = NX_FALSE;
         if (login_option)
         {
 
-            return NX_SUCCESS;
+            return;
         }
         else
         {
             /* Switch client to plain authentication. */
             client_ptr -> nx_smtp_client_authentication_type = NX_SMTP_CLIENT_AUTH_PLAIN;
 
-            return NX_SUCCESS;
+            return;
         }
     }
 
@@ -4161,7 +4165,7 @@ UINT   found = NX_FALSE;
     if (plain_option && (client_ptr -> nx_smtp_client_authentication_type == NX_SMTP_CLIENT_AUTH_PLAIN))
     {
         /* Yes, and there's a match, we're done here.  */
-        return NX_SUCCESS;
+        return;
     }
 
     /* If we are here, the server offers LOGIN authentication but the Client preference is something else. */
@@ -4171,15 +4175,15 @@ UINT   found = NX_FALSE;
         /* Switch client to LOGIN authentication. */
         client_ptr -> nx_smtp_client_authentication_type = NX_SMTP_CLIENT_AUTH_LOGIN;
 
-        return NX_SUCCESS;
+        return;
     }
 
     /* Handle the case of no matches between server/client.  Assume the server requires authentication
        and set Client type to plain. */
     client_ptr -> nx_smtp_client_authentication_type = NX_SMTP_CLIENT_AUTH_PLAIN;
 
-    /* Return successful completion of checking options.  */
-    return NX_SUCCESS;
+    /* Return.  */
+    return;
 
 }
 
@@ -4188,7 +4192,7 @@ UINT   found = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_smtp_parse_response                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4238,6 +4242,9 @@ UINT   found = NX_FALSE;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved boundary check,    */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_smtp_parse_response(NX_SMTP_CLIENT *client_ptr, UCHAR *buffer, UINT argument_index, 
@@ -4253,16 +4260,14 @@ UCHAR *work_ptr;
 UINT is_last_code;
 
 
-    memset(&argument[0], 0, argument_length);
-    work_ptr = argument;
-
     /* Check for invalid input parameters.  */
-    if ((buffer == NX_NULL) || (argument == NX_NULL) || (buffer_length == 0) || 
-        (argument_length == 0) || (argument_index == 0))
+    if ((buffer == NX_NULL) || (buffer_length == 0) || (argument_index == 0))
     {
 
         return NX_SMTP_INVALID_PARAM;
     }
+
+    work_ptr = argument;
 
     /* Is this the first word? 
        The first word is the reply code, not an SMTP command parameter */
@@ -4288,6 +4293,11 @@ UINT is_last_code;
             else if ((*buffer >= 0x30) && (*buffer <= 0x39))
             {
 
+                if (work_ptr >= argument + argument_length)
+                {
+                    return(NX_SMTP_INTERNAL_ERROR);
+                }
+
                 /* Yes, copy to buffer. */
                 *work_ptr = *buffer;  
                 work_ptr++;
@@ -4302,19 +4312,6 @@ UINT is_last_code;
             /* Get the next character in the buffer.  */
             buffer++;
             i++;
-        }
-
-        /* Are we at the end of the buffer?  */
-        if (i == buffer_length)
-        {       
-
-            /* Yes, is there a line terminator?  */
-            if (*(argument - 2) == 0x0D && *(argument - 1) == 0x0A)
-            {
-
-                /* Yes, remove it with a null character */
-                *(argument - 2) = (CHAR) 0x0;
-            }
         }
     }
     else
@@ -4593,270 +4590,3 @@ UINT i = 0;
 
     return ;
 }
-
-
-CHAR    _nx_smtp_base64_array[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; 
-
-
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    _nx_smtp_base64_encode                              PORTABLE C      */
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */
-/*                                                                        */
-/*    This function encodes the input string into a base64                */
-/*    representation. It is the caller's responsibility to match the      */
-/*    name and base64name buffers in size to avoid overwriting memory.    */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    name                            Pointer to name to encode           */
-/*    base64name                      Pointer to name base64 encoded      */
-/*    length                          Size of input buffer to encode      */
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
-/*    None                                                                */
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    Application Code                                                    */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-VOID  _nx_smtp_base64_encode(UCHAR *name, UCHAR *base64name, UINT length)
-{
-
-UINT    pad;
-UINT    i, j;
-UINT    step;
-
-
-    /* Adjust the length to represent the base64 name.  */
-    length =  ((length * 8) / 6);
-
-    /* Default padding to none.  */
-    pad =  0;
-
-    /* Determine if an extra conversion is needed.  */
-    if ((length * 6) % 24)
-    {
-        /* Some padding is needed.  */
-
-        /* Calculate the number of pad characters.  */
-        pad =  (length * 6) % 24;
-        pad =  (24 - pad) / 6;
-        pad =  pad - 1;
-
-        /* Adjust the length to pickup the character fraction.  */
-        length++;
-    }
-
-    /* Setup index into the base64name.  */
-    j =  0;
-
-    /* Compute the base64name.  */
-    step =  0;
-    i =     0;
-    while (j < length) 
-    {
-        /* Determine which step we are in.  */
-        if (step == 0)
-        {
-            /* Use first 6 bits of name character for index.  */
-            base64name[j++] =  (UCHAR)_nx_smtp_base64_array[((UINT) name[i]) >> 2];
-            step++;
-        }
-        else if (step == 1)
-        {
-
-            /* Use last 2 bits of name character and first 4 bits of next name character for index.  */
-            base64name[j++] =  (UCHAR)_nx_smtp_base64_array[((((UINT) name[i]) & 0x3) << 4) | (((UINT) name[i+1]) >> 4)];
-            i++;
-            step++;
-        }
-        else if (step == 2)
-        {
-
-            /* Use last 4 bits of name character and first 2 bits of next name character for index.  */
-            base64name[j++] =  (UCHAR)_nx_smtp_base64_array[((((UINT) name[i]) & 0xF) << 2) | (((UINT) name[i+1]) >> 6)];
-            i++;
-            step++;
-        }
-        else /* Step 3 */
-        {
-
-            /* Use last 6 bits of name character for index.  */
-            base64name[j++] =  (UCHAR)_nx_smtp_base64_array[(((UINT) name[i]) & 0x3F)];
-            i++;
-            step = 0;
-        }
-    }
-
-    /* Determine if the index needs to be advanced.  */
-    if (step != 3)
-        i++;
-
-    /* Now add the PAD characters.  */
-    while ((pad--) && (j < NX_SMTP_CLIENT_AUTH_CHALLENGE_ENCODED_SIZE))
-    {
-
-        /* Pad base64name with '=' characters.  */
-        base64name[j++] = '=';
-    }
-
-    /* Put a NULL character in.  */
-    base64name[j] =  NX_NULL;
-}
-
-/**************************************************************************/
-/*                                                                        */
-/*  FUNCTION                                               RELEASE        */
-/*                                                                        */
-/*    _nx_smtp_base64_decode                              PORTABLE C      */
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */
-/*                                                                        */
-/*    This function decodes the input base64 ASCII string and converts    */
-/*    it into a standard ASCII representation. It is the caller's         */
-/*    responsibility to match the name and base64name buffers in size to  */
-/*    avoid overwriting memory.                                           */
-/*                                                                        */
-/*  INPUT                                                                 */
-/*                                                                        */
-/*    base64name                            Encoded base64 name string    */
-/*    name                                  Name string                   */
-/*                                                                        */
-/*  OUTPUT                                                                */
-/*                                                                        */
-/*    None                                                                */
-/*                                                                        */
-/*  CALLS                                                                 */
-/*                                                                        */
-/*    _nx_utility_string_length_check       Get length of string          */
-/*                                                                        */
-/*  CALLED BY                                                             */
-/*                                                                        */
-/*    _nx_smtp_server_basic_authenticate    Basic authentication          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-VOID  _nx_smtp_base64_decode(UCHAR *base64name, UCHAR *name)
-{
-
-UINT    length;
-UINT    i, j;
-UINT    value1, value2;
-UINT    step;
-
-
-    /* Calculate the name length.  */
-    if (_nx_utility_string_length_check((CHAR *)base64name, &length, NX_SMTP_SERVER_CHALLENGE_MAX_STRING))
-    {
-        name[0] =  NX_NULL;
-        return;
-    }
-
-    /* Adjust the length to represent the ASCII name.  */
-    length =  ((length * 6) / 8);
-
-    /* Setup index into the ASCII name.  */
-    j =  0;
-
-    /* Compute the ASCII name.  */
-    step =  0;
-    i =     0;
-
-    while ((j < length) && (base64name[i]) && (base64name[i] != '=') && (j < NX_SMTP_CLIENT_AUTH_CHALLENGE_SIZE))
-    {
-
-        /* Derive values of the Base64 name.  */
-        if ((base64name[i] >= 'A') && (base64name[i] <= 'Z'))
-            value1 =  (UINT) (base64name[i] - 'A');
-        else if ((base64name[i] >= 'a') && (base64name[i] <= 'z'))
-            value1 =  (UINT) (base64name[i] - 'a') + 26;
-        else if ((base64name[i] >= '0') && (base64name[i] <= '9'))
-            value1 =  (UINT) (base64name[i] - '0') + 52;
-        else if (base64name[i] == '+')
-            value1 =  62;
-        else if (base64name[i] == '/')
-            value1 =  63;
-        else
-            value1 =  0;
-
-        /* Derive value for the next character.  */
-        if ((base64name[i+1] >= 'A') && (base64name[i+1] <= 'Z'))
-            value2 =  (UINT) (base64name[i+1] - 'A');
-        else if ((base64name[i+1] >= 'a') && (base64name[i+1] <= 'z'))
-            value2 =  (UINT) (base64name[i+1] - 'a') + 26;
-        else if ((base64name[i+1] >= '0') && (base64name[i+1] <= '9'))
-            value2 =  (UINT) (base64name[i+1] - '0') + 52;
-        else if (base64name[i+1] == '+')
-            value2 =  62;
-        else if (base64name[i+1] == '/')
-            value2 =  63;
-        else
-            value2 =  0;
-
-        /* Determine which step we are in.  */
-        if (step == 0)
-        {
-
-            /* Use first value and first 2 bits of second value.  */
-            name[j++] =    (UCHAR) (((value1 & 0x3f) << 2) | ((value2 >> 4) & 3));
-            i++;
-            step++;
-        }
-        else if (step == 1)
-        {
-
-            /* Use last 4 bits of first value and first 4 bits of next value.  */
-            name[j++] =    (UCHAR) (((value1 & 0xF) << 4) | (value2 >> 2));
-            i++;
-            step++;
-        }
-        else if (step == 2)
-        {
-
-            /* Use first 2 bits and following 6 bits of next value.  */
-            name[j++] =   (UCHAR) (((value1 & 3) << 6) | (value2 & 0x3f));
-            i++;
-            i++;
-            step =  0;
-        }
-    }
-
-    /* Put a NULL character in.  */
-    name[j] =  NX_NULL;
-
-    return;
-}
-

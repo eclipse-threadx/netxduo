@@ -34,7 +34,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_arp_dynamic_entry_set                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -77,6 +77,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), corrected*/
+/*                                            the returned status,        */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_arp_dynamic_entry_set(NX_IP *ip_ptr, ULONG ip_address,
@@ -164,7 +167,7 @@ ULONG         next_hop_address;
             tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
             /* Return the error status.  */
-            return(NX_SUCCESS);
+            return(NX_DUPLICATED_ENTRY);
         }
     }
     else

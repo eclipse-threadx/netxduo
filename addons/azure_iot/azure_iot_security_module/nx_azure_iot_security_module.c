@@ -36,7 +36,7 @@ BIT_VECTOR_DECLARATIONS(hubs_t, ASC_SECURITY_MODULE_MAX_HUB_DEVICES)
 static const CHAR *telemetry_headers[MAX_PROPERTY_COUNT][2] = {{MTI_KEY, MTI_VALUE},
                                                                {"%24.ifid", "urn%3Aazureiot%3ASecurity%3ASecurityAgent%3A1"}};
 
-static time_t _security_module_unix_time_get(time_t *unix_time);
+static unsigned long _security_module_unix_time_get(unsigned long *unix_time);
 static VOID _security_module_event_process(VOID *security_module_ptr, ULONG common_events, ULONG module_own_events);
 static void _security_module_event_process_state_pending(NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr);
 static void _security_module_event_process_state_active(NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr);
@@ -46,7 +46,7 @@ static void _security_module_update_state(NX_AZURE_IOT_SECURITY_MODULE *security
 static bool _security_module_exists_connected_iot_hub(NX_AZURE_IOT *nx_azure_iot_ptr);
 static void _security_module_state_machine(NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr);
 static void _security_module_state_machine_cb(event_loop_timer_handler h, void *ctx);
-static void _security_module_state_machine_schedule(NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr, time_t delay);
+static void _security_module_state_machine_schedule(NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr, unsigned long delay);
 static UINT _security_module_get_nx_status(UINT current);
 static void _security_module_message_ready_cb(notifier_t *notifier, int msg, void *payload);
 static NX_AZURE_IOT_HUB_CLIENT *_security_module_get_connected_hub_client(NX_AZURE_IOT_RESOURCE *resource_ptr);
@@ -283,11 +283,10 @@ UINT nx_azure_iot_security_module_disable(NX_AZURE_IOT *nx_azure_iot_ptr)
     _initialized = false;
     security_module_ptr->state = SECURITY_MODULE_STATE_NOT_INITIALIZED;
     components_manager_deinit();
-    if (event_loop != NULL)
+    if (event_loop != NULL) /* (event_loop == NULL) - Should never happen */
     {
-        /* Should never happen */
         event_loop->stop();
-        event_loop->deinit();
+        event_loop->deinit(true);
     }
 
 cleanup:
@@ -316,27 +315,27 @@ static void _security_module_message_ready_cb(notifier_t *notifier, int msg, voi
     _security_module_state_machine(security_module_ptr);
 }
 
-static time_t _security_module_unix_time_get(time_t *unix_time)
+static unsigned long _security_module_unix_time_get(unsigned long *unix_time)
 {
     ULONG t;
     NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr = components_manager_get_self_ctx();
 
     if (security_module_ptr == NULL || security_module_ptr->nx_azure_iot_ptr == NULL)
     {
-        return -1;
+        return (unsigned long)-1;
     }
 
     if (security_module_ptr->nx_azure_iot_ptr->nx_azure_iot_unix_time_get(&t) == NX_SUCCESS)
     {
         if (unix_time != NULL)
         {
-            *unix_time = (time_t)t;
+            *unix_time = (unsigned long)t;
         }
 
-        return (time_t)t;
+        return (unsigned long)t;
     }
 
-    return -1;
+    return (unsigned long)-1;
 }
 
 static UINT _security_module_get_nx_status(UINT current)
@@ -419,7 +418,7 @@ error:
     }
 }
 
-static void _security_module_state_machine_schedule(NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr, time_t delay)
+static void _security_module_state_machine_schedule(NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr, unsigned long delay)
 {
     ievent_loop_get_instance()->timer_delete(security_module_ptr->h_state_machine);
     security_module_ptr->h_state_machine = ievent_loop_get_instance()->timer_create(
@@ -495,8 +494,8 @@ static bool _is_skip_resource(
 
 static void _security_module_event_process_state_pending(NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr)
 {
-    time_t now_timestamp;
-    time_t delay = ASC_SECURITY_MODULE_SEND_MESSAGE_RETRY_TIME;
+    unsigned long now_timestamp;
+    unsigned long delay = ASC_SECURITY_MODULE_SEND_MESSAGE_RETRY_TIME;
 
     /* Reevaluate Security Module State */
     if (_security_module_exists_connected_iot_hub(security_module_ptr->nx_azure_iot_ptr))
@@ -510,13 +509,13 @@ static void _security_module_event_process_state_pending(NX_AZURE_IOT_SECURITY_M
     }
 
      /* Get current timestamp. */
-    if (itime_time(&now_timestamp) == -1)
+    if (itime_time(&now_timestamp) == (unsigned long)-1)
     {
         LogError(LogLiteralArgs("Failed to retrieve timestamp"));
     }
 
-    if (security_module_ptr->state_timestamp != -1 &&
-        now_timestamp != -1 &&
+    if (security_module_ptr->state_timestamp != (unsigned long)-1 &&
+        now_timestamp != (unsigned long)-1 &&
         now_timestamp - security_module_ptr->state_timestamp > ASC_SECURITY_MODULE_PENDING_TIME)
     {
         /* Security Module pending state time expired. */
@@ -621,7 +620,7 @@ static void _security_module_event_process_state_active(NX_AZURE_IOT_SECURITY_MO
 
 static void _security_module_event_process_state_suspended(NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr)
 {
-    time_t delay = ASC_SECURITY_MODULE_SEND_MESSAGE_RETRY_TIME;
+    unsigned long delay = ASC_SECURITY_MODULE_SEND_MESSAGE_RETRY_TIME;
 
     /* Reevaluate Security Module State */
     if (_security_module_exists_connected_iot_hub(security_module_ptr->nx_azure_iot_ptr))
@@ -713,7 +712,7 @@ static int _state2notify(security_module_state_t state)
 
 static void _security_module_update_state(NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr, security_module_state_t state)
 {
-    time_t now_timestamp;
+    unsigned long now_timestamp;
 
     if (security_module_ptr->state == state)
     {
@@ -722,7 +721,7 @@ static void _security_module_update_state(NX_AZURE_IOT_SECURITY_MODULE *security
     }
 
     /* Set security module state timestamp. */
-    if (itime_time(&now_timestamp) == -1)
+    if (itime_time(&now_timestamp) == (unsigned long)-1)
     {
         LogError(LogLiteralArgs("Failed to retrive time"));
     }

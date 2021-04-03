@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_http_client.h                                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -45,6 +45,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            parsing base64,             */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -107,8 +111,8 @@ extern   "C" {
 #define NX_HTTP_CLIENT_MIN_PACKET_SIZE      600
 #endif
 
-/* NX_HTTP_MAX_STRING is base64 of "name:password" and plus 1 if an extra conversion is needed. */
-#define NX_HTTP_MAX_STRING                  ((NX_HTTP_MAX_NAME + NX_HTTP_MAX_PASSWORD + 1) * 4 / 3 + 1)
+/* NX_HTTP_MAX_STRING is base64 of "name:password" and plus 1 if an extra conversion is needed and plus 2 pad if needed. */
+#define NX_HTTP_MAX_STRING                  ((NX_HTTP_MAX_NAME + NX_HTTP_MAX_PASSWORD + 1) * 4 / 3 + 1 + 2)
 #define NX_HTTP_MAX_BINARY_MD5              16
 #define NX_HTTP_MAX_ASCII_MD5               32
 
@@ -282,7 +286,6 @@ UINT        _nx_http_client_type_get(CHAR *name, CHAR *http_type_string);
 UINT        _nx_http_client_content_length_get(NX_PACKET *packet_ptr);
 UINT        _nx_http_client_calculate_content_offset(NX_PACKET *packet_ptr);
 UINT        _nx_http_client_number_convert(UINT number, CHAR *string);
-VOID        _nx_http_client_base64_encode(CHAR *name, UINT length, CHAR *base64name);
 
 
 #endif  /* NX_HTTP_SOURCE_CODE */

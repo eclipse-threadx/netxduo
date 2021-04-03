@@ -28,12 +28,12 @@ HASHSET_DEFINITIONS(network_activity_ipv4_t, IPV4_HASHSET_SIZE)
 
 network_activity_ipv4_t *network_activity_ipv4_init()
 {
-    return object_pool_network_activity_ipv4_t_get();
+    return object_pool_get(network_activity_ipv4_t);
 }
 
 void network_activity_ipv4_deinit(network_activity_ipv4_t *network_activity_ipv4, void *context)
 {
-    object_pool_network_activity_ipv4_t_free(network_activity_ipv4);
+    object_pool_free(network_activity_ipv4_t, network_activity_ipv4);
 }
 
 
@@ -74,7 +74,7 @@ void hashset_network_activity_ipv4_t_update(network_activity_ipv4_t *old_data, n
 {
     old_data->common.bytes_in += new_data->common.bytes_in;
     old_data->common.bytes_out += new_data->common.bytes_out;
-    object_pool_network_activity_ipv4_t_free(new_data);
+    object_pool_free(network_activity_ipv4_t, new_data);
 }
 
 
@@ -85,13 +85,13 @@ HASHSET_DEFINITIONS(network_activity_ipv6_t, IPV6_HASHSET_SIZE)
 
 network_activity_ipv6_t *network_activity_ipv6_init()
 {
-    return object_pool_network_activity_ipv6_t_get();
+    return object_pool_get(network_activity_ipv6_t);
 }
 
 
 void network_activity_ipv6_deinit(network_activity_ipv6_t *network_activity_ipv6, void *context)
 {
-    object_pool_network_activity_ipv6_t_free(network_activity_ipv6);
+    object_pool_free(network_activity_ipv6_t, network_activity_ipv6);
 }
 
 
@@ -132,6 +132,6 @@ void hashset_network_activity_ipv6_t_update(network_activity_ipv6_t *old_data, n
 {
     old_data->common.bytes_in += new_data->common.bytes_in;
     old_data->common.bytes_out += new_data->common.bytes_out;
-    object_pool_network_activity_ipv6_t_free(new_data);
+    object_pool_free(network_activity_ipv6_t, new_data);
 }
 #endif /* NX_DISABLE_IPV6 */

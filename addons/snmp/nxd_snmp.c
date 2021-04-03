@@ -1613,7 +1613,7 @@ UINT _nx_snmp_agent_version_set(NX_SNMP_AGENT *agent_ptr, UINT enabled_v1, UINT 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_set_interface                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1646,6 +1646,9 @@ UINT _nx_snmp_agent_version_set(NX_SNMP_AGENT *agent_ptr, UINT enabled_v1, UINT 
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            checked the interface index,*/
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_snmp_agent_set_interface(NX_SNMP_AGENT *agent_ptr, UINT if_index)
@@ -1655,6 +1658,12 @@ UINT status;
     if ((agent_ptr == NX_NULL) || (agent_ptr -> nx_snmp_agent_id != NX_SNMP_ID))
     {
         return NX_PTR_ERROR;
+    }
+
+    /* Check for valid interface index.  */
+    if (if_index >= NX_MAX_PHYSICAL_INTERFACES)
+    {
+        return(NX_INVALID_INTERFACE);
     }
 
     status = _nx_snmp_agent_set_interface(agent_ptr, if_index);
@@ -3977,7 +3986,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_snmp_agent_trap_send                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4035,6 +4044,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            checked the interface index,*/
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_snmp_agent_trap_send(NX_SNMP_AGENT *agent_ptr, NXD_ADDRESS *ip_address, UCHAR *community, UCHAR *enterprise, 
@@ -4233,6 +4245,21 @@ UINT                 packet_type;
 
 
 #ifndef NX_DISABLE_IPV4
+
+    /* Check if the interface index is valid.  */
+    if (agent_ptr -> nx_snmp_agent_interface_index >= NX_MAX_PHYSICAL_INTERFACES)
+    {
+
+        /* Increment the internal error counter.  */
+        agent_ptr -> nx_snmp_agent_internal_errors++;
+
+        /* Release the trap packet.  */
+        nx_packet_release(trap_packet_ptr);
+
+        /* Return to caller.  */
+        return(NX_SNMP_ERROR);
+    }
+
     trap_object_data.nx_snmp_object_data_msw =   
         (LONG)(agent_ptr -> nx_snmp_agent_ip_ptr) -> nx_ip_interface[agent_ptr -> nx_snmp_agent_interface_index].nx_interface_ip_address;
 #else
@@ -16988,7 +17015,7 @@ UINT  _nx_snmp_utility_version_set(UCHAR *buffer_ptr, UINT snmp_version, UCHAR *
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_version_error_response                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -17033,13 +17060,16 @@ UINT  _nx_snmp_utility_version_set(UCHAR *buffer_ptr, UINT snmp_version, UCHAR *
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            verification of encryption, */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_version_error_response(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr, UCHAR *request_type_ptr, 
                                       UCHAR *error_string_ptr, UINT error_code, UINT error_index)
 {
 
-UINT    status;
+UINT    status = NX_SUCCESS;
 #ifndef NX_SNMP_DISABLE_V3
 ULONG   temp;
 #endif
@@ -17084,24 +17114,47 @@ ULONG   temp;
     _nx_snmp_utility_error_info_set(error_string_ptr, error_code, error_index, packet_ptr -> nx_packet_data_end);
 
 #ifndef NX_SNMP_DISABLE_V3
-    /* Is the security set to encryption? */
-    temp = (ULONG)agent_ptr -> nx_snmp_agent_v3_message_security_options;
-    if (temp & NX_SNMP_SECURITY_PRIVACY)
+
+    if (agent_ptr -> nx_snmp_agent_current_version == NX_SNMP_VERSION_3)
     {
 
-        /* Encrypt the PDU and setup the response to have an encryption header.  This
-           will also compute our privacy parameter. */ 
-        _nx_snmp_agent_encrypt_pdu(agent_ptr, NX_NULL, NX_NULL, 
-                                   NX_NULL, NX_NULL, 
-                                   NX_NULL, NX_NULL, pdu_privacy_ptr); 
-    }
+        /* Is the security set to encryption? */
+        temp = (ULONG)agent_ptr -> nx_snmp_agent_v3_message_security_options;
+        if (temp & NX_SNMP_SECURITY_PRIVACY)
+        {
 
-    /* Is the security set to authentication? */
-    if (temp & NX_SNMP_SECURITY_AUTHORIZE)
-    {
+            /* Encrypt the PDU and setup the response to have an encryption header.  This
+               will also compute our privacy parameter. */ 
+            status = _nx_snmp_agent_encrypt_pdu(agent_ptr, NX_NULL, NX_NULL, 
+                                                NX_NULL, NX_NULL, 
+                                                NX_NULL, NX_NULL, pdu_privacy_ptr); 
+
+            /* Check status.  */
+            if (status)
+            {
+
+                /* Release the packet.  */
+                nx_packet_release(packet_ptr);
+                return;
+            }
+        }
+
+        /* Is the security set to authentication? */
+        if (temp & NX_SNMP_SECURITY_AUTHORIZE)
+        {
     
-        /* Compute our authentication parameter.  */
-        status = _nx_snmp_agent_add_auth_parameter(agent_ptr, packet_ptr, pdu_auth_parm_ptr);
+            /* Compute our authentication parameter.  */
+            status = _nx_snmp_agent_add_auth_parameter(agent_ptr, packet_ptr, pdu_auth_parm_ptr);
+
+            /* Check status.  */
+            if (status)
+            {
+
+                /* Release the packet.  */
+                nx_packet_release(packet_ptr);
+                return;
+            }
+        }
     }
 #endif
 
@@ -19183,7 +19236,7 @@ INT         buffer_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_version_3_process                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -19248,6 +19301,10 @@ INT         buffer_length;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved boundary check,    */
+/*                                            checked NULL pointer,       */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_version_3_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr)
@@ -19718,6 +19775,23 @@ INT         buffer_length;
     else
     {
 
+        /* Check if security option is set, but the security parameter is empty.*/
+        if (agent_ptr -> nx_snmp_agent_v3_message_security_options)
+        {
+
+            /* Increment the invalid packet error counter.  */
+            agent_ptr -> nx_snmp_agent_invalid_packets++;
+
+            /* Increment the internal error counter.  */
+            agent_ptr -> nx_snmp_agent_internal_errors++;
+
+            /* Release the packet.  */
+            nx_packet_release(packet_ptr);
+
+            /* Return to caller.  */
+            return;
+        }
+
         /* Position past the empty security parameter field.  */
         length =  2;
     }
@@ -19921,7 +19995,7 @@ INT         buffer_length;
 
             return;
         }
-        else
+        else if (request_authentication_ptr)
         {
             /* Otherwise Ok to process authentication parameter. */
             authenticate_message = NX_TRUE;
@@ -21408,6 +21482,23 @@ INT         buffer_length;
 
             /* Calculate the total variable size.  */
             total_variable_length =  variable_length + length;
+
+            if ((length == 0) || (total_variable_length > variable_list_length) ||
+                (total_variable_length > (UINT)buffer_length))
+            {
+
+                /* Increment the invalid packet error counter.  */
+                agent_ptr -> nx_snmp_agent_invalid_packets++;
+
+                /* Release the packet.  */
+                nx_packet_release(packet_ptr);
+
+                /* Release the response packet.  */
+                nx_packet_release(response_packet_ptr);
+
+                /* Return to caller.  */
+                return;
+            }
 
             /* Move the buffer pointer up.  */
             buffer_ptr =  buffer_ptr + length;
@@ -23187,7 +23278,7 @@ UCHAR               report_security_level;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_add_auth_parameter                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -23230,6 +23321,9 @@ UCHAR               report_security_level;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            checked NULL pointer,       */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_agent_add_auth_parameter(NX_SNMP_AGENT *agent_ptr, NX_PACKET *response_packet_ptr, UCHAR *response_authentication_ptr)
@@ -23239,6 +23333,11 @@ UINT  i;
 UCHAR key1[NX_SNMP_DIGEST_WORKING_SIZE];
 UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
 
+        /* Check if the pointer is NULL. */
+        if (!response_authentication_ptr)
+        {
+            return(NX_SNMP_UNSUPPORTED_AUTHENTICATION);
+        }
 
         /* Determine which authentication is required.  */
         if ((agent_ptr -> nx_snmp_agent_v3_authentication_key) && 
@@ -23366,7 +23465,7 @@ UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_encrypt_pdu                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -23410,6 +23509,9 @@ UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            verification of encryption, */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -23451,6 +23553,13 @@ UINT  adjusted_pdu_length;
     }
     else
     {
+
+        /* Check if the pointer is NULL. */
+        if (!pdu_buffer_ptr)
+        {
+            return(NX_SNMP_INVALID_PDU_ENCRYPTION);
+        }
+
         /* Set the temp ptr to where the PDU starts in the request packet. */
         temp_ptr = pdu_buffer_ptr;
         adjusted_pdu_length = pdu_length;

@@ -13,8 +13,15 @@
 #define COLLECTION_H
 #include <asc_config.h>
 
+/* Pay your attention, that this implementation is not thread safe. */
+/* This macro must be first in object */
 #define COLLECTION_INTERFACE(type)\
 type *previous;\
 type *next
+
+typedef struct {
+    /* This macro must be first in object */
+    COLLECTION_INTERFACE(void);
+} collection_item_t;
 
 #endif /* COLLECTION_H */

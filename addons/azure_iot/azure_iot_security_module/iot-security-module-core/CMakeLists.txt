@@ -78,6 +78,7 @@ add_library(${TARGET_NAME} STATIC
     $<$<BOOL:${ASC_COLLECTOR_BASELINE_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/src/collectors/baseline.c>
     $<$<BOOL:${ASC_COLLECTOR_BASELINE_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/src/serializer/baseline.c>
     $<$<BOOL:${ASC_COLLECTOR_BASELINE_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/src/model/objects/object_baseline_ext.c>
+    $<$<BOOL:${ASC_COLLECTOR_LOG_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/src/serializer/log.c>
     $<$<BOOL:${ASC_COLLECTOR_HEARTBEAT_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/src/serializer/heartbeat.c>
     $<$<BOOL:${ASC_COLLECTOR_PROCESS_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/src/serializer/process.c>
     $<$<BOOL:${ASC_COLLECTOR_LISTENING_PORTS_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/src/serializer/listening_ports.c>
@@ -101,6 +102,11 @@ add_library(${TARGET_NAME} STATIC
     src/utils/notifier.c
     src/utils/uuid.c
     src/utils/collection/bit_vector.c
+    src/utils/collection/stack.c
+    src/utils/collection/list.c
+    src/utils/collection/hashtable.c
+    $<$<BOOL:${ASC_LINKED_LIST_NODE_SUPPORT}>:${CMAKE_CURRENT_SOURCE_DIR}/src/utils/collection/linked_list_node.c>
+    $<IF:$<BOOL:${ASC_DYNAMIC_MEMORY_ENABLED}>,src/object_pool_dynamic.c,src/object_pool_static.c>
     $<$<BOOL:${ASC_BEST_EFFORT_EVENT_LOOP}>:${CMAKE_CURRENT_SOURCE_DIR}/src/utils/event_loop_be.c>
     src/utils/string_utils.c
 )

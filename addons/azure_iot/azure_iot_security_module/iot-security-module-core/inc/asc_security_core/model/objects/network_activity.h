@@ -28,16 +28,18 @@ typedef struct {
 
 
 typedef struct network_activity_ipv4_t {
-    network_activity_common_t common;
+    /* This macro must be first in object */
     COLLECTION_INTERFACE(struct network_activity_ipv4_t);
+    network_activity_common_t common;
     uint32_t local_address;
     uint32_t remote_address;
 } network_activity_ipv4_t;
 
 
 typedef struct network_activity_ipv6_t {
-    network_activity_common_t common;
+    /* This macro must be first in object */
     COLLECTION_INTERFACE(struct network_activity_ipv6_t);
+    network_activity_common_t common;
     uint32_t local_address[4];
     uint32_t remote_address[4];
 } network_activity_ipv6_t;

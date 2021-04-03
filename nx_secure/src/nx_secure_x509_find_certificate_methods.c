@@ -15,7 +15,7 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    Transport Layer Security (TLS)                                     */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
@@ -23,7 +23,6 @@
 #define NX_SECURE_SOURCE_CODE
 
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -31,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_find_certificate_methods            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -72,6 +71,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_find_certificate_methods(NX_SECURE_X509_CERT *cert, USHORT signature_algorithm,
@@ -86,12 +88,12 @@ SHORT index;
         if (cert -> nx_secure_x509_cipher_table[index].nx_secure_x509_crypto_identifier == signature_algorithm)
         {
             *crypto_methods = &cert -> nx_secure_x509_cipher_table[index];
-            return(NX_SUCCESS);
+            return(NX_SECURE_X509_SUCCESS);
         }
     }
 
     /* No entry found, crypto routines unknown. */
-    *crypto_methods = NX_NULL;
-    return(NX_SECURE_TLS_UNKNOWN_CERT_SIG_ALGORITHM);
+    *crypto_methods = NX_CRYPTO_NULL;
+    return(NX_SECURE_X509_UNKNOWN_CERT_SIG_ALGORITHM);
 }
 

@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -30,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_remote_endpoint_certificate_get     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,6 +73,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_remote_endpoint_certificate_get(NX_SECURE_X509_CERTIFICATE_STORE *store,
@@ -89,7 +91,7 @@ INT                  compare_value;
     list_head = store -> nx_secure_x509_remote_certificates;
     candidate = list_head;
 
-    if (candidate == NX_NULL)
+    if (candidate == NX_CRYPTO_NULL)
     {
         /* No remote certificates in this store! */
         return(NX_SECURE_X509_CERTIFICATE_NOT_FOUND);
@@ -98,11 +100,11 @@ INT                  compare_value;
     /* At this point, we have multiple certificates in the remote store. We need to loop
        to find the one that isn't an issuer for the others. The list should almost always be
        short (< 5 entries) so optimization isn't critical. */
-    while (candidate -> nx_secure_x509_next_certificate != NX_NULL)
+    while (candidate -> nx_secure_x509_next_certificate != NX_CRYPTO_NULL)
     {
         compare_cert = list_head;
 
-        while (compare_cert != NX_NULL)
+        while (compare_cert != NX_CRYPTO_NULL)
         {
             /* Search the entire list for this certificate's distinguished name in the issuer fields. */
             compare_value = _nx_secure_x509_distinguished_name_compare(&candidate -> nx_secure_x509_distinguished_name,
@@ -118,7 +120,7 @@ INT                  compare_value;
             compare_cert = compare_cert -> nx_secure_x509_next_certificate;
         }
 
-        if (compare_cert != NX_NULL)
+        if (compare_cert != NX_CRYPTO_NULL)
         {
             /* Advance the pointer to the next entry in the list. */
             candidate = candidate -> nx_secure_x509_next_certificate;
@@ -136,6 +138,6 @@ INT                  compare_value;
 
     /* No matter what we found, it is a certificate so return success - if the certificate
        is invalid for any reason, that will be caught during certificate verification. */
-    return(NX_SUCCESS);
+    return(NX_SECURE_X509_SUCCESS);
 }
 

@@ -19,6 +19,7 @@
 #include "asc_security_core/components_factory_declarations.h"
 #include "asc_security_core/components_manager.h"
 #include "asc_security_core/serializer.h"
+#include "asc_security_core/utils/itime.h"
 #include "asc_security_core/utils/notifier.h"
 #include "asc_security_core/utils/num2str.h"
 
@@ -45,7 +46,7 @@ static asc_result_t _collector_system_information_serialize_events(collector_int
 {
     asc_result_t result = ASC_RESULT_OK;
     system_information_t system_information;
-    time_t current_time;
+    unsigned long current_time;
     
     memset(&system_information, 0, sizeof(system_information_t));
 

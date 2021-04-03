@@ -39,7 +39,7 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_certificate_verify           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -85,6 +85,9 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*                                            ECC find curve method,      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            updated X.509 return value, */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_certificate_verify(NX_SECURE_TLS_SESSION *tls_session,
@@ -197,6 +200,13 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
     status = _nx_secure_x509_find_certificate_methods(client_certificate, signature_algorithm, &crypto_methods);
     if (status != NX_SUCCESS)
     {
+
+        /* Translate some X.509 return values into TLS return values. */
+        if (status == NX_SECURE_X509_UNKNOWN_CERT_SIG_ALGORITHM)
+        {
+            return(NX_SECURE_TLS_UNKNOWN_CERT_SIG_ALGORITHM);
+        }
+
         return(status);
     }
 

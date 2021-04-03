@@ -15,7 +15,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
 
 #include "flatcc/flatcc_builder.h"
 
@@ -23,6 +22,7 @@
 #include "asc_security_core/serializer.h"
 
 struct serializer {
+    /* This macro must be first in object */
     COLLECTION_INTERFACE(serializer_t);
     
     flatcc_builder_t builder;
@@ -42,6 +42,6 @@ struct serializer {
  * @return  ASC_RESULT_OK on success,
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_start(serializer_t *serializer, time_t timestamp, time_t collection_interval);
+asc_result_t serializer_event_start(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval);
 
 #endif /* SERIALIZER_PRIVATE_H */

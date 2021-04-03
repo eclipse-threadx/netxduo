@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 
@@ -31,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_extended_key_usage_extension_parse  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -69,6 +68,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_extended_key_usage_extension_parse(NX_SECURE_X509_CERT *certificate,
@@ -100,7 +102,7 @@ NX_SECURE_X509_EXTENSION key_usage_extension;
     status = _nx_secure_x509_extension_find(certificate, &key_usage_extension, NX_SECURE_TLS_X509_TYPE_EXTENDED_KEY_USAGE);
 
     /* See if extension present - it is OK if not present! */
-    if (status != NX_SUCCESS)
+    if (status != NX_SECURE_X509_SUCCESS)
     {
         return(status);
     }
@@ -155,7 +157,7 @@ NX_SECURE_X509_EXTENSION key_usage_extension;
         /* If our OID matches the passed-in key usage OID type, success! */
         if (usage_oid == key_usage)
         {
-            return(NX_SUCCESS);
+            return(NX_SECURE_X509_SUCCESS);
         }
 
         current_buffer += tlv_length;

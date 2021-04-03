@@ -34,6 +34,6 @@ static asc_result_t _collector_heartbeat_init(component_id_t id)
 
 static asc_result_t _collector_heartbeat_get_events(collector_internal_t *collector_internal_ptr, serializer_t *serializer)
 {
-    time_t timestamp = itime_time(NULL);
+    unsigned long timestamp = itime_time(NULL);
     return serializer_event_add_heartbeat(serializer, timestamp, collector_internal_ptr->interval);
 }

@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_remote_certificate           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -81,6 +81,9 @@
 /*                                            fixed certificate buffer    */
 /*                                            allocation,                 */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            updated X.509 return value, */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_remote_certificate(NX_SECURE_TLS_SESSION *tls_session,
@@ -240,6 +243,13 @@ ULONG                cert_buf_size;
         /* Make sure we parsed a valid certificate. */
         if (status != NX_SUCCESS)
         {
+
+            /* Translate some X.509 return values into TLS return values. */
+            if (status == NX_SECURE_X509_UNSUPPORTED_PUBLIC_CIPHER)
+            {
+                return(NX_SECURE_TLS_UNSUPPORTED_PUBLIC_CIPHER);
+            }
+
             return(status);
         }
 
@@ -278,6 +288,13 @@ ULONG                cert_buf_size;
         /* Make sure we parsed a valid certificate. */
         if (status != NX_SUCCESS)
         {
+
+            /* Translate some X.509 return values into TLS return values. */
+            if (status == NX_SECURE_X509_CERT_ID_DUPLICATE)
+            {
+                return(NX_SECURE_TLS_CERT_ID_DUPLICATE);
+            }
+
             return(status);
         }
 
@@ -380,6 +397,13 @@ ULONG                cert_buf_size;
         /* Make sure we parsed a valid certificate. */
         if (status != NX_SUCCESS)
         {
+
+            /* Translate some X.509 return values into TLS return values. */
+            if (status == NX_SECURE_X509_UNSUPPORTED_PUBLIC_CIPHER)
+            {
+                return(NX_SECURE_TLS_UNSUPPORTED_PUBLIC_CIPHER);
+            }
+
             return(status);
         }
     
@@ -389,12 +413,19 @@ ULONG                cert_buf_size;
 
         if (status != NX_SUCCESS)
         {
+
+            /* Translate some X.509 return values into TLS return values. */
+            if (status == NX_SECURE_X509_CERT_ID_DUPLICATE)
+            {
+                return(NX_SECURE_TLS_CERT_ID_DUPLICATE);
+            }
+
             return(status);
         }
 
         /* Make sure the certificate has it's cipher table initialized. */
         certificate -> nx_secure_x509_cipher_table = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table;
-        certificate -> nx_secure_x509_cipher_table_size = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table_size;    
+        certificate -> nx_secure_x509_cipher_table_size = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table_size; 
     }
 #ifdef NX_SECURE_TLS_CLIENT_DISABLED
     /* If TLS Client is disabled and we have processed a ServerCertificate message, something is wrong... */

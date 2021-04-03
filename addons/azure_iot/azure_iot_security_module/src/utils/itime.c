@@ -11,7 +11,7 @@
 
 #include <asc_config.h>
 
-#include <time.h>
+#include <string.h>
 
 #include "asc_security_core/utils/itime.h"
 
@@ -22,11 +22,11 @@ void itime_init(unix_time_callback_t time_callback)
     _time_callback = time_callback;
 }
 
-time_t itime_time(time_t *timer)
+unsigned long itime_time(unsigned long *timer)
 {
     if (_time_callback == NULL)
     {
-        return -1;
+        return (unsigned long)-1;
     }
 
     return _time_callback(timer);

@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_web_http_common.h                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -46,6 +46,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            parsing base64,             */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -103,8 +107,8 @@ extern   "C" {
 #define NX_PHYSICAL_TRAILER                     4
 #endif
 
-/* NX_WEB_HTTP_MAX_STRING is base64 of "name:password" and plus 1 if an extra conversion is needed. */
-#define NX_WEB_HTTP_MAX_STRING                  ((NX_WEB_HTTP_MAX_NAME + NX_WEB_HTTP_MAX_PASSWORD  + 1 ) * 4 / 3 + 1)
+/* NX_WEB_HTTP_MAX_STRING is base64 of "name:password" and plus 1 if an extra conversion is needed and plus 2 pad if needed.. */
+#define NX_WEB_HTTP_MAX_STRING                  ((NX_WEB_HTTP_MAX_NAME + NX_WEB_HTTP_MAX_PASSWORD  + 1 ) * 4 / 3 + 1 + 2)
 
 #define NX_WEB_HTTP_MAX_BINARY_MD5              16
 #define NX_WEB_HTTP_MAX_ASCII_MD5               32

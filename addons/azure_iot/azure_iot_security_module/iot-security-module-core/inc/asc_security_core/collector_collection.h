@@ -14,11 +14,10 @@
 #include <asc_config.h>
 
 #include <stdint.h>
-#include <time.h>
 
 #include "asc_security_core/asc_result.h"
 #include "asc_security_core/collector.h"
-#include "asc_security_core/utils/collection/linked_list.h"
+#include "asc_security_core/utils/collection/list.h"
 
 typedef struct priority_collectors priority_collectors_t;
 typedef struct collector_collection collector_collection_t;
@@ -48,7 +47,7 @@ void collector_collection_deinit(collector_collection_t *collector_collection_pt
  * 
  * @return  ASC_RESULT_OK on success, corresponding error code otherwise.
  */
-asc_result_t collector_collection_register(collector_collection_t *collector_collection_ptr, collector_t *collector_ptr, time_t collect_offset);
+asc_result_t collector_collection_register(collector_collection_t *collector_collection_ptr, collector_t *collector_ptr, unsigned long collect_offset);
 
 /**
  * @brief Unregister collector from collector_collection
@@ -106,16 +105,16 @@ collector_t *collector_collection_get_collector_by_priority(collector_collection
  * @param action_function   a predicate to call to for each collector
  * @param context           caller context
  */
-void collector_collection_foreach(collector_collection_t *collector_collection_ptr, linked_list_collector_t_action action_function, void *context);
+void collector_collection_foreach(collector_collection_t *collector_collection_ptr, void(*action_function)(collector_t *collector, void *context), void *context);
 
 /**
  * @brief returns the list of collectors of the priority collection
  *
  * @param priority_collectors_ptr    the priority collection
  *
- * @return A @c linked_list_collector_t which stands for the list of collectors of the priority collection
+ * @return A @c linked_list_t which stands for the list of collectors of the priority collection
  */
-linked_list_collector_t_handle priority_collectors_get_list(priority_collectors_t *priority_collectors_ptr);
+linked_list_t *priority_collectors_get_list(priority_collectors_t *priority_collectors_ptr);
 
 
 /**

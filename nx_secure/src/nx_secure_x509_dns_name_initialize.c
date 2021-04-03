@@ -15,7 +15,7 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
@@ -25,7 +25,6 @@
 
 /* Include necessary system files.  */
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -33,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_dns_name_initialize                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +69,9 @@
 /*                                            buffer length verification, */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_dns_name_initialize(NX_SECURE_X509_DNS_NAME *dns_name,
@@ -88,6 +90,6 @@ UINT _nx_secure_x509_dns_name_initialize(NX_SECURE_X509_DNS_NAME *dns_name,
     dns_name -> nx_secure_x509_dns_name_length = length;
 
     /* Return completion status.  */
-    return(NX_SUCCESS);
+    return(NX_SECURE_X509_SUCCESS);
 }
 

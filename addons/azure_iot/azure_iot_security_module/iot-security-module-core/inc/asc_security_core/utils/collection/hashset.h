@@ -29,7 +29,7 @@
  *            - hashset_##type##_update
  *
  *          Additional Notes:
- *          - Make sure the struct-type uses COLLECTION_INTERFACE (see collection.h)
+ *          - Make sure the struct-type uses COLLECTION_INTERFACE (see collection.h) This macro must be first in object.
  *          - The Hashset does NOT allocate any memory
  *          - The size defined in HASHSET_DEFINITION is the expected size for any hashset instance
  *          - When implementing hashset_##type##_hash and hashset_##type##_equals, make sure that
