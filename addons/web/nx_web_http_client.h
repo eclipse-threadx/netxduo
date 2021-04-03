@@ -27,7 +27,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_web_http_client.h                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -46,6 +46,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            parsing base64,             */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -632,7 +636,6 @@ UINT        _nx_web_http_client_type_get(CHAR *name, CHAR *http_type_string);
 UINT        _nx_web_http_client_content_length_get(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr);
 UINT        _nx_web_http_client_process_header_fields(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr);
 UINT        _nx_web_http_client_number_convert(UINT number, CHAR *string);
-VOID        _nx_web_http_client_base64_encode(CHAR *name, UINT length, CHAR *base64name);
 UINT        _nx_web_http_client_content_type_header_add(NX_WEB_HTTP_CLIENT *client_ptr, CHAR *resource, ULONG wait_option);
 UINT        _nx_web_http_client_content_length_header_add(NX_WEB_HTTP_CLIENT *client_ptr, ULONG total_bytes, ULONG wait_option);
 VOID        _nx_web_http_client_error_exit(NX_WEB_HTTP_CLIENT *client_ptr, UINT wait_option);

@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -30,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_chain_verify            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +70,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_chain_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
@@ -92,12 +94,16 @@ INT                  compare_result;
     /* Get working pointer to certificate chain entry. */
     current_certificate = certificate;
 
-    if (current_certificate == NX_NULL)
+    if (current_certificate == NX_CRYPTO_NULL)
     {
+#ifdef NX_CRYPTO_STANDALONE_ENABLE
+        return(NX_CRYPTO_PTR_ERROR);
+#else
         return(NX_PTR_ERROR);
+#endif /* NX_CRYPTO_STANDALONE_ENABLE */
     }
 
-    while (current_certificate != NX_NULL)
+    while (current_certificate != NX_CRYPTO_NULL)
     {
 
         /* Check the certificate expiration against the current time. */
@@ -112,16 +118,16 @@ INT                  compare_result;
             /* Find the certificate issuer in the store. */
             status = _nx_secure_x509_store_certificate_find(store, &current_certificate -> nx_secure_x509_issuer, 0, &issuer_certificate, &issuer_location);
 
-            if (status != NX_SUCCESS)
+            if (status != NX_SECURE_X509_SUCCESS)
             {
-                return(NX_SECURE_TLS_ISSUER_CERTIFICATE_NOT_FOUND);
+                return(NX_SECURE_X509_ISSUER_CERTIFICATE_NOT_FOUND);
             }
         }
         else
         {
 #ifndef NX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES
             /* The certificate is self-signed. If we don't allow that, return error. */
-            return(NX_SECURE_TLS_INVALID_SELF_SIGNED_CERT);
+            return(NX_SECURE_X509_INVALID_SELF_SIGNED_CERT);
 #else
             /* Certificate is self-signed and we are configured to accept them. */
             issuer_certificate = current_certificate;
@@ -142,7 +148,7 @@ INT                  compare_result;
                then continue the verification process. */
             if (issuer_location == NX_SECURE_X509_CERT_LOCATION_TRUSTED)
             {
-                return(NX_SUCCESS);
+                return(NX_SECURE_X509_SUCCESS);
             }
 
 #ifdef NX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES
@@ -152,9 +158,9 @@ INT                  compare_result;
                 /* Check for self-signed certificate in trusted store. */
                 status = _nx_secure_x509_store_certificate_find(store, &current_certificate -> nx_secure_x509_distinguished_name, 0, &issuer_certificate, &issuer_location);
                 
-                if(status == NX_SUCCESS && issuer_location == NX_SECURE_X509_CERT_LOCATION_TRUSTED)
+                if(status == NX_SECURE_X509_SUCCESS && issuer_location == NX_SECURE_X509_CERT_LOCATION_TRUSTED)
                 {
-                    return(NX_SUCCESS);
+                    return(NX_SECURE_X509_SUCCESS);
                 }
                 /* Self-signed certificate is not trusted. */
                 return(NX_SECURE_X509_CHAIN_VERIFY_FAILURE);

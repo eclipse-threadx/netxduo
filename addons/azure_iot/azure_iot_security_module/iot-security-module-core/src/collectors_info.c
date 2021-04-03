@@ -22,6 +22,7 @@
 #include "asc_security_core/utils/notifier.h"
 
 typedef struct notifier_container_t {
+    /* This macro must be first in object */
     COLLECTION_INTERFACE(struct notifier_container_t);
 
     notifier_t notifier;

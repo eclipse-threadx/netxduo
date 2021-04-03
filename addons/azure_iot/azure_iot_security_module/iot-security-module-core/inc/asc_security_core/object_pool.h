@@ -22,7 +22,4 @@
 #include "asc_security_core/object_pool_static.h"
 #endif
 
-#define object_pool_get(type)              object_pool_##type##_get()
-#define object_pool_free(type,object)      object_pool_##type##_free(object)
-
 #endif /* OBJECT_POOL_H */

@@ -18,7 +18,7 @@
 
 #include "serializer_private.h"
 
-asc_result_t serializer_event_start(serializer_t *serializer, time_t timestamp, time_t collection_interval)
+asc_result_t serializer_event_start(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval)
 {
     if (serializer->state == SERIALIZER_STATE_MESSAGE_EMPTY && flatbuffers_failed(AzureIoTSecurity_Message_events_start(&serializer->builder))) {
         log_error("failed in AzureIoTSecurity_Message_events_start");

@@ -26,14 +26,23 @@
 
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
 
-NX_SECURE_TLS_ECC _nx_secure_tls_ecc_info;
+#ifndef NX_SECURE_DISABLE_X509
+/* Supported named curves. */
+extern const USHORT *_nx_secure_x509_ecc_supported_groups;
+
+/* Number of supported named curves. */
+extern USHORT  _nx_secure_x509_ecc_supported_groups_count;
+
+/* Corresponding crypto methods for the supported named curve. */
+extern const NX_CRYPTO_METHOD **_nx_secure_x509_ecc_curves;
+#endif
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_ecc_initialize                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -68,6 +77,9 @@ NX_SECURE_TLS_ECC _nx_secure_tls_ecc_info;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            ECC curve table in X509,    */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_ecc_initialize(NX_SECURE_TLS_SESSION *tls_session,
@@ -79,9 +91,11 @@ UINT _nx_secure_tls_ecc_initialize(NX_SECURE_TLS_SESSION *tls_session,
     tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups_count = supported_group_count;
     tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_curves = curves;
 
-    _nx_secure_tls_ecc_info.nx_secure_tls_ecc_supported_groups = supported_groups;
-    _nx_secure_tls_ecc_info.nx_secure_tls_ecc_supported_groups_count = supported_group_count;
-    _nx_secure_tls_ecc_info.nx_secure_tls_ecc_curves = curves;
+#ifndef NX_SECURE_DISABLE_X509
+    _nx_secure_x509_ecc_supported_groups = supported_groups;
+    _nx_secure_x509_ecc_supported_groups_count = supported_group_count;
+    _nx_secure_x509_ecc_curves = curves;
+#endif
 
     return(NX_SUCCESS);
 }

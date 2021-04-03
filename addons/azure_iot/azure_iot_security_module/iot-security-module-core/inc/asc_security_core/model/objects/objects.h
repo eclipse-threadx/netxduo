@@ -13,6 +13,9 @@
 #define OBJECTS_H
 #include <asc_config.h>
 
+#ifdef ASC_COLLECTOR_LOG_ENABLED
+#include "asc_security_core/model/objects/log.h"
+#endif
 
 #ifdef ASC_COLLECTOR_SYSTEM_INFORMATION_ENABLED
 #include "asc_security_core/model/objects/system_information.h"

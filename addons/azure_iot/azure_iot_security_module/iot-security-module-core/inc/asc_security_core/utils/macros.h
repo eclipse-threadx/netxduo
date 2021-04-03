@@ -29,4 +29,12 @@
 #define ATTRIBUTE_FORMAT(fmt_index, args_index)
 #endif
 
+#ifdef __clang__
+#define ATTRIBUTE_NONNUL(_index, ...) __attribute__((nonnull (_index, ##__VA_ARGS__)))
+#elif __GNUC__
+#define ATTRIBUTE_NONNUL(_index, ...) __attribute__((nonnull(_index, ##__VA_ARGS__)))
+#else
+#define ATTRIBUTE_NONNUL(_index, ...)
+#endif
+
 #endif /* __MACROS_H__ */

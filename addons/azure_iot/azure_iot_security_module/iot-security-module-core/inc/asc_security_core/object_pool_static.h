@@ -14,65 +14,39 @@
 #define OBJECT_POOL_STATIC_H
 #include <asc_config.h>
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include <stdint.h>
 
-#include "asc_security_core/logger.h"
+#include "asc_security_core/object_pool_def.h"
+
+/* Pay your attention, that this implementation is not thread safe. */
+
+/* The "type" in OBJECT_POOL_DECLARATIONS(type) OBJECT_POOL_DEFINITIONS(type) macros MUST be from following type:
+typedef struct NAME_OF_DATA_FOR_LINKED_LIST_t {
+    // This macro must be first in object 
+    COLLECTION_INTERFACE(struct NAME_OF_DATA_FOR_LINKED_LIST_t);
+    < Any data >
+} NAME_OF_DATA_FOR_LINKED_LIST_t;
+*/
+#define OBJECT_POOL_DECLARATIONS(type)\
+extern type _##type##_pool[];\
+extern object_pool_t _##type##_pool_obj;
 
 #define OBJECT_POOL_DEFINITIONS(type, pool_size)\
-STACK_DEFINITIONS(type)\
-static bool _##type##_is_pool_initialized = false;\
-static type _##type##_pool[pool_size];\
-static stack_##type _stack_##type = {0};\
-static stack_##type##_handle _stack_##type##_handle;\
-static uint32_t _##type##_pool_size = pool_size;\
-static uint32_t _##type##_current_pool_size = 0;\
-static uint32_t _##type##_failures = 0;\
-void object_pool_##type##_init() \
-{\
-    if (_##type##_is_pool_initialized) {\
-        return;\
-    }\
-\
-    _stack_##type##_handle = &(_stack_##type);\
-    stack_##type##_init(_stack_##type##_handle);\
-    for (uint32_t i=0; i<pool_size; i++) {\
-        type *obj = _##type##_pool + i;\
-        stack_##type##_push(_stack_##type##_handle, obj);\
-  }\
-\
-    _##type##_is_pool_initialized = true;\
-}\
-type *object_pool_##type##_get(void) \
-{\
-    object_pool_##type##_init();\
-    if ((_##type##_current_pool_size) >= (_##type##_pool_size)) {\
-        (_##type##_failures)++;\
-        if ((_##type##_failures) % (_##type##_pool_size) == 0) {\
-            log_debug("Pool exceeded objects [%d/%d] failures=[%d]", _##type##_current_pool_size, _##type##_pool_size, _##type##_failures); \
-        }\
-        return NULL;\
-    }\
-    (_##type##_current_pool_size)++;\
-    return stack_##type##_pop(_stack_##type##_handle);\
-}\
-void object_pool_##type##_free(type *obj) \
-{\
-    if (obj) { \
-        if (_##type##_current_pool_size == 0) { \
-            log_fatal("Invalid memory free"); \
-        } else { \
-            (_##type##_current_pool_size)--; \
-            stack_##type##_push(_stack_##type##_handle, obj);\
-        } \
-    } \
-}\
+type _##type##_pool[pool_size];\
+object_pool_t _##type##_pool_obj = {.item_size = sizeof(type), .size = pool_size, .initialized = false, .stack = {0}, .current_size = 0, .failures = 0};
 
-#define OBJECT_POOL_DECLARATIONS(type)\
-STACK_DECLARATIONS(type)\
-void object_pool_##type##_init(void);\
-type *object_pool_##type##_get(void);\
-void object_pool_##type##_free(type *obj);\
+void *__object_pool_get(object_pool_t *pool, uintptr_t offset1, uintptr_t offset2, uintptr_t objs);
+void __object_pool_free(object_pool_t *pool, void *obj);
+size_t __object_pool_get_available_size(object_pool_t *pool);
+
+#define object_pool_get(type) \
+(type *)__object_pool_get((object_pool_t *)&_##type##_pool_obj, (uintptr_t)(&_##type##_pool[0]), (uintptr_t)(&(_##type##_pool[0].previous)), (uintptr_t)_##type##_pool)
+
+#define object_pool_free(type, obj) \
+__object_pool_free((object_pool_t *)&_##type##_pool_obj, (void *)obj)
+
+/* Returns number of available objects of specific type. */
+#define object_pool_get_available_size(type) \
+__object_pool_get_available_size((object_pool_t *)&_##type##_pool_obj)
 
 #endif /* OBJECT_POOL_STATIC_H */

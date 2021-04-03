@@ -24,7 +24,7 @@ static asc_result_t _serializer_network_activity_add_ipv4_activity(serializer_t 
 static asc_result_t _serializer_network_activity_add_ipv6_activity(serializer_t *serializer, network_activity_ipv6_t *ipv6_payload);
 static asc_result_t _serializer_network_activity_add_common(serializer_t *serializer, network_activity_common_t *common);
 
-asc_result_t serializer_event_add_network_activity(serializer_t *serializer, time_t timestamp, time_t collection_interval,
+asc_result_t serializer_event_add_network_activity(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval,
                                                          network_activity_ipv4_t *ipv4_payload, network_activity_ipv6_t *ipv6_payload)
 {
     log_debug("serializer_event_add_network_activity, serializer=[%p], timestamp=[%lu], collection_interval=[%lu], ipv4_payload=[%p], ipv6_payload=[%p]",

@@ -15,7 +15,6 @@
 
 #include <stdbool.h>
 #include <limits.h>
-#include <time.h>
 
 #include "asc_security_core/asc_result.h"
 #include "asc_security_core/collector_collection.h"
@@ -67,14 +66,14 @@ asc_result_t core_collector_unregister(collector_t *collector_ptr);
  *
  * @return  init_random_collect_offset value.
  */
-time_t core_get_init_random_collect_offset(void);
+unsigned long core_get_init_random_collect_offset(void);
 
 /**
  * @brief Get current (last set) collect time.
  *
  * @return  nearest_collect_time value. In case of unset timer the CORE_NEAREST_TIMER_UNSET_VAL=LONG_MAX will be returned.
  */
-time_t core_get_nearest_collect_time(void);
+unsigned long core_get_nearest_collect_time(void);
 
 /**
  * @brief Get collectors collections that registered to core

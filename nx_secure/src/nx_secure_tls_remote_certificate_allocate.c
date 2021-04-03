@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_allocate          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,6 +80,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            updated X.509 return value, */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_remote_certificate_allocate(NX_SECURE_TLS_SESSION *tls_session,
@@ -104,6 +107,12 @@ UINT status;
 
     /* Release the protection. */
     tx_mutex_put(&_nx_secure_tls_protection);
+
+    /* Translate some X.509 return values into TLS return values. */
+    if (status == NX_SECURE_X509_CERT_ID_DUPLICATE)
+    {
+        return(NX_SECURE_TLS_CERT_ID_DUPLICATE);
+    }
 
     return(status);
 }

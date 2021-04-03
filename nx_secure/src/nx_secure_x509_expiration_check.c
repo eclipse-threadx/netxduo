@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /* Local helper function. */
@@ -34,7 +33,7 @@ static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, US
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_expiration_check                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +69,9 @@ static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, US
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_expiration_check(NX_SECURE_X509_CERT *certificate, ULONG current_time)
@@ -81,7 +83,7 @@ UINT  status;
     /* First, convert the X.509 ASN.1 time format into 32-bit UINX-epoch format of the "not before" field. */
     status = _nx_secure_x509_asn1_time_to_unix_convert(certificate -> nx_secure_x509_not_before, certificate -> nx_secure_x509_not_before_length,
                                                        certificate -> nx_secure_x509_validity_format, &not_before);
-    if (status != NX_SUCCESS)
+    if (status != NX_SECURE_X509_SUCCESS)
     {
         return(status);
     }
@@ -89,7 +91,7 @@ UINT  status;
     /* Convert the "not after" time field. */
     status = _nx_secure_x509_asn1_time_to_unix_convert(certificate -> nx_secure_x509_not_after, certificate -> nx_secure_x509_not_after_length,
                                                        certificate -> nx_secure_x509_validity_format, &not_after);
-    if (status != NX_SUCCESS)
+    if (status != NX_SECURE_X509_SUCCESS)
     {
         return(status);
     }
@@ -108,7 +110,7 @@ UINT  status;
         return(NX_SECURE_X509_CERTIFICATE_NOT_YET_VALID);
     }
 
-    return(NX_SUCCESS);
+    return(NX_SECURE_X509_SUCCESS);
 }
 
 
@@ -171,7 +173,7 @@ static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, US
 LONG year, month, day, hour, minute, second;
 UINT index;
 
-    NX_PARAMETER_NOT_USED(asn1_length);
+    NX_CRYPTO_PARAMETER_NOT_USED(asn1_length);
     index = 0;
 
     /* See what format we are using. */
@@ -272,6 +274,6 @@ UINT index;
         return(NX_SECURE_X509_INVALID_DATE_FORMAT);
     }
 
-    return(NX_SUCCESS);
+    return(NX_SECURE_X509_SUCCESS);
 }
 

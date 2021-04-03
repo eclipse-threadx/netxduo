@@ -21,6 +21,7 @@
 
 typedef struct emitter_page emitter_page_t;
 struct emitter_page {
+    /* This macro must be first in object */
     COLLECTION_INTERFACE(emitter_page_t);
     flatcc_emitter_page_t page;
 };
@@ -35,7 +36,7 @@ void *serializer_page_alloc(size_t size)
         return NULL;
     }
 
-    emitter_page_t *page = object_pool_emitter_page_t_get();
+    emitter_page_t *page = object_pool_get(emitter_page_t);
     if (page != NULL) {
         static flatcc_emitter_page_t *temp;
         temp = &(page->page);
@@ -55,5 +56,5 @@ void serializer_page_free(void *page)
     }
 
     emitter_page_t *page_ptr = containerof(page, emitter_page_t, page);
-    object_pool_emitter_page_t_free(page_ptr);
+    object_pool_free(emitter_page_t, page_ptr);
 }

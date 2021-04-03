@@ -15,7 +15,7 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
@@ -23,14 +23,14 @@
 #define NX_SECURE_SOURCE_CODE
 
 
-#include "nx_secure_tls.h"
+#include "nx_secure_x509.h"
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_list_remove             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -67,6 +67,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_list_remove(NX_SECURE_X509_CERT **list_head,
@@ -76,20 +79,25 @@ NX_SECURE_X509_CERT **current_cert;
 INT                   compare_result;
 
     /* Check to see if the head of the certificates list is NULL. */
-    if (list_head == NX_NULL)
+    if (list_head == NX_CRYPTO_NULL)
     {
+
         /* Our certificate pointer was NULL, so return error. */
+#ifdef NX_CRYPTO_STANDALONE_ENABLE
+        return(NX_CRYPTO_PTR_ERROR);
+#else
         return(NX_PTR_ERROR);
+#endif /* NX_CRYPTO_STANDALONE_ENABLE */
     }
     else
     {
         /* Walk the list until we find a certificate with a matching CN. */
         current_cert = list_head;
 
-        while ((*current_cert) != NX_NULL)
+        while ((*current_cert) != NX_CRYPTO_NULL)
         {
             /* If name is passed as NX_NULL, use the cert_id to match. */
-            if (name == NX_NULL)
+            if (name == NX_CRYPTO_NULL)
             {
                 /* Check the cert_id against the ID in the certificate. */
                 compare_result = ((*current_cert) -> nx_secure_x509_cert_identifier == cert_id) ? 0 : 1;
@@ -106,7 +114,7 @@ INT                   compare_result;
                 *current_cert = (*current_cert) -> nx_secure_x509_next_certificate;
 
                 /* We are OK to quit now, we removed the certificate. */
-                return(NX_SUCCESS);
+                return(NX_SECURE_X509_SUCCESS);
             }
 
             /* Advance our current certificate pointers. */
@@ -114,6 +122,6 @@ INT                   compare_result;
         }
     }
 
-    return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
+    return(NX_SECURE_X509_CERTIFICATE_NOT_FOUND);
 }
 

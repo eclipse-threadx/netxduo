@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -30,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_store_certificate_remove            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -78,6 +77,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_store_certificate_remove(NX_SECURE_X509_CERTIFICATE_STORE *store,
@@ -85,15 +87,19 @@ UINT _nx_secure_x509_store_certificate_remove(NX_SECURE_X509_CERTIFICATE_STORE *
                                               UINT location, UINT cert_id)
 {
 UINT                  status;
-NX_SECURE_X509_CERT **store_ptr = NX_NULL;
+NX_SECURE_X509_CERT **store_ptr = NX_CRYPTO_NULL;
 
     /* Store must be non-NULL. */
-    if (store == NX_NULL)
+    if (store == NX_CRYPTO_NULL)
     {
+#ifdef NX_CRYPTO_STANDALONE_ENABLE
+        return(NX_CRYPTO_PTR_ERROR);
+#else
         return(NX_PTR_ERROR);
+#endif /* NX_CRYPTO_STANDALONE_ENABLE */
     }
 
-    status = NX_SUCCESS;
+    status = NX_SECURE_X509_SUCCESS;
 
     /* Pick our store based on location. */
     switch (location)
@@ -112,7 +118,11 @@ NX_SECURE_X509_CERT **store_ptr = NX_NULL;
         break;
     case NX_SECURE_X509_CERT_LOCATION_NONE:     /* Deliberate fall-through. */
     default:
+#ifdef NX_CRYPTO_STANDALONE_ENABLE
+        status = NX_CRYPTO_INVALID_PARAMETER;
+#else
         status = NX_INVALID_PARAMETERS;
+#endif /* NX_CRYPTO_STANDALONE_ENABLE */
         break;
     }
 

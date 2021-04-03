@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_map_error_to_alert                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            updated X.509 return value, */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_secure_tls_map_error_to_alert(UINT error_number, UINT *alert_number, UINT *alert_level)
@@ -135,6 +138,7 @@ VOID _nx_secure_tls_map_error_to_alert(UINT error_number, UINT *alert_number, UI
     case NX_SECURE_X509_WRONG_SIGNATURE_METHOD:
     case NX_SECURE_X509_INVALID_DATE_FORMAT:
     case NX_SECURE_X509_ASN1_LENGTH_TOO_LONG:
+    case NX_SECURE_X509_CERTIFICATE_NOT_FOUND:
     case NX_SECURE_X509_PKCS7_PARSING_FAILED:         /* Deliberate fall-through. */
         *alert_number = NX_SECURE_TLS_ALERT_BAD_CERTIFICATE;
         *alert_level = NX_SECURE_TLS_ALERT_LEVEL_FATAL;

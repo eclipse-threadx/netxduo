@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_http_server.h                                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -45,6 +45,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            parsing base64,             */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -172,8 +176,8 @@ extern   "C" {
 #define NX_HTTP_SERVER_RETRY_SHIFT          1           /* Every retry is twice as long                        */
 #endif
 
-/* NX_HTTP_MAX_STRING is base64 of "name:password" and plus 1 if an extra conversion is needed. */
-#define NX_HTTP_MAX_STRING                  ((NX_HTTP_MAX_NAME + NX_HTTP_MAX_PASSWORD + 1) * 4 / 3 + 1)
+/* NX_HTTP_MAX_STRING is base64 of "name:password" and plus 1 if an extra conversion is needed and plus 2 pad if needed. */
+#define NX_HTTP_MAX_STRING                  ((NX_HTTP_MAX_NAME + NX_HTTP_MAX_PASSWORD + 1) * 4 / 3 + 1 + 2)
 
 #define NX_HTTP_MAX_BINARY_MD5              16
 #define NX_HTTP_MAX_ASCII_MD5               32
@@ -576,8 +580,6 @@ UINT        _nx_http_server_calculate_content_offset(NX_PACKET *packet_ptr);
 UINT        _nx_http_server_number_convert(UINT number, CHAR *string);
 UINT        _nx_http_server_type_get(NX_HTTP_SERVER *server_ptr, CHAR *name, CHAR *http_type_string);
 UINT        _nx_http_server_type_get_extended(NX_HTTP_SERVER *server_ptr, CHAR *name, UINT name_length, CHAR *http_type_string, UINT http_type_string_max_size);
-VOID        _nx_http_base64_encode(CHAR *name, UINT length, CHAR *base64name);
-VOID        _nx_http_base64_decode(CHAR *base64name, UINT length, CHAR *name);
 
 #ifdef  NX_HTTP_DIGEST_ENABLE
 UINT        _nx_http_server_digest_authenticate(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *name_ptr, UINT name_length, CHAR *password_ptr, UINT password_length, CHAR *realm_ptr, UINT realm_length, UINT *auth_request_present);

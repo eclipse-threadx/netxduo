@@ -15,7 +15,7 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
@@ -23,10 +23,7 @@
 #define NX_SECURE_SOURCE_CODE
 
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
-#include <stdio.h>
-#include <string.h>
 
 
 /* OIDs for X509 items
@@ -234,7 +231,7 @@ static const UINT _nx_secure_x509_oid_map_size = sizeof(_nx_secure_x509_oid_map)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_oid_parse                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -283,6 +280,9 @@ static const UINT _nx_secure_x509_oid_map_size = sizeof(_nx_secure_x509_oid_map)
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_secure_x509_oid_parse(const UCHAR *oid, ULONG length, UINT *oid_value)

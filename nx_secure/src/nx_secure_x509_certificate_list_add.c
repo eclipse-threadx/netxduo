@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -30,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_list_add                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -75,6 +74,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_list_add(NX_SECURE_X509_CERT **list_head,
@@ -98,13 +100,17 @@ INT                  compare_result;
         current_cert = *list_head;
         previous_cert = current_cert;
 
-        while (current_cert != NX_NULL)
+        while (current_cert != NX_CRYPTO_NULL)
         {
             if (current_cert == certificate)
             {
                 /* Oops, tried to add the same certificate twice (would lead
                    to circular list)! */
+#ifdef NX_CRYPTO_STANDALONE_ENABLE
+                return(NX_CRYPTO_INVALID_PARAMETER);
+#else
                 return(NX_INVALID_PARAMETERS);
+#endif /* NX_CRYPTO_STANDALONE_ENABLE */
             }
 
             /* If the certificate has a non-zero identifier, make sure the identifier wasn't added yet! */
@@ -112,7 +118,7 @@ INT                  compare_result;
                 current_cert -> nx_secure_x509_cert_identifier == certificate -> nx_secure_x509_cert_identifier)
             {
                 /* Duplicate ID found - don't add to the list! */
-                return(NX_SECURE_TLS_CERT_ID_DUPLICATE);
+                return(NX_SECURE_X509_CERT_ID_DUPLICATE);
             }
 
             /* We want to be able to add duplicate entries to some of the certificate stores (e.g. the
@@ -126,7 +132,11 @@ INT                  compare_result;
                 if (compare_result == 0)
                 {
                     /* A certificate with the same distinguished name was already added to this list. */
+#ifdef NX_CRYPTO_STANDALONE_ENABLE
+                    return(NX_CRYPTO_INVALID_PARAMETER);
+#else
                     return(NX_INVALID_PARAMETERS);
+#endif /* NX_CRYPTO_STANDALONE_ENABLE */
                 }
             }
 
@@ -140,6 +150,6 @@ INT                  compare_result;
         certificate -> nx_secure_x509_next_certificate = NULL;
     }
 
-    return(NX_SECURE_TLS_SUCCESS);
+    return(NX_SECURE_X509_SUCCESS);
 }
 

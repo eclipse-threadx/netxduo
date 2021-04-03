@@ -23,7 +23,6 @@
 #define NX_SECURE_SOURCE_CODE
 
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -31,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_pkcs7_decode                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,6 +73,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_pkcs7_decode(const UCHAR *signature_pointer, UINT signature_length,
@@ -84,11 +86,11 @@ UINT         i;
 USHORT       tlv_type;
 USHORT       tlv_type_class;
 ULONG        tlv_length;
-const UCHAR *tlv_data = NX_NULL;
+const UCHAR *tlv_data = NX_CRYPTO_NULL;
 ULONG        header_length;
 ULONG        seq_length;
 UINT         status;
-const UCHAR *signature_data = NX_NULL;
+const UCHAR *signature_data = NX_CRYPTO_NULL;
 ULONG        remaining_length;
 
     /* Certificate signatures encrypted with RSA use PKCS#7 encoding (RFC 5652) which
@@ -206,6 +208,6 @@ ULONG        remaining_length;
     *hash_length = tlv_length;
 
     /* Signature is valid. */
-    return(NX_SUCCESS);
+    return(NX_SECURE_X509_SUCCESS);
 }
 

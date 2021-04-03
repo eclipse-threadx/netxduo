@@ -66,5 +66,6 @@ asc_result_t notifier_unsubscribe(notify_topic_t topic, notifier_t *notifier);
  *
  *  @param topic Topic enumerator
  *  @return ASC_RESULT_OK on success, ASC_RESULT_EXCEPTION otherwise.
- */asc_result_t notifier_deinit(notify_topic_t topic);
+ */
+asc_result_t notifier_deinit(notify_topic_t topic);
 #endif

@@ -124,7 +124,9 @@ extern "C" {
 
 #define _Alignas(t) __declspec (align(t))
 #define _Alignof(t) __alignof(t)
-
+#elif defined(__CCRX__)
+#define alignas(t)
+#define alignof(t)
 #else
 #error please update pstdalign.h with support for current compiler and library
 #endif

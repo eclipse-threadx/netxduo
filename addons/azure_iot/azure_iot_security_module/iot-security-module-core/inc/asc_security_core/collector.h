@@ -15,15 +15,12 @@
 
 #include <assert.h>
 #include <stdbool.h>
-#include <time.h>
 
 #include "asc_security_core/asc_result.h"
 #include "asc_security_core/component_info.h"
 
 #include "asc_security_core/object_pool.h"
 #include "asc_security_core/serializer.h"
-#include "asc_security_core/utils/collection/linked_list.h"
-#include "asc_security_core/utils/itime.h"
 
 #define COLLECTOR_OBJECT_POOL_COUNT COLLECTORS_COUNT
 
@@ -60,7 +57,7 @@ typedef enum {
 struct collector_internal_t {
     collector_enum_t type;
     collector_priority_t priority;
-    time_t interval;
+    unsigned long interval;
 
     collector_serialize_function_t collect_function;
     void *state;
@@ -78,6 +75,7 @@ typedef enum {
  *
  */
 typedef struct collector_t {
+    /* This macro must be first in object */
     COLLECTION_INTERFACE(struct collector_t);
 
     /*@{*/
@@ -90,15 +88,14 @@ typedef struct collector_t {
     * @name Timestamps
     */
     /*@{*/
-    time_t last_collected_timestamp;
-    time_t last_sent_timestamp;
+    unsigned long last_collected_timestamp;
+    unsigned long last_sent_timestamp;
     /*@}*/
 
     collector_internal_t internal;
 } collector_t;
 
 OBJECT_POOL_DECLARATIONS(collector_t)
-LINKED_LIST_DECLARATIONS(collector_t)
 
 /**
  * @brief Default allocate and initialize collector
@@ -113,7 +110,7 @@ LINKED_LIST_DECLARATIONS(collector_t)
  *
  * @return ASC_RESULT_OK on success, corresponding error code otherwise.
  */
-asc_result_t collector_default_create(component_id_t id, collector_enum_t type, collector_priority_t priority, collector_serialize_function_t collect_function, time_t interval, void *state);
+asc_result_t collector_default_create(component_id_t id, collector_enum_t type, collector_priority_t priority, collector_serialize_function_t collect_function, unsigned long interval, void *state);
 
 /**
  * @brief Collector priority getter
@@ -131,7 +128,7 @@ collector_priority_t collector_get_priority(collector_t *collector_ptr);
  *
  * @return Collector last collected timestamp
  */
-time_t collector_get_last_collected_timestamp(collector_t *collector_ptr);
+unsigned long collector_get_last_collected_timestamp(collector_t *collector_ptr);
 
 /**
  * @brief Collector last collected timestamp setter
@@ -141,7 +138,7 @@ time_t collector_get_last_collected_timestamp(collector_t *collector_ptr);
  *
  * @return ASC_RESULT_OK on success, corresponding error code otherwise.
  */
-asc_result_t collector_set_last_collected_timestamp(collector_t *collector_ptr, time_t last_collected_timestamp);
+asc_result_t collector_set_last_collected_timestamp(collector_t *collector_ptr, unsigned long last_collected_timestamp);
 
 /**
  * @brief Serialize the events in the collector

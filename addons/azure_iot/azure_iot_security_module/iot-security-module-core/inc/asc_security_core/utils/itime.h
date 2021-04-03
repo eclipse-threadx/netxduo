@@ -14,13 +14,12 @@
 #include <asc_config.h>
 
 #include <stdint.h>
-#include <time.h>
 
 #define SEC_MIN (60)
 #define SEC_HOUR (SEC_MIN * 60)
 #define SEC_DAY (SEC_HOUR * 24)
 
-typedef time_t (*unix_time_callback_t)(time_t *unix_time);
+typedef unsigned long (*unix_time_callback_t)(unsigned long *unix_time);
 
 void itime_init(unix_time_callback_t time_callback);
 
@@ -30,7 +29,7 @@ void itime_init(unix_time_callback_t time_callback);
  * @details This function provides the same functionality as the
  *          standard C @c time() function.
  */
-time_t itime_time(time_t *timer);
+unsigned long itime_time(unsigned long *timer);
 
 
 #endif /* ITIME_H */

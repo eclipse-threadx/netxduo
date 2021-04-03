@@ -15,17 +15,16 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
+#include "nx_secure_x509.h"
 
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
-#include "nx_secure_x509.h"
 
 
 /**************************************************************************/
@@ -33,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_ec_private_key_parse                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +69,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_ec_private_key_parse(const UCHAR *buffer, UINT length,
@@ -221,7 +223,7 @@ USHORT       version;
         /* The public key is not present. */
         if (ec_key != NULL)
         {
-            ec_key -> nx_secure_ec_public_key = NX_NULL;
+            ec_key -> nx_secure_ec_public_key = NX_CRYPTO_NULL;
             ec_key -> nx_secure_ec_public_key_length = 0;
         }
 

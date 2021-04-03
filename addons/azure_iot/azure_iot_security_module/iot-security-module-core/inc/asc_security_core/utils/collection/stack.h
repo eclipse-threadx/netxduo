@@ -13,62 +13,20 @@
 #define STACK_H
 #include <asc_config.h>
 
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "asc_security_core/utils/collection/collection.h"
 
-#define STACK_DECLARATIONS(type) \
-typedef struct {\
-    type *head;\
-    size_t size;\
-} stack_##type;\
-typedef stack_##type *stack_##type##_handle;\
-extern void stack_##type##_init(stack_##type##_handle stack);\
-extern void stack_##type##_push(stack_##type##_handle stack, type *item);\
-extern type *stack_##type##_pop(stack_##type##_handle stack);\
-extern type *stack_##type##_peek(stack_##type##_handle stack);\
+/* Pay your attention, that this implementation is not thread safe. */
 
-#define STACK_DEFINITIONS(type) \
-extern void stack_##type##_init(stack_##type##_handle stack) \
-{\
-    if ((stack) == NULL) {\
-        return;\
-    }\
-    (stack)->head = NULL;\
-    (stack)->size = 0;\
-}\
-void stack_##type##_push(stack_##type##_handle stack, type *item) \
-{\
-    type *current_head = (stack)->head;\
-    if ((current_head) == NULL) {\
-        (stack)->head = item;\
-        (item)->next = NULL;\
-        (item)->previous = NULL;\
-        (stack)->size++;\
-        return;\
-    }\
-    (item)->next = current_head;\
-    (item)->previous = NULL;\
-    (current_head)->previous = item;\
-    (stack)->head = item;\
-    (stack)->size++;\
-    return;\
-}\
-type *stack_##type##_pop(stack_##type##_handle stack) \
-{\
-    type *current_head = (stack)->head;\
-    if ((current_head) == NULL) {\
-        return NULL;\
-    }\
-    type *new_head = (current_head)->next;\
-    (current_head)->previous = (current_head)->next = NULL;\
-    if ((new_head) != NULL) {\
-        (new_head)->previous = NULL;\
-    }\
-    (stack)->head = new_head;\
-    return current_head;\
-}\
-type *stack_##type##_peek(stack_##type##_handle stack) \
-{\
-    return (stack)->head;\
-}\
+typedef struct {
+    collection_item_t *head;
+    size_t size;
+} stack_collection_t;
+
+void stack_push(stack_collection_t *stack, collection_item_t *item);
+collection_item_t * stack_pop(stack_collection_t *stack);
+collection_item_t * stack_peek(stack_collection_t *stack);
 
 #endif /* STACK_H */

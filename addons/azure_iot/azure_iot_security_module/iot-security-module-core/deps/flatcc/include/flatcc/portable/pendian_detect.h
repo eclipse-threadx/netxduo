@@ -57,7 +57,7 @@ extern "C" {
   defined(_M_IA64) || defined(_M_ALPHA) ||                                  \
   defined(__amd64) || defined(__amd64__) || defined(_M_AMD64) ||            \
   defined(__x86_64) || defined(__x86_64__) || defined(_M_X64) ||            \
-  defined(__bfin__)
+  defined(__bfin__) || defined(__LIT)
 
 #define __BYTE_ORDER__ __ORDER_LITTLE_ENDIAN__
 
@@ -70,7 +70,7 @@ extern "C" {
   defined(_MIPSEB) || defined(__MIPSEB) || defined(__MIPSEB__) ||           \
   defined(__sparc) || defined(__sparc__) ||                                 \
   defined(_POWER) || defined(__powerpc__) || defined(__ppc__) ||            \
-  defined(__hpux) || defined(__hppa) || defined(__s390__)
+  defined(__hpux) || defined(__hppa) || defined(__s390__) || defined(__BIG)
 
 #define __BYTE_ORDER__ __ORDER_BIG_ENDIAN__
 

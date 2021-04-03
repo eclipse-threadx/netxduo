@@ -26,14 +26,12 @@
 
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
 
-extern NX_SECURE_TLS_ECC _nx_secure_tls_ecc_info;
-
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_find_curve_method                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -77,8 +75,6 @@ extern NX_SECURE_TLS_ECC _nx_secure_tls_ecc_info;
 /*                                          Send CertificateVerify        */
 /*    _nx_secure_tls_send_server_key_exchange                             */
 /*                                          Send ServerKeyExchange        */
-/*    _nx_secure_x509_certificate_verify    Verify a certificate          */
-/*    _nx_secure_x509_crl_verify            Verify revocation list        */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -88,30 +84,24 @@ extern NX_SECURE_TLS_ECC _nx_secure_tls_ecc_info;
 /*  09-30-2020     Timothy Stapko           Modified comment(s), added    */
 /*                                            curve priority return value,*/
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            ECC curve table in X509,    */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_find_curve_method(NX_SECURE_TLS_SESSION *tls_session,
                                       USHORT named_curve, const NX_CRYPTO_METHOD **curve_method, UINT *curve_priority)
 {
 USHORT i;
-NX_SECURE_TLS_ECC *ecc_info;
-
-    if (tls_session == NX_NULL)
-    {
-        ecc_info = &_nx_secure_tls_ecc_info;
-    }
-    else
-    {
-        ecc_info = &(tls_session -> nx_secure_tls_ecc);
-    }
 
     *curve_method = NX_NULL;
+
     /* Find out the curve method for the named curve. */
-    for (i = 0; i < ecc_info -> nx_secure_tls_ecc_supported_groups_count; i++)
+    for (i = 0; i < tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups_count; i++)
     {
-        if (named_curve == ecc_info -> nx_secure_tls_ecc_supported_groups[i])
+        if (named_curve == tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups[i])
         {
-            *curve_method = ecc_info -> nx_secure_tls_ecc_curves[i];
+            *curve_method = tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_curves[i];
 
             /* The index in the supported list is the curve priority: lower value == higher priority. */
             if(curve_priority != NX_NULL)

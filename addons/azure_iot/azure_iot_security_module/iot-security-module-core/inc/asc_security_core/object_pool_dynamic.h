@@ -13,38 +13,43 @@
 #define OBJECT_POOL_DYNAMIC_H
 #include <asc_config.h>
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include <stdint.h>
 
-#include "asc_security_core/logger.h"
+#include "asc_security_core/object_pool_def.h"
 
+/* Pay your attention, that this implementation is not thread safe. */
+
+/* The "type" in OBJECT_POOL_DECLARATIONS(type) OBJECT_POOL_DEFINITIONS(type) macros MUST be from following type:
+typedef struct NAME_OF_DATA_FOR_LINKED_LIST_t {
+    // This macro must be first in object 
+    COLLECTION_INTERFACE(struct NAME_OF_DATA_FOR_LINKED_LIST_t);
+    < Any data >
+} NAME_OF_DATA_FOR_LINKED_LIST_t;
+*/
 #define OBJECT_POOL_DECLARATIONS(type)\
-type *object_pool_##type##_get(void);\
-void object_pool_##type##_free(type *object);\
+extern type _##type##_pool_test;\
+extern object_pool_t _##type##_pool_obj;
 
 #define OBJECT_POOL_DEFINITIONS(type, pool_size)\
-static uint32_t _##type##_pool_size = pool_size;\
-static uint32_t _##type##_current_pool_size = 0;\
-type *object_pool_##type##_get() \
-{\
-    if ((_##type##_pool_size != 0) && (_##type##_current_pool_size) >= (_##type##_pool_size)) {\
-        log_debug("Pool exceeded objects count %d size %d", _##type##_current_pool_size, _##type##_pool_size); \
-        return NULL;\
-    }\
-    (_##type##_current_pool_size)++;\
-    return (type*)malloc(sizeof(type));\
-}\
-void object_pool_##type##_free(type *obj) \
-{\
-    if (obj) { \
-        if (_##type##_current_pool_size == 0) { \
-            log_fatal("Invalid memory free"); \
-        } else { \
-            free(obj);\
-            (_##type##_current_pool_size)--; \
-        } \
-    } \
-}\
+type _##type##_pool_test;\
+object_pool_t _##type##_pool_obj = {.item_size = sizeof(type), .size = pool_size, .initialized = false, .stack = {0}, .current_size = 0, .failures = 0};
+
+void *__object_pool_get(object_pool_t *pool, uintptr_t offset1, uintptr_t offset2);
+void __object_pool_free(object_pool_t *pool, void *obj);
+size_t __object_pool_get_available_size(object_pool_t *pool);
+
+#define object_pool_init(type) _##type##_pool_obj.initialized = true
+
+#define object_pool_get(type)\
+(type *)__object_pool_get((object_pool_t *)&_##type##_pool_obj, (uintptr_t)(&_##type##_pool_test), (uintptr_t)(&(_##type##_pool_test.previous)))
+
+#define object_pool_free(type, obj)\
+__object_pool_free((object_pool_t *)&_##type##_pool_obj, (void *)obj)
+
+/* Returns number of available objects of specific type.
+ * If the definition of pool (OBJECT_POOL_DEFINITIONS(type_t, 0)) was done with zero size - always returns SIZE_MAX.
+ */
+#define object_pool_get_available_size(type) \
+__object_pool_get_available_size((object_pool_t *)&_##type##_pool_obj)
 
 #endif /* OBJECT_POOL_DYNAMIC_H */

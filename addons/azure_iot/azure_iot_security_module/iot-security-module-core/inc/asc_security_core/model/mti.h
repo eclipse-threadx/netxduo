@@ -19,7 +19,7 @@
 
 #define MTI_NAME "mti"
 #define SCHEMA_MAJOR_VER "2"
-#define SCHEMA_MINOR_VER "0"
+#define SCHEMA_MINOR_VER "3"
 
 #define JSON_ENCODING   "0"
 #define FLAT_BUFFERS    "1"

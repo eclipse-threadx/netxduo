@@ -12,8 +12,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 
+#include "asc_security_core/utils/itime.h"
 #include "asc_security_core/logger.h"
 #include "asc_security_core/components_manager.h"
 #include "asc_security_core/core.h"
@@ -22,7 +22,6 @@
 #include "asc_security_core/collector.h"
 
 OBJECT_POOL_DEFINITIONS(collector_t, COLLECTOR_OBJECT_POOL_COUNT)
-LINKED_LIST_DEFINITIONS(collector_t)
 
 static collector_t *collector_alloc(component_id_t id)
 {
@@ -39,7 +38,7 @@ cleanup:
     return collector_ptr;
 }
 
-static asc_result_t collector_init_with_params(collector_internal_t *collector_internal_ptr, collector_enum_t type, collector_priority_t priority, collector_serialize_function_t collect_function, time_t interval, void *state)
+static asc_result_t collector_init_with_params(collector_internal_t *collector_internal_ptr, collector_enum_t type, collector_priority_t priority, collector_serialize_function_t collect_function, unsigned long interval, void *state)
 {
     if (collector_internal_ptr == NULL) {
         return ASC_RESULT_BAD_ARGUMENT;
@@ -56,7 +55,7 @@ static asc_result_t collector_init_with_params(collector_internal_t *collector_i
     return ASC_RESULT_OK;
 }
 
-asc_result_t collector_default_create(component_id_t id, collector_enum_t type, collector_priority_t priority, collector_serialize_function_t collect_function, time_t interval, void *state)
+asc_result_t collector_default_create(component_id_t id, collector_enum_t type, collector_priority_t priority, collector_serialize_function_t collect_function, unsigned long interval, void *state)
 {
     asc_result_t result = ASC_RESULT_OK;
     collector_t *collector_ptr = collector_alloc(id);
@@ -138,9 +137,9 @@ collector_priority_t collector_get_priority(collector_t *collector_ptr)
     return priority;
 }
 
-time_t collector_get_last_collected_timestamp(collector_t *collector_ptr)
+unsigned long collector_get_last_collected_timestamp(collector_t *collector_ptr)
 {
-    time_t last_collected_timestamp = 0;
+    unsigned long last_collected_timestamp = 0;
 
     if (collector_ptr == NULL) {
         log_error("Failed to retrieve collector last collected timestamp, bad argument");
@@ -151,7 +150,7 @@ time_t collector_get_last_collected_timestamp(collector_t *collector_ptr)
     return last_collected_timestamp;
 }
 
-asc_result_t collector_set_last_collected_timestamp(collector_t *collector_ptr, time_t last_collected_timestamp)
+asc_result_t collector_set_last_collected_timestamp(collector_t *collector_ptr, unsigned long last_collected_timestamp)
 {
     if (collector_ptr == NULL) {
         log_error("Failed to set collector last collected timestamp, bad argument");
@@ -169,8 +168,13 @@ asc_result_t collector_serialize_events(collector_t *collector_ptr, serializer_t
         log_error("Collector failed to serialize events, bad argument");
         return ASC_RESULT_BAD_ARGUMENT;
     }
+    unsigned long now = itime_time(NULL);
+    if (now == (unsigned long)(-1)) {
+        log_error("Error get current time");
+        now = 0;
+    }
 
-    collector_ptr->last_collected_timestamp = itime_time(NULL);
+    collector_ptr->last_collected_timestamp = now;
 
     if (collector_ptr->internal.collect_function == NULL) {
         log_error("Collector failed to serialize events, internal collect function is NULL");

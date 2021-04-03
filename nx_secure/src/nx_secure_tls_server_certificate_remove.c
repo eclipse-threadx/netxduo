@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_server_certificate_remove            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -69,6 +69,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            updated X.509 return value, */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_server_certificate_remove(NX_SECURE_TLS_SESSION *tls_session, UINT cert_id)
@@ -78,6 +81,12 @@ UINT status;
     /* Remove the certificate from the local store. */
     status = _nx_secure_x509_store_certificate_remove(&tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store,
                                                       NX_NULL, NX_SECURE_X509_CERT_LOCATION_LOCAL, cert_id);
+
+    /* Translate some X.509 return values into TLS return values. */
+    if (status == NX_SECURE_X509_CERTIFICATE_NOT_FOUND)
+    {
+        return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
+    }
 
     /* Return completion status.  */
     return(status);

@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -30,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_store_certificate_find              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +69,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_store_certificate_find(NX_SECURE_X509_CERTIFICATE_STORE *store,
@@ -80,41 +82,45 @@ UINT _nx_secure_x509_store_certificate_find(NX_SECURE_X509_CERTIFICATE_STORE *st
 UINT status;
 
     /* Name and store must be non-NULL. */
-    if (name == NX_NULL || store == NX_NULL || certificate == NX_NULL || location == NX_NULL)
+    if (name == NX_CRYPTO_NULL || store == NX_CRYPTO_NULL || certificate == NX_CRYPTO_NULL || location == NX_CRYPTO_NULL)
     {
+#ifdef NX_CRYPTO_STANDALONE_ENABLE
+        return(NX_CRYPTO_PTR_ERROR);
+#else
         return(NX_PTR_ERROR);
+#endif /* NX_CRYPTO_STANDALONE_ENABLE */
     }
 
     /* Search each location in turn. */
 
     /* Start with trusted certificates - if we find one, we are probably done! */
     status = _nx_secure_x509_certificate_list_find(&store -> nx_secure_x509_trusted_certificates, name, cert_id, certificate);
-    if (status == NX_SUCCESS)
+    if (status == NX_SECURE_X509_SUCCESS)
     {
         *location = NX_SECURE_X509_CERT_LOCATION_TRUSTED;
-        return(NX_SUCCESS);
+        return(NX_SECURE_X509_SUCCESS);
     }
 
     /* Next, local certificates. */
     status = _nx_secure_x509_certificate_list_find(&store -> nx_secure_x509_local_certificates, name, cert_id, certificate);
-    if (status == NX_SUCCESS)
+    if (status == NX_SECURE_X509_SUCCESS)
     {
         *location = NX_SECURE_X509_CERT_LOCATION_LOCAL;
-        return(NX_SUCCESS);
+        return(NX_SECURE_X509_SUCCESS);
     }
 
     /* Finally, check remote certs. */
     status = _nx_secure_x509_certificate_list_find(&store -> nx_secure_x509_remote_certificates, name, cert_id, certificate);
-    if (status == NX_SUCCESS)
+    if (status == NX_SECURE_X509_SUCCESS)
     {
         *location = NX_SECURE_X509_CERT_LOCATION_REMOTE;
-        return(NX_SUCCESS);
+        return(NX_SECURE_X509_SUCCESS);
     }
 
 
     /* If we get here, the certificate was not found in any of the stores. */
     *location = NX_SECURE_X509_CERT_LOCATION_NONE;
 
-    return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
+    return(NX_SECURE_X509_CERTIFICATE_NOT_FOUND);
 }
 

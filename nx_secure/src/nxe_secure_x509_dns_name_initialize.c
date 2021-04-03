@@ -15,7 +15,7 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
@@ -25,8 +25,8 @@
 
 /* Include necessary system files.  */
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
+
 /* Bring in externs for caller checking code.  */
 
 NX_SECURE_CALLER_CHECKING_EXTERNS
@@ -36,7 +36,7 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_secure_x509_dns_name_initialize                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.6        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,9 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_secure_x509_dns_name_initialize(NX_SECURE_X509_DNS_NAME *dns_name,
@@ -78,9 +81,13 @@ UINT _nxe_secure_x509_dns_name_initialize(NX_SECURE_X509_DNS_NAME *dns_name,
 {
 UINT status;
 
-    if (dns_name == NX_NULL)
+    if (dns_name == NX_CRYPTO_NULL)
     {
+#ifdef NX_CRYPTO_STANDALONE_ENABLE
+        return(NX_CRYPTO_PTR_ERROR);
+#else
         return(NX_PTR_ERROR);
+#endif /* NX_CRYPTO_STANDALONE_ENABLE */
     }
 
     if (length > NX_SECURE_X509_DNS_NAME_MAX)

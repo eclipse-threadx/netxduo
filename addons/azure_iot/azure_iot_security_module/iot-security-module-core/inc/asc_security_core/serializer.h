@@ -15,7 +15,6 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <time.h>
 
 #include "asc_security_core/asc_result.h"
 #include "asc_security_core/model/objects/objects.h"
@@ -164,6 +163,24 @@ asc_result_t serializer_message_begin(serializer_t *serializer, const char *secu
  */
 asc_result_t serializer_message_end(serializer_t *serializer);
 
+#ifdef ASC_COLLECTOR_LOG_ENABLED
+/**
+ * @brief   Adds a Log event to current message.
+ *          Callable from states:   SERIALIZER_STATE_INITIALIZED, SERIALIZER_STATE_MESSAGE_PROCESSING
+ *          On success sets state to: SERIALIZER_STATE_MESSAGE_PROCESSING
+ *
+ * @param serializer            The serializer
+ * @param timestamp             The event timestamp
+ * @param collection_interval   The collection interval
+ * @param report_list_iter      The log report list iterator
+ *
+ * @return  ASC_RESULT_OK on success,
+ *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
+ *          ASC_RESULT_EXCEPTION otherwise
+ */
+asc_result_t serializer_event_add_log(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval, log_fetcher_t *fetcher);
+#endif
+
 #ifdef ASC_COLLECTOR_NETWORK_ACTIVITY_ENABLED
 /**
  * @brief   Adds a network activity event to current message.
@@ -180,7 +197,7 @@ asc_result_t serializer_message_end(serializer_t *serializer);
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_network_activity(serializer_t *serializer, time_t timestamp, time_t collection_interval,
+asc_result_t serializer_event_add_network_activity(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval,
                                                    network_activity_ipv4_t *ipv4_payload, network_activity_ipv6_t *ipv6_payload);
 #endif
 
@@ -199,7 +216,7 @@ asc_result_t serializer_event_add_network_activity(serializer_t *serializer, tim
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_process(serializer_t *serializer, time_t timestamp, time_t collection_interval, process_t *payload);
+asc_result_t serializer_event_add_process(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval, process_t *payload);
 #endif
 
 #ifdef ASC_COLLECTOR_SYSTEM_INFORMATION_ENABLED
@@ -217,7 +234,7 @@ asc_result_t serializer_event_add_process(serializer_t *serializer, time_t times
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_system_information(serializer_t *serializer, time_t timestamp, time_t collection_interval,
+asc_result_t serializer_event_add_system_information(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval,
                                                      system_information_t *payload);
 #endif
 
@@ -235,7 +252,7 @@ asc_result_t serializer_event_add_system_information(serializer_t *serializer, t
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, time_t timestamp, time_t collection_interval);
+asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval);
 #endif
 
 
@@ -255,7 +272,7 @@ asc_result_t serializer_event_add_heartbeat(serializer_t *serializer, time_t tim
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_listening_ports(serializer_t *serializer, time_t timestamp, time_t collection_interval,
+asc_result_t serializer_event_add_listening_ports(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval,
                                                   listening_ports_ipv4_t *ipv4_payload, listening_ports_ipv6_t *ipv6_payload);
 #endif
 
@@ -274,7 +291,7 @@ asc_result_t serializer_event_add_listening_ports(serializer_t *serializer, time
  *          ASC_RESULT_BAD_ARGUMENT if @a serializer is NULL
  *          ASC_RESULT_EXCEPTION otherwise
  */
-asc_result_t serializer_event_add_baseline(serializer_t *serializer, time_t timestamp, time_t collection_interval, linked_list_iterator_baseline_report_t *report_list_iter);
+asc_result_t serializer_event_add_baseline(serializer_t *serializer, unsigned long timestamp, unsigned long collection_interval, linked_list_t *report_list);
 #endif
 
 /**

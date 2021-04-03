@@ -200,6 +200,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_x509_extended_key_usage_extension_parse.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_x509_extension_find.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_x509_find_certificate_methods.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_x509_find_curve_method.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_x509_free_certificate_get.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_x509_key_usage_extension_parse.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_x509_local_certificate_find.c

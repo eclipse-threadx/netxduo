@@ -13,7 +13,7 @@
 #define _IEVENT_LOOP_H_
 #include <asc_config.h>
 
-#include <time.h>
+#include <stdbool.h>
 
 #define EVENT_LOOP_DEFAULT_MAX_COUNT_RUN_UNTIL 100
 
@@ -39,11 +39,17 @@ typedef uintptr_t event_loop_signal_handler;
 typedef void (*event_loop_signal_cb_t)(event_loop_signal_handler h, int signal_num, void *ctx);
 
 typedef struct {
-/** @brief  Initialize the event loop. */
-    int (*init)(void);
+/** @brief  Initialize the event loop. Returns true on success, otherwise false */
+    bool (*init)(void);
 
-/** @brief  Unitialize the event loop. */
-    int (*deinit)(void);
+/** 
+ * @brief  Unitialize the event loop.
+ * @param flush perform run_until loop on deinit
+ * 
+ * Returns false if there are unhandled event callbacks still exists, otherwise true.
+ * If parameter (flush == false) always returns true.
+ */
+    bool (*deinit)(bool flush);
 
 /**
  * @brief   Handle all events registered on the loop.
@@ -80,8 +86,8 @@ typedef struct {
  * 
  * @return An object representing the timer. Used later for destroying it
  */
-    event_loop_timer_handler (*timer_create)(event_loop_timer_cb_t cb, void *ctx, time_t delay,
-        time_t repeat, event_loop_timer_handler *self);
+    event_loop_timer_handler (*timer_create)(event_loop_timer_cb_t cb, void *ctx, unsigned long delay,
+        unsigned long repeat, event_loop_timer_handler *self);
 
 /**
  * @brief   Delete a timer.
