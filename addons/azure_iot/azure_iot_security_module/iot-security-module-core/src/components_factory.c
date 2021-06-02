@@ -13,16 +13,7 @@
 #include <stdlib.h>
 
 #include "asc_security_core/components_factory_declarations.h"
-
-#define COMPONENTS_FACTORY_UNLOAD(_component) do { \
-    g_component_factory[_component].component.ops = NULL; \
-    g_component_factory[_component].component.info.state = COMPONENT_UNLOADED; \
-    g_component_factory[_component].component.info.id = 0; \
-    g_component_factory[_component].component.info.name = NULL; \
-    g_component_factory[_component].component.info.enumerator = COMPONENTS_COUNT; \
-    g_component_factory[_component].component.info.log_level = ASC_LOG_LEVEL; \
-    bit_vector_clean(component_owners_t, &g_component_factory[_component].component.info.owners); \
-} while (0)
+#include "asc_security_core/components_manager.h"
 
 components_factory_t g_component_factory[COMPONENTS_COUNT];
 
@@ -80,11 +71,70 @@ component_load_function_t **components_factory_get_load_array(void)
     return component_load_function_array;
 }
 
+component_id_t components_factory_create_id(int index)
+{
+    return (component_id_t)(&g_component_factory[index].component);
+}
+
+asc_result_t components_factory_set(const char *name, int index, component_ops_t *ops, bool auto_disable)
+{
+    if (name == NULL || str_str(name, "_")) {
+        log_fatal("Component name=[%s] is wrong (NULL or has '_')", name ? name : "NULL");
+        return ASC_RESULT_BAD_ARGUMENT;
+    }
+    if (components_manager_get_id_by_name(name, str_len(name))) {
+        log_fatal("Component name=[%s] already exists", name);
+        return ASC_RESULT_BAD_ARGUMENT;
+    }
+    g_component_factory[index].component.info.state = COMPONENT_LOADED;
+    g_component_factory[index].component.info.last_result = ASC_RESULT_OK;
+    g_component_factory[index].component.info.log_level = ASC_LOG_LEVEL;
+    g_component_factory[index].component.ops = ops;
+    g_component_factory[index].component.info.id = components_factory_create_id(index);
+    g_component_factory[index].component.info.name = name;
+    g_component_factory[index].component.info.enumerator = index;
+    g_component_factory[index].component.info.auto_start_disable = auto_disable;
+    bit_vector_clean(component_owners_t, &g_component_factory[index].component.info.owners);
+    //__auto_generated_self_id = g_component_factory[_component].component.info.id;
+    return ASC_RESULT_OK;
+}
+
+#ifdef ASC_DYNAMIC_FACTORY_ENABLED
+asc_result_t components_factory_set_dynamic_collector(const char *name, int index, component_ops_t *ops, bool auto_disable)
+{
+    if (index < (__COLLECTOR_COUNT + ASC_EXTRA_COLLECTORS_COUNT) || index >= COLLECTORS_COUNT) {
+        log_fatal("Index=[%d] is out of dynamic collectors area", index);
+        return ASC_RESULT_MEMORY_EXCEPTION;
+    }
+    return components_factory_set(name, index, ops, auto_disable);
+}
+
+asc_result_t components_factory_set_dynamic_component(const char *name, int index, component_ops_t *ops, bool auto_disable)
+{
+    if (index < (__COMPONENT_COUNT + ASC_EXTRA_COMPONENTS_COUNT) || index >= COMPONENTS_COUNT) {
+        log_fatal("Index=[%d] is out of dynamic components area", index);
+        return ASC_RESULT_MEMORY_EXCEPTION;
+    }
+    return components_factory_set(name, index, ops, auto_disable);
+}
+#endif
+
+void component_factory_unload(int index)
+{
+    g_component_factory[index].component.ops = NULL;
+    g_component_factory[index].component.info.state = COMPONENT_UNLOADED;
+    g_component_factory[index].component.info.id = 0;
+    g_component_factory[index].component.info.name = NULL;
+    g_component_factory[index].component.info.enumerator = COMPONENTS_COUNT;
+    g_component_factory[index].component.info.log_level = ASC_LOG_LEVEL;
+    bit_vector_clean(component_owners_t, &g_component_factory[index].component.info.owners);
+}
+
 void components_factory_unload(void)
 {
     int index;
 
     for (index = 0; index < COMPONENTS_COUNT; index++) {
-        COMPONENTS_FACTORY_UNLOAD(index);
+        component_factory_unload(index);
     }
 }

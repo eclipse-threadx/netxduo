@@ -18,7 +18,13 @@
 
 #include "flatcc/flatcc_builder.h"
 #include "flatcc/flatcc_emitter.h"
+#include "flatcc/flatcc_assert.h"
 
+#ifndef FLATCC_NO_ASSERT 
+int __SET_ASSERT__ = 0;
+int __ASSERT_VAL__ = 0;
+const char *__ASSERT_REASON__ = "";
+#endif
 /*
  * `check` is designed to handle incorrect use errors that can be
  * ignored in production of a tested product.
@@ -314,7 +320,7 @@ static inline void *reserve_buffer(flatcc_builder_t *B, int alloc_type, size_t u
 
     if (used + need > buf->iov_len) {
         if (B->alloc(B->alloc_context, buf, used + need, zero_init, alloc_type)) {
-            check(0, "memory allocation failed");
+            check(__SET_ASSERT__, "memory allocation failed");
             return 0;
         }
     }
@@ -664,11 +670,11 @@ static inline flatcc_builder_ref_t emit_front(flatcc_builder_t *B, iov_state_t *
         (iov->len > 16 && iov->len - 16 > FLATBUFFERS_UOFFSET_MAX) || 
 #endif  
         ref >= B->emit_start) {
-        check(0, "buffer too large to represent");
+        check(__SET_ASSERT__, "buffer too large to represent");
         return 0;
     }
     if (B->emit(B->emit_context, iov->iov, iov->count, ref, iov->len)) {
-        check(0, "emitter rejected buffer content");
+        check(__SET_ASSERT__, "emitter rejected buffer content");
         return 0;
     }
     return B->emit_start = ref;
@@ -690,11 +696,11 @@ static inline flatcc_builder_ref_t emit_back(flatcc_builder_t *B, iov_state_t *i
      * separately.
      */
     if (B->emit_end < ref) {
-        check(0, "buffer too large to represent");
+        check(__SET_ASSERT__, "buffer too large to represent");
         return 0;
     }
     if (B->emit(B->emit_context, iov->iov, iov->count, ref, iov->len)) {
-        check(0, "emitter rejected buffer content");
+        check(__SET_ASSERT__, "emitter rejected buffer content");
         return 0;
     }
     /*
@@ -719,7 +725,7 @@ static int align_to_block(flatcc_builder_t *B, uint16_t *align, uint16_t block_a
             init_iov();
             push_iov(_pad, end_pad);
             if (0 == emit_back(B, &iov)) {
-                check(0, "emitter rejected buffer content");
+                check(__SET_ASSERT__, "emitter rejected buffer content");
                 return -1;
             }
         }
@@ -789,7 +795,7 @@ flatcc_builder_ref_t flatcc_builder_create_buffer(flatcc_builder_t *B,
     }
     write_uoffset(&object_offset, (uoffset_t)object_ref - buffer_base);
     if (0 == (buffer_ref = emit_front(B, &iov))) {
-        check(0, "emitter rejected buffer content");
+        check(__SET_ASSERT__, "emitter rejected buffer content");
         return 0;
     }
     return buffer_ref;
@@ -1482,7 +1488,7 @@ static flatcc_builder_ref_t _create_offset_vector_direct(flatcc_builder_t *B,
             if (types) {
                 check(types[i] == 0, "union vector cannot have null element without type NONE");
             } else {
-                check(0, "offset vector cannot have null element");
+                check(__SET_ASSERT__, "offset vector cannot have null element");
             }
         }
     }
@@ -1811,7 +1817,7 @@ void *flatcc_builder_table_add(flatcc_builder_t *B, int id, size_t size, uint16_
     }
 #else
     if (B->vs[id] != 0) {
-        check(0, "table field already set");
+        check(__SET_ASSERT__, "table field already set");
         return 0;
     }
 #endif
@@ -1846,7 +1852,7 @@ flatcc_builder_ref_t *flatcc_builder_table_add_offset(flatcc_builder_t *B, int i
     }
 #else
     if (B->vs[id] != 0) {
-        check(0, "table field already set");
+        check(__SET_ASSERT__, "table field already set");
         return 0;
     }
 #endif
@@ -1971,11 +1977,11 @@ void *flatcc_builder_finalize_buffer(flatcc_builder_t *B, size_t *size_out)
     buffer = FLATCC_BUILDER_ALLOC(size);
 
     if (!buffer) {
-        check(0, "failed to allocated memory for finalized buffer");
+        check(__SET_ASSERT__, "failed to allocated memory for finalized buffer");
         goto done;
     }
     if (!flatcc_builder_copy_buffer(B, buffer, size)) {
-        check(0, "default emitter declined to copy buffer");
+        check(__SET_ASSERT__, "default emitter declined to copy buffer");
         FLATCC_BUILDER_FREE(buffer);
         buffer = 0;
     }

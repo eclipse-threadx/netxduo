@@ -27,7 +27,7 @@
 #include "nx_crypto_method_self_test.h"
 
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 
 /* BF8D54470B5F365F14F84C0E046DE4053DE7A05DB847CD2C9844632082F588602EA3885DEF9CA21B8B46AA7CB9588938 */
 static UCHAR key_1[] = {
@@ -57,7 +57,7 @@ static ULONG output[4];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_method_self_test_hmac_md5                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -91,6 +91,10 @@ static ULONG output[4];
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_self_test_hmac_md5(NX_CRYPTO_METHOD *crypto_method_hmac_md5,

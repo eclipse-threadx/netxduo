@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_initialize              PORTABLE C      */
-/*                                                           6.1.5        */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -102,6 +102,10 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            removed dependency on TLS,  */
 /*                                            resulting in version 6.1.6  */
+/*  06-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            supported hardware EC       */
+/*                                            private key,                */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_initialize(NX_SECURE_X509_CERT *certificate,
@@ -180,6 +184,12 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
                 status = _nx_secure_x509_ec_private_key_parse(private_key, priv_len, &bytes_processed, ec_key);
                 break;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+
+            case NX_SECURE_X509_KEY_TYPE_HARDWARE:
+                certificate -> nx_secure_x509_private_key.user_key.key_data = private_key;
+                certificate -> nx_secure_x509_private_key.user_key.key_length = priv_len;
+                status = NX_SUCCESS;
+                break;
             case NX_SECURE_X509_KEY_TYPE_NONE:
             default:
                 /* Unknown or invalid key type, return error. */

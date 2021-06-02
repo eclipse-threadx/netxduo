@@ -34,7 +34,7 @@ extern   "C" {
 
 #include "nx_crypto.h"
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 
 UINT _nx_crypto_method_self_test_aes(NX_CRYPTO_METHOD *crypto_method_aes,
                                             VOID *metadata, UINT metadata_size);

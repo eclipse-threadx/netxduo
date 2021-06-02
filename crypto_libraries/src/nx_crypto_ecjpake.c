@@ -28,7 +28,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecjpake_init                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1525,9 +1525,13 @@ UINT               status;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 UINT _nx_crypto_ecjpake_key_encryption_key_generate(NX_CRYPTO_METHOD *hash_method,
                                                     VOID *hash_metadata,
                                                     UCHAR *key_expansion,

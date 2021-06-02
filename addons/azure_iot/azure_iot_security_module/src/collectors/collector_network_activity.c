@@ -181,7 +181,7 @@ static asc_result_t _init(component_id_t id);
 static asc_result_t _start(component_id_t id);
 static asc_result_t _stop(component_id_t id);
 
-COLLECTOR_OPS_DEFINITIONS(_init, collector_default_deinit, collector_default_subscribe, collector_default_unsubscribe, _start, _stop);
+COLLECTOR_OPS_DEFINITIONS(, _init, collector_default_deinit, collector_default_subscribe, collector_default_unsubscribe, _start, _stop);
 
 COMPONENTS_FACTORY_DEFINITION(NetworkActivity, &_ops)
 

@@ -619,6 +619,7 @@ UINT nx_azure_iot_mqtt_tls_setup(NXD_MQTT_CLIENT *client_ptr, NX_SECURE_TLS_SESS
                                  NX_SECURE_X509_CERT *trusted_certificate)
 {
 UINT status;
+UINT i;
 NX_AZURE_IOT_RESOURCE *resource_ptr;
 
     NX_PARAMETER_NOT_USED(certificate);
@@ -651,21 +652,30 @@ NX_AZURE_IOT_RESOURCE *resource_ptr;
         LogError(LogLiteralArgs("Failed to create TLS session status: %d"), status);
         return(status);
     }
-
-    status = nx_secure_tls_trusted_certificate_add(tls_session, resource_ptr -> resource_trusted_certificate);
-    if (status)
+    
+    for (i = 0; i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_trusted_certificates); i++)
     {
-        LogError(LogLiteralArgs("Failed to add trusted CA certificate to session status: %d"), status);
-        return(status);
+        if (resource_ptr -> resource_trusted_certificates[i])
+        {
+            status = nx_secure_tls_trusted_certificate_add(tls_session, resource_ptr -> resource_trusted_certificates[i]);
+            if (status)
+            {
+                LogError(LogLiteralArgs("Failed to add trusted CA certificate to session status: %d"), status);
+                return(status);
+            }
+        }
     }
 
-    if (resource_ptr -> resource_device_certificate)
+    for (i = 0; i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_device_certificates); i++)
     {
-        status = nx_secure_tls_local_certificate_add(tls_session, resource_ptr -> resource_device_certificate);
-        if (status)
+        if (resource_ptr -> resource_device_certificates[i])
         {
-            LogError(LogLiteralArgs("Failed to add device certificate to session status: %d"), status);
-            return(status);
+            status = nx_secure_tls_local_certificate_add(tls_session, resource_ptr -> resource_device_certificates[i]);
+            if (status)
+            {
+                LogError(LogLiteralArgs("Failed to add device certificate to session status: %d"), status);
+                return(status);
+            }
         }
     }
 

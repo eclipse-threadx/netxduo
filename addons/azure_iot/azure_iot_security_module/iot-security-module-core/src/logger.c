@@ -9,14 +9,21 @@
 /*                                                                             */
 /*******************************************************************************/
 #include <asc_config.h>
+#include "asc_security_core/components_manager.h"
+// #define ASC_TIME_H_SUPPORT
 
+#if ASC_LOG_LEVEL != LOG_LEVEL_NOTSET
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
 
+#ifdef ASC_TIME_H_SUPPORT
+#include <time.h>
+#endif
+
 #include "asc_security_core/logger.h"
+#include "asc_security_core/utils/itime.h"
 #include "asc_security_core/utils/string_utils.h"
-#include "asc_security_core/components_manager.h"
 #ifdef ASC_COMPONENT_CONFIGURATION
 #include "asc_security_core/configuration.h"
 #endif
@@ -24,9 +31,12 @@
 #include "asc_security_core/utils/string_utils.h"
 #include "asc_security_core/logger.h"
 
-#if ASC_LOG_LEVEL != LOG_LEVEL_NOTSET
-
 static unsigned int _system_level = ASC_LOG_LEVEL;
+#ifdef ASC_LOG_TIMESTAMP_DEFAULT
+static bool _timestamp = true;
+#else
+static bool _timestamp = false;
+#endif
 
 static code2string_t _log_levels[] = {
     {LOG_LEVEL_NOTSET, "NOSET"},
@@ -196,8 +206,23 @@ bool logger_set_system_log_level(int set)
     return true;
 }
 
+int logger_get_system_log_level(void)
+{
+    return (int)_system_level;
+}
+
+void logger_set_timestamp(bool set)
+{
+    _timestamp = set;
+}
+
 bool logger_log(component_id_t id, unsigned int level, const char *filename, const char *func, int line, const char *fmt, ...)
 {
+#define MDC_FORMAT "%s [%s/%s:%d] "
+#define MDC_TS_FORMAT "%s %lu - [%s/%s:%d] "
+#ifdef ASC_TIME_H_SUPPORT
+    #define MDC_TS_TIME_H_FORMAT "%s %02d:%02d:%02d [%s/%s:%d] "
+#endif
     const char *level_str = NULL;
 
     if (_system_level < level
@@ -214,7 +239,21 @@ bool logger_log(component_id_t id, unsigned int level, const char *filename, con
             level_str = "UNDEF";
     }
 
-    printf(MDC_FORMAT , level_str, filename, func, line);
+    if (_timestamp) {
+        unsigned long rawtime = itime_time(NULL);
+#ifdef ASC_TIME_H_SUPPORT
+        struct tm *ptm = localtime((time_t *)&rawtime);
+        if (ptm == NULL) {
+            printf(MDC_TS_FORMAT, level_str, rawtime, filename, func, line);
+        } else {
+            printf(MDC_TS_TIME_H_FORMAT, level_str, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, filename, func, line);
+        }
+#else
+        printf(MDC_TS_FORMAT, level_str, rawtime, filename, func, line);
+#endif
+    } else {
+        printf(MDC_FORMAT, level_str, filename, func, line);
+    }
 
     va_list args;
     va_start(args, fmt);

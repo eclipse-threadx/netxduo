@@ -13,9 +13,6 @@
 #define __COMPONENTS_FACTORY_ENUM_H__
 #include <asc_config.h>
 
-/**
- * @brief Factory enumerator of collectors. This enumerator comes first in component enum.
- */
 typedef enum {
 #ifdef ASC_COLLECTOR_SYSTEM_INFORMATION_ENABLED
     SystemInformation,
@@ -38,15 +35,20 @@ typedef enum {
     __COLLECTOR_COUNT // Must be last
 } collector_enum_t;
 
-#ifndef ASC_EXTRA_COLLECTORS_COUNT
-#define COLLECTORS_COUNT __COLLECTOR_COUNT
-#else
-#define COLLECTORS_COUNT (__COLLECTOR_COUNT + ASC_EXTRA_COLLECTORS_COUNT)
-#endif
+#define COLLECTORS_COUNT (__COLLECTOR_COUNT + ASC_EXTRA_COLLECTORS_COUNT + ASC_DYNAMIC_COLLECTORS_MAX)
 
 /**
  * @brief Factory enumerator of all built-in component.
  * Components factory has following struct:
+ * FACTORY_ARRAY[__COLLECTOR_COUNT, ASC_EXTRA_COLLECTORS_COUNT, ASC_DYNAMIC_COLLECTORS_MAX, __COMPONENT_COUNT, ASC_EXTRA_COMPONENTS_COUNT, ASC_DYNAMIC_COMPONENTS_MAX]
+ *                                  COLLECTORS_COUNT
+ *               |________________________________________________________________________|
+ *                                                                                                 COMPONENTS_COUNT
+ *               |___________________________________________________________________________________________________________________________________________________|
+ */
+/**
+ * @brief Factory enumerator of collectors. This enumerator comes first in component enum.
+ *
  * <Product collectors>:
  * <starts>:    0
  *              CollectorN1
@@ -56,7 +58,12 @@ typedef enum {
  * <starts>:    __COLLECTOR_COUNT
  *              CollectorExtraN1
  *              CollectorExtraNx
- * <ends>:      COLLECTORS_COUNT
+ * <ends>:      __COLLECTOR_COUNT + ASC_EXTRA_COLLECTORS_COUNT
+ * <Dynamic collectors>:
+ * <starts>:    __COLLECTOR_COUNT + ASC_DYNAMIC_COLLECTORS_MAX
+ *              CollectorDynamicN1
+ *              CollectorDynamicNx
+ * <ends>:      COLLECTORS_COUNT = __COLLECTOR_COUNT + ASC_DYNAMIC_COLLECTORS_MAX + ASC_DYNAMIC_COLLECTORS_MAX
  * <Product components>:
  * <starts>:    COLLECTORS_COUNT
  *              ComponentN1
@@ -66,7 +73,11 @@ typedef enum {
  * <starts>:    __COMPONENT_COUNT
  *              ComponentExtraN1
  *              ComponentExtraNx
- * <ends>:      COMPONENTS_COUNT
+ * <Dynamic components>:
+ * <starts>:    __COMPONENT_COUNT + ASC_EXTRA_COMPONENTS_COUNT
+ *              ComponentDynamicN1
+ *              ComponentDynamicNx
+ * <ends>:      COMPONENTS_COUNT = __COMPONENT_COUNT + ASC_EXTRA_COMPONENTS_COUNT + ASC_DYNAMIC_COMPONENTS_MAX
  *
  * Each component should be defined in 5 places:
  * in @c component_enum_t or @c collector_enum_t enum: ComponentName or CollectorName
@@ -109,10 +120,6 @@ typedef enum {
     __COMPONENT_COUNT // Must be last
 } component_enum_t;
 
-#ifndef ASC_EXTRA_COMPONENTS_COUNT
-#define COMPONENTS_COUNT __COMPONENT_COUNT
-#else
-#define COMPONENTS_COUNT (__COMPONENT_COUNT + ASC_EXTRA_COMPONENTS_COUNT)
-#endif
+#define COMPONENTS_COUNT (__COMPONENT_COUNT + ASC_EXTRA_COMPONENTS_COUNT + ASC_DYNAMIC_COMPONENTS_MAX)
 
 #endif // __COMPONENTS_FACTORY_ENUM_H__

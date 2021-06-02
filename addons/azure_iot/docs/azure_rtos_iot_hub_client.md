@@ -87,6 +87,41 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
+**nx_azure_iot_hub_client_trusted_cert_add**
+***
+<div style="text-align: right"> Add trusted certificate </div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_trusted_cert_add(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                              NX_SECURE_X509_CERT *trusted_certificate);
+```
+**Description**
+
+<p>This routine adds the trusted certificate. It can be called multiple times to set multiple trusted certificates.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT` |
+| trusted_certificate [in]    | A pointer to a `NX_SECURE_X509_CERT` |
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successfully add trusted certificate to Azure IoT Hub Instance.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to add trusted certificate to Azure IoT Hub Instance due to invalid parameter.
+* NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to add trusted certificate due to `NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS` is too small.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
 **nx_azure_iot_hub_client_device_cert_set**
 ***
 <div style="text-align: right"> Set client certificate </div>
@@ -98,7 +133,7 @@ UINT nx_azure_iot_hub_client_device_cert_set(NX_AZURE_IOT_HUB_CLIENT *hub_client
 ```
 **Description**
 
-<p>This routine sets the device certificate.</p>
+<p>This routine sets the device certificate. It can be called multiple times to set certificate chain.</p>
 
 **Parameters**
 
@@ -108,8 +143,9 @@ UINT nx_azure_iot_hub_client_device_cert_set(NX_AZURE_IOT_HUB_CLIENT *hub_client
 | device_certificate [in]    | A pointer to a `NX_SECURE_X509_CERT` |
 
 **Return Values**
-* NX_AZURE_IOT_SUCCESS Successfully set device certificate to AZ IoT Hub Instance.
-* NX_AZURE_IOT_INVALID_PARAMETER Fail to set device certificate to AZ IoT Hub Instance due to invalid parameter.
+* NX_AZURE_IOT_SUCCESS Successfully set device certificate to Azure IoT Hub Instance.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to set device certificate to Azure IoT Hub Instance due to invalid parameter.
+* NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to set device certificate due to `NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS` is too small.
 
 **Allowed From**
 

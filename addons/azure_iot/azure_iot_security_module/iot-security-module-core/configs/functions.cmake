@@ -1,6 +1,6 @@
-macro(CONF_GROUPS_OPTIONS __core_config_dir)
-    # include default groups configuration
-    include(${__core_config_dir}groups_configuration.cmake)
+macro(CONF_DEPENDS_OPTIONS __core_config_dir)
+    # include default depends configuration
+    include(${__core_config_dir}depends_configuration.cmake)
 endmacro()
 
 macro(CONF_DEFINE_BASE __config_path __base)
@@ -67,11 +67,11 @@ macro(CONF_CREATE_DIST __dist __core_config_dir __plat_config_dir __output __ifd
     set(g_core_config_path ${__core_config_dir})
     set(g_plat_config_path ${__plat_config_dir})
 
-    # set default options from ${__core_config_dir}groups_configuration.cmake
-    CONF_GROUPS_OPTIONS(${__core_config_dir})
-
     # configure target dist
     include(${__plat_config_dir}${__dist}.dist)
+
+    # set depends from ${__core_config_dir}depends_configuration.cmake
+    CONF_DEPENDS_OPTIONS(${__core_config_dir})
 
     # create asc_config.h.in.tmp for target dist
     CONF_IN_CREATE(${__core_config_dir} ${__plat_config_dir} ${__dist} ${CMAKE_BINARY_DIR}/asc_config.h.in.tmp ${__ifdef} ${__cpp})

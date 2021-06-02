@@ -23,7 +23,7 @@ extern const UINT _nx_azure_iot_tls_ciphersuite_map_size;
 
 /* Define the metadata size for _nx_azure_iot_tls_ciphers.  */
 #ifndef NX_AZURE_IOT_TLS_METADATA_BUFFER_SIZE
-#define NX_AZURE_IOT_TLS_METADATA_BUFFER_SIZE                     (9 * 1024)
+#define NX_AZURE_IOT_TLS_METADATA_BUFFER_SIZE                     (10 * 1024)
 #endif /* NX_AZURE_IOT_TLS_METADATA_BUFFER_SIZE  */
 
 #endif /* NX_AZURE_IOT_CIPHERSUITES_H */

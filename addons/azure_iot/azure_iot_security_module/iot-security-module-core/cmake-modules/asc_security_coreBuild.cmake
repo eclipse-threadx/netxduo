@@ -51,6 +51,7 @@ function(setTargetCompileOptions target)
           "-Wfloat-equal"
           "-Wmissing-declarations"
           "-Wno-unused-parameter"
+          "-Wjump-misses-init"
       )
       
       if(${build_pedantic})

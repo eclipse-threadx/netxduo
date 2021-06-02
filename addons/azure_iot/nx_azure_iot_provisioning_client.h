@@ -160,14 +160,28 @@ UINT nx_azure_iot_provisioning_client_initialize(NX_AZURE_IOT_PROVISIONING_CLIEN
 UINT nx_azure_iot_provisioning_client_deinitialize(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr);
 
 /**
+ * @brief Add more trusted certificate in the IoT Provisioning client if needed. It can be called multiple times to set certificate chain.
+ *
+ * @param[in] prov_client_ptr A pointer to a #NX_AZURE_IOT_PROVISIONING_CLIENT.
+ * @param[in] trusted_certificate A pointer to a `NX_SECURE_X509_CERT`, which is the trusted certificate.
+ * @return A `UINT` with the result of the API.
+ *  @retval #NX_AZURE_IOT_SUCCESS Successfully add trusted certificate to AZ IoT Provisioning Client Instance.
+ *  @retval #NX_AZURE_IOT_INVALID_PARAMETER Fail to add trusted certificate to AZ IoT Provisioning Client Instance due to invalid parameter.
+ *  @retval #NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to add trusted certificate due to NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS is too small.
+ */
+UINT nx_azure_iot_provisioning_client_trusted_cert_add(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr,
+                                                       NX_SECURE_X509_CERT *trusted_certificate);
+
+/**
  * @brief Set client certificate.
- * @details This routine sets the device certificate.
+ * @details This routine sets the device certificate. It can be called multiple times to set certificate chain.
  *
  * @param[in] prov_client_ptr A pointer to a #NX_AZURE_IOT_PROVISIONING_CLIENT.
  * @param[in] x509_cert A pointer to a `NX_SECURE_X509_CERT` client cert.
  * @return A `UINT` with the result of the API.
  *  @retval #NX_AZURE_IOT_SUCCESS Successfully set device certs to AZ IoT Provisioning Client Instance.
  *  @retval #NX_AZURE_IOT_INVALID_PARAMETER Fail to set device certs to AZ IoT Provisioning Client Instance due to invalid parameter.
+ *  @retval #NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to set device certificate due to NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS is too small.
  */
 UINT nx_azure_iot_provisioning_client_device_cert_set(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr,
                                                       NX_SECURE_X509_CERT *x509_cert);

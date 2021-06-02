@@ -48,6 +48,18 @@ extern   "C" {
 #define NX_AZURE_IOT_LOG_LEVEL    2
 #endif /* NX_AZURE_IOT_LOG_LEVEL */
 
+/* Define maximum trusted certificates count.  */
+#ifndef NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS
+#define NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS 3
+#endif /* NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS */
+
+/* Define maximum device certificates count.  */
+#ifndef NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS
+#define NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS 2
+#endif /* NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS */
+
+#define NX_AZURE_IOT_ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+
 /* Define the az iot log function. */
 #define LogError(...)
 #define LogInfo(...)
@@ -170,8 +182,8 @@ typedef struct NX_AZURE_IOT_RESOURCE_STRUCT
     UINT                                   resource_cipher_map_size;
     UCHAR                                 *resource_metadata_ptr;
     UINT                                   resource_metadata_size;
-    NX_SECURE_X509_CERT                   *resource_trusted_certificate;
-    NX_SECURE_X509_CERT                   *resource_device_certificate;
+    NX_SECURE_X509_CERT                   *resource_trusted_certificates[NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS];
+    NX_SECURE_X509_CERT                   *resource_device_certificates[NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS];
     const UCHAR                           *resource_hostname;
     UINT                                   resource_hostname_length;
     struct NX_AZURE_IOT_RESOURCE_STRUCT   *resource_next;

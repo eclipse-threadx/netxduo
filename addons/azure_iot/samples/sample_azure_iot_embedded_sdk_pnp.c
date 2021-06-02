@@ -40,24 +40,26 @@
 
 /* Sample events.  */
 #define SAMPLE_ALL_EVENTS                                               ((ULONG)0xFFFFFFFF)
-#define SAMPLE_CONNECT_EVENT                                            ((ULONG)0x00000001)
-#define SAMPLE_INITIALIZATION_EVENT                                     ((ULONG)0x00000002)
-#define SAMPLE_METHOD_MESSAGE_EVENT                                     ((ULONG)0x00000004)
-#define SAMPLE_DEVICE_TWIN_GET_EVENT                                    ((ULONG)0x00000008)
-#define SAMPLE_DEVICE_TWIN_DESIRED_PROPERTY_EVENT                       ((ULONG)0x00000010)
-#define SAMPLE_TELEMETRY_SEND_EVENT                                     ((ULONG)0x00000020)
-#define SAMPLE_DEVICE_TWIN_REPORTED_PROPERTY_EVENT                      ((ULONG)0x00000040)
-#define SAMPLE_DISCONNECT_EVENT                                         ((ULONG)0x00000080)
-#define SAMPLE_RECONNECT_EVENT                                          ((ULONG)0x00000100)
-#define SAMPLE_CONNECTED_EVENT                                          ((ULONG)0x00000200)
+#define SAMPLE_NETWORK_CHECK_EVENT                                      ((ULONG)0x00000001)
+#define SAMPLE_CONNECT_EVENT                                            ((ULONG)0x00000002)
+#define SAMPLE_INITIALIZATION_EVENT                                     ((ULONG)0x00000004)
+#define SAMPLE_METHOD_MESSAGE_EVENT                                     ((ULONG)0x00000008)
+#define SAMPLE_DEVICE_TWIN_GET_EVENT                                    ((ULONG)0x00000010)
+#define SAMPLE_DEVICE_TWIN_DESIRED_PROPERTY_EVENT                       ((ULONG)0x00000020)
+#define SAMPLE_TELEMETRY_SEND_EVENT                                     ((ULONG)0x00000040)
+#define SAMPLE_DEVICE_TWIN_REPORTED_PROPERTY_EVENT                      ((ULONG)0x00000080)
+#define SAMPLE_DISCONNECT_EVENT                                         ((ULONG)0x00000100)
+#define SAMPLE_RECONNECT_EVENT                                          ((ULONG)0x00000200)
+#define SAMPLE_CONNECTED_EVENT                                          ((ULONG)0x00000400)
 
 /* Sample states.  */
 #define SAMPLE_STATE_NONE                                               (0)
 #define SAMPLE_STATE_INIT                                               (1)
-#define SAMPLE_STATE_CONNECTING                                         (2)
-#define SAMPLE_STATE_CONNECT                                            (3)
-#define SAMPLE_STATE_CONNECTED                                          (4)
-#define SAMPLE_STATE_DISCONNECTED                                       (5)
+#define SAMPLE_STATE_NETWORK_CHECK                                      (2)
+#define SAMPLE_STATE_CONNECTING                                         (3)
+#define SAMPLE_STATE_CONNECT                                            (4)
+#define SAMPLE_STATE_CONNECTED                                          (5)
+#define SAMPLE_STATE_DISCONNECTED                                       (6)
 
 #define SAMPLE_DEAFULT_START_TEMP_CELSIUS                               (22)
 #define DOUBLE_DECIMAL_PLACE_DIGITS                                     (2)
@@ -106,6 +108,8 @@ static UINT sample_dps_entry(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr,
 
 /* Define Azure RTOS TLS info.  */
 static NX_SECURE_X509_CERT root_ca_cert;
+static NX_SECURE_X509_CERT root_ca_cert_2;
+static NX_SECURE_X509_CERT root_ca_cert_3;
 static UCHAR nx_azure_iot_tls_metadata_buffer[NX_AZURE_IOT_TLS_METADATA_BUFFER_SIZE];
 static ULONG nx_azure_iot_thread_stack[NX_AZURE_IOT_STACK_SIZE / sizeof(ULONG)];
 
@@ -131,6 +135,9 @@ static NX_AZURE_IOT nx_azure_iot;
 static SAMPLE_CONTEXT sample_context;
 static volatile UINT sample_connection_status = NX_NOT_CONNECTED;
 static UINT exponential_retry_count;
+
+/* Define IP pointer. */
+static NX_IP *nx_azure_iot_ip_ptr;
 
 /* Telemetry.  */
 static const CHAR telemetry_name[] = "temperature";
@@ -493,8 +500,26 @@ SAMPLE_CONTEXT *sample_ctx = (SAMPLE_CONTEXT *)context;
                        SAMPLE_DEVICE_TWIN_DESIRED_PROPERTY_EVENT, TX_OR);
 }
 
+static VOID sample_network_check(SAMPLE_CONTEXT *context)
+{
+ULONG gateway_address;
+
+    if (context -> state != SAMPLE_STATE_NETWORK_CHECK)
+    {
+        return;
+    }
+
+    while (nx_ip_gateway_address_get(nx_azure_iot_ip_ptr, &gateway_address))
+    {
+        tx_thread_sleep(NX_IP_PERIODIC_RATE);
+    }
+
+    context -> state = SAMPLE_STATE_CONNECT;
+}
+
 static VOID sample_connect_action(SAMPLE_CONTEXT *context)
 {
+
     if (context -> state != SAMPLE_STATE_CONNECT)
     {
         return;
@@ -599,14 +624,24 @@ NX_AZURE_IOT_HUB_CLIENT* iothub_client_ptr = &(context -> iothub_client);
         return;
     }
 
+    /* Add more CA certificates.  */
+    if ((status = nx_azure_iot_hub_client_trusted_cert_add(iothub_client_ptr, &root_ca_cert_2)))
+    {
+        printf("Failed on nx_azure_iot_hub_client_trusted_cert_add!: error code = 0x%08x\r\n", status);
+    }
+    else if ((status = nx_azure_iot_hub_client_trusted_cert_add(iothub_client_ptr, &root_ca_cert_3)))
+    {
+        printf("Failed on nx_azure_iot_hub_client_trusted_cert_add!: error code = 0x%08x\r\n", status);
+    }
+
 #if (USE_DEVICE_CERTIFICATE == 1)
 
     /* Initialize the device certificate.  */
-    if ((status = nx_secure_x509_certificate_initialize(&device_certificate,
-                                                        (UCHAR *)sample_device_cert_ptr, (USHORT)sample_device_cert_len,
-                                                        NX_NULL, 0,
-                                                        (UCHAR *)sample_device_private_key_ptr, (USHORT)sample_device_private_key_len,
-                                                        DEVICE_KEY_TYPE)))
+    else if ((status = nx_secure_x509_certificate_initialize(&device_certificate,
+                                                             (UCHAR *)sample_device_cert_ptr, (USHORT)sample_device_cert_len,
+                                                             NX_NULL, 0,
+                                                             (UCHAR *)sample_device_private_key_ptr, (USHORT)sample_device_private_key_len,
+                                                             DEVICE_KEY_TYPE)))
     {
         printf("Failed on nx_secure_x509_certificate_initialize!: error code = 0x%08x\r\n", status);
     }
@@ -619,9 +654,9 @@ NX_AZURE_IOT_HUB_CLIENT* iothub_client_ptr = &(context -> iothub_client);
 #else
 
     /* Set symmetric key.  */
-    if ((status = nx_azure_iot_hub_client_symmetric_key_set(iothub_client_ptr,
-                                                            (UCHAR *)DEVICE_SYMMETRIC_KEY,
-                                                            sizeof(DEVICE_SYMMETRIC_KEY) - 1)))
+    else if ((status = nx_azure_iot_hub_client_symmetric_key_set(iothub_client_ptr,
+                                                                 (UCHAR *)DEVICE_SYMMETRIC_KEY,
+                                                                 sizeof(DEVICE_SYMMETRIC_KEY) - 1)))
     {
         printf("Failed on nx_azure_iot_hub_client_symmetric_key_set!\r\n");
     }
@@ -676,7 +711,7 @@ NX_AZURE_IOT_HUB_CLIENT* iothub_client_ptr = &(context -> iothub_client);
 
     if (status == NX_AZURE_IOT_SUCCESS)
     {
-        context -> state = SAMPLE_STATE_CONNECT;
+        context -> state = SAMPLE_STATE_NETWORK_CHECK;
     }
 }
 
@@ -713,7 +748,7 @@ static VOID sample_connection_error_recover(SAMPLE_CONTEXT *context)
             printf("reconnecting iothub, after backoff\r\n");
 
             tx_thread_sleep(exponential_backoff_with_jitter());
-            context -> state = SAMPLE_STATE_CONNECT;
+            context -> state = SAMPLE_STATE_NETWORK_CHECK;
         }
         break;
     }
@@ -726,6 +761,12 @@ static VOID sample_trigger_action(SAMPLE_CONTEXT *context)
         case SAMPLE_STATE_INIT:
         {
             tx_event_flags_set(&(context -> sample_events), SAMPLE_INITIALIZATION_EVENT, TX_OR);
+        }
+        break;
+
+        case SAMPLE_STATE_NETWORK_CHECK:
+        {
+            tx_event_flags_set(&(context -> sample_events), SAMPLE_NETWORK_CHECK_EVENT, TX_OR);
         }
         break;
 
@@ -1065,11 +1106,21 @@ UINT status;
     *iothub_hostname_length = sizeof(sample_iothub_hostname);
     *iothub_device_id_length = sizeof(sample_iothub_device_id);
 
+    /* Add more CA certificates.  */
+    if ((status = nx_azure_iot_provisioning_client_trusted_cert_add(prov_client_ptr, &root_ca_cert_2)))
+    {
+        printf("Failed on nx_azure_iot_provisioning_client_trusted_cert_add!: error code = 0x%08x\r\n", status);
+    }
+    else if ((status = nx_azure_iot_provisioning_client_trusted_cert_add(prov_client_ptr, &root_ca_cert_3)))
+    {
+        printf("Failed on nx_azure_iot_provisioning_client_trusted_cert_add!: error code = 0x%08x\r\n", status);
+    }
+
 #if (USE_DEVICE_CERTIFICATE == 1)
 
     /* Initialize the device certificate.  */
-    if ((status = nx_secure_x509_certificate_initialize(&device_certificate, (UCHAR *)sample_device_cert_ptr, (USHORT)sample_device_cert_len, NX_NULL, 0,
-                                                        (UCHAR *)sample_device_private_key_ptr, (USHORT)sample_device_private_key_len, DEVICE_KEY_TYPE)))
+    else if ((status = nx_secure_x509_certificate_initialize(&device_certificate, (UCHAR *)sample_device_cert_ptr, (USHORT)sample_device_cert_len, NX_NULL, 0,
+                                                             (UCHAR *)sample_device_private_key_ptr, (USHORT)sample_device_private_key_len, DEVICE_KEY_TYPE)))
     {
         printf("Failed on nx_secure_x509_certificate_initialize!: error code = 0x%08x\r\n", status);
     }
@@ -1082,8 +1133,8 @@ UINT status;
 #else
 
     /* Set symmetric key.  */
-    if ((status = nx_azure_iot_provisioning_client_symmetric_key_set(prov_client_ptr, (UCHAR *)DEVICE_SYMMETRIC_KEY,
-                                                                     sizeof(DEVICE_SYMMETRIC_KEY) - 1)))
+    else if ((status = nx_azure_iot_provisioning_client_symmetric_key_set(prov_client_ptr, (UCHAR *)DEVICE_SYMMETRIC_KEY,
+                                                                          sizeof(DEVICE_SYMMETRIC_KEY) - 1)))
     {
         printf("Failed on nx_azure_iot_hub_client_symmetric_key_set!: error code = 0x%08x\r\n", status);
     }
@@ -1125,29 +1176,31 @@ UINT status;
  * Sample Event loop
  *
  *
- *       +--------------+           +--------------+      +--------------+       +--------------+
- *       |              |  INIT     |              |      |              |       |              |
- *       |              | SUCCESS   |              |      |              |       |              +--------+
- *       |    INIT      |           |    CONNECT   |      |  CONNECTING  |       |   CONNECTED  |        | (TELEMETRY |
- *       |              +----------->              +----->+              +------->              |        |  METHOD |
- *       |              |           |              |      |              |       |              <--------+  DEVICETWIN)
- *       |              |           |              |      |              |       |              |
- *       +-----+--------+           +----+---+-----+      +------+-------+       +--------+-----+
- *             ^                         ^   |                   |                        |
- *             |                         |   |                   |                        |
- *             |                         |   |                   |                        |
- *             |                         |   | CONNECT           | CONNECTING             |
- *             |                         |   |  FAIL             |   FAIL                 |
- * REINITIALIZE|                RECONNECT|   |                   |                        |
- *             |                         |   |                   v                        |  DISCONNECT
- *             |                         |   |        +----------+-+                      |
- *             |                         |   |        |            |                      |
- *             |                         |   +------->+            |                      |
- *             |                         |            | DISCONNECT |                      |
- *             |                         |            |            +<---------------------+
- *             |                         +------------+            |
- *             +--------------------------------------+            |
- *                                                    +------------+
+ * +--------------+         +--------------+         +--------------+    +--------------+
+ * |              |  INIT   |              | NETWORK |              |    |              |
+ * |              | SUCCESS |              |  GOOD   |              |    |              |
+ * |    INIT      |         |   NETWORK    |         |   CONNECT    |    |  CONNECTING  |
+ * |              +--------->    CHECK     +--------->              +---->              +--+
+ * |              |         |              |         |              |    |              |  |
+ * |              |         |              |         |              |    |              |  |
+ * +------^-------+         +------^-------+         +------+-------+    +-----------+--+  |
+ *        |                        |                        |                        |     |
+ *        |                        |           CONNECT FAIL |                        |     |
+ *        |                        |          +-------------+                        |     |
+ *        |                        |          |                      CONNECTING FAIL |     |
+ *        |              RECONNECT |          |      +-------------------------------+     |
+ *        |                        |          |      |                                     |
+ *        |                        |       +--v------v----+              +--------------+  |
+ *        | REINITIALIZE           |       |              |              |              |  |
+ *        |                        +-------+              |  DISCONNECT  |              |  |
+ *        |                                | DISCONNECTED |              |   CONNECTED  |  |
+ *        |                                |              <--------------+              <--+
+ *        +--------------------------------+              |              |              |
+ *                                         |              |              |              |
+ *                                         +--------------+              +---^------+---+
+ *                                                                           |      |(TELEMETRY |
+ *                                                                           |      | METHOD |
+ *                                                                           +------+ DEVICE TWIN)
  *
  *
  *
@@ -1169,6 +1222,11 @@ UINT loop = NX_TRUE;
             }
 
             continue;
+        }
+
+        if (app_events & SAMPLE_NETWORK_CHECK_EVENT)
+        {
+            sample_network_check(context);
         }
 
         if (app_events & SAMPLE_CONNECT_EVENT)
@@ -1243,6 +1301,8 @@ void sample_entry(NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr, NX_DNS *dns_ptr, UINT
 {
 UINT status = 0;
 
+    nx_azure_iot_ip_ptr = ip_ptr;
+
     nx_azure_iot_log_init(log_callback);
 
     /* Create Azure IoT handler.  */
@@ -1254,9 +1314,27 @@ UINT status = 0;
         return;
     }
 
-    /* Initialize CA certificate.  */
+    /* Initialize CA certificates.  */
     if ((status = nx_secure_x509_certificate_initialize(&root_ca_cert, (UCHAR *)_nx_azure_iot_root_cert,
                                                         (USHORT)_nx_azure_iot_root_cert_size,
+                                                        NX_NULL, 0, NULL, 0, NX_SECURE_X509_KEY_TYPE_NONE)))
+    {
+        printf("Failed to initialize ROOT CA certificate!: error code = 0x%08x\r\n", status);
+        nx_azure_iot_delete(&nx_azure_iot);
+        return;
+    }
+
+    if ((status = nx_secure_x509_certificate_initialize(&root_ca_cert_2, (UCHAR *)_nx_azure_iot_root_cert_2,
+                                                        (USHORT)_nx_azure_iot_root_cert_size_2,
+                                                        NX_NULL, 0, NULL, 0, NX_SECURE_X509_KEY_TYPE_NONE)))
+    {
+        printf("Failed to initialize ROOT CA certificate!: error code = 0x%08x\r\n", status);
+        nx_azure_iot_delete(&nx_azure_iot);
+        return;
+    }
+
+    if ((status = nx_secure_x509_certificate_initialize(&root_ca_cert_3, (UCHAR *)_nx_azure_iot_root_cert_3,
+                                                        (USHORT)_nx_azure_iot_root_cert_size_3,
                                                         NX_NULL, 0, NULL, 0, NX_SECURE_X509_KEY_TYPE_NONE)))
     {
         printf("Failed to initialize ROOT CA certificate!: error code = 0x%08x\r\n", status);

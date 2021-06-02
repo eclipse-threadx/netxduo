@@ -196,7 +196,7 @@ UINT nx_azure_iot_security_module_enable(NX_AZURE_IOT *nx_azure_iot_ptr)
         goto cleanup;
     }
 
-    if (nx_azure_iot_ptr->nx_azure_iot_unix_time_get(&t) != NX_SUCCESS)
+    if (nx_azure_iot_ptr->nx_azure_iot_unix_time_get(&t) != NX_AZURE_IOT_SUCCESS)
     {
         status = NX_AZURE_IOT_FAILURE;
         LogError(LogLiteralArgs("Failed to retrieve UNIX time"));
@@ -322,10 +322,10 @@ static unsigned long _security_module_unix_time_get(unsigned long *unix_time)
 
     if (security_module_ptr == NULL || security_module_ptr->nx_azure_iot_ptr == NULL)
     {
-        return (unsigned long)-1;
+        return ITIME_FAILED;
     }
 
-    if (security_module_ptr->nx_azure_iot_ptr->nx_azure_iot_unix_time_get(&t) == NX_SUCCESS)
+    if (security_module_ptr->nx_azure_iot_ptr->nx_azure_iot_unix_time_get(&t) == NX_AZURE_IOT_SUCCESS)
     {
         if (unix_time != NULL)
         {
@@ -335,7 +335,7 @@ static unsigned long _security_module_unix_time_get(unsigned long *unix_time)
         return (unsigned long)t;
     }
 
-    return (unsigned long)-1;
+    return ITIME_FAILED;
 }
 
 static UINT _security_module_get_nx_status(UINT current)
@@ -509,13 +509,13 @@ static void _security_module_event_process_state_pending(NX_AZURE_IOT_SECURITY_M
     }
 
      /* Get current timestamp. */
-    if (itime_time(&now_timestamp) == (unsigned long)-1)
+    if (itime_time(&now_timestamp) == ITIME_FAILED)
     {
         LogError(LogLiteralArgs("Failed to retrieve timestamp"));
     }
 
-    if (security_module_ptr->state_timestamp != (unsigned long)-1 &&
-        now_timestamp != (unsigned long)-1 &&
+    if (security_module_ptr->state_timestamp != ITIME_FAILED &&
+        now_timestamp != ITIME_FAILED &&
         now_timestamp - security_module_ptr->state_timestamp > ASC_SECURITY_MODULE_PENDING_TIME)
     {
         /* Security Module pending state time expired. */
@@ -721,7 +721,7 @@ static void _security_module_update_state(NX_AZURE_IOT_SECURITY_MODULE *security
     }
 
     /* Set security module state timestamp. */
-    if (itime_time(&now_timestamp) == (unsigned long)-1)
+    if (itime_time(&now_timestamp) == ITIME_FAILED)
     {
         LogError(LogLiteralArgs("Failed to retrive time"));
     }

@@ -40,13 +40,15 @@ static bool _linked_list_find_condition(void *item, void *condition_input)
 
 int32_t notifier_notify(notify_topic_t topic, int msg_num, void *payload)
 {
+    linked_list_t *linked_list_handle = NULL;
+    notifier_item_t *curr = NULL;
+
     if (topic >= NOTIFY_TOPICS_NUMBER) {
         log_error("Failed to remove notifier due to bad argument");
         goto error;
     }
 
-    linked_list_t *linked_list_handle = &_notify_arr[topic];
-    notifier_item_t *curr = NULL;
+    linked_list_handle = &_notify_arr[topic];
     linked_list_foreach(linked_list_handle, curr) {
         if (curr->notifier->notify) {
             curr->notifier->notify(curr->notifier, msg_num, payload);

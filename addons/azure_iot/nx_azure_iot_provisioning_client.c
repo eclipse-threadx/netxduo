@@ -839,7 +839,7 @@ az_span registration_id_span = az_span_create((UCHAR *)registration_id, (INT)reg
     prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_cipher_map_size = cipher_map_size;
     prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_metadata_ptr = metadata_memory;
     prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_metadata_size = memory_size;
-    prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_trusted_certificate = trusted_certificate;
+    prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_trusted_certificates[0] = trusted_certificate;
     prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_hostname = endpoint;
     prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_hostname_length = endpoint_length;
     resource_ptr -> resource_mqtt_client_id_length = prov_client_ptr -> nx_azure_iot_provisioning_client_registration_id_length;
@@ -1012,9 +1012,54 @@ UINT status;
     return(NX_AZURE_IOT_SUCCESS);
 }
 
+UINT nx_azure_iot_provisioning_client_trusted_cert_add(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr,
+                                                       NX_SECURE_X509_CERT *trusted_certificate)
+{
+UINT i;
+NX_AZURE_IOT_RESOURCE *resource_ptr;
+
+    if ((prov_client_ptr == NX_NULL) ||
+        (prov_client_ptr -> nx_azure_iot_ptr == NX_NULL) ||
+        (trusted_certificate == NX_NULL))
+    {
+        LogError(LogLiteralArgs("IoTHub device certificate set fail: INVALID POINTER"));
+        return(NX_AZURE_IOT_INVALID_PARAMETER);
+    }
+
+    /* Obtain the mutex.  */
+    tx_mutex_get(prov_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr, TX_WAIT_FOREVER);
+
+    resource_ptr = &(prov_client_ptr -> nx_azure_iot_provisioning_client_resource);
+    for (i = 0; i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_trusted_certificates); i++)
+    {
+        if (resource_ptr -> resource_trusted_certificates[i] == NX_NULL)
+        {
+            resource_ptr -> resource_trusted_certificates[i] = trusted_certificate;
+            break;
+        }
+    }
+
+    /* Release the mutex.  */
+    tx_mutex_put(prov_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr);
+
+    if (i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_trusted_certificates))
+    {
+        return(NX_AZURE_IOT_SUCCESS);
+    }
+    else
+    {
+
+        /* No more space to store trusted certificate.  */
+        return(NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE);
+    }
+}
+
 UINT nx_azure_iot_provisioning_client_device_cert_set(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr,
                                                       NX_SECURE_X509_CERT *x509_cert)
 {
+UINT i;
+NX_AZURE_IOT_RESOURCE *resource_ptr;
+
     if ((prov_client_ptr == NX_NULL) || (prov_client_ptr -> nx_azure_iot_ptr == NX_NULL) || (x509_cert == NX_NULL))
     {
         LogError(LogLiteralArgs("IoTProvisioning device cert set fail: INVALID POINTER"));
@@ -1024,12 +1069,29 @@ UINT nx_azure_iot_provisioning_client_device_cert_set(NX_AZURE_IOT_PROVISIONING_
     /* Obtain the mutex.  */
     tx_mutex_get(prov_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr, NX_WAIT_FOREVER);
 
-    prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_device_certificate = x509_cert;
+    resource_ptr = &(prov_client_ptr -> nx_azure_iot_provisioning_client_resource);
+    for (i = 0; i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_device_certificates); i++)
+    {
+        if (resource_ptr -> resource_device_certificates[i] == NX_NULL)
+        {
+            resource_ptr -> resource_device_certificates[i] = x509_cert;
+            break;
+        }
+    }
 
     /* Release the mutex.  */
     tx_mutex_put(prov_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr);
 
-    return(NX_AZURE_IOT_SUCCESS);
+    if (i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_device_certificates))
+    {
+        return(NX_AZURE_IOT_SUCCESS);
+    }
+    else
+    {
+
+        /* No more space to store device certificate.  */
+        return(NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE);
+    }
 }
 
 

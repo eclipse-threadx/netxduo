@@ -129,7 +129,7 @@ static event_timer_t *_timer_add(event_timer_t *t, event_loop_timer_cb_t cb, voi
     event_timer_t *curr = NULL, *new;
     bool is_periodic = !!t;
     unsigned long now = itime_time(NULL);
-    if (now == (unsigned long)(-1)) {
+    if (now == ITIME_FAILED) {
         log_error("Error get current time");
         now = 0;
     }
@@ -195,7 +195,7 @@ static bool _run_once(void)
 {
     event_timer_t *t;
     unsigned long now = itime_time(NULL);
-    if (now == (unsigned long)(-1)) {
+    if (now == ITIME_FAILED) {
         log_error("Error get current time");
         now = 0;
     }

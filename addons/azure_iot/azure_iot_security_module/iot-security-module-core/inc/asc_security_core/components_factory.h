@@ -34,20 +34,11 @@ extern component_load_function_t components_factory_##_component##_load_ptr;
 #define COMPONENTS_FACTORY_DEFINITION(_component, _ops) \
 asc_result_t components_factory_##_component##_load(void);\
 asc_result_t components_factory_##_component##_load(void) { \
-    if ((char *)#_component == NULL || str_str(#_component, "_")){ log_fatal("Component name is NULL or has '_'"); return ASC_RESULT_BAD_ARGUMENT; } \
-    g_component_factory[_component].component.info.state = COMPONENT_LOADED; \
-    g_component_factory[_component].component.info.last_result = ASC_RESULT_OK; \
-    g_component_factory[_component].component.info.log_level = ASC_LOG_LEVEL; \
-    g_component_factory[_component].component.ops = _ops; \
-    g_component_factory[_component].component.info.id = (component_id_t)(&g_component_factory[_component].component); \
-    g_component_factory[_component].component.info.name = #_component; \
-    g_component_factory[_component].component.info.enumerator = _component; \
-    bit_vector_clean(component_owners_t, &g_component_factory[_component].component.info.owners); \
+    asc_result_t result = components_factory_set(#_component, _component, _ops, false); \
     __auto_generated_self_id = g_component_factory[_component].component.info.id; \
-    return ASC_RESULT_OK; \
+    return result; \
 } \
 component_load_function_t components_factory_##_component##_load_ptr = components_factory_##_component##_load;
-
 
 /* Add this macro in src/components_factory.c */
 #define COMPONENTS_FACTORY_LOAD(_component) &components_factory_##_component##_load_ptr

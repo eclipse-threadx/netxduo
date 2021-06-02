@@ -40,7 +40,7 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_certificate_verify              PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -91,6 +91,10 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            updated X.509 return value, */
 /*                                            resulting in version 6.1.6  */
+/*  06-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            supported hardware EC       */
+/*                                            private key,                */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_certificate_verify(NX_SECURE_TLS_SESSION *tls_session,
@@ -122,6 +126,7 @@ const CHAR client_context[] = "TLS 1.3, client CertificateVerify\0"; /* Includes
 const NX_CRYPTO_METHOD    *curve_method_cert;
 NX_SECURE_EC_PRIVATE_KEY  *ec_privkey;
 NX_SECURE_EC_PUBLIC_KEY   *ec_pubkey;
+NX_SECURE_EC_PRIVATE_KEY  ec_hardware_privkey;
 NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
@@ -762,7 +767,19 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         }
 #endif
 
-        ec_privkey = &local_certificate -> nx_secure_x509_private_key.ec_private_key;
+        /* Check for hardware key types before encrypting the hash to produce the signature. */
+        if(local_certificate -> nx_secure_x509_private_key_type == NX_SECURE_X509_KEY_TYPE_HARDWARE)
+        {
+            /* The certificate private key is stored in a secure element or similar. Just pass the private/user key data to the driver. */
+            ec_hardware_privkey.nx_secure_ec_private_key = local_certificate -> nx_secure_x509_private_key.user_key.key_data;
+            ec_hardware_privkey.nx_secure_ec_private_key_length = (USHORT)local_certificate -> nx_secure_x509_private_key.user_key.key_length;
+            ec_hardware_privkey.nx_secure_ec_named_curve = local_certificate -> nx_secure_x509_public_key.ec_public_key.nx_secure_ec_named_curve;
+            ec_privkey = &ec_hardware_privkey;
+        }
+        else
+        {
+            ec_privkey = &local_certificate -> nx_secure_x509_private_key.ec_private_key;
+        }
         ec_pubkey = &local_certificate -> nx_secure_x509_public_key.ec_public_key;
 
         /* Find out which named curve the local certificate is using. */

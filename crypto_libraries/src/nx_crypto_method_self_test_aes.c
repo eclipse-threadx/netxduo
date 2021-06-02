@@ -26,7 +26,7 @@
 /* Include necessary system files.  */
 #include "nx_crypto_method_self_test.h"
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 
 #define INPUT_OUTPUT_LENGTH (16)
 /* 02CF1E1D9796AD3395D8126757B6FC7C705F082FB85270427760AC173759CE07 */
@@ -122,7 +122,7 @@ static UCHAR output[INPUT_OUTPUT_LENGTH];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_method_self_test_aes                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -155,6 +155,10 @@ static UCHAR output[INPUT_OUTPUT_LENGTH];
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_self_test_aes(NX_CRYPTO_METHOD *crypto_method_aes,

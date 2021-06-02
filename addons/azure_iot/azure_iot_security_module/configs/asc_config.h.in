@@ -2,9 +2,18 @@
 /************************
 * Platform configuration
 *************************/
+#ifdef FLATCC_ASSERT
+#undef FLATCC_ASSERT
+#endif
+
 #ifndef __ASC_CONFIG_EXCLUDE_PORT__H__
 #include "tx_port.h"
 #include "nx_port.h"
+#include "nx_api.h"
+
+/* Flat buffer serializer platform */
+#cmakedefine FLATCC_ASSERT @FLATCC_ASSERT@
+
 #endif /* __ASC_CONFIG_EXCLUDE_PORT__H__ */
 
 /* Security Module pending time, in seconds */
