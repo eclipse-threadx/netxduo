@@ -21,6 +21,8 @@
 
 /* Pay your attention, that this implementation is not thread safe. */
 
+#define HASH_KEY(_key) ((const void *)((uintptr_t)(_key)))
+
 /**
  * @brief   Typedef of hash function
  *

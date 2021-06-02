@@ -58,6 +58,13 @@ asc_result_t components_manager_init(void)
         }
     }
 
+#ifdef ASC_DYNAMIC_FACTORY_ENABLED
+    asc_result_t result_dyn = components_factory_load_dynamic(NULL);
+    if (result_dyn != ASC_RESULT_OK && result_dyn != ASC_RESULT_EMPTY) {
+        result = result_dyn;
+    }
+#endif
+
     components_manager_do_lcm_action(COMPONENT_INITIALIZED, COMPONENT_LOADED);
     components_manager_do_lcm_action(COMPONENT_SUBSCRIBED, COMPONENT_INITIALIZED);
     components_manager_do_lcm_action(COMPONENT_RUNNING, COMPONENT_SUBSCRIBED);
@@ -77,6 +84,9 @@ asc_result_t components_manager_deinit(void)
     components_manager_do_lcm_action(COMPONENT_UNSUBSCRIBED, COMPONENT_UNDEFINED);
     components_manager_do_lcm_action(COMPONENT_LOADED, COMPONENT_UNDEFINED);
 
+#ifdef ASC_DYNAMIC_FACTORY_ENABLED
+    components_factory_unload_dynamic(); // must be before components_factory_unload();
+#endif
     components_factory_unload();
     _components_manager_global_context = 0;
     return ASC_RESULT_OK;
@@ -120,7 +130,12 @@ unsigned int components_manager_get_log_level(component_id_t id)
     }
     component_info_t *info = components_manager_get_info(id);
 
-    return info ? info->log_level : LOG_LEVEL_DEBUG; // return highest on fail
+    // return debug if no info or not initialized yet to not lost the log print
+    if (!info || info->state == COMPONENT_UNLOADED) {
+        return LOG_LEVEL_DEBUG;
+    }
+
+    return info->log_level; 
 }
 
 bool components_manager_set_log_level_all(int set)
@@ -142,7 +157,7 @@ component_t *components_manager_get_component(component_id_t id)
 {
     for (int index = 0; index < COMPONENTS_COUNT; index++) {
         if (g_component_factory[index].component.info.id == id) {
-            return (component_t*)id;
+            return &g_component_factory[index].component;
         }
     }
     return NULL;
@@ -381,7 +396,9 @@ static void _perform_lcm_action(lcm_func_t func, int index, component_state_enum
         break;
     default:
         if (func == NULL) {
-            g_component_factory[index].component.info.state = to_state;
+            if (g_component_factory[index].component.info.state != COMPONENT_FAIL) {
+                g_component_factory[index].component.info.state = to_state;
+            }
             log_debug("%d function function in component=[%s] is not armed", to_state, g_component_factory[index].component.info.name);
             return;
         }
@@ -418,8 +435,8 @@ static void components_manager_do_lcm_action(component_state_enum_t to_state, co
             is_stop_start_same_state = true;
         }
 
-        if (!is_stop_start_same_state && from_state != COMPONENT_UNDEFINED && g_component_factory[index].component.info.state != from_state) {
-            log_error("Expected=[%d] state is not match current=[%d]", from_state, g_component_factory[index].component.info.state);
+        if (func && !is_stop_start_same_state && from_state != COMPONENT_UNDEFINED && g_component_factory[index].component.info.state != from_state) {
+            log_error("Expected=[%d] state is not match current=[%d] component=[%s]", from_state, g_component_factory[index].component.info.state, g_component_factory[index].component.info.name);
             g_component_factory[index].component.info.last_result = ASC_RESULT_PARSE_EXCEPTION;
             continue;
         }

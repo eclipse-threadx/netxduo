@@ -26,7 +26,7 @@ unsigned long itime_time(unsigned long *timer)
 {
     if (_time_callback == NULL)
     {
-        return (unsigned long)-1;
+        return ITIME_FAILED;
     }
 
     return _time_callback(timer);

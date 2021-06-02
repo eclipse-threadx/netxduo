@@ -77,7 +77,7 @@ extern   "C" {
 #define NX_AZURE_IOT_HUB_CLIENT_MAX_BACKOFF_JITTER_PERCENT          (60)
 #endif /* NX_AZURE_IOT_HUB_CLIENT_MAX_BACKOFF_JITTER_PERCENT */
 
-/* Define AZ IoT Hub Client state.  */
+/* Define Azure IoT Hub Client state.  */
 /**< The client is not connected */
 #define NX_AZURE_IOT_HUB_CLIENT_STATUS_NOT_CONNECTED                0
 
@@ -200,13 +200,27 @@ UINT nx_azure_iot_hub_client_initialize(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
 UINT nx_azure_iot_hub_client_deinitialize(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr);
 
 /**
- * @brief Set the client certificate in the IoT Hub client.
+ * @brief Add more trusted certificate in the IoT Hub client if needed. It can be called multiple times to set multiple trusted certificates.
+ *
+ * @param[in] hub_client_ptr A pointer to a #NX_AZURE_IOT_HUB_CLIENT.
+ * @param[in] trusted_certificate A pointer to a `NX_SECURE_X509_CERT`, which is the trusted certificate.
+ * @return A `UINT` with the result of the API.
+ *   @retval #NX_AZURE_IOT_SUCCESS Successfully add trusted certificate to Azure IoT Hub Instance.
+ *   @retval #NX_AZURE_IOT_INVALID_PARAMETER Fail to add trusted certificate to Azure IoT Hub Instance due to invalid parameter.
+ *   @retval #NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to add trusted certificate due to NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS is too small.
+ */
+UINT nx_azure_iot_hub_client_trusted_cert_add(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                              NX_SECURE_X509_CERT *trusted_certificate);
+
+/**
+ * @brief Set the client certificate in the IoT Hub client. It can be called multiple times to set certificate chain.
  *
  * @param[in] hub_client_ptr A pointer to a #NX_AZURE_IOT_HUB_CLIENT.
  * @param[in] device_certificate A pointer to a `NX_SECURE_X509_CERT`, which is the device certificate.
  * @return A `UINT` with the result of the API.
- *   @retval #NX_AZURE_IOT_SUCCESS Successfully set device certificate to AZ IoT Hub Instance.
- *   @retval #NX_AZURE_IOT_INVALID_PARAMETER Fail to set device certificate to AZ IoT Hub Instance due to invalid parameter.
+ *   @retval #NX_AZURE_IOT_SUCCESS Successfully set device certificate to Azure IoT Hub Instance.
+ *   @retval #NX_AZURE_IOT_INVALID_PARAMETER Fail to set device certificate to Azure IoT Hub Instance due to invalid parameter.
+ *   @retval #NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to set device certificate due to NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS is too small.
  */
 UINT nx_azure_iot_hub_client_device_cert_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
                                              NX_SECURE_X509_CERT *device_certificate);

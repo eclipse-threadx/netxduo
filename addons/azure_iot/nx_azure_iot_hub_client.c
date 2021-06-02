@@ -22,14 +22,16 @@
 
 #ifndef NX_AZURE_IOT_HUB_CLIENT_USER_AGENT
 
-/* Useragent e.g: DeviceClientType=c%2F1.0.0-preview.1%20%28nx%206.0%3Bazrtos%206.0%29 */
+/* Useragent e.g: DeviceClientType=c%2F1.0.0%20%28nx%206.0.0%3Bazrtos%206.0.0%29 */
 #define NX_AZURE_IOT_HUB_CLIENT_STR(C)          #C
 #define NX_AZURE_IOT_HUB_CLIENT_TO_STR(x)       NX_AZURE_IOT_HUB_CLIENT_STR(x)
 #define NX_AZURE_IOT_HUB_CLIENT_USER_AGENT      "DeviceClientType=c%2F" AZ_SDK_VERSION_STRING "%20%28nx%20" \
                                                 NX_AZURE_IOT_HUB_CLIENT_TO_STR(NETXDUO_MAJOR_VERSION) "." \
-                                                NX_AZURE_IOT_HUB_CLIENT_TO_STR(NETXDUO_MINOR_VERSION) "%3Bazrtos%20"\
+                                                NX_AZURE_IOT_HUB_CLIENT_TO_STR(NETXDUO_MINOR_VERSION) "." \
+                                                NX_AZURE_IOT_HUB_CLIENT_TO_STR(NETXDUO_PATCH_VERSION) "%3Bazrtos%20"\
                                                 NX_AZURE_IOT_HUB_CLIENT_TO_STR(THREADX_MAJOR_VERSION) "." \
-                                                NX_AZURE_IOT_HUB_CLIENT_TO_STR(THREADX_MINOR_VERSION) "%29"
+                                                NX_AZURE_IOT_HUB_CLIENT_TO_STR(THREADX_MINOR_VERSION) "."  \
+                                                NX_AZURE_IOT_HUB_CLIENT_TO_STR(THREADX_PATCH_VERSION) "%29"
 #endif /* NX_AZURE_IOT_HUB_CLIENT_USER_AGENT */
 
 static VOID nx_azure_iot_hub_client_received_message_cleanup(NX_AZURE_IOT_HUB_CLIENT_RECEIVE_MESSAGE *message);
@@ -155,7 +157,7 @@ az_result core_result;
     hub_client_ptr -> nx_azure_iot_hub_client_resource.resource_cipher_map_size = cipher_map_size;
     hub_client_ptr -> nx_azure_iot_hub_client_resource.resource_metadata_ptr = metadata_memory;
     hub_client_ptr -> nx_azure_iot_hub_client_resource.resource_metadata_size = memory_size;
-    hub_client_ptr -> nx_azure_iot_hub_client_resource.resource_trusted_certificate = trusted_certificate;
+    hub_client_ptr -> nx_azure_iot_hub_client_resource.resource_trusted_certificates[0] = trusted_certificate;
     hub_client_ptr -> nx_azure_iot_hub_client_resource.resource_hostname = host_name;
     hub_client_ptr -> nx_azure_iot_hub_client_resource.resource_hostname_length = host_name_length;
     options.module_id = az_span_create((UCHAR *)module_id, (INT)module_id_length);
@@ -688,9 +690,53 @@ UINT status;
     return(NX_AZURE_IOT_SUCCESS);
 }
 
+UINT nx_azure_iot_hub_client_trusted_cert_add(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                              NX_SECURE_X509_CERT *trusted_certificate)
+{
+UINT i;
+NX_AZURE_IOT_RESOURCE *resource_ptr;
+
+    if ((hub_client_ptr == NX_NULL) ||
+        (hub_client_ptr -> nx_azure_iot_ptr == NX_NULL) ||
+        (trusted_certificate == NX_NULL))
+    {
+        LogError(LogLiteralArgs("IoTHub device certificate set fail: INVALID POINTER"));
+        return(NX_AZURE_IOT_INVALID_PARAMETER);
+    }
+
+    /* Obtain the mutex.  */
+    tx_mutex_get(hub_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr, TX_WAIT_FOREVER);
+
+    resource_ptr = &(hub_client_ptr -> nx_azure_iot_hub_client_resource);
+    for (i = 0; i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_trusted_certificates); i++)
+    {
+        if (resource_ptr -> resource_trusted_certificates[i] == NX_NULL)
+        {
+            resource_ptr -> resource_trusted_certificates[i] = trusted_certificate;
+            break;
+        }
+    }
+
+    /* Release the mutex.  */
+    tx_mutex_put(hub_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr);
+
+    if (i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_trusted_certificates))
+    {
+        return(NX_AZURE_IOT_SUCCESS);
+    }
+    else
+    {
+
+        /* No more space to store trusted certificate.  */
+        return(NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE);
+    }
+}
+
 UINT nx_azure_iot_hub_client_device_cert_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
                                              NX_SECURE_X509_CERT *device_certificate)
 {
+UINT i;
+NX_AZURE_IOT_RESOURCE *resource_ptr;
 
     if ((hub_client_ptr == NX_NULL) ||
         (hub_client_ptr -> nx_azure_iot_ptr == NX_NULL) ||
@@ -703,12 +749,29 @@ UINT nx_azure_iot_hub_client_device_cert_set(NX_AZURE_IOT_HUB_CLIENT *hub_client
     /* Obtain the mutex.  */
     tx_mutex_get(hub_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr, TX_WAIT_FOREVER);
 
-    hub_client_ptr -> nx_azure_iot_hub_client_resource.resource_device_certificate = device_certificate;
+    resource_ptr = &(hub_client_ptr -> nx_azure_iot_hub_client_resource);
+    for (i = 0; i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_device_certificates); i++)
+    {
+        if (resource_ptr -> resource_device_certificates[i] == NX_NULL)
+        {
+            resource_ptr -> resource_device_certificates[i] = device_certificate;
+            break;
+        }
+    }
 
     /* Release the mutex.  */
     tx_mutex_put(hub_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr);
 
-    return(NX_AZURE_IOT_SUCCESS);
+    if (i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_device_certificates))
+    {
+        return(NX_AZURE_IOT_SUCCESS);
+    }
+    else
+    {
+
+        /* No more space to store device certificate.  */
+        return(NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE);
+    }
 }
 
 UINT nx_azure_iot_hub_client_symmetric_key_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
@@ -1248,7 +1311,7 @@ ULONG bytes_copied;
     NX_PARAMETER_NOT_USED(packet_id);
     NX_PARAMETER_NOT_USED(context);
 
-    /* Mointor subscribe ack.  */
+    /* Monitor subscribe ack.  */
     if (type == MQTT_CONTROL_PACKET_TYPE_SUBACK)
     {
 

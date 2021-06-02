@@ -26,7 +26,7 @@
 /* Include necessary system files.  */
 
 #include "nx_crypto_dh.h"
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 
 /* The Diffie-Hellman group 2 modulus. */
 /* Modulus, in byte stream, be */
@@ -57,7 +57,7 @@ static const HN_UBASE _nx_dh_group_2_modulus[] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_dh_setup                                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -108,6 +108,10 @@ static const HN_UBASE _nx_dh_group_2_modulus[] =
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_dh_setup(NX_CRYPTO_DH  *dh_ptr,

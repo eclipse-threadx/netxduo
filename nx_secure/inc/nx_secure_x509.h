@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_x509.h                                    PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -47,6 +47,10 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            removed dependency on TLS,  */
 /*                                            resulting in version 6.1.6  */
+/*  06-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            supported hardware EC       */
+/*                                            private key,                */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -179,6 +183,7 @@ extern   "C" {
 #define NX_SECURE_X509_KEY_TYPE_NONE                              0x00000000 /* Default value for no key. */
 #define NX_SECURE_X509_KEY_TYPE_RSA_PKCS1_DER                     0x00000001 /* DER-encoded PKCS-1 RSA private key. */
 #define NX_SECURE_X509_KEY_TYPE_EC_DER                            0x00000002 /* DER-encoded EC private key. */
+#define NX_SECURE_X509_KEY_TYPE_HARDWARE                          0x00000003 /* Hardware private key */
 
 
 /*  ASN.1 Format:

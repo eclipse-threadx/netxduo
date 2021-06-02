@@ -40,7 +40,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_ack_check                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -81,6 +81,9 @@
 /*                                            corrected the calculation of*/
 /*                                            ending packet sequence,     */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_state_ack_check(NX_TCP_SOCKET *socket_ptr, NX_TCP_HEADER *tcp_header_ptr)
@@ -132,6 +135,7 @@ UINT           wrapped_flag = NX_FALSE;
                 search_header_ptr =  (NX_TCP_HEADER *)(search_ptr -> nx_packet_ip_header +
                                                        sizeof(NX_IPV4_HEADER));
             }
+            else
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
             if (search_ptr -> nx_packet_ip_version == NX_IP_VERSION_V6)
@@ -141,7 +145,11 @@ UINT           wrapped_flag = NX_FALSE;
                 search_header_ptr =  (NX_TCP_HEADER *)(search_ptr -> nx_packet_ip_header +
                                                        sizeof(NX_IPV6_HEADER));
             }
+            else
 #endif /* FEATURE_NX_IPV6 */
+            {
+                return(NX_FALSE);
+            }
 
             /* Determine the size of the TCP header.  */
             temp =  search_header_ptr -> nx_tcp_header_word_3;

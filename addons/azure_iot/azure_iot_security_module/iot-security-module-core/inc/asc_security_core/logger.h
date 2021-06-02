@@ -31,6 +31,8 @@
     #define log_error(...)
     #define log_fatal(...)
     #define logger_set_system_log_level(_l)
+    #define logger_set_timestamp(_s)
+    #define logger_get_system_log_level() (LOG_LEVEL_NOTSET)
 #else
     #include <stdio.h>
     #include <string.h>
@@ -41,7 +43,6 @@
     #include "asc_security_core/component_id.h"
 
     #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-    #define MDC_FORMAT "%s [%s/%s:%d] "
 
     bool logger_log(component_id_t id, unsigned int level, const char *filename, const char *func, int line, const char *fmt, ...) ATTRIBUTE_FORMAT(6, 7);
 /**
@@ -52,6 +53,8 @@
  * @return true on seccess, otherwise false.
  */
     bool logger_set_system_log_level(int set);
+    void logger_set_timestamp(bool set);
+    int logger_get_system_log_level(void);
 
     // define log by severity according to ASC_LOG_LEVEL
     #if ASC_LOG_LEVEL < LOG_LEVEL_DEBUG

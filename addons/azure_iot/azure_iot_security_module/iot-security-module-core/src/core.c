@@ -82,7 +82,7 @@ static void _security_module_state_cb(notifier_t *notifier, int message_num, voi
 static void _init_random_collect_offset(core_t *core_ptr)
 {
     unsigned long now = itime_time(NULL);
-    if (now == (unsigned long)(-1)) {
+    if (now == ITIME_FAILED) {
         log_error("Error get current time");
         now = 0;
     }
@@ -104,7 +104,7 @@ static unsigned long _calculate_collector_time_offset(core_t *core_ptr, collecto
     // TODO it breaks sequence of collections and cause to increasing of security messages - need to sync on init_random_collect_offset
     if (state == COMPONENT_RUNNING) {
         unsigned long now = itime_time(NULL);
-        if (now == (unsigned long)(-1)) {
+        if (now == ITIME_FAILED) {
             log_error("Error get current time");
             now = 0;
         }
@@ -317,7 +317,7 @@ static asc_result_t core_collect(core_t *core_ptr, unsigned long now)
     bool at_least_one_success = false;
     bool time_passed = false;
 
-    if (now == (unsigned long)(-1)) {
+    if (now == ITIME_FAILED) {
         log_error("Error get current time");
         return ASC_RESULT_IMPOSSIBLE;
     }
@@ -441,7 +441,7 @@ static asc_result_t _set_next_collect_timer(core_t *core_ptr, unsigned long now,
     // stop existing timer
     el->timer_delete(core_ptr->h_collect);
 
-    if (now == (unsigned long)(-1)) {
+    if (now == ITIME_FAILED) {
         log_error("Error get current time");
         core_ptr->h_collect = el->timer_create(cb_collect, core_ptr, ASC_HIGH_PRIORITY_INTERVAL, 0, &core_ptr->h_collect);
         core_ptr->nearest_collect_time = ASC_HIGH_PRIORITY_INTERVAL;

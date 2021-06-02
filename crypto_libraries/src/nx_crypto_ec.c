@@ -685,7 +685,7 @@ NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_secp521r1 =
     _nx_crypto_ec_fp_projective_multiple,
     _nx_crypto_ec_secp521r1_reduce
 };
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 static NX_CRYPTO_CONST NX_CRYPTO_EC *_nx_crypto_ec_named_curves[] =
 {
     &_nx_crypto_ec_secp192r1,
@@ -1907,9 +1907,13 @@ UINT                  compare_value;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_digit_reduce(NX_CRYPTO_EC *curve,
                                                    NX_CRYPTO_HUGE_NUMBER *value,
                                                    HN_UBASE digit,
@@ -2028,9 +2032,13 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_digit_reduce(NX_CRYPTO_EC *curve,
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_reduce(NX_CRYPTO_EC *curve,
                                             NX_CRYPTO_HUGE_NUMBER *value,
                                             HN_UBASE *scratch)
@@ -3330,9 +3338,13 @@ NX_CRYPTO_EC_POINT    public_key;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_precomputation(NX_CRYPTO_EC *curve,
                                                  UINT window_width,
                                                  UINT bits,
@@ -3510,9 +3522,13 @@ UINT                       i, j;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fixed_output(NX_CRYPTO_EC *curve,
                                                INT (*output)(const CHAR *format, ...),
                                                const CHAR *tab,
@@ -3755,9 +3771,13 @@ const CHAR                *array_name[] = {"", "_2e"};
 /*  09-30-2020     Timothy Stapko           Modified comment(s), updated  */
 /*                                            constants, resulting        */
 /*                                            in version 6.1              */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_get_named_curve(NX_CRYPTO_EC **curve, UINT curve_id)
 {
 UINT i;

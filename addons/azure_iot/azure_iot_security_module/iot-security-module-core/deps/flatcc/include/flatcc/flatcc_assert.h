@@ -32,6 +32,13 @@ extern "C" {
 #define FLATCC_ASSERT(x) ((void)0)
 /* Grisu3 is used for floating point conversion in JSON processing. */
 #define GRISU3_NO_ASSERT
+#define __SET_ASSERT__
+#define __ASSERT_VAL__
+#define __ASSERT_REASON__
+#else
+extern int __SET_ASSERT__;
+extern int __ASSERT_VAL__;
+extern const char *__ASSERT_REASON__;
 #endif
 
 #ifndef FLATCC_ASSERT

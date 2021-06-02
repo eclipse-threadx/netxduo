@@ -27,7 +27,7 @@
 #include "nx_crypto.h"
 #include "nx_crypto_hmac_sha2.h"
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 
 #define NX_CRYPTO_INTEGRITY_TEST_CHECK(status)                                      \
     if(status)                                                                      \
@@ -92,14 +92,14 @@ extern NX_CRYPTO_METHOD crypto_method_hmac_sha256;
 extern const CHAR nx_crypto_hash_key[];
 extern const UINT nx_crypto_hash_key_size;
 static UCHAR nx_crypto_hmac_output[64];
-static NX_CRYPTO_SHA256_HMAC nx_crypto_fips_hmac;
+static NX_CRYPTO_SHA256_HMAC nx_crypto_self_test_hmac;
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hardware_rand_initialize                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -140,6 +140,10 @@ static NX_CRYPTO_SHA256_HMAC nx_crypto_fips_hmac;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP void _nx_crypto_hardware_rand_initialize_stm32f4(void)
@@ -358,7 +362,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_integrity_test(void)
 UINT status;
 
     status = _nx_crypto_method_hmac_sha256_operation(NX_CRYPTO_AUTHENTICATE,  /* op */
-                                                     (VOID*)&nx_crypto_fips_hmac,
+                                                     (VOID*)&nx_crypto_self_test_hmac,
                                                      &crypto_method_hmac_sha256, /* Method */
                                                      (UCHAR*)nx_crypto_hash_key,
                                                      nx_crypto_hash_key_size,
@@ -366,7 +370,7 @@ UINT status;
                                                      (ULONG)_nx_crypto_module_hash_value - (ULONG)&_nx_crypto_module_program_begin,
                                                      NX_CRYPTO_NULL, /* iv_ptr, not used */
                                                      nx_crypto_hmac_output, sizeof(nx_crypto_hmac_output),
-                                                     &nx_crypto_fips_hmac, sizeof(nx_crypto_fips_hmac),
+                                                     &nx_crypto_self_test_hmac, sizeof(nx_crypto_self_test_hmac),
                                                      NX_CRYPTO_NULL, NX_CRYPTO_NULL);
     NX_CRYPTO_INTEGRITY_TEST_CHECK(status)
 

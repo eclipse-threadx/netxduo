@@ -26,6 +26,10 @@ extern   "C" {
 /* Users can use this root certificate as sample, and also can build the root certificate by themself.  */
 extern const unsigned char _nx_azure_iot_root_cert[];
 extern const unsigned int _nx_azure_iot_root_cert_size;
+extern const unsigned char _nx_azure_iot_root_cert_2[];
+extern const unsigned int _nx_azure_iot_root_cert_size_2;
+extern const unsigned char _nx_azure_iot_root_cert_3[];
+extern const unsigned int _nx_azure_iot_root_cert_size_3;
 
 
 /* Determine if a C++ compiler is being used.  If so, ensure that standard

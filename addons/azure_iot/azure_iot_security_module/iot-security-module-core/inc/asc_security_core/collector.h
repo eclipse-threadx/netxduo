@@ -197,8 +197,8 @@ asc_result_t collector_default_start(component_id_t id);
  */
 asc_result_t collector_default_stop(component_id_t id);
 
-#define COLLECTOR_OPS_DEFINITIONS(__init, __deinit, __subscribe, __unsubscribe, __start, __stop) \
-static component_ops_t _ops = { \
+#define COLLECTOR_OPS_DEFINITIONS(__ops, __init, __deinit, __subscribe, __unsubscribe, __start, __stop) \
+static component_ops_t _ops##__ops = { \
     .init = __init, \
     .deinit = __deinit, \
     .subscribe = __subscribe, \

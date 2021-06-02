@@ -102,7 +102,7 @@ int flatcc_refmap_resize(flatcc_refmap_t *refmap, size_t count)
         refmap->table = _flatcc_refmap_calloc(buckets, sizeof(refmap->table[0]));
         if (refmap->table == 0) {
             refmap->table = T_old;
-            FLATCC_ASSERT(0); /* out of memory */
+            FLATCC_ASSERT(__SET_ASSERT__); /* out of memory */
             return -1;
         }
     }

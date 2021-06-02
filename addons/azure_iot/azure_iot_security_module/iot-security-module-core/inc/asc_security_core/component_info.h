@@ -61,7 +61,7 @@ typedef struct {
     component_id_t id;
 
 /* The component's name */
-    char *name;
+    const char *name;
 
 /* The component's enumerator */
     int enumerator;
@@ -80,6 +80,7 @@ typedef struct {
 
 /* The log level */
     unsigned int log_level;
+
 } component_info_t;
 
 /**

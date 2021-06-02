@@ -14,7 +14,7 @@
 #define __flatbuffers_read_vt(ID, offset, t)\
 flatbuffers_voffset_t offset = 0;\
 {   flatbuffers_voffset_t id__tmp, *vt__tmp;\
-    FLATCC_ASSERT(t != 0 && "null pointer table access");\
+    FLATCC_ASSERT((0 != (__ASSERT_VAL__ = (t != 0))) && (NULL != (__ASSERT_REASON__ = "null pointer table access")));\
     id__tmp = ID;\
     vt__tmp = (flatbuffers_voffset_t *)((uint8_t *)(t) -\
         __flatbuffers_soffset_read_from_pe(t));\
@@ -51,7 +51,7 @@ __flatbuffers_define_scan_by_scalar_field(N, NK, T)
     if (offset__tmp) {\
         return (T)((uint8_t *)(t) + offset__tmp);\
     }\
-    FLATCC_ASSERT(!(r) && "required field missing");\
+    FLATCC_ASSERT((0 != (__ASSERT_VAL__ = !(r))) && (NULL != (__ASSERT_REASON__ = "required field missing")));\
     return 0;\
 }
 #define __flatbuffers_offset_field(T, ID, t, r, adjust)\
@@ -64,7 +64,7 @@ __flatbuffers_define_scan_by_scalar_field(N, NK, T)
         return (T)((uint8_t *)(elem__tmp) + adjust +\
               __flatbuffers_uoffset_read_from_pe(elem__tmp));\
     }\
-    FLATCC_ASSERT(!(r) && "required field missing");\
+    FLATCC_ASSERT((0 != (__ASSERT_VAL__ = !(r))) && (NULL != (__ASSERT_REASON__ = "required field missing")));\
     return 0;\
 }
 #define __flatbuffers_vector_field(T, ID, t, r) __flatbuffers_offset_field(T, ID, t, r, sizeof(flatbuffers_uoffset_t))
@@ -104,14 +104,14 @@ __flatbuffers_define_scan_by_string_field(N, NK)
 static inline size_t flatbuffers_vec_len(const void *vec)
 __flatbuffers_vec_len(vec)
 #define __flatbuffers_scalar_vec_at(N, vec, i)\
-{ FLATCC_ASSERT(flatbuffers_vec_len(vec) > (i) && "index out of range");\
+{ FLATCC_ASSERT(flatbuffers_vec_len(vec) > (i) && (NULL != (__ASSERT_REASON__ = "index out of range")));\
   return __flatbuffers_read_scalar(N, &(vec)[i]); }
 #define __flatbuffers_struct_vec_at(vec, i)\
-{ FLATCC_ASSERT(flatbuffers_vec_len(vec) > (i) && "index out of range"); return (vec) + (i); }
+{ FLATCC_ASSERT(flatbuffers_vec_len(vec) > (i) && (NULL != (__ASSERT_REASON__ = "index out of range"))); return (vec) + (i); }
 /* `adjust` skips past the header for string vectors. */
 #define __flatbuffers_offset_vec_at(T, vec, i, adjust)\
 { const flatbuffers_uoffset_t *elem__tmp = (vec) + (i);\
-  FLATCC_ASSERT(flatbuffers_vec_len(vec) > (i) && "index out of range");\
+  FLATCC_ASSERT(flatbuffers_vec_len(vec) > (i) && (NULL != (__ASSERT_REASON__ = "index out of range")));\
   return (T)((uint8_t *)(elem__tmp) + (size_t)__flatbuffers_uoffset_read_from_pe(elem__tmp) + (adjust)); }
 #define __flatbuffers_define_scalar_vec_len(N)\
 static inline size_t N ## _vec_len(N ##_vec_t vec__tmp)\
@@ -191,7 +191,7 @@ static inline size_t T ## _union_vec_len(T ## _union_vec_t uv__tmp)\
 { return NS ## vec_len(uv__tmp.type); }\
 static inline T ## _union_t T ## _union_vec_at(T ## _union_vec_t uv__tmp, size_t i__tmp)\
 { T ## _union_t u__tmp = { 0, 0 }; size_t n__tmp = NS ## vec_len(uv__tmp.type);\
-  FLATCC_ASSERT(n__tmp > (i__tmp) && "index out of range"); u__tmp.type = uv__tmp.type[i__tmp];\
+  FLATCC_ASSERT(n__tmp > (i__tmp) && (NULL != (__ASSERT_REASON__ = "index out of range"))); u__tmp.type = uv__tmp.type[i__tmp];\
   /* Unknown type is treated as NONE for schema evolution. */\
   if (u__tmp.type == 0) return u__tmp;\
   u__tmp.value = NS ## generic_vec_at(uv__tmp.value, i__tmp); return u__tmp; }\
@@ -217,7 +217,7 @@ static inline T ## _union_vec_t N ## _ ## NK ## _union(N ## _table_t t__tmp)\
 { T ## _union_vec_t uv__tmp; uv__tmp.type = N ## _ ## NK ## _type_get(t__tmp);\
   uv__tmp.value = N ## _ ## NK(t__tmp);\
   FLATCC_ASSERT(NS ## vec_len(uv__tmp.type) == NS ## vec_len(uv__tmp.value)\
-  && "union vector type length mismatch"); return uv__tmp; }
+  && (NULL != (__ASSERT_REASON__ = "union vector type length mismatch"))); return uv__tmp; }
 #include <string.h>
 static const size_t flatbuffers_not_found = (size_t)-1;
 static const size_t flatbuffers_end = (size_t)-1;

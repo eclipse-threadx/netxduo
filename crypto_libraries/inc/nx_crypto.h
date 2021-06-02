@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_crypto.h                                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -45,6 +45,10 @@
 /*                                            by default, and added       */
 /*                                            crypto standalone support,  */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            Renamed FIPS symbol and     */
+/*                                            fips memory functions,      */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -76,21 +80,28 @@ extern   "C" {
 #define NX_CRYPTO_LITTLE_ENDIAN           1
 #endif
 
+/* Deprecated definition, provided only for backward compatibility */
+#ifdef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
+#define NX_CRYPTO_SELF_TEST
+#endif /* NX_CRYPTO_SELF_TEST */
+#endif /* NX_CRYPTO_FIPS */
+
 #include "nx_crypto_const.h"
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 
-VOID *_nx_crypto_fips_memcpy(void *dest, const void *src, size_t size);
-VOID *_nx_crypto_fips_memmove(void *dest, const void *src, size_t size);
-VOID *_nx_crypto_fips_memset(void *dest, int value, size_t size);
-int   _nx_crypto_fips_memcmp(const void *dest, const void *src, size_t size);
+VOID *_nx_crypto_self_test_memcpy(void *dest, const void *src, size_t size);
+VOID *_nx_crypto_self_test_memmove(void *dest, const void *src, size_t size);
+VOID *_nx_crypto_self_test_memset(void *dest, int value, size_t size);
+int   _nx_crypto_self_test_memcmp(const void *dest, const void *src, size_t size);
 UINT  _nx_crypto_drbg(UINT bits, UCHAR *result);
 
 #ifdef _NX_CRYPTO_INITIALIZE_
-VOID *(*volatile _nx_crypto_memset_ptr)(void *dest, int value, size_t size) = _nx_crypto_fips_memset;
-VOID *(*volatile _nx_crypto_memcpy_ptr)(void *dest, const void *src, size_t size) = _nx_crypto_fips_memcpy;
+VOID *(*volatile _nx_crypto_memset_ptr)(void *dest, int value, size_t size) = _nx_crypto_self_test_memset;
+VOID *(*volatile _nx_crypto_memcpy_ptr)(void *dest, const void *src, size_t size) = _nx_crypto_self_test_memcpy;
 #else
 extern VOID *(*volatile _nx_crypto_memset_ptr)(void *dest, int value, size_t size);
 extern VOID *(*volatile _nx_crypto_memcpy_ptr)(void *dest, const void *src, size_t size);
@@ -101,7 +112,7 @@ extern VOID *(*volatile _nx_crypto_memcpy_ptr)(void *dest, const void *src, size
 #endif
 
 #ifndef NX_CRYPTO_MEMMOVE
-#define NX_CRYPTO_MEMMOVE   _nx_crypto_fips_memmove
+#define NX_CRYPTO_MEMMOVE   _nx_crypto_self_test_memmove
 #endif
 
 #ifndef NX_CRYPTO_MEMSET
@@ -109,7 +120,7 @@ extern VOID *(*volatile _nx_crypto_memcpy_ptr)(void *dest, const void *src, size
 #endif
 
 #ifndef NX_CRYPTO_MEMCMP
-#define NX_CRYPTO_MEMCMP    _nx_crypto_fips_memcmp
+#define NX_CRYPTO_MEMCMP    _nx_crypto_self_test_memcmp
 #endif
 
 #ifndef NX_CRYPTO_RBG
@@ -118,7 +129,7 @@ extern VOID *(*volatile _nx_crypto_memcpy_ptr)(void *dest, const void *src, size
 
 #define NX_CRYPTO_CONST
 
-#else /* NON FIPS build. */
+#else /* NON NX_CRYPTO_SELF_TEST build. */
 
 #ifdef _NX_CRYPTO_INITIALIZE_
 VOID *(*volatile _nx_crypto_memset_ptr)(void *dest, int value, size_t size) = memset;
@@ -177,9 +188,9 @@ extern VOID *(*volatile _nx_crypto_memcpy_ptr)(void *dest, const void *src, size
 #endif
 #endif
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 
-/* FIPS build forces NX_SECURE_KEY_CLEAR to be set */
+/* NX_CRYPTO_SELF_TEST build forces NX_SECURE_KEY_CLEAR to be set */
 #ifndef NX_SECURE_KEY_CLEAR
 #define NX_SECURE_KEY_CLEAR
 #endif /* NX_SECURE_KEY_CLEAR */
@@ -197,7 +208,7 @@ extern unsigned int _nx_crypto_library_state;
 #else
 
 #define NX_CRYPTO_STATE_CHECK
-#endif /* NX_CRYPTO_FIPS */
+#endif /* NX_CRYPTO_SELF_TEST */
 
 /* Keep functions not used which is compiler specific. */
 #ifndef NX_CRYPTO_KEEP
@@ -374,7 +385,7 @@ typedef struct NX_CRYPTO_CIPHERSUITE_STRUCT
 
 UINT  _nx_crypto_initialize(VOID);
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 #define nx_crypto_method_self_test                      _nx_crypto_method_self_test
 #define nx_crypto_module_state_get                      _nx_crypto_module_state_get
 /* int nx_crypto_rand(void); */

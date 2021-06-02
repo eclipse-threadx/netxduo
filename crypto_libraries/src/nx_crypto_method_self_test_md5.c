@@ -26,7 +26,7 @@
 /* Include necessary system files.  */
 #include "nx_crypto_method_self_test.h"
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 
 /* f149e41d848f59276cfddd743bafa9a90e1ee4a263a118142b33e3702176ef0a59f8237a1cb51b42f3ded6b202d9af0997898fdd03cf60bda951c514547a0850cec25444ae2f24cb711bfbafcc3956c941d3de69f155e3f8b10f06db5f37359b772ddd43e1035a0a0d3db33242d5843033833b0dd43b870c6bf60e8deab55f317cc3273f5e3ba747f0cb65050cb7228796210d9254873643008d45f29cfd6c5b060c9a */
 static UCHAR plain_1[] = {
@@ -56,7 +56,7 @@ static ULONG output[4];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_method_self_test_md5                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -89,6 +89,10 @@ static ULONG output[4];
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_self_test_md5(NX_CRYPTO_METHOD *crypto_method_md5,

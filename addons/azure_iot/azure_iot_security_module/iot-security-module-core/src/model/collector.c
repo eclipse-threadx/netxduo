@@ -169,7 +169,7 @@ asc_result_t collector_serialize_events(collector_t *collector_ptr, serializer_t
         return ASC_RESULT_BAD_ARGUMENT;
     }
     unsigned long now = itime_time(NULL);
-    if (now == (unsigned long)(-1)) {
+    if (now == ITIME_FAILED) {
         log_error("Error get current time");
         now = 0;
     }

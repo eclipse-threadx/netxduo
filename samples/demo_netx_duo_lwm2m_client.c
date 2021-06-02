@@ -2,7 +2,6 @@
  * This is a demonstration of the NetX LWM2M Client.
  */
 
-#include "time.h"
 #include "nx_api.h"
 #include "nx_lwm2m_client.h"
 
@@ -869,8 +868,6 @@ UCHAR *secret_key = NX_NULL;
 UINT secret_key_len = 0;
 #endif /* USE_DTLS */
 #endif /* BOOTSTRAP */
-
-    srand(time(NULL));
 
 #ifndef SAMPLE_DHCP_DISABLE
     dhcp_wait();

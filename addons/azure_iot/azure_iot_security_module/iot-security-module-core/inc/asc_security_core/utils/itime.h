@@ -19,6 +19,8 @@
 #define SEC_HOUR (SEC_MIN * 60)
 #define SEC_DAY (SEC_HOUR * 24)
 
+#define ITIME_FAILED ((unsigned long)(-1))
+
 typedef unsigned long (*unix_time_callback_t)(unsigned long *unix_time);
 
 void itime_init(unix_time_callback_t time_callback);

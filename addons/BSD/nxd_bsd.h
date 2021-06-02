@@ -62,7 +62,9 @@ extern   "C" {
 
 #endif
 
+#ifndef __CCRX__
 #include "time.h"
+#endif /* __CCRX__ */
 
 /* Bring in the necessary NetX include file.  */
 #include "nx_api.h"
@@ -499,7 +501,10 @@ extern   "C" {
 
 /* Define data types used in structure timeval.  */
 
-typedef LONG        suseconds_t;  
+#ifdef __CCRX__
+typedef LONG        time_t;
+#endif /* __CCRX__ */
+typedef LONG        suseconds_t;
 
 #ifndef __SES_ARM
 struct timeval

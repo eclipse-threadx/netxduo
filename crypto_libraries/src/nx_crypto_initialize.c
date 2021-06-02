@@ -24,7 +24,7 @@
 #include "nx_crypto.h"
 
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 
 /* Include necessary system files.  */
 
@@ -33,8 +33,8 @@
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_crypto_fips_memcpy                              PORTABLE C      */
-/*                                                           6.1          */
+/*    _nx_crypto_self_test_memcpy                         PORTABLE C      */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,9 +71,12 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed function,           */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memcpy(void *dest, const void *src, size_t size)
+NX_CRYPTO_KEEP VOID *_nx_crypto_self_test_memcpy(void *dest, const void *src, size_t size)
 {
     char *from, *to;
     unsigned int i;
@@ -93,8 +96,8 @@ NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memcpy(void *dest, const void *src, size_t 
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_crypto_fips_memset                              PORTABLE C      */
-/*                                                           6.1          */
+/*    _nx_crypto_self_test_memset                         PORTABLE C      */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -131,9 +134,12 @@ NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memcpy(void *dest, const void *src, size_t 
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed function,           */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memset(void *dest, int value, size_t size)
+NX_CRYPTO_KEEP VOID *_nx_crypto_self_test_memset(void *dest, int value, size_t size)
 {
     char  *to;
     unsigned int i;
@@ -153,8 +159,8 @@ NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memset(void *dest, int value, size_t size)
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_crypto_fips_memcmp                              PORTABLE C      */
-/*                                                           6.1          */
+/*    _nx_crypto_self_test_memcmp                         PORTABLE C      */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -193,9 +199,12 @@ NX_CRYPTO_KEEP VOID *_nx_crypto_fips_memset(void *dest, int value, size_t size)
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed function,           */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-NX_CRYPTO_KEEP int _nx_crypto_fips_memcmp(const void *str1, const void *str2, size_t size)
+NX_CRYPTO_KEEP int _nx_crypto_self_test_memcmp(const void *str1, const void *str2, size_t size)
 {
     char *string1;
     char *string2;
@@ -216,8 +225,8 @@ NX_CRYPTO_KEEP int _nx_crypto_fips_memcmp(const void *str1, const void *str2, si
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_crypto_fips_memmove                             PORTABLE C      */
-/*                                                           6.1          */
+/*    _nx_crypto_self_test_memmove                        PORTABLE C      */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -253,9 +262,12 @@ NX_CRYPTO_KEEP int _nx_crypto_fips_memcmp(const void *str1, const void *str2, si
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed function,           */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-NX_CRYPTO_KEEP void* _nx_crypto_fips_memmove(void *dest, const void *src, size_t size)
+NX_CRYPTO_KEEP void* _nx_crypto_self_test_memmove(void *dest, const void *src, size_t size)
 {
     char *from, *to;
     unsigned int i;

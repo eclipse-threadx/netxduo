@@ -31,7 +31,7 @@ static UCHAR _nx_secure_client_padded_pre_master[600];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_client_key_exchange          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,6 +80,10 @@ static UCHAR _nx_secure_client_padded_pre_master[600];
 /*                                            ECC find curve method,      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            supported hardware EC       */
+/*                                            private key,                */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_client_key_exchange(NX_SECURE_TLS_SESSION *tls_session,
@@ -360,7 +364,8 @@ UINT                                  private_key_length;
 
             /* Check for user-defined key types. */
             user_defined_key = NX_FALSE;
-            if ((local_certificate -> nx_secure_x509_private_key_type & NX_SECURE_X509_KEY_TYPE_USER_DEFINED_MASK) != 0x0)
+            if (((local_certificate -> nx_secure_x509_private_key_type & NX_SECURE_X509_KEY_TYPE_USER_DEFINED_MASK) != 0x0) ||
+                ( local_certificate -> nx_secure_x509_private_key_type == NX_SECURE_X509_KEY_TYPE_HARDWARE))
             {
                 user_defined_key = NX_TRUE;
             }

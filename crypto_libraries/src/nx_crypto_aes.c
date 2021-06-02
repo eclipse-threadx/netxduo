@@ -396,9 +396,9 @@ static const UCHAR aes_rcon_array[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40,
 
 #endif
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 extern UINT _nx_crypto_library_state;
-#endif /* NX_CRYPTO_FIPS */
+#endif /* NX_CRYPTO_SELF_TEST */
 
 /**************************************************************************/
 /* Utility routines                                                       */
@@ -411,7 +411,7 @@ extern UINT _nx_crypto_library_state;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_aes_add_round_key                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -447,6 +447,10 @@ extern UINT _nx_crypto_library_state;
 /*  09-30-2020     Timothy Stapko           Modified comment(s), updated  */
 /*                                            constants and conditionals, */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_aes_add_round_key(NX_CRYPTO_AES *aes_ptr, UINT *round_key)
