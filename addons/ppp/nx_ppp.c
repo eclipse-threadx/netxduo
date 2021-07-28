@@ -2210,7 +2210,7 @@ NX_PACKET       *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update                    PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2257,6 +2257,9 @@ NX_PACKET       *packet_ptr;
 /*                                            improved packet length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.2  */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            the logic of retransmission,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_state_machine_update(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -2801,9 +2804,6 @@ UINT    status;
                         /* Yes, the peer can accept larger messages than the default.  */
                         (ppp_ptr -> nx_ppp_interface_ptr) -> nx_interface_ip_mtu_size =  ppp_ptr -> nx_ppp_mru;
                     }
-                    
-                    /* Disable the LCP timeout.  */
-                    ppp_ptr -> nx_ppp_timeout =  0;
                 }
 
                 /* Send configuration reply.  */

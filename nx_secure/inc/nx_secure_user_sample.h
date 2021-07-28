@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */
 /*                                                                        */
 /*    nx_secure_user.h                                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -48,6 +48,8 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -93,11 +95,12 @@
    #define NX_SECURE_ENABLE_PSK_CIPHERSUITES
  */
 
-/* NX_SECURE_AEAD_CIPHER_CHECK AEAD ciphersuites other than AES-CCM or AES-GCM.
+/* NX_SECURE_AEAD_CIPHER_CHECK allows to detect user-implemented AEAD algorithms other than AES-CCM or
+   AES-GCM. It can be defined like #define NX_SECURE_AEAD_CIPHER_CHECK(a) ((a) == NEW_ALGORITHM_ID).
    It works only when NX_SECURE_ENABLE_AEAD_CIPHER is defined.
    By default this feature is not enabled. */
 /*
-   #define NX_SECURE_AEAD_CIPHER_CHECK
+   #define NX_SECURE_AEAD_CIPHER_CHECK(a) NX_FALSE
 */
 
 /* NX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES enables self signed certificates. By default
@@ -303,6 +306,18 @@
    for strict X509 comparisons. By default this feature is not enabled. */
 /*
    #define NX_SECURE_X509_USE_EXTENDED_DISTINGUISHED_NAMES
+*/
+
+/* If the handshake hash state cannot be copied using memory copy on metadata,
+   NX_SECURE_HASH_METADATA_CLONE should be defined to a function that clones the hash state.
+   UINT nx_crypto_hash_clone(VOID *dest_metadata, VOID *source_metadata, ULONG length);
+   #define NX_SECURE_HASH_METADATA_CLONE nx_crypto_hash_clone
+*/
+
+/* If cleaning up is required for the handshake hash crypto after being cloned,
+   NX_SECURE_HASH_CLONE_CLEANUP macro should be defined to a clean up function:
+   UINT nx_crypto_clone_cleanup(VOID *metadata, ULONG length);
+   #define NX_SECURE_HASH_CLONE_CLEANUP nx_crypto_clone_cleanup
 */
 
 #endif /* SRC_NX_SECURE_USER_H */

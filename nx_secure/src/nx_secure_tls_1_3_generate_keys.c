@@ -169,7 +169,7 @@ UINT is_resumption_psk = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_handshake_keys          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -200,6 +200,9 @@ UINT is_resumption_psk = NX_FALSE;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            cleanup for session cipher, */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -373,6 +376,17 @@ UINT                                  hash_size;
     /* Initialize the crypto method used in the session cipher. */
     if (session_cipher_method -> nx_crypto_init != NULL)
     {
+        if (tls_session -> nx_secure_tls_session_cipher_client_initialized && session_cipher_method -> nx_crypto_cleanup)
+        {
+            status = session_cipher_method -> nx_crypto_cleanup(tls_session -> nx_secure_session_cipher_metadata_area_client);
+            if (status != NX_CRYPTO_SUCCESS)
+            {
+                return(status);
+            }
+
+            tls_session -> nx_secure_tls_session_cipher_client_initialized = 0;
+        }
+
         /* Set client write key. */
         status = session_cipher_method -> nx_crypto_init((NX_CRYPTO_METHOD*)session_cipher_method,
                                                          tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_write_key,
@@ -384,6 +398,19 @@ UINT                                  hash_size;
         if (status != NX_CRYPTO_SUCCESS)
         {
             return(status);
+        }
+
+        tls_session -> nx_secure_tls_session_cipher_client_initialized = 1;
+
+        if (tls_session -> nx_secure_tls_session_cipher_server_initialized && session_cipher_method -> nx_crypto_cleanup)
+        {
+            status = session_cipher_method -> nx_crypto_cleanup(tls_session -> nx_secure_session_cipher_metadata_area_server);
+            if (status != NX_CRYPTO_SUCCESS)
+            {
+                return(status);
+            }
+
+            tls_session -> nx_secure_tls_session_cipher_server_initialized = 0;
         }
 
         /* Set server write key. */
@@ -398,6 +425,8 @@ UINT                                  hash_size;
         {
             return(status);
         }
+
+        tls_session -> nx_secure_tls_session_cipher_server_initialized = 1;
     }
 
     return(NX_SUCCESS);

@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_crypto_port.h                                  Cortex-M3/Keil    */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -41,6 +41,8 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
+/*  08-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -48,6 +50,7 @@
 #define _NX_CRYPTO_PORT_H_
 #include <stdlib.h>
 #include <string.h>
+#include "cmsis_compiler.h"
 
 #ifdef NX_CRYPTO_STANDALONE_ENABLE
 

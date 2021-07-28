@@ -31,7 +31,7 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_record                       PORTABLE C      */
-/*                                                           6.1.4        */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -88,6 +88,9 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*                                            support for fragmented TLS  */
 /*                                            Handshake messages,         */
 /*                                            resulting in version 6.1.4  */
+/* 08-02-2021      Timothy Stapko           Modified comment(s), checked  */
+/*                                            TLS state before processing,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
@@ -129,6 +132,18 @@ NX_PACKET *decrypted_packet;
 
     status = NX_CONTINUE;
     *bytes_processed = 0;
+
+    /* Make sure the TLS socket is not closed. */
+    if (tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_NONE)
+    {
+
+        /* Session already closed. Release the packet. */
+        if (packet_ptr != NX_NULL)
+        {
+            nx_packet_release(packet_ptr);
+        }
+        return(NX_SECURE_TLS_INVALID_STATE);
+    }
 
     /* Process the packet. */
     if (packet_ptr != NX_NULL)

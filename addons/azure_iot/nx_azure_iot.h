@@ -140,6 +140,9 @@ UINT nx_azure_iot_log(UCHAR *type_ptr, UINT type_len, UCHAR *msg_ptr, UINT msg_l
 #define NX_AZURE_IOT_NO_SUBSCRIBE_ACK                     0x20014
 #define NX_AZURE_IOT_THROTTLED                            0x20015
 
+#define NX_AZURE_IOT_EMPTY_JSON                           0x20016
+#define NX_AZURE_IOT_SAS_TOKEN_EXPIRED                    0x20017
+
 /* Resource type managed by AZ_IOT.  */
 #define NX_AZURE_IOT_RESOURCE_IOT_HUB                     0x1
 #define NX_AZURE_IOT_RESOURCE_IOT_PROVISIONING            0x2
@@ -209,6 +212,15 @@ typedef struct NX_AZURE_IOT_STRUCT
     struct NX_AZURE_IOT_RESOURCE_STRUCT   *nx_azure_iot_resource_list_header;
     UINT                                 (*nx_azure_iot_unix_time_get)(ULONG *unix_time);
 } NX_AZURE_IOT;
+
+typedef struct NX_AZURE_IOT_THREAD_STRUCT
+{
+    TX_THREAD                           *thread_ptr;
+    struct NX_AZURE_IOT_THREAD_STRUCT   *thread_next;
+    UINT                                 thread_message_type;
+    UINT                                 thread_expected_id;     /* Used by device twin. */
+    NX_PACKET                           *thread_received_message;
+} NX_AZURE_IOT_THREAD;
 
 /**
  * @brief Create the Azure IoT subsystem

@@ -36,7 +36,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_disconnect                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -80,6 +80,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_disconnect(NX_TCP_SOCKET *socket_ptr, ULONG wait_option)
@@ -88,6 +91,9 @@ UINT  _nx_tcp_socket_disconnect(NX_TCP_SOCKET *socket_ptr, ULONG wait_option)
 #ifndef NX_DISABLE_RESET_DISCONNECT
 NX_TCP_HEADER tcp_header;
 #endif
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+NX_INTERFACE *interface_ptr;
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 UINT          status;
 NX_IP        *ip_ptr;
 
@@ -128,6 +134,25 @@ NX_IP        *ip_ptr;
     socket_ptr -> nx_tcp_socket_keepalive_timeout =  0;
     socket_ptr -> nx_tcp_socket_keepalive_retries =  0;
 #endif
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+    interface_ptr = socket_ptr -> nx_tcp_socket_connect_interface;
+    if (interface_ptr &&
+        (interface_ptr -> nx_interface_capability_flag & NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD) &&
+        (interface_ptr -> nx_interface_tcpip_offload_handler))
+    {
+
+        /* Let TCP/IP offload interface close the connection.  */
+        interface_ptr -> nx_interface_tcpip_offload_handler(ip_ptr, interface_ptr, socket_ptr,
+                                                            NX_TCPIP_OFFLOAD_TCP_SOCKET_DISCONNECT,
+                                                            NX_NULL, NX_NULL, NX_NULL, 0, NX_NULL,
+                                                            wait_option);
+
+        /* Reset socket state.  */
+        socket_ptr -> nx_tcp_socket_state = NX_TCP_CLOSED;
+    }
+    else
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
     /* Determine if the connection wasn't fully completed.  */
     if ((socket_ptr -> nx_tcp_socket_state == NX_TCP_SYN_SENT) ||

@@ -80,7 +80,7 @@ NX_CALLER_CHECKING_EXTERNS
 #define NX_FTP_CODE_NO_SPACE         "552"  /* Requested file action aborted, no space.  */
 #define NX_FTP_CODE_BAD_NAME         "553"  /* Requested action not taken, File name not allowed.  */
 
-static VOID _nx_ftp_server_number_to_ascii(UCHAR *buffer_ptr, UINT buffer_size, UINT number);
+static VOID _nx_ftp_server_number_to_ascii(UCHAR *buffer_ptr, UINT buffer_size, UINT number, UCHAR pad);
                                    
 /**************************************************************************/
 /*                                                                        */
@@ -1523,7 +1523,7 @@ ULONG                   events;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ftp_server_command_process                      PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1598,6 +1598,9 @@ ULONG                   events;
 /*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
 /*                                            resulting in version 6.1.3  */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            corrected the pad character,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_command_process(NX_FTP_SERVER *ftp_server_ptr)
@@ -3582,17 +3585,17 @@ ULONG                   block_size;
                                 memcpy(&buffer_ptr[1], "rw-rw-rw-", 9); /* Use case of memcpy is verified. */
                             }
                             memcpy(&buffer_ptr[10], "  1 owner group ", 16); /* Use case of memcpy is verified. */
-                            _nx_ftp_server_number_to_ascii(&buffer_ptr[26], 10, size);
+                            _nx_ftp_server_number_to_ascii(&buffer_ptr[26], 10, size, ' ');
                             buffer_ptr[36] = ' ';
                             buffer_ptr[37] = (UCHAR)months[month - 1][0];
                             buffer_ptr[38] = (UCHAR)months[month - 1][1];
                             buffer_ptr[39] = (UCHAR)months[month - 1][2];
                             buffer_ptr[40] = ' ';
-                            _nx_ftp_server_number_to_ascii(&buffer_ptr[41], 2, day);
+                            _nx_ftp_server_number_to_ascii(&buffer_ptr[41], 2, day, '0');
                             buffer_ptr[43] = ' ';
-                            _nx_ftp_server_number_to_ascii(&buffer_ptr[44], 2, hour);
+                            _nx_ftp_server_number_to_ascii(&buffer_ptr[44], 2, hour, '0');
                             buffer_ptr[46] = ':';
-                            _nx_ftp_server_number_to_ascii(&buffer_ptr[47], 2, minute);
+                            _nx_ftp_server_number_to_ascii(&buffer_ptr[47], 2, minute, '0');
                             buffer_ptr[49] = ' ';
                             memcpy(&buffer_ptr[50], filename, length); /* Use case of memcpy is verified. */
                             length += 50;
@@ -6866,7 +6869,7 @@ NX_PACKET   *last_packet;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ftp_server_number_to_ascii                      PORTABLE C      */ 
-/*                                                           6.1.7        */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6905,9 +6908,12 @@ NX_PACKET   *last_packet;
 /*  06-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            corrected the size check,   */
 /*                                            resulting in version 6.1.7  */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            corrected the pad character,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
-static VOID _nx_ftp_server_number_to_ascii(UCHAR *buffer_ptr, UINT buffer_size, UINT number)
+static VOID _nx_ftp_server_number_to_ascii(UCHAR *buffer_ptr, UINT buffer_size, UINT number, UCHAR pad)
 {
 UINT    digit;
 UINT    size;
@@ -6915,8 +6921,8 @@ UINT    size;
     /* Initialize counters.  */
     size = 1;
 
-    /* Initialize buffer with spaces. */
-    memset(buffer_ptr, ' ', buffer_size);
+    /* Initialize buffer with pad character. */
+    memset(buffer_ptr, pad, buffer_size);
 
     /* Loop to convert the number to ASCII.  */
     while (size <= buffer_size)

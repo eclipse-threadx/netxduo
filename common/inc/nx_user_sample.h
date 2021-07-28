@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */
 /*                                                                        */
 /*    nx_user.h                                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -47,6 +47,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -750,6 +753,12 @@
 /* Define the max string length. The default value is 1024.  */
 /*
 #define NX_MAX_STRING_LENGTH                                1024
+*/
+
+/* Defined, the TCP/IP offload feature is enabled.
+   NX_ENABLE_INTERFACE_CAPABILITY must be defined to enable this feature.  */
+/*
+#define NX_ENABLE_TCPIP_OFFLOAD
 */
 
 #endif

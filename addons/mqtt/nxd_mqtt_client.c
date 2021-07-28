@@ -705,7 +705,7 @@ NXD_MQTT_CLIENT *client_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_copy_transmit_packet                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -749,12 +749,25 @@ NXD_MQTT_CLIENT *client_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            supported maximum transmit  */
+/*                                            queue depth,                */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_copy_transmit_packet(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PACKET **new_packet_ptr,
                                            USHORT packet_id, UCHAR set_duplicate_flag, UINT wait_option)
 {
 UINT status;
+
+#ifdef NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH
+    if (client_ptr -> message_transmit_queue_depth >= NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH)
+    {
+
+        /* Hit the transmit queue depeth. No more packets should be queued. */
+        return(NX_TX_QUEUE_DEPTH);
+    }
+#endif /* NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH */
 
     /* Copy current packet. */
     status = nx_packet_copy(packet_ptr, new_packet_ptr, client_ptr -> nxd_mqtt_client_packet_pool_ptr, wait_option);
@@ -775,6 +788,11 @@ UINT status;
         *((*new_packet_ptr) -> nx_packet_prepend_ptr) = (*((*new_packet_ptr) -> nx_packet_prepend_ptr)) | MQTT_PUBLISH_DUP_FLAG;
     }
 
+#ifdef NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH
+    /* Increase the transmit queue depth.  */
+    client_ptr -> message_transmit_queue_depth++;
+#endif /* NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH */
+
     return(NXD_MQTT_SUCCESS);
 }
 
@@ -783,7 +801,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_release_transmit_packet                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -824,6 +842,10 @@ UINT status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            supported maximum transmit  */
+/*                                            queue depth,                */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_release_transmit_packet(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PACKET *previous_packet_ptr)
@@ -843,6 +865,10 @@ static VOID _nxd_mqtt_release_transmit_packet(NXD_MQTT_CLIENT *client_ptr, NX_PA
         client_ptr -> message_transmit_queue_tail = previous_packet_ptr;
     }
     nx_packet_release(packet_ptr);
+
+#ifdef NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH
+    client_ptr -> message_transmit_queue_depth--;
+#endif /* NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH */
 }
 
 /**************************************************************************/
@@ -3675,7 +3701,7 @@ UCHAR               fixed_header;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_connect                            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3738,6 +3764,10 @@ UCHAR               fixed_header;
 /*                                            is set in CONNACK, corrected*/
 /*                                            mqtt client state,          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the logic for     */
+/*                                            non-blocking mode,          */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_connect(NXD_MQTT_CLIENT *client_ptr, NXD_ADDRESS *server_ip, UINT server_port,
@@ -3916,7 +3946,7 @@ UINT                 old_priority;
     }
 
     /* Just return for non-blocking mode.  */
-    if (status == NX_IN_PROGRESS)
+    if ((status == NX_IN_PROGRESS) || (wait_option == 0))
     {
         return(NX_IN_PROGRESS);
     }
@@ -4430,7 +4460,7 @@ UINT _nxd_mqtt_client_delete(NXD_MQTT_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_publish_packet_send                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4472,6 +4502,10 @@ UINT _nxd_mqtt_client_delete(NXD_MQTT_CLIENT *client_ptr)
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            supported maximum transmit  */
+/*                                            queue depth,                */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_publish_packet_send(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr,
@@ -4499,6 +4533,11 @@ UINT       ret = NXD_MQTT_SUCCESS;
         if (status != TX_SUCCESS)
         {
             nx_packet_release(transmit_packet_ptr);
+
+#ifdef NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH
+            /* Decrease the transmit queue depth.  */
+            client_ptr -> message_transmit_queue_depth--;
+#endif /* NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH */
             return(NXD_MQTT_MUTEX_FAILURE);
         }
 

@@ -39,7 +39,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_packet_send                                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -83,6 +83,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            added new ip filter,        */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ip_packet_send(NX_IP *ip_ptr, NX_PACKET *packet_ptr,
@@ -132,6 +136,24 @@ ULONG           val;
         /* Return... nothing more can be done!  */
         return;
     }
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+    if (packet_ptr -> nx_packet_address.nx_packet_interface_ptr -> nx_interface_capability_flag &
+        NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD)
+    {
+#ifndef NX_DISABLE_IP_INFO
+
+        /* Increment the IP invalid packet error.  */
+        ip_ptr -> nx_ip_invalid_transmit_packets++;
+#endif
+
+        /* Ignore sending all packets for TCP/IP offload. Release the packet.  */
+        _nx_packet_transmit_release(packet_ptr);
+
+        /* Return... nothing more can be done!  */
+        return;
+    }
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
 #ifdef NX_IPSEC_ENABLE
     /* Check if this packet is continued after HW crypto engine. */
@@ -191,7 +213,8 @@ ULONG           val;
     {
 
         /* Add the IP Header to the packet.  */
-        _nx_ip_header_add(ip_ptr, packet_ptr, destination_ip, type_of_service, time_to_live, protocol, fragment);
+        _nx_ip_header_add(ip_ptr, packet_ptr, packet_ptr -> nx_packet_ip_interface -> nx_interface_ip_address,
+                          destination_ip, type_of_service, time_to_live, protocol, fragment);
 
 #ifdef NX_ENABLE_IP_PACKET_FILTER
         /* Check if the IP packet filter is set. */
@@ -201,6 +224,20 @@ ULONG           val;
             /* Yes, call the IP packet filter routine. */
             if (ip_ptr -> nx_ip_packet_filter((VOID *)(packet_ptr -> nx_packet_prepend_ptr),
                                               NX_IP_PACKET_OUT) != NX_SUCCESS)
+            {
+
+                /* Drop the packet. */
+                _nx_packet_transmit_release(packet_ptr);
+                return;
+            }
+        }
+
+        /* Check if the IP packet filter extended is set. */
+        if (ip_ptr -> nx_ip_packet_filter_extended)
+        {
+
+            /* Yes, call the IP packet filter extended routine. */
+            if (ip_ptr -> nx_ip_packet_filter_extended(ip_ptr, packet_ptr, NX_IP_PACKET_OUT) != NX_SUCCESS)
             {
 
                 /* Drop the packet. */

@@ -43,7 +43,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ipv6_header_add                                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -84,6 +84,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ipv6_header_add(NX_IP *ip_ptr, NX_PACKET **packet_pptr,
@@ -251,22 +254,6 @@ USHORT                     short_val;
         NX_IPV6_ADDRESS_CHANGE_ENDIAN(ip_header_ptr -> nx_ip_header_destination_ip);
         NX_IPV6_ADDRESS_CHANGE_ENDIAN(ip_header_ptr -> nx_ip_header_source_ip);
 
-#ifdef NX_ENABLE_IP_PACKET_FILTER
-        /* Check if the IP packet filter is set. */
-        if (ip_ptr -> nx_ip_packet_filter)
-        {
-
-            /* Yes, call the IP packet filter routine. */
-            if (ip_ptr -> nx_ip_packet_filter((VOID *)(packet_ptr -> nx_packet_prepend_ptr),
-                                              NX_IP_PACKET_OUT) != NX_SUCCESS)
-            {
-
-                /* Drop the packet. */
-                _nx_packet_transmit_release(packet_ptr);
-                return(NX_INVALID_PACKET);
-            }
-        }
-#endif /* NX_ENABLE_IP_PACKET_FILTER */
 #ifdef NX_IPSEC_ENABLE
     }
     else

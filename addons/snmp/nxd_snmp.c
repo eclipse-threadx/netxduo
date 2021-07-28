@@ -14094,7 +14094,7 @@ UINT  _nx_snmp_utility_error_info_set(UCHAR *buffer_ptr, UINT error_code, UINT e
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_object_id_get                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14117,7 +14117,7 @@ UINT  _nx_snmp_utility_error_info_set(UCHAR *buffer_ptr, UINT error_code, UINT e
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
-/*    None                                                                */ 
+/*    _nx_utility_uint_to_string            Convert number to ASCII       */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -14133,6 +14133,10 @@ UINT  _nx_snmp_utility_error_info_set(UCHAR *buffer_ptr, UINT error_code, UINT e
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved the logic of       */
+/*                                            converting number to string,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_object_id_get(UCHAR *buffer_ptr, UCHAR *object_string, INT buffer_length)
@@ -14404,48 +14408,23 @@ UINT    string_length;
             value =  value + temp;
         }
 
-        /* Loop to convert value into ASCII.  */
-        size =  0;
-        do
+        /* Convert value into ASCII.  */
+        size = _nx_utility_uint_to_string(value, 10, (CHAR *)object_string, NX_SNMP_MAX_OCTET_STRING + 1 - string_length);
+
+        if (size == 0)
         {
-
-            /* Shift the current digits over one.  */
-            for (i = size; i != 0; i--)
-            {
-
-                /* Move each digit over one place.  */
-                object_string[i] =  object_string[i-1];
-            }
-
-            /* Compute the next decimal digit.  */
-            byte =  (UCHAR) (value % 10);
-
-            /* Update the input number.  */
-            value =  value / 10;
-
-            /* Store the new digit in ASCII form.  */
-            object_string[0] =  (UCHAR)(byte + 0x30);
-
-            /* Increment the size.  */
-            size++;
-
-            /* Increment the string length.  */
-            string_length++;
-
-            /* Determine if the length is too long.  */
-            if (string_length >= NX_SNMP_MAX_OCTET_STRING)
-            {
             
-                /* String is too long.  */
+            /* String is too long.  */
                 
-                /* Null-terminate the string.  */
-                *object_string =  NX_NULL;
+            /* Null-terminate the string.  */
+            *object_string =  NX_NULL;
                 
-                /* Return the length.  */
-                return(length);
-            }
-
-        } while ((size < 10) && (value));
+            /* Return the length.  */
+            return(length);
+        }
+        
+        /* Adjust the object string length.  */
+        string_length += size;
 
         /* Adjust the object string.  */
         object_string =  object_string + size;

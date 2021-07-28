@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_reset                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            cleanup for session cipher, */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_reset(NX_SECURE_TLS_SESSION *session_ptr)
@@ -125,6 +128,8 @@ UINT temp_status;
     /* Sessions are not active when we start the socket. */
     session_ptr -> nx_secure_tls_remote_session_active = 0;
     session_ptr -> nx_secure_tls_local_session_active = 0;
+    session_ptr -> nx_secure_tls_session_cipher_client_initialized = 0;
+    session_ptr -> nx_secure_tls_session_cipher_server_initialized = 0;
 
     /* Set the current ciphersuite to TLS_NULL_WITH_NULL_NULL which is the
     * specified ciphersuite for the handshake (pre-change cipher spec). */

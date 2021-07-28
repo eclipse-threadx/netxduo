@@ -300,6 +300,7 @@ static UINT sample_parse_desired_temp_property(SAMPLE_CONTEXT *context,
 double parsed_value;
 UINT version;
 NX_AZURE_IOT_JSON_READER copy_json_reader;
+UINT status;
 
     if (nx_azure_iot_json_reader_next_token(json_reader_ptr))
     {
@@ -325,12 +326,12 @@ NX_AZURE_IOT_JSON_READER copy_json_reader;
         return(NX_NOT_SUCCESSFUL);
     }
 
-    if (sample_json_child_token_move(json_reader_ptr,
-                                     (UCHAR *)desired_temp_property_name,
-                                     sizeof(desired_temp_property_name) - 1) ||
-        nx_azure_iot_json_reader_token_double_get(json_reader_ptr, &parsed_value))
+    if ((status = sample_json_child_token_move(json_reader_ptr,
+                                               (UCHAR *)desired_temp_property_name,
+                                               sizeof(desired_temp_property_name) - 1)) || 
+        (status = nx_azure_iot_json_reader_token_double_get(json_reader_ptr, &parsed_value)))
     {
-        return(NX_NOT_SUCCESSFUL);
+        return(status);
     }
 
     current_device_temp = parsed_value;
@@ -920,7 +921,8 @@ NX_AZURE_IOT_JSON_READER json_reader;
         return;
     }
 
-    if (sample_parse_desired_temp_property(context, &json_reader, NX_TRUE) != NX_AZURE_IOT_SUCCESS)
+    status = sample_parse_desired_temp_property(context, &json_reader, NX_TRUE);
+    if (status && (status != NX_AZURE_IOT_NOT_FOUND))
     {
         printf("Failed to parse value\r\n");
     }
@@ -1014,7 +1016,8 @@ NX_AZURE_IOT_JSON_READER json_reader;
         return;
     }
 
-    if (sample_parse_desired_temp_property(context, &json_reader, NX_FALSE) != NX_AZURE_IOT_SUCCESS)
+    status = sample_parse_desired_temp_property(context, &json_reader, NX_FALSE);
+    if (status && (status != NX_AZURE_IOT_NOT_FOUND))
     {
         printf("Failed to parse value\r\n");
     }

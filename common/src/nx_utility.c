@@ -204,6 +204,116 @@ UINT i;
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
+/*    _nx_utility_uint_to_string                          PORTABLE C      */
+/*                                                           6.1.8        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function converts the unsigned integer to string.              */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    number                                Input number                  */
+/*    base                                  Base of the conversion        */
+/*                                           8 for OCT                    */
+/*                                           10 for DEC                   */
+/*                                           16 for HEX                   */
+/*    string_buffer                         Pointer to string buffer      */
+/*    string_buffer_size                    Size of string buffer         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    size                                  The size of output string     */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_utility_uint_to_string(UINT number, UINT base, CHAR *string_buffer, UINT string_buffer_size)
+{
+UINT i;
+UINT digit;
+UINT size;
+
+    /* Check for invalid input pointers.  */
+    if ((string_buffer == NX_NULL) || (string_buffer_size == 0))
+    {
+        return(0);
+    }
+
+    /* Initialize.  */
+    i = 0;
+    size = 0;
+
+    /* Loop to convert the number to ASCII. Minus 1 to put NULL terminal.  */
+    while (size < string_buffer_size - 1)
+    {
+
+        /* Shift the current digits over one.  */
+        for (i = size; i != 0; i--)
+        {
+
+            /* Move each digit over one place.  */
+            string_buffer[i] = string_buffer[i-1];
+        }
+
+        /* Compute the next decimal digit.  */
+        digit = number % base;
+
+        /* Update the input number.  */
+        number = number / base;
+
+        /* Store the new digit in ASCII form.  */
+        if (digit < 10)
+        {
+            string_buffer[0] = (CHAR) (digit + '0');
+        }
+        else
+        {
+            string_buffer[0] = (CHAR) (digit + 'a' - 0xa);
+        }
+
+        /* Increment the size.  */
+        size++;
+
+        /* Determine if the number is now zero.  */
+        if (number == 0)
+            break;
+    }
+
+    /* Determine if there is an overflow error.  */
+    if (number)
+    {
+
+        /* Error, return bad values to user.  */
+        size = 0;
+    }
+
+    /* Make the string NULL terminated.  */
+    string_buffer[size] = (CHAR) NX_NULL;
+
+    /* Return size to caller.  */
+    return(size);
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
 /*    _nx_utility_base64_encode                           PORTABLE C      */
 /*                                                           6.1.6        */
 /*  AUTHOR                                                                */

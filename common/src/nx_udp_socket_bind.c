@@ -30,12 +30,117 @@
 #include "tx_thread.h"
 
 
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_udp_socket_driver_bind                          PORTABLE C      */
+/*                                                           6.1.8        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function binds to a UDP port through TCP/IP offload interface. */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    socket_ptr                            Pointer to UDP socket         */
+/*    port                                  16-bit UDP port number        */
+/*    wait_option                           Suspension option             */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_udp_socket_unbind                 Unbind UDP port               */
+/*    tx_mutex_get                          Obtain protection mutex       */
+/*    tx_mutex_put                          Release protection mutex      */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_udp_socket_bind                                                 */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_udp_socket_driver_bind(NX_UDP_SOCKET *socket_ptr, UINT port, ULONG wait_option)
+{
+UINT          status = NX_SUCCESS;
+UINT          i;
+NX_INTERFACE *interface_ptr;
+NX_IP        *ip_ptr;
+
+
+    /* Setup the pointer to the associated IP instance.  */
+    ip_ptr =  socket_ptr -> nx_udp_socket_ip_ptr;
+
+    /* Obtain the IP mutex.  */
+    tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
+
+    /* Loop all interfaces to bind to ones support TCP/IP offload.  */
+    for (i = 0; i < NX_MAX_IP_INTERFACES; i++)
+    {
+
+        /* Use a local variable for convenience.  */
+        interface_ptr = &(ip_ptr -> nx_ip_interface[i]);
+
+        /* Check for valid interfaces.  */
+        if ((interface_ptr -> nx_interface_valid == NX_FALSE) ||
+            (interface_ptr -> nx_interface_link_up == NX_FALSE))
+        {
+
+            /* Skip interface not valid.  */
+            continue;
+        }
+
+        /* Check for TCP/IP offload feature.  */
+        if (((interface_ptr -> nx_interface_capability_flag & NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD) == 0) ||
+            (interface_ptr -> nx_interface_tcpip_offload_handler == NX_NULL))
+        {
+
+            /* Skip interface not support TCP/IP offload.  */
+            continue;
+        }
+
+        /* Let TCP/IP offload interface bind to port.  */
+        status = interface_ptr -> nx_interface_tcpip_offload_handler(ip_ptr, interface_ptr,
+                                                                     socket_ptr,
+                                                                     NX_TCPIP_OFFLOAD_UDP_SOCKET_BIND,
+                                                                     NX_NULL, NX_NULL, NX_NULL, port,
+                                                                     NX_NULL, wait_option);
+        if (status)
+        {
+
+            /* At least one of the interface fails to bind to port.  */
+            _nx_udp_socket_unbind(socket_ptr);
+            status = NX_TCPIP_OFFLOAD_ERROR;
+            break;
+        }
+    }
+
+    /* Release the IP protection.  */
+    tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+    return(status);
+}
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_udp_socket_bind                                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -75,6 +180,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_udp_socket_bind(NX_UDP_SOCKET *socket_ptr, UINT  port, ULONG wait_option)
@@ -89,6 +197,7 @@ NX_IP         *ip_ptr;
 TX_THREAD     *thread_ptr;
 NX_UDP_SOCKET *search_ptr;
 NX_UDP_SOCKET *end_ptr;
+UINT           status = NX_SUCCESS;
 
 
     /* Setup the pointer to the associated IP instance.  */
@@ -222,9 +331,6 @@ NX_UDP_SOCKET *end_ptr;
 
         /* Release the mutex protection.  */
         tx_mutex_put(&(ip_ptr -> nx_ip_protection));
-
-        /* Return success to the caller.  */
-        return(NX_SUCCESS);
     }
     else if (wait_option)
     {
@@ -296,7 +402,7 @@ NX_UDP_SOCKET *end_ptr;
         _tx_thread_system_suspend(thread_ptr);
 
         /* Return the completion status.  */
-        return(thread_ptr -> tx_thread_suspend_status);
+        status = thread_ptr -> tx_thread_suspend_status;
     }
     else
     {
@@ -305,7 +411,19 @@ NX_UDP_SOCKET *end_ptr;
         tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
         /* Return the port unavailable error.  */
-        return(NX_PORT_UNAVAILABLE);
+        status = NX_PORT_UNAVAILABLE;
     }
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+    if (status == NX_SUCCESS)
+    {
+
+        /* Bind to TCP/IP offload interface.  */
+        status = _nx_udp_socket_driver_bind(socket_ptr, port, wait_option);
+    }
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
+    /* Return success to the caller.  */
+    return(status);
 }
 

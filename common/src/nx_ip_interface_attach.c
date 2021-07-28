@@ -38,7 +38,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_interface_attach                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -88,6 +88,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ip_interface_attach(NX_IP *ip_ptr, CHAR *interface_name, ULONG ip_address, ULONG network_mask, VOID (*ip_link_driver)(struct NX_IP_DRIVER_STRUCT *))
@@ -159,12 +162,25 @@ ULONG         address[4];
     if (ip_ptr -> nx_ip_initialize_done == NX_TRUE)
     {
 
+#ifdef NX_ENABLE_INTERFACE_CAPABILITY
+        /* Clear capability flag.  */
+        ip_ptr -> nx_ip_interface[i].nx_interface_capability_flag = 0;
+#endif /* NX_ENABLE_INTERFACE_CAPABILITY */
+
         /* First attach the interface to the device. */
         driver_request.nx_ip_driver_ptr       =  ip_ptr;
         driver_request.nx_ip_driver_command   =  NX_LINK_INTERFACE_ATTACH;
         driver_request.nx_ip_driver_interface = &(ip_ptr -> nx_ip_interface[i]);
         (ip_ptr -> nx_ip_interface[i].nx_interface_link_driver_entry)(&driver_request);
 
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+        if (ip_ptr -> nx_ip_interface[i].nx_interface_capability_flag & NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD)
+        {
+
+            /* Set checksum capability for TCP/IP offload interface.  */
+            ip_ptr -> nx_ip_interface[i].nx_interface_capability_flag |= NX_INTERFACE_CAPABILITY_CHECKSUM_ALL;
+        }
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
         /* Call the link driver to initialize the hardware. Among other
            responsibilities, the driver is required to provide the

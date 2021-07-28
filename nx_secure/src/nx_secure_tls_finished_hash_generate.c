@@ -33,7 +33,7 @@ static UCHAR handshake_hash[16 + 20]; /* We concatenate MD5 and SHA-1 hashes int
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_finished_hash_generate               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -72,6 +72,9 @@ static UCHAR handshake_hash[16 + 20]; /* We concatenate MD5 and SHA-1 hashes int
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            hash clone and cleanup,     */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_finished_hash_generate(NX_SECURE_TLS_SESSION *tls_session,
@@ -133,9 +136,9 @@ UINT                                  hash_size = 0;
 #endif /* NX_SECURE_ENABLE_DTLS */
     {
         /* Copy over the handshake hash state into scratch space to do the intermediate calculation. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
+        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
 
         /* Finalize the handshake message hash that we started at the beginning of the handshake. */
         method_ptr = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_sha256_method;
@@ -158,15 +161,19 @@ UINT                                  hash_size = 0;
                                               NX_NULL,
                                               NX_NULL);
 
-            if(status != NX_CRYPTO_SUCCESS)
-            {
-                return(status);
-            }                                                     
         }
         else
         {
-            return(NX_SECURE_TLS_MISSING_CRYPTO_ROUTINE);
+            status = NX_SECURE_TLS_MISSING_CRYPTO_ROUTINE;
         }
+
+        NX_SECURE_HASH_CLONE_CLEANUP(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                     tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size);
+
+        if (status != NX_CRYPTO_SUCCESS)
+        {
+            return(status);
+        }                                                     
 
         /* For TLS 1.2, the PRF is defined by the ciphersuite. However, if we are using an older ciphersuite,
          * default to the TLS 1.2 default PRF, which uses SHA-256-HMAC. */
@@ -186,15 +193,11 @@ UINT                                  hash_size = 0;
         tls_session -> nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_1)
 #endif /* NX_SECURE_ENABLE_DTLS */
     {
-        /* Copy over the handshake hash metadata into scratch metadata area to do the intermediate calculation. Copy SHA-1 in
-           first, then MD5. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size); /* Use case of memcpy is verified. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch +
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size); /* Use case of memcpy is verified. */
+        /* Copy over the handshake hash metadata into scratch metadata area to do the intermediate calculation.  */
+        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch +
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size); /* Use case of memcpy is verified. */
 
         /* Finalize the handshake message hashes that we started at the beginning of the handshake. */
         method_ptr = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_md5_method;
@@ -218,16 +221,22 @@ UINT                                  hash_size = 0;
                                               metadata_size,
                                               NX_NULL,
                                               NX_NULL);
-
-            if(status != NX_CRYPTO_SUCCESS)
-            {
-                return(status);
-            }                                                     
         }
         else
         {
-            return(NX_SECURE_TLS_MISSING_CRYPTO_ROUTINE);
+            status = NX_SECURE_TLS_MISSING_CRYPTO_ROUTINE;
         }
+
+        NX_SECURE_HASH_CLONE_CLEANUP(metadata, metadata_size);
+
+        if (status != NX_CRYPTO_SUCCESS)
+        {
+            return(status);
+        }
+
+        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size); /* Use case of memcpy is verified. */
 
         method_ptr = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_sha1_method;
         handler = tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_handler;
@@ -251,14 +260,18 @@ UINT                                  hash_size = 0;
                                               NX_NULL,
                                               NX_NULL);
 
-            if(status != NX_CRYPTO_SUCCESS)
-            {
-                return(status);
-            }                                                     
+
         }
         else
         {
-            return(NX_SECURE_TLS_MISSING_CRYPTO_ROUTINE);
+            status = NX_SECURE_TLS_MISSING_CRYPTO_ROUTINE;
+        }
+
+        NX_SECURE_HASH_CLONE_CLEANUP(metadata, metadata_size);
+
+        if (status != NX_CRYPTO_SUCCESS)
+        {
+            return(status);
         }
 
         /* TLS 1.0 and TLS 1.1 use the same PRF. */
