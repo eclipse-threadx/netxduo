@@ -43,7 +43,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_thread_entry                                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -114,6 +114,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ip_thread_entry(ULONG ip_ptr_value)
@@ -163,6 +166,15 @@ NXD_IPV6_ADDRESS *interface_ipv6_address;
             driver_request.nx_ip_driver_command    =  NX_LINK_INTERFACE_ATTACH;
             driver_request.nx_ip_driver_interface  = &(ip_ptr -> nx_ip_interface[i]);
             (ip_ptr -> nx_ip_interface[i].nx_interface_link_driver_entry)(&driver_request);
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+            if (ip_ptr -> nx_ip_interface[i].nx_interface_capability_flag & NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD)
+            {
+
+                /* Set checksum capability for TCP/IP offload interface.  */
+                ip_ptr -> nx_ip_interface[i].nx_interface_capability_flag |= NX_INTERFACE_CAPABILITY_CHECKSUM_ALL;
+            }
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
             /* Call the link driver to initialize the hardware. Among other
                responsibilities, the driver is required to provide the

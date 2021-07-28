@@ -39,7 +39,7 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_certificate_verify           PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -88,6 +88,9 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            updated X.509 return value, */
 /*                                            resulting in version 6.1.6  */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            hash clone and cleanup,     */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_certificate_verify(NX_SECURE_TLS_SESSION *tls_session,
@@ -356,7 +359,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
 
         /* Generate a hash of all sent and received handshake messages to this point (not a Finished hash!). */
         /* Copy over the handshake hash state into a local structure to do the intermediate calculation. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
 
@@ -378,6 +381,10 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
                                                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size,
                                                         NX_NULL,
                                                         NX_NULL);
+        }
+
+        NX_SECURE_HASH_CLONE_CLEANUP(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                     tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size);
 
             if (status != NX_CRYPTO_SUCCESS)
             {
@@ -385,8 +392,6 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
                 return(status);
             }
         }
-        
-    }
 
 #endif
 
@@ -403,12 +408,8 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
         /* Signature size is the size of SHA-1 (20) + MD5 (16). */
         signature_length = 36;
 
-        /* Copy over the handshake hash metadata into scratch metadata area to do the intermediate calculation. Copy SHA-1 in
-           first, then MD5. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size); /* Use case of memcpy is verified. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch +
+        /* Copy over the handshake hash metadata into scratch metadata area to do the intermediate calculation.  */
+        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch +
                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size,
                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata,
                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size); /* Use case of memcpy is verified. */
@@ -432,13 +433,22 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
                                                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size,
                                                         NX_NULL,
                                                         NX_NULL);
+        }
+
+        NX_SECURE_HASH_CLONE_CLEANUP(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch +
+                                     tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size,
+                                     tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size);
 
             if (status != NX_CRYPTO_SUCCESS)
             {
+
                 /* Something failed in the hash calculation. */
                 return(status);
             }
-        }
+
+        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size); /* Use case of memcpy is verified. */
 
         hash_method = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_sha1_method;
         if (hash_method -> nx_crypto_operation != NX_NULL)
@@ -458,8 +468,15 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
                                                         NX_NULL,
                                                         NX_NULL);
 
+
+        }
+
+        NX_SECURE_HASH_CLONE_CLEANUP(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                     tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size);
+
             if (status != NX_CRYPTO_SUCCESS)
             {
+
                 /* Something failed in the hash calculation. */
 #ifdef NX_SECURE_KEY_CLEAR
                 NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
@@ -467,7 +484,6 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
                 return(status);
             }
         }
-    }
 #endif
 
 

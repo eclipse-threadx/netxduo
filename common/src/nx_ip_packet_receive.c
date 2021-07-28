@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_packet_receive                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -74,6 +74,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added new ip filter,        */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ip_packet_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -117,6 +120,20 @@ UCHAR version_byte;
         /* Yes, call the IP packet filter routine. */
         if (ip_ptr -> nx_ip_packet_filter((VOID *)(packet_ptr -> nx_packet_prepend_ptr),
                                           NX_IP_PACKET_IN) != NX_SUCCESS)
+        {
+
+            /* Drop the packet. */
+            _nx_packet_release(packet_ptr);
+            return;
+        }
+    }
+
+    /* Check if the IP packet filter extended is set. */
+    if (ip_ptr -> nx_ip_packet_filter_extended)
+    {
+
+        /* Yes, call the IP packet filter extended routine. */
+        if (ip_ptr -> nx_ip_packet_filter_extended(ip_ptr, packet_ptr, NX_IP_PACKET_IN) != NX_SUCCESS)
         {
 
             /* Drop the packet. */

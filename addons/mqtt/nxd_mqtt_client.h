@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_mqtt_client.h                                   PORTABLE C      */
-/*                                                           6.1.2        */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -48,6 +48,10 @@
 /*  11-09-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            added packet id parameter,  */
 /*                                            resulting in version 6.1.2  */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported maximum transmit  */
+/*                                            queue depth,                */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -77,6 +81,11 @@ extern   "C" {
 #error "The feature NXD_MQTT_REQUIRE_TLS requires NX_SECURE_ENABLE."
 #endif /* NX_SECURE_ENABLE */
 #endif /* NXD_MQTT_REQUIRE_TLS */
+
+/* Defined, MQTT transmit queue depth is enabled. It must be positive integer.  */
+/*
+#define NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH                          20
+*/
 
 /* Define memcpy, memset and memcmp functions used internal. */
 #ifndef NXD_MQTT_SECURE_MEMCPY
@@ -331,6 +340,9 @@ typedef struct NXD_MQTT_CLIENT_STRUCT
     NX_PACKET                     *nxd_mqtt_client_processing_packet;
     NX_PACKET                     *message_transmit_queue_head;
     NX_PACKET                     *message_transmit_queue_tail;
+#ifdef NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH
+    UINT                           message_transmit_queue_depth;
+#endif /* NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH */
     NX_PACKET                     *message_receive_queue_head;
     NX_PACKET                     *message_receive_queue_tail;
     UINT                           message_receive_queue_depth;

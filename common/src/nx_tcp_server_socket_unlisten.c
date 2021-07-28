@@ -30,12 +30,96 @@
 #include "nx_packet.h"
 
 
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_tcp_server_socket_driver_unlisten               PORTABLE C      */
+/*                                                           6.1.8        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function handles the TCP server unlisten for TCP/IP offload    */
+/*    interface.                                                          */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    ip_ptr                                Pointer to IP instance        */
+/*    socket_ptr                            Pointer to TCP socket         */
+/*    port                                  TCP port number               */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    tx_mutex_get                          Obtain protection             */
+/*    tx_mutex_put                          Release protection            */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_tcp_server_socket_unlisten                                      */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_tcp_server_socket_driver_unlisten(NX_IP *ip_ptr, NX_TCP_SOCKET *socket_ptr, UINT port)
+{
+UINT          i;
+NX_INTERFACE *interface_ptr;
+
+    /* Loop all interfaces to unlisten to ones support TCP/IP offload.  */
+    for (i = 0; i < NX_MAX_IP_INTERFACES; i++)
+    {
+
+        /* Use a local variable for convenience.  */
+        interface_ptr = &(ip_ptr -> nx_ip_interface[i]);
+
+        /* Check for valid interfaces.  */
+        if (interface_ptr -> nx_interface_valid == NX_FALSE)
+        {
+
+            /* Skip interface not valid.  */
+            continue;
+        }
+
+        /* Check for TCP/IP offload feature.  */
+        if (((interface_ptr -> nx_interface_capability_flag &
+              NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD) == 0) ||
+            (interface_ptr -> nx_interface_tcpip_offload_handler == NX_NULL))
+        {
+
+            /* Skip interface not support TCP/IP offload.  */
+            continue;
+        }
+
+        /* Let TCP/IP offload interface unlisten to port.  */
+        interface_ptr -> nx_interface_tcpip_offload_handler(ip_ptr, interface_ptr, socket_ptr,
+                                                            NX_TCPIP_OFFLOAD_TCP_SERVER_SOCKET_UNLISTEN,
+                                                            NX_NULL, NX_NULL, NX_NULL,
+                                                            port, NX_NULL, NX_NO_WAIT);
+    }
+
+    return(NX_SUCCESS);
+}
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_server_socket_unlisten                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -71,6 +155,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_server_socket_unlisten(NX_IP *ip_ptr, UINT port)
@@ -191,6 +278,10 @@ struct NX_TCP_LISTEN_STRUCT *listen_ptr;
                 /* Add the listen request back to the available list.  */
                 listen_ptr -> nx_tcp_listen_next =  ip_ptr -> nx_ip_tcp_available_listen_requests;
                 ip_ptr -> nx_ip_tcp_available_listen_requests =  listen_ptr;
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+                _nx_tcp_server_socket_driver_unlisten(ip_ptr, socket_ptr, port);
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
                 /* Release the protection.  */
                 tx_mutex_put(&(ip_ptr -> nx_ip_protection));

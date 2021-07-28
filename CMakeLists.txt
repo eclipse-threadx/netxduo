@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
 # Set up the project
 project(netxduo
-    VERSION 6.0.0 
     LANGUAGES C ASM
 )    
 
@@ -39,7 +38,11 @@ endif()
 set(CUSTOM_INC_DIR ${CMAKE_CURRENT_BINARY_DIR}/custom_inc)
 
 # Pick up the port specific stuff first
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ports/${THREADX_ARCH}/${THREADX_TOOLCHAIN})
+if(DEFINED NETXDUO_CUSTOM_PORT)
+    add_subdirectory(${NETXDUO_CUSTOM_PORT} netxduo_port)
+else()
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ports/${THREADX_ARCH}/${THREADX_TOOLCHAIN})
+endif()
 
 # Then the common files
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)
@@ -50,6 +53,9 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/addons)
 # Network security and crypto components
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/crypto_libraries)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/nx_secure)
+
+# Utility components
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/utility)
 
 # If the user provided an override, copy it to the custom directory
 if (NOT NX_USER_FILE)

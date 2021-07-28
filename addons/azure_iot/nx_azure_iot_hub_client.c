@@ -355,7 +355,7 @@ az_result       core_result;
             return(status);
         }
 
-        expiry_time_secs += NX_AZURE_IOT_HUB_CLIENT_TOKEN_EXPIRY;
+        expiry_time_secs += NX_AZURE_IOT_HUB_CLIENT_TOKEN_CONNECTION_TIMEOUT;
         status = hub_client_ptr -> nx_azure_iot_hub_client_token_refresh(hub_client_ptr,
                                                                          expiry_time_secs,
                                                                          hub_client_ptr -> nx_azure_iot_hub_client_symmetric_key,
@@ -372,6 +372,7 @@ az_result       core_result;
             LogError(LogLiteralArgs("IoTHub client connect fail: Token generation failed status: %d"), status);
             return(status);
         }
+        hub_client_ptr -> nx_azure_iot_hub_client_sas_token_expiry_time = expiry_time_secs;
     }
     else
     {
@@ -541,6 +542,7 @@ static VOID nx_azure_iot_hub_client_mqtt_disconnect_notify(NXD_MQTT_CLIENT *clie
 NX_AZURE_IOT_RESOURCE *resource = nx_azure_iot_resource_search(client_ptr);
 NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr = NX_NULL;
 NX_AZURE_IOT_THREAD *thread_list_ptr;
+ULONG current_time = 0;
 
     /* This function is protected by MQTT mutex.  */
 
@@ -548,12 +550,11 @@ NX_AZURE_IOT_THREAD *thread_list_ptr;
     {
         hub_client_ptr = (NX_AZURE_IOT_HUB_CLIENT *)resource -> resource_data_ptr;
     }
-    else
+    
+    if (hub_client_ptr == NX_NULL)
     {
         return;
     }
-
-    NX_ASSERT(hub_client_ptr != NX_NULL);
 
     /* Wake up all threads.  */
     for (thread_list_ptr = hub_client_ptr -> nx_azure_iot_hub_client_thread_suspended;
@@ -571,8 +572,20 @@ NX_AZURE_IOT_THREAD *thread_list_ptr;
         /* Call connection notify if it is set.  */
         if (hub_client_ptr && hub_client_ptr -> nx_azure_iot_hub_client_connection_status_callback)
         {
-            hub_client_ptr -> nx_azure_iot_hub_client_connection_status_callback(hub_client_ptr,
-                                                                                 NX_AZURE_IOT_DISCONNECTED);
+            if (hub_client_ptr -> nx_azure_iot_hub_client_token_refresh &&
+                (nx_azure_iot_unix_time_get(hub_client_ptr -> nx_azure_iot_ptr,
+                                            &current_time) == NX_AZURE_IOT_SUCCESS) &&
+                (current_time > hub_client_ptr -> nx_azure_iot_hub_client_sas_token_expiry_time))
+            {
+                hub_client_ptr -> nx_azure_iot_hub_client_connection_status_callback(hub_client_ptr,
+                                                                                     NX_AZURE_IOT_SAS_TOKEN_EXPIRED);
+            }
+            else
+            {
+                hub_client_ptr -> nx_azure_iot_hub_client_connection_status_callback(hub_client_ptr,
+                                                                                     NX_AZURE_IOT_DISCONNECTED);
+            }
+            
         }
     }
 }
@@ -621,6 +634,8 @@ NX_AZURE_IOT_THREAD *thread_list_ptr;
     nx_azure_iot_hub_client_received_message_cleanup(&(hub_client_ptr -> nx_azure_iot_hub_client_device_twin_message));
     nx_azure_iot_hub_client_received_message_cleanup(&(hub_client_ptr -> nx_azure_iot_hub_client_device_twin_desired_properties_message));
     nx_azure_iot_hub_client_received_message_cleanup(&(hub_client_ptr -> nx_azure_iot_hub_client_direct_method_message));
+
+    hub_client_ptr -> nx_azure_iot_hub_client_state = NX_AZURE_IOT_HUB_CLIENT_STATUS_NOT_CONNECTED;
 
     /* Release the mutex.  */
     tx_mutex_put(hub_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr);
@@ -1451,8 +1466,12 @@ UINT nx_azure_iot_hub_client_report_properties_response_callback_set(NX_AZURE_IO
         return(NX_AZURE_IOT_INVALID_PARAMETER);
     }
 
+    tx_mutex_get(hub_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr, TX_WAIT_FOREVER);
+
     hub_client_ptr -> nx_azure_iot_hub_client_report_properties_response_callback = callback_ptr;
     hub_client_ptr -> nx_azure_iot_hub_client_report_properties_response_callback_args = callback_args;
+
+    tx_mutex_put(hub_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr);
 
     return(NX_AZURE_IOT_SUCCESS);
 }
@@ -2222,7 +2241,7 @@ NX_AZURE_IOT_THREAD *thread_list_ptr;
 static UINT nx_azure_iot_hub_client_device_twin_message_type_get(az_iot_hub_client_twin_response *out_twin_response_ptr,
                                                                  UINT request_id)
 {
-UINT mesg_type;
+UINT message_type;
 
     switch (out_twin_response_ptr -> response_type)
     {
@@ -2234,24 +2253,24 @@ UINT mesg_type;
         {
 
             /* Odd requests are of reported properties and even of twin properties.  */
-            mesg_type = request_id % 2 == 0 ? NX_AZURE_IOT_HUB_DEVICE_TWIN_PROPERTIES :
-                        NX_AZURE_IOT_HUB_DEVICE_TWIN_REPORTED_PROPERTIES_RESPONSE;
+            message_type = request_id % 2 == 0 ? NX_AZURE_IOT_HUB_DEVICE_TWIN_PROPERTIES :
+                                NX_AZURE_IOT_HUB_DEVICE_TWIN_REPORTED_PROPERTIES_RESPONSE;
         }
         break;
 
         case AZ_IOT_HUB_CLIENT_TWIN_RESPONSE_TYPE_DESIRED_PROPERTIES :
         {
-            mesg_type = NX_AZURE_IOT_HUB_DEVICE_TWIN_DESIRED_PROPERTIES;
+            message_type = NX_AZURE_IOT_HUB_DEVICE_TWIN_DESIRED_PROPERTIES;
         }
         break;
 
         default :
         {
-            mesg_type = NX_AZURE_IOT_HUB_NONE;
+            message_type = NX_AZURE_IOT_HUB_NONE;
         }
     }
 
-    return mesg_type;
+    return message_type;
 }
 
 static UINT nx_azure_iot_hub_client_device_twin_parse(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,

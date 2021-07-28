@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_keys_set                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -76,6 +76,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            cleanup for session cipher, */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 #define NX_SECURE_SOURCE_CODE
@@ -223,15 +226,39 @@ const NX_CRYPTO_METHOD               *session_cipher_method = NX_NULL;
         /* Set client write key. */
         if (is_client)
         {
+            if (tls_session -> nx_secure_tls_session_cipher_client_initialized && session_cipher_method -> nx_crypto_cleanup)
+            {
+                status = session_cipher_method -> nx_crypto_cleanup(tls_session -> nx_secure_session_cipher_metadata_area_client);
+                if (status != NX_CRYPTO_SUCCESS)
+                {
+                    return(status);
+                }
+
+                tls_session -> nx_secure_tls_session_cipher_client_initialized = 0;
+            }
+
             status = session_cipher_method -> nx_crypto_init((NX_CRYPTO_METHOD*)session_cipher_method,
                                                     tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_write_key,
                                                     session_cipher_method -> nx_crypto_key_size_in_bits,
                                                     &tls_session -> nx_secure_session_cipher_handler_client,
                                                     tls_session -> nx_secure_session_cipher_metadata_area_client,
                                                     tls_session -> nx_secure_session_cipher_metadata_size);
+
+            tls_session -> nx_secure_tls_session_cipher_client_initialized = 1;
         }
         else
         {
+            if (tls_session -> nx_secure_tls_session_cipher_server_initialized && session_cipher_method -> nx_crypto_cleanup)
+            {
+                status = session_cipher_method -> nx_crypto_cleanup(tls_session -> nx_secure_session_cipher_metadata_area_server);
+                if (status != NX_CRYPTO_SUCCESS)
+                {
+                    return(status);
+                }
+
+                tls_session -> nx_secure_tls_session_cipher_server_initialized = 0;
+            }
+
             /* Set server write key. */
             status = session_cipher_method -> nx_crypto_init((NX_CRYPTO_METHOD*)session_cipher_method,
                                                     tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_write_key,
@@ -239,6 +266,8 @@ const NX_CRYPTO_METHOD               *session_cipher_method = NX_NULL;
                                                     &tls_session -> nx_secure_session_cipher_handler_server,
                                                     tls_session -> nx_secure_session_cipher_metadata_area_server,
                                                     tls_session -> nx_secure_session_cipher_metadata_size);
+
+            tls_session -> nx_secure_tls_session_cipher_server_initialized = 1;
         }
         if(status != NX_CRYPTO_SUCCESS)
         {

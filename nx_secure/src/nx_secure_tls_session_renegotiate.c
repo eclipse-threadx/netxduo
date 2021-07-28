@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_renegotiate                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -87,13 +87,16 @@
 /*                                            supported chained packet,   */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed packet leak bug,      */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 UINT _nx_secure_tls_session_renegotiate(NX_SECURE_TLS_SESSION *tls_session, UINT wait_option)
 {
 UINT       status = NX_NOT_SUCCESSFUL;
-NX_PACKET *incoming_packet;
+NX_PACKET *incoming_packet = NX_NULL;
 NX_PACKET *send_packet;
 
     /* Get the protection. */
@@ -196,6 +199,11 @@ NX_PACKET *send_packet;
                 break;
             }
         }
+
+        if (incoming_packet != NX_NULL)
+        {
+            nx_secure_tls_packet_release(incoming_packet);
+        }
     }
 #endif
 
@@ -256,6 +264,11 @@ NX_PACKET *send_packet;
             {
                 break;
             }
+        }
+
+        if (incoming_packet != NX_NULL)
+        {
+            nx_secure_tls_packet_release(incoming_packet);
         }
     }
 #endif
