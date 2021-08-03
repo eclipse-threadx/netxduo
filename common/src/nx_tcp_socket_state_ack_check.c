@@ -88,6 +88,7 @@
 /**************************************************************************/
 UINT  _nx_tcp_socket_state_ack_check(NX_TCP_SOCKET *socket_ptr, NX_TCP_HEADER *tcp_header_ptr)
 {
+TX_INTERRUPT_SAVE_AREA
 
 NX_TCP_HEADER *search_header_ptr = NX_NULL;
 NX_PACKET     *search_ptr;
@@ -673,9 +674,19 @@ UINT           wrapped_flag = NX_FALSE;
                next pointer.  */
             search_ptr =  search_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next;
 
+            /* Disable interrupts temporarily.
+               Following sequence must be atomic or contain a Data Synchronization Barrier before
+               nx_packet_queue_next is evaluated. Without it a race condition with the TX ISR calling
+               nx_transmit_release() can occur and we end up with packets never being released. */
+            TX_DISABLE
+
             /* Set the packet to allocated to indicate it is no longer part of the TCP queue.  */
             /*lint -e{923} suppress cast of ULONG to pointer.  */
             previous_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next =  ((NX_PACKET *)NX_PACKET_ALLOCATED);
+            NX_PACKET *transmit_done_flag = previous_ptr -> nx_packet_queue_next;
+
+            /* Restore interrupts.  */            
+            TX_RESTORE
 
             /* Has the packet been transmitted? This is only pertinent if a retransmit of
                the packet occurred prior to receiving the ACK. If so, the packet could be
@@ -683,7 +694,7 @@ UINT           wrapped_flag = NX_FALSE;
                release it directly at this point.  The driver or the ARP processing will
                release it when finished.  */
             /*lint -e{923} suppress cast of ULONG to pointer.  */
-            if (previous_ptr -> nx_packet_queue_next ==  ((NX_PACKET *)NX_DRIVER_TX_DONE))
+            if (transmit_done_flag == ((NX_PACKET *)NX_DRIVER_TX_DONE))
             {
 
                 /* Yes, the driver has already released the packet.  */
