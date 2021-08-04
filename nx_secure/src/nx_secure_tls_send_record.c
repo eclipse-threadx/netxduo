@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_record                          PORTABLE C      */
-/*                                                           6.1.7        */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -86,6 +86,10 @@
 /*                                            resulting in version 6.1    */
 /*  06-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1.7  */
+/*  08-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            used wait forever on        */
+/*                                            transmission mutex,         */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
@@ -118,7 +122,7 @@ NX_PACKET *current_packet;
     tx_mutex_put(&_nx_secure_tls_protection);
 
     /* Get transmit mutex first. */
-    status = tx_mutex_get(&(tls_session -> nx_secure_tls_session_transmit_mutex), wait_option);
+    status = tx_mutex_get(&(tls_session -> nx_secure_tls_session_transmit_mutex), TX_WAIT_FOREVER);
 
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 

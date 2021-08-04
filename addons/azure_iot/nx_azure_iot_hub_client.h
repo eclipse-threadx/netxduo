@@ -60,10 +60,14 @@ extern   "C" {
 #define NX_AZURE_IOT_HUB_CLIENT_DNS_TIMEOUT                         (5 * NX_IP_PERIODIC_RATE)
 #endif /* NX_AZURE_IOT_HUB_CLIENT_DNS_TIMEOUT */
 
-/* Set the default token expiry in secs.  */
-#ifndef NX_AZURE_IOT_HUB_CLIENT_TOKEN_EXPIRY
-#define NX_AZURE_IOT_HUB_CLIENT_TOKEN_EXPIRY                        (3600)
+/* Set the default timeout for connection with SAS token authentication in secs.  */
+#ifndef NX_AZURE_IOT_HUB_CLIENT_TOKEN_CONNECTION_TIMEOUT
+#ifdef NX_AZURE_IOT_HUB_CLIENT_TOKEN_EXPIRY
+#define NX_AZURE_IOT_HUB_CLIENT_TOKEN_CONNECTION_TIMEOUT            NX_AZURE_IOT_HUB_CLIENT_TOKEN_EXPIRY
+#else
+#define NX_AZURE_IOT_HUB_CLIENT_TOKEN_CONNECTION_TIMEOUT            (3600)
 #endif /* NX_AZURE_IOT_HUB_CLIENT_TOKEN_EXPIRY */
+#endif /* NX_AZURE_IOT_HUB_CLIENT_SAS_CONNECTION_TIMEOUT */
 
 #ifndef NX_AZURE_IOT_HUB_CLIENT_MAX_BACKOFF_IN_SEC
 #define NX_AZURE_IOT_HUB_CLIENT_MAX_BACKOFF_IN_SEC                  (10 * 60)
@@ -91,15 +95,6 @@ extern   "C" {
 #ifndef NX_AZURE_IOT_HUB_CLIENT_TELEMETRY_QOS
 #define NX_AZURE_IOT_HUB_CLIENT_TELEMETRY_QOS                       NX_AZURE_IOT_MQTT_QOS_1
 #endif /* NX_AZURE_IOT_HUB_CLIENT_TELEMETRY_QOS */
-
-typedef struct NX_AZURE_IOT_THREAD_STRUCT
-{
-    TX_THREAD                           *thread_ptr;
-    struct NX_AZURE_IOT_THREAD_STRUCT   *thread_next;
-    UINT                                 thread_message_type;
-    UINT                                 thread_expected_id;     /* Used by device twin. */
-    NX_PACKET                           *thread_received_message;
-} NX_AZURE_IOT_THREAD;
 
 /* Forward declration*/
 struct NX_AZURE_IOT_HUB_CLIENT_STRUCT;
@@ -153,6 +148,7 @@ typedef struct NX_AZURE_IOT_HUB_CLIENT_STRUCT
     az_iot_hub_client                       iot_hub_client_core;
     UINT                                    nx_azure_iot_hub_client_throttle_count;
     ULONG                                   nx_azure_iot_hub_client_throttle_end_time;
+    ULONG                                   nx_azure_iot_hub_client_sas_token_expiry_time;
 } NX_AZURE_IOT_HUB_CLIENT;
 
 

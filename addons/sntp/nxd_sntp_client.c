@@ -72,8 +72,6 @@ extern  volatile ULONG      _tx_thread_system_state;
 
 TX_EVENT_FLAGS_GROUP        nx_sntp_client_events;
 
-static UINT _nx_sntp_client_number_to_ascii(CHAR *buffer_ptr, UINT buffer_size, UINT number);
-
 /* Define internal time variables for offsets between
    receipt of SNTP packet and application to 
    SNTP Client local time. */
@@ -4154,7 +4152,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_get_local_time_extended             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4180,8 +4178,8 @@ UINT status;
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_fraction_to_usecs                           */ 
-/*                                       Convert NTP fraction to usecs    */
-/*    _nx_sntp_client_number_to_ascii  Converts number to ascii text      */ 
+/*                                      Convert NTP fraction to usecs     */
+/*    _nx_utility_uint_to_string        Converts number to ascii text     */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -4195,6 +4193,10 @@ UINT status;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved the logic of       */
+/*                                            converting number to string,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_get_local_time_extended(NX_SNTP_CLIENT *client_ptr, ULONG *seconds, ULONG *fraction, CHAR *buffer, UINT buffer_size) 
@@ -4228,8 +4230,8 @@ UINT length = 0;
         buffer[offset++] = 'e';
         buffer[offset++] = ':';
         buffer[offset++] = ' ';
-        length = _nx_sntp_client_number_to_ascii(&buffer[offset], buffer_size - offset,
-                                                 client_ptr->nx_sntp_client_local_ntp_time.seconds);
+        length = _nx_utility_uint_to_string(client_ptr -> nx_sntp_client_local_ntp_time.seconds,
+                                            10, &buffer[offset], buffer_size - offset);
         if (length == 0)
         {
             return(NX_SIZE_ERROR);
@@ -4240,7 +4242,7 @@ UINT length = 0;
             return(NX_SIZE_ERROR);
         }
         buffer[offset++] = '.';
-        length = _nx_sntp_client_number_to_ascii(&buffer[offset], 6, usecs);
+        length = _nx_utility_uint_to_string(usecs, 10, &buffer[offset], buffer_size - offset);
         if (length == 0)
         {
             return(NX_SIZE_ERROR);
@@ -4253,6 +4255,8 @@ UINT length = 0;
             memmove(&buffer[offset + (6 - length)], &buffer[offset], length); /* Use case of memmove is verified.  */
             memset(&buffer[offset], '0', (6 - length));
         }
+
+        offset += 6;
         buffer[offset++] = ' ';
         buffer[offset++] = 's';
         buffer[offset++] = 'e';
@@ -4840,7 +4844,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_display_date_time           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4869,8 +4873,8 @@ UINT status;
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*    _nx_sntp_client_utility_convert_seconds_to_date                     */ 
-/*                                     Converts seconds to year, month    */
-/*    _nx_sntp_client_number_to_ascii  Converts number to ascii text      */ 
+/*                                      Converts seconds to year, month   */
+/*    _nx_utility_uint_to_string        Converts number to ascii text     */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -4883,6 +4887,10 @@ UINT status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved the logic of       */
+/*                                            converting number to string,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_sntp_client_utility_display_date_time(NX_SNTP_CLIENT *client_ptr, CHAR *buffer, UINT length)
@@ -4935,48 +4943,48 @@ const CHAR         *months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
     offset = 4;
 
     /* Write in the rest of the data as numeric from the Date Time objext. */
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.day);
+    return_length = _nx_utility_uint_to_string(DisplayTime.day, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 2))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = ',';
     buffer[offset++] = ' ';
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.year);
+    return_length = _nx_utility_uint_to_string(DisplayTime.year, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 1))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = ' ';
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.hour);
+    return_length = _nx_utility_uint_to_string(DisplayTime.hour, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 1))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = ':';
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.minute);
+    return_length = _nx_utility_uint_to_string(DisplayTime.minute, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 1))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = ':';
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.second);
+    return_length = _nx_utility_uint_to_string(DisplayTime.second, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 1))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = '.';
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.millisecond);
+    return_length = _nx_utility_uint_to_string(DisplayTime.millisecond, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 5))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = ' ';
     buffer[offset++] = 'U';
     buffer[offset++] = 'T';
@@ -6404,105 +6412,4 @@ UINT  carry;
 
     /* Ok to add operands!*/
     return NX_SUCCESS;
-}
-
-
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    _nx_sntp_client_number_to_ascii                     PORTABLE C      */ 
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*   This function converts a number to ascii text.                       */
-/*                                                                        */ 
-/*   INPUT                                                                */ 
-/*                                                                        */ 
-/*    buffer_ptr                     Pointer to output string buffer      */
-/*    buffer_size                    Size of output buffer                */
-/*    number                         Number to convert to ASCII           */
-/*                                                                        */
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    size                           Size of converted string             */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    _nx_sntp_client_utility_display_date_time                           */ 
-/*                                     Convert an NTP time                */
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-static UINT _nx_sntp_client_number_to_ascii(CHAR *buffer_ptr, UINT buffer_size, UINT number)
-{
-
-UINT    i;
-UINT    digit;
-UINT    size;
-
-    /* Initialize counters.  */
-    size = 0;
-
-    /* Loop to convert the number to ASCII.  */
-    while (size < buffer_size)
-    {
-
-        /* Shift the current digits over one.  */
-        for (i = size; i != 0; i--)
-        {
-
-            /* Move each digit over one place.  */
-            buffer_ptr[i] =  buffer_ptr[i - 1];
-        }
-
-        /* Compute the next decimal digit.  */
-        digit = (number % 10);
-
-        /* Update the input number.  */
-        number = (number / 10);
-
-        /* Store the new digit in ASCII form.  */
-        if (digit < 10)
-        {
-            buffer_ptr[0] = (CHAR)(digit + '0');
-        }
-        else
-        {
-            buffer_ptr[0] = (CHAR)((digit - 10) + 'a');
-        }
-
-        /* Increment the size.  */
-        size++;
-
-        /* Determine if the number is now zero.  */
-        if (number == 0)
-            break;
-    }
-
-    /* Determine if there is an overflow error.  */
-    if (number)
-    {
-
-        /* Error, return bad values to user.  */
-        return(0);
-    }
-
-    /* Return size to caller.  */
-    return(size);
 }

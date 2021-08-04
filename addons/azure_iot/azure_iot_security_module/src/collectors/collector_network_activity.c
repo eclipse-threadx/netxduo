@@ -89,7 +89,7 @@ static void _append_ipv6_payload_to_list(network_activity_ipv6_t *data_ptr, void
  *
  * @return  network_activity_t*
  */
-static network_activity_ipv6_t *_ipv6_callback(VOID *ip_packet, UINT direction, byte_order_t ip_header_byte_order);
+static network_activity_ipv6_t *_ipv6_callback(struct NX_IP_STRUCT *ip_ptr, NX_PACKET *packet_ptr_st, UINT direction, byte_order_t ip_header_byte_order);
 #endif /* NX_DISABLE_IPV6 */
 
 /**
@@ -99,7 +99,7 @@ static network_activity_ipv6_t *_ipv6_callback(VOID *ip_packet, UINT direction, 
  * @param   direction               The direction of the packet (NX_IP_PACKET_IN / NX_IP_PACKET_OUT)
  * @param   ip_header_byte_order    The byte order of the IP header
  */
-static void _collector_network_activity_ip_callback(VOID* ip_packet, UINT direction, byte_order_t ip_header_byte_order);
+static VOID _collector_network_activity_ip_callback(struct NX_IP_STRUCT *ip_ptr, NX_PACKET *packet_ptr, UINT direction, byte_order_t ip_header_byte_order);
 
 /**
  * @brief   Initialize the port layer of the network activity collector.
@@ -116,7 +116,7 @@ static asc_result_t _collector_network_activity_port_init();
  *
  * @return  NX_SUCCESS
  **/
-static UINT _collector_network_activity_port_ip_callback(VOID* ip_packet, UINT direction);
+static UINT _collector_network_activity_port_ip_callback(struct NX_IP_STRUCT *ip_ptr, NX_PACKET *packet_ptr, UINT direction);
 
 #ifdef ASC_COLLECTOR_NETWORK_ACTIVITY_CAPTURE_UNICAST_ONLY
 /**
@@ -304,7 +304,7 @@ static asc_result_t _collector_network_activity_port_init()
 
     while (created_count--)
     {
-        nx_ip_ptr->nx_ip_packet_filter = _collector_network_activity_port_ip_callback;
+        nx_ip_ptr->nx_ip_packet_filter_extended = _collector_network_activity_port_ip_callback;
 
 #ifdef ASC_COLLECTOR_NETWORK_ACTIVITY_CAPTURE_UNICAST_ONLY
         if (nx_ip_ptr->nx_ip_tcp_packet_receive)
@@ -334,7 +334,7 @@ cleanup:
 }
 
 
-static UINT _collector_network_activity_port_ip_callback(VOID *ip_packet, UINT direction)
+static UINT _collector_network_activity_port_ip_callback(struct NX_IP_STRUCT *ip_ptr, NX_PACKET *packet_ptr, UINT direction)
 {
 #ifdef ASC_COLLECTOR_NETWORK_ACTIVITY_CAPTURE_UNICAST_ONLY
     /* Incoming packets are captured on the transport layer */
@@ -343,8 +343,7 @@ static UINT _collector_network_activity_port_ip_callback(VOID *ip_packet, UINT d
         return NX_SUCCESS;
     }
 #endif
-
-    _collector_network_activity_ip_callback(ip_packet, direction, BYTE_ORDER_NETWORK);
+    _collector_network_activity_ip_callback(ip_ptr, packet_ptr, direction, BYTE_ORDER_NETWORK);
 
     /* return NX_SUCCESS, otherwise NetX will drop the packet */
     return NX_SUCCESS;
@@ -354,7 +353,7 @@ static UINT _collector_network_activity_port_ip_callback(VOID *ip_packet, UINT d
 #ifdef ASC_COLLECTOR_NETWORK_ACTIVITY_CAPTURE_UNICAST_ONLY
 static VOID _collector_network_activity_port_tcp_callback(struct NX_IP_STRUCT *ip_ptr, struct NX_PACKET_STRUCT *packet_ptr)
 {
-    _collector_network_activity_ip_callback(packet_ptr->nx_packet_ip_header, NX_IP_PACKET_IN, BYTE_ORDER_HOST);
+    _collector_network_activity_ip_callback(ip_ptr, packet_ptr, NX_IP_PACKET_IN, BYTE_ORDER_HOST);
 
     if (_tcp_packet_receive_original)
     {
@@ -365,7 +364,7 @@ static VOID _collector_network_activity_port_tcp_callback(struct NX_IP_STRUCT *i
 
 static VOID _collector_network_activity_port_udp_callback(struct NX_IP_STRUCT *ip_ptr, struct NX_PACKET_STRUCT *packet_ptr)
 {
-    _collector_network_activity_ip_callback(packet_ptr->nx_packet_ip_header, NX_IP_PACKET_IN, BYTE_ORDER_HOST);
+    _collector_network_activity_ip_callback(ip_ptr, packet_ptr, NX_IP_PACKET_IN, BYTE_ORDER_HOST);
 
     if (_udp_packet_receive_original)
     {
@@ -376,7 +375,7 @@ static VOID _collector_network_activity_port_udp_callback(struct NX_IP_STRUCT *i
 
 static VOID _collector_network_activity_port_icmp_callback(struct NX_IP_STRUCT *ip_ptr, struct NX_PACKET_STRUCT *packet_ptr)
 {
-    _collector_network_activity_ip_callback(packet_ptr->nx_packet_ip_header, NX_IP_PACKET_IN, BYTE_ORDER_HOST);
+    _collector_network_activity_ip_callback(ip_ptr, packet_ptr, NX_IP_PACKET_IN, BYTE_ORDER_HOST);
 
     if (_icmp_packet_receive_original)
     {
@@ -534,8 +533,9 @@ static void _append_ipv6_payload_to_list(network_activity_ipv6_t *data_ptr, void
 }
 
 
-static network_activity_ipv6_t *_ipv6_callback(VOID *ip_packet, UINT direction, byte_order_t ip_header_byte_order)
+static network_activity_ipv6_t *_ipv6_callback(struct NX_IP_STRUCT *ip_ptr, NX_PACKET *packet_ptr_st, UINT direction, byte_order_t ip_header_byte_order)
 {
+    VOID * ip_packet = packet_ptr_st->nx_packet_ip_header;
     network_activity_ipv6_t *result = network_activity_ipv6_init();
     if (result == NULL)
     {
@@ -552,7 +552,6 @@ static network_activity_ipv6_t *_ipv6_callback(VOID *ip_packet, UINT direction, 
     uint16_t payload_length = (uint16_t)(ip_header_word_1 >> 16);
     uint16_t header_length = 40;
     packet_ptr += header_length;
-
     bool found_transport_header = false;
 
     /*
@@ -596,11 +595,17 @@ static network_activity_ipv6_t *_ipv6_callback(VOID *ip_packet, UINT direction, 
         }
 
         payload_length = (uint16_t)(payload_length - header_length);
-        packet_ptr += header_length;
         if (!found_transport_header)
         {
             next_header_type = (uint8_t)(ip_header_word_0 >> 24);
         }
+    
+        if ((ALIGN_TYPE)(packet_ptr + header_length) >= (ALIGN_TYPE)(packet_ptr_st ->nx_packet_append_ptr))
+        {
+            network_activity_ipv6_deinit(result, NULL);
+            return NULL;
+        }
+        packet_ptr += header_length;
 
     } while (!found_transport_header);
 
@@ -669,8 +674,9 @@ static network_activity_ipv6_t *_ipv6_callback(VOID *ip_packet, UINT direction, 
 #endif
 
 
-static void _collector_network_activity_ip_callback(VOID* ip_packet, UINT direction, byte_order_t ip_header_byte_order)
+static VOID _collector_network_activity_ip_callback(struct NX_IP_STRUCT *ip_ptr, NX_PACKET *packet_ptr, UINT direction, byte_order_t ip_header_byte_order)
 {
+    VOID * ip_packet = packet_ptr->nx_packet_ip_header;
     uint32_t ip_header_word_0 = (ip_header_byte_order == BYTE_ORDER_NETWORK) ? ntohl(*(uint32_t *)ip_packet) : *(uint32_t *)ip_packet;
     uint8_t version = (uint8_t)(ip_header_word_0 >> 28);
 
@@ -685,7 +691,7 @@ static void _collector_network_activity_ip_callback(VOID* ip_packet, UINT direct
     else if (version == NX_IP_VERSION_V6)
     {
 #ifndef NX_DISABLE_IPV6
-        network_activity_ipv6_t *ipv6_object = _ipv6_callback(ip_packet, direction, ip_header_byte_order);
+        network_activity_ipv6_t *ipv6_object = _ipv6_callback(ip_ptr, packet_ptr, direction, ip_header_byte_order);
         if (ipv6_object != NULL)
         {
             hashset_network_activity_ipv6_t_add_or_update(_current_ipv6_hashtable, ipv6_object);

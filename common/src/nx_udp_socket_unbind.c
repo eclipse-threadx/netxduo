@@ -31,12 +31,98 @@
 #include "tx_thread.h"
 
 
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_udp_socket_driver_unbind                        PORTABLE C      */
+/*                                                           6.1.8        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function unbinds a UDP port through TCP/IP offload interface.  */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    socket_ptr                            Pointer to UDP socket         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_udp_socket_bind                                                 */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_udp_socket_driver_unbind(NX_UDP_SOCKET *socket_ptr)
+{
+UINT          i;
+NX_INTERFACE *interface_ptr;
+NX_IP        *ip_ptr;
+
+
+    /* Setup the pointer to the associated IP instance.  */
+    ip_ptr =  socket_ptr -> nx_udp_socket_ip_ptr;
+
+    /* Loop all interfaces to unbind to ones support TCP/IP offload.  */
+    for (i = 0; i < NX_MAX_IP_INTERFACES; i++)
+    {
+
+        /* Use a local variable for convenience.  */
+        interface_ptr = &(ip_ptr -> nx_ip_interface[i]);
+
+        /* Check for valid interfaces.  */
+        if (interface_ptr -> nx_interface_valid == NX_FALSE)
+        {
+
+            /* Skip interface not valid.  */
+            continue;
+        }
+
+        /* Check for TCP/IP offload feature.  */
+        if (((interface_ptr -> nx_interface_capability_flag & NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD) == 0) ||
+            (interface_ptr -> nx_interface_tcpip_offload_handler == NX_NULL))
+        {
+
+            /* Skip interface not support TCP/IP offload.  */
+            continue;
+        }
+
+        /* Let TCP/IP offload interface unbind port.  Return value is ignored.  */
+        interface_ptr -> nx_interface_tcpip_offload_handler(ip_ptr, interface_ptr,
+                                                            socket_ptr,
+                                                            NX_TCPIP_OFFLOAD_UDP_SOCKET_UNBIND,
+                                                            NX_NULL, NX_NULL, NX_NULL,
+                                                            socket_ptr -> nx_udp_socket_port,
+                                                            NX_NULL, NX_NO_WAIT);
+    }
+
+    return(NX_SUCCESS);
+}
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_udp_socket_unbind                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -74,6 +160,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_udp_socket_unbind(NX_UDP_SOCKET *socket_ptr)
@@ -137,6 +226,10 @@ NX_PACKET     *next_packet_ptr;
 
     /* Calculate the hash index in the UDP port array of the associated IP instance.  */
     index =  (UINT)((port + (port >> 8)) & NX_UDP_PORT_TABLE_MASK);
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+    _nx_udp_socket_driver_unbind(socket_ptr);
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
     /* Disable interrupts while we unlink the current socket.  */
     TX_DISABLE

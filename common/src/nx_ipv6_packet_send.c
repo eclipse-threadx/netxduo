@@ -39,7 +39,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ipv6_packet_send                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -93,6 +93,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_ipv6_packet_send(NX_IP *ip_ptr, NX_PACKET *packet_ptr,
@@ -120,6 +123,23 @@ NX_IPV6_DESTINATION_ENTRY *dest_entry_ptr;
     /* Interface can not be NULL. */
     NX_ASSERT(if_ptr != NX_NULL);
 
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+    if (if_ptr -> nx_interface_capability_flag & NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD)
+    {
+#ifndef NX_DISABLE_IP_INFO
+
+        /* Increment the IP invalid packet error.  */
+        ip_ptr -> nx_ip_invalid_transmit_packets++;
+#endif
+
+        /* Ignore sending all packets for TCP/IP offload. Release the packet.  */
+        _nx_packet_transmit_release(packet_ptr);
+
+        /* Return... nothing more can be done!  */
+        return;
+    }
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
     /* Add IPv6 header. */
     if (_nx_ipv6_header_add(ip_ptr, &packet_ptr, protocol, payload_size,
                             hop_limit, src_address, dest_address, &fragment) != NX_SUCCESS)
@@ -128,6 +148,37 @@ NX_IPV6_DESTINATION_ENTRY *dest_entry_ptr;
         /* Failed to add header. */
         return;
     }
+
+#ifdef NX_ENABLE_IP_PACKET_FILTER
+    /* Check if the IP packet filter is set. */
+    if (ip_ptr -> nx_ip_packet_filter)
+    {
+
+        /* Yes, call the IP packet filter routine. */
+        if (ip_ptr -> nx_ip_packet_filter((VOID *)(packet_ptr -> nx_packet_prepend_ptr),
+                                          NX_IP_PACKET_OUT) != NX_SUCCESS)
+        {
+
+            /* Drop the packet. */
+            _nx_packet_transmit_release(packet_ptr);
+            return;
+        }
+    }
+
+    /* Check if the IP packet filter extended is set. */
+    if (ip_ptr -> nx_ip_packet_filter_extended)
+    {
+
+        /* Yes, call the IP packet filter extended routine. */
+        if (ip_ptr -> nx_ip_packet_filter_extended(ip_ptr, packet_ptr, NX_IP_PACKET_OUT) != NX_SUCCESS)
+        {
+
+            /* Drop the packet. */
+            _nx_packet_transmit_release(packet_ptr);
+            return;
+        }
+    }
+#endif /* NX_ENABLE_IP_PACKET_FILTER */
 
     next_hop_mtu = if_ptr -> nx_interface_ip_mtu_size;
     packet_ptr -> nx_packet_ip_header = packet_ptr -> nx_packet_prepend_ptr;

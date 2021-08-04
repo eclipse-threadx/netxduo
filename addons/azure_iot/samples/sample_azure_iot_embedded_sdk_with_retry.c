@@ -224,6 +224,12 @@ UINT status;
         }
         break;
 
+        case NX_AZURE_IOT_SAS_TOKEN_EXPIRED:
+        {
+            printf("SAS token expired\r\n");
+        }
+        /* fallthrough */
+
         default :
         {
             printf("reconnecting iothub, after backoff\r\n");

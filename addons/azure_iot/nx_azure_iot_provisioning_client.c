@@ -33,11 +33,6 @@
 #define NX_AZURE_IOT_PROVISIONING_CLIENT_PAYLOAD_END                  "}"
 #define NX_AZURE_IOT_PROVISIONING_CLIENT_POLICY_NAME                  "registration"
 
-/* Set the default timeout for connecting on cloud thread.  */
-#ifndef NX_AZURE_IOT_PROVISIONING_CLIENT_CONNECT_TIMEOUT
-#define NX_AZURE_IOT_PROVISIONING_CLIENT_CONNECT_TIMEOUT              (20 * NX_IP_PERIODIC_RATE)
-#endif /* NX_AZURE_IOT_PROVISIONING_CLIENT_CONNECT_TIMEOUT */
-
 /* Set the default retry to Provisioning service.  */
 #ifndef NX_AZURE_IOT_PROVISIONING_CLIENT_DEFAULT_RETRY
 #define NX_AZURE_IOT_PROVISIONING_CLIENT_DEFAULT_RETRY                (3)
@@ -97,7 +92,7 @@ UINT status;
                                                                   &response -> register_response);
     if (az_result_failed(core_result))
     {
-        LogError(LogLiteralArgs("IoTProvisioning client failed to parse packet, error status: "), core_result);
+        LogError(LogLiteralArgs("IoTProvisioning client failed to parse packet, error status: %d"), core_result);
         return(NX_AZURE_IOT_SDK_CORE_ERROR);
     }
 
@@ -465,7 +460,7 @@ UINT status;
         {
 
             /* Start new operation.  */
-            status = nx_azure_iot_provisioning_client_send_req(context, NULL, NX_AZURE_IOT_PROVISIONING_CLIENT_CONNECT_TIMEOUT);
+            status = nx_azure_iot_provisioning_client_send_req(context, NULL, NX_NO_WAIT);
         }
 
         if (status)

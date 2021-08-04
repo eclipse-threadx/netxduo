@@ -25,7 +25,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_crypto_sha5.h                                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -45,6 +45,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), and      */
+/*                                            used ULONG64_DEFINED macro, */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -65,13 +68,11 @@ extern   "C" {
 
 #include "nx_crypto.h"
 
-#ifndef ULONG64
+#ifndef ULONG64_DEFINED
+#define ULONG64_DEFINED
 #define ULONG64                              unsigned long long
 #endif /* ULONG64 */
 
-#ifndef LONG64
-#define LONG64                               long long
-#endif /* LONG64 */
 
 #define NX_CRYPTO_SHA512_BLOCK_SIZE_IN_BYTES    128
 #define NX_CRYPTO_SHA384_ICV_LEN_IN_BITS        384

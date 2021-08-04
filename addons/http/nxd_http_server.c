@@ -5364,105 +5364,6 @@ CHAR    *buffer_ptr;
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_http_server_number_convert                      PORTABLE C      */
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */
-/*                                                                        */
-/*    This function converts a number into an ASCII string.               */
-/*                                                                        */
-/*  INPUT                                                                 */
-/*                                                                        */
-/*    number                                Unsigned integer number       */
-/*    string                                Destination string            */
-/*                                                                        */
-/*  OUTPUT                                                                */
-/*                                                                        */
-/*    Size                                  Number of bytes in string     */
-/*                                           (0 implies an error)         */
-/*                                                                        */
-/*  CALLS                                                                 */
-/*                                                                        */
-/*    None                                                                */
-/*                                                                        */
-/*  CALLED BY                                                             */
-/*                                                                        */
-/*    _nx_http_server_get_process           Process GET request           */
-/*    _nx_http_server_response_send         Send response to client       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-UINT  _nx_http_server_number_convert(UINT number, CHAR *string)
-{
-
-UINT    j;
-UINT    digit;
-UINT    size;
-
-
-    /* Initialize counters.  */
-    size =  0;
-
-    /* Loop to convert the number to ASCII.  */
-    while (size < 10)
-    {
-
-        /* Shift the current digits over one.  */
-        for (j = size; j != 0; j--)
-        {
-
-            /* Move each digit over one place.  */
-            string[j] =  string[j-1];
-        }
-
-        /* Compute the next decimal digit.  */
-        digit =  number % 10;
-
-        /* Update the input number.  */
-        number =  number / 10;
-
-        /* Store the new digit in ASCII form.  */
-        string[0] =  (CHAR) (digit + 0x30);
-
-        /* Increment the size.  */
-        size++;
-
-        /* Determine if the number is now zero.  */
-        if (number == 0)
-            break;
-    }
-
-    /* Make the string NULL terminated.  */
-    string[size] =  (CHAR) NX_NULL;
-
-    /* Determine if there is an overflow error.  */
-    if (number)
-    {
-
-        /* Error, return bad values to user.  */
-        size =  0;
-        string[0] = '0';
-    }
-
-    /* Return size to caller.  */
-    return(size);
-}
-
-
-/**************************************************************************/
-/*                                                                        */
-/*  FUNCTION                                               RELEASE        */
-/*                                                                        */
 /*    _nxe_http_server_type_get                           PORTABLE C      */
 /*                                                           6.1          */
 /*  AUTHOR                                                                */
@@ -7789,7 +7690,7 @@ UCHAR   ch;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_generate_response_header            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7824,7 +7725,7 @@ UCHAR   ch;
 /*    nx_packet_data_append                                               */
 /*    memcmp                                                              */
 /*    _nx_utility_string_length_check                                     */
-/*    _nx_http_server_number_convert                                      */
+/*    _nx_utility_uint_to_string                                          */
 /*    _nx_http_server_date_to_string                                      */
 /*    nx_packet_release                                                   */
 /*                                                                        */ 
@@ -7843,6 +7744,10 @@ UCHAR   ch;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved the logic of       */
+/*                                            converting number to string,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_generate_response_header(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, CHAR *status_code, 
@@ -7926,7 +7831,7 @@ CHAR        status_code_not_modified;
         {
 
             /* Convert the content_length to ASCII representation.  */
-            temp = _nx_http_server_number_convert(content_length, temp_string);
+            temp = _nx_utility_uint_to_string(content_length, 10, temp_string, sizeof(temp_string));
 
             /* Place the "Content-Length" field in the header.  */
             status += nx_packet_data_append(packet_ptr, "Content-Length: ", 16,
@@ -7990,7 +7895,7 @@ CHAR        status_code_not_modified;
                                                 server_ptr -> nx_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
 
                 /* Convert the max-age to ASCII representation.  */
-                temp = _nx_http_server_number_convert(max_age, temp_string);
+                temp = _nx_utility_uint_to_string(max_age, 10, temp_string, sizeof(temp_string));
                 status += nx_packet_data_append(packet_ptr, temp_string, temp,
                                                 server_ptr -> nx_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
 

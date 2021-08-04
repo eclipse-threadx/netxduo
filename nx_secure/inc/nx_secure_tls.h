@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.1.7        */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +70,11 @@
 /*  06-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            updated product constants,  */
 /*                                            resulting in version 6.1.7  */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            hash clone and cleanup,     */
+/*                                            added state to cleanup      */
+/*                                            session cipher,             */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -130,7 +135,7 @@ extern   "C" {
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
 #define NETX_SECURE_MINOR_VERSION                       1
-#define NETX_SECURE_PATCH_VERSION                       7
+#define NETX_SECURE_PATCH_VERSION                       8
 
 /* The following symbols are defined for backward compatibility reasons. */
 #define EL_PRODUCT_NETX_SECURE
@@ -156,6 +161,14 @@ extern   "C" {
 #ifndef NX_SECURE_MEMMOVE
 #define NX_SECURE_MEMMOVE                               memmove
 #endif /* NX_SECURE_MEMMOVE */
+
+#ifndef NX_SECURE_HASH_METADATA_CLONE
+#define NX_SECURE_HASH_METADATA_CLONE                   NX_SECURE_MEMCPY
+#endif /* NX_SECURE_HASH_METADATA_CLONE */
+
+#ifndef NX_SECURE_HASH_CLONE_CLEANUP
+#define NX_SECURE_HASH_CLONE_CLEANUP(x, y)
+#endif /* NX_SECURE_HASH_CLONE_CLEANUP  */
 
 /* Map NX_SECURE_CALLER_CHECKING_EXTERNS to NX_CALLER_CHECKING_EXTERNS, which is defined
    in nx_port.h.*/
@@ -1130,11 +1143,15 @@ typedef struct NX_SECURE_TLS_SESSION_STRUCT
     USHORT nx_secure_tls_protocol_version_override;
 
     /* The highest supported protocol version obtained through negotiation. */
-	USHORT nx_secure_tls_negotiated_highest_protocol_version;
+    USHORT nx_secure_tls_negotiated_highest_protocol_version;
 
     /* State of local and remote encryption - post ChangeCipherSpec. */
     UCHAR nx_secure_tls_remote_session_active;
     UCHAR nx_secure_tls_local_session_active;
+
+    /* State of whether the client and server session cipher is initialized. */
+    UCHAR nx_secure_tls_session_cipher_client_initialized;
+    UCHAR nx_secure_tls_session_cipher_server_initialized;
 
     /* Chosen ciphersuite. */
     const NX_SECURE_TLS_CIPHERSUITE_INFO *nx_secure_tls_session_ciphersuite;

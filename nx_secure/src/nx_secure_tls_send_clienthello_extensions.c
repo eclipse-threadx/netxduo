@@ -826,7 +826,7 @@ USHORT named_curve;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_psk_extension       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.8        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -865,6 +865,9 @@ USHORT named_curve;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            hash clone and cleanup,     */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -1071,9 +1074,9 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
     {
 
         /* Save the handshake hash state. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
-                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
-                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
+        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
     }
 
     /* Hash the ClientHello up to its current point. */
@@ -1087,17 +1090,30 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
 
     /* Save the transcript hash for the ClientHello, which is used in generating the PSK binders. */
     status = _nx_secure_tls_1_3_transcript_hash_save(tls_session, NX_SECURE_TLS_TRANSCRIPT_IDX_CLIENTHELLO, NX_FALSE);
-    if(status != NX_SUCCESS)
+    if (status != NX_SUCCESS)
     {
+
+        if (tls_session -> nx_secure_tls_client_state != NX_SECURE_TLS_CLIENT_STATE_IDLE)
+        {
+            NX_SECURE_HASH_CLONE_CLEANUP(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size);
+        }
+
         return(status);
     }
 
     /* Restore the original metadata(ClientHello1 and HelloRetryRequest) from scratch buffer. */
     if (tls_session -> nx_secure_tls_client_state != NX_SECURE_TLS_CLIENT_STATE_IDLE)
     {
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
-                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
-                         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
+        NX_SECURE_HASH_CLONE_CLEANUP(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
+                                     tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size);
+
+        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
+
+        NX_SECURE_HASH_CLONE_CLEANUP(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                     tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size);
     }
 
     /* Loop through all IDs and set the binders accordingly. */
