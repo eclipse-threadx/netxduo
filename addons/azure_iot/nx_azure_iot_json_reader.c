@@ -208,6 +208,22 @@ UINT nx_azure_iot_json_reader_token_int32_get(NX_AZURE_IOT_JSON_READER *reader_p
     return(NX_AZURE_IOT_SUCCESS);
 }
 
+UINT nx_azure_iot_json_reader_token_uint32_get(NX_AZURE_IOT_JSON_READER *reader_ptr, 
+                                               uint32_t *value_ptr)
+{
+    if ((reader_ptr == NX_NULL) || (value_ptr == NX_NULL))
+    {
+        return (NX_AZURE_IOT_INVALID_PARAMETER);
+    }
+
+    if (az_result_failed(az_json_token_get_uint32(&(reader_ptr->json_reader.token), value_ptr)))
+    {
+        return (NX_AZURE_IOT_SDK_CORE_ERROR);
+    }
+
+    return (NX_AZURE_IOT_SUCCESS);
+}
+
 UINT  nx_azure_iot_json_reader_token_double_get(NX_AZURE_IOT_JSON_READER *reader_ptr,
                                                 double *value_ptr)
 {

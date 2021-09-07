@@ -149,6 +149,18 @@ UINT nx_azure_iot_json_reader_token_int32_get(NX_AZURE_IOT_JSON_READER *reader_p
                                               int32_t *value_ptr);
 
 /**
+ * @brief Gets the JSON token's number as a 32-bit unsigned integer.
+ *
+ * @param[in] reader_ptr A pointer to an #NX_AZURE_IOT_JSON_READER instance.
+ * @param[out] value_ptr A pointer to a variable to receive the value.
+ *
+ * @return An `UINT` value indicating the result of the operation.
+ * @retval #NX_AZURE_IOT_SUCCESS The number is returned.
+ */
+UINT nx_azure_iot_json_reader_token_uint32_get(NX_AZURE_IOT_JSON_READER *reader_ptr, 
+                                               uint32_t *value_ptr);
+
+/**
  * @brief Gets the JSON token's number as a `double`.
  *
  * @param[in] reader_ptr A pointer to an #NX_AZURE_IOT_JSON_READER instance.
