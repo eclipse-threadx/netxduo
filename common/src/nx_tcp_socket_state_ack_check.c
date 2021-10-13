@@ -40,7 +40,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_ack_check                      PORTABLE C      */
-/*                                                           6.1.7        */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -84,10 +84,17 @@
 /*  06-02-2021     Yuxin Zhou               Modified comment(s),          */
 /*                                            fixed compiler warnings,    */
 /*                                            resulting in version 6.1.7  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the bug of race       */
+/*                                            condition, removed useless  */
+/*                                            code,                       */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_state_ack_check(NX_TCP_SOCKET *socket_ptr, NX_TCP_HEADER *tcp_header_ptr)
 {
+
+TX_INTERRUPT_SAVE_AREA
 
 NX_TCP_HEADER *search_header_ptr = NX_NULL;
 NX_PACKET     *search_ptr;
@@ -230,10 +237,6 @@ UINT           wrapped_flag = NX_FALSE;
             /*lint -e{923} suppress cast of ULONG to pointer.  */
             if ((search_ptr) && (search_ptr -> nx_packet_queue_next == ((NX_PACKET *)NX_DRIVER_TX_DONE)))
             {
-
-                /* Setup a pointer to header of this packet in the sent list.  */
-                /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
-                search_header_ptr =  (NX_TCP_HEADER *)search_ptr -> nx_packet_prepend_ptr;
 
                 /* Determine if the incoming ACK matches the front of our transmit queue. */
                 if (tcp_header_ptr -> nx_tcp_acknowledgment_number == starting_tx_sequence)
@@ -483,23 +486,6 @@ UINT           wrapped_flag = NX_FALSE;
             /* Reset the duplicated ACK counter. */
             socket_ptr -> nx_tcp_socket_duplicated_ack_received = 0;
 
-            /* Determine if the packet has been transmitted.  */
-            /*lint -e{923} suppress cast of ULONG to pointer.  */
-            if (socket_ptr -> nx_tcp_socket_transmit_sent_head -> nx_packet_queue_next != ((NX_PACKET *)NX_DRIVER_TX_DONE))
-            {
-
-                /* Setup a pointer to header of this packet in the sent list.  */
-                search_header_ptr =  (NX_TCP_HEADER *)(socket_ptr -> nx_tcp_socket_transmit_sent_head -> nx_packet_ip_header +
-                                                       socket_ptr -> nx_tcp_socket_transmit_sent_head -> nx_packet_ip_header_length);
-            }
-            else
-            {
-
-                /* Setup a pointer to header of this packet in the sent list.  */
-                /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
-                search_header_ptr =  (NX_TCP_HEADER *)socket_ptr -> nx_tcp_socket_transmit_sent_head -> nx_packet_prepend_ptr;
-            }
-
             /* Set previous cumulative acknowlesgement. */
             socket_ptr -> nx_tcp_socket_previous_highest_ack = starting_tx_sequence;
 
@@ -673,6 +659,9 @@ UINT           wrapped_flag = NX_FALSE;
                next pointer.  */
             search_ptr =  search_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next;
 
+            /* Disable interrupts temporarily.  */
+            TX_DISABLE
+
             /* Set the packet to allocated to indicate it is no longer part of the TCP queue.  */
             /*lint -e{923} suppress cast of ULONG to pointer.  */
             previous_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next =  ((NX_PACKET *)NX_PACKET_ALLOCATED);
@@ -685,6 +674,9 @@ UINT           wrapped_flag = NX_FALSE;
             /*lint -e{923} suppress cast of ULONG to pointer.  */
             if (previous_ptr -> nx_packet_queue_next ==  ((NX_PACKET *)NX_DRIVER_TX_DONE))
             {
+
+                /* Restore interrupts.  */
+                TX_RESTORE
 
                 /* Yes, the driver has already released the packet.  */
 
@@ -730,8 +722,8 @@ UINT           wrapped_flag = NX_FALSE;
                     socket_ptr -> nx_tcp_socket_tx_outstanding_bytes = 0;
                 }
 
-                /* Let driver release the packet.  */
-                previous_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next = ((NX_PACKET *)NX_PACKET_ALLOCATED);
+                /* Restore interrupts.  */
+                TX_RESTORE
             }
         }
 

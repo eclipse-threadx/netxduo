@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */
 /*                                                                        */
 /*    nx_secure_user.h                                    PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.9        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -50,6 +50,11 @@
 /*                                            resulting in version 6.1    */
 /*  08-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            macro to disable client     */
+/*                                            initiated renegotiation for */
+/*                                            TLS server instances,       */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -289,6 +294,14 @@
 /*
    #define NX_SECURE_TLS_REQUIRE_RENEGOTIATION_EXT
 */
+
+/* NX_SECURE_TLS_DISABLE_CLIENT_INITIATED_RENEGOTIATION disables client-initiated renegotiation for TLS
+   servers. In some instances, client-initiated renegotiation can become a possible denial-of-service 
+   vulnerability. */
+/*
+  #define NX_SECURE_TLS_DISABLE_CLIENT_INITIATED_RENEGOTIATION
+ */
+
 
 /* NX_SECURE_X509_DISABLE_CRL disables X509 Certificate Revocation List check.
    By default this feature is enabled. */

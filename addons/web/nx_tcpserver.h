@@ -24,7 +24,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_tcpserver.h                                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -42,6 +42,9 @@
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed packet leak issue,    */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            deprecated unused macros,   */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -60,14 +63,17 @@
 #include "nx_secure_tls_api.h"
 #endif /* NX_WEB_HTTPS_ENABLE */
 
+/* Deprecated. This symbol is defined for compatibility. */
 #ifndef NX_TCPSERVER_ACCEPT_WAIT    
 #define NX_TCPSERVER_ACCEPT_WAIT 1
 #endif /* NX_TCPSERVER_ACCEPT_WAIT */
 
+/* Deprecated. This symbol is defined for compatibility. */
 #ifndef NX_TCPSERVER_DISCONNECT_WAIT    
 #define NX_TCPSERVER_DISCONNECT_WAIT 1
 #endif /* NX_TCPSERVER_DISCONNECT_WAIT */
 
+/* Deprecated. This symbol is defined for compatibility. */
 #ifndef NX_TCPSERVER_PRIORITY    
 #define NX_TCPSERVER_PRIORITY 4
 #endif /* NX_TCPSERVER_PRIORITY */

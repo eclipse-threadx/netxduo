@@ -127,7 +127,6 @@ UINT nx_azure_iot_json_reader_deinit(NX_AZURE_IOT_JSON_READER *reader_ptr)
 
     if (reader_ptr -> packet_ptr)
     {
-        nx_packet_release(reader_ptr -> packet_ptr);
         reader_ptr -> packet_ptr = NX_NULL;
     }
 
@@ -185,6 +184,22 @@ UINT nx_azure_iot_json_reader_token_bool_get(NX_AZURE_IOT_JSON_READER *reader_pt
     }
 
     if (az_result_failed(az_json_token_get_boolean(&(reader_ptr -> json_reader.token), (bool *)value_ptr)))
+    {
+        return(NX_AZURE_IOT_SDK_CORE_ERROR);
+    }
+
+    return(NX_AZURE_IOT_SUCCESS);
+}
+
+UINT nx_azure_iot_json_reader_token_uint32_get(NX_AZURE_IOT_JSON_READER *reader_ptr,
+                                               uint32_t *value_ptr)
+{
+    if ((reader_ptr == NX_NULL) || (value_ptr == NX_NULL))
+    {
+        return(NX_AZURE_IOT_INVALID_PARAMETER);
+    }
+
+    if (az_result_failed(az_json_token_get_uint32(&(reader_ptr -> json_reader.token), value_ptr)))
     {
         return(NX_AZURE_IOT_SDK_CORE_ERROR);
     }

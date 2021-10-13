@@ -25,9 +25,6 @@
 #define NX_AZURE_IOT_WAIT_OPTION NX_WAIT_FOREVER
 #endif /* NX_AZURE_IOT_WAIT_OPTION */
 
-/* Define offset of MQTT telemetry packet.  */
-#define NX_AZURE_IOT_PUBLISH_PACKET_START_OFFSET   7
-
 /* Convert number to upper hex.  */
 #define NX_AZURE_IOT_NUMBER_TO_UPPER_HEX(number)    (CHAR)(number + (number < 10 ? '0' : 'A' - 10))
 

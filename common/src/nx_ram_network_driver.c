@@ -110,7 +110,7 @@ static _nx_ram_network_driver_instance_type nx_ram_driver[NX_MAX_RAM_INTERFACES]
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -146,6 +146,10 @@ static _nx_ram_network_driver_instance_type nx_ram_driver[NX_MAX_RAM_INTERFACES]
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added sample of returning   */
+/*                                            link's interface type,      */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr)
@@ -522,6 +526,14 @@ UINT          interface_index;
 
         /* Return the link's line speed in the supplied return pointer. Unsupported feature.  */
         *(driver_req_ptr -> nx_ip_driver_return_ptr) = 0;
+        break;
+    }
+
+    case NX_LINK_GET_INTERFACE_TYPE:
+    {
+
+        /* Return the link's interface type in the supplied return pointer. Unsupported feature.  */
+        *(driver_req_ptr -> nx_ip_driver_return_ptr) = NX_INTERFACE_TYPE_UNKNOWN;
         break;
     }
 

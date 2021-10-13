@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_handshake_hash_update                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,6 +73,11 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
+/*                                            compilation issue with      */
+/*                                            TLS 1.3 and disabling TLS   */
+/*                                            server,                     */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_handshake_hash_update(NX_SECURE_TLS_SESSION *tls_session, UCHAR *data,
@@ -83,6 +88,7 @@ const NX_CRYPTO_METHOD *method_ptr;
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 UINT                    hash_length;
+USHORT                  hello_retry_process = 0;
 #endif
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -122,10 +128,23 @@ UINT                    hash_length;
                                                        NX_NULL,
                                                        NX_NULL);
 
+            /* See if we have recieved or are sending a hello retry message - we need to process the hash differently. */
+#ifndef NX_SECURE_TLS_SERVER_DISABLED
+            if (tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_SERVER)
+            {
+                hello_retry_process = (tls_session -> nx_secure_tls_server_state == NX_SECURE_TLS_SERVER_STATE_SEND_HELLO_RETRY);
+            }
+#endif
+#ifndef NX_SECURE_TLS_CLIENT_DISABLED
+            if (tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_CLIENT)
+            {
+                hello_retry_process = (tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HELLO_RETRY);
+            }
+#endif
+
            /* Modify message buffer - replace message with hash used for HelloRetryRequest processing. */
             if ((status == NX_SUCCESS) &&
-                ((tls_session -> nx_secure_tls_server_state == NX_SECURE_TLS_SERVER_STATE_SEND_HELLO_RETRY)||
-                 (tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HELLO_RETRY)) &&
+                (hello_retry_process) &&
                 (data[0] == NX_SECURE_TLS_CLIENT_HELLO) &&
                 (length > NX_SECURE_TLS_HANDSHAKE_HEADER_SIZE))
             {

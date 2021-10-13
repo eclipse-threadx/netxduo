@@ -48,7 +48,7 @@ static code2string_t _log_levels[] = {
     {-1, NULL}
 };
 
-static asc_result_t _init(component_id_t id)
+static asc_result_t _cm_init(component_id_t id)
 {
     return ASC_RESULT_OK;
 }
@@ -162,12 +162,12 @@ static asc_result_t _conf_apply(linked_list_t *conf_list, conf_origin_t origin)
 }
 #endif
 
-static asc_result_t _deinit(component_id_t id)
+static asc_result_t _cm_deinit(component_id_t id)
 {
     return ASC_RESULT_OK;
 }
 
-static asc_result_t _subscribe(component_id_t id)
+static asc_result_t _cm_subscribe(component_id_t id)
 {
 #ifdef ASC_COMPONENT_CONFIGURATION
     return configuration_component_register(components_manager_get_name(id), _conf_validate, _conf_apply);
@@ -176,7 +176,7 @@ static asc_result_t _subscribe(component_id_t id)
 #endif
 }
 
-static asc_result_t _unsubscribe(component_id_t id)
+static asc_result_t _cm_unsubscribe(component_id_t id)
 {
 #ifdef ASC_COMPONENT_CONFIGURATION
     return configuration_component_unregister(components_manager_get_name(id));
@@ -186,10 +186,10 @@ static asc_result_t _unsubscribe(component_id_t id)
 }
 
 static component_ops_t _ops = {
-    .init = _init,
-    .deinit = _deinit,
-    .subscribe = _subscribe,
-    .unsubscribe = _unsubscribe,
+    .init = _cm_init,
+    .deinit = _cm_deinit,
+    .subscribe = _cm_subscribe,
+    .unsubscribe = _cm_unsubscribe,
 };
 
 COMPONENTS_FACTORY_DEFINITION(Logger, &_ops)

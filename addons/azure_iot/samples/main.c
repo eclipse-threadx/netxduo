@@ -52,7 +52,7 @@ extern VOID sample_entry(NX_IP* ip_ptr, NX_PACKET_POOL* pool_ptr, NX_DNS* dns_pt
 #define SAMPLE_IP_THREAD_PRIORITY       (1)
 #endif /* SAMPLE_IP_THREAD_PRIORITY */
 
-#ifdef SAMPLE_DHCP_DISABLE
+#if defined(SAMPLE_DHCP_DISABLE) && !defined(SAMPLE_NETWORK_CONFIGURE)
 #ifndef SAMPLE_IPV4_ADDRESS
 /*#define SAMPLE_IPV4_ADDRESS           IP_ADDRESS(192, 168, 100, 33)*/
 #error "SYMBOL SAMPLE_IPV4_ADDRESS must be defined. This symbol specifies the IP address of device. "
@@ -75,6 +75,11 @@ extern VOID sample_entry(NX_IP* ip_ptr, NX_PACKET_POOL* pool_ptr, NX_DNS* dns_pt
 #else
 #define SAMPLE_IPV4_ADDRESS             IP_ADDRESS(0, 0, 0, 0)
 #define SAMPLE_IPV4_MASK                IP_ADDRESS(0, 0, 0, 0)
+
+#ifndef SAMPLE_DHCP_WAIT_OPTION
+#define SAMPLE_DHCP_WAIT_OPTION         (20 * NX_IP_PERIODIC_RATE)
+#endif /* SAMPLE_DHCP_WAIT_OPTION */
+
 #endif /* SAMPLE_DHCP_DISABLE */
 
 #ifndef SAMPLE_SNTP_SYNC_MAX
@@ -118,7 +123,9 @@ static ULONG sample_pool_stack_size = sizeof(sample_pool_stack);
 extern ULONG sample_pool_stack[];
 extern ULONG sample_pool_stack_size;
 #endif
+#ifndef SAMPLE_NETWORK_CONFIGURE
 static ULONG sample_arp_cache_area[SAMPLE_ARP_CACHE_SIZE / sizeof(ULONG)];
+#endif
 static ULONG sample_helper_thread_stack[SAMPLE_HELPER_STACK_SIZE / sizeof(ULONG)];
 
 static const CHAR *sntp_servers[] =
@@ -134,10 +141,10 @@ static UINT sntp_server_index;
 static void sample_helper_thread_entry(ULONG parameter);
 
 #ifndef SAMPLE_DHCP_DISABLE
-static void dhcp_wait();
+static UINT dhcp_wait();
 #endif /* SAMPLE_DHCP_DISABLE */
 
-static UINT dns_create();
+static UINT dns_create(ULONG dns_server_address);
 
 static UINT sntp_time_sync();
 static UINT unix_time_get(ULONG *unix_time);
@@ -152,6 +159,10 @@ void SAMPLE_NETWORK_DRIVER(struct NX_IP_DRIVER_STRUCT *driver_req);
 #ifdef SAMPLE_BOARD_SETUP
 void SAMPLE_BOARD_SETUP();
 #endif /* SAMPLE_BOARD_SETUP */
+
+#ifdef SAMPLE_NETWORK_CONFIGURE
+void SAMPLE_NETWORK_CONFIGURE(NX_IP *ip_ptr, ULONG *dns_address);
+#endif
 
 /* Define main entry point.  */
 int main(void)
@@ -201,6 +212,7 @@ UINT  status;
         return;
     }
 
+#ifndef SAMPLE_NETWORK_CONFIGURE
     /* Enable ARP and supply ARP cache memory for IP Instance 0.  */
     status = nx_arp_enable(&ip_0, (VOID *)sample_arp_cache_area, sizeof(sample_arp_cache_area));
 
@@ -220,6 +232,7 @@ UINT  status;
         printf("nx_icmp_enable fail: %u\r\n", status);
         return;
     }
+#endif
 
     /* Enable TCP traffic.  */
     status = nx_tcp_enable(&ip_0);
@@ -268,11 +281,21 @@ ULONG   ip_address = 0;
 ULONG   network_mask = 0;
 ULONG   gateway_address = 0;
 UINT    unix_time;
+ULONG   dns_server_address[3];
+#ifndef SAMPLE_DHCP_DISABLE
+UINT    dns_server_address_size = sizeof(dns_server_address);
+#endif
 
     NX_PARAMETER_NOT_USED(parameter);
 
 #ifndef SAMPLE_DHCP_DISABLE
-    dhcp_wait();
+    if (dhcp_wait())
+    {
+        printf("Failed to get the IP address!\r\n");
+        return;
+    }
+#elif defined(SAMPLE_NETWORK_CONFIGURE)
+    SAMPLE_NETWORK_CONFIGURE(&ip_0, &dns_server_address[0]);
 #else
     nx_ip_gateway_address_set(&ip_0, SAMPLE_GATEWAY_ADDRESS);
 #endif /* SAMPLE_DHCP_DISABLE  */
@@ -298,8 +321,16 @@ UINT    unix_time;
            (gateway_address >> 8 & 0xFF),
            (gateway_address & 0xFF));
 
+#ifndef SAMPLE_DHCP_DISABLE
+    /* Retrieve DNS server address.  */
+    nx_dhcp_interface_user_option_retrieve(&dhcp_0, 0, NX_DHCP_OPTION_DNS_SVR, (UCHAR *)(dns_server_address),
+                                           &dns_server_address_size);
+#elif !defined(SAMPLE_NETWORK_CONFIGURE)
+    dns_server_address[0] = SAMPLE_DNS_SERVER_ADDRESS;
+#endif /* SAMPLE_DHCP_DISABLE */
+
     /* Create DNS.  */
-    status = dns_create();
+    status = dns_create(dns_server_address[0]);
 
     /* Check for DNS create errors.  */
     if (status)
@@ -331,31 +362,59 @@ UINT    unix_time;
 }
 
 #ifndef SAMPLE_DHCP_DISABLE
-static void dhcp_wait()
+static UINT dhcp_wait()
 {
+UINT    status;
 ULONG   actual_status;
 
     printf("DHCP In Progress...\r\n");
 
     /* Create the DHCP instance.  */
-    nx_dhcp_create(&dhcp_0, &ip_0, "DHCP Client");
+    status = nx_dhcp_create(&dhcp_0, &ip_0, "DHCP Client");
+
+    /* Check status.  */
+    if (status)
+    {
+        return(status);
+    }
 
     /* Request NTP server.  */
-    nx_dhcp_user_option_request(&dhcp_0, NX_DHCP_OPTION_NTP_SVR);
+    status = nx_dhcp_user_option_request(&dhcp_0, NX_DHCP_OPTION_NTP_SVR);
+
+    /* Check status.  */
+    if (status)
+    {
+        nx_dhcp_delete(&dhcp_0);
+        return(status);
+    }
 
     /* Start the DHCP Client.  */
-    nx_dhcp_start(&dhcp_0);
+    status = nx_dhcp_start(&dhcp_0);
+
+    /* Check status.  */
+    if (status)
+    {
+        nx_dhcp_delete(&dhcp_0);
+        return(status);
+    }
 
     /* Wait util address is solved.  */
-    nx_ip_status_check(&ip_0, NX_IP_ADDRESS_RESOLVED, &actual_status, NX_WAIT_FOREVER);
+    status = nx_ip_status_check(&ip_0, NX_IP_ADDRESS_RESOLVED, &actual_status, SAMPLE_DHCP_WAIT_OPTION);
+
+    /* Check status.  */
+    if (status)
+    {
+        nx_dhcp_delete(&dhcp_0);
+        return(status);
+    }
+
+    return(NX_SUCCESS);
 }
 #endif /* SAMPLE_DHCP_DISABLE  */
 
-static UINT dns_create()
+static UINT dns_create(ULONG dns_server_address)
 {
 UINT    status;
-ULONG   dns_server_address[3];
-UINT    dns_server_address_size = sizeof(dns_server_address);
 
     /* Create a DNS instance for the Client.  Note this function will create
        the DNS Client packet pool for creating DNS message packets intended
@@ -379,16 +438,8 @@ UINT    dns_server_address_size = sizeof(dns_server_address);
     }
 #endif /* NX_DNS_CLIENT_USER_CREATE_PACKET_POOL */
 
-#ifndef SAMPLE_DHCP_DISABLE
-    /* Retrieve DNS server address.  */
-    nx_dhcp_interface_user_option_retrieve(&dhcp_0, 0, NX_DHCP_OPTION_DNS_SVR, (UCHAR *)(dns_server_address),
-                                           &dns_server_address_size);
-#else
-    dns_server_address[0] = SAMPLE_DNS_SERVER_ADDRESS;
-#endif /* SAMPLE_DHCP_DISABLE */
-
     /* Add an IPv4 server address to the Client list.  */
-    status = nx_dns_server_add(&dns_0, dns_server_address[0]);
+    status = nx_dns_server_add(&dns_0, dns_server_address);
     if (status)
     {
         nx_dns_delete(&dns_0);
@@ -397,10 +448,10 @@ UINT    dns_server_address_size = sizeof(dns_server_address);
 
     /* Output DNS Server address.  */
     printf("DNS Server address: %lu.%lu.%lu.%lu\r\n",
-           (dns_server_address[0] >> 24),
-           (dns_server_address[0] >> 16 & 0xFF),
-           (dns_server_address[0] >> 8 & 0xFF),
-           (dns_server_address[0] & 0xFF));
+           (dns_server_address >> 24),
+           (dns_server_address >> 16 & 0xFF),
+           (dns_server_address >> 8 & 0xFF),
+           (dns_server_address & 0xFF));
 
     return(NX_SUCCESS);
 }
@@ -511,8 +562,11 @@ UINT    i;
 static UINT sntp_time_sync()
 {
 UINT status;
+ULONG gateway_address;
 ULONG sntp_server_address[3];
+#ifndef SAMPLE_DHCP_DISABLE
 UINT  sntp_server_address_size = sizeof(sntp_server_address);
+#endif
 
 #ifndef SAMPLE_DHCP_DISABLE
     /* Retrieve NTP server address.  */
@@ -546,6 +600,12 @@ UINT  sntp_server_address_size = sizeof(sntp_server_address);
     for (UINT i = 0; i < SAMPLE_SNTP_SYNC_MAX; i++)
     {
         printf("SNTP Time Sync...%s\r\n", sntp_servers[sntp_server_index]);
+
+        /* Make sure the network is still valid.  */
+        while (nx_ip_gateway_address_get(&ip_0, &gateway_address))
+        {
+            tx_thread_sleep(NX_IP_PERIODIC_RATE);
+        }
 
         /* Look up SNTP Server address. */
         status = nx_dns_host_by_name_get(&dns_0, (UCHAR *)sntp_servers[sntp_server_index], &sntp_server_address[0], 5 * NX_IP_PERIODIC_RATE);

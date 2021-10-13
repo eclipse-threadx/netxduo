@@ -32,7 +32,7 @@ extern const UCHAR _nx_secure_tls_hello_retry_request_random[32];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -78,11 +78,15 @@ extern const UCHAR _nx_secure_tls_hello_retry_request_random[32];
 /*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
+/*                                            TLS 1.3 compilation issue,  */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_serverhello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
                                         UINT message_length)
 {
+#ifndef NX_SECURE_TLS_CLIENT_DISABLED
 UINT                                  length;
 UCHAR                                 compression_method;
 USHORT                                version, total_extensions_length;
@@ -311,5 +315,13 @@ NX_SECURE_TLS_SERVER_STATE            old_client_state = tls_session -> nx_secur
 
     return(NX_SUCCESS);
 #endif
+#else /* NX_SECURE_TLS_SERVER_DISABLED */
+    /* If Server TLS is disabled and we recieve a serverhello, error! */    
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(packet_buffer);
+    NX_PARAMETER_NOT_USED(message_length);
+    
+    return(NX_SECURE_TLS_UNEXPECTED_MESSAGE);
+#endif    
 }
 

@@ -62,15 +62,15 @@ typedef struct {
     bool is_in_start;
 } calc_nearest_collect_t;
 
-static asc_result_t _init(component_id_t id);
-static asc_result_t _deinit(component_id_t id);
-static asc_result_t _start(component_id_t id);
-static asc_result_t _stop(component_id_t id);
+static asc_result_t _cm_init(component_id_t id);
+static asc_result_t _cm_deinit(component_id_t id);
+static asc_result_t _cm_start(component_id_t id);
+static asc_result_t _cm_stop(component_id_t id);
 static component_ops_t _ops = {
-    .init = _init,
-    .deinit = _deinit,
-    .start = _start,
-    .stop = _stop,
+    .init = _cm_init,
+    .deinit = _cm_deinit,
+    .start = _cm_start,
+    .stop = _cm_stop,
 };
 
 COMPONENTS_FACTORY_DEFINITION(CollectorsCore, &_ops)
@@ -650,7 +650,7 @@ collector_collection_t *core_get_collector_collection(void)
 }
 
 /* OPS Functions */
-static asc_result_t _init(component_id_t id)
+static asc_result_t _cm_init(component_id_t id)
 {
     core_t *ptr = core_init(id);
 
@@ -663,7 +663,7 @@ static asc_result_t _init(component_id_t id)
     return ASC_RESULT_OK;
 }
 
-static asc_result_t _deinit(component_id_t id)
+static asc_result_t _cm_deinit(component_id_t id)
 {
     core_t *core_ptr = components_manager_get_self_ctx();
 
@@ -676,7 +676,7 @@ static asc_result_t _deinit(component_id_t id)
     return ASC_RESULT_OK;
 }
 
-asc_result_t _stop(component_id_t id)
+asc_result_t _cm_stop(component_id_t id)
 {
     core_t *core_ptr = components_manager_get_self_ctx();
 
@@ -692,7 +692,7 @@ asc_result_t _stop(component_id_t id)
     return ASC_RESULT_OK;
 }
 
-static asc_result_t _start(component_id_t id)
+static asc_result_t _cm_start(component_id_t id)
 {
     core_t *core_ptr = components_manager_get_self_ctx();
 

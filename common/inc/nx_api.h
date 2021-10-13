@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_api.h                                            PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -76,6 +76,10 @@
 /*                                            added function to convert   */
 /*                                            unsigned integer to string, */
 /*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added support for getting   */
+/*                                            interface type,             */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -489,7 +493,7 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 #define AZURE_RTOS_NETXDUO
 #define NETXDUO_MAJOR_VERSION                    6
 #define NETXDUO_MINOR_VERSION                    1
-#define NETXDUO_PATCH_VERSION                    8
+#define NETXDUO_PATCH_VERSION                    9
 
 /* Define the following symbols for backward compatibility */
 #define EL_PRODUCT_NETXDUO
@@ -1315,6 +1319,7 @@ typedef struct NX_IPV6_DEFAULT_ROUTER_ENTRY_STRUCT
 #define NX_LINK_RX_ENABLE                          25
 #define NX_LINK_RX_DISABLE                         26
 #define NX_LINK_6LOWPAN_COMMAND                    27 /* 6LowPAN driver command, the sub command see nx_6lowpan.h.  */
+#define NX_LINK_GET_INTERFACE_TYPE                 28
 
 #define NX_LINK_USER_COMMAND                       50 /* Values after this value are reserved for application.  */
 
@@ -1378,12 +1383,20 @@ typedef struct NX_IPV6_DEFAULT_ROUTER_ENTRY_STRUCT
 #define NX_IP_PACKET_OUT                           1
 #endif /* NX_ENABLE_IP_PACKET_FILTER */
 
+/* Define the interface type.  */
+#define NX_INTERFACE_TYPE_UNKNOWN                  0
+#define NX_INTERFACE_TYPE_OTHER                    1
+#define NX_INTERFACE_TYPE_ETHERNET                 2
+#define NX_INTERFACE_TYPE_WIFI                     3
+#define NX_INTERFACE_TYPE_CELLULAR                 4
+#define NX_INTERFACE_TYPE_BLUETOOTH                5
+#define NX_INTERFACE_TYPE_LORAWAN                  6
+#define NX_INTERFACE_TYPE_MAX                      7
 
 #ifdef NX_ENABLE_THREAD
 /* Define the packet type for Thread MLE.  */
 #define NX_PACKET_TYPE_THREAD_MLE                  0x01
 #endif /* NX_ENABLE_THREAD  */
-
 
 /* Define IPv4/v6 Address structure */
 typedef struct NXD_ADDRESS_STRUCT

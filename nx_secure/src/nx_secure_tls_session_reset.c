@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_reset                        PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,6 +74,10 @@
 /*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
 /*                                            cleanup for session cipher, */
 /*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            option to disable client    */
+/*                                            initiated renegotiation,    */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_reset(NX_SECURE_TLS_SESSION *session_ptr)
@@ -164,6 +168,7 @@ UINT temp_status;
     /* Flag to indicate when a session renegotiation is taking place. */
     session_ptr -> nx_secure_tls_renegotiation_handshake = NX_FALSE;
     session_ptr -> nx_secure_tls_secure_renegotiation_verified = NX_FALSE;
+    session_ptr -> nx_secure_tls_server_renegotiation_requested = NX_FALSE;
 #endif
 
     /* Flag to indicate when credentials have been received from the remote host. */

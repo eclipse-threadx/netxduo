@@ -207,7 +207,7 @@ NX_TCP_HEADER  *header_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_send_internal                        PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -256,6 +256,10 @@ NX_TCP_HEADER  *header_ptr;
 /*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            supported TCP/IP offload,   */
 /*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed the bug of race       */
+/*                                            condition,                  */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_send_internal(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr, ULONG wait_option)
@@ -318,6 +322,14 @@ UINT            compute_checksum = 1;
         return(NX_NOT_BOUND);
     }
 
+    /* Pickup the important information from the socket.  */
+
+    /* Setup the pointer to the associated IP instance.  */
+    ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
+
+    /* Restore interrupts.  */
+    TX_RESTORE
+
     /* Check if the connection is in progress. */
     if ((socket_ptr -> nx_tcp_socket_state == NX_TCP_SYN_SENT) || (socket_ptr -> nx_tcp_socket_state == NX_TCP_SYN_RECEIVED))
     {
@@ -326,24 +338,19 @@ UINT            compute_checksum = 1;
         _nx_tcp_socket_state_wait(socket_ptr, NX_TCP_ESTABLISHED, wait_option);
     }
 
+    /* Obtain the IP mutex.  */
+    tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
+
     /* Check for the socket being in an established state.  */
     if ((socket_ptr -> nx_tcp_socket_state != NX_TCP_ESTABLISHED) && (socket_ptr -> nx_tcp_socket_state != NX_TCP_CLOSE_WAIT))
     {
 
-        /* Restore interrupts.  */
-        TX_RESTORE
+        /* Release the protection.  */
+        tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
         /* Socket is not connected, return an error message.  */
         return(NX_NOT_CONNECTED);
     }
-
-    /* Pickup the important information from the socket.  */
-
-    /* Setup the pointer to the associated IP instance.  */
-    ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
-
-    /* Restore interrupts.  */
-    TX_RESTORE
 
     /* Add debug information. */
     NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
@@ -374,6 +381,9 @@ UINT            compute_checksum = 1;
         if (socket_ptr -> nx_tcp_socket_ipv6_addr -> nxd_ipv6_address_state != NX_IPV6_ADDR_STATE_VALID)
         {
 
+            /* Release the protection.  */
+            tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
             /* Add debug information. */
             NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
 
@@ -400,8 +410,6 @@ UINT            compute_checksum = 1;
     {
 
         /* This interface supports TCP/IP offload.  */
-        tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
-
         status = _nx_tcp_socket_driver_send(socket_ptr, packet_ptr, wait_option);
 
         /* Release the IP protection.  */
@@ -424,6 +432,9 @@ UINT            compute_checksum = 1;
 
     /* Get original pool. */
     pool_ptr = packet_ptr -> nx_packet_pool_owner;
+
+    /* Release the protection.  */
+    tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
     /* Loop to send the packet. */
     for (;;)

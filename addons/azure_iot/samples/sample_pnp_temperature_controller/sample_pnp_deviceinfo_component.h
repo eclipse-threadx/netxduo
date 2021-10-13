@@ -16,11 +16,10 @@
 extern   "C" {
 #endif
 
-#include "nx_azure_iot_hub_client.h"
-#include "nx_api.h"
+#include "nx_azure_iot_hub_client_properties.h"
 
-UINT sample_pnp_deviceinfo_report_all_properties(UCHAR *component_name_ptr, UINT component_name_len,
-                                                 NX_AZURE_IOT_HUB_CLIENT *iothub_client_ptr);
+UINT sample_pnp_deviceinfo_report_all_properties(UCHAR *component_name_ptr, USHORT component_name_length,
+                                                 NX_AZURE_IOT_HUB_CLIENT *iotpnp_client_ptr);
 
 #ifdef __cplusplus
 }

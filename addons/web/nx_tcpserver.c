@@ -128,7 +128,7 @@ NX_TCP_SOCKET  *socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_relisten                               PORTABLE C     */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -164,6 +164,9 @@ NX_TCP_SOCKET  *socket_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            removed debug output,       */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_tcpserver_relisten(NX_TCPSERVER *server_ptr)
@@ -187,7 +190,6 @@ NX_TCP_SESSION *session_ptr;
                                                &session_ptr -> nx_tcp_session_socket);
         if((status != NX_SUCCESS) && (status != NX_CONNECTION_PENDING))
         {
-            printf("%d, %d\n", status, __LINE__);
             return NX_TCPSERVER_FAIL;
         }
 
@@ -202,7 +204,6 @@ NX_TCP_SESSION *session_ptr;
                                                &server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_socket);
         if((status != NX_SUCCESS) && (status != NX_CONNECTION_PENDING))
         {
-            printf("%d, %d\n", status, __LINE__);
             return NX_TCPSERVER_FAIL;
         }
     }
@@ -832,7 +833,7 @@ NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_connect_process                        PORTABLE C     */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -872,6 +873,10 @@ NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed packet leak issue,    */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed TLS connection        */
+/*                                            deadlock issue,             */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_connect_process(NX_TCPSERVER *server_ptr)
@@ -941,6 +946,7 @@ NX_TCP_SESSION *session_ptr = NX_NULL;
             if(status != NX_SUCCESS)
             {
                 nx_secure_tls_session_end(&server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_tls_session, NX_WAIT_FOREVER);
+                nx_tcp_socket_disconnect(&server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_socket, NX_NO_WAIT);
                 nx_tcp_server_socket_unaccept(&server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_socket);
             }
         }

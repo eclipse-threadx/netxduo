@@ -10381,7 +10381,7 @@ ALIGN_TYPE  *head;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_cache_delete_rr_string                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10410,13 +10410,18 @@ ALIGN_TYPE  *head;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_cache_delete_rr_string(NX_DNS *dns_ptr, VOID *cache_ptr, UINT cache_size, NX_DNS_RR *record_ptr)
 {
 
+#ifdef NX_DNS_ENABLE_EXTENDED_RR_TYPES
 UINT    string_len;
 UINT    size;
+#endif /* NX_DNS_ENABLE_EXTENDED_RR_TYPES */
 
 
     /* Check the cache.  */
