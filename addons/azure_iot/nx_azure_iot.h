@@ -77,15 +77,15 @@ UINT nx_azure_iot_log(UCHAR *type_ptr, UINT type_len, UCHAR *msg_ptr, UINT msg_l
 
 #if NX_AZURE_IOT_LOG_LEVEL > 0
 #undef LogError
-#define LogError(...) nx_azure_iot_log(LogLiteralArgs("[ERROR] "), ##__VA_ARGS__)
+#define LogError(...) nx_azure_iot_log(LogLiteralArgs("[ERROR] "), __VA_ARGS__)
 #endif /* NX_AZURE_IOT_LOG_LEVEL > 0 */
 #if NX_AZURE_IOT_LOG_LEVEL > 1
 #undef LogInfo
-#define LogInfo(...) nx_azure_iot_log(LogLiteralArgs("[INFO] "), ##__VA_ARGS__)
+#define LogInfo(...) nx_azure_iot_log(LogLiteralArgs("[INFO] "), __VA_ARGS__)
 #endif /* NX_AZURE_IOT_LOG_LEVEL > 1 */
 #if NX_AZURE_IOT_LOG_LEVEL > 2
 #undef LogDebug
-#define LogDebug(...) nx_azure_iot_log(LogLiteralArgs("[DEBUG] "), ##__VA_ARGS__)
+#define LogDebug(...) nx_azure_iot_log(LogLiteralArgs("[DEBUG] "), __VA_ARGS__)
 #endif /* NX_AZURE_IOT_LOG_LEVEL > 2 */
 
 #define NX_AZURE_IOT_MQTT_QOS_0                           0
@@ -160,6 +160,9 @@ UINT nx_azure_iot_log(UCHAR *type_ptr, UINT type_len, UCHAR *msg_ptr, UINT msg_l
 
 /* MQTT Subscribe topic offset.  */
 #define NX_AZURE_IOT_MQTT_SUBSCRIBE_TOPIC_OFFSET          6
+
+/* MQTT Publish offset.  */
+#define NX_AZURE_IOT_PUBLISH_PACKET_START_OFFSET          7
 
 /**
  * @brief Resource struct
@@ -321,7 +324,6 @@ UINT nx_azure_iot_base64_hmac_sha256_calculate(NX_AZURE_IOT_RESOURCE *resource_p
                                                const UCHAR *message_ptr, UINT message_size,
                                                UCHAR *buffer_ptr, UINT buffer_len,
                                                UCHAR **output_ptr, UINT *output_len_ptr);
-
 
 #ifdef __cplusplus
 }

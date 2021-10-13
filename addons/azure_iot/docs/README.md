@@ -5,7 +5,7 @@ Azure IoT Middleware for Azure RTOS is a platform specific library that acts as 
 * Expose smart client interfaces (IoTHub_Client, DeviceProvisioning_Client) for the customers, to be consumed in their application.
 * Orchestrate the interaction between Embedded C SDK and platform.
 * Provide Azure RTOS platform initialization.
-* IoT Plug and Play support.
+* [IoT Plug and Play](https://docs.microsoft.com/azure/iot-develop/overview-iot-plug-and-play) support.
 * Security capabilities.
 * Resource limitation aware.
 * Protocol support.
@@ -47,6 +47,7 @@ Manufacturer | Device | Samples |
 
 Basic features provided by [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot):
 * Connect to IoTHub via MQTT.
+* APIs following the IoT Plug and Play convention to implement Telemetry, Commands, Properties and Components defined in a DTDL model.
 * Send device to cloud (D2C) message.
 * Receive cloud to device (C2D) message.
 * Device Twins.
@@ -58,9 +59,9 @@ Enhanced features provided in middleware:
 * Device Provisioning Service.
 * JSON parser.
 
-## Azure Defender for IoT security module
+## Azure Defender for IoT
 
-The [Azure Defender for IoT security module](https://docs.microsoft.com/azure/defender-for-iot/iot-security-azure-rtos) provides a comprehensive security solution for Azure RTOS devices. The middleware ships with the ASC for IoT Security Module built-in and enabled by default to detect common threats and potential malicious activities.
+The [Azure Defender for IoT](https://docs.microsoft.com/azure/defender-for-iot/iot-security-azure-rtos) provides a comprehensive security solution for Azure RTOS devices. The middleware ships with the ASC for IoT Security Module built-in and enabled by default to detect common threats and potential malicious activities.
 
 ### Opt-out
 
@@ -108,6 +109,7 @@ Learn [here](https://docs.microsoft.com/en-us/azure/defender-for-iot) for more i
 
 * [nx_azure_iot](./azure_rtos_iot.md)    
 * [nx_azure_iot_hub_client](./azure_rtos_iot_hub_client.md)
+* [nx_azure_iot_hub_client_properties](./azure_rtos_iot_hub_client_properties.md)
 * [nx_azure_iot_provisioning_client](./azure_rtos_iot_provisioning_client.md)
 * [nx_azure_iot_json](./azure_rtos_iot_json.md)
 * [nx_azure_iot_security_module](../azure_iot_security_module/docs/nx_azure_iot_security_module.md)

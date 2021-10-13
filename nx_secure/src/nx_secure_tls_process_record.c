@@ -31,7 +31,7 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_record                       PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -91,6 +91,9 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /* 08-02-2021      Timothy Stapko           Modified comment(s), checked  */
 /*                                            TLS state before processing,*/
 /*                                            resulting in version 6.1.8  */
+/* 10-15-2021      Timothy Stapko           Modified comment(s), fixed    */
+/*                                            TLS 1.3 compile issue,      */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
@@ -449,7 +452,7 @@ NX_PACKET *decrypted_packet;
             status = NX_SECURE_TLS_ALERT_RECEIVED;
             break;
         case NX_SECURE_TLS_HANDSHAKE:
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_CLIENT_DISABLED)
             /* TLS 1.3 can send post-handshake messages with TLS HANDSHAKE record type. Process those separately. */
             if(tls_session->nx_secure_tls_1_3 && tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HANDSHAKE_FINISHED)
             {

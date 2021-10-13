@@ -21,13 +21,13 @@ extern "C" {
 /********************
 * Core configuration
 *********************/
-/* Based on 2021.05.12-3.5.0 core tag */
+/* Based on 2021.09.28-3.5.1 core tag */
 
 /* ID and version */
 #define ASC_SECURITY_MODULE_ID "defender-iot-micro-agent"
 #define SECURITY_MODULE_VERSION_MAJOR 3
 #define SECURITY_MODULE_VERSION_MINOR 5
-#define SECURITY_MODULE_VERSION_PATCH 1
+#define SECURITY_MODULE_VERSION_PATCH 2
 #ifndef SECURITY_MODULE_VERSION_MAJOR
 #define SECURITY_MODULE_VERSION_MAJOR 0
 #endif

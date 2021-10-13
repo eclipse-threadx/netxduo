@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_icmp.h                                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -44,11 +44,16 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
+/*                                            necessary header file,      */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
 #ifndef NX_ICMP_H
 #define NX_ICMP_H
+
+#include "nx_api.h"
 
 VOID _nx_icmp_packet_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr);
 VOID _nx_icmp_cleanup(TX_THREAD *thread_ptr NX_CLEANUP_PARAMETER);

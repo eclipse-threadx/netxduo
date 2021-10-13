@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */ 
 /*    nxd_ftp_server.h                                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -45,6 +45,11 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the issue of clearing */
+/*                                            data socket, included       */
+/*                                            necessary header file,      */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -60,6 +65,8 @@
 extern   "C" {
 
 #endif
+
+#include "nx_api.h"
 
 
 #ifndef      NX_FTP_NO_FILEX
@@ -415,6 +422,7 @@ VOID        _nx_ftp_server_timeout(ULONG ftp_server_address);
 VOID        _nx_ftp_server_timeout_processing(NX_FTP_SERVER *ftp_server_ptr);
 VOID        _nx_ftp_server_control_disconnect(NX_TCP_SOCKET *control_socket_ptr);
 VOID        _nx_ftp_server_control_disconnect_processing(NX_FTP_SERVER *ftp_server_ptr);
+VOID        _nx_ftp_server_data_socket_cleanup(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_CLIENT_REQUEST *client_req_ptr);
 
 #endif  /* NX_FTP_SOURCE_CODE */
 

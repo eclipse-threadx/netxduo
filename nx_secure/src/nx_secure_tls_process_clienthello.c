@@ -36,7 +36,7 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_clienthello                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -91,6 +91,10 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*                                            fixed renegotiation bug,    */
 /*                                            improved negotiation logic, */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            ability to disable client   */
+/*                                            initiated renegotiation,    */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_clienthello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -152,8 +156,16 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
         }
 #endif
 
-#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
-        if (tls_session -> nx_secure_tls_renegotation_enabled && tls_session -> nx_secure_tls_secure_renegotiation)
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 
+        /* If Client initiated renegotiation is enabled, handle the renegotiation 
+           handshake if appropriate. Otherwise return "no renegotiation allowed" error. */
+        if (tls_session -> nx_secure_tls_renegotation_enabled && tls_session -> nx_secure_tls_secure_renegotiation 
+#if defined(NX_SECURE_TLS_DISABLE_CLIENT_INITIATED_RENEGOTIATION)
+            /* If client initiated renegotiation is disabled for TLS servers, only allow 
+               server-initiated renegotiations requested by the server itself. */
+            && tls_session -> nx_secure_tls_server_renegotiation_requested
+#endif
+           )
         {
             tls_session -> nx_secure_tls_renegotiation_handshake = NX_TRUE;
 
@@ -177,7 +189,11 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
                     return(status);
                 }
             }
-        }
+
+            /* We don't want any more clienthellos to come in after this - only the first one
+               in response to our original request. */
+            tls_session -> nx_secure_tls_server_renegotiation_requested = NX_FALSE; 
+	}
         else
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
         {
@@ -340,7 +356,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
         }
     }
 
-#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 
     if ((tls_session -> nx_secure_tls_renegotiation_handshake) && (!tls_session -> nx_secure_tls_secure_renegotiation_verified))
     {
 
@@ -443,7 +459,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
             }
         }
 
-#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 
         if (cipher_entry == TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
         {
             if (tls_session -> nx_secure_tls_renegotiation_handshake)

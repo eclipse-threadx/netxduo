@@ -47,7 +47,7 @@ const UCHAR _nx_secure_tls_1_1_random[8] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -85,10 +85,16 @@ const UCHAR _nx_secure_tls_1_1_random[8] =
 /*                                            buffer length verification, */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
+/*                                            compilation issue with      */
+/*                                            TLS 1.3 and disabling TLS   */
+/*                                            server,                     */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_serverhello(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet)
 {
+#ifndef NX_SECURE_TLS_SERVER_DISABLED
 ULONG  length;
 UINT   gmt_time;
 UINT   random_value;
@@ -243,6 +249,17 @@ UINT   status;
     send_packet -> nx_packet_append_ptr = send_packet -> nx_packet_append_ptr + length;
     send_packet -> nx_packet_length = send_packet -> nx_packet_length + length;
 
-    return(status);
+    return(status);  
+#else
+
+    NX_PARAMETER_NOT_USED(send_packet);
+
+    /* If TLS Server is disabled and we have processed a ClientKeyExchange, something is wrong... */
+    tls_session -> nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_ERROR;   
+    
+    /* Server is disabled, we shouldn't be sending a ServerHello - error! */
+    return(NX_SECURE_TLS_INVALID_STATE);
+#endif    
+    
 }
 

@@ -27,7 +27,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_web_http_server.h                                PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -54,6 +54,9 @@
 /*                                            improved the logic of       */
 /*                                            converting number to string,*/
 /*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            deprecated unused macros,   */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -142,6 +145,7 @@ extern   "C" {
 #define NX_WEB_HTTP_SERVER_MAX_PENDING          (NX_WEB_HTTP_SERVER_SESSION_MAX << 1)
 #endif
 
+/* Deprecated. This symbol is defined for compatibility. */
 #ifndef NX_WEB_HTTP_SERVER_THREAD_TIME_SLICE
 #define NX_WEB_HTTP_SERVER_THREAD_TIME_SLICE    2
 #endif

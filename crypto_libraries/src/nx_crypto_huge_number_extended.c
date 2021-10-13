@@ -189,7 +189,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_subtract_digit(NX_CRYPTO_HUGE_NUMBER 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_power_modulus                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -242,6 +242,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_subtract_digit(NX_CRYPTO_HUGE_NUMBER 
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_power_modulus(NX_CRYPTO_HUGE_NUMBER *number,
@@ -263,7 +265,6 @@ NX_CRYPTO_HUGE_NUMBER temp;
     NX_CRYPTO_HUGE_NUMBER_SET_DIGIT(result, 1);
 
     exp_size = exponent -> nx_crypto_huge_number_size;
-    modulus -> nx_crypto_huge_number_size = modulus -> nx_crypto_huge_number_size;
     val = exponent -> nx_crypto_huge_number_data;
     /* Loop through the bits of the exponent. For each bit set, multiply the result by the running square. */
     for (index = 0; index < exp_size; index++)

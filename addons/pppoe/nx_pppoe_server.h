@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */ 
 /*    nx_pppoe_server.h                                   PORTABLE C      */  
-/*                                                           6.1.4        */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -47,6 +47,9 @@
 /*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
 /*                                            fixed the compiler errors,  */
 /*                                            resulting in version 6.1.4  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
+/*                                            necessary header file,      */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -62,6 +65,8 @@
 extern   "C" {
 
 #endif
+
+#include "nx_api.h"
 
 /* Note: Prerequisite for using PPPoE.
          Redefine NX_PHYSICAL_HEADER to 24 to ensure enough space for filling in physical header.

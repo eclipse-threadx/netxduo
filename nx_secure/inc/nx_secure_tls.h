@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -75,6 +75,10 @@
 /*                                            added state to cleanup      */
 /*                                            session cipher,             */
 /*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            support to disable client   */
+/*                                            initiated renegotiation,    */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -1177,6 +1181,10 @@ typedef struct NX_SECURE_TLS_SESSION_STRUCT
     /* This flag indicates whether the renegotiation_info extension is present and
        the data in the extension is verified during secure renegotiation. */
     USHORT nx_secure_tls_secure_renegotiation_verified;
+
+    /* This flag indicates that a server instance has requested a renegotiation
+       so we can differentiate between client initiated and server initiated. */
+    USHORT nx_secure_tls_server_renegotiation_requested;
 
     /* The verify data is named "remote" and "local" since it can be used by
        both TLS Client and TLS Server instances. */

@@ -43,7 +43,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_dispatch_process                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -98,6 +98,10 @@
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), fixed    */
 /*                                            destination header check,   */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), expanded */
+/*                                            protocols support for raw   */
+/*                                            packet,                     */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ip_dispatch_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT protocol)
@@ -452,6 +456,19 @@ NX_ICMPV6_HEADER *icmp_header_ptr;
             }
 #endif /* NX_IPSEC_ENABLE */
 
+#if defined(NX_ENABLE_IP_RAW_PACKET_ALL_STACK) && defined(NX_ENABLE_IP_RAW_PACKET_FILTER)
+            if ((ip_ptr -> nx_ip_raw_ip_processing) && (ip_ptr -> nx_ip_raw_packet_filter))
+            {
+
+                /* Let RAW packet filter handler filter all incoming packets.  */
+                if ((ip_ptr -> nx_ip_raw_ip_processing)(ip_ptr, protocol << 16, packet_ptr) == NX_SUCCESS)
+                {
+                    /* No need to free the packet as it is consumed by the raw process */
+                    return(0);
+                }
+            }
+#endif /* defined(NX_ENABLE_IP_RAW_PACKET_ALL_STACK) && defined(NX_ENABLE_IP_RAW_PACKET_FILTER) */
+
             if (protocol == NX_PROTOCOL_TCP)
             {
 #ifdef FEATURE_NX_IPV6
@@ -565,10 +582,15 @@ NX_ICMPV6_HEADER *icmp_header_ptr;
             {
                 if (ip_ptr -> nx_ip_raw_ip_processing)
                 {
-                    if ((ip_ptr -> nx_ip_raw_ip_processing)(ip_ptr, protocol << 16, packet_ptr) == NX_SUCCESS)
+#if defined(NX_ENABLE_IP_RAW_PACKET_ALL_STACK) && defined(NX_ENABLE_IP_RAW_PACKET_FILTER)
+                    if (ip_ptr -> nx_ip_raw_packet_filter == NX_NULL)
+#endif /* defined(NX_ENABLE_IP_RAW_PACKET_ALL_STACK) && defined(NX_ENABLE_IP_RAW_PACKET_FILTER) */
                     {
-                        /* No need to free the packet as it is consumed by the raw process */
-                        return(0);
+                        if ((ip_ptr -> nx_ip_raw_ip_processing)(ip_ptr, protocol << 16, packet_ptr) == NX_SUCCESS)
+                        {
+                            /* No need to free the packet as it is consumed by the raw process */
+                            return(0);
+                        }
                     }
                 }
 

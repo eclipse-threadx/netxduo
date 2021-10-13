@@ -66,7 +66,7 @@ static void _timers_list_debug_print(void)
 #define _timers_list_debug_print()
 #endif
 
-static bool _init(void)
+static bool _be_init(void)
 {
     _event_loop_initialized = true;
     _event_loop_is_running = true;
@@ -75,7 +75,7 @@ static bool _init(void)
     return true;
 }
 
-static bool _deinit(bool flush)
+static bool _be_deinit(bool flush)
 {
     if (!_event_loop_initialized) {
         return true;
@@ -261,8 +261,8 @@ static void _timer_delete(event_loop_timer_handler handler)
 ievent_loop_t *event_loop_be_instance_attach(void)
 {
     static ievent_loop_t event_loop = {
-        .init = _init,
-        .deinit = _deinit,
+        .init = _be_init,
+        .deinit = _be_deinit,
         .run = NULL,
         .run_once = _run_once,
         .run_until = _run_until,

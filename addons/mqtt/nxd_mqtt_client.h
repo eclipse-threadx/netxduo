@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_mqtt_client.h                                   PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -52,6 +52,9 @@
 /*                                            supported maximum transmit  */
 /*                                            queue depth,                */
 /*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
+/*                                            necessary header file,      */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -67,6 +70,8 @@
 extern   "C" {
 
 #endif
+
+#include "nx_api.h"
 
 #ifdef NX_SECURE_ENABLE
 #include "nx_secure_tls_api.h"

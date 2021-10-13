@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */ 
 /*    nx_ppp.h                                            PORTABLE C      */  
-/*                                                           6.1.2        */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -49,6 +49,9 @@
 /*                                            improved packet length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.2  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
+/*                                            necessary header file,      */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -64,6 +67,8 @@
 extern   "C" {
 
 #endif
+
+#include "nx_api.h"
 
 /* Define the PPP ID.  */
 

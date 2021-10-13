@@ -177,21 +177,21 @@ static nx_ip_transport_packet_receive_cb_t _udp_packet_receive_original = NULL;
 static nx_ip_transport_packet_receive_cb_t _icmp_packet_receive_original = NULL;
 #endif /* ASC_COLLECTOR_NETWORK_ACTIVITY_CAPTURE_UNICAST_ONLY */
 
-static asc_result_t _init(component_id_t id);
-static asc_result_t _start(component_id_t id);
-static asc_result_t _stop(component_id_t id);
+static asc_result_t _cm_init(component_id_t id);
+static asc_result_t _cm_start(component_id_t id);
+static asc_result_t _cm_stop(component_id_t id);
 
-COLLECTOR_OPS_DEFINITIONS(, _init, collector_default_deinit, collector_default_subscribe, collector_default_unsubscribe, _start, _stop);
+COLLECTOR_OPS_DEFINITIONS(, _cm_init, collector_default_deinit, collector_default_subscribe, collector_default_unsubscribe, _cm_start, _cm_stop);
 
 COMPONENTS_FACTORY_DEFINITION(NetworkActivity, &_ops)
 
-static asc_result_t _init(component_id_t id)
+static asc_result_t _cm_init(component_id_t id)
 {
     return collector_default_create(id, NetworkActivity, COLLECTOR_PRIORITY_HIGH,
         _collector_network_activity_serialize_events, ASC_HIGH_PRIORITY_INTERVAL, NULL);
 }
 
-static asc_result_t _start(component_id_t id)
+static asc_result_t _cm_start(component_id_t id)
 {
     hashset_network_activity_ipv4_t_init(_ipv4_hashtables[0]);
     hashset_network_activity_ipv4_t_init(_ipv4_hashtables[1]);
@@ -207,7 +207,7 @@ static asc_result_t _start(component_id_t id)
     return _collector_network_activity_port_init();
 }
 
-static asc_result_t _stop(component_id_t id)
+static asc_result_t _cm_stop(component_id_t id)
 {
     _collector_network_activity_port_deinit();
 

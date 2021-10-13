@@ -72,6 +72,8 @@ NX_PACKET *tail_packet_ptr;
 static VOID nx_azure_iot_json_writer_packet_update(NX_AZURE_IOT_JSON_WRITER *json_writer_ptr)
 {
 NX_PACKET *tail_packet_ptr;
+UINT last_chunk_size =
+    (UINT)az_span_size(az_json_writer_get_bytes_used_in_destination(&(json_writer_ptr -> json_writer)));
 
     if (json_writer_ptr -> packet_ptr == NX_NULL)
     {
@@ -88,12 +90,10 @@ NX_PACKET *tail_packet_ptr;
     }
 
     NX_ASSERT((tail_packet_ptr -> nx_packet_data_start + json_writer_ptr -> nx_tail_packet_offset +
-               (UINT)json_writer_ptr -> json_writer._internal.bytes_written) <=
-              tail_packet_ptr -> nx_packet_data_end);
+               last_chunk_size) <= tail_packet_ptr -> nx_packet_data_end);
 
     tail_packet_ptr -> nx_packet_append_ptr =
-        tail_packet_ptr -> nx_packet_data_start + json_writer_ptr -> nx_tail_packet_offset +
-        (UINT)json_writer_ptr -> json_writer._internal.bytes_written;
+        tail_packet_ptr -> nx_packet_data_start + json_writer_ptr -> nx_tail_packet_offset + last_chunk_size;
     json_writer_ptr -> packet_ptr -> nx_packet_length =
         json_writer_ptr -> nx_packet_init_length + (UINT)json_writer_ptr -> json_writer._internal.total_bytes_written;
 }
@@ -177,7 +177,6 @@ UINT nx_azure_iot_json_writer_deinit(NX_AZURE_IOT_JSON_WRITER *json_writer_ptr)
 
     if (json_writer_ptr -> packet_ptr)
     {
-        nx_packet_release(json_writer_ptr -> packet_ptr);
         json_writer_ptr -> packet_ptr = NX_NULL;
     }
 

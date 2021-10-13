@@ -11,8 +11,6 @@
 
 #include "sample_pnp_deviceinfo_component.h"
 
-#include "nx_azure_iot_pnp_helpers.h"
-
 #define DOUBLE_DECIMAL_PLACE_DIGITS                                     (2)
 
 /* Reported property keys and values.  */
@@ -33,13 +31,9 @@ static const double sample_pnp_device_info_total_storage_property_value = 1024.0
 static const CHAR sample_pnp_device_info_total_memory_property_name[] = "totalMemory";
 static const double sample_pnp_device_info_total_memory_property_value = 128;
 
-static UCHAR scratch_buffer[512];
-
-static UINT append_properties(NX_AZURE_IOT_JSON_WRITER *json_writer, VOID *context)
+static UINT append_properties(NX_AZURE_IOT_JSON_WRITER *json_writer)
 {
 UINT status;
-
-    NX_PARAMETER_NOT_USED(context);
 
     if (nx_azure_iot_json_writer_append_property_with_string_value(json_writer,
                                                                    (UCHAR *)sample_pnp_device_info_manufacturer_property_name,
@@ -91,51 +85,57 @@ UINT status;
     return(status);
 }
 
-UINT sample_pnp_deviceinfo_report_all_properties(UCHAR *component_name_ptr, UINT component_name_len,
-                                                 NX_AZURE_IOT_HUB_CLIENT *iothub_client_ptr)
+UINT sample_pnp_deviceinfo_report_all_properties(UCHAR *component_name_ptr, USHORT component_name_length,
+                                                 NX_AZURE_IOT_HUB_CLIENT *iotpnp_client_ptr)
 {
-UINT reported_properties_length;
 UINT status;
-UINT response_status;
-UINT request_id;
-NX_AZURE_IOT_JSON_WRITER json_builder;
-ULONG reported_property_version;
+UINT response_status = 0;
+NX_PACKET *packet_ptr;
+NX_AZURE_IOT_JSON_WRITER json_writer;
 
-    if ((status = nx_azure_iot_json_writer_with_buffer_init(&json_builder,
-                                                            scratch_buffer,
-                                                            sizeof(scratch_buffer))))
+    if ((status = nx_azure_iot_hub_client_reported_properties_create(iotpnp_client_ptr,
+                                                                     &packet_ptr, NX_WAIT_FOREVER)))
     {
-        printf("Failed to initialize json writer\r\n");
-        return(NX_NOT_SUCCESSFUL);
+        printf("Failed create reported properties: error code = 0x%08x\r\n", status);
+        return(status);
     }
 
-    if ((status = nx_azure_iot_pnp_helper_build_reported_property(component_name_ptr, component_name_len,
-                                                                  append_properties, NX_NULL,
-                                                                  &json_builder)))
+    if ((status = nx_azure_iot_json_writer_init(&json_writer, packet_ptr, NX_WAIT_FOREVER)))
+    {
+        printf("Failed init json writer: error code = 0x%08x\r\n", status);
+        nx_packet_release(packet_ptr);
+        return(status);
+    }
+
+    if ((status = nx_azure_iot_json_writer_append_begin_object(&json_writer)) ||
+        (status = nx_azure_iot_hub_client_reported_properties_component_begin(iotpnp_client_ptr,
+                                                                              &json_writer,
+                                                                              component_name_ptr,
+                                                                              component_name_length)) ||
+        (status = append_properties(&json_writer)) ||
+        (status = nx_azure_iot_hub_client_reported_properties_component_end(iotpnp_client_ptr,
+                                                                            &json_writer)) ||
+        (status = nx_azure_iot_json_writer_append_end_object(&json_writer)))
     {
         printf("Failed to build reported property!: error code = 0x%08x\r\n", status);
-        nx_azure_iot_json_writer_deinit(&json_builder);
+        nx_packet_release(packet_ptr);
         return(status);
     }
 
-    reported_properties_length = nx_azure_iot_json_writer_get_bytes_used(&json_builder);
-    if ((status = nx_azure_iot_hub_client_device_twin_reported_properties_send(iothub_client_ptr,
-                                                                               scratch_buffer,
-                                                                               reported_properties_length,
-                                                                               &request_id, &response_status,
-                                                                               &reported_property_version,
-                                                                               (5 * NX_IP_PERIODIC_RATE))))
+    if ((status = nx_azure_iot_hub_client_reported_properties_send(iotpnp_client_ptr,
+                                                                   packet_ptr,
+                                                                   NX_NULL, &response_status,
+                                                                   NX_NULL,
+                                                                   (5 * NX_IP_PERIODIC_RATE))))
     {
-        printf("Device twin reported properties failed!: error code = 0x%08x\r\n", status);
-        nx_azure_iot_json_writer_deinit(&json_builder);
+        printf("Reported properties send failed!: error code = 0x%08x\r\n", status);
+        nx_packet_release(packet_ptr);
         return(status);
     }
-
-    nx_azure_iot_json_writer_deinit(&json_builder);
 
     if ((response_status < 200) || (response_status >= 300))
     {
-        printf("device twin report properties failed with code : %d\r\n", response_status);
+        printf("Reported properties send failed with code : %d\r\n", response_status);
         return(NX_NOT_SUCCESSFUL);
     }
 

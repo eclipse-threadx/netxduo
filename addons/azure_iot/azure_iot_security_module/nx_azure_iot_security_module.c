@@ -59,18 +59,18 @@ static bool _is_skip_resource(
 
 static bool _initialized;
 
-static asc_result_t _init(component_id_t id);
-static asc_result_t _deinit(component_id_t id);
-static asc_result_t _start(component_id_t id);
+static asc_result_t _cm_init(component_id_t id);
+static asc_result_t _cm_deinit(component_id_t id);
+static asc_result_t _cm_start(component_id_t id);
 static component_ops_t _ops = {
-    .init = _init,
-    .start = _start,
-    .deinit = _deinit
+    .init = _cm_init,
+    .start = _cm_start,
+    .deinit = _cm_deinit
 };
 
 COMPONENTS_FACTORY_DEFINITION(SecurityModule, &_ops)
 
-static asc_result_t _start(component_id_t id)
+static asc_result_t _cm_start(component_id_t id)
 {
     NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr = components_manager_get_self_ctx();
 
@@ -84,7 +84,7 @@ static asc_result_t _start(component_id_t id)
     return ASC_RESULT_OK;
 }
 
-static asc_result_t _init(component_id_t id)
+static asc_result_t _cm_init(component_id_t id)
 {
     asc_result_t result = ASC_RESULT_OK;
     component_info_t *info;
@@ -130,7 +130,7 @@ cleanup:
     return result;
 }
 
-static asc_result_t _deinit(component_id_t id)
+static asc_result_t _cm_deinit(component_id_t id)
 {
     UINT status = NX_AZURE_IOT_SUCCESS;
     NX_AZURE_IOT_SECURITY_MODULE *security_module_ptr = components_manager_get_self_ctx();

@@ -24,6 +24,9 @@
 
 #include "nx_secure_tls.h"
 
+#ifndef NX_SECURE_TLS_CLIENT_DISABLED
+
+
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 static UINT _nx_secure_tls_proc_serverhello_sec_reneg_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                                 UCHAR *packet_buffer,
@@ -51,12 +54,14 @@ static UINT _nx_secure_tls_proc_serverhello_ecjpake_key_kp_pair(NX_SECURE_TLS_SE
                                                                 USHORT *extension_length, UINT message_length);
 #endif
 
+#endif /* NX_SECURE_TLS_CLIENT_DISABLED */
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello_extensions       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.9        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -102,6 +107,9 @@ static UINT _nx_secure_tls_proc_serverhello_ecjpake_key_kp_pair(NX_SECURE_TLS_SE
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
+/*                                            TLS 1.3 compilation issue,  */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_serverhello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -109,6 +117,8 @@ UINT _nx_secure_tls_process_serverhello_extensions(NX_SECURE_TLS_SESSION *tls_se
                                                    NX_SECURE_TLS_HELLO_EXTENSION *extensions,
                                                    UINT *num_extensions)
 {
+#ifndef NX_SECURE_TLS_CLIENT_DISABLED
+	
 UINT status;
 
 #ifdef NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE
@@ -363,8 +373,20 @@ USHORT                                supported_version = tls_session -> nx_secu
 #endif
 
     return(status);
+#else    
+    /* If Client TLS is disabled and we recieve a server key exchange, error! */    
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(packet_buffer);
+    NX_PARAMETER_NOT_USED(message_length);
+    NX_PARAMETER_NOT_USED(extensions);
+    NX_PARAMETER_NOT_USED(num_extensions);
+    
+    return(NX_SECURE_TLS_UNEXPECTED_MESSAGE);
+#endif
 }
 
+
+#ifndef NX_SECURE_TLS_CLIENT_DISABLED
 
 /**************************************************************************/
 /*                                                                        */
@@ -1068,3 +1090,4 @@ ULONG  offset;
 }
 #endif
 
+#endif /* NX_SECURE_TLS_CLIENT_DISABLED */
