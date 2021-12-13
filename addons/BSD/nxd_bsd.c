@@ -168,13 +168,13 @@ static INT   bsd_string_to_number(const CHAR *string, UINT *number);
 static ULONG _nx_bsd_string_length(CHAR * string);
 
 #ifdef NX_BSD_RAW_PPPOE_SUPPORT
-static INT   nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, 
+static INT   nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, const CHAR *msg, INT msgLength, 
                                           INT flags,  struct sockaddr* destAddr, INT destAddrLen);
 static UINT  nx_bsd_socket_create_id = 0;
 #endif /* NX_BSD_RAW_PPPOE_SUPPORT */
 
 #ifdef NX_BSD_RAW_SUPPORT
-static INT   _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, 
+static INT   _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, const CHAR *msg, INT msgLength, 
                                               INT flags,  struct sockaddr* destAddr, INT destAddrLen);
 static VOID  _nx_bsd_hardware_packet_received(NX_PACKET *packet_ptr, UCHAR *consumed);
 #endif /* NX_BSD_RAW_SUPPORT */
@@ -3722,7 +3722,7 @@ NX_BSD_SOCKET *bsd_socket_ptr;
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-INT  sendto(INT sockID, CHAR *msg, INT msgLength, INT flags,  struct sockaddr *destAddr, INT destAddrLen)
+INT  sendto(INT sockID, const CHAR *msg, INT msgLength, INT flags,  struct sockaddr *destAddr, INT destAddrLen)
 {
 UINT                 status;
 NX_BSD_SOCKET       *bsd_socket_ptr;
@@ -12407,7 +12407,7 @@ NX_IPV6_HEADER_OPTION           *option;
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-static INT nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct sockaddr* destAddr, INT destAddrLen)
+static INT nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, const CHAR *msg, INT msgLength, INT flags,  struct sockaddr* destAddr, INT destAddrLen)
 {
 UINT                if_index;
 struct sockaddr_ll *destAddr_ll;    
@@ -12726,7 +12726,7 @@ NX_BSD_SOCKET *bsd_ptr;
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-static INT _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct sockaddr* destAddr, INT destAddrLen)
+static INT _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, const CHAR *msg, INT msgLength, INT flags,  struct sockaddr* destAddr, INT destAddrLen)
 {
 UINT                if_index;
 struct sockaddr_ll *destAddr_ll;    

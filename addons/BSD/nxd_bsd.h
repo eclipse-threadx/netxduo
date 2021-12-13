@@ -834,7 +834,7 @@ VOID nx_bsd_raw_receive_notify(NX_IP *ip_ptr, UINT bsd_socket_index);
 UINT nx_bsd_socket_set_inherited_settings(UINT master_sock_id, UINT secondary_sock_id);
 INT  recvfrom(INT sockID, CHAR *buffer, INT buffersize, INT flags,struct sockaddr *fromAddr, INT *fromAddrLen);
 INT  recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags);
-INT  sendto(INT sockID, CHAR *msg, INT msgLength, INT flags, struct sockaddr *destAddr, INT destAddrLen);
+INT  sendto(INT sockID, const CHAR *msg, INT msgLength, INT flags, struct sockaddr *destAddr, INT destAddrLen);
 INT  send(INT sockID, const CHAR *msg, INT msgLength, INT flags);
 INT  select(INT nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
 INT  soc_close( INT sockID);
