@@ -14094,7 +14094,7 @@ UINT  _nx_snmp_utility_error_info_set(UCHAR *buffer_ptr, UINT error_code, UINT e
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_object_id_get                      PORTABLE C      */ 
-/*                                                           6.1.8        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14137,6 +14137,10 @@ UINT  _nx_snmp_utility_error_info_set(UCHAR *buffer_ptr, UINT error_code, UINT e
 /*                                            improved the logic of       */
 /*                                            converting number to string,*/
 /*                                            resulting in version 6.1.8  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            initialized the sequence    */
+/*                                            byte value,                 */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_object_id_get(UCHAR *buffer_ptr, UCHAR *object_string, INT buffer_length)
@@ -14166,9 +14170,6 @@ UINT    string_length;
 
     /* Initialize the string length to 0.  */
     string_length = 0;
-
-    /* Initialize the sequence byte value to NULL. */
-    value = 0; 
 
     /* First see if the ANS1 object type is present.  */
     if (buffer_ptr[0] != NX_SNMP_ANS1_OBJECT_ID)
@@ -14319,6 +14320,9 @@ UINT    string_length;
     /* Loop to pickup the remaining characters in the object string.  */
     while (total)
     {
+
+        /* Initialize the sequence byte value to NULL. */
+        value = 0; 
 
         /* Move the buffer pointer forward.  */
         byte =  *buffer_ptr++;

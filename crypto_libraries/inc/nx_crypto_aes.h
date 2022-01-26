@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_crypto_aes.h                                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -43,6 +43,10 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            moved inverse key expansion,*/
+/*                                            added using RAM tables,     */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -106,6 +110,13 @@ extern   "C" {
 #define NX_CRYPTO_AES_KEY_SCHEDULE_ENCRYPT       1
 #define NX_CRYPTO_AES_KEY_SCHEDULE_DECRYPT       2
 
+/* Define NX_CRYPTO_AES_USE_RAM_TABLES to move tables to RAM. */
+#ifdef NX_CRYPTO_AES_USE_RAM_TABLES
+#define NX_CRYPTO_AES_TABLE                      static
+#else
+#define NX_CRYPTO_AES_TABLE                      static const
+#endif
+
 /* Define the control block structure for backward compatibility. */
 #define NX_AES                                   NX_CRYPTO_AES
 
@@ -122,7 +133,8 @@ typedef struct NX_CRYPTO_AES_STRUCT
     /* Number of AES rounds for the current key. */
     UCHAR nx_crypto_aes_rounds;
 
-    UCHAR nx_crypto_aes_reserved;
+    /* Use the flag field to indicate the inverse key expansion is done. */
+    UCHAR nx_crypto_aes_inverse_key_expanded;
 
     /* The key schedule is as large as the key size (max = 256 bits) with expansion, total 64 UINT words. */
     UINT nx_crypto_aes_key_schedule[NX_CRYPTO_AES_MAX_KEY_SIZE * 8];

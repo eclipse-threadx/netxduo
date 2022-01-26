@@ -276,7 +276,7 @@ ULONG      work_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_data_check                     PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -320,6 +320,10 @@ ULONG      work_length;
 /*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            supported TCP/IP offload,   */
 /*                                            resulting in version 6.1.8  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed unsigned integers     */
+/*                                            comparison,                 */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_state_data_check(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr)
@@ -388,7 +392,7 @@ NX_IP         *ip_ptr;
     {
 
         /* Step1. trim the data on the left side of the receive window.  */
-        if (((INT)socket_ptr -> nx_tcp_socket_rx_sequence - (INT)packet_begin_sequence) > 0)
+        if (((INT)(socket_ptr -> nx_tcp_socket_rx_sequence - packet_begin_sequence)) > 0)
         {
 
             /* Calculate the data length that out of window.  */
@@ -406,8 +410,8 @@ NX_IP         *ip_ptr;
         }
 
         /* Step2. trim the data on the right side of the receive window.  */
-        if ((((INT)packet_end_sequence - (INT)socket_ptr -> nx_tcp_socket_rx_sequence) -
-             (INT)socket_ptr -> nx_tcp_socket_rx_window_current) > 0)
+        if (((INT)((packet_end_sequence - socket_ptr -> nx_tcp_socket_rx_sequence) -
+                   socket_ptr -> nx_tcp_socket_rx_window_current)) > 0)
         {
 
             /* Calculate the data length that out of window.  */
@@ -658,7 +662,7 @@ NX_IP         *ip_ptr;
            packet_begin_sequence is to the right of the end of it. */
 
         /* Packet data begins to the right of the expected sequence (out of sequence data). Force an ACK. */
-        if (((INT)packet_begin_sequence - (INT)socket_ptr -> nx_tcp_socket_rx_sequence) > 0)
+        if (((INT)(packet_begin_sequence - socket_ptr -> nx_tcp_socket_rx_sequence)) > 0)
         {
             _nx_tcp_packet_send_ack(socket_ptr, socket_ptr -> nx_tcp_socket_tx_sequence);
         }

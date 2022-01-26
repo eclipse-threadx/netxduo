@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_x509.h                                    PORTABLE C      */
-/*                                                           6.1.7        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -51,6 +51,10 @@
 /*                                            supported hardware EC       */
 /*                                            private key,                */
 /*                                            resulting in version 6.1.7  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            ignored public key in EC    */
+/*                                            private key,                */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -538,13 +542,6 @@ typedef struct NX_SECURE_EC_PRIVATE_KEY_STRUCT
 
     /* Size of the EC private key. */
     USHORT nx_secure_ec_private_key_length;
-
-    /* Public key for EC. */
-    /* This field is optional and it can be NX_NULL. */
-    const UCHAR *nx_secure_ec_public_key;
-
-    /* Size of the key used by the algorithm. */
-    USHORT nx_secure_ec_public_key_length;
 
     /* Named curve used. */
     UINT nx_secure_ec_named_curve;

@@ -193,7 +193,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
             /* We don't want any more clienthellos to come in after this - only the first one
                in response to our original request. */
             tls_session -> nx_secure_tls_server_renegotiation_requested = NX_FALSE; 
-	}
+    }
         else
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
         {

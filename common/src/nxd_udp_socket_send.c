@@ -44,7 +44,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_udp_socket_driver_send                          PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -79,6 +79,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), corrected*/
+/*                                            the logic for queued packet,*/
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_udp_socket_driver_send(NX_UDP_SOCKET *socket_ptr,
@@ -92,6 +95,7 @@ NX_IP          *ip_ptr;
 NX_INTERFACE   *interface_ptr = NX_NULL;
 UCHAR          *original_ptr = packet_ptr -> nx_packet_prepend_ptr + sizeof(NX_UDP_HEADER);
 ULONG           original_length = packet_ptr -> nx_packet_length - sizeof(NX_UDP_HEADER);
+UINT            packet_reset = NX_FALSE;
 
     /* Set up the pointer to the associated IP instance.  */
     ip_ptr =  socket_ptr -> nx_udp_socket_ip_ptr;
@@ -181,6 +185,16 @@ ULONG           original_length = packet_ptr -> nx_packet_length - sizeof(NX_UDP
     packet_ptr -> nx_packet_prepend_ptr = original_ptr;
     packet_ptr -> nx_packet_length = original_length;
 
+    /* Determine if the packet is a queued data packet. _nx_packet_transmit_release in Offload handler
+       does not release the packet immediately and only adjusts the prepend pointer to User data,
+       since the packet may need to be resent. To keep the same logic for retransmission in upper layer,
+       the prepend pointer must be reset to UDP header.  */
+    if ((packet_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next != ((NX_PACKET*)NX_PACKET_ALLOCATED)) &&
+        (packet_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next != ((NX_PACKET*)NX_PACKET_FREE)))
+    {
+        packet_reset = NX_TRUE;
+    }
+
     /* Let TCP/IP offload interface send the packet.  */
     status = interface_ptr -> nx_interface_tcpip_offload_handler(ip_ptr, interface_ptr, socket_ptr,
                                                                  NX_TCPIP_OFFLOAD_UDP_SOCKET_SEND,
@@ -197,6 +211,14 @@ ULONG           original_length = packet_ptr -> nx_packet_length - sizeof(NX_UDP
     }
     else
     {
+
+        /* Reset prepend pointer to UDP header for queued packet.  */
+        if (packet_reset == NX_TRUE)
+        {
+            packet_ptr -> nx_packet_prepend_ptr = original_ptr - sizeof(NX_UDP_HEADER);
+            packet_ptr -> nx_packet_length = original_length + sizeof(NX_UDP_HEADER);
+        }
+
         return(NX_SUCCESS);
     }
 }

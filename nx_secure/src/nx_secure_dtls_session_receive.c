@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_receive                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,6 +80,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            released packet securely,   */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed out-of-order handling,*/
+/*                                            resulting in version 6.1.10 */   
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_receive(NX_SECURE_DTLS_SESSION *dtls_session,
@@ -332,9 +335,21 @@ UINT                   source_port;
             /* Clear out the packet, we don't want any of the data in it. */
             nx_secure_tls_packet_release(packet_ptr);
 
-            if (status != NX_CONTINUE)
+            if (status == NX_SECURE_TLS_ALERT_RECEIVED)
             {
 
+                /* See if the alert was a CloseNotify */
+                if(tls_session -> nx_secure_tls_received_alert_level == NX_SECURE_TLS_ALERT_LEVEL_WARNING &&
+                   tls_session -> nx_secure_tls_received_alert_value == NX_SECURE_TLS_ALERT_CLOSE_NOTIFY)
+                {
+
+                    /* Close the connection */
+                    status = NX_SECURE_TLS_CLOSE_NOTIFY_RECEIVED;
+                }
+                /* Dont send alert to remote host if we recevied an alert */
+            }
+            else if (status != NX_CONTINUE)
+            {
                 /* Error status, send alert back to remote host. */
                 /* Get our alert number and level from our status. */
                 error_number = status;

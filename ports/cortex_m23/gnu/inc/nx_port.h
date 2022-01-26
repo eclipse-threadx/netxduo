@@ -190,7 +190,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M23/GNU Version 6.1.9 *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M23/GNU Version 6.1.10 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

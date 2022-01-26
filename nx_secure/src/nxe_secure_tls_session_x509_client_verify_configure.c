@@ -36,7 +36,7 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_secure_tls_session_x509_client_verify_configure PORTABLE C     */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,6 +73,9 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            removed redundant checking, */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_secure_tls_session_x509_client_verify_configure(NX_SECURE_TLS_SESSION *tls_session, UINT certs_number, VOID *certificate_buffer, ULONG buffer_size)
@@ -109,7 +112,7 @@ UINT cert_buffer_size;
         metadata_size = sizeof(NX_SECURE_X509_CERT) * certs_number;
 
         /* Check that buffer is large enough. */
-        if(buffer_size < metadata_size || certs_number == 0 || buffer_size == 0)
+        if(buffer_size < metadata_size || certs_number == 0)
         {
             return(NX_INVALID_PARAMETERS);
         }

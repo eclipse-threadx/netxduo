@@ -207,7 +207,7 @@ NX_TCP_HEADER  *header_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_send_internal                        PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -260,6 +260,10 @@ NX_TCP_HEADER  *header_ptr;
 /*                                            fixed the bug of race       */
 /*                                            condition,                  */
 /*                                            resulting in version 6.1.9  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the throughput of  */
+/*                                            TCP transmission,           */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_send_internal(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr, ULONG wait_option)
@@ -433,15 +437,9 @@ UINT            compute_checksum = 1;
     /* Get original pool. */
     pool_ptr = packet_ptr -> nx_packet_pool_owner;
 
-    /* Release the protection.  */
-    tx_mutex_put(&(ip_ptr -> nx_ip_protection));
-
     /* Loop to send the packet. */
     for (;;)
     {
-
-        /* Place protection while we check the sequence number for the new TCP packet.  */
-        tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
 
         /* Pick up the min(cwnd, swnd) */
         if (socket_ptr -> nx_tcp_socket_tx_window_advertised > socket_ptr -> nx_tcp_socket_tx_window_congestion)
@@ -827,6 +825,9 @@ UINT            compute_checksum = 1;
                 {
                     _nx_packet_release(send_packet);
                 }
+
+                /* Regain exclusive access to IP instance. */
+                tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
                 continue;
             }
 
@@ -1010,6 +1011,9 @@ UINT            compute_checksum = 1;
 
                 /* Release the protection.  */
                 tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+                /* Regain exclusive access to IP instance. */
+                tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
             }
         }
         else if ((wait_option) && (_tx_thread_current_ptr != &(ip_ptr -> nx_ip_thread)))

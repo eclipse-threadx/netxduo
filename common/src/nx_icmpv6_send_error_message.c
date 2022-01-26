@@ -42,7 +42,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_send_error_message                      PORTABLE C       */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -90,6 +90,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed unsigned integers     */
+/*                                            comparison,                 */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_icmpv6_send_error_message(NX_IP *ip_ptr, NX_PACKET *offending_packet,
@@ -197,7 +201,7 @@ NXD_ADDRESS      dest_addr;
        room for the Physical frame header, IPv6 header and ICMPv6 header of the error message. */
     payload = pkt_ptr -> nx_packet_pool_owner -> nx_packet_pool_payload_size;
 
-    if (((INT)(bytes_to_copy + sizeof(NX_IPV6_HEADER) + sizeof(NX_ICMPV6_ERROR) + NX_PHYSICAL_HEADER) - (INT)payload) > 0)
+    if (((INT)((bytes_to_copy + sizeof(NX_IPV6_HEADER) + sizeof(NX_ICMPV6_ERROR) + NX_PHYSICAL_HEADER) - payload)) > 0)
     {
 
         bytes_to_copy = (UINT)(payload - (sizeof(NX_IPV6_HEADER) + sizeof(NX_ICMPV6_ERROR) + NX_PHYSICAL_HEADER));

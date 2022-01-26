@@ -71,7 +71,7 @@ TODO`s: Configure core settings of application for your IoTHub.
 
 /* Required when DPS is used.  */
 #ifndef ENDPOINT
-#define ENDPOINT                                    ""
+#define ENDPOINT                                    "global.azure-devices-provisioning.net"
 #endif /* ENDPOINT */
 
 #ifndef ID_SCOPE

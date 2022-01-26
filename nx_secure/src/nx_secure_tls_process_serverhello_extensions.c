@@ -118,7 +118,7 @@ UINT _nx_secure_tls_process_serverhello_extensions(NX_SECURE_TLS_SESSION *tls_se
                                                    UINT *num_extensions)
 {
 #ifndef NX_SECURE_TLS_CLIENT_DISABLED
-	
+
 UINT status;
 
 #ifdef NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE

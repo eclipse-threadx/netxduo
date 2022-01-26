@@ -1594,6 +1594,9 @@ UINT nx_azure_iot_hub_client_reported_properties_send(NX_AZURE_IOT_HUB_CLIENT *h
 **Description**
 
 <p>This routine sends the reported properties contain in the packet.</p>
+<p>Note: The return status of the API indicates if the reported properties is sent out successfully or not,
+the response status is used to track if the reported properties is accepted or not by IoT Hub, and the
+reponse status is available only when the return status is NX_AZURE_IOT_SUCCESS.</p>
 
 **Parameters**
 
@@ -1613,7 +1616,6 @@ UINT nx_azure_iot_hub_client_reported_properties_send(NX_AZURE_IOT_HUB_CLIENT *h
  * NX_AZURE_IOT_NOT_ENABLED Fail to send reported properties due to property is not enabled.
  * NX_AZURE_IOT_SDK_CORE_ERROR Fail to send reported properties due to SDK core error.
  * NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to send reported properties due to buffer size is too small.
- * NX_AZURE_IOT_NO_PACKET Fail to send reported properties due to no packet available.
  * NX_NO_PACKET Fail to send reported properties due to no packet available.
  * NX_AZURE_IOT_DISCONNECTED Fail to send reported properties due to disconnect.
 

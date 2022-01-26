@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_crypto.h                                         PORTABLE C      */
-/*                                                           6.1.7        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -49,6 +49,9 @@
 /*                                            Renamed FIPS symbol and     */
 /*                                            fips memory functions,      */
 /*                                            resulting in version 6.1.7  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            added missing symbol,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -164,6 +167,10 @@ extern VOID *(*volatile _nx_crypto_memcpy_ptr)(void *dest, const void *src, size
 
 #if !defined(NX_CRYPTO_CHANGE_ULONG_ENDIAN) && defined(NX_CHANGE_ULONG_ENDIAN)
 #define NX_CRYPTO_CHANGE_ULONG_ENDIAN NX_CHANGE_ULONG_ENDIAN
+#endif
+
+#if !defined(NX_CRYPTO_CHANGE_USHORT_ENDIAN) && defined(NX_CHANGE_USHORT_ENDIAN)
+#define NX_CRYPTO_CHANGE_USHORT_ENDIAN NX_CHANGE_USHORT_ENDIAN
 #endif
 
 #ifndef NX_CRYPTO_INTEGRITY_TEST

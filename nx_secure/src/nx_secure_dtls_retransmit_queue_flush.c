@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_retransmit_queue_flush              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            released packet securely,   */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed packet leak,          */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_secure_dtls_retransmit_queue_flush(NX_SECURE_DTLS_SESSION *dtls_session)
@@ -92,8 +95,7 @@ NX_PACKET *next_packet_ptr;
 
     /* Loop to clear all the packets out.  */
     while (packet_ptr &&
-           (packet_ptr != (NX_PACKET *)NX_PACKET_ENQUEUED) &&
-           (packet_ptr -> nx_packet_queue_next == (NX_PACKET *)NX_DRIVER_TX_DONE))
+           (packet_ptr != (NX_PACKET *)NX_PACKET_ENQUEUED))
     {
 
         /* Disable interrupts.  */

@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_ec_private_key_parse                PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -72,6 +72,10 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            removed dependency on TLS,  */
 /*                                            resulting in version 6.1.6  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            ignored public key in EC    */
+/*                                            private key,                */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_ec_private_key_parse(const UCHAR *buffer, UINT length,
@@ -218,68 +222,7 @@ USHORT       version;
         _nx_secure_x509_oid_parse(tlv_data, tlv_length, &ec_key -> nx_secure_ec_named_curve);
     }
 
-    if (seq_length == 0)
-    {
-        /* The public key is not present. */
-        if (ec_key != NULL)
-        {
-            ec_key -> nx_secure_ec_public_key = NX_CRYPTO_NULL;
-            ec_key -> nx_secure_ec_public_key_length = 0;
-        }
-
-        return(NX_SECURE_X509_SUCCESS);
-    }
-
-    /* Advance our working pointer past the last field. */
-    tlv_data = &tlv_data[tlv_length];
-
-    /* Parse our next field, the public key. */
-    status = _nx_secure_x509_asn1_tlv_block_parse(tlv_data, (ULONG *)&length, &tlv_type, &tlv_type_class, &tlv_length, &tlv_data, &header_length);
-
-    /*  Make sure we parsed the block alright. */
-    if (status != 0)
-    {
-        return(status);
-    }
-
-    if (tlv_type != 1 || tlv_type_class != NX_SECURE_ASN_TAG_CLASS_CONTEXT)
-    {
-        return(NX_SECURE_PKCS1_INVALID_PRIVATE_KEY);
-    }
-
-    /* Update byte count. */
-    *bytes_processed += header_length;
-    seq_length = tlv_length;
-
-    /* Parse the publicKey. */
-    status = _nx_secure_x509_asn1_tlv_block_parse(tlv_data, &seq_length, &tlv_type, &tlv_type_class, &tlv_length, &tlv_data, &header_length);
-
-    /*  Make sure we parsed the block alright. */
-    if (status != 0)
-    {
-        return(status);
-    }
-
-    if (tlv_type != NX_SECURE_ASN_TAG_BIT_STRING || tlv_type_class != NX_SECURE_ASN_TAG_CLASS_UNIVERSAL)
-    {
-        return(NX_SECURE_PKCS1_INVALID_PRIVATE_KEY);
-    }
-
-    /* Update byte count. */
-    *bytes_processed += (header_length + tlv_length);
-
-    /* The value is a bitstring. */
-    if (ec_key != NULL)
-    {
-        if (tlv_data[0] == 0)
-        {
-            tlv_data++;
-            tlv_length--;
-        }
-        ec_key -> nx_secure_ec_public_key = tlv_data;
-        ec_key -> nx_secure_ec_public_key_length = (USHORT)tlv_length;
-    }
-
+    /* The optional public key is ignored.  */
     return(NX_SECURE_X509_SUCCESS);
 }
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */

@@ -22,7 +22,6 @@
 
 #define NX_SECURE_SOURCE_CODE
 
-
 /* Include necessary system files.  */
 
 #include "nx_secure_tls.h"
@@ -32,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_free              PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -77,6 +76,10 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            updated X.509 return value, */
 /*                                            resulting in version 6.1.6  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved code coverage      */
+/*                                            results,                    */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_remote_certificate_free(NX_SECURE_TLS_SESSION *tls_session,
@@ -96,17 +99,16 @@ NX_SECURE_X509_CERT              *certificate;
     /* Find the certificate using it's name. */
     status = _nx_secure_x509_certificate_list_find(&list_head, name, 0, &certificate);
 
-    if (status != NX_SUCCESS)
+    /* Now status can only be NX_SECURE_X509_CERTIFICATE_NOT_FOUND or NX_SECURE_X509_SUCCESS as
+       “&list_head” and “&certificate” are not NULL.
+       Translate X.509 return values into TLS return values. */
+    if (status == NX_SECURE_X509_CERTIFICATE_NOT_FOUND)
     {
-
-        /* Translate some X.509 return values into TLS return values. */
-        if (status == NX_SECURE_X509_CERTIFICATE_NOT_FOUND)
-        {
-            return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
-        }
-
-        return(status);
+        return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
     }
+
+    /* Make sure status is NX_SECURE_X509_SUCCESS here. */
+    NX_ASSERT(status == NX_SECURE_X509_SUCCESS);
 
     /* Remove the certificate from the remote store. */
     _nx_secure_x509_store_certificate_remove(store, name, NX_SECURE_X509_CERT_LOCATION_REMOTE, 0);

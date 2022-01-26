@@ -178,15 +178,19 @@ az_result core_result;
 UINT nx_azure_iot_json_reader_token_bool_get(NX_AZURE_IOT_JSON_READER *reader_ptr,
                                              UINT *value_ptr)
 {
+bool bool_value;
+
     if ((reader_ptr == NX_NULL) || (value_ptr == NX_NULL))
     {
         return(NX_AZURE_IOT_INVALID_PARAMETER);
     }
 
-    if (az_result_failed(az_json_token_get_boolean(&(reader_ptr -> json_reader.token), (bool *)value_ptr)))
+    if (az_result_failed(az_json_token_get_boolean(&(reader_ptr -> json_reader.token), &bool_value)))
     {
         return(NX_AZURE_IOT_SDK_CORE_ERROR);
     }
+
+    *value_ptr = bool_value;
 
     return(NX_AZURE_IOT_SUCCESS);
 }

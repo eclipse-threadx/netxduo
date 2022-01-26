@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */  
 /*    nxd_dhcp_client.h                                   PORTABLE C      */ 
-/*                                                           6.1.8        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -49,6 +49,9 @@
 /*                                            adding additional request   */
 /*                                            option in parameter request,*/
 /*                                            resulting in version 6.1.8  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            multiple client instances,  */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -509,6 +512,9 @@ typedef struct NX_DHCP_STRUCT
 
     /* Define the callback function for adding specific DHCP user option.  */
     UINT (*nx_dhcp_user_option_add)(struct NX_DHCP_STRUCT *dhcp_ptr, UINT iface_index, UINT message_type, UCHAR *user_option_ptr, UINT *user_option_length);
+
+    /* Define the link between other DHCP structures created by the application.  */
+    struct NX_DHCP_STRUCT *nx_dhcp_created_next;
 
     /* This pointer is reserved for application specific use.  */
     void            *nx_dhcp_reserved_ptr;

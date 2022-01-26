@@ -203,7 +203,7 @@ UINT cmp;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_subtract                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -262,6 +262,9 @@ UINT cmp;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_subtract(NX_CRYPTO_HUGE_NUMBER *left, NX_CRYPTO_HUGE_NUMBER *right)
@@ -276,7 +279,6 @@ UINT cmp;
     }
     else
     {
-        cmp = _nx_crypto_huge_number_compare_unsigned(left, right);
 
         if (cmp == NX_CRYPTO_HUGE_NUMBER_EQUAL)
         {

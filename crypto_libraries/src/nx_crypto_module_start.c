@@ -27,7 +27,7 @@
 #include "nx_crypto.h"
 #include "nx_crypto_hmac_sha2.h"
 
-#ifdef NX_CRYPTO_SELF_TEST
+#if  defined(NX_CRYPTO_SELF_TEST) && defined(STM32F469xx)
 
 #define NX_CRYPTO_INTEGRITY_TEST_CHECK(status)                                      \
     if(status)                                                                      \
@@ -99,7 +99,7 @@ static NX_CRYPTO_SHA256_HMAC nx_crypto_self_test_hmac;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_hardware_rand_initialize                 PORTABLE C      */
-/*                                                           6.1.7        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -144,6 +144,9 @@ static NX_CRYPTO_SHA256_HMAC nx_crypto_self_test_hmac;
 /*                                            renamed FIPS symbol to      */
 /*                                            self-test,                  */
 /*                                            resulting in version 6.1.7  */
+/*  01-31-2022     Bhupendra Naphade        Modified comment(s),          */
+/*                                            updated build condition,    */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP void _nx_crypto_hardware_rand_initialize_stm32f4(void)

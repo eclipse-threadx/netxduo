@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_verify            PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -77,6 +77,10 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            updated X.509 return value, */
 /*                                            resulting in version 6.1.6  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved code coverage      */
+/*                                            results,                    */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_remote_certificate_verify(NX_SECURE_TLS_SESSION *tls_session)
@@ -136,19 +140,20 @@ ULONG                             current_time;
     if (status != NX_SUCCESS)
     {
 
-        /* Translate some X.509 return values into TLS return values. */
+        /* Translate some X.509 return values into TLS return values. NX_SECURE_X509_CERTIFICATE_NOT_FOUND is removed
+           as _nx_secure_x509_certificate_chain_verify() will not return this value. */
         switch (status)
         {
-        case NX_SECURE_X509_CERTIFICATE_NOT_FOUND:
-            return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
         case NX_SECURE_X509_UNSUPPORTED_PUBLIC_CIPHER:
             return(NX_SECURE_TLS_UNSUPPORTED_PUBLIC_CIPHER);
         case NX_SECURE_X509_UNKNOWN_CERT_SIG_ALGORITHM:
             return(NX_SECURE_TLS_UNKNOWN_CERT_SIG_ALGORITHM);
         case NX_SECURE_X509_CERTIFICATE_SIG_CHECK_FAILED:
             return(NX_SECURE_TLS_CERTIFICATE_SIG_CHECK_FAILED);
+#ifndef NX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES
         case NX_SECURE_X509_INVALID_SELF_SIGNED_CERT:
             return(NX_SECURE_TLS_INVALID_SELF_SIGNED_CERT);
+#endif
         case NX_SECURE_X509_ISSUER_CERTIFICATE_NOT_FOUND:
             return(NX_SECURE_TLS_ISSUER_CERTIFICATE_NOT_FOUND);
         case NX_SECURE_X509_MISSING_CRYPTO_ROUTINE:

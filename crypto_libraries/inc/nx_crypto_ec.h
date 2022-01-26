@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_crypto_ec.h                                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -44,6 +44,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s), and      */
 /*                                            added public key validation,*/
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -181,26 +184,288 @@ typedef struct NX_CRYPTO_EC_STRUCT
     _nx_crypto_huge_number_shift_left(value, shift);                 \
     curve -> nx_crypto_ec_reduce(curve, value, scratch);
 
-#define NX_CRYPTO_EC_SECP192R1_DATA_SETUP(s, b, c0, c1, c2, c3, c4, c5) \
-    b[0] = c0; b[1] = c1; b[2] = c2;                                    \
-    b[3] = c3; b[4] = c4; b[5] = c5;                                    \
-    _nx_crypto_huge_number_setup(s, (UCHAR *)b, 24);
+#if (NX_CRYPTO_HUGE_NUMBER_BITS == 32)
 
-#define NX_CRYPTO_EC_SECP224R1_DATA_SETUP(s, b, c0, c1, c2, c3, c4, c5, c6) \
-    b[0] = c0; b[1] = c1; b[2] = c2;  b[3] = c3;                            \
-    b[4] = c4; b[5] = c5; b[6] = c6;                                        \
-    _nx_crypto_huge_number_setup(s, (UCHAR *)b, 28);
+#define NX_CRYPTO_EC_ASSIGN_REV(a, b) (a) = (b); NX_CRYPTO_CHANGE_ULONG_ENDIAN(a)
+#define NX_CRYPTO_EC_CHANGE_ENDIAN(a, b, c) NX_CRYPTO_EC_ASSIGN_REV(b, c); (a) = (b)
+
+#define NX_CRYPTO_EC_SECP192R1_DATA_SETUP(s, b, c0, c1, c2, c3, c4, c5)         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[5], b, c0);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[4], b, c1);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[3], b, c2);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[2], b, c3);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[1], b, c4);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[0], b, c5);    \
+    (s) -> nx_crypto_huge_number_size = 6;                                      \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+#define NX_CRYPTO_EC_SECP224R1_DATA_SETUP(s, b, c0, c1, c2, c3, c4, c5, c6)     \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[6], b, c0);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[5], b, c1);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[4], b, c2);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[3], b, c3);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[2], b, c4);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[1], b, c5);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[0], b, c6);    \
+    (s) -> nx_crypto_huge_number_size = 7;                                      \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
 
 #define NX_CRYPTO_EC_SECP256R1_DATA_SETUP(s, b, c0, c1, c2, c3, c4, c5, c6, c7) \
-    b[0] = c0; b[1] = c1; b[2] = c2;  b[3] = c3;                                \
-    b[4] = c4; b[5] = c5; b[6] = c6;  b[7] = c7;                                \
-    _nx_crypto_huge_number_setup(s, (UCHAR *)b, 32);
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[7], b, c0);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[6], b, c1);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[5], b, c2);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[4], b, c3);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[3], b, c4);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[2], b, c5);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[1], b, c6);    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[0], b, c7);    \
+    (s) -> nx_crypto_huge_number_size = 8;                                      \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+#define NX_CRYPTO_EC_SECP256R1_DATA_SETUP_LS1(s, b1, b2, c0, c1, c2, c3, c4, c5, c6, c7) \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, c0);                                                     \
+    (s) -> nx_crypto_huge_number_data[8] = (b1) >> 31;                                   \
+    (s) -> nx_crypto_huge_number_size = 8 + ((b1) >> 31);                                \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, c1);                                                     \
+    (s) -> nx_crypto_huge_number_data[7] = ((b1) << 1) | ((b2) >> 31);                   \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, c2);                                                     \
+    (s) -> nx_crypto_huge_number_data[6] = ((b2) << 1) | ((b1) >> 31);                   \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, c3);                                                     \
+    (s) -> nx_crypto_huge_number_data[5] = ((b1) << 1) | ((b2) >> 31);                   \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, c4);                                                     \
+    (s) -> nx_crypto_huge_number_data[4] = ((b2) << 1) | ((b1) >> 31);                   \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, c5);                                                     \
+    (s) -> nx_crypto_huge_number_data[3] = ((b1) << 1) | ((b2) >> 31);                   \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, c6);                                                     \
+    (s) -> nx_crypto_huge_number_data[2] = ((b2) << 1) | ((b1) >> 31);                   \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, c7);                                                     \
+    (s) -> nx_crypto_huge_number_data[1] = ((b1) << 1) | ((b2) >> 31);                   \
+    (s) -> nx_crypto_huge_number_data[0] = (b2) << 1;                                    \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
 
 #define NX_CRYPTO_EC_SECP384R1_DATA_SETUP(s, b, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) \
-    b[0] = c0; b[1] = c1; b[2] = c2;  b[3] = c3;                                                  \
-    b[4] = c4; b[5] = c5; b[6] = c6;  b[7] = c7;                                                  \
-    b[8] = c8; b[9] = c9; b[10] = c10;  b[11] = c11;                                              \
-    _nx_crypto_huge_number_setup(s, (UCHAR *)b, 48);
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[11], b, c0);                     \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[10], b, c1);                     \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[9], b, c2);                      \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[8], b, c3);                      \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[7], b, c4);                      \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[6], b, c5);                      \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[5], b, c6);                      \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[4], b, c7);                      \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[3], b, c8);                      \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[2], b, c9);                      \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[1], b, c10);                     \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[0], b, c11);                     \
+    (s) -> nx_crypto_huge_number_size = 12;                                                       \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+#define NX_CRYPTO_EC_SECP384R1_DATA_SETUP_LS1(s, b1, b2, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, c0);                                                                       \
+    (s) -> nx_crypto_huge_number_data[12] = (b1) >> 31;                                                    \
+    (s) -> nx_crypto_huge_number_size = 12 + ((b1) >> 31);                                                 \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, c1);                                                                       \
+    (s) -> nx_crypto_huge_number_data[11] = ((b1) << 1) | ((b2) >> 31);                                    \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, c2);                                                                       \
+    (s) -> nx_crypto_huge_number_data[10] = ((b2) << 1) | ((b1) >> 31);                                    \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, c3);                                                                       \
+    (s) -> nx_crypto_huge_number_data[9] = ((b1) << 1) | ((b2) >> 31);                                     \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, c4);                                                                       \
+    (s) -> nx_crypto_huge_number_data[8] = ((b2) << 1) | ((b1) >> 31);                                     \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, c5);                                                                       \
+    (s) -> nx_crypto_huge_number_data[7] = ((b1) << 1) | ((b2) >> 31);                                     \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, c6);                                                                       \
+    (s) -> nx_crypto_huge_number_data[6] = ((b2) << 1) | ((b1) >> 31);                                     \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, c7);                                                                       \
+    (s) -> nx_crypto_huge_number_data[5] = ((b1) << 1) | ((b2) >> 31);                                     \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, c8);                                                                       \
+    (s) -> nx_crypto_huge_number_data[4] = ((b2) << 1) | ((b1) >> 31);                                     \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, c9);                                                                       \
+    (s) -> nx_crypto_huge_number_data[3] = ((b1) << 1) | ((b2) >> 31);                                     \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, c10);                                                                      \
+    (s) -> nx_crypto_huge_number_data[2] = ((b2) << 1) | ((b1) >> 31);                                     \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, c11);                                                                      \
+    (s) -> nx_crypto_huge_number_data[1] = ((b1) << 1) | ((b2) >> 31);                                     \
+    (s) -> nx_crypto_huge_number_data[0] = (b2) << 1;                                                      \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+#else
+
+#define NX_CRYPTO_EC_ASSIGN_REV(a,b) (a) = (b); NX_CRYPTO_CHANGE_USHORT_ENDIAN(a)
+#define NX_CRYPTO_EC_CHANGE_ENDIAN(a, b, c) NX_CRYPTO_EC_ASSIGN_REV(b, c); (a) = (b)
+
+#define NX_CRYPTO_EC_SECP192R1_DATA_SETUP(s, b, c0, c1, c2, c3, c4, c5)                         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[11], b, (HN_UBASE)(c0));       \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[10], b, (HN_UBASE)(c0 >> 16)); \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[9], b, (HN_UBASE)(c1));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[8], b, (HN_UBASE)(c1 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[7], b, (HN_UBASE)(c2));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[6], b, (HN_UBASE)(c2 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[5], b, (HN_UBASE)(c3));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[4], b, (HN_UBASE)(c3 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[3], b, (HN_UBASE)(c4));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[2], b, (HN_UBASE)(c4 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[1], b, (HN_UBASE)(c5));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[0], b, (HN_UBASE)(c5 >> 16));  \
+    (s) -> nx_crypto_huge_number_size = 12;                                                     \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+#define NX_CRYPTO_EC_SECP224R1_DATA_SETUP(s, b, c0, c1, c2, c3, c4, c5, c6)                     \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[13], b, (HN_UBASE)(c0));       \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[12], b, (HN_UBASE)(c0 >> 16)); \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[11], b, (HN_UBASE)(c1));       \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[10], b, (HN_UBASE)(c1 >> 16)); \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[9], b, (HN_UBASE)(c2));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[8], b, (HN_UBASE)(c2 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[7], b, (HN_UBASE)(c3));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[6], b, (HN_UBASE)(c3 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[5], b, (HN_UBASE)(c4));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[4], b, (HN_UBASE)(c4 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[3], b, (HN_UBASE)(c5));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[2], b, (HN_UBASE)(c5 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[1], b, (HN_UBASE)(c6));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[0], b, (HN_UBASE)(c6 >> 16));  \
+    (s) -> nx_crypto_huge_number_size = 14;                                                     \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+#define NX_CRYPTO_EC_SECP256R1_DATA_SETUP(s, b, c0, c1, c2, c3, c4, c5, c6, c7)                 \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[15], b, (HN_UBASE)(c0));       \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[14], b, (HN_UBASE)(c0 >> 16)); \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[13], b, (HN_UBASE)(c1));       \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[12], b, (HN_UBASE)(c1 >> 16)); \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[11], b, (HN_UBASE)(c2));       \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[10], b, (HN_UBASE)(c2 >> 16)); \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[9], b, (HN_UBASE)(c3));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[8], b, (HN_UBASE)(c3 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[7], b, (HN_UBASE)(c4));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[6], b, (HN_UBASE)(c4 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[5], b, (HN_UBASE)(c5));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[4], b, (HN_UBASE)(c5 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[3], b, (HN_UBASE)(c6));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[2], b, (HN_UBASE)(c6 >> 16));  \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[1], b, (HN_UBASE)(c7));        \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[0], b, (HN_UBASE)(c7 >> 16));  \
+    (s) -> nx_crypto_huge_number_size = 16;                                                     \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+#define NX_CRYPTO_EC_SECP256R1_DATA_SETUP_LS1(s, b1, b2, c0, c1, c2, c3, c4, c5, c6, c7) \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c0));                                         \
+    (s) -> nx_crypto_huge_number_data[16] = (HN_UBASE)((b1) >> 15);                      \
+    (s) -> nx_crypto_huge_number_size = (UINT)(16 + (HN_UBASE)((b1) >> 15));             \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c0 >> 16));                                   \
+    (s) -> nx_crypto_huge_number_data[15] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));      \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c1));                                         \
+    (s) -> nx_crypto_huge_number_data[14] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));      \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c1 >> 16));                                   \
+    (s) -> nx_crypto_huge_number_data[13] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));      \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c2));                                         \
+    (s) -> nx_crypto_huge_number_data[12] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));      \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c2 >> 16));                                   \
+    (s) -> nx_crypto_huge_number_data[11] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));      \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c3));                                         \
+    (s) -> nx_crypto_huge_number_data[10] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));      \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c3 >> 16));                                   \
+    (s) -> nx_crypto_huge_number_data[9] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));       \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c4));                                         \
+    (s) -> nx_crypto_huge_number_data[8] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));       \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c4 >> 16));                                   \
+    (s) -> nx_crypto_huge_number_data[7] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));       \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c5));                                         \
+    (s) -> nx_crypto_huge_number_data[6] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));       \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c5 >> 16));                                   \
+    (s) -> nx_crypto_huge_number_data[5] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));       \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c6));                                         \
+    (s) -> nx_crypto_huge_number_data[4] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));       \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c6 >> 16));                                   \
+    (s) -> nx_crypto_huge_number_data[3] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));       \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c7));                                         \
+    (s) -> nx_crypto_huge_number_data[2] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));       \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c7 >> 16));                                   \
+    (s) -> nx_crypto_huge_number_data[1] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));       \
+    (s) -> nx_crypto_huge_number_data[0] = (HN_UBASE)((b2) << 1);                        \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+#define NX_CRYPTO_EC_SECP384R1_DATA_SETUP(s, b, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[23], b, (HN_UBASE)(c0));         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[22], b, (HN_UBASE)(c0 >> 16));   \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[21], b, (HN_UBASE)(c1));         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[20], b, (HN_UBASE)(c1 >> 16));   \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[19], b, (HN_UBASE)(c2));         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[18], b, (HN_UBASE)(c2 >> 16));   \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[17], b, (HN_UBASE)(c3));         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[16], b, (HN_UBASE)(c3 >> 16));   \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[15], b, (HN_UBASE)(c4));         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[14], b, (HN_UBASE)(c4 >> 16));   \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[13], b, (HN_UBASE)(c5));         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[12], b, (HN_UBASE)(c5 >> 16));   \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[11], b, (HN_UBASE)(c6));         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[10], b, (HN_UBASE)(c6 >> 16));   \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[9], b, (HN_UBASE)(c7));          \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[8], b, (HN_UBASE)(c7 >> 16));    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[7], b, (HN_UBASE)(c8));          \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[6], b, (HN_UBASE)(c8 >> 16));    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[5], b, (HN_UBASE)(c9));          \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[4], b, (HN_UBASE)(c9 >> 16));    \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[3], b, (HN_UBASE)(c10));         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[2], b, (HN_UBASE)(c10 >> 16));   \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[1], b, (HN_UBASE)(c11));         \
+    NX_CRYPTO_EC_CHANGE_ENDIAN((s) -> nx_crypto_huge_number_data[0], b, (HN_UBASE)(c11 >> 16));   \
+    (s) -> nx_crypto_huge_number_size = 24;                                                       \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+#define NX_CRYPTO_EC_SECP384R1_DATA_SETUP_LS1(s, b1, b2, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c0));                                                           \
+    (s) -> nx_crypto_huge_number_data[24] = (HN_UBASE)((b1) >> 15);                                        \
+    (s) -> nx_crypto_huge_number_size = (UINT)(24 + (HN_UBASE)((b1) >> 15));                               \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c0 >> 16));                                                     \
+    (s) -> nx_crypto_huge_number_data[23] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c1));                                                           \
+    (s) -> nx_crypto_huge_number_data[22] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c1 >> 16));                                                     \
+    (s) -> nx_crypto_huge_number_data[21] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c2));                                                           \
+    (s) -> nx_crypto_huge_number_data[20] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c2 >> 16));                                                     \
+    (s) -> nx_crypto_huge_number_data[19] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c3));                                                           \
+    (s) -> nx_crypto_huge_number_data[18] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c3 >> 16));                                                     \
+    (s) -> nx_crypto_huge_number_data[17] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c4));                                                           \
+    (s) -> nx_crypto_huge_number_data[16] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c4 >> 16));                                                     \
+    (s) -> nx_crypto_huge_number_data[15] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c5));                                                           \
+    (s) -> nx_crypto_huge_number_data[14] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c5 >> 16));                                                     \
+    (s) -> nx_crypto_huge_number_data[13] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c6));                                                           \
+    (s) -> nx_crypto_huge_number_data[12] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c6 >> 16));                                                     \
+    (s) -> nx_crypto_huge_number_data[11] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c7));                                                           \
+    (s) -> nx_crypto_huge_number_data[10] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                        \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c7 >> 16));                                                     \
+    (s) -> nx_crypto_huge_number_data[9] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                         \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c8));                                                           \
+    (s) -> nx_crypto_huge_number_data[8] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                         \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c8 >> 16));                                                     \
+    (s) -> nx_crypto_huge_number_data[7] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                         \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c9));                                                           \
+    (s) -> nx_crypto_huge_number_data[6] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                         \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c9 >> 16));                                                     \
+    (s) -> nx_crypto_huge_number_data[5] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                         \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c10));                                                          \
+    (s) -> nx_crypto_huge_number_data[4] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                         \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c10 >> 16));                                                    \
+    (s) -> nx_crypto_huge_number_data[3] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                         \
+    NX_CRYPTO_EC_ASSIGN_REV(b1, (HN_UBASE)(c11));                                                          \
+    (s) -> nx_crypto_huge_number_data[2] = (HN_UBASE)(((b2) << 1) | ((b1) >> 15));                         \
+    NX_CRYPTO_EC_ASSIGN_REV(b2, (HN_UBASE)(c11 >> 16));                                                    \
+    (s) -> nx_crypto_huge_number_data[1] = (HN_UBASE)(((b1) << 1) | ((b2) >> 15));                         \
+    (s) -> nx_crypto_huge_number_data[0] = (HN_UBASE)((b2) << 1);                                          \
+    (s) -> nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+#endif
 
 extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_secp192r1;
 extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_secp224r1;

@@ -39,7 +39,7 @@ static UINT _nx_secure_dtls_send_clienthello_sec_spf_extensions(NX_SECURE_TLS_SE
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_send_clienthello                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -81,6 +81,9 @@ static UINT _nx_secure_dtls_send_clienthello_sec_spf_extensions(NX_SECURE_TLS_SE
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            updated cookie handling,    */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_send_clienthello(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *send_packet)
@@ -174,7 +177,7 @@ USHORT                      protocol_version;
                 packet_buffer, (UINT)(send_packet -> nx_packet_append_ptr - packet_buffer));
 
         /* Set cookie. */
-        NX_SECURE_MEMCPY(packet_buffer, dtls_session -> nx_secure_dtls_cookie,
+        NX_SECURE_MEMCPY(packet_buffer, dtls_session -> nx_secure_dtls_client_cookie_ptr,
                dtls_session -> nx_secure_dtls_cookie_length); /* Use case of memcpy is verified. */
         length += dtls_session -> nx_secure_dtls_cookie_length;
 

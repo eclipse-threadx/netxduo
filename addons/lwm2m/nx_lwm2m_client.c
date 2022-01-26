@@ -4342,7 +4342,7 @@ CHAR c;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_lwm2m_client_coap_header_parse                  PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4379,6 +4379,10 @@ CHAR c;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            token and processing        */
+/*                                            confirmable response,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 const VOID *_nx_lwm2m_client_coap_header_parse(const VOID *ptr, const VOID *ptr_max, UCHAR *type_ptr, UCHAR *code_ptr, USHORT *id_ptr, const VOID **token_ptr_ptr, UINT *token_length_ptr)
@@ -4432,6 +4436,12 @@ UINT token_length;
         {
             return(NX_NULL);
         }
+    }
+    else
+    {
+
+        /* Ignore empty message */
+        return(NX_NULL);
     }
 
     /* Get message ID */
@@ -6539,7 +6549,7 @@ UINT resource_count;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_lwm2m_client_firmware_write                     PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6575,6 +6585,9 @@ UINT resource_count;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            compiler warnings,          */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_lwm2m_client_firmware_write(NX_LWM2M_CLIENT_OBJECT *object_ptr, NX_LWM2M_CLIENT_OBJECT_INSTANCE *instance_ptr, NX_LWM2M_CLIENT_RESOURCE *resource, UINT resource_count, UINT write_op)
@@ -6584,7 +6597,7 @@ UINT status;
 UINT flags;
 const CHAR *uri_ptr = NX_NULL;
 UINT uri_length;
-NX_LWM2M_BOOL update_supported_objects, old_update_value;
+NX_LWM2M_BOOL update_supported_objects, old_update_value = 0;
 UINT i;
 
     NX_PARAMETER_NOT_USED(instance_ptr);
@@ -14222,7 +14235,7 @@ NX_LWM2M_CLIENT_NOTIFY *notify_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_lwm2m_client_session_receive                    PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14267,6 +14280,10 @@ NX_LWM2M_CLIENT_NOTIFY *notify_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            token and processing        */
+/*                                            confirmable response,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_lwm2m_client_session_receive(NX_LWM2M_CLIENT_SESSION *session_ptr, NX_PACKET *packet_ptr)
@@ -14314,10 +14331,12 @@ UINT i;
     if (ptr != NX_NULL)
     {
         /* check type of message: */
-        if (msg_type == NX_LWM2M_CLIENT_COAP_TYPE_ACK || msg_type == NX_LWM2M_CLIENT_COAP_TYPE_RST)
+        if ((msg_type == NX_LWM2M_CLIENT_COAP_TYPE_ACK) || (msg_type == NX_LWM2M_CLIENT_COAP_TYPE_RST) ||
+            (msg_type == NX_LWM2M_CLIENT_COAP_TYPE_CON && (msg_code & NX_LWM2M_CLIENT_COAP_CLASS_MASK) != NX_LWM2M_CLIENT_COAP_CLASS_REQUEST))
         {
             /* Response to our last request? */
-            if (session_ptr -> nx_lwm2m_client_session_substate == NX_LWM2M_CLIENT_SESSION_SUBSTATE_REQUEST_SENT && session_ptr -> nx_lwm2m_client_session_request_id == msg_id)
+            if (session_ptr -> nx_lwm2m_client_session_substate == NX_LWM2M_CLIENT_SESSION_SUBSTATE_REQUEST_SENT && 
+                (session_ptr -> nx_lwm2m_client_session_request_id == msg_id || msg_type == NX_LWM2M_CLIENT_COAP_TYPE_CON))
             {
                 if (msg_type == NX_LWM2M_CLIENT_COAP_TYPE_RST || (msg_code & NX_LWM2M_CLIENT_COAP_CLASS_MASK) != NX_LWM2M_CLIENT_COAP_CLASS_SUCCESS)
                 {
@@ -14326,7 +14345,8 @@ UINT i;
                     session_ptr -> nx_lwm2m_client_session_error = NX_LWM2M_CLIENT_ERROR;
                     _nx_lwm2m_client_session_state_update(session_ptr, session_ptr -> nx_lwm2m_client_session_state == NX_LWM2M_CLIENT_SESSION_BOOTSTRAP_REQUESTING ? NX_LWM2M_CLIENT_SESSION_BOOTSTRAP_ERROR : NX_LWM2M_CLIENT_SESSION_ERROR);
                 }
-                else
+                else if ((token_length == sizeof(session_ptr -> nx_lwm2m_client_session_token)) && 
+                         (memcmp(token_ptr, session_ptr -> nx_lwm2m_client_session_token, token_length) == 0)) /* Use case of memcmp is verified. */
                 {
                     /* Success, update client state */
                     switch (session_ptr -> nx_lwm2m_client_session_state)
@@ -14381,6 +14401,12 @@ UINT i;
                         /* XXX SHOULD NOY GO HERE */
                         NX_ASSERT(0);
 
+                    }
+
+                    /* Send an empty ACK to the response in confirmable type.  */
+                    if (msg_type == NX_LWM2M_CLIENT_COAP_TYPE_CON)
+                    {
+                        _nx_lwm2m_client_session_send_response(session_ptr, 0, msg_id, NX_TRUE, NX_NULL, 0, NX_NULL, NX_NULL, NX_NULL, NX_NULL, NX_NULL);
                     }
                 }
 
@@ -15590,7 +15616,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_lwm2m_client_session_send_request               PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -15630,12 +15656,17 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            token and processing        */
+/*                                            confirmable response,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_lwm2m_client_session_send_request(NX_LWM2M_CLIENT_SESSION *session_ptr, NX_LWM2M_BOOL first)
 {
 NX_PACKET *packet_ptr;
 UINT status;
+UINT i;
 
     /* Check that current state is valid for sending a request */
     NX_ASSERT(session_ptr -> nx_lwm2m_client_session_state == NX_LWM2M_CLIENT_SESSION_BOOTSTRAP_REQUESTING || session_ptr -> nx_lwm2m_client_session_state == NX_LWM2M_CLIENT_SESSION_REGISTERING || session_ptr -> nx_lwm2m_client_session_state == NX_LWM2M_CLIENT_SESSION_UPDATING || session_ptr -> nx_lwm2m_client_session_state == NX_LWM2M_CLIENT_SESSION_DISABLING || session_ptr -> nx_lwm2m_client_session_state == NX_LWM2M_CLIENT_SESSION_DEREGISTERING);
@@ -15709,7 +15740,7 @@ UINT status;
         {
 
             /* Set CoAP header and type of request */
-            *ptr++ = NX_LWM2M_CLIENT_COAP_VERSION_1 | NX_LWM2M_CLIENT_COAP_TYPE_CON;
+            *ptr++ = NX_LWM2M_CLIENT_COAP_VERSION_1 | NX_LWM2M_CLIENT_COAP_TYPE_CON | NX_LWM2M_CLIENT_COAP_TOKEN_LEN;
             if (session_ptr -> nx_lwm2m_client_session_state == NX_LWM2M_CLIENT_SESSION_DISABLING || session_ptr -> nx_lwm2m_client_session_state == NX_LWM2M_CLIENT_SESSION_DEREGISTERING)
             {
 
@@ -15724,6 +15755,13 @@ UINT status;
             }
             *ptr++ = (UCHAR) (session_ptr -> nx_lwm2m_client_session_request_id >> 8);
             *ptr++ = (UCHAR)  session_ptr -> nx_lwm2m_client_session_request_id;
+
+            /* Set token */
+            for (i = 0; i < sizeof(session_ptr -> nx_lwm2m_client_session_token); i++)
+            {
+                session_ptr -> nx_lwm2m_client_session_token[i] = (UCHAR) NX_RAND();
+                *ptr++ = session_ptr -> nx_lwm2m_client_session_token[i];
+            }
 
             /* Add options */
             last_option = 0;
@@ -16163,7 +16201,7 @@ NX_LWM2M_CLIENT_NOTIFY *notify_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_lwm2m_client_discover_resource                  PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16200,16 +16238,19 @@ NX_LWM2M_CLIENT_NOTIFY *notify_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            compiler warnings,          */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 static UCHAR *_nx_lwm2m_client_discover_resource(NX_LWM2M_CLIENT_SESSION *session_ptr, UCHAR *ptr, UCHAR *ptr_max, NX_LWM2M_CLIENT_OBJECT *object_ptr, NX_LWM2M_CLIENT_OBJECT_INSTANCE *instance_ptr, const NX_LWM2M_CLIENT_RESOURCE *resource_ptr)
 {
 UINT flags;
-NX_LWM2M_INT32 pmin;
-NX_LWM2M_INT32 pmax;
-NX_LWM2M_CLIENT_NOTIFY_NUMBER gt;
-NX_LWM2M_CLIENT_NOTIFY_NUMBER lt;
-NX_LWM2M_CLIENT_NOTIFY_NUMBER stp;
+NX_LWM2M_INT32 pmin = 0;
+NX_LWM2M_INT32 pmax = 0;
+NX_LWM2M_CLIENT_NOTIFY_NUMBER gt = 0;
+NX_LWM2M_CLIENT_NOTIFY_NUMBER lt = 0;
+NX_LWM2M_CLIENT_NOTIFY_NUMBER stp = 0;
 
     /* Write resource path */
     ptr = (UCHAR *) _nx_lwm2m_client_corelink_path_add((CHAR *) ptr, (CHAR *) ptr_max, object_ptr -> object_id, instance_ptr -> object_instance_id, resource_ptr -> resource_id);

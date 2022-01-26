@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_create_ext                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -82,6 +82,9 @@
 /*                                            added ECC initialization,   */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            added null pointer checking,*/
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -527,6 +530,11 @@ ULONG metadata_size_sha256 = 0;
         /* Coming from the old-style API. Don't allocate crypto table. */
         crypto_table = tls_session->nx_secure_tls_crypto_table;
 
+        if (crypto_table == NX_NULL)
+        {
+            return(NX_PTR_ERROR);
+        }
+
         /* Start by assuming all versions are enabled, remove versions without the appropriate ciphers. */
         tls_session->nx_secure_tls_supported_versions = NX_SECURE_TLS_BITFIELD_VERSIONS_ALL;
     }
@@ -631,11 +639,7 @@ ULONG metadata_size_sha256 = 0;
                 supported_groups[i] = (USHORT)(curve_crypto_list[i] -> nx_crypto_algorithm & 0xFFFF);
             }
 
-            status = _nx_secure_tls_ecc_initialize(tls_session, supported_groups, ecc_curves_count, (const NX_CRYPTO_METHOD **)curve_crypto_list);
-            if (status != NX_SUCCESS)
-            {
-                return(status);
-            }
+            _nx_secure_tls_ecc_initialize(tls_session, supported_groups, ecc_curves_count, (const NX_CRYPTO_METHOD **)curve_crypto_list);
         }
 #endif
 
@@ -667,11 +671,14 @@ ULONG metadata_size_sha256 = 0;
 #endif
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
     crypto_method_sha256 = crypto_table -> nx_secure_tls_handshake_hash_sha256_method;
-    metadata_size_sha256 = crypto_method_sha256 -> nx_crypto_metadata_area_size;
-
-    if (metadata_size_sha256 & 0x3)
+    if (crypto_method_sha256 != NX_NULL)
     {
-        metadata_size_sha256 += 4 - (metadata_size_sha256 & 0x3);
+        metadata_size_sha256 = crypto_method_sha256 -> nx_crypto_metadata_area_size;
+
+        if (metadata_size_sha256 & 0x3)
+        {
+            metadata_size_sha256 += 4 - (metadata_size_sha256 & 0x3);
+        }
     }
 #endif
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -766,7 +773,8 @@ ULONG metadata_size_sha256 = 0;
         max_handshake_hash_scratch_size = metadata_size_sha256;
     }
 
-    if (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_prf_sha256_method -> nx_crypto_metadata_area_size)
+    if ((crypto_table -> nx_secure_tls_prf_sha256_method != NX_NULL) &&
+        (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_prf_sha256_method -> nx_crypto_metadata_area_size))
     {
         max_tls_prf_metadata_size = crypto_table -> nx_secure_tls_prf_sha256_method -> nx_crypto_metadata_area_size;
     }

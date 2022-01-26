@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_packet_process                       PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -86,6 +86,10 @@
 /*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            supported TCP/IP offload,   */
 /*                                            resulting in version 6.1.8  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed unsigned integers     */
+/*                                            comparison,                 */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_socket_packet_process(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr)
@@ -178,8 +182,8 @@ ULONG         tcpip_offload;
                     outside_of_window = NX_FALSE;
                 }
             }
-            else if (((INT)packet_sequence - (INT)rx_sequence >= 0) &&
-                     ((INT)rx_sequence + (INT)rx_window - (INT)packet_sequence > 0))
+            else if (((INT)(packet_sequence - rx_sequence) >= 0) &&
+                     ((INT)(rx_sequence + rx_window - packet_sequence) > 0))
             {
                 outside_of_window = NX_FALSE;
             }
@@ -187,10 +191,10 @@ ULONG         tcpip_offload;
         else
         {
             if ((rx_window > 0) &&
-                ((((INT)packet_sequence - (INT)rx_sequence >= 0) &&
-                  ((INT)rx_sequence + (INT)rx_window - (INT)packet_sequence > 0)) ||
-                 (((INT)packet_sequence + ((INT)packet_data_length - 1) - (INT)rx_sequence >= 0) &&
-                  ((INT)rx_sequence + 1 + ((INT)rx_window - (INT)packet_sequence) - (INT)packet_data_length > 0))))
+                ((((INT)(packet_sequence - rx_sequence) >= 0) &&
+                  ((INT)(rx_sequence + rx_window - packet_sequence) > 0)) ||
+                 (((INT)(packet_sequence + (packet_data_length - 1) - rx_sequence) >= 0) &&
+                  ((INT)(rx_sequence + 1 + (rx_window - packet_sequence) - packet_data_length) > 0))))
             {
                 outside_of_window = NX_FALSE;
             }
