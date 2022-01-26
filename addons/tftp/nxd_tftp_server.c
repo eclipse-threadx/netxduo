@@ -1074,7 +1074,7 @@ ULONG                   events;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_tftp_server_process_received_data               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1115,6 +1115,10 @@ ULONG                   events;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), improved */
+/*                                            the logic of processing     */
+/*                                            chained packet,             */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_tftp_server_process_received_data(NX_TFTP_SERVER *server_ptr)
@@ -1122,8 +1126,8 @@ VOID _nx_tftp_server_process_received_data(NX_TFTP_SERVER *server_ptr)
 
 UINT         status;
 NX_PACKET    *packet_ptr;
-UCHAR        *buffer_ptr;
-UCHAR        request_code;
+UCHAR        request_code[2];
+ULONG        bytes_copyed;
 
 
     /* Wait for a request on the TFTP UDP well known port 69.  */
@@ -1150,26 +1154,19 @@ UCHAR        request_code;
 
     /* Otherwise, we have received a packet successfully.  */
 
-    /* Setup a pointer to packet buffer area.  */
-    buffer_ptr =  packet_ptr -> nx_packet_prepend_ptr;
+    /* Pickup up the request code. First one must be zero.  */
+    status = nx_packet_data_extract_offset(packet_ptr, 0, request_code, sizeof(request_code), &bytes_copyed);
 
-    /* Pickup up the request code.  First one must be zero. */
-    request_code =  *buffer_ptr++;  
-
-    /* If not zero, abort. */
-    if (request_code)
+    /* Check the return status. */
+    if (status || (request_code[0] != 0))
     {
 
-        nx_packet_release(packet_ptr); 
-                                       
+        nx_packet_release(packet_ptr);
         return; 
     }
 
-    /* Now get the actual request code. */
-    request_code =  *buffer_ptr++;  
-
     /* Process relative to the TFTP request code.  */
-    switch (request_code)
+    switch (request_code[1])
     {
 
     case NX_TFTP_CODE_READ:
@@ -1233,7 +1230,7 @@ UCHAR        request_code;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_tftp_server_open_for_read_process               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1277,6 +1274,14 @@ UCHAR        request_code;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            checked the format of the   */
+/*                                            received packet, improved   */
+/*                                            the logic of processing     */
+/*                                            chained packet, fixed the   */
+/*                                            issue of cleaning up the    */
+/*                                            client request entry,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_tftp_server_open_for_read_process(NX_TFTP_SERVER *server_ptr, NX_PACKET *packet_ptr)
@@ -1289,6 +1294,7 @@ UCHAR                    *buffer_ptr;
 NX_TFTP_CLIENT_REQUEST   *client_request_ptr;
 NX_PACKET                *new_packet = NX_NULL;
 UINT                     status;
+UINT                     count = 0;
 
 
     /* Extract the source IP and port numbers.  */
@@ -1327,63 +1333,45 @@ UINT                     status;
         return;
     }
 
-    /* Initialize the client request structure.  */
-#ifndef NX_DISABLE_IPV4
-    if (ip_address.nxd_ip_version == NX_IP_VERSION_V4)
+    /* Packet chain isn't supported.  */
+#ifndef NX_DISABLE_PACKET_CHAIN
+    if (packet_ptr -> nx_packet_next)
     {
-
-        client_request_ptr ->nx_tftp_client_request_ip_address.nxd_ip_version = NX_IP_VERSION_V4;
-        client_request_ptr ->nx_tftp_client_request_ip_address.nxd_ip_address.v4 = ip_address.nxd_ip_address.v4;
-    }
-    else
-#endif /* NX_DISABLE_IPV4 */
-#ifdef FEATURE_NX_IPV6
-    if (ip_address.nxd_ip_version == NX_IP_VERSION_V6)
-    {
-        COPY_NXD_ADDRESS(&ip_address, &(client_request_ptr ->nx_tftp_client_request_ip_address));
-    }
-    else
-#endif        
-    {
-        /* Release the original packet.  */
         nx_packet_release(packet_ptr);
-
         return;
     }
-
-    
-    client_request_ptr -> nx_tftp_client_request_port =             port;
-    client_request_ptr -> nx_tftp_client_request_block_number =     1;
-    client_request_ptr -> nx_tftp_client_request_open_type =        NX_TFTP_STATE_OPEN;
-    client_request_ptr -> nx_tftp_client_request_exact_fit =        NX_FALSE;
-
-#ifdef NX_TFTP_SERVER_RETRANSMIT_ENABLE
-
-    /* Reset the retransmission timeout and retries for the client request. */
-    client_request_ptr -> nx_tftp_client_retransmit_timeout =  NX_TFTP_SERVER_RETRANSMIT_TIMEOUT;
-    client_request_ptr -> nx_tftp_client_retransmit_retries =  0;
-#else
-
-    /* Clear the count of ACK retransmits from the other side. */
-    client_request_ptr -> nx_tftp_client_request_retransmits = 0;
-    
-#endif
+#endif /* NX_DISABLE_PACKET_CHAIN */
 
     /* Setup a pointer to the file name.  */
     buffer_ptr =  (UCHAR *) (packet_ptr -> nx_packet_prepend_ptr + 2);
 
-    if (packet_ptr -> nx_packet_length < 4)
+    /* The format of RRQ/WRQ packet should be:
+        2 bytes     string    1 byte     string   1 byte
+        ------------------------------------------------
+        | Opcode |  Filename  |   0  |    Mode    |   0  |
+        ------------------------------------------------
+    */
+    while (buffer_ptr < (packet_ptr -> nx_packet_append_ptr - 1))
+    {
+        if (*buffer_ptr == 0)
+        {
+            count++;
+            if (count == 2)
+                break;
+        }
+
+        buffer_ptr++;
+    }
+
+    /* Check if the format of the termination is correct.  */
+    if ((count != 1) || *(UCHAR *)(packet_ptr -> nx_packet_append_ptr - 1))
     {
         nx_packet_release(packet_ptr);
         return;
     }
 
-    /* Check if the packet buffer ends with NULL. */
-    if (*(UCHAR *)(packet_ptr -> nx_packet_append_ptr - 1))
-    {
-        nx_packet_release(packet_ptr);
-        return;
-    }
+    /* Reset the pointer to the file name.  */
+    buffer_ptr =  (UCHAR *) (packet_ptr -> nx_packet_prepend_ptr + 2);
 
     /* Pickup the file size.  */
     status =  fx_directory_information_get(server_ptr -> nx_tftp_server_media_ptr, (CHAR *) buffer_ptr, NX_NULL, &file_size, NX_NULL, NX_NULL, NX_NULL, NX_NULL, NX_NULL, NX_NULL);
@@ -1449,6 +1437,47 @@ UINT                     status;
         return;
     }
 
+    /* Initialize the client request structure.  */
+#ifndef NX_DISABLE_IPV4
+    if (ip_address.nxd_ip_version == NX_IP_VERSION_V4)
+    {
+
+        client_request_ptr ->nx_tftp_client_request_ip_address.nxd_ip_version = NX_IP_VERSION_V4;
+        client_request_ptr ->nx_tftp_client_request_ip_address.nxd_ip_address.v4 = ip_address.nxd_ip_address.v4;
+    }
+    else
+#endif /* NX_DISABLE_IPV4 */
+#ifdef FEATURE_NX_IPV6
+    if (ip_address.nxd_ip_version == NX_IP_VERSION_V6)
+    {
+        COPY_NXD_ADDRESS(&ip_address, &(client_request_ptr ->nx_tftp_client_request_ip_address));
+    }
+    else
+#endif
+    {
+        /* Release the original packet.  */
+        nx_packet_release(packet_ptr);
+
+        return;
+    }
+
+    client_request_ptr -> nx_tftp_client_request_port =             port;
+    client_request_ptr -> nx_tftp_client_request_block_number =     1;
+    client_request_ptr -> nx_tftp_client_request_open_type =        NX_TFTP_STATE_OPEN;
+    client_request_ptr -> nx_tftp_client_request_exact_fit =        NX_FALSE;
+
+#ifdef NX_TFTP_SERVER_RETRANSMIT_ENABLE
+
+    /* Reset the retransmission timeout and retries for the client request. */
+    client_request_ptr -> nx_tftp_client_retransmit_timeout =  NX_TFTP_SERVER_RETRANSMIT_TIMEOUT;
+    client_request_ptr -> nx_tftp_client_retransmit_retries =  0;
+#else
+
+    /* Clear the count of ACK retransmits from the other side. */
+    client_request_ptr -> nx_tftp_client_request_retransmits = 0;
+    
+#endif
+
     client_request_ptr -> nx_tftp_client_file_size = file_size;  
 
     /* Read data when length of file is larger then 0. */
@@ -1469,6 +1498,8 @@ UINT                     status;
 
             /* Unable to read the file, close it and release the packet.  */
             fx_file_close(&(client_request_ptr ->nx_tftp_client_request_file));
+
+            memset(client_request_ptr, 0, sizeof(NX_TFTP_CLIENT_REQUEST));
 
             nx_packet_release(packet_ptr);
             return;
@@ -1532,7 +1563,7 @@ UINT                     status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_tftp_server_open_for_write_process              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1576,6 +1607,12 @@ UINT                     status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            checked the format of the   */
+/*                                            received packet, improved   */
+/*                                            the logic of processing     */
+/*                                            chained packet,             */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tftp_server_open_for_write_process(NX_TFTP_SERVER *server_ptr, NX_PACKET *packet_ptr)
@@ -1586,6 +1623,7 @@ UCHAR                   *buffer_ptr;
 NX_TFTP_CLIENT_REQUEST  *client_request_ptr;
 NX_PACKET               *new_packet;
 UINT                    status;
+UINT                    count = 0;
 
 
     /* Extract the source IP and port numbers.  */
@@ -1624,21 +1662,45 @@ UINT                    status;
         return;
     }
 
+    /* Packet chain isn't supported.  */
+#ifndef NX_DISABLE_PACKET_CHAIN
+    if (packet_ptr -> nx_packet_next)
+    {
+        nx_packet_release(packet_ptr);
+        return;
+    }
+#endif /* NX_DISABLE_PACKET_CHAIN */
+
     /* Setup a pointer to the file name.  */
     buffer_ptr =  (UCHAR *) (packet_ptr -> nx_packet_prepend_ptr + 2);
 
-    if (packet_ptr -> nx_packet_length < 4)
+    /* The format of RRQ/WRQ packet should be:
+        2 bytes     string    1 byte     string   1 byte
+        ------------------------------------------------
+        | Opcode |  Filename  |   0  |    Mode    |   0  |
+        ------------------------------------------------
+    */
+    while (buffer_ptr < (packet_ptr -> nx_packet_append_ptr - 1))
+    {
+        if (*buffer_ptr == 0)
+        {
+            count++;
+            if (count == 2)
+                break;
+        }
+
+        buffer_ptr++;
+    }
+
+    /* Check if the format of the termination is correct.  */
+    if ((count != 1) || *(UCHAR *)(packet_ptr -> nx_packet_append_ptr - 1))
     {
         nx_packet_release(packet_ptr);
         return;
     }
 
-    /* Check if the packet buffer ends with NULL. */
-    if (*(UCHAR *)(packet_ptr -> nx_packet_append_ptr - 1))
-    {
-        nx_packet_release(packet_ptr);
-        return;
-    }
+    /* Reset the pointer to the file name.  */
+    buffer_ptr =  (UCHAR *) (packet_ptr -> nx_packet_prepend_ptr + 2);
 
     /* Perform a file create. This will fail if the file is already present, which we don't care about at this point.  */
     fx_file_delete(server_ptr -> nx_tftp_server_media_ptr, (CHAR *) buffer_ptr);
@@ -1776,7 +1838,7 @@ UINT                    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_tftp_server_data_process                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1819,6 +1881,10 @@ UINT                    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), improved */
+/*                                            the logic of processing     */
+/*                                            chained packet,             */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tftp_server_data_process(NX_TFTP_SERVER *server_ptr, NX_PACKET *packet_ptr)
@@ -1827,7 +1893,7 @@ VOID  _nx_tftp_server_data_process(NX_TFTP_SERVER *server_ptr, NX_PACKET *packet
 NXD_ADDRESS             ip_address;
 UINT                    port;
 USHORT                  block_number;
-UCHAR                   *buffer_ptr;
+ULONG                   bytes_copyed;
 NX_TFTP_CLIENT_REQUEST  *client_request_ptr;
 UINT                    status;
 
@@ -1854,18 +1920,18 @@ UINT                    status;
         return;
     }
 
-    /* Setup a pointer to the block number.  */
-    buffer_ptr =  (UCHAR *) (packet_ptr -> nx_packet_prepend_ptr + 2);
+    /* Pickup the block number.  */
+    status = nx_packet_data_extract_offset(packet_ptr, 2, (UCHAR *)&block_number, sizeof(block_number), &bytes_copyed);
 
-    if (packet_ptr -> nx_packet_length < 4)
+    /* Check return status.  */
+    if (status || (bytes_copyed != 2))
     {
         nx_packet_release(packet_ptr);
         return;
     }
 
-    /* Pickup the block number.  */
-    block_number =  (USHORT)(*buffer_ptr++);
-    block_number =  (USHORT)((block_number << 8) | (*buffer_ptr));
+    /* Adjust the endianness.  */
+    NX_CHANGE_USHORT_ENDIAN(block_number);
 
     /* Determine if this block number matches the current client block number.  */
     if (client_request_ptr -> nx_tftp_client_request_block_number != block_number)
@@ -2026,7 +2092,7 @@ UINT                    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_tftp_server_ack_process                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2069,6 +2135,10 @@ UINT                    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), improved */
+/*                                            the logic of processing     */
+/*                                            chained packet,             */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tftp_server_ack_process(NX_TFTP_SERVER *server_ptr, NX_PACKET *packet_ptr)
@@ -2077,8 +2147,9 @@ VOID  _nx_tftp_server_ack_process(NX_TFTP_SERVER *server_ptr, NX_PACKET *packet_
 NXD_ADDRESS             ip_address;
 UINT                    port;
 USHORT                  block_number;
-UCHAR                   *buffer_ptr;
+ULONG                   bytes_copyed;
 NX_TFTP_CLIENT_REQUEST  *client_request_ptr;
+UINT                    status;
 
 
     /* Extract the source IP and port numbers.  */
@@ -2103,18 +2174,18 @@ NX_TFTP_CLIENT_REQUEST  *client_request_ptr;
         return;
     }
 
-    /* Setup a pointer to the block number.  */
-    buffer_ptr =  (UCHAR *) (packet_ptr -> nx_packet_prepend_ptr + 2);
+    /* Pickup the block number.  */
+    status = nx_packet_data_extract_offset(packet_ptr, 2, (UCHAR *)&block_number, sizeof(block_number), &bytes_copyed);
 
-    if (packet_ptr -> nx_packet_length < 4)
+    /* Check return status.  */
+    if (status || (bytes_copyed != 2))
     {
         nx_packet_release(packet_ptr);
         return;
     }
 
-    /* Pickup the block number.  */
-    block_number =  (USHORT)(*buffer_ptr++);
-    block_number =  (USHORT)((block_number << 8) | (*buffer_ptr));
+    /* Adjust the endianness.  */
+    NX_CHANGE_USHORT_ENDIAN(block_number);
 
     /* Determine if this block number matches the request.  */
     if (client_request_ptr -> nx_tftp_client_request_block_number != block_number)
@@ -2536,7 +2607,7 @@ NX_PACKET   *new_packet;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_tftp_server_error_process                      PORTABLE C       */ 
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2570,6 +2641,10 @@ NX_PACKET   *new_packet;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), improved */
+/*                                            the logic of processing     */
+/*                                            chained packet,             */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tftp_server_error_process(NX_TFTP_SERVER *server_ptr, NX_PACKET *packet_ptr)
@@ -2581,15 +2656,17 @@ UINT    port;
 NXD_ADDRESS  ip_address;
 NX_TFTP_CLIENT_REQUEST *client_request_ptr;
 
-
-    /* Pickup a pointer to the error code in the buffer.  */
-    buffer_ptr =  packet_ptr -> nx_packet_prepend_ptr + 2;
-
-    if (packet_ptr -> nx_packet_length < 4)
+    /* Packet chain isn't supported.  */
+#ifndef NX_DISABLE_PACKET_CHAIN
+    if (packet_ptr -> nx_packet_next)
     {
         nx_packet_release(packet_ptr);
         return;
     }
+#endif /* NX_DISABLE_PACKET_CHAIN */
+
+    /* Pickup a pointer to the error code in the buffer.  */
+    buffer_ptr =  packet_ptr -> nx_packet_prepend_ptr + 2;
 
     /* Set the error code in the server control block.  */
     server_ptr -> nx_tftp_server_error_code =  (((UINT) (*buffer_ptr)) << 8);

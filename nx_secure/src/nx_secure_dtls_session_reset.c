@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_reset                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            released packet securely,   */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            updated cookie handling,    */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_reset(NX_SECURE_DTLS_SESSION *dtls_session)
@@ -96,6 +99,7 @@ NX_PACKET *next_packet_ptr;
     /* Reset the cookie. */
     dtls_session -> nx_secure_dtls_cookie_length = 0;
     NX_SECURE_MEMSET(dtls_session -> nx_secure_dtls_cookie, 0, sizeof(dtls_session -> nx_secure_dtls_cookie));
+    dtls_session -> nx_secure_dtls_client_cookie_ptr = NX_NULL;
 
     /* Reset the fragment length. */
     dtls_session -> nx_secure_dtls_fragment_length = 0;

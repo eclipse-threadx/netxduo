@@ -40,7 +40,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_ack_check                      PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -89,6 +89,10 @@
 /*                                            condition, removed useless  */
 /*                                            code,                       */
 /*                                            resulting in version 6.1.9  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed unsigned integers     */
+/*                                            comparison,                 */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_state_ack_check(NX_TCP_SOCKET *socket_ptr, NX_TCP_HEADER *tcp_header_ptr)
@@ -436,7 +440,7 @@ UINT           wrapped_flag = NX_FALSE;
             {
 
                 /* If the ACK is a duplicate, it can be ignored. */
-                if ((INT)tcp_header_ptr -> nx_tcp_acknowledgment_number - (INT)ending_tx_sequence > 0)
+                if ((INT)(tcp_header_ptr -> nx_tcp_acknowledgment_number - ending_tx_sequence) > 0)
                 {
 
                     /* The ACK sequence is invalid. Respond with an ACK to let the other
@@ -549,11 +553,11 @@ UINT           wrapped_flag = NX_FALSE;
          * 2. SND.WL1 < SEG.SEQ or
          * 3. SND.WL1 = SEG.SEQ and SND.WL2 =< SEG.ACK
          * RFC793, Section 3.9, Page72. */
-        if ((((INT)tcp_header_ptr -> nx_tcp_acknowledgment_number - (INT)starting_tx_sequence > 0) &&
-             ((INT)tcp_header_ptr -> nx_tcp_acknowledgment_number - (INT)ending_tx_sequence <= 0)) ||
-            ((INT)tcp_header_ptr -> nx_tcp_sequence_number - (INT)ending_rx_sequence > 0) ||
-            (((INT)tcp_header_ptr -> nx_tcp_sequence_number == (INT)ending_rx_sequence) &&
-             ((INT)tcp_header_ptr -> nx_tcp_acknowledgment_number - (INT)starting_tx_sequence >= 0)))
+        if ((((INT)(tcp_header_ptr -> nx_tcp_acknowledgment_number - starting_tx_sequence) > 0) &&
+             ((INT)(tcp_header_ptr -> nx_tcp_acknowledgment_number - ending_tx_sequence) <= 0)) ||
+            ((INT)(tcp_header_ptr -> nx_tcp_sequence_number - ending_rx_sequence) > 0) ||
+            (((INT)(tcp_header_ptr -> nx_tcp_sequence_number == ending_rx_sequence)) &&
+             ((INT)(tcp_header_ptr -> nx_tcp_acknowledgment_number - starting_tx_sequence) >= 0)))
         {
 
             /* Update this socket's transmit window with the advertised window size in the ACK message.  */

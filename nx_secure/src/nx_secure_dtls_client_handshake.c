@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_client_handshake                    PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -115,6 +115,9 @@
 /*                                            verification, added null    */
 /*                                            pointer checking,           */
 /*                                            resulting in version 6.1.3  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed out-of-order handling,*/
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_client_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
@@ -168,7 +171,7 @@ NX_SECURE_TLS_SESSION *tls_session;
              *    - Once fragment is reassembled, check message sequence for repeats
              */
 
-            /* For now, if we see a repeated message sequence, assume an unnecessary retransmission and ignore. */
+            /* If we see a repeated message sequence, assume an unnecessary retransmission and ignore. */
             if (message_seq < dtls_session -> nx_secure_dtls_remote_handshake_sequence)
             {
                 /* Re-transmitted message. */
@@ -188,6 +191,12 @@ NX_SECURE_TLS_SESSION *tls_session;
                 return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
             }
 
+            /* If this message sequence isn't what we expect, continue reading packets. */ 
+            if(message_seq != dtls_session -> nx_secure_dtls_expected_handshake_sequence)
+            {
+                return(NX_SECURE_TLS_OUT_OF_ORDER_MESSAGE);
+            }
+
             /* If we have a new sequence number, we have a new record (may be fragmented). Unless
                the sequence number is 0, which means it is the first record. */
             if (message_seq > dtls_session -> nx_secure_dtls_remote_handshake_sequence || (message_seq == 0 && fragment_offset == 0))
@@ -195,6 +204,11 @@ NX_SECURE_TLS_SESSION *tls_session;
                 /* New record starting, reset the fragment length and handshake sequence number. */
                 dtls_session -> nx_secure_dtls_remote_handshake_sequence = message_seq;
                 dtls_session -> nx_secure_dtls_fragment_length = message_length;
+            }
+
+            if (fragment_length > dtls_session -> nx_secure_dtls_fragment_length)
+            {
+                return(NX_SECURE_TLS_INVALID_PACKET);
             }
 
             /* When we receive a message fragment, subtract it from the current fragment length. */
@@ -216,9 +230,9 @@ NX_SECURE_TLS_SESSION *tls_session;
                     dtls_session -> nx_secure_dtls_expected_handshake_sequence = 0;
                 }
 
-                /* If the recontructed message has a sequence number less than the expected, it's
+                /* If the recontructed message has a sequence not equal to the expected, it's
                    a retransmission we need to ignore. */
-                if (message_seq < dtls_session -> nx_secure_dtls_expected_handshake_sequence)
+                if (message_seq != dtls_session -> nx_secure_dtls_expected_handshake_sequence)
                 {
                     return(NX_SUCCESS);
                 }

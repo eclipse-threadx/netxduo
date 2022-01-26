@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_packet_allocate                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,6 +73,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            fixed the packet leak,      */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_packet_allocate(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET_POOL *pool_ptr,
@@ -105,6 +108,7 @@ USHORT iv_size;
 
         /* Packet buffer is too small. */
         nx_packet_release(*packet_ptr);
+        *packet_ptr = NX_NULL;
         return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
     }
 
@@ -120,6 +124,10 @@ USHORT iv_size;
 
         if (status != NX_SUCCESS)
         {
+
+            /* Fail to get the size of the IV. */
+            nx_packet_release(*packet_ptr);
+            *packet_ptr = NX_NULL;
             return(status);
         }
 

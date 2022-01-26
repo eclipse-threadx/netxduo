@@ -69,7 +69,7 @@
 
 #ifdef NX_SECURE_SYSTEM_INIT
 CHAR                            _nx_secure_version_id[] =
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Secure Generic Version G6.1.9 *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Secure Generic Version G6.1.10 *";
 #else
 extern  CHAR                    _nx_secure_version_id[];
 #endif

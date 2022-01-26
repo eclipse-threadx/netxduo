@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_record                      PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -84,6 +84,9 @@
 /*                                            improved buffer length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.3  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed out-of-order handling,*/
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_record(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *packet_ptr,
@@ -98,6 +101,8 @@ UINT                   message_length;
 UCHAR                 *packet_data;
 NX_SECURE_TLS_SESSION *tls_session;
 UCHAR                  epoch_seq_num[8];
+ULONG                  seq_num_rewind[2];
+ULONG                  window_rewind;
 NX_PACKET             *decrypted_packet;
 
     /* Basic state machine:
@@ -112,6 +117,10 @@ NX_PACKET             *decrypted_packet;
 
     header_length = NX_SECURE_DTLS_RECORD_HEADER_SIZE;
 
+    /* Save the sequence number in case we reject a record (e.g. handshake message missing). */
+    seq_num_rewind[0] = tls_session -> nx_secure_tls_remote_sequence_number[0];
+    seq_num_rewind[1] = tls_session -> nx_secure_tls_remote_sequence_number[1];
+    window_rewind = dtls_session -> nx_secure_dtls_sliding_window;
 
     /* Process the DTLS record header, which will set the state. */
     status = _nx_secure_dtls_process_header(dtls_session, packet_ptr, record_offset, &message_type, &message_length, header_data, &header_length);
@@ -196,14 +205,16 @@ NX_PACKET             *decrypted_packet;
         /* Check to see if decryption or verification failed. */
         if(error_status != NX_SECURE_TLS_SUCCESS)
         {
-            /* Decryption failed. */
+            /* Decryption failed. Rewind the sequence number and sliding window. */
+            tls_session -> nx_secure_tls_remote_sequence_number[0] = seq_num_rewind[0];
+            tls_session -> nx_secure_tls_remote_sequence_number[1] = seq_num_rewind[1];
+            dtls_session -> nx_secure_dtls_sliding_window = window_rewind;
             return(error_status);
         }
 
         /* Check to see if decryption or verification failed. */
         if (status == NX_SECURE_TLS_SUCCESS)
         {
-            
             /* Copy data to original packet to keep IP header available. */
             /* Note: At the point of this memcpy the plaintext should never be larger than the cipher.
                Assertion check is to protect against future changes inadvertently causing an overflow. */
@@ -229,11 +240,17 @@ NX_PACKET             *decrypted_packet;
     case NX_SECURE_TLS_CHANGE_CIPHER_SPEC:
         /* Received a ChangeCipherSpec message - from now on all messages from remote host
            will be encrypted using the session keys. */
-        _nx_secure_tls_process_changecipherspec(tls_session, packet_data, message_length);
-
-
-        /* New epoch if we receive a CCS message. */
-        dtls_session -> nx_secure_dtls_remote_epoch = (USHORT)(dtls_session -> nx_secure_dtls_remote_epoch + 1);
+        status = _nx_secure_tls_process_changecipherspec(tls_session, packet_data, message_length);
+        if(status != NX_SUCCESS)
+        {
+            /* Received out-of-order CCS message. */
+            status = NX_SECURE_TLS_OUT_OF_ORDER_MESSAGE;
+        }
+        else
+        {
+            /* New epoch if we receive a CCS message. */
+            dtls_session -> nx_secure_dtls_remote_epoch = (USHORT)(dtls_session -> nx_secure_dtls_remote_epoch + 1);
+        }
 
         break;
     case NX_SECURE_TLS_ALERT:
@@ -278,6 +295,17 @@ NX_PACKET             *decrypted_packet;
         status = NX_SECURE_TLS_UNRECOGNIZED_MESSAGE_TYPE;
         break;
     }
+
+    /* If we received an out-of-order handshake message, rewind the sequence number. */
+    if(status == NX_SECURE_TLS_OUT_OF_ORDER_MESSAGE)
+    {
+        /* Handshake message was not what we expected, so rewind the sequence number. */
+        tls_session -> nx_secure_tls_remote_sequence_number[0] = seq_num_rewind[0];
+        tls_session -> nx_secure_tls_remote_sequence_number[1] = seq_num_rewind[1];
+        dtls_session -> nx_secure_dtls_sliding_window = window_rewind;
+        status = NX_CONTINUE;
+    }
+
 
     return(status);
 }

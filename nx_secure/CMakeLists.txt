@@ -64,6 +64,8 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_session_start.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_session_trusted_certificate_add.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_session_trusted_certificate_remove.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_session_sliding_window_check.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_session_sliding_window_update.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_verify_mac.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_module_hash_compute.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_1_3_client_handshake.c

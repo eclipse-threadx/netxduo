@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_header                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -72,6 +72,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed out-of-order handling,*/
+/*                                            resulting in version 6.1.10 */   
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_header(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *packet_ptr,
@@ -146,16 +149,15 @@ NX_SECURE_TLS_SESSION *tls_session;
      * To handle the message ordering properly, the epochs must match (the CCS
      * message changes the epoch after being sent or received so new messages
      * should all have the new epoch). When the epochs match, the sequence numbers
-     * can be compared. We have 3 cases to handle:
+     * can be compared. We have 2 cases to handle:
      *  1) The incoming sequence number is less than or equal to the local count.
-     *        - This is a retransmission of an earlier message and should be ignored.
-     *  2) The incoming sequence is equal to the local count + 1
-     *        - This is the valid next message in the sequence
-     *  3) The incoming sequence is greater than the local count + 1
+     *        - This is a retransmission of an earlier message and should be ignored (handshake)
+     *        - If the earlier message was NOT seen, check the sliding window to accept/ignore
+     *  2) The incoming sequence is greater than the local count + 1
      *        - A message was dropped. We need to handle the out-of-order
-     *          message, either by ignoring it (and waiting for the retransmission)
-     *          or by buffering the message until we get to the proper
-     *          sequence number.
+     *          message. 
+     *        - During the handshake, accept this record as the next valid message
+     *        - During the session, accept and update the sliding window.
      */
 
 
@@ -185,37 +187,89 @@ NX_SECURE_TLS_SESSION *tls_session;
 
     /* Now check the sequence number against what we already received to see if it is a new message
        or a retransmission from the remote host. */
-    if (remote_sequence_number[0] > 0 || remote_sequence_number[1] > 0)
+
+    /* Sliding window (RFC 6347, Section 4.1.2.6):
+        Duplicates are rejected through the use of a sliding receive window.
+        (How the window is implemented is a local matter, but the following
+        text describes the functionality that the implementation must
+        exhibit.)  A minimum window size of 32 MUST be supported, but a
+        window size of 64 is preferred and SHOULD be employed as the default.
+        Another window size (larger than the minimum) MAY be chosen by the
+        receiver.  (The receiver does not notify the sender of the window
+        size.)
+
+        The "right" edge of the window represents the highest validated
+        sequence number value received on this session.  Records that contain
+        sequence numbers lower than the "left" edge of the window are
+        rejected.  Packets falling within the window are checked against a
+        list of received packets within the window.  An efficient means for
+        performing this check, based on the use of a bit mask, is described
+        in Section 3.4.3 of [ESP].
+
+         If the received record falls within the window and is new, or if the
+        packet is to the right of the window, then the receiver proceeds to
+        MAC verification.  If the MAC validation fails, the receiver MUST
+        discard the received record as invalid.  The receive window is
+        updated only if the MAC verification succeeds.
+    */         
+
+    /* Handshake messages. No sliding window check. */
+    if (remote_epoch == 0 && (remote_sequence_number[0] > 0 || remote_sequence_number[1] > 0))
     {
         if (remote_sequence_number[0] < tls_session -> nx_secure_tls_remote_sequence_number[0] ||
-            remote_sequence_number[1] < tls_session -> nx_secure_tls_remote_sequence_number[1])
+            remote_sequence_number[1] <= tls_session -> nx_secure_tls_remote_sequence_number[1])
         {
-            /* We already saw this message! */
+
             NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[0]);
             NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[1]);
+
             return(NX_SECURE_TLS_REPEAT_MESSAGE_RECEIVED);
         }
-        else if (remote_sequence_number[1] != (tls_session -> nx_secure_tls_remote_sequence_number[1] + 1))
-        {
-            /* Out-of-order message - we missed a datagram! */
-            NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[0]);
-            NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[1]);
-            return(NX_SECURE_TLS_OUT_OF_ORDER_MESSAGE);
-        }
-        else
-        {
-            /* Update the current sequence number to match what we just received. */
-            tls_session -> nx_secure_tls_remote_sequence_number[0] = remote_sequence_number[0];
-            tls_session -> nx_secure_tls_remote_sequence_number[1] = remote_sequence_number[1];
 
-            /* Swap back now that comparisons are done. */
-            NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[0]);
-            NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[1]);
+        /* Update the current sequence number to match what we just received. */
+        tls_session -> nx_secure_tls_remote_sequence_number[0] = remote_sequence_number[0];
+        tls_session -> nx_secure_tls_remote_sequence_number[1] = remote_sequence_number[1];
+
+        /* The sequence number is larger than our current. This is a valid handshake record or 
+           out-of-order newer application data record. Update the current sequence number after the MAC check. */
+        /* Swap back now that comparisons are done. */
+        NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[0]);
+        NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[1]);
+
+    }
+    else if (remote_epoch > 0 && (remote_sequence_number[0] > 0 || remote_sequence_number[1] > 0))
+    {
+        /* Changed our Epoch, so new sequence number */
+        if (remote_sequence_number[0] < tls_session -> nx_secure_tls_remote_sequence_number[0] ||
+            remote_sequence_number[1] <= tls_session -> nx_secure_tls_remote_sequence_number[1])
+        {
+            /* Incoming number is less than the "right" side of our sliding window. Check if
+               it falls in the sliding window (greater than the "left" side and not seen yet). */
+           status = _nx_secure_dtls_session_sliding_window_check(dtls_session, remote_sequence_number);
+
+            if(status == NX_FALSE)
+            {
+                NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[0]);
+                NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[1]);
+                return(NX_SECURE_TLS_REPEAT_MESSAGE_RECEIVED);
+            }
         }
+
+        /* Update the sliding window with the new sequence number. This updates the sequence number as well. */
+        status = _nx_secure_dtls_session_sliding_window_update(dtls_session, remote_sequence_number);
+
+        NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[0]);
+        NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[1]);
+
+        if(status != NX_SUCCESS)
+        {
+            return(status);
+        }
+
     }
     else if (remote_epoch == 0)
     {
-
+        /* Remote epoch of 0 with sequence number of 0 indicates start of new session. */
 #ifndef NX_SECURE_TLS_CLIENT_DISABLED
         if ((tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_CLIENT) &&
             (tls_session -> nx_secure_tls_client_state != NX_SECURE_TLS_CLIENT_STATE_IDLE))
@@ -246,10 +300,9 @@ NX_SECURE_TLS_SESSION *tls_session;
     {
         /* Check the record's protocol version against the current session. */
         status = _nx_secure_tls_check_protocol_version(tls_session, protocol_version, NX_SECURE_DTLS);
-        return(status);
     }
 
-    return(NX_SUCCESS);
+    return(status);
 }
 #endif /* NX_SECURE_ENABLE_DTLS */
 

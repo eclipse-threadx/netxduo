@@ -154,7 +154,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_create                                     PORTABLE C      */ 
-/*                                                           6.1.8        */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -205,12 +205,17 @@ UINT    status;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
 /*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved the code,           */
+/*                                            improved the code,          */
 /*                                            resulting in version 6.1.8  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            multiple client instances,  */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_create(NX_DHCP *dhcp_ptr, NX_IP *ip_ptr, CHAR *name_ptr)
 {
+
+TX_INTERRUPT_SAVE_AREA
 
 UINT    status;
 #ifdef NX_DHCP_CLIENT_ENABLE_HOST_NAME_CHECK
@@ -379,6 +384,8 @@ UINT    label_length = 0;
         nx_udp_socket_delete(&(dhcp_ptr -> nx_dhcp_socket));
     }
 
+    dhcp_ptr -> nx_dhcp_socket.nx_udp_socket_reserved_ptr = (VOID*)dhcp_ptr;
+
     /* Create the ThreadX activity timeout timer.  This will be used to periodically check to see if
        a client connection has gone silent and needs to be terminated.  */
     status =  tx_timer_create(&(dhcp_ptr -> nx_dhcp_timer), "DHCP Client Timer", _nx_dhcp_timeout_entry,
@@ -482,11 +489,21 @@ UINT    label_length = 0;
         return(status);
     }
 
+    /* Otherwise, the DHCP initialization was successful.  Place the
+       DHCP control block on the list of created DHCP instances.  */
+    TX_DISABLE
+
     /* Update the dhcp structure ID.  */
     dhcp_ptr -> nx_dhcp_id =  NX_DHCP_ID;
 
-    /* Save the DHCP instance.  */
+    /* Setup this DHCP's created links.  */
+    dhcp_ptr -> nx_dhcp_created_next = _nx_dhcp_created_ptr;
+
+    /* Place the new DHCP control block on the head of created DHCPs.  */
     _nx_dhcp_created_ptr = dhcp_ptr;
+
+    /* Restore previous interrupt posture.  */
+    TX_RESTORE
 
     /* Default enable DHCP on the primary interface (0).  */
     _nx_dhcp_interface_enable(dhcp_ptr, 0);
@@ -1670,7 +1687,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_delete                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1714,12 +1731,18 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            multiple client instances,  */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_delete(NX_DHCP *dhcp_ptr)
 {
 
+TX_INTERRUPT_SAVE_AREA
+
 UINT    i;
+NX_DHCP *dhcp_previous;
 
     /* Get the DHCP mutex.  */
     tx_mutex_get(&(dhcp_ptr -> nx_dhcp_mutex), TX_WAIT_FOREVER);
@@ -1769,8 +1792,33 @@ UINT    i;
     /* Delete the DHCP mutex.  */
     tx_mutex_delete(&(dhcp_ptr -> nx_dhcp_mutex));
 
+    /* Disable interrupts.  */
+    TX_DISABLE
+
     /* Clear the dhcp structure ID. */
     dhcp_ptr -> nx_dhcp_id =  0;
+
+    /* Remove the DHCP instance from the created list.  */
+    if (_nx_dhcp_created_ptr == dhcp_ptr)
+    {
+        _nx_dhcp_created_ptr = _nx_dhcp_created_ptr -> nx_dhcp_created_next;
+    }
+    else
+    {
+        for (dhcp_previous = _nx_dhcp_created_ptr;
+             dhcp_previous -> nx_dhcp_created_next;
+             dhcp_previous = dhcp_previous -> nx_dhcp_created_next)
+        {
+            if (dhcp_previous -> nx_dhcp_created_next == dhcp_ptr)
+            {
+                dhcp_previous -> nx_dhcp_created_next  = dhcp_ptr -> nx_dhcp_created_next;
+                break;
+            }
+        }
+    }
+
+    /* Restore interrupts.  */
+    TX_RESTORE
 
     /* Return a successful status.  */
     return(NX_SUCCESS);
@@ -4961,7 +5009,7 @@ UINT  _nx_dhcp_user_option_add_callback_set(NX_DHCP *dhcp_ptr, UINT (*dhcp_user_
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_udp_receive_notify                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4995,15 +5043,20 @@ UINT  _nx_dhcp_user_option_add_callback_set(NX_DHCP *dhcp_ptr, UINT (*dhcp_user_
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            multiple client instances,  */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_dhcp_udp_receive_notify(NX_UDP_SOCKET *socket_ptr)
 {
 
-    NX_PARAMETER_NOT_USED(socket_ptr);
+NX_DHCP *dhcp_ptr;
+
+    dhcp_ptr = (NX_DHCP *)(socket_ptr -> nx_udp_socket_reserved_ptr);
 
     /* Set the data received event flag.  */
-    tx_event_flags_set(&(_nx_dhcp_created_ptr -> nx_dhcp_events), NX_DHCP_CLIENT_RECEIVE_EVENT, TX_OR);
+    tx_event_flags_set(&(dhcp_ptr -> nx_dhcp_events), NX_DHCP_CLIENT_RECEIVE_EVENT, TX_OR);
 }
 
 
@@ -8758,7 +8811,7 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_ip_conflict                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8795,21 +8848,44 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            multiple client instances,  */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcp_ip_conflict(NX_IP *ip_ptr, UINT iface_index, ULONG ip_address, ULONG physical_msw, ULONG physical_lsw)
 {
 
-    NX_PARAMETER_NOT_USED(ip_ptr);
+TX_INTERRUPT_SAVE_AREA
+
+NX_DHCP *dhcp_ptr;
+
     NX_PARAMETER_NOT_USED(ip_address);
     NX_PARAMETER_NOT_USED(physical_msw);
     NX_PARAMETER_NOT_USED(physical_lsw);
 
-    /* Set the interface index.  */
-    _nx_dhcp_created_ptr -> nx_dhcp_interface_conflict_flag |= (UINT)(1 << iface_index);
+    /* Disable interrupts.  */
+    TX_DISABLE
 
-    /* Set the address conflict event flag.  */
-    tx_event_flags_set(&(_nx_dhcp_created_ptr -> nx_dhcp_events), NX_DHCP_CLIENT_CONFLICT_EVENT, TX_OR);
+    /* Find the DHCP client.  */
+    for (dhcp_ptr = _nx_dhcp_created_ptr; dhcp_ptr; dhcp_ptr = dhcp_ptr -> nx_dhcp_created_next)
+    {
+        if (dhcp_ptr -> nx_dhcp_ip_ptr == ip_ptr)
+        {
+
+            /* Set the interface index.  */
+            dhcp_ptr -> nx_dhcp_interface_conflict_flag |= (UINT)(1 << iface_index);
+
+            /* Set the address conflict event flag.  */
+            tx_event_flags_set(&(_nx_dhcp_created_ptr -> nx_dhcp_events), NX_DHCP_CLIENT_CONFLICT_EVENT, TX_OR);
+
+            break;
+        }
+    }
+
+    /* Restore interrupts.  */
+    TX_RESTORE
+
 }
 #endif
 

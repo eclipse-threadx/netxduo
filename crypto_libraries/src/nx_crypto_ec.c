@@ -1126,7 +1126,7 @@ UINT                   buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp192r1_reduce                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1176,6 +1176,9 @@ UINT                   buffer_size;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp192r1_reduce(NX_CRYPTO_EC *curve,
@@ -1184,7 +1187,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp192r1_reduce(NX_CRYPTO_EC *curve,
 {
 NX_CRYPTO_HUGE_NUMBER temp;
 UINT                 *data;
-UINT                 *buffer;
+HN_UBASE              rev1;
 UINT                  size = 0;
 UINT                  compare_value;
 
@@ -1202,8 +1205,6 @@ UINT                  compare_value;
     NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 36);
 
     data = (UINT *)(((ULONG)scratch + 3) & (ULONG) ~3);
-    scratch += (64 >> HN_SIZE_SHIFT);
-    buffer = (UINT *)scratch;
 
     /* c= (c5,...,c2,c1,c0), ci is a 64-bit word */
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 48, &size);
@@ -1219,19 +1220,19 @@ UINT                  compare_value;
     _nx_crypto_huge_number_setup(value, (UCHAR *)data + 24, 24);
 
     /* s2 = (0,c3,c3) */
-    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, rev1,
                                       0, 0, data[4], data[5],
                                       data[4], data[5]);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s3 = (c4,c4,0) */
-    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, rev1,
                                       data[2], data[3], data[2],
                                       data[3], 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s4 = (c5,c5,c5) */
-    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, rev1,
                                       data[0], data[1], data[0], data[1],
                                       data[0], data[1]);
     _nx_crypto_huge_number_add(value, &temp);
@@ -1259,7 +1260,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp224r1_reduce                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1312,6 +1313,9 @@ UINT                  compare_value;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp224r1_reduce(NX_CRYPTO_EC *curve,
@@ -1320,7 +1324,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp224r1_reduce(NX_CRYPTO_EC *curve,
 {
 NX_CRYPTO_HUGE_NUMBER temp;
 UINT                 *data;
-UINT                 *buffer;
+HN_UBASE              rev1;
 UINT                  size = 0;
 UINT                  compare_value;
 
@@ -1338,8 +1342,6 @@ UINT                  compare_value;
     NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 36);
 
     data = (UINT *)(((ULONG)scratch + 3) & (ULONG) ~3);
-    scratch += (64 >> HN_SIZE_SHIFT);
-    buffer = (UINT *)scratch;
 
     /* c= (c13,...,c2,c1,c0), ci is a 32-bit word */
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 56, &size);
@@ -1355,25 +1357,25 @@ UINT                  compare_value;
     _nx_crypto_huge_number_setup(value, (UCHAR *)data + 28, 28);
 
     /* s2 = (c10,c9,c8,c7,0,0,0) */
-    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, rev1,
                                       data[3], data[4], data[5],
                                       data[6], 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s3 = (0,c13,c12,c11,0,0,0) */
-    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, rev1,
                                       0, data[0], data[1],
                                       data[2], 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s4 = (c13,c12,c11,c10,c9,c8,c7) */
-    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, rev1,
                                       data[0], data[1], data[2], data[3],
                                       data[4], data[5], data[6]);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s5 = (0,0,0,0,c13,c12,c11) */
-    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, rev1,
                                       0, 0, 0, 0, data[0],
                                       data[1], data[2]);
     _nx_crypto_huge_number_subtract(value, &temp);
@@ -1401,7 +1403,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp256r1_reduce                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1454,6 +1456,9 @@ UINT                  compare_value;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp256r1_reduce(NX_CRYPTO_EC *curve,
@@ -1462,7 +1467,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp256r1_reduce(NX_CRYPTO_EC *curve,
 {
 NX_CRYPTO_HUGE_NUMBER temp;
 UINT                 *data;
-UINT                 *buffer;
+HN_UBASE              rev1;
+HN_UBASE              rev2;
 UINT                  size = 0;
 UINT                  compare_value;
 
@@ -1480,8 +1486,6 @@ UINT                  compare_value;
     NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 36);
 
     data = (UINT *)(((ULONG)scratch + 3) & (ULONG) ~3);
-    scratch += (64 >> HN_SIZE_SHIFT);
-    buffer = (UINT *)scratch;
 
     /* c= (c15,...,c2,c1,c0), ci is a 32-bit word */
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 64, &size);
@@ -1497,51 +1501,49 @@ UINT                  compare_value;
     _nx_crypto_huge_number_setup(value, (UCHAR *)data + 32, 32);
 
     /* s2 = (c15,c14,c13,c12,c11,0,0,0) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
-                                      data[0], data[1], data[2], data[3],
-                                      data[4], 0, 0, 0);
-    _nx_crypto_huge_number_shift_left(&temp, 1);
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP_LS1(&temp, rev1, rev2,
+                                          data[0], data[1], data[2], data[3],
+                                          data[4], 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s3 = (0,c15,c14,c13,c12,0,0,0) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
-                                      0, data[0], data[1], data[2],
-                                      data[3], 0, 0, 0);
-    _nx_crypto_huge_number_shift_left(&temp, 1);
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP_LS1(&temp, rev1, rev2,
+                                          0, data[0], data[1], data[2],
+                                          data[3], 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s4 = (c15,c14,0,0,0,c10,c9,c8) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[0], data[1], 0, 0,
                                       0, data[5], data[6], data[7]);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s5 = (c8,c13,c15,c14,c13,c11,c10,c9) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[7], data[2], data[0], data[1],
                                       data[2], data[4], data[5], data[6]);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s6 = (c10,c8,0,0,0,c13,c12,c11) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[5], data[7], 0, 0,
                                       0, data[2], data[3], data[4]);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s7 = (c11,c9,0,0,c15,c14,c13,c12) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[4], data[6], 0, 0,
                                       data[0], data[1], data[2], data[3]);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s8 = (c12,0,c10,c9,c8,c15,c14,c13) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[3], 0, data[5], data[6],
                                       data[7], data[0], data[1], data[2]);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s9 = (c13,0,c11,c10,c9,0,c15,c14) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[2], 0, data[4], data[5],
                                       data[6], 0, data[0], data[1]);
     _nx_crypto_huge_number_subtract(value, &temp);
@@ -1569,7 +1571,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp384r1_reduce                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1619,6 +1621,9 @@ UINT                  compare_value;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp384r1_reduce(NX_CRYPTO_EC *curve,
@@ -1627,7 +1632,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp384r1_reduce(NX_CRYPTO_EC *curve,
 {
 NX_CRYPTO_HUGE_NUMBER temp;
 UINT                 *data;
-UINT                 *buffer;
+HN_UBASE              rev1;
+HN_UBASE              rev2;
 UINT                  size = 0;
 UINT                  compare_value;
 
@@ -1642,11 +1648,9 @@ UINT                  compare_value;
         return;
     }
 
-    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 48);
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 52);
 
     data = (UINT *)(((ULONG)scratch + 3) & (ULONG) ~3);
-    scratch += (96 >> HN_SIZE_SHIFT);
-    buffer = (UINT *)scratch;
 
     /* c= (c23,...,c2,c1,c0), ci is a 32-bit word */
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 96, &size);
@@ -1662,10 +1666,9 @@ UINT                  compare_value;
     _nx_crypto_huge_number_setup(value, (UCHAR *)data + 48, 48);
 
     /* s2 = (0,0,0,0,0,c23,c22,c21,0,0,0,0) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
-                                      0, 0, 0, 0, 0, data[0],
-                                      data[1], data[2], 0, 0, 0, 0);
-    _nx_crypto_huge_number_shift_left(&temp, 1);
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP_LS1(&temp, rev1, rev2,
+                                          0, 0, 0, 0, 0, data[0],
+                                          data[1], data[2], 0, 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s3 = (c23,c22,c21,c20,c19,c18,c17,c16,c15,c14,c13,c12) */
@@ -1673,48 +1676,48 @@ UINT                  compare_value;
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s4 = (c20,c19,c18,c17,c16,c15,c14,c13,c12,c23,c22,c21) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       data[3], data[4], data[5], data[6],
                                       data[7], data[8], data[9], data[10],
                                       data[11], data[0], data[1], data[2]);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s5 = (c19,c18,c17,c16,c15,c14,c13,c12,c20,0,c23,0) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       data[4], data[5], data[6],
                                       data[7], data[8], data[9], data[10],
                                       data[11], data[3], 0, data[0], 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s6 = (0,0,0,0,c23,c22,c21,c20,0,0,0,0) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       0, 0, 0, 0,
                                       data[0], data[1], data[2], data[3],
                                       0, 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s7 = (0,0,0,0,0,0,c23,c22,c21,0,0,c20) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       0, 0, 0, 0, 0, 0,
                                       data[0], data[1], data[2],
                                       0, 0, data[3]);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s8 = (c22,c21,c20,c19,c18,c17,c16,c15,c14,c13,c12,c23) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       data[1], data[2], data[3], data[4],
                                       data[5], data[6], data[7], data[8],
                                       data[9], data[10], data[11], data[0]);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s9 = (0,0,0,0,0,0,0,c23,c22,c21,c20,0) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       0, 0, 0, 0, 0, 0, 0, data[0],
                                       data[1], data[2], data[3], 0);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s10 = (0,0,0,0,0,0,0,c23,c23,0,0,0) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       0, 0, 0, 0, 0, 0, 0, data[0],
                                       data[0], 0, 0, 0);
     _nx_crypto_huge_number_subtract(value, &temp);
@@ -4237,7 +4240,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_validate_public_key                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -4275,6 +4278,9 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION
@@ -4287,8 +4293,9 @@ NX_CRYPTO_HUGE_NUMBER temp;
 NX_CRYPTO_HUGE_NUMBER right;
 UINT                  compare_value;
 UINT                  buffer_size = chosen_curve -> nx_crypto_ec_n.nx_crypto_huge_buffer_size;
-NX_CRYPTO_EC_POINT    pt;
 HN_UBASE             *scratch2 = scratch;
+
+    NX_CRYPTO_PARAMETER_NOT_USED(partial);
 
     /* 1. Verify Q is not the point at infinity. */ 
     if(_nx_crypto_ec_point_is_infinite(public_key))
@@ -4350,6 +4357,8 @@ HN_UBASE             *scratch2 = scratch;
         verification in step 1, ensures that the public key is in the correct range in the correct EC
         subgroup; that is, it is in the correct EC subgroup and is not the identity element O.)
     */
+    /* Removed this validation as h is 1 for all the software supported curves and nQ = O
+        is implied by the checks in step 2 and 3.
     if (!partial)
     {
         NX_CRYPTO_EC_POINT_INITIALIZE(&pt, NX_CRYPTO_EC_POINT_AFFINE, scratch, buffer_size);
@@ -4359,6 +4368,7 @@ HN_UBASE             *scratch2 = scratch;
             return(NX_CRYPTO_INVALID_KEY);
         }
     }
+    */
 
     return(NX_CRYPTO_SUCCESS);
 }

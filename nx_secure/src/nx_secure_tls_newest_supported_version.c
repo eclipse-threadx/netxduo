@@ -196,7 +196,7 @@ USHORT highest_version_not_greater_than_client_version = 0;
         }
     }
 
-	/* No versions of TLS have been enabled. Set protocol to 0 to indicate failure. */
+    /* No versions of TLS have been enabled. Set protocol to 0 to indicate failure. */
     if (highest_version == 0)
     {
         (*protocol_version) = 0;
@@ -219,14 +219,14 @@ USHORT highest_version_not_greater_than_client_version = 0;
         if ((*protocol_version) < highest_version && (*protocol_version) > lowest_version)
         {
             (*protocol_version) = highest_version_not_greater_than_client_version;
-	    }
+        }
         else
         {
             (*protocol_version) = 0;
         }
     }
 
-	session_ptr -> nx_secure_tls_negotiated_highest_protocol_version = (*protocol_version);
+    session_ptr -> nx_secure_tls_negotiated_highest_protocol_version = (*protocol_version);
     return;
 }
 
