@@ -95,10 +95,14 @@ Professional support plans (https://azure.microsoft.com/en-us/support/options/) 
 ## Additional Resources
 
 The following are references to additional Azure RTOS and Azure IoT in general:
-|   |   |
+| Content | Link |
 |---|---|
-| Azure RTOS Website: | https://azure.microsoft.com/en-us/services/rtos/ |
+| TraceX Installer | https://aka.ms/azrtos-tracex-installer |
+| Azure RTOS Documentation and Guides: | https://docs.microsoft.com/azure/rtos |
+| Azure RTOS Website: | https://azure.microsoft.com/services/rtos/ |
 | Azure RTOS Sales Questions: | https://azure-rtos.ms-iot-contact.com/ |
-| Microsoft Q/A for Azure IoT: | https://docs.microsoft.com/en-us/answers/products/azure?product=iot |
-| Internet of Things Show: | https://aka.ms/iotshow |
-| IoT Tech Community: | https://aka.ms/iottechcommunity |
+| Azure RTOS Product Support Policy | https://aka.ms/azrtos/lts |
+| Azure RTOS Functional Safety Artifacts | https://aka.ms/azrtos/tuv |
+| For technical questions check out Microsoft Q/A for Azure IoT | https://aka.ms/QnA/azure-rtos |
+| Internet of Things Show for latest announcements and online training | https://aka.ms/iotshow |
+| IoT Tech Community | https://aka.ms/community/azure-rtos |
