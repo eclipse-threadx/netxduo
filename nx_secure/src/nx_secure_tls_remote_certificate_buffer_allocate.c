@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_buffer_allocate   PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -82,6 +82,9 @@
 /*  01-31-2022     Timothy Stapko           Modified comment(s),          */
 /*                                            removed parameter checking, */
 /*                                            resulting in version 6.1.10 */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), added    */
+/*                                            assert to check for zero,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_remote_certificate_buffer_allocate(NX_SECURE_TLS_SESSION *tls_session, UINT certs_number, VOID *certificate_buffer, ULONG buffer_size)
@@ -101,6 +104,8 @@ UINT count;
     {
         return(NX_INVALID_PARAMETERS);
     }
+
+    NX_ASSERT(certs_number != 0);
 
     /* Calculate the per-certificate size allocated from the buffer. */
     cert_buffer_size = (buffer_size - metadata_size) / certs_number;

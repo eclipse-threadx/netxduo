@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_generate_premaster_secret            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -72,6 +72,9 @@
 /*                                            ECC find curve method,      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), removed  */
+/*                                            internal unreachable logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_generate_premaster_secret(NX_SECURE_TLS_SESSION *tls_session, UINT id)
@@ -112,7 +115,7 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
         /* Get reference to remote server certificate so we can find out the named curve. */
         status = _nx_secure_x509_remote_endpoint_certificate_get(&tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store,
                                                                  &server_certificate);
-        if (status || server_certificate == NX_NULL)
+        if (status)
         {
             /* No certificate found, error! */
             return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
@@ -126,12 +129,6 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
         if(status != NX_SUCCESS)
         {
             return(status);
-        }
-
-        if (curve_method_cert == NX_NULL)
-        {
-            /* The remote certificate is using an unsupported curve. */
-            return(NX_SECURE_TLS_UNSUPPORTED_ECC_CURVE);
         }
 
         ecdh_method = tls_session -> nx_secure_tls_session_ciphersuite -> nx_secure_tls_public_cipher;

@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_record                          PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -90,6 +90,9 @@
 /*                                            used wait forever on        */
 /*                                            transmission mutex,         */
 /*                                            resulting in version 6.1.8  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
@@ -198,14 +201,7 @@ NX_PACKET *current_packet;
     if (tls_session -> nx_secure_tls_local_session_active)
     {
         /*************************************************************************************************************/
-
-        if (tls_session -> nx_secure_tls_session_ciphersuite == NX_NULL)
-        {
-
-            /* Likely internal error since at this point ciphersuite negotiation was theoretically completed. */
-            tx_mutex_put(&(tls_session -> nx_secure_tls_session_transmit_mutex));
-            return(NX_SECURE_TLS_UNKNOWN_CIPHERSUITE);
-        }
+        NX_ASSERT(tls_session -> nx_secure_tls_session_ciphersuite != NX_NULL)
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
         /* TLS 1.3 records have the record type appended in a single byte. */

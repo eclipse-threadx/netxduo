@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_crypto_ecdh.h                                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -43,6 +43,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            x25519 and x448 curves,     */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -132,6 +135,32 @@ UINT _nx_crypto_method_ecdh_operation(UINT op,
                                       VOID *crypto_metadata, ULONG crypto_metadata_size,
                                       VOID *packet_ptr,
                                       VOID (*nx_crypto_hw_process_callback)(VOID *, UINT));
+
+#ifdef NX_CRYPTO_ENABLE_CURVE25519_448
+UINT _nx_crypto_ecdh_key_pair_import_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
+                                                NX_CRYPTO_EC *curve,
+                                                UCHAR *local_private_key_ptr,
+                                                ULONG  local_private_key_len,
+                                                UCHAR *local_public_key_ptr,
+                                                ULONG  local_public_key_len);
+UINT _nx_crypto_ecdh_private_key_export_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
+                                                   UCHAR *local_private_key_ptr,
+                                                   ULONG  local_private_key_len,
+                                                   ULONG *actual_local_private_key_len);
+UINT _nx_crypto_ecdh_setup_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
+                                      UCHAR *local_public_key_ptr,
+                                      ULONG  local_public_key_len,
+                                      ULONG *actual_local_public_key_len,
+                                      NX_CRYPTO_EC *curve,
+                                      HN_UBASE *scratch_buf_ptr);
+UINT _nx_crypto_ecdh_compute_secret_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
+                                               UCHAR *share_secret_key_ptr,
+                                               ULONG  share_secret_key_len_ptr,
+                                               ULONG *actual_share_secret_key_len,
+                                               UCHAR *remote_public_key,
+                                               ULONG  remote_public_key_len,
+                                               HN_UBASE *scratch_buf_ptr);
+#endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */
 
 #ifdef __cplusplus
 }

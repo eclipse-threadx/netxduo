@@ -337,12 +337,10 @@ UINT                   source_port;
 
             if (status == NX_SECURE_TLS_ALERT_RECEIVED)
             {
-
                 /* See if the alert was a CloseNotify */
                 if(tls_session -> nx_secure_tls_received_alert_level == NX_SECURE_TLS_ALERT_LEVEL_WARNING &&
                    tls_session -> nx_secure_tls_received_alert_value == NX_SECURE_TLS_ALERT_CLOSE_NOTIFY)
                 {
-
                     /* Close the connection */
                     status = NX_SECURE_TLS_CLOSE_NOTIFY_RECEIVED;
                 }

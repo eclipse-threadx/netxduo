@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_receive                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +70,9 @@
 /*                                            supported chained packet,   */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), added    */
+/*                                            conditional TLS 1.3 build,  */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_session_receive(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET **packet_ptr_ptr,
@@ -139,14 +142,13 @@ UINT local_initiated_renegotiation = NX_FALSE;
     else
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
     {
-        if (status == NX_SECURE_TLS_POST_HANDSHAKE_RECEIVED)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+        /* Continue processing while we are receiving post-handshake messages. */
+        while (status == NX_SECURE_TLS_POST_HANDSHAKE_RECEIVED)
         {
-            /* Continue processing while we are receiving post-handshake messages. */
-            while (status == NX_SECURE_TLS_POST_HANDSHAKE_RECEIVED)
-            {
-                status = _nx_secure_tls_session_receive_records(tls_session, packet_ptr_ptr, wait_option);
-            }
+            status = _nx_secure_tls_session_receive_records(tls_session, packet_ptr_ptr, wait_option);
         }
+#endif /* NX_SECURE_TLS_TLS_1_3_ENABLED */
     }
 
 

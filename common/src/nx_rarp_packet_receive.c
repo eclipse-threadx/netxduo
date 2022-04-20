@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rarp_packet_receive                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -72,6 +72,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added internal ip address   */
+/*                                            change notification,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_rarp_packet_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -83,6 +87,7 @@ ULONG *message_ptr;
 UINT   i;
 VOID   (*address_change_notify)(NX_IP *, VOID *) = NX_NULL;
 VOID  *additional_info = NX_NULL;
+VOID   (*address_change_notify_internal)(NX_IP *, VOID *) = NX_NULL;
 
 
 #ifndef NX_DISABLE_RX_SIZE_CHECKING
@@ -155,6 +160,9 @@ VOID  *additional_info = NX_NULL;
             address_change_notify =  ip_ptr -> nx_ip_address_change_notify;
             additional_info =        ip_ptr -> nx_ip_address_change_notify_additional_info;
 
+            /* Pickup the internal notification callback.  */
+            address_change_notify_internal = ip_ptr -> nx_ip_address_change_notify_internal;
+
             /* Set the IP address of this IP instance to the target
                IP address in the RARP response.  */
             packet_ptr -> nx_packet_address.nx_packet_interface_ptr -> nx_interface_ip_address =  *(message_ptr + 6);
@@ -211,6 +219,13 @@ VOID  *additional_info = NX_NULL;
     {
         /* Yes, call the application's IP address change notify function.  */
         (address_change_notify)(ip_ptr, additional_info);
+    }
+
+    /* Determine if the internal application should be notified of the IP address change. */
+    if (address_change_notify_internal != NX_NULL)
+    {
+        /* Yes, call the internal application's IP address change notify function.  */
+        (address_change_notify_internal)(ip_ptr, NX_NULL);
     }
 
     return;

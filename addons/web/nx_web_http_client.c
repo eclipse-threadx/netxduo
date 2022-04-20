@@ -1505,7 +1505,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_client_response_body_get               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1551,6 +1551,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            released invalid packet,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_web_http_client_response_body_get(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET **packet_pptr, ULONG wait_option)
@@ -1586,6 +1589,9 @@ UINT        status_code = NX_SUCCESS;
         {
             if (response_packet_ptr -> nx_packet_append_ptr - response_packet_ptr -> nx_packet_prepend_ptr < 12)
             {
+
+                /* Release invalid packet.  */
+                nx_packet_release(response_packet_ptr);
                 status = NX_WEB_HTTP_ERROR;
             }
         }

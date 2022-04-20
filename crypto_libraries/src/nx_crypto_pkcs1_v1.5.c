@@ -189,7 +189,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_pkcs1_v1_5_verify                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -221,6 +221,9 @@ UINT status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            corrected the operation,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_pkcs1_v1_5_verify(UCHAR *message, UINT message_length,
@@ -263,7 +266,7 @@ UINT status;
     }
 
     /* Decrypt the signature by the public key to get EM1 */
-    status = (ctx -> public_cipher_method) -> nx_crypto_operation(NX_CRYPTO_ENCRYPT,
+    status = (ctx -> public_cipher_method) -> nx_crypto_operation(NX_CRYPTO_DECRYPT,
                                                                   NX_CRYPTO_NULL,
                                                                   ctx -> public_cipher_method,
                                                                   public_key,

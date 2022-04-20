@@ -548,6 +548,72 @@ UINT status;
     }
     return(NX_SUCCESS);
 }
+
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_tcpserver_tls_ecc_setup                         PORTABLE C      */
+/*                                                           6.1.11       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function configures supported curve lists for NetX socket      */
+/*    server instance using TLS.                                          */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    server_ptr                            Pointer to control block      */
+/*    supported_groups                      List of supported groups      */
+/*    supported_group_count                 Number of supported groups    */
+/*    curves                                List of curve methods         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_secure_tls_ecc_initialize         Initializes curve lists for TLS*/
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_tcpserver_tls_ecc_setup(NX_TCPSERVER *server_ptr,
+                                 const USHORT *supported_groups, USHORT supported_group_count,
+                                 const NX_CRYPTO_METHOD **curves)
+{
+UINT i;
+UINT status;
+NX_SECURE_TLS_SESSION* tls_session;
+
+    /* Loop through all sessions, initialize each one. */
+    for (i = 0; i < server_ptr -> nx_tcpserver_sessions_count; ++i)
+    {
+
+        tls_session = &(server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_tls_session);
+        status = nx_secure_tls_ecc_initialize(tls_session, supported_groups, supported_group_count, curves);
+        if (status != NX_SUCCESS)
+        {
+            return(status);
+        }
+    }
+
+    return(NX_SUCCESS);
+}
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 #endif
 
 /**************************************************************************/
@@ -833,7 +899,7 @@ NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_connect_process                        PORTABLE C     */
-/*                                                           6.1.9        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -877,6 +943,10 @@ NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*                                            fixed TLS connection        */
 /*                                            deadlock issue,             */
 /*                                            resulting in version 6.1.9  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the wait option   */
+/*                                            of TLS connection,          */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_connect_process(NX_TCPSERVER *server_ptr)
@@ -941,7 +1011,7 @@ NX_TCP_SESSION *session_ptr = NX_NULL;
         if(server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_using_tls == NX_TRUE)
         {
             status = nx_secure_tls_session_start(&server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_tls_session, 
-                                                 &server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_socket, NX_WAIT_FOREVER);
+                                                 &server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_socket, server_ptr -> nx_tcpserver_timeout * NX_IP_PERIODIC_RATE);
             
             if(status != NX_SUCCESS)
             {

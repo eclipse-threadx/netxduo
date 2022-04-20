@@ -25,7 +25,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_mdns.h                                          PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -49,6 +49,9 @@
 /*                                            prevented infinite loop in  */
 /*                                            name compression,           */
 /*                                            resulting in version 6.1.3  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -249,23 +252,23 @@ extern   "C" {
 
 
 /* Define the mDNS's probing timer interval, default 250ms in spec. In tick.
-   should be:250 * NX_IP_PERIODIC_RATE /1000 = 250 * 100 /1000 = 25.  */
+   should be: 250 * NX_IP_PERIODIC_RATE / 1000.  */
 #ifndef NX_MDNS_PROBING_TIMER_COUNT
-#define NX_MDNS_PROBING_TIMER_COUNT             25
+#define NX_MDNS_PROBING_TIMER_COUNT             (250 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_PROBING_TIMER_COUNT  */
 
 
 /* Define the mDNS's announcing timer interval, default 250ms in spec. In tick.
-   should be:250 * NX_IP_PERIODIC_RATE /1000 = 250 * 100 /1000 = 25.  */
+   should be: 250 * NX_IP_PERIODIC_RATE / 1000.  */
 #ifndef NX_MDNS_ANNOUNCING_TIMER_COUNT
-#define NX_MDNS_ANNOUNCING_TIMER_COUNT          25
+#define NX_MDNS_ANNOUNCING_TIMER_COUNT          (250 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_ANNOUNCING_TIMER_COUNT  */
 
 
 /* Define the mDNS's goodbye timer interval, default 250ms in spec. In tick.
-   should be:250 * NX_IP_PERIODIC_RATE /1000 = 250 * 100 /1000 = 25.  */
+   should be: 250 * NX_IP_PERIODIC_RATE / 1000.  */
 #ifndef NX_MDNS_GOODBYE_TIMER_COUNT
-#define NX_MDNS_GOODBYE_TIMER_COUNT             25
+#define NX_MDNS_GOODBYE_TIMER_COUNT             (250 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_GOODBYE_TIMER_COUNT  */
 
 
@@ -283,17 +286,17 @@ extern   "C" {
 
 /* Define the mDNS's query delay timer interval, 20-120ms. In tick. */
 #ifndef NX_MDNS_QUERY_DELAY_MIN
-#define NX_MDNS_QUERY_DELAY_MIN                 2
+#define NX_MDNS_QUERY_DELAY_MIN                 (20 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_QUERY_DELAY_MIN  */
 
 #ifndef NX_MDNS_QUERY_DELAY_RANGE
-#define NX_MDNS_QUERY_DELAY_RANGE               10
+#define NX_MDNS_QUERY_DELAY_RANGE               (100 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_QUERY_DELAY_RANGE  */
 
 
 /* Define the mDNS's response delay time interval for multicast query.  */
 /* The time interval, in ticks, in responding to a query to ensure an interval of at least 1s 
-   since the last time the record was multicast. The default value is 100 ticks.  */
+   since the last time the record was multicast. The default value is NX_IP_PERIODIC_RATE ticks.  */
 #ifndef NX_MDNS_RESPONSE_INTERVAL
 #define NX_MDNS_RESPONSE_INTERVAL               NX_IP_PERIODIC_RATE
 #endif /* NX_MDNS_RESPONSE_INTERVAL  */
@@ -301,35 +304,35 @@ extern   "C" {
 
 /* Define the mDNS's response delay time interval for probe message.  */
 /* The time interval, in ticks, in responding to a probe queries to ensure an interval of 
-   at least 250ms since the last time the record was multicast. The default value is 25 ticks.  */
+   at least 250ms since the last time the record was multicast. The default value is (250 * NX_IP_PERIODIC_RATE / 1000) ticks.  */
 #ifndef NX_MDNS_RESPONSE_PROBING_TIMER_COUNT
-#define NX_MDNS_RESPONSE_PROBING_TIMER_COUNT    25
+#define NX_MDNS_RESPONSE_PROBING_TIMER_COUNT    (250 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_RESPONSE_PROBING_TIMER_COUNT  */
 
 
 /* Define the mDNS's response delay time interval for unicast query, 10 ms. In tick.  */
 #ifndef NX_MDNS_RESPONSE_UNIQUE_DELAY
-#define NX_MDNS_RESPONSE_UNIQUE_DELAY           1
+#define NX_MDNS_RESPONSE_UNIQUE_DELAY           (10 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_RESPONSE_UNIQUE_DELAY  */
 
 
 /* Define the mDNS's response delay time interval for shared message, 20-120ms. In tick.  */
 #ifndef NX_MDNS_RESPONSE_SHARED_DELAY_MIN
-#define NX_MDNS_RESPONSE_SHARED_DELAY_MIN       2
+#define NX_MDNS_RESPONSE_SHARED_DELAY_MIN       (20 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_RESPONSE_SHARED_DELAY_MIN */
 
 #ifndef NX_MDNS_RESPONSE_SHARED_DELAY_RANGE
-#define NX_MDNS_RESPONSE_SHARED_DELAY_RANGE     10
+#define NX_MDNS_RESPONSE_SHARED_DELAY_RANGE     (100 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_RESPONSE_SHARED_DELAY_RANGE  */
 
 
 /* Define the mDNS's response delay time interval for query with TC, 400-500 ms. In tick.  */
 #ifndef NX_MDNS_RESPONSE_TC_DELAY_MIN
-#define NX_MDNS_RESPONSE_TC_DELAY_MIN           40
+#define NX_MDNS_RESPONSE_TC_DELAY_MIN           (400 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_RESPONSE_TC_DELAY_MIN  */
 
 #ifndef NX_MDNS_RESPONSE_TC_DELAY_RANGE
-#define NX_MDNS_RESPONSE_TC_DELAY_RANGE         10
+#define NX_MDNS_RESPONSE_TC_DELAY_RANGE         (100 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_RESPONSE_TC_DELAY_RANGE  */
 
 
@@ -337,7 +340,7 @@ extern   "C" {
 /* This value allows a response to include messages that would be sent within
    the next 120ms range.  */
 #ifndef NX_MDNS_TIMER_COUNT_RANGE
-#define NX_MDNS_TIMER_COUNT_RANGE               12
+#define NX_MDNS_TIMER_COUNT_RANGE               (120 * NX_IP_PERIODIC_RATE / 1000)
 #endif /* NX_MDNS_TIMER_COUNT_RANGE  */
 
 
@@ -981,8 +984,6 @@ typedef struct NX_MDNS_RR_STRUCT
     ULONG   nx_mdns_rr_ttl;                     /* The time interval that the RR may be cached before the source of 
                                                    the information should again be consulted.                           */
 
-    UINT    nx_mdns_rr_interface_index;         /* RR interface index.                                                  */
-
     USHORT  nx_mdns_rr_rdata_length;            /* The length of rdata. nx_mdns_rr_rdata                                */
 
     UCHAR   nx_mdns_rr_state;                   /* The resource records state, Probing, Annoncing, Valid.               */
@@ -996,11 +997,13 @@ typedef struct NX_MDNS_RR_STRUCT
     ULONG   nx_mdns_rr_elapsed_time;            /* Define the time elasped for the peer RR.                             */
 
     ULONG   nx_mdns_rr_remaining_ticks;         /* Define the remaining ticks of the peer RR.                           */
-    
+
+    ULONG   nx_mdns_rr_response_interval;       /* Define the time interval for two responses. Local RR.                */
+
+    UCHAR   nx_mdns_rr_interface_index;         /* RR interface index.                                                  */
+
     UCHAR   nx_mdns_rr_announcing_max_time;     /* RR announcing max time. Local RR.                                    */
 
-    UCHAR   nx_mdns_rr_response_interval;       /* Define the time interval for two responses. Local RR.                */
-    
     UCHAR   nx_mdns_rr_conflict_count;          /* The conflict count of service name or host name. Local RR.           */
 
     UCHAR   nx_mdns_rr_poof_count;              /* The Passive Observation Of Failures count of resource record. Peer RR.*/

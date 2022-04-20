@@ -32,7 +32,7 @@ static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_verify_mac                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -76,6 +76,9 @@ static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*                                            verified memcpy use cases,  */
 /*                                            supported chained packet,   */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            reorganized internal logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_verify_mac(NX_SECURE_TLS_SESSION *tls_session, UCHAR *header_data,
@@ -175,13 +178,21 @@ ULONG  bytes_copied;
     /* Now, compare the hash we generated to the one we received. */
     if (nx_packet_data_extract_offset(packet_ptr,
                                       offset + data_length,
-                                      _received_hash, hash_size, &bytes_copied) ||
-                                      (bytes_copied != hash_size))
+                                      _received_hash, hash_size, &bytes_copied))
+                                      
     {
 
         /* The record data was smaller than the selected hash... Error. */
         return(NX_SECURE_TLS_PADDING_CHECK_FAILED);
     }
+
+    if (bytes_copied != hash_size)
+    {
+
+        /* The record data was smaller than the selected hash... Error. */
+        return(NX_SECURE_TLS_PADDING_CHECK_FAILED);
+    }
+
     compare_result = NX_SECURE_MEMCMP(_received_hash, _generated_hash, hash_size);
 
 #ifdef NX_SECURE_KEY_CLEAR

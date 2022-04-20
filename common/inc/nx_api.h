@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_api.h                                            PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -83,6 +83,11 @@
 /*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            updated product constants,  */
 /*                                            resulting in version 6.1.10 */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            updated product constants,  */
+/*                                            added internal ip address   */
+/*                                            change notification,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -496,7 +501,7 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 #define AZURE_RTOS_NETXDUO
 #define NETXDUO_MAJOR_VERSION                    6
 #define NETXDUO_MINOR_VERSION                    1
-#define NETXDUO_PATCH_VERSION                    10
+#define NETXDUO_PATCH_VERSION                    11
 
 /* Define the following symbols for backward compatibility */
 #define EL_PRODUCT_NETXDUO
@@ -2643,11 +2648,17 @@ typedef struct NX_IP_STRUCT
     /* Define the IP address change notification callback routine pointer.  */
     VOID        (*nx_ip_address_change_notify)(struct NX_IP_STRUCT *, VOID *);
     VOID        *nx_ip_address_change_notify_additional_info;
+
+    /* Define the internal IP address change notification callback routine pointer, used in mDNS.  */
+    VOID        (*nx_ip_address_change_notify_internal)(struct NX_IP_STRUCT *, VOID *);
 #endif /* !NX_DISABLE_IPV4  */
 
 #ifdef FEATURE_NX_IPV6
 #ifdef NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY
     VOID        (*nx_ipv6_address_change_notify)(struct NX_IP_STRUCT *ip_ptr, UINT status, UINT interface_index, UINT addres_index, ULONG *ip_address);
+
+    /* Define the internal IPv6 address change notification callback routine pointer, used in mDNS.  */
+    VOID        (*nx_ipv6_address_change_notify_internal)(struct NX_IP_STRUCT *ip_ptr, UINT status, UINT interface_index, UINT addres_index, ULONG *ip_address);
 #endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
 #endif /* FEATURE_NX_IPV6 */
 

@@ -113,7 +113,9 @@ static VOID         _nx_mdns_additional_a_aaaa_find(NX_MDNS *mdns_ptr, UCHAR *na
 static VOID         _nx_mdns_probing_send(NX_MDNS *mdns_ptr, UINT interface_index);
 static VOID         _nx_mdns_announcing_send(NX_MDNS *mdns_ptr, UINT interface_index);
 static VOID         _nx_mdns_response_send(NX_MDNS *mdns_ptr, UINT interface_index);
+#ifndef NX_DISABLE_IPV4
 static VOID         _nx_mdns_ip_address_change_notify(NX_IP *ip_ptr, VOID *additional_info);
+#endif /* NX_DISABLE_IPV4 */
 #ifdef NX_MDNS_ENABLE_IPV6
 static VOID         _nx_mdns_ipv6_address_change_notify(NX_IP *ip_ptr, UINT method, UINT interface_index, UINT index, ULONG *ipv6_address);
 #endif /* NX_MDNS_ENABLE_IPV6  */
@@ -299,7 +301,7 @@ UCHAR   *ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_create                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -359,6 +361,11 @@ UCHAR   *ptr;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            used internal ip address    */
+/*                                            change notification,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_mdns_create(NX_MDNS *mdns_ptr, NX_IP *ip_ptr, NX_PACKET_POOL *packet_pool,
@@ -435,24 +442,16 @@ UINT    host_name_size;
     _nx_mdns_created_ptr = mdns_ptr;
 
 #ifndef NX_MDNS_DISABLE_SERVER
-    /* Register IP address change callback. */
-    status = nx_ip_address_change_notify(mdns_ptr -> nx_mdns_ip_ptr, _nx_mdns_ip_address_change_notify, NX_NULL);
 
-    /* Check for error */
-    if (status)
-    {
-        return(status);
-    }
+#ifndef NX_DISABLE_IPV4
+    /* Setup the IP address change callback function. */
+    ip_ptr -> nx_ip_address_change_notify_internal = _nx_mdns_ip_address_change_notify;
+#endif /* NX_DISABLE_IPV4 */
 
 #ifdef NX_MDNS_ENABLE_IPV6
-    /* Register IPv6 address change callback. */
-    status = nxd_ipv6_address_change_notify(mdns_ptr -> nx_mdns_ip_ptr, _nx_mdns_ipv6_address_change_notify);
 
-    /* Check for error */
-    if (status)
-    {
-        return(status);
-    }
+    /* Setup the IPv6 address change callback function. */
+    ip_ptr -> nx_ipv6_address_change_notify_internal =  _nx_mdns_ipv6_address_change_notify;
 #endif /* NX_MDNS_ENABLE_IPV6  */
 #endif /* NX_MDNS_DISABLE_SERVER */
 
@@ -608,7 +607,7 @@ UINT    host_name_size;
     mdns_ptr -> nx_mdns_id = NX_MDNS_ID;
 
     /* The random delay of first probing for RR. */
-    mdns_ptr -> nx_mdns_first_probing_delay = (ULONG)(1 + (NX_RAND() % NX_MDNS_PROBING_TIMER_COUNT));
+    mdns_ptr -> nx_mdns_first_probing_delay = (ULONG)(1 + (((ULONG)NX_RAND()) % NX_MDNS_PROBING_TIMER_COUNT));
 
     /* Return a successful status.  */
     return(NX_SUCCESS);
@@ -3100,7 +3099,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_one_shot_query                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3144,6 +3143,9 @@ UINT    status;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_one_shot_query(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, NX_MDNS_SERVICE *service, UINT timeout)
@@ -3231,7 +3233,7 @@ UINT        name_length;
 
                     /* Release the mDNS mutex.  */
                     tx_mutex_put(&(mdns_ptr -> nx_mdns_mutex));
-                    return (status);
+                    return (NX_MDNS_DATA_SIZE_ERROR);
                 }
                 memcpy((char *)(service -> buffer), (char*)(answer_rr -> nx_mdns_rr_name), name_length); /* Use case of memcpy is verified. */
             }
@@ -3244,7 +3246,7 @@ UINT        name_length;
 
                     /* Release the mDNS mutex.  */
                     tx_mutex_put(&(mdns_ptr -> nx_mdns_mutex));
-                    return (status);
+                    return (NX_MDNS_DATA_SIZE_ERROR);
                 }
                 memcpy((CHAR *)(service -> buffer), (CHAR *)(answer_rr -> nx_mdns_rr_rdata.nx_mdns_rr_rdata_ptr.nx_mdns_rr_ptr_name), name_length); /* Use case of memcpy is verified. */
             }
@@ -3280,7 +3282,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_one_shot_query                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3327,6 +3329,10 @@ UINT        name_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_one_shot_query(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, NX_MDNS_RR **out_rr, ULONG wait_option, UINT interface_index)
@@ -3394,7 +3400,7 @@ UINT        name_length;
         temp_resource_record.nx_mdns_rr_word = (temp_resource_record.nx_mdns_rr_word | NX_MDNS_RR_FLAG_PEER);
 
         /* Set the interface index.  */
-        temp_resource_record.nx_mdns_rr_interface_index = interface_index;
+        temp_resource_record.nx_mdns_rr_interface_index = (UCHAR)interface_index;
 
         /* Add the resource record.  */
         status = _nx_mdns_cache_add_resource_record(mdns_ptr, NX_MDNS_CACHE_TYPE_PEER, &temp_resource_record, &insert_rr, NX_NULL);
@@ -3410,7 +3416,7 @@ UINT        name_length;
 
         /* A multicast DNS querier should also delay the first query of the series by 
            a randomly chosen amount in the range 20-120ms.  */
-        insert_rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (NX_RAND() % NX_MDNS_QUERY_DELAY_RANGE));
+        insert_rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_QUERY_DELAY_RANGE));
         insert_rr -> nx_mdns_rr_retransmit_lifetime = NX_MDNS_TIMER_COUNT_RANGE;
 
         /* Set the mDNS timer.  */
@@ -3716,7 +3722,7 @@ UINT        i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_continuous_query                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3759,6 +3765,10 @@ UINT        i;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_continuous_query(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, UINT interface_index)
@@ -3815,7 +3825,7 @@ UINT        name_length;
     }
 
     /* Set the interface index.  */
-    temp_resource_record.nx_mdns_rr_interface_index = interface_index;
+    temp_resource_record.nx_mdns_rr_interface_index = (UCHAR)interface_index;
 
     /* Add the resource record.  */
     status = _nx_mdns_cache_add_resource_record(mdns_ptr, NX_MDNS_CACHE_TYPE_PEER, &temp_resource_record, &insert_rr, NX_NULL);
@@ -3831,7 +3841,7 @@ UINT        name_length;
 
     /* A multicast DNS querier should also delay the first query of the series by 
         a randomly chosen amount in the range 20-120ms.  */
-    insert_rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (NX_RAND() % NX_MDNS_QUERY_DELAY_RANGE));
+    insert_rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_QUERY_DELAY_RANGE));
     insert_rr -> nx_mdns_rr_retransmit_lifetime = NX_MDNS_TIMER_COUNT_RANGE;
 
     /* Set the mDNS timer.  */
@@ -4190,7 +4200,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_lookup                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4235,6 +4245,9 @@ UINT    status;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_lookup(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, UINT service_index, NX_MDNS_SERVICE *service)
@@ -4304,7 +4317,7 @@ UINT        target_string_length;
 
             /* Release the mDNS mutex.  */
             tx_mutex_put(&(mdns_ptr -> nx_mdns_mutex));
-            return (status);
+            return (NX_MDNS_DATA_SIZE_ERROR);
         }
     }
 
@@ -4314,7 +4327,7 @@ UINT        target_string_length;
 
         /* Release the mDNS mutex.  */
         tx_mutex_put(&(mdns_ptr -> nx_mdns_mutex));
-        return (status);
+        return (NX_MDNS_DATA_SIZE_ERROR);
     }
 
     /* Loop to search local and peer cache.  */
@@ -5655,7 +5668,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_rr_parameter_set                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5695,6 +5708,9 @@ UINT        name_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_rr_parameter_set(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, ULONG ttl, UINT rdata_length,
@@ -5723,7 +5739,7 @@ UINT        name_length;
         return(status);
 
     /* Set the parameters.  */
-    rr_record -> nx_mdns_rr_interface_index = interface_index;
+    rr_record -> nx_mdns_rr_interface_index = (UCHAR)interface_index;
     rr_record -> nx_mdns_rr_type = type;
     rr_record -> nx_mdns_rr_class = NX_MDNS_RR_CLASS_IN;
     rr_record -> nx_mdns_rr_ttl = ttl;
@@ -6766,7 +6782,7 @@ UINT        active;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_timer_event_process                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6808,6 +6824,10 @@ UINT        active;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_mdns_timer_event_process(NX_MDNS *mdns_ptr)
@@ -6881,9 +6901,9 @@ UINT        rr_name_length;
             }
 
             /* Calculate the time interval for two responses.*/
-            if (p -> nx_mdns_rr_response_interval > (UCHAR)mdns_ptr -> nx_mdns_timer_min_count)
+            if (p -> nx_mdns_rr_response_interval > mdns_ptr -> nx_mdns_timer_min_count)
             {
-                p -> nx_mdns_rr_response_interval = (UCHAR)(p -> nx_mdns_rr_response_interval - mdns_ptr -> nx_mdns_timer_min_count);
+                p -> nx_mdns_rr_response_interval = (ULONG)(p -> nx_mdns_rr_response_interval - mdns_ptr -> nx_mdns_timer_min_count);
 
                 /* Compare the timer count.and set the minimum timer count. */
                 if ((p -> nx_mdns_rr_response_interval != 0) &&
@@ -7201,7 +7221,7 @@ UINT        rr_name_length;
                             p -> nx_mdns_rr_retransmit_count = NX_MDNS_RR_UPDATE_COUNT;
 
                             /* 50% of the record lifetime has elapsed,the querier should plan to issure a query at 80%-82% of the record lifetime */
-                            p -> nx_mdns_rr_timer_count = p -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(30 + (NX_RAND() % 3)) / 100;
+                            p -> nx_mdns_rr_timer_count = p -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(30 + (((ULONG)NX_RAND()) % 3)) / 100;
                         }
                         else
                         {
@@ -7236,7 +7256,7 @@ UINT        rr_name_length;
 
                             /* mDNS Responder MUST NOT multicast a record until at least one second has elapsed since the last time that record was multicast. RFC6762, Section6, Page16.  */
                             /* Set the next response time interval.  */
-                            p -> nx_mdns_rr_response_interval = (UCHAR)(NX_MDNS_RESPONSE_INTERVAL + NX_MDNS_TIMER_COUNT_RANGE);
+                            p -> nx_mdns_rr_response_interval = (ULONG)(NX_MDNS_RESPONSE_INTERVAL + NX_MDNS_TIMER_COUNT_RANGE);
 
                             /* Compare the timer count.and set the minimum timer count. */
                             if (p -> nx_mdns_rr_response_interval < timer_min_count)
@@ -7344,7 +7364,7 @@ UINT        rr_name_length;
                             while(remaining_ticks > p -> nx_mdns_rr_timer_count)
                                 remaining_ticks -= p -> nx_mdns_rr_timer_count;
 
-                            p -> nx_mdns_rr_timer_count = remaining_ticks + (p -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(NX_RAND() % 3) / 100);
+                            p -> nx_mdns_rr_timer_count = remaining_ticks + (p -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(((ULONG)NX_RAND()) % 3) / 100);
                         }
 
                         /* Compare the timer count.and set the minimum timer count. */
@@ -7463,6 +7483,7 @@ static VOID _nx_mdns_udp_receive_notify(NX_UDP_SOCKET *socket_ptr)
 }
 
 #ifndef NX_MDNS_DISABLE_SERVER
+#ifndef NX_DISABLE_IPV4
 /**************************************************************************/ 
 /*                                                                        */ 
 /*  FUNCTION                                               RELEASE        */ 
@@ -7519,6 +7540,7 @@ static VOID _nx_mdns_ip_address_change_notify(NX_IP *ip_ptr, VOID *additional_in
 
     return;
 }
+#endif /* NX_DISABLE_IPV4 */
 
 
 /**************************************************************************/ 
@@ -7791,7 +7813,7 @@ UINT             interface_index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_process                             PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7840,6 +7862,10 @@ UINT             interface_index;
 /*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
 /*                                            resulting in version 6.1.4  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_process(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UINT interface_index)
@@ -8054,7 +8080,7 @@ NX_MDNS_RR         *nsec_rr;
                            Responders SHOULD delay their responses by a random amount of time selected with uniform random distribution in the range 400-500ms. RFC6762, Section6, Page 15.  */
                         if (mdns_flags & NX_MDNS_TC_FLAG)
                         {            
-                            p -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_TC_DELAY_MIN + (NX_RAND() % NX_MDNS_RESPONSE_TC_DELAY_RANGE));
+                            p -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_TC_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_RESPONSE_TC_DELAY_RANGE));
                         }
                         else
                         {
@@ -8064,7 +8090,7 @@ NX_MDNS_RR         *nsec_rr;
                             if (authority_count)
                             {
                                 if (p -> nx_mdns_rr_response_interval > (NX_MDNS_RESPONSE_INTERVAL - NX_MDNS_RESPONSE_PROBING_TIMER_COUNT))
-                                    p -> nx_mdns_rr_response_interval = (UCHAR)(p -> nx_mdns_rr_response_interval - (NX_MDNS_RESPONSE_INTERVAL - NX_MDNS_RESPONSE_PROBING_TIMER_COUNT));
+                                    p -> nx_mdns_rr_response_interval = (ULONG)(p -> nx_mdns_rr_response_interval - (NX_MDNS_RESPONSE_INTERVAL - NX_MDNS_RESPONSE_PROBING_TIMER_COUNT));
                                 else
                                     p -> nx_mdns_rr_response_interval = 0;
                             }                                 
@@ -8081,7 +8107,7 @@ NX_MDNS_RR         *nsec_rr;
                                 else
                                 {
                                     /* Set the timer count, delay 20-120ms.  */
-                                    p -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_SHARED_DELAY_MIN + (NX_RAND() % NX_MDNS_RESPONSE_SHARED_DELAY_RANGE));
+                                    p -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_SHARED_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_RESPONSE_SHARED_DELAY_RANGE));
                                 }
                             }
                             else
@@ -8158,7 +8184,7 @@ NX_MDNS_RR         *nsec_rr;
                         rr_search -> nx_mdns_rr_send_flag = NX_MDNS_RR_SEND_MULTICAST;
 
                         /* Set the timer count, delay 20-120ms.  */
-                        rr_search -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_SHARED_DELAY_MIN + (NX_RAND() % NX_MDNS_RESPONSE_SHARED_DELAY_RANGE));
+                        rr_search -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_SHARED_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_RESPONSE_SHARED_DELAY_RANGE));
 
                         /* Set the mDNS timer.  */
                         _nx_mdns_timer_set(mdns_ptr, rr_search, rr_search -> nx_mdns_rr_timer_count);
@@ -9635,7 +9661,7 @@ UINT        rr_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_rr_set                              PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9680,6 +9706,9 @@ UINT        rr_name_length;
 /*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
 /*                                            resulting in version 6.1.4  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), improved */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_rr_set(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, NX_MDNS_RR *rr_ptr, UINT op, UINT interface_index)
@@ -9718,7 +9747,7 @@ UINT            temp_string_length;
     }
 
     /* Set the interface.  */
-    rr_ptr -> nx_mdns_rr_interface_index = interface_index;
+    rr_ptr -> nx_mdns_rr_interface_index = (UCHAR)interface_index;
 
     /* Process the name string.  */
     if (_nx_mdns_name_string_decode(packet_ptr -> nx_packet_prepend_ptr, 
@@ -9793,7 +9822,7 @@ UINT            temp_string_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_rr_process                          PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9841,6 +9870,10 @@ UINT            temp_string_length;
 /*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
 /*                                            resulting in version 6.1.4  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_rr_process(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, UINT interface_index)
@@ -9919,7 +9952,7 @@ UINT            rr_name_length;
     }
 
     /* Set the interface index.  */
-    rr_ptr.nx_mdns_rr_interface_index = interface_index;
+    rr_ptr.nx_mdns_rr_interface_index = (UCHAR)interface_index;
 
     /* Set the rdata information for answer record.  */
     status = _nx_mdns_packet_rr_data_set(mdns_ptr, packet_ptr, data_ptr, &rr_ptr, NX_MDNS_RR_OP_PEER_ADD_ANSWER);
@@ -10067,7 +10100,7 @@ UINT            rr_name_length;
                 {
 
                     /* Set the timer count. */
-                    p -> nx_mdns_rr_timer_count = insert_ptr -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(80 + (NX_RAND() % 3)) / 100;
+                    p -> nx_mdns_rr_timer_count = insert_ptr -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(80 + (((ULONG)NX_RAND()) % 3)) / 100;
 
                     /* Set the mDNS timer.  */
                     _nx_mdns_timer_set(mdns_ptr, p, p -> nx_mdns_rr_timer_count);
@@ -12887,7 +12920,7 @@ UINT            cache_count = 1;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_query_check                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12924,6 +12957,9 @@ UINT            cache_count = 1;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_query_check(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, UINT one_shot, NX_MDNS_RR **search_rr, UINT interface_index)
@@ -13007,7 +13043,7 @@ UINT        name_length;
 
         /* A multicast DNS querier should also delay the first query of the series by 
            a randomly chosen amount in the range 20-120ms.  */
-        rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (NX_RAND() % NX_MDNS_QUERY_DELAY_RANGE));
+        rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_QUERY_DELAY_RANGE));
         rr -> nx_mdns_rr_retransmit_lifetime = NX_MDNS_TIMER_COUNT_RANGE;
 
         /* Set the mDNS timer.  */

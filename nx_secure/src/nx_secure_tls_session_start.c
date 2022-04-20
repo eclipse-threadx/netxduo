@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_start                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -77,6 +77,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            supported chained packet,   */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), removed  */
+/*                                            internal unreachable logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_start(NX_SECURE_TLS_SESSION *tls_session, NX_TCP_SOCKET *tcp_socket,
@@ -184,7 +187,7 @@ NX_PACKET *send_packet;
        or an error/timeout occurs. */
     status = _nx_secure_tls_handshake_process(tls_session, wait_option);
 
-    if ((status == NX_CONTINUE) && (wait_option == 0))
+    if (status == NX_CONTINUE)
     {
         
         /* It is non blocking mode. */

@@ -6635,7 +6635,7 @@ UINT  _nxe_http_server_get_entity_header(NX_HTTP_SERVER *server_ptr, NX_PACKET *
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_http_server_get_entity_header                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6677,6 +6677,9 @@ UINT  _nxe_http_server_get_entity_header(NX_HTTP_SERVER *server_ptr, NX_PACKET *
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed write underflow,      */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memmove use cases, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_get_entity_header(NX_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, UCHAR *entity_header_buffer, ULONG buffer_size)
@@ -6780,7 +6783,7 @@ UINT                        index;
             /* Leave boundary string only. */
             memmove(&multipart_ptr -> nx_http_server_multipart_boundary[4],
                     &multipart_ptr -> nx_http_server_multipart_boundary[index],
-                    quotation_index - index + 1);
+                    quotation_index - index + 1); /* Use case of memmove is verified.  */
         }
         else
         {

@@ -32,7 +32,7 @@ static UCHAR _nx_secure_client_padded_pre_master[600];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_client_key_exchange             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -75,6 +75,11 @@ static UCHAR _nx_secure_client_padded_pre_master[600];
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Zhen Kong                Modified comment(s), improved */
+/*                                            internal logic to check data*/
+/*                                            size and then improved code */
+/*                                            coverage, resulting in      */
+/*                                            version 6.1.11              */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_client_key_exchange(NX_SECURE_TLS_SESSION *tls_session,
@@ -214,6 +219,16 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
             /* If using RSA, the length is equal to the key size. */
             data_size = remote_certificate -> nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus_length;
 
+            /* check data_size */
+            if ((data_size < NX_SECURE_TLS_RSA_PREMASTER_SIZE + 1) ||
+                (((ULONG)(send_packet -> nx_packet_data_end) - (ULONG)(send_packet -> nx_packet_append_ptr)) < (2u + data_size)))
+            {
+                _nx_secure_tls_remote_certificate_free_all(tls_session);
+
+                /* Invalid certificate modulus length. */
+                return(NX_SECURE_TLS_INVALID_CERTIFICATE);
+            }
+
             /* PKCS#1 v1.5 padding. The scheme is to start with the block type (0x00, 0x02 for PKCS#1)
                then pad with non-zero bytes (random is cryptographically more secure), followed with
                a single 0 byte right before the payload, which comes at the end of the RSA block. */
@@ -227,15 +242,6 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
                     rand_byte = (UCHAR)NX_RAND();
                 } while (rand_byte == 0);
                 _nx_secure_client_padded_pre_master[i] = rand_byte;
-            }
-
-            if ((data_size < NX_SECURE_TLS_RSA_PREMASTER_SIZE) ||
-                (((ULONG)(send_packet -> nx_packet_data_end) - (ULONG)(send_packet -> nx_packet_append_ptr)) < (2u + data_size)))
-            {
-                _nx_secure_tls_remote_certificate_free_all(tls_session);
-
-                /* Invalid certificate modulus length. */
-                return(NX_SECURE_TLS_INVALID_CERTIFICATE);
             }
 
             /* Now put the pre-master data into the padded buffer - must be at the end. */

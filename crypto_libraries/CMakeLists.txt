@@ -45,7 +45,6 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_crypto_method_self_test_rsa.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_crypto_method_self_test_sha.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_crypto_methods.c
-	${CMAKE_CURRENT_LIST_DIR}/src/nx_crypto_module_start.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_crypto_null_cipher.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_crypto_phash.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_crypto_pkcs1_v1.5.c

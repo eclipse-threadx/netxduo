@@ -493,6 +493,7 @@ NX_PACKET  *resp_packet_ptr;
 UINT        status;
 NXD_ADDRESS server_ip;
 UINT        length = 0;
+CHAR       *ip_addr_string;
 
 #ifdef FEATURE_NX_IPV6
 UINT  address_index;
@@ -514,7 +515,8 @@ UINT  interface_index;
 #ifndef NX_DISABLE_IPV4
     server_ip.nxd_ip_version = NX_IP_VERSION_V4;
     server_ip.nxd_ip_address.v4 = nx_iperf_test_ip -> nx_ip_interface[0].nx_interface_ip_address;
-    status += htmlwrite(resp_packet_ptr, nx_iperf_get_ip_addr_string(&server_ip, &length), length);
+    ip_addr_string = nx_iperf_get_ip_addr_string(&server_ip, &length);
+    status += htmlwrite(resp_packet_ptr, ip_addr_string, length);
     status += htmlwrite(resp_packet_ptr, "\n", sizeof("\n") - 1);
 #endif
 
@@ -528,7 +530,8 @@ UINT  interface_index;
         /* Get the IPv6 address.  */
         if (nxd_ipv6_address_get(nx_iperf_test_ip, address_index, &server_ip, &prefix_length, &interface_index) == NX_SUCCESS)
         {
-            status += htmlwrite(resp_packet_ptr, nx_iperf_get_ip_addr_string(&server_ip, &length), length);
+            ip_addr_string = nx_iperf_get_ip_addr_string(&server_ip, &length);
+            status += htmlwrite(resp_packet_ptr, ip_addr_string, length);
             status += htmlwrite(resp_packet_ptr, "\n", sizeof("\n") - 1);
             address_index++;
         }
@@ -552,7 +555,8 @@ UINT  interface_index;
 
     status = nx_packet_allocate(server_ptr -> nx_web_http_server_packet_pool_ptr, &resp_packet_ptr, NX_TCP_PACKET, NX_WAIT_FOREVER);
     status += htmlwrite(resp_packet_ptr, udptxsubmittag1, sizeof(udptxsubmittag1) - 1);
-    status += htmlwrite(resp_packet_ptr, nx_iperf_get_ip_addr_string(&udp_tx_ip_address, &length), length);
+    ip_addr_string = nx_iperf_get_ip_addr_string(&udp_tx_ip_address, &length);
+    status += htmlwrite(resp_packet_ptr, ip_addr_string, length);
     status += htmlwrite(resp_packet_ptr, udptxsubmittag2, sizeof(udptxsubmittag2) - 1);
     length = _nx_utility_uint_to_string(udp_tx_port, 10, mytempstring, sizeof(mytempstring));
     status += htmlwrite(resp_packet_ptr, mytempstring, length);
@@ -586,7 +590,8 @@ UINT  interface_index;
 
     status = nx_packet_allocate(server_ptr -> nx_web_http_server_packet_pool_ptr, &resp_packet_ptr, NX_TCP_PACKET, NX_WAIT_FOREVER);
     status += htmlwrite(resp_packet_ptr, tcptxsubmittag1, sizeof(tcptxsubmittag1) - 1);
-    status += htmlwrite(resp_packet_ptr, nx_iperf_get_ip_addr_string(&tcp_tx_ip_address, &length), length);
+    ip_addr_string = nx_iperf_get_ip_addr_string(&tcp_tx_ip_address, &length);
+    status += htmlwrite(resp_packet_ptr, ip_addr_string, length);
     status += htmlwrite(resp_packet_ptr, tcptxsubmittag2, sizeof(tcptxsubmittag2) - 1);
     length = _nx_utility_uint_to_string(tcp_tx_port, 10, mytempstring, sizeof(mytempstring));
     status += htmlwrite(resp_packet_ptr, mytempstring, length);
@@ -938,10 +943,26 @@ UINT      length;
 static void nx_iperf_send_image(NX_WEB_HTTP_SERVER *server_ptr, UCHAR *img, UINT imgsize)
 {
 
-UINT   remaining;
-UCHAR *position;
-UINT   max_size;
-UINT   status;
+UINT       remaining;
+UCHAR     *position;
+UINT       max_size;
+UINT       status;
+NX_PACKET *resp_packet_ptr;
+
+    /* Generate HTTP header.  */
+    status = nx_web_http_server_callback_generate_response_header(server_ptr,
+                                                                  &resp_packet_ptr, NX_WEB_HTTP_STATUS_OK, imgsize, "image/jpeg", NX_NULL);
+    if (status)
+    {
+        return;
+    }
+
+    status = nx_web_http_server_callback_packet_send(server_ptr, resp_packet_ptr);
+    if (status)
+    {
+        nx_packet_release(resp_packet_ptr);
+        return;
+    }
 
     status = nx_tcp_socket_mss_get(&(server_ptr -> nx_web_http_server_current_session_ptr -> nx_tcp_session_socket), (ULONG *)&max_size);
     if (status)
@@ -1098,6 +1119,7 @@ static void nx_iperf_print_tcp_rx_results(NX_WEB_HTTP_SERVER *server_ptr, NXD_AD
 UINT       status;
 NX_PACKET *resp_packet_ptr;
 UINT       length = 0;
+CHAR      *ip_addr_string;
 
     status = nx_packet_allocate(server_ptr -> nx_web_http_server_packet_pool_ptr,
                                 &resp_packet_ptr,
@@ -1120,7 +1142,8 @@ UINT       length = 0;
     status += htmlwrite(resp_packet_ptr, tdtag, sizeof(tdtag) - 1);
     status += htmlwrite(resp_packet_ptr, fonttag, sizeof(fonttag) - 1);
     status += htmlwrite(resp_packet_ptr, "Source IP Address: ", sizeof("Source IP Address: ") - 1);
-    status += htmlwrite(resp_packet_ptr, nx_iperf_get_ip_addr_string(peer_ip_address, &length), length);
+    ip_addr_string = nx_iperf_get_ip_addr_string(peer_ip_address, &length);
+    status += htmlwrite(resp_packet_ptr, ip_addr_string, length);
     status += htmlwrite(resp_packet_ptr, fontendtag, sizeof(fontendtag) - 1);
     status += htmlwrite(resp_packet_ptr, tdendtag, sizeof(tdendtag) - 1);
     status += htmlwrite(resp_packet_ptr, trendtag, sizeof(trendtag) - 1);
@@ -1198,6 +1221,7 @@ static void nx_iperf_print_tcp_tx_results(NX_WEB_HTTP_SERVER *server_ptr, NXD_AD
 UINT       status;
 NX_PACKET *resp_packet_ptr;
 UINT       length = 0;
+CHAR      *ip_addr_string;
 
     status = nx_packet_allocate(server_ptr -> nx_web_http_server_packet_pool_ptr,
                                 &resp_packet_ptr,
@@ -1220,7 +1244,8 @@ UINT       length = 0;
     status += htmlwrite(resp_packet_ptr, tdtag, sizeof(tdtag) - 1);
     status += htmlwrite(resp_packet_ptr, fonttag, sizeof(fonttag) - 1);
     status += htmlwrite(resp_packet_ptr, "Destination IP Address: ", sizeof("Destination IP Address: ") - 1);
-    status += htmlwrite(resp_packet_ptr, nx_iperf_get_ip_addr_string(peer_ip_address, &length), length);
+    ip_addr_string = nx_iperf_get_ip_addr_string(peer_ip_address, &length);
+    status += htmlwrite(resp_packet_ptr, ip_addr_string, length);
     status += htmlwrite(resp_packet_ptr, fontendtag, sizeof(fontendtag) - 1);
     status += htmlwrite(resp_packet_ptr, tdendtag, sizeof(tdendtag) - 1);
     status += htmlwrite(resp_packet_ptr, trendtag, sizeof(trendtag) - 1);
@@ -1308,6 +1333,7 @@ static void nx_iperf_print_udp_rx_results(NX_WEB_HTTP_SERVER *server_ptr, NXD_AD
 UINT       status;
 NX_PACKET *resp_packet_ptr;
 UINT       length = 0;
+CHAR      *ip_addr_string;
 
     status = nx_packet_allocate(server_ptr -> nx_web_http_server_packet_pool_ptr,
                                 &resp_packet_ptr,
@@ -1331,7 +1357,8 @@ UINT       length = 0;
     status += htmlwrite(resp_packet_ptr, tdtag, sizeof(tdtag) - 1);
     status += htmlwrite(resp_packet_ptr, fonttag, sizeof(fonttag) - 1);
     status += htmlwrite(resp_packet_ptr, "Source IP Address: ", sizeof("Source IP Address: ") - 1);
-    status += htmlwrite(resp_packet_ptr, nx_iperf_get_ip_addr_string(peer_ip_address, &length), length);
+    ip_addr_string = nx_iperf_get_ip_addr_string(peer_ip_address, &length);
+    status += htmlwrite(resp_packet_ptr, ip_addr_string, length);
     status += htmlwrite(resp_packet_ptr, fontendtag, sizeof(fontendtag) - 1);
     status += htmlwrite(resp_packet_ptr, tdendtag, sizeof(tdendtag) - 1);
     status += htmlwrite(resp_packet_ptr, trendtag, sizeof(trendtag) - 1);
@@ -1408,6 +1435,7 @@ static void nx_iperf_print_udp_tx_results(NX_WEB_HTTP_SERVER *server_ptr, NXD_AD
 UINT       status;
 NX_PACKET *resp_packet_ptr;
 UINT       length = 0;
+CHAR      *ip_addr_string;
 
     status = nx_packet_allocate(server_ptr -> nx_web_http_server_packet_pool_ptr,
                                 &resp_packet_ptr,
@@ -1431,7 +1459,8 @@ UINT       length = 0;
     status += htmlwrite(resp_packet_ptr, tdtag, sizeof(tdtag) - 1);
     status += htmlwrite(resp_packet_ptr, fonttag, sizeof(fonttag) - 1);
     status += htmlwrite(resp_packet_ptr, "Destination IP Address: ", sizeof("Destination IP Address: ") - 1);
-    status += htmlwrite(resp_packet_ptr, nx_iperf_get_ip_addr_string(peer_ip_address, &length), length);
+    ip_addr_string = nx_iperf_get_ip_addr_string(peer_ip_address, &length);
+    status += htmlwrite(resp_packet_ptr, ip_addr_string, length);
     status += htmlwrite(resp_packet_ptr, fontendtag, sizeof(fontendtag) - 1);
     status += htmlwrite(resp_packet_ptr, tdendtag, sizeof(tdendtag) - 1);
     status += htmlwrite(resp_packet_ptr, trendtag, sizeof(trendtag) - 1);

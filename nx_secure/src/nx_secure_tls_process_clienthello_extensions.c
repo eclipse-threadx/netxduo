@@ -718,7 +718,7 @@ UCHAR expected_signature = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_clienthello_keyshare_extension  PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -758,6 +758,9 @@ UCHAR expected_signature = 0;
 /*                                            TLS 1.3 and disabling TLS   */
 /*                                            server,                     */
 /*                                            resulting in version 6.1.9  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), removed  */
+/*                                            public key format checking, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
@@ -774,7 +777,6 @@ USHORT  offset;
 USHORT key_share_length;
 USHORT key_group;
 USHORT key_length;
-UCHAR  legacy_form;
 NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecc_key_data;
 UCHAR                                *pubkey;
 UCHAR                                *private_key;
@@ -876,16 +878,6 @@ NX_SECURE_TLS_ECC *ecc_info;
     {
         tls_session -> nx_secure_tls_server_state = NX_SECURE_TLS_SERVER_STATE_SEND_HELLO_RETRY;
         return(NX_SUCCESS);
-    }
-
-    /* Extract the legacy form value. NOTE: the form must be included in the ECC calculations below
-      so don't advance the offset! */
-    legacy_form = pubkey[0];
-
-    if(legacy_form != 0x4)
-    {
-        /* In TLS 1.3, the only valid form is 0x4. */
-        return(NX_SECURE_TLS_BAD_CLIENTHELLO_KEYSHARE);
     }
 
     /* Get the curve method to initialize the remote public key data. */

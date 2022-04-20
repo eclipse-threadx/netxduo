@@ -38,7 +38,7 @@ static UCHAR decrypted_signature[512];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_server_key_exchange           PORTABLE C     */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -84,6 +84,9 @@ static UCHAR decrypted_signature[512];
 /*                                            ECC find curve method,      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed unnecessary code,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_server_key_exchange(NX_SECURE_TLS_SESSION *tls_session,
@@ -232,13 +235,9 @@ UINT                                  i;
         /* Find out which named curve the server is using. */
         status = _nx_secure_tls_find_curve_method(tls_session, (USHORT)((packet_buffer[1] << 8) + packet_buffer[2]), &curve_method, NX_NULL);
 
-        if(status != NX_SUCCESS)
+        if (status != NX_SUCCESS)
         {
-            return(status);
-        }
 
-        if (curve_method == NX_NULL)
-        {
             /* The remote server is using an unsupported curve. */
             return(NX_SECURE_TLS_UNSUPPORTED_ECC_CURVE);
         }
@@ -248,7 +247,7 @@ UINT                                  i;
         /* Get reference to remote server certificate so we can get the public key for signature verification. */
         status = _nx_secure_x509_remote_endpoint_certificate_get(&tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store,
                                                                  &server_certificate);
-        if (status || server_certificate == NX_NULL)
+        if (status)
         {
             /* No certificate found, error! */
             return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
@@ -750,11 +749,7 @@ UINT                                  i;
 
             if(status != NX_SUCCESS)
             {
-                return(status);
-            }
 
-            if (curve_method_cert == NX_NULL)
-            {
                 /* The remote certificate is using an unsupported curve. */
                 return(NX_SECURE_TLS_UNSUPPORTED_ECC_CURVE);
             }

@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_remote_certificate           PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -84,6 +84,9 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            updated X.509 return value, */
 /*                                            resulting in version 6.1.6  */
+/*  04-25-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            removed unnecessary code,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_remote_certificate(NX_SECURE_TLS_SESSION *tls_session,
@@ -315,11 +318,8 @@ ULONG                cert_buf_size;
     /* ======================== Save off the endpoint certificate for later use. =============================*/
     /* Get the endpoint from the certificates we just parsed. */
     status = _nx_secure_x509_remote_endpoint_certificate_get(&tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store,
-                                                            &certificate);
-    if(status != NX_SUCCESS)                                                             
-    {
-        return(status);
-    }    
+                                                             &certificate);
+    NX_ASSERT(status == NX_SUCCESS);
 
     /* If the endpoint certificate was NOT allocated by the user application, we need to
         make a copy and save it for later use. */
@@ -350,13 +350,6 @@ ULONG                cert_buf_size;
             /* No remote certificates added. Instead try extracting space from packet buffer. */
             cert_buffer = &tls_session -> nx_secure_tls_packet_buffer[data_length];
             cert_buf_size = tls_session -> nx_secure_tls_packet_buffer_size - data_length;
-
-            if (cert_buf_size < sizeof(NX_SECURE_X509_CERT))
-            {
-
-                /* Not enough space to allocate the X.509 structure. */
-                return(NX_SECURE_TLS_INSUFFICIENT_CERT_SPACE);
-            }
 
             /* Get space for the parsing structure. */
             cert_buf_size -= sizeof(NX_SECURE_X509_CERT);
@@ -390,38 +383,15 @@ ULONG                cert_buf_size;
 
         /* Re-parse the certificate using the original data. */
         status = _nx_secure_x509_certificate_parse(certificate -> nx_secure_x509_certificate_raw_data, endpoint_length, &bytes_processed, certificate);
+        NX_ASSERT(status == NX_SUCCESS);
 
         /* Get the protection. */
         tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-        /* Make sure we parsed a valid certificate. */
-        if (status != NX_SUCCESS)
-        {
-
-            /* Translate some X.509 return values into TLS return values. */
-            if (status == NX_SECURE_X509_UNSUPPORTED_PUBLIC_CIPHER)
-            {
-                return(NX_SECURE_TLS_UNSUPPORTED_PUBLIC_CIPHER);
-            }
-
-            return(status);
-        }
     
         /* Re-add the remote endpoint certificate for later use. */
         status = _nx_secure_x509_certificate_list_add(&tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store.nx_secure_x509_remote_certificates,
-                                                        certificate, NX_TRUE);
-
-        if (status != NX_SUCCESS)
-        {
-
-            /* Translate some X.509 return values into TLS return values. */
-            if (status == NX_SECURE_X509_CERT_ID_DUPLICATE)
-            {
-                return(NX_SECURE_TLS_CERT_ID_DUPLICATE);
-            }
-
-            return(status);
-        }
+                                                      certificate, NX_TRUE);
+        NX_ASSERT(status == NX_SUCCESS);
 
         /* Make sure the certificate has it's cipher table initialized. */
         certificate -> nx_secure_x509_cipher_table = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table;

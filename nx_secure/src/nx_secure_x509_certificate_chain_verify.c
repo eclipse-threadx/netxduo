@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_chain_verify            PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,6 +73,9 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            removed dependency on TLS,  */
 /*                                            resulting in version 6.1.6  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            reorganized internal logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_chain_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
@@ -93,15 +96,6 @@ INT                  compare_result;
 
     /* Get working pointer to certificate chain entry. */
     current_certificate = certificate;
-
-    if (current_certificate == NX_CRYPTO_NULL)
-    {
-#ifdef NX_CRYPTO_STANDALONE_ENABLE
-        return(NX_CRYPTO_PTR_ERROR);
-#else
-        return(NX_PTR_ERROR);
-#endif /* NX_CRYPTO_STANDALONE_ENABLE */
-    }
 
     while (current_certificate != NX_CRYPTO_NULL)
     {
@@ -163,7 +157,7 @@ INT                  compare_result;
                     return(NX_SECURE_X509_SUCCESS);
                 }
                 /* Self-signed certificate is not trusted. */
-                return(NX_SECURE_X509_CHAIN_VERIFY_FAILURE);
+                break;
             }
 #endif
         }
@@ -172,7 +166,7 @@ INT                  compare_result;
         current_certificate = issuer_certificate;
     } /* End while. */
 
-    /* Certificate is valid. */
+    /* Certificate is invalid. */
     return(NX_SECURE_X509_CHAIN_VERIFY_FAILURE);
 }
 

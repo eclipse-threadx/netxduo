@@ -622,7 +622,7 @@ az_result core_result;
     buffer_size = (UINT)(packet_ptr -> nx_packet_data_end - packet_ptr -> nx_packet_prepend_ptr);
 
     status = nx_azure_iot_mqtt_packet_id_get(&(prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_mqtt),
-                                             packet_id, wait_option);
+                                             packet_id);
     if (status)
     {
         LogError(LogLiteralArgs("failed to get packetId "));

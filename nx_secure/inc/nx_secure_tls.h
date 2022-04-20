@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -82,6 +82,9 @@
 /*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            updated product constants,  */
 /*                                            resulting in version 6.1.10 */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            enabled AEAD for TLS 1.3,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -127,7 +130,7 @@ extern   "C" {
 
 #include "nx_secure_x509.h"
 
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE)
+#if defined(NX_SECURE_TLS_ENABLE_TLS_1_3) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE)
 #ifndef NX_SECURE_ENABLE_AEAD_CIPHER
 #define NX_SECURE_ENABLE_AEAD_CIPHER
 #endif /* NX_SECURE_ENABLE_AEAD_CIPHER */
@@ -142,7 +145,7 @@ extern   "C" {
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
 #define NETX_SECURE_MINOR_VERSION                       1
-#define NETX_SECURE_PATCH_VERSION                       10
+#define NETX_SECURE_PATCH_VERSION                       11
 
 /* The following symbols are defined for backward compatibility reasons. */
 #define EL_PRODUCT_NETX_SECURE

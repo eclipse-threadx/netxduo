@@ -117,7 +117,7 @@ UINT  status;
 
 /* Helper function to convert the ASN.1 time formats into UNIX epoch time for comparison. */
 
-#define date_2_chars_to_int(buffer, index) (LONG)(((buffer[index] - '0') * 10) + (buffer[index + 1] - '0'))
+#define date_2_chars_to_int(buffer, index) (ULONG)(((buffer[index] - '0') * 10) + (buffer[index + 1] - '0'))
 
 /* Array indexed on month - 1 gives the total number of days in all previous months (through last day of previous
    month). Leap years are handled in the logic below and are not reflected in this array. */
@@ -129,7 +129,7 @@ static const UINT days_before_month[12] = {0, 31, 59, 90, 120, 151, 181, 212, 24
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_asn1_time_to_unix_convert           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -165,12 +165,17 @@ static const UINT days_before_month[12] = {0, 31, 59, 90, 120, 151, 181, 212, 24
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            changed LONG to ULONG to    */
+/*                                            extend the time range,      */
+/*                                            removed unused code,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, USHORT asn1_length,
                                                       USHORT format, ULONG *unix_time)
 {
-LONG year, month, day, hour, minute, second;
+ULONG year, month, day, hour, minute, second;
 UINT index;
 
     NX_CRYPTO_PARAMETER_NOT_USED(asn1_length);
@@ -208,7 +213,6 @@ UINT index;
                 hour -= date_2_chars_to_int(asn1_time, index);
                 index += 2;
                 minute -= date_2_chars_to_int(asn1_time, index);
-                index += 2;
             }
             else if (asn1_time[index] == '-')
             {
@@ -216,7 +220,6 @@ UINT index;
                 hour += date_2_chars_to_int(asn1_time, index);
                 index += 2;
                 minute += date_2_chars_to_int(asn1_time, index);
-                index += 2;
             }
             else
             {
@@ -252,13 +255,13 @@ UINT index;
 
         /* Finally, calculate the number of seconds from the extracted values. */
         day += year * 365;
-        day += (LONG)days_before_month[month - 1];
+        day += days_before_month[month - 1];
         hour += day * 24;
         minute += hour * 60;
         second += minute * 60;
 
         /* Finally, return the converted time. */
-        *unix_time = (ULONG)second;
+        *unix_time = second;
     }
     else if (format == NX_SECURE_ASN_TAG_GENERALIZED_TIME)
     {

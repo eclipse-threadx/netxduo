@@ -88,15 +88,15 @@
         ULONG _i;                                           \
         ULONG _tmp;                                         \
         _i = (UINT)arg;                                     \
-        /* i = A, B, C, D */                                \
+        /* _i = A, B, C, D */                               \
         _tmp = _i ^ (((_i) >> 16) | (_i << 16));            \
-        /* tmp = i ^ (i ROR 16) = A^C, B^D, C^A, D^B */     \
+        /* tmp = _i ^ (_i ROR 16) = A^C, B^D, C^A, D^B*/    \
         _tmp &= 0xff00ffff;                                 \
         /* tmp = A^C, 0, C^A, D^B */                        \
         _i = ((_i) >> 8) | (_i<<24);                        \
-        /* i = D, A, B, C */                                \
+        /* _i = D, A, B, C */                               \
         _i = _i ^ ((_tmp) >> 8);                            \
-        /* i = D, C, B, A */                                \
+        /* _i = D, C, B, A */                               \
         arg = _i;                                           \
     }
 #define NX_CHANGE_USHORT_ENDIAN(a)      a = ((USHORT)((a >> 8) | (a << 8)) & 0xFFFF)
@@ -200,7 +200,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Linux/GNU Version 6.1.10 *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Linux/GNU Version 6.1.11 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

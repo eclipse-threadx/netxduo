@@ -55,7 +55,7 @@ static UINT _nx_secure_x509_extract_oid_data(const UCHAR *buffer, UINT oid, UINT
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_parse                   PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -105,6 +105,9 @@ static UINT _nx_secure_x509_extract_oid_data(const UCHAR *buffer, UINT oid, UINT
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            removed dependency on TLS,  */
 /*                                            resulting in version 6.1.6  */
+/*  04-25-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            added parameter checking,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_parse(const UCHAR *buffer, UINT length, UINT *bytes_processed,
@@ -166,6 +169,12 @@ UINT         status;
      *    - Some functions may be used in multiple places (e.g. subject info parsing)
      *    - At the lowest level, all parsing will be done by the ASN.1 TLV block parser.
      */
+
+
+    if (cert == NX_CRYPTO_NULL)
+    {
+        return(NX_CRYPTO_PTR_ERROR);
+    }
 
     /*  Parse a TLV block and get information to continue parsing. */
     status = _nx_secure_x509_asn1_tlv_block_parse(buffer, (ULONG *)&length, &tlv_type, &tlv_type_class, &tlv_length, &tlv_data, &header_length);
@@ -240,7 +249,7 @@ UINT         status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_extract_oid_data                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -281,6 +290,10 @@ UINT         status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            removed parameter checking, */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_extract_oid_data(const UCHAR *buffer, UINT oid, UINT oid_param, ULONG length,
@@ -299,19 +312,6 @@ NX_SECURE_EC_PUBLIC_KEY *ec_pubkey;
     NX_CRYPTO_PARAMETER_NOT_USED(oid_param);
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
-#ifdef NX_CRYPTO_STANDALONE_ENABLE
-    if (cert == NX_CRYPTO_NULL)
-    {
-        return(NX_CRYPTO_PTR_ERROR);
-    }
-#else
-    NX_ASSERT(cert != NX_CRYPTO_NULL);
-#endif /* NX_CRYPTO_STANDALONE_ENABLE */
-
-    /* IMPORTANT NOTE: This function MUST handle a NULL value for the "cert" parameter - we need to parse the
-     * certificate data no matter what, and in some cases we might want to parse past the data rather than saving
-     * it off in the cert structure. By passing the structure as NULL, this function should just pass over the parsed data.
-     */
 
     status = _nx_secure_x509_asn1_tlv_block_parse(buffer, &length, &tlv_type, &tlv_type_class, &tlv_length, &tlv_data, &header_length);
     if (status != 0)
@@ -365,7 +365,7 @@ NX_SECURE_EC_PUBLIC_KEY *ec_pubkey;
          * This is due to the modulus being encoded as an ASN.1 bit string, which may
          * require padding bits to get to a multiple of 8 for byte alignment. The byte
          * represents the number of padding bits, but in X509 it should always be 0. */
-        cert -> nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus = &tlv_data[1];
+        cert -> nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus = tlv_data + 1;
         cert -> nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus_length = (USHORT)(tlv_length - 1);
 
         /* Finally the public exponent. */
@@ -1433,7 +1433,7 @@ UINT         status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_parse_unique_ids                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1470,6 +1470,9 @@ UINT         status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_unique_ids(const UCHAR *buffer, ULONG length,
@@ -1517,7 +1520,7 @@ UINT         processed_id;
         /* The field is an IMPLICIT bit string, so the data just follows the context-specific tag. */
 
         /* Save off a pointer to the issuer unique identifier data and its length. */
-        cert -> nx_secure_x509_issuer_identifier = &tlv_data[1];
+        cert -> nx_secure_x509_issuer_identifier = tlv_data + 1;
         cert -> nx_secure_x509_issuer_identifier_length = (USHORT)(tlv_length - 1);
 
         /* Return the number of bytes we processed. */
@@ -1550,7 +1553,7 @@ UINT         processed_id;
         /* The field is an IMPLICIT bit string, so the data just follows the context-specific tag. */
 
         /* Save off a pointer to the issuer unique identifier data and its length. */
-        cert -> nx_secure_x509_subject_identifier = &tlv_data[1];
+        cert -> nx_secure_x509_subject_identifier = tlv_data + 1;
         cert -> nx_secure_x509_subject_identifier_length = (USHORT)(tlv_length - 1);
 
         /* Return the number of bytes we processed. */
@@ -1696,7 +1699,7 @@ UINT         status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_parse_signature_data                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1737,6 +1740,9 @@ UINT         status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_signature_data(const UCHAR *buffer, ULONG length,
@@ -1772,7 +1778,7 @@ UINT         status;
      * This is due to the data being encoded as an ASN.1 bit string, which may
      * require padding bits to get to a multiple of 8 for byte alignment. The byte
      * represents the number of padding bits, but in X509 it should always be 0. */
-    cert -> nx_secure_x509_signature_data = &tlv_data[1];
+    cert -> nx_secure_x509_signature_data = tlv_data + 1;
     cert -> nx_secure_x509_signature_data_length = tlv_length - 1;
 
     /* Return the number of bytes we processed. */

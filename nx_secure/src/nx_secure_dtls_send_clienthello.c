@@ -174,7 +174,7 @@ USHORT                      protocol_version;
 
         /* Move the data to insert cookie. */
         NX_SECURE_MEMMOVE(packet_buffer + dtls_session -> nx_secure_dtls_cookie_length,
-                packet_buffer, (UINT)(send_packet -> nx_packet_append_ptr - packet_buffer));
+                packet_buffer, (UINT)(send_packet -> nx_packet_append_ptr - packet_buffer)); /* Use case of memmove is verified.  */
 
         /* Set cookie. */
         NX_SECURE_MEMCPY(packet_buffer, dtls_session -> nx_secure_dtls_client_cookie_ptr,

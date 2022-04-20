@@ -140,7 +140,7 @@ NX_IP        *ip_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_udp_socket_bind                                 PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -183,6 +183,9 @@ NX_IP        *ip_ptr;
 /*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            supported TCP/IP offload,   */
 /*                                            resulting in version 6.1.8  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_udp_socket_bind(NX_UDP_SOCKET *socket_ptr, UINT  port, ULONG wait_option)
@@ -228,7 +231,7 @@ UINT           status = NX_SUCCESS;
     {
 
         /* Call the find routine to allocate a UDP port.  */
-        port = NX_SEARCH_PORT_START + (UINT)(NX_RAND() % ((NX_MAX_PORT + 1) - NX_SEARCH_PORT_START));
+        port = NX_SEARCH_PORT_START + (UINT)(((ULONG)NX_RAND()) % ((NX_MAX_PORT + 1) - NX_SEARCH_PORT_START));
         if (_nx_udp_free_port_find(ip_ptr, port, &port) != NX_SUCCESS)
         {
 

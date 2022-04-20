@@ -82,7 +82,7 @@ static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SE
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -131,6 +131,9 @@ static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SE
 /*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yajun Xia                Modified comment(s),          */
+/*                                            added exception case,       */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_clienthello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -150,6 +153,10 @@ UINT   status;
                                                                 &length,
                                                                 &extension_length,
                                                                 available_size);
+    if (status != NX_SUCCESS)
+    {
+        return(status);
+    }
     total_extensions_length = (USHORT)(total_extensions_length + extension_length);
 #endif
 
@@ -269,7 +276,7 @@ UINT   status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_sig_extension       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -307,6 +314,9 @@ UINT   status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed unused code,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_send_clienthello_sig_extension(NX_SECURE_TLS_SESSION *tls_session,
@@ -383,7 +393,6 @@ NX_SECURE_X509_CRYPTO *cipher_table;
 
     packet_buffer[ext_pos] = (UCHAR)((sighash_len & 0xFF00) >> 8);
     packet_buffer[ext_pos + 1] = (UCHAR)(sighash_len & 0x00FF);
-    ext_pos += 2;
 
     /* Return our updated packet offset. */
     *extension_length = ext_len;

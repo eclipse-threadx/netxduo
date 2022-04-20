@@ -34,7 +34,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_ipv6_address_set                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -83,6 +83,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added internal ip address   */
+/*                                            change notification,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_ipv6_address_set(NX_IP *ip_ptr, UINT interface_index, NXD_ADDRESS *ip_address, ULONG prefix_length, UINT *address_index)
@@ -92,6 +96,7 @@ UINT  _nxd_ipv6_address_set(NX_IP *ip_ptr, UINT interface_index, NXD_ADDRESS *ip
 TX_INTERRUPT_SAVE_AREA
 #ifdef NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY
 VOID                (*address_change_notify)(NX_IP *, UINT, UINT, UINT, ULONG *);
+VOID                (*address_change_notify_internal)(NX_IP *, UINT, UINT, UINT, ULONG *);
 #endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
 NXD_IPV6_ADDRESS *ipv6_addr;
 NXD_IPV6_ADDRESS *interface_ipv6_address;
@@ -292,6 +297,7 @@ ULONG             multicast_address[4];
 #ifdef NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY
     /* Pickup the current notification callback and additional information pointers.  */
     address_change_notify =  ip_ptr -> nx_ipv6_address_change_notify;
+    address_change_notify_internal =  ip_ptr -> nx_ipv6_address_change_notify_internal;
 #endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
     /* Release the protection while the IPv6 address is modified. */
     tx_mutex_put(&(ip_ptr -> nx_ip_protection));
@@ -304,6 +310,15 @@ ULONG             multicast_address[4];
 
         /* Yes, call the application's address change notify function.  */
         (address_change_notify)(ip_ptr, NX_IPV6_ADDRESS_MANUAL_CONFIG, interface_index, index, &ipv6_addr -> nxd_ipv6_address[0]);
+    }
+
+    /* Is the internal application configured for notification of address changes and/or
+       prefix_length change?  */
+    if ((address_change_notify_internal) && (ipv6_addr -> nxd_ipv6_address_state == NX_IPV6_ADDR_STATE_VALID))
+    {
+
+        /* Yes, call the internal application's address change notify function.  */
+        (address_change_notify_internal)(ip_ptr, NX_IPV6_ADDRESS_MANUAL_CONFIG, interface_index, index, &ipv6_addr -> nxd_ipv6_address[0]);
     }
 #endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
 

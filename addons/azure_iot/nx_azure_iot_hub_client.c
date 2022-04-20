@@ -34,10 +34,10 @@
 #define NX_AZURE_IOT_HUB_CLIENT_USER_AGENT_DEVICE_TYPE "U"
 #endif /* NX_AZURE_IOT_HUB_CLIENT_USER_AGENT_DEVICE_TYPE */
 
-/* Useragent e.g: DeviceClientType=c%2F1.0.0%20%28nx%206.0.0%3Bazrtos%206.0.0%29 */
+/* Useragent e.g: azsdk-c%2F1.3.0%20%28azrtos%206.1.2%3B0%3B0%3BU%29 */
 #define NX_AZURE_IOT_HUB_CLIENT_STR(C)          #C
 #define NX_AZURE_IOT_HUB_CLIENT_TO_STR(x)       NX_AZURE_IOT_HUB_CLIENT_STR(x)
-#define NX_AZURE_IOT_HUB_CLIENT_USER_AGENT      "DeviceClientType=c%2F" AZ_SDK_VERSION_STRING "%20%28azrtos%20" \
+#define NX_AZURE_IOT_HUB_CLIENT_USER_AGENT      "azsdk-c%2F" AZ_SDK_VERSION_STRING "%20%28azrtos%20" \
                                                 NX_AZURE_IOT_HUB_CLIENT_TO_STR(THREADX_MAJOR_VERSION) "." \
                                                 NX_AZURE_IOT_HUB_CLIENT_TO_STR(THREADX_MINOR_VERSION) "." \
                                                 NX_AZURE_IOT_HUB_CLIENT_TO_STR(THREADX_PATCH_VERSION) "%3B"\
@@ -1172,7 +1172,7 @@ UCHAR packet_id[2];
     topic_len = packet_ptr -> nx_packet_length;
 
     status = nx_azure_iot_mqtt_packet_id_get(&(hub_client_ptr -> nx_azure_iot_hub_client_resource.resource_mqtt),
-                                             packet_id, wait_option);
+                                             packet_id);
     if (status)
     {
         LogError(LogLiteralArgs("Failed to get packet id"));

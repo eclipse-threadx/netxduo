@@ -701,12 +701,27 @@ NX_CRYPTO_EXTENDED_OUTPUT
     {
         /* Setup local key pair. */
         extended_output = (NX_CRYPTO_EXTENDED_OUTPUT *)output;
-        status = _nx_crypto_ecdh_setup(ecdh,
-                                       extended_output -> nx_crypto_extended_output_data,
-                                       extended_output -> nx_crypto_extended_output_length_in_byte,
-                                       &extended_output -> nx_crypto_extended_output_actual_size,
-                                       ecdh -> nx_crypto_ecdh_curve,
-                                       ecdh -> nx_crypto_ecdh_scratch_buffer);
+#ifdef NX_CRYPTO_ENABLE_CURVE25519_448
+        if (ecdh -> nx_crypto_ecdh_curve -> nx_crypto_ec_id == NX_CRYPTO_EC_X25519 ||
+            ecdh -> nx_crypto_ecdh_curve -> nx_crypto_ec_id == NX_CRYPTO_EC_X448)
+        {
+            status = _nx_crypto_ecdh_setup_x25519_448(ecdh,
+                                                      extended_output -> nx_crypto_extended_output_data,
+                                                      extended_output -> nx_crypto_extended_output_length_in_byte,
+                                                      &extended_output -> nx_crypto_extended_output_actual_size,
+                                                      ecdh -> nx_crypto_ecdh_curve,
+                                                      ecdh -> nx_crypto_ecdh_scratch_buffer);
+        }
+        else
+#endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */
+        {
+            status = _nx_crypto_ecdh_setup(ecdh,
+                                           extended_output -> nx_crypto_extended_output_data,
+                                           extended_output -> nx_crypto_extended_output_length_in_byte,
+                                           &extended_output -> nx_crypto_extended_output_actual_size,
+                                           ecdh -> nx_crypto_ecdh_curve,
+                                           ecdh -> nx_crypto_ecdh_scratch_buffer);
+        }
     }
     else if (op == NX_CRYPTO_DH_KEY_PAIR_IMPORT)
     {
@@ -715,31 +730,80 @@ NX_CRYPTO_EXTENDED_OUTPUT
             return(NX_CRYPTO_PTR_ERROR);
         }
 
-        /* Import local key pair. */
-        status = _nx_crypto_ecdh_key_pair_import(ecdh, ecdh -> nx_crypto_ecdh_curve,
-                                                 key, (key_size_in_bits >> 3),
-                                                 input, input_length_in_byte);
+#ifdef NX_CRYPTO_ENABLE_CURVE25519_448
+        if (ecdh -> nx_crypto_ecdh_curve -> nx_crypto_ec_id == NX_CRYPTO_EC_X25519 ||
+            ecdh -> nx_crypto_ecdh_curve -> nx_crypto_ec_id == NX_CRYPTO_EC_X448)
+        {
+
+            /* Import local key pair. */
+            status = _nx_crypto_ecdh_key_pair_import_x25519_448(ecdh, ecdh -> nx_crypto_ecdh_curve,
+                                                                key, (key_size_in_bits >> 3),
+                                                                input, input_length_in_byte);
+        }
+        else
+#endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */
+        {
+
+            /* Import local key pair. */
+            status = _nx_crypto_ecdh_key_pair_import(ecdh, ecdh -> nx_crypto_ecdh_curve,
+                                                     key, (key_size_in_bits >> 3),
+                                                     input, input_length_in_byte);
+        }
     }
     else if (op == NX_CRYPTO_DH_PRIVATE_KEY_EXPORT)
     {
         /* Export local private key. */
         extended_output = (NX_CRYPTO_EXTENDED_OUTPUT *)output;
-        status = _nx_crypto_ecdh_private_key_export(ecdh,
-                                                    extended_output -> nx_crypto_extended_output_data,
-                                                    extended_output -> nx_crypto_extended_output_length_in_byte,
-                                                    &extended_output -> nx_crypto_extended_output_actual_size);
+
+#ifdef NX_CRYPTO_ENABLE_CURVE25519_448
+        if (ecdh -> nx_crypto_ecdh_curve -> nx_crypto_ec_id == NX_CRYPTO_EC_X25519 ||
+            ecdh -> nx_crypto_ecdh_curve -> nx_crypto_ec_id == NX_CRYPTO_EC_X448)
+        {
+            status = _nx_crypto_ecdh_private_key_export_x25519_448(ecdh,
+                                                                   extended_output -> nx_crypto_extended_output_data,
+                                                                   extended_output -> nx_crypto_extended_output_length_in_byte,
+                                                                   &extended_output -> nx_crypto_extended_output_actual_size);
+        }
+        else
+#endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */
+        {
+
+            status = _nx_crypto_ecdh_private_key_export(ecdh,
+                                                        extended_output -> nx_crypto_extended_output_data,
+                                                        extended_output -> nx_crypto_extended_output_length_in_byte,
+                                                        &extended_output -> nx_crypto_extended_output_actual_size);
+        }
     }
     else if (op == NX_CRYPTO_DH_CALCULATE)
     {
         /* Compute shared secret. */
         extended_output = (NX_CRYPTO_EXTENDED_OUTPUT *)output;
-        status = _nx_crypto_ecdh_compute_secret(ecdh,
-                                                extended_output -> nx_crypto_extended_output_data,
-                                                extended_output -> nx_crypto_extended_output_length_in_byte,
-                                                &extended_output -> nx_crypto_extended_output_actual_size,
-                                                input,
-                                                input_length_in_byte,
-                                                ecdh -> nx_crypto_ecdh_scratch_buffer);
+
+#ifdef NX_CRYPTO_ENABLE_CURVE25519_448
+        if (ecdh -> nx_crypto_ecdh_curve -> nx_crypto_ec_id == NX_CRYPTO_EC_X25519 ||
+            ecdh -> nx_crypto_ecdh_curve -> nx_crypto_ec_id == NX_CRYPTO_EC_X448)
+        {
+
+            status = _nx_crypto_ecdh_compute_secret_x25519_448(ecdh,
+                                                               extended_output -> nx_crypto_extended_output_data,
+                                                               extended_output -> nx_crypto_extended_output_length_in_byte,
+                                                               &extended_output -> nx_crypto_extended_output_actual_size,
+                                                               input,
+                                                               input_length_in_byte,
+                                                               ecdh -> nx_crypto_ecdh_scratch_buffer);
+        }
+        else
+#endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */
+        {
+
+            status = _nx_crypto_ecdh_compute_secret(ecdh,
+                                                    extended_output -> nx_crypto_extended_output_data,
+                                                    extended_output -> nx_crypto_extended_output_length_in_byte,
+                                                    &extended_output -> nx_crypto_extended_output_actual_size,
+                                                    input,
+                                                    input_length_in_byte,
+                                                    ecdh -> nx_crypto_ecdh_scratch_buffer);
+        }
     }
     else
     {
@@ -748,3 +812,383 @@ NX_CRYPTO_EXTENDED_OUTPUT
 
     return(status);
 }
+
+#ifdef NX_CRYPTO_ENABLE_CURVE25519_448
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_ecdh_key_pair_import_x25519_448          PORTABLE C      */
+/*                                                           6.1.11       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sets up a Elliptic-curve Diffie-Hellman context by    */
+/*    importing a local key pair.                                         */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    ecdh_ptr                              ECDH context                  */
+/*    curve                                 Elliptic Curve                */
+/*    local_private_key_ptr                 Pointer to local private key  */
+/*    local_private_key_len                 Local private key length      */
+/*    local_public_key_ptr                  Pointer to local public key   */
+/*    local_public_key_len                  Remote public key length      */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_crypto_method_ecdh_operation      Perform ECDH operation        */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*                                                                        */
+/**************************************************************************/
+NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_key_pair_import_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
+                                                               NX_CRYPTO_EC *curve,
+                                                               UCHAR *local_private_key_ptr,
+                                                               ULONG  local_private_key_len,
+                                                               UCHAR *local_public_key_ptr,
+                                                               ULONG  local_public_key_len)
+{
+UINT key_len;
+
+
+    NX_CRYPTO_PARAMETER_NOT_USED(local_public_key_ptr);
+
+    key_len = (curve -> nx_crypto_ec_bits + 7) >> 3;
+
+    if (local_private_key_len != key_len)
+    {
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
+
+    if (local_public_key_len > key_len)
+    {
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
+
+    /* Assign the desired key size based on the chosen elliptic curve. */
+    ecdh_ptr -> nx_crypto_ecdh_key_size = key_len;
+
+    /* Copy the private key buffer. */
+    NX_CRYPTO_MEMCPY(ecdh_ptr -> nx_crypto_ecdh_private_key_buffer, local_private_key_ptr, local_private_key_len); /* Use case of memcpy is verified. */
+
+    return(NX_CRYPTO_SUCCESS);
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_ecdh_private_key_export_x25519_448       PORTABLE C      */
+/*                                                           6.1.11       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function exports the local private key in Elliptic-curve       */
+/*    Diffie-Hellman context.                                             */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    ecdh_ptr                              ECDH context                  */
+/*    local_private_key_ptr                 Pointer to local private key  */
+/*    local_private_key_len                 Local private key length      */
+/*    actual_local_private_key_len          Pointer to private key length */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    NX_CRYPTO_MEMCPY                      Copy the key                  */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_crypto_method_ecdh_operation      Perform ECDH operation        */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*                                                                        */
+/**************************************************************************/
+NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_private_key_export_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
+                                                                  UCHAR *local_private_key_ptr,
+                                                                  ULONG  local_private_key_len,
+                                                                  ULONG *actual_local_private_key_len)
+{
+UINT          clen;
+NX_CRYPTO_EC *curve;
+
+    /* Make sure the key size was assigned before we do anything else. */
+    if (0 == ecdh_ptr -> nx_crypto_ecdh_key_size)
+    {
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
+
+    curve = ecdh_ptr -> nx_crypto_ecdh_curve;
+
+    /* Check to make sure the buffer is large enough to hold the private key. */
+    clen = (curve -> nx_crypto_ec_bits + 7) >> 3;
+    if (local_private_key_len < clen)
+    {
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
+
+    /* Copy the private key buffer. */
+    NX_CRYPTO_MEMCPY(local_private_key_ptr, ecdh_ptr -> nx_crypto_ecdh_private_key_buffer, clen); /* Use case of memcpy is verified. */
+
+    *actual_local_private_key_len = clen;
+
+    return(NX_CRYPTO_SUCCESS);
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_ecdh_setup_x25519_448                    PORTABLE C      */
+/*                                                           6.1.11       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sets up a Elliptic-curve Diffie-Hellman context by    */
+/*    generating a local key pair.                                        */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    ecdh_ptr                              ECDH context                  */
+/*    share_secret_key_ptr                  Shared secret buffer pointer  */
+/*    share_secret_key_len_ptr              Length of shared secret       */
+/*    local_public_key_ptr                  Pointer to local public key   */
+/*    local_public_key_len                  Remote public key length      */
+/*    scratch_buf_ptr                       Pointer to scratch buffer,    */
+/*                                            which cannot be smaller     */
+/*                                            than 6 times of the key     */
+/*                                            size (in bytes). This       */
+/*                                            scratch buffer can be       */
+/*                                            reused after this function  */
+/*                                            returns.                    */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_crypto_ec_key_pair_generation_x25519                            */
+/*                                          Generate EC Key Pair          */
+/*    _nx_crypto_ec_extract_fixed_size_le   Extract huge number           */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_crypto_method_ecdh_operation      Perform ECDH operation        */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*                                                                        */
+/**************************************************************************/
+NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_setup_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
+                                                     UCHAR *local_public_key_ptr,
+                                                     ULONG  local_public_key_len,
+                                                     ULONG *actual_local_public_key_len,
+                                                     NX_CRYPTO_EC *curve,
+                                                     HN_UBASE *scratch_buf_ptr)
+{
+UINT key_len;
+UINT status;
+NX_CRYPTO_HUGE_NUMBER private_key;
+NX_CRYPTO_EC_POINT    public_key;
+
+    key_len = (curve -> nx_crypto_ec_bits + 7) >> 3;
+    if (local_public_key_len < key_len)
+    {
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
+
+    ecdh_ptr -> nx_crypto_ecdh_curve = curve;
+
+    /* Assign the desired key size based on the chosen elliptic curve. */
+    ecdh_ptr -> nx_crypto_ecdh_key_size = key_len;
+
+    /* Public key buffer (and scratch). */
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&public_key.nx_crypto_ec_point_x, scratch_buf_ptr, key_len);
+
+    /* Private key buffer - note that no scratch is required for the private key. */
+    private_key.nx_crypto_huge_number_data = ecdh_ptr -> nx_crypto_ecdh_private_key_buffer;
+    private_key.nx_crypto_huge_number_size = ecdh_ptr -> nx_crypto_ecdh_key_size >> HN_SIZE_SHIFT;
+    private_key.nx_crypto_huge_buffer_size = sizeof(ecdh_ptr -> nx_crypto_ecdh_private_key_buffer);
+    private_key.nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+    /* Clear the private key buffer. */
+    NX_CRYPTO_MEMSET(ecdh_ptr -> nx_crypto_ecdh_private_key_buffer, 0,
+                     sizeof(ecdh_ptr -> nx_crypto_ecdh_private_key_buffer));
+
+    /* Generate Key Pair. */
+    status = _nx_crypto_ec_key_pair_generation_x25519(curve, &curve -> nx_crypto_ec_g, &private_key,
+                                                      &public_key, scratch_buf_ptr);
+    if (status)
+    {
+        return(status);
+    }
+
+    /* Copy the public key into the return buffer. */
+    status = _nx_crypto_ec_extract_fixed_size_le(&public_key.nx_crypto_ec_point_x,
+                                                 local_public_key_ptr, key_len);
+    if (status)
+    {
+        return(status);
+    }
+
+    *actual_local_public_key_len = key_len;
+
+    return(NX_CRYPTO_SUCCESS);
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_ecdh_compute_secret_x25519_448           PORTABLE C      */
+/*                                                           6.1.11       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function computes the Elliptic-curve Diffie-Hellman shared     */
+/*    secret using an existing Elliptic-curve Diffie-Hellman context      */
+/*    and a public key received from a remote entity.                     */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    ecdh_ptr                              ECDH context                  */
+/*    share_secret_key_ptr                  Shared secret buffer pointer  */
+/*    share_secret_key_len_ptr              Length of shared secret       */
+/*    remote_public_key                     Pointer to remote public key  */
+/*    remote_public_key_len                 Remote public key length      */
+/*    scratch_buf_ptr                       Pointer to scratch buffer,    */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_crypto_ec_extract_fixed_size_le   Extract huge number           */
+/*    [nx_crypto_ec_multiple]               Perform multiplication for EC */
+/*    _nx_crypto_huge_number_is_zero        Check for all-zero value      */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_crypto_method_ecdh_operation      Perform ECDH operation        */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*                                                                        */
+/**************************************************************************/
+NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_compute_secret_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
+                                                              UCHAR *share_secret_key_ptr,
+                                                              ULONG  share_secret_key_len_ptr,
+                                                              ULONG *actual_share_secret_key_len,
+                                                              UCHAR *remote_public_key,
+                                                              ULONG  remote_public_key_len,
+                                                              HN_UBASE *scratch_buf_ptr)
+{
+UINT                  status;
+UINT                  key_size;
+UINT                  clen;
+NX_CRYPTO_EC         *curve;
+/* Actual huge numbers used in calculations */
+NX_CRYPTO_HUGE_NUMBER private_key;
+NX_CRYPTO_EC_POINT    public_key, shared_secret;
+
+    /* Make sure the key size was assigned before we do anything else. */
+    if (0 == ecdh_ptr -> nx_crypto_ecdh_key_size)
+    {
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
+
+    curve = ecdh_ptr -> nx_crypto_ecdh_curve;
+
+    /* Figure out the sizes of our keys and buffers. */
+    key_size = ecdh_ptr -> nx_crypto_ecdh_key_size;
+
+    /* Make sure the remote public key size is correct. */
+    if (remote_public_key_len != key_size)
+    {
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
+
+    /* Check to make sure the buffer is large enough to hold the shared secret key. */
+    clen = (curve -> nx_crypto_ec_bits + 7) >> 3;
+    if (share_secret_key_len_ptr < clen)
+    {
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
+
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&public_key.nx_crypto_ec_point_x, scratch_buf_ptr, key_size);
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&shared_secret.nx_crypto_ec_point_x, scratch_buf_ptr, key_size);
+
+    /* Copy the remote public key from the caller's buffer. */
+    NX_CRYPTO_MEMCPY(public_key.nx_crypto_ec_point_x.nx_crypto_huge_number_data, remote_public_key, remote_public_key_len); /* Use case of memcpy is verified. */
+    public_key.nx_crypto_ec_point_x.nx_crypto_huge_number_size = key_size >> HN_SIZE_SHIFT;
+
+    /* Private key buffer  */
+    private_key.nx_crypto_huge_number_data = (HN_UBASE*)ecdh_ptr -> nx_crypto_ecdh_private_key_buffer;
+    private_key.nx_crypto_huge_number_size = key_size >> HN_SIZE_SHIFT;
+    private_key.nx_crypto_huge_buffer_size = key_size;
+    private_key.nx_crypto_huge_number_is_negative = NX_CRYPTO_FALSE;
+
+    /* Finally, generate shared secret from the remote public key, our generated private key, and the curve.
+       The actual calculation is "shared_secret = private_key * public_key". */
+    curve -> nx_crypto_ec_multiple(curve, &public_key, &private_key, &shared_secret, scratch_buf_ptr);
+
+    /* Check for the all-zero value results. */
+    if (_nx_crypto_huge_number_is_zero(&shared_secret.nx_crypto_ec_point_x))
+    {
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    /* Copy the shared secret into the return buffer. */
+    status = _nx_crypto_ec_extract_fixed_size_le(&shared_secret.nx_crypto_ec_point_x,
+                                                 share_secret_key_ptr, clen);
+
+    /* The public key size is simply the key size for this group. */
+    *actual_share_secret_key_len = clen;
+
+    return(status);
+}
+
+#endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */
