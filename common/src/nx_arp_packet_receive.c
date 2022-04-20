@@ -36,7 +36,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_arp_packet_receive                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -75,6 +75,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler errors,      */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_arp_packet_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -242,10 +245,10 @@ NX_INTERFACE *interface_ptr;
 #endif
 
             /* If trace is enabled, insert this event into the trace buffer.  */
-            NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_ARP_RESPONSE_SEND, ip_ptr, sender_ip, packet_ptr, 0, NX_TRACE_INTERNAL_EVENTS, 0, 0)
+            NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_ARP_RESPONSE_SEND, ip_ptr, sender_ip_address, packet_ptr, 0, NX_TRACE_INTERNAL_EVENTS, 0, 0);
 
             /* Set the ARP message type to ARP response.  */
-            * (message_ptr + 1) =  (*(message_ptr + 1) & 0xFFFF0000) | NX_ARP_OPTION_RESPONSE;
+            *(message_ptr + 1) =  (*(message_ptr + 1) & 0xFFFF0000) | NX_ARP_OPTION_RESPONSE;
 
             /* Now fill in the new source and destination information for the ARP response.  */
             *(message_ptr + 2) =  (ULONG)(packet_ptr -> nx_packet_ip_interface -> nx_interface_physical_address_msw << 16) |
@@ -281,7 +284,7 @@ NX_INTERFACE *interface_ptr;
             driver_request.nx_ip_driver_interface            =  packet_ptr -> nx_packet_ip_interface;
 
             /* If trace is enabled, insert this event into the trace buffer.  */
-            NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_IO_DRIVER_ARP_RESPONSE_SEND, ip_ptr, packet_ptr, packet_ptr -> nx_packet_length, 0, NX_TRACE_INTERNAL_EVENTS, 0, 0)
+            NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_IO_DRIVER_ARP_RESPONSE_SEND, ip_ptr, packet_ptr, packet_ptr -> nx_packet_length, 0, NX_TRACE_INTERNAL_EVENTS, 0, 0);
 
             /* No need to update packet_ptr -> nx_packet_ip_interface.  When responding to an ARP request, use the same interface where the request was received. */
 

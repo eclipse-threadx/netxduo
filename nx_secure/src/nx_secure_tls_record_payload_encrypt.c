@@ -36,7 +36,7 @@ UCHAR _nx_secure_tls_record_block_buffer[NX_SECURE_TLS_MAX_CIPHER_BLOCK_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_payload_encrypt               PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -82,6 +82,9 @@ UCHAR _nx_secure_tls_record_block_buffer[NX_SECURE_TLS_MAX_CIPHER_BLOCK_SIZE];
 /*                                            to finalize the encryption  */
 /*                                            of this record, resulting   */
 /*                                            in version 6.1.8            */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            reorganized internal logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_record_payload_encrypt(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
@@ -366,10 +369,8 @@ UCHAR                                *icv_ptr = NX_NULL;
         /* Append data for AEAD cipher */
         status = nx_packet_data_append(send_packet, icv_ptr, icv_size,
                                            tls_session -> nx_secure_tls_packet_pool, NX_WAIT_FOREVER);
-        if (status)
-        {
-            return(status);
-        }
+
+        return(status);
     }
     
     return(NX_SUCCESS);
@@ -380,7 +381,7 @@ UCHAR                                *icv_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_data_encrypt_init             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -419,6 +420,9 @@ UCHAR                                *icv_ptr = NX_NULL;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            reorganized internal logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_record_data_encrypt_init(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
@@ -700,10 +704,7 @@ UINT                                  message_length;
         NX_SECURE_MEMSET(_nx_secure_tls_record_block_buffer, 0, block_size);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
-        if (status)
-        {
-            return(status);
-        }
+        return(status);
     }
 
     return(NX_SUCCESS);

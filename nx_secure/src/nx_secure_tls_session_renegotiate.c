@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_renegotiate                  PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -94,6 +94,9 @@
 /*                                            option to disable client    */
 /*                                            initiated renegotiation,    */
 /*                                            resulting in version 6.1.9  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), changed  */
+/*                                            an error to assert,         */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
@@ -235,13 +238,10 @@ NX_PACKET *send_packet;
 
         /* Populate our packet with HelloRequest data. */
         status = _nx_secure_tls_send_hellorequest(tls_session, send_packet);
+        NX_ASSERT(status == NX_SUCCESS);
 
-        if (status == NX_SUCCESS)
-        {
-
-            /* Send the HelloRequest to kick things off. */
-            status = _nx_secure_tls_send_handshake_record(tls_session, send_packet, NX_SECURE_TLS_HELLO_REQUEST, wait_option);
-        }
+        /* Send the HelloRequest to kick things off. */
+        status = _nx_secure_tls_send_handshake_record(tls_session, send_packet, NX_SECURE_TLS_HELLO_REQUEST, wait_option);
 
         /* If anything after the allocate fails, we need to release our packet. */
         if (status != NX_SUCCESS)

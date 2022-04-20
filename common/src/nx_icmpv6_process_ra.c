@@ -37,7 +37,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_process_ra                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -79,6 +79,10 @@
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            option length verification, */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added internal ip address   */
+/*                                            change notification,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_icmpv6_process_ra(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -408,6 +412,12 @@ UINT                          interface_index;
                                 interface_index = if_ptr -> nx_interface_index;
                                 (ip_ptr -> nx_ipv6_address_change_notify)(ip_ptr, NX_IPV6_ADDRESS_STATELESS_AUTO_CONFIG, interface_index,
                                                                           first_unused, &ipv6_address -> nxd_ipv6_address[0]);
+                            }
+                            if ((ip_ptr -> nx_ipv6_address_change_notify_internal) && (ipv6_address -> nxd_ipv6_address_state == NX_IPV6_ADDR_STATE_VALID))
+                            {
+                                interface_index = if_ptr -> nx_interface_index;
+                                (ip_ptr -> nx_ipv6_address_change_notify_internal)(ip_ptr, NX_IPV6_ADDRESS_STATELESS_AUTO_CONFIG, interface_index,
+                                                                                   first_unused, &ipv6_address -> nxd_ipv6_address[0]);
                             }
 #endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
                         }

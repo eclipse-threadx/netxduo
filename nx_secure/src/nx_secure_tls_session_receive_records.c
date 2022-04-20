@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_receive_records              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -77,6 +77,9 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            supported chained packet,   */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), added    */
+/*                                            conditional TLS 1.3 build,  */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_session_receive_records(NX_SECURE_TLS_SESSION *tls_session,
@@ -146,7 +149,11 @@ UCHAR          handshake_finished = NX_FALSE;
     }
 
     /* Cleanup if the record processing was successful or if we have a renegotiation attempt. */
-    if (status == NX_SUCCESS || status == NX_SECURE_TLS_POST_HANDSHAKE_RECEIVED)
+    if (status == NX_SUCCESS 
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+        || status == NX_SECURE_TLS_POST_HANDSHAKE_RECEIVED
+#endif /* (NX_SECURE_TLS_TLS_1_3_ENABLED) */
+        )
     {
 
         /* Remove processed packets. Data in released packet will be cleared by nx_secure_tls_packet_release. */

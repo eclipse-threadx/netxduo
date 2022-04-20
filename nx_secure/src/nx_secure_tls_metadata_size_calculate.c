@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_metadata_size_calculate              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -65,6 +65,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved the code,          */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_metadata_size_calculate(const NX_SECURE_TLS_CRYPTO *crypto_table,
@@ -94,11 +97,6 @@ const NX_CRYPTO_METHOD *crypto_method_sha1;
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
 const NX_CRYPTO_METHOD *crypto_method_sha256;
 #endif
-
-    if (crypto_table == NX_NULL)
-    {
-        return(NX_PTR_ERROR);
-    }
 
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
     crypto_method_md5 = crypto_table -> nx_secure_tls_handshake_hash_md5_method;

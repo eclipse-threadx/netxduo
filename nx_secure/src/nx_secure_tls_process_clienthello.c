@@ -36,7 +36,7 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_clienthello                  PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -95,6 +95,10 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*                                            ability to disable client   */
 /*                                            initiated renegotiation,    */
 /*                                            resulting in version 6.1.9  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),  fixed   */
+/*                                            the bug of processing       */
+/*                                            extensions,                 */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_clienthello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -354,6 +358,14 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
                 }
             }
         }
+        else
+        {
+            num_extensions = 0;
+        }
+    }
+    else
+    {
+        num_extensions = 0;
     }
 
 #if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 

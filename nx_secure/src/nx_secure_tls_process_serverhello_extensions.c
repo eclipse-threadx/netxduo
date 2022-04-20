@@ -762,7 +762,7 @@ INT    compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_serverhello_keyshare_extension  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -799,6 +799,9 @@ INT    compare_value;
 /*  09-30-2020     Timothy Stapko           Modified comment(s), update   */
 /*                                            ECC find curve method,      */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), removed  */
+/*                                            public key format checking, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -814,7 +817,6 @@ UINT i;
 ULONG  offset;
 USHORT key_group;
 USHORT key_length;
-UCHAR  legacy_form;
 NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA *ecc_key_data;
 UCHAR                                *pubkey;
 UCHAR                                *private_key;
@@ -889,16 +891,6 @@ NX_SECURE_TLS_ECC *ecc_info;
         }
         offset = (USHORT)(offset + 2);
 
-        /* Extract the legacy form value. NOTE: the form must be included in the ECC calculations below
-          so don't advance the offset! */
-        legacy_form = packet_buffer[offset];
-
-        if(legacy_form != 0x4)
-        {
-            /* In TLS 1.3, the only valid form is 0x4. */
-            return(NX_SECURE_TLS_BAD_SERVERHELLO_KEYSHARE);
-        }
-        
         /* Initialize the remote public key in our session. */
         pubkey = &packet_buffer[offset];
 

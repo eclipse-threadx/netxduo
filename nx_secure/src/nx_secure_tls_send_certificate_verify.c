@@ -40,7 +40,7 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_certificate_verify              PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -98,6 +98,9 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
 /*                                            hash clone and cleanup,     */
 /*                                            resulting in version 6.1.8  */
+/*  04-25-2022     Zhen Kong                Modified comment(s), removed  */
+/*                                            unreachable code and branch,*/
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_certificate_verify(NX_SECURE_TLS_SESSION *tls_session,
@@ -185,14 +188,8 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
     if (status)
     {
 
-        /* Translate some X.509 return values into TLS return values. */
-        if (status == NX_SECURE_X509_CERTIFICATE_NOT_FOUND)
-        {
-            return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
-        }
-
-        /* The local certificate was not found. */
-        return(status);
+        /* Translate X.509 return values into TLS return values. */
+        return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
     }
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -233,13 +230,9 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
     if (status != NX_SUCCESS)
     {
 
-        /* Translate some X.509 return values into TLS return values. */
-        if (status == NX_SECURE_X509_UNKNOWN_CERT_SIG_ALGORITHM)
-        {
-            return(NX_SECURE_TLS_UNKNOWN_CERT_SIG_ALGORITHM);
-        }
+        /* Translate X.509 return values into TLS return values. */
+        return(NX_SECURE_TLS_UNKNOWN_CERT_SIG_ALGORITHM);
 
-        return(status);
     }
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -385,8 +378,8 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         /* Generate a hash of all sent and received handshake messages to this point (not a Finished hash!). */
         /* Copy over the handshake hash state into a local structure to do the intermediate calculation. */
         NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
 
         /* Use SHA-256 for now... */
         hash_method = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_sha256_method;
@@ -431,9 +424,9 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
     {
         /* Copy over the handshake hash metadata into scratch metadata area to do the intermediate calculation.  */
         NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch +
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata,
-               tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size); /* Use case of memcpy is verified. */
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata,
+                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size); /* Use case of memcpy is verified. */
 
         /* Finalize the handshake message hashes that we started at the beginning of the handshake. */
         hash_method = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_md5_method;
@@ -462,9 +455,9 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size);
 
         if (status != NX_CRYPTO_SUCCESS)
-            {
-                return(status);
-            }                                                     
+        {
+            return(status);
+        }                                                     
 
         NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
                                       tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata,
@@ -494,10 +487,10 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                                      tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size);
 
         if (status != NX_CRYPTO_SUCCESS)
-            {
-                return(status);
-            }                                                     
-        }
+        {
+            return(status);
+        }                                                     
+    }
 #endif
 
     /* Make sure we found a supported version (essentially an assertion check). */
@@ -546,7 +539,11 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         if (tls_session -> nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_2 ||
             tls_session -> nx_secure_tls_protocol_version == NX_SECURE_DTLS_VERSION_1_2)
 #else
+
+#if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
         if (tls_session -> nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_2)
+#endif
+
 #endif /* NX_SECURE_ENABLE_DTLS */
         {
             /* Signature algorithm used. */
@@ -742,7 +739,11 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         if (tls_session -> nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_2 ||
             tls_session -> nx_secure_tls_protocol_version == NX_SECURE_DTLS_VERSION_1_2)
 #else
+
+#if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
         if (tls_session -> nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_2)
+#endif
+
 #endif /* NX_SECURE_ENABLE_DTLS */
         {
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -809,15 +810,10 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         }
 #endif /* NX_SECURE_KEY_CLEAR  */
 
-
+        /* curve_method_cert is set to NX_NULL if status != NX_SUCCESS */
         if(status != NX_SUCCESS)
         {
             return(status);
-        }
-        if (curve_method_cert == NX_NULL)
-        {
-            /* The local certificate is using an unsupported curve. */
-            return(NX_SECURE_TLS_UNSUPPORTED_ECC_CURVE);
         }
 
         if (public_cipher_method -> nx_crypto_init != NX_NULL)

@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_certificate                     PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -76,7 +76,9 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            updated X.509 return value, */
 /*                                            resulting in version 6.1.6  */
-/*                                                                        */
+/*  04-25-2022     Zhen Kong                Modified comment(s), removed  */
+/*                                            unreachable error code,     */
+/*                                            resulting in version 6.1.11 */
 /**************************************************************************/
 UINT _nx_secure_tls_send_certificate(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
                                      ULONG wait_option)
@@ -137,14 +139,9 @@ UINT                 extensions_length;
         if (status)
         {
 
-            /* Translate some X.509 return values into TLS return values. */
-            if (status == NX_SECURE_X509_CERTIFICATE_NOT_FOUND)
-            {
-                return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
-            }
-
-            /* No certificate found, error! */
-            return(status);
+            /* _nx_secure_x509_local_device_certificate_get can only return
+                NX_SECURE_X509_CERTIFICATE_NOT_FOUND in this case. */
+            return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
         }
     }
 

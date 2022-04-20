@@ -31,7 +31,7 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_record                       PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -94,6 +94,9 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /* 10-15-2021      Timothy Stapko           Modified comment(s), fixed    */
 /*                                            TLS 1.3 compile issue,      */
 /*                                            resulting in version 6.1.9  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed unnecessary code,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
@@ -396,7 +399,7 @@ NX_PACKET *decrypted_packet;
                                                        message_length, &bytes_copied);
             }
 
-            if (status || (bytes_copied != message_length))
+            if (status)
             {
                 return(NX_SECURE_TLS_INVALID_PACKET);
             }

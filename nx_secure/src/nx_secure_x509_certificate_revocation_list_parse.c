@@ -543,7 +543,7 @@ UCHAR        oid_found = NX_CRYPTO_FALSE;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_crl_signature_data_parse            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -581,6 +581,9 @@ UCHAR        oid_found = NX_CRYPTO_FALSE;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_signature_data_parse(const UCHAR *buffer, ULONG length,
@@ -612,7 +615,7 @@ UINT         status;
      * This is due to the data being encoded as an ASN.1 bit string, which may
      * require padding bits to get to a multiple of 8 for byte alignment. The byte
      * represents the number of padding bits, but in X509 it should always be 0. */
-    crl -> nx_secure_x509_crl_signature_data = &tlv_data[1];
+    crl -> nx_secure_x509_crl_signature_data = tlv_data + 1;
     crl -> nx_secure_x509_crl_signature_data_length = tlv_length - 1;
 
     /* Return the number of bytes we processed. */

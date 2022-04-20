@@ -42,7 +42,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_perform_DAD                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -80,6 +80,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added internal ip address   */
+/*                                            change notification,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -143,6 +147,14 @@ UINT              ipv6_addr_index;
                         ipv6_addr_index = (ULONG)nx_ipv6_address_next -> nxd_ipv6_address_index;
                         ip_ptr -> nx_ipv6_address_change_notify(ip_ptr, NX_IPV6_ADDRESS_DAD_SUCCESSFUL,
                                                                 i, ipv6_addr_index, &nx_ipv6_address_next -> nxd_ipv6_address[0]);
+                    }
+
+                    /* If the internal callback function is set, invoke the callback function . */
+                    if (ip_ptr -> nx_ipv6_address_change_notify_internal)
+                    {
+                        ipv6_addr_index = (ULONG)nx_ipv6_address_next -> nxd_ipv6_address_index;
+                        ip_ptr -> nx_ipv6_address_change_notify_internal(ip_ptr, NX_IPV6_ADDRESS_DAD_SUCCESSFUL,
+                                                                         i, ipv6_addr_index, &nx_ipv6_address_next -> nxd_ipv6_address[0]);
                     }
 #endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
                 }

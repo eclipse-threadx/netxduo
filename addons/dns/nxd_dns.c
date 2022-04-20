@@ -3987,7 +3987,7 @@ UINT        i;
 
         /* At least one DNS server is required - return an error.  */
         return(NX_DNS_NO_SERVER);
-    }        
+    }
 
     /* Bind the UDP socket to random port for each query.  */
     status =  nx_udp_socket_bind(&(dns_ptr -> nx_dns_socket), NX_ANY_PORT, TX_WAIT_FOREVER);
@@ -4033,7 +4033,7 @@ UINT        i;
 
                 /* Yes, have done, just return success.  */
                 return NX_SUCCESS;
-            }  
+            }
             else
             {
 
@@ -4848,7 +4848,6 @@ ULONG               time_remaining;
     /* Return completion status. */
     return(status);
 }
-
 
 /**************************************************************************/ 
 /*                                                                        */ 

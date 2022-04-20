@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_client_socket_bind                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -73,6 +73,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_client_socket_bind(NX_TCP_SOCKET *socket_ptr, UINT port, ULONG wait_option)
@@ -116,7 +119,7 @@ NX_TCP_SOCKET *end_ptr;
     {
 
         /* Call the find routine to allocate a TCP port.  */
-        port = NX_SEARCH_PORT_START + (UINT)(NX_RAND() % ((NX_MAX_PORT + 1) - NX_SEARCH_PORT_START));
+        port = NX_SEARCH_PORT_START + (UINT)(((ULONG)NX_RAND()) % ((NX_MAX_PORT + 1) - NX_SEARCH_PORT_START));
         if (_nx_tcp_free_port_find(ip_ptr, port, &port) != NX_SUCCESS)
         {
 

@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_create_ext                   PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -85,6 +85,10 @@
 /*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
 /*                                            added null pointer checking,*/
 /*                                            resulting in version 6.1.10 */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added null pointer checking,*/
+/*                                            removed unused code,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -646,8 +650,8 @@ ULONG metadata_size_sha256 = 0;
     }
 
     /* Get working pointers to our crypto methods. */
-    ciphersuite_table = crypto_table->nx_secure_tls_ciphersuite_lookup_table;
-    ciphersuite_table_size = crypto_table->nx_secure_tls_ciphersuite_lookup_table_size;
+    ciphersuite_table = crypto_table -> nx_secure_tls_ciphersuite_lookup_table;
+    ciphersuite_table_size = crypto_table -> nx_secure_tls_ciphersuite_lookup_table_size;
 
     cert_crypto = crypto_table -> nx_secure_tls_x509_cipher_table;
     cert_crypto_size = crypto_table -> nx_secure_tls_x509_cipher_table_size;
@@ -655,18 +659,26 @@ ULONG metadata_size_sha256 = 0;
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
     crypto_method_md5 = crypto_table -> nx_secure_tls_handshake_hash_md5_method;
     crypto_method_sha1 = crypto_table -> nx_secure_tls_handshake_hash_sha1_method;
-    metadata_size_md5 = crypto_method_md5 -> nx_crypto_metadata_area_size;
-    metadata_size_sha1 = crypto_method_sha1 -> nx_crypto_metadata_area_size;
 
-    /* Align metadata size to four bytes. */
-    if (metadata_size_md5 & 0x3)
+    if (crypto_method_md5 != NX_NULL)
     {
-        metadata_size_md5 += 4 - (metadata_size_md5 & 0x3);
+        metadata_size_md5 = crypto_method_md5 -> nx_crypto_metadata_area_size;
+
+        /* Align metadata size to four bytes. */
+        if (metadata_size_md5 & 0x3)
+        {
+            metadata_size_md5 += 4 - (metadata_size_md5 & 0x3);
+        }
     }
 
-    if (metadata_size_sha1 & 0x3)
+    if (crypto_method_sha1 != NX_NULL)
     {
-        metadata_size_sha1 += 4 - (metadata_size_sha1 & 0x3);
+        metadata_size_sha1 = crypto_method_sha1 -> nx_crypto_metadata_area_size;
+
+        if (metadata_size_sha1 & 0x3)
+        {
+            metadata_size_sha1 += 4 - (metadata_size_sha1 & 0x3);
+        }
     }
 #endif
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
@@ -682,7 +694,7 @@ ULONG metadata_size_sha256 = 0;
     }
 #endif
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-    tls_session->nx_secure_tls_1_3_supported = NX_FALSE;
+    tls_session -> nx_secure_tls_1_3_supported = NX_FALSE;
 #endif
 
     /* Loop through the ciphersuite table and find the largest metadata for each type of cipher. */
@@ -758,9 +770,12 @@ ULONG metadata_size_sha256 = 0;
             max_handshake_hash_scratch_size = metadata_size_md5 + metadata_size_sha1;
         }
 
-        if (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_prf_1_method -> nx_crypto_metadata_area_size)
+        if (crypto_table -> nx_secure_tls_prf_1_method != NX_NULL)
         {
-            max_tls_prf_metadata_size = crypto_table -> nx_secure_tls_prf_1_method -> nx_crypto_metadata_area_size;
+            if (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_prf_1_method -> nx_crypto_metadata_area_size)
+            {
+                max_tls_prf_metadata_size = crypto_table -> nx_secure_tls_prf_1_method -> nx_crypto_metadata_area_size;
+            }
         }
     }
 #endif
@@ -781,10 +796,17 @@ ULONG metadata_size_sha256 = 0;
 #endif
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-    max_handshake_hash_scratch_size += crypto_table -> nx_secure_tls_hmac_method -> nx_crypto_metadata_area_size;
-    if (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_hkdf_method -> nx_crypto_metadata_area_size)
+    if (crypto_table -> nx_secure_tls_hmac_method != NX_NULL)
     {
-        max_tls_prf_metadata_size = crypto_table -> nx_secure_tls_hkdf_method -> nx_crypto_metadata_area_size;
+        max_handshake_hash_scratch_size += crypto_table -> nx_secure_tls_hmac_method -> nx_crypto_metadata_area_size;
+    }
+
+    if (crypto_table -> nx_secure_tls_hkdf_method != NX_NULL)
+    {
+        if (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_hkdf_method -> nx_crypto_metadata_area_size)
+        {
+            max_tls_prf_metadata_size = crypto_table -> nx_secure_tls_hkdf_method -> nx_crypto_metadata_area_size;
+        }
     }
 #endif
 
@@ -859,11 +881,11 @@ ULONG metadata_size_sha256 = 0;
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
     if (tls_session -> nx_secure_tls_supported_versions & (USHORT)(NX_SECURE_TLS_BITFIELD_VERSION_1_0 | NX_SECURE_TLS_BITFIELD_VERSION_1_1))
     {
-    tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata = &metadata_area[offset];
+        tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata = &metadata_area[offset];
         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size = metadata_size_md5;
         offset += metadata_size_md5;
 
-    tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata = &metadata_area[offset];
+        tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata = &metadata_area[offset];
         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size = metadata_size_sha1;
         offset += metadata_size_sha1;
     }
@@ -905,7 +927,6 @@ ULONG metadata_size_sha256 = 0;
     /* TLS PRF metadata. */
     tls_session -> nx_secure_tls_prf_metadata_area = &metadata_area[offset];
     tls_session -> nx_secure_tls_prf_metadata_size = max_tls_prf_metadata_size;
-    offset += max_tls_prf_metadata_size;
 
     /* Place the new TLS control block on the list of created TLS. */
     if (_nx_secure_tls_created_ptr)
@@ -935,7 +956,7 @@ ULONG metadata_size_sha256 = 0;
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
     /* Flag to indicate when a session renegotiation is enabled. Enabled by default. */
-    if(tls_session->nx_secure_tls_1_3)
+    if (tls_session -> nx_secure_tls_1_3)
     {
         tls_session -> nx_secure_tls_renegotation_enabled = NX_FALSE;
     }

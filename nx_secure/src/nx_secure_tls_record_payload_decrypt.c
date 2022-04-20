@@ -49,7 +49,7 @@ extern UCHAR _nx_secure_tls_record_block_buffer[NX_SECURE_TLS_MAX_CIPHER_BLOCK_S
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_payload_decrypt               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -101,6 +101,9 @@ extern UCHAR _nx_secure_tls_record_block_buffer[NX_SECURE_TLS_MAX_CIPHER_BLOCK_S
 /*                                            verified memcpy use cases,  */
 /*                                            supported chained packet,   */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            reorganized internal logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_record_payload_decrypt(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *encrypted_packet,
@@ -367,7 +370,7 @@ UCHAR                                 nonce[13];
                                                    iv, iv_size, &bytes_copied);
             if (status || (bytes_copied != iv_size))
             {
-                return(status);
+                return(NX_SECURE_TLS_INVALID_PACKET);
             }
             offset += iv_size;
 
@@ -415,7 +418,7 @@ UCHAR                                 nonce[13];
         message_length = (*decrypted_packet) -> nx_packet_length;
         status = nx_packet_data_extract_offset(*decrypted_packet, message_length - 1,
                                                &padding_length, 1, &bytes_copied);
-        if (status || (bytes_copied != 1))
+        if (status)
         {
             nx_secure_tls_packet_release(*decrypted_packet);
             return(NX_SECURE_TLS_PADDING_CHECK_FAILED);
@@ -429,7 +432,7 @@ UCHAR                                 nonce[13];
 
             /* Check all padding values. */
             offset = (UINT)(message_length - (UINT)(1 + padding_length));
-            while ((offset < (message_length - 1)) && (status == NX_SUCCESS))
+            while (offset < (message_length - 1))
             {
                 copy_size = (UCHAR)(((message_length - 1) - offset) & 0xFF);
                 if (copy_size > sizeof(_nx_secure_tls_record_block_buffer))
@@ -439,11 +442,7 @@ UCHAR                                 nonce[13];
                 status = nx_packet_data_extract_offset(*decrypted_packet,
                                                        offset, _nx_secure_tls_record_block_buffer,
                                                        copy_size, &bytes_copied);
-                if (status)
-                {
-                    nx_secure_tls_packet_release(*decrypted_packet);
-                    return(NX_SECURE_TLS_PADDING_CHECK_FAILED);
-                }
+                NX_ASSERT(status == NX_SUCCESS);
 
                 offset += bytes_copied;
 
@@ -486,7 +485,7 @@ UCHAR                                 nonce[13];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_chained_packet_decrypt        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -532,6 +531,9 @@ UCHAR                                 nonce[13];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            reorganized internal logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_record_chained_packet_decrypt(NX_SECURE_TLS_SESSION *tls_session,
@@ -622,14 +624,6 @@ const NX_CRYPTO_METHOD *session_cipher_method;
             return(status);
         }
 
-        if (bytes_processed > message_length)
-        {
-
-            /* Error. We should never hit here. */
-            nx_secure_tls_packet_release(packet_ptr);
-            return(NX_SECURE_TLS_INVALID_PACKET);
-        }
-
         offset += bytes_processed;
         message_length -= bytes_processed;
     }
@@ -651,7 +645,7 @@ const NX_CRYPTO_METHOD *session_cipher_method;
         if (status || (bytes_copied != icv_size))
         {
             nx_secure_tls_packet_release(packet_ptr);
-            return(status);
+            return(NX_SECURE_TLS_INVALID_PACKET);
         }
     }
 
@@ -690,7 +684,7 @@ const NX_CRYPTO_METHOD *session_cipher_method;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_packet_decrypt                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -735,6 +729,9 @@ const NX_CRYPTO_METHOD *session_cipher_method;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            the issue of endless loop,  */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_record_packet_decrypt(NX_SECURE_TLS_SESSION *tls_session,
@@ -855,7 +852,7 @@ UINT original_offset = offset;
         /* Decrypt output to packet directly. */
         output = packet_ptr -> nx_packet_append_ptr;
 
-        if (block_size)
+        if ((block_size) && (decrypted_length > block_size))
         {
             
             /* Get rounded length. */

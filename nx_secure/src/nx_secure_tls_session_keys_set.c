@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_keys_set                     PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -79,6 +79,9 @@
 /*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
 /*                                            cleanup for session cipher, */
 /*                                            resulting in version 6.1.8  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 #define NX_SECURE_SOURCE_CODE
@@ -163,7 +166,7 @@ const NX_CRYPTO_METHOD               *session_cipher_method = NX_NULL;
             NX_SECURE_MEMCPY(&tls_session -> nx_secure_tls_key_material.nx_secure_tls_key_material_data[key_offset],
                              &tls_session -> nx_secure_tls_key_material.nx_secure_tls_new_key_material_data[key_offset], hash_size); /* Use case of memcpy is verified. */
         }
-        tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_write_mac_secret = &key_block[key_offset];
+        tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_write_mac_secret = key_block + key_offset;
         key_offset += hash_size;
 
         /* Copy new server mac secret if setting server keys. */
@@ -172,7 +175,7 @@ const NX_CRYPTO_METHOD               *session_cipher_method = NX_NULL;
             NX_SECURE_MEMCPY(&tls_session -> nx_secure_tls_key_material.nx_secure_tls_key_material_data[key_offset],
                              &tls_session -> nx_secure_tls_key_material.nx_secure_tls_new_key_material_data[key_offset], hash_size); /* Use case of memcpy is verified. */
         }
-        tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_write_mac_secret = &key_block[key_offset];
+        tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_write_mac_secret = key_block + key_offset;
         key_offset += hash_size;
     }
 
@@ -185,7 +188,7 @@ const NX_CRYPTO_METHOD               *session_cipher_method = NX_NULL;
             NX_SECURE_MEMCPY(&tls_session -> nx_secure_tls_key_material.nx_secure_tls_key_material_data[key_offset],
                              &tls_session -> nx_secure_tls_key_material.nx_secure_tls_new_key_material_data[key_offset], key_size); /* Use case of memcpy is verified. */
         }
-        tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_write_key = &key_block[key_offset];
+        tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_write_key = key_block + key_offset;
         key_offset += key_size;
 
         /* Copy new server session key if setting server keys. */
@@ -194,7 +197,7 @@ const NX_CRYPTO_METHOD               *session_cipher_method = NX_NULL;
             NX_SECURE_MEMCPY(&tls_session -> nx_secure_tls_key_material.nx_secure_tls_key_material_data[key_offset],
                              &tls_session -> nx_secure_tls_key_material.nx_secure_tls_new_key_material_data[key_offset], key_size); /* Use case of memcpy is verified. */
         }
-        tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_write_key = &key_block[key_offset];
+        tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_write_key = key_block + key_offset;
         key_offset += key_size;
     }
 
@@ -207,7 +210,7 @@ const NX_CRYPTO_METHOD               *session_cipher_method = NX_NULL;
             NX_SECURE_MEMCPY(&tls_session -> nx_secure_tls_key_material.nx_secure_tls_key_material_data[key_offset],
                              &tls_session -> nx_secure_tls_key_material.nx_secure_tls_new_key_material_data[key_offset], iv_size); /* Use case of memcpy is verified. */
         }
-        tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_iv = &key_block[key_offset];
+        tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_iv = key_block + key_offset;
         key_offset += iv_size;
 
         /* Copy new server IV if setting server keys. */
@@ -216,8 +219,7 @@ const NX_CRYPTO_METHOD               *session_cipher_method = NX_NULL;
             NX_SECURE_MEMCPY(&tls_session -> nx_secure_tls_key_material.nx_secure_tls_key_material_data[key_offset],
                              &tls_session -> nx_secure_tls_key_material.nx_secure_tls_new_key_material_data[key_offset], iv_size); /* Use case of memcpy is verified. */
         }
-        tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_iv = &key_block[key_offset];
-        key_offset += iv_size;
+        tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_iv = key_block + key_offset;
     }
 
     /* Initialize the crypto method used in the session cipher. */

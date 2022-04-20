@@ -7067,7 +7067,7 @@ UINT            name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_client_send_with_zero_source_address       PORTABLE C      */ 
-/*                                                           6.1.8        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7105,6 +7105,9 @@ UINT            name_length;
 /*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            supported new ip filter,    */
 /*                                            resulting in version 6.1.8  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            set the IP header pointer,  */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_client_send_with_zero_source_address(NX_DHCP *dhcp_ptr, UINT iface_index, NX_PACKET *packet_ptr)
@@ -7236,6 +7239,8 @@ NX_IP_DRIVER    driver_request;
 
     /* Setup the IP header pointer.  */
     ip_header_ptr =  (NX_IPV4_HEADER *) packet_ptr -> nx_packet_prepend_ptr; 
+    packet_ptr -> nx_packet_ip_header = packet_ptr -> nx_packet_prepend_ptr;
+    packet_ptr -> nx_packet_ip_header_length = sizeof(NX_IPV4_HEADER);
 
     /* Build the first 32-bit word of the IP header.  */
     ip_header_ptr -> nx_ip_header_word_0 =  (NX_IP_VERSION | socket_ptr -> nx_udp_socket_type_of_service | (0xFFFF & packet_ptr -> nx_packet_length));
@@ -7259,7 +7264,7 @@ NX_IP_DRIVER    driver_request;
     NX_CHANGE_ULONG_ENDIAN(ip_header_ptr -> nx_ip_header_word_2);
     NX_CHANGE_ULONG_ENDIAN(ip_header_ptr -> nx_ip_header_source_ip);
     NX_CHANGE_ULONG_ENDIAN(ip_header_ptr -> nx_ip_header_destination_ip);
-     
+
 #ifdef NX_DISABLE_IP_TX_CHECKSUM
     compute_checksum = 0;
 #else /* NX_DISABLE_IP_TX_CHECKSUM */

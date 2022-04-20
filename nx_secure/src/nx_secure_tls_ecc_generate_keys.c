@@ -47,7 +47,7 @@ static const UCHAR _NX_CRYPTO_DER_OID_SHA_512[]     =  {0x30, 0x51, 0x30, 0x0d, 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_ecc_generate_keys                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -96,6 +96,9 @@ static const UCHAR _NX_CRYPTO_DER_OID_SHA_512[]     =  {0x30, 0x51, 0x30, 0x0d, 
 /*                                            ECC find curve method,      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), removed  */
+/*                                            internal unreachable logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_ecc_generate_keys(NX_SECURE_TLS_SESSION *tls_session, UINT ecc_named_curve, USHORT sign_key,
@@ -157,11 +160,6 @@ USHORT                                signature_algorithm_id;
     {
         return(status);
     }
-    if (curve_method == NX_NULL)
-    {
-        return(NX_SECURE_TLS_UNSUPPORTED_ECC_CURVE);
-    }
-
 
     if (ecdhe_method -> nx_crypto_init != NX_NULL)
     {
@@ -728,13 +726,14 @@ USHORT                                signature_algorithm_id;
             _nx_secure_padded_signature[0] = 0x0;
             _nx_secure_padded_signature[1] = 0x1;
             _nx_secure_padded_signature[signature_offset - 1] = 0x0;
+#if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
             if (der_encoding_length > 0)
+#endif
             {
                 NX_CRYPTO_MEMCPY(&_nx_secure_padded_signature[signature_offset], der_encoding, der_encoding_length); /* Use case of memcpy is verified. */
                 signature_offset += der_encoding_length;
             }
             NX_CRYPTO_MEMCPY(&_nx_secure_padded_signature[signature_offset], hash, hash_length); /* Use case of memcpy is verified. */
-
             if (auth_method -> nx_crypto_init != NX_NULL)
             {
                 /* Initialize the crypto method with public key. */
@@ -749,7 +748,6 @@ USHORT                                signature_algorithm_id;
                     return(status);
                 }
             }
-
             if (auth_method -> nx_crypto_operation != NX_NULL)
             {
                 /* Sign the hash we just generated using our local RSA private key (associated with our local cert). */
@@ -795,12 +793,6 @@ USHORT                                signature_algorithm_id;
             if(status != NX_SUCCESS)
             {
                 return(status);
-            }
-            if (curve_method_cert == NX_NULL)
-            {
-
-                /* The local certificate is using an unsupported curve. */
-                return(NX_SECURE_TLS_UNSUPPORTED_ECC_CURVE);
             }
 
             if (auth_method -> nx_crypto_init != NX_NULL)

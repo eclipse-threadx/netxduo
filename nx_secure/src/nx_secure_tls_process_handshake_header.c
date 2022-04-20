@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_handshake_header             PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,6 +74,9 @@
 /*                                            improved buffer length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.3  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed unused code,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_handshake_header(UCHAR *packet_buffer, USHORT *message_type,
@@ -93,7 +96,6 @@ UINT _nx_secure_tls_process_handshake_header(UCHAR *packet_buffer, USHORT *messa
 
     /* Get the length of the TLS data. */
     *message_length = (UINT)((packet_buffer[0] << 16) + (packet_buffer[1] << 8) + packet_buffer[2]);
-    packet_buffer += 3;
 
     /* We have extracted 4 bytes of the header. */
     *header_size = 4;
