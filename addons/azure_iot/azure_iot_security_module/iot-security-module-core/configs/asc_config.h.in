@@ -1,7 +1,7 @@
 /********************
 * Core configuration
 *********************/
-/* Based on 2021.09.28-3.5.1 core tag */
+/* Based on 2022.07.19-3.5.3 core tag */
 
 /* ID and version */
 #cmakedefine ASC_SECURITY_MODULE_ID "@ASC_SECURITY_MODULE_ID@"

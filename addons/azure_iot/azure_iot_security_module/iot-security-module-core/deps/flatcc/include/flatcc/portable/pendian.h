@@ -131,7 +131,7 @@ extern "C" {
 /* Assume it goes for all. */
 #if !defined(le16toh)
 
-#if defined(__LITTLE_ENDIAN__)
+#if (__LITTLE_ENDIAN__==1)
 
 #define le16toh(v) (v)
 #define le32toh(v) (v)
@@ -149,7 +149,7 @@ extern "C" {
 #define htobe32(v) bswap32(v)
 #define htobe64(v) bswap64(v)
 
-#elif defined(__BIG_ENDIAN__)
+#elif (__BIG_ENDIAN__==1)
 
 #define le16toh(v) bswap16(v)
 #define le32toh(v) bswap32(v)

@@ -33,11 +33,11 @@ extern "C" {
 
 #ifdef __BYTE_ORDER__
 
-#if defined(__LITTLE_ENDIAN__) && __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+#if (__LITTLE_ENDIAN__ == 1) && __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
 #error __LITTLE_ENDIAN__ inconsistent with __BYTE_ORDER__
 #endif
 
-#if defined(__BIG_ENDIAN__) && __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__
+#if (__BIG_ENDIAN__ == 1) && __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__
 #error __BIG_ENDIAN__ inconsistent with __BYTE_ORDER__
 #endif
 
@@ -45,7 +45,7 @@ extern "C" {
 
 
 #if                                                                         \
-  defined(__LITTLE_ENDIAN__) ||                                             \
+  (__LITTLE_ENDIAN__ == 1) ||                                               \
   (defined(__BYTE_ORDER) && __BYTE_ORDER == __ORDER_LITTLE_ENDIAN) ||       \
   defined(__ARMEL__) || defined(__THUMBEL__) ||                             \
   defined(__AARCH64EL__) ||                                                 \
@@ -64,7 +64,7 @@ extern "C" {
 #endif
 
 #if                                                                         \
-  defined (__BIG_ENDIAN__) ||                                               \
+  (__BIG_ENDIAN__ == 1) ||                                                  \
   (defined(__BYTE_ORDER) && __BYTE_ORDER == __ORDER_BIG_ENDIAN) ||          \
   defined(__ARMEB__) || defined(THUMBEB__) || defined (__AARCH64EB__) ||    \
   defined(_MIPSEB) || defined(__MIPSEB) || defined(__MIPSEB__) ||           \
@@ -107,7 +107,7 @@ extern "C" {
 #endif
 #endif /* __BYTE_ORDER__ */
 
-#if defined(__LITTLE_ENDIAN__) && defined(__BIG_ENDIAN__)
+#if (__LITTLE_ENDIAN__ == 1) && (__BIG_ENDIAN__ == 1)
 #error conflicting definitions of __LITTLE_ENDIAN__ and __BIG_ENDIAN__
 #endif
 

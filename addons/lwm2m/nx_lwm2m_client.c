@@ -25,10 +25,6 @@
 
 #include "nx_lwm2m_client.h"
 
-#ifndef TX_DISABLE_ERROR_CHECKING
-#define TX_DISABLE_ERROR_CHECKING
-#endif
-
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */

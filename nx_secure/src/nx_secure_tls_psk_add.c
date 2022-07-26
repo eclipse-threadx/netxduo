@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_psk_add                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -72,6 +72,9 @@
 /*                                            buffer length verification, */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed PSK size verification,*/
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 #if defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE)
@@ -89,8 +92,8 @@ UINT current_index;
 
     /* Make sure we have space to add the PSK and its identity data. */
     if ((current_index + 1) < NX_SECURE_TLS_MAX_PSK_KEYS &&
-        psk_length < NX_SECURE_TLS_MAX_PSK_SIZE &&
-        identity_length < NX_SECURE_TLS_MAX_PSK_ID_SIZE &&
+        psk_length <= NX_SECURE_TLS_MAX_PSK_SIZE &&
+        identity_length <= NX_SECURE_TLS_MAX_PSK_ID_SIZE &&
         hint_length <= NX_SECURE_TLS_MAX_PSK_ID_SIZE)
     {
         /* Save off the PSK and its length. */

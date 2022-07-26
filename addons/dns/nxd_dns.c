@@ -192,7 +192,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_create                                      PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -233,6 +233,9 @@ UINT    status;
 /*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            randomized the source port, */
 /*                                            resulting in version 6.1.4  */
+/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s), and      */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dns_create(NX_DNS *dns_ptr, NX_IP *ip_ptr, UCHAR *domain_name)
@@ -261,22 +264,8 @@ UINT            status;
 #endif
 
     /* Create the DNS UDP socket.  */
-    status =  nx_udp_socket_create(ip_ptr, &(dns_ptr -> nx_dns_socket), "DNS Socket",
-                        NX_DNS_TYPE_OF_SERVICE, NX_DNS_FRAGMENT_OPTION, NX_DNS_TIME_TO_LIVE, NX_DNS_QUEUE_DEPTH);
-
-    /* Check status of socket create.  */
-    if (status != NX_SUCCESS)
-    {
-
-#ifndef NX_DNS_CLIENT_USER_CREATE_PACKET_POOL
-
-        /* Delete the packet pool. */
-        nx_packet_pool_delete(dns_ptr -> nx_dns_packet_pool_ptr);
-#endif
-
-        /* Return the NetX error.  */
-        return(status);
-    }
+    nx_udp_socket_create(ip_ptr, &(dns_ptr -> nx_dns_socket), "DNS Socket",
+                         NX_DNS_TYPE_OF_SERVICE, NX_DNS_FRAGMENT_OPTION, NX_DNS_TIME_TO_LIVE, NX_DNS_QUEUE_DEPTH);
 
     /* Create a DNS mutex for multi-thread access protection.  */
     status =  tx_mutex_create(&dns_ptr -> nx_dns_mutex, "DNS Mutex", TX_NO_INHERIT);
@@ -539,7 +528,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_delete                                      PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -576,6 +565,10 @@ UINT    status;
 /*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            randomized the source port, */
 /*                                            resulting in version 6.1.4  */
+/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s),          */
+/*                                            removed error checking for  */
+/*                                            nx_packet_pool_delete,      */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_delete(NX_DNS *dns_ptr)
@@ -596,13 +589,8 @@ UINT    status;
 #ifndef NX_DNS_CLIENT_USER_CREATE_PACKET_POOL
 
     /* Delete the DNS packet pool.  */
-    status =  nx_packet_pool_delete(dns_ptr -> nx_dns_packet_pool_ptr);
+    nx_packet_pool_delete(dns_ptr -> nx_dns_packet_pool_ptr);
 
-    if (status != NX_SUCCESS)
-    {
-        /* Return the packet pool delete error. */
-        return status;
-    }
 #endif
 
     /* Delete the DNS mutex.  */
@@ -770,7 +758,7 @@ NXD_ADDRESS dns_server_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_dns_server_add                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -804,6 +792,9 @@ NXD_ADDRESS dns_server_address;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s) and       */
+/*                                            simplified some branches,   */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxde_dns_server_add(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
@@ -824,14 +815,6 @@ UINT    status;
     {
 
         return NX_DNS_PARAM_ERROR;
-    }
-
-    /* Check for an invalid address type. */
-    if ((server_address -> nxd_ip_version != NX_IP_VERSION_V4) && 
-        (server_address -> nxd_ip_version != NX_IP_VERSION_V6))
-    {
-
-        return NX_DNS_INVALID_ADDRESS_TYPE;
     }
 
     /* Check if the server address is unspecified (::). */
@@ -868,6 +851,10 @@ UINT    status;
         /* Unsupported address type. */
         return NX_DNS_INVALID_ADDRESS_TYPE;
 #endif /* NX_DISABLE_IPV4 */
+    }
+    else
+    {
+        return NX_DNS_INVALID_ADDRESS_TYPE;
     }
 
     /* Check for appropriate caller.  */
@@ -937,7 +924,7 @@ UINT _nxd_dns_server_add(NX_DNS *dns_ptr, NXD_ADDRESS *dns_server_address)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_server_add_internal                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -972,6 +959,9 @@ UINT _nxd_dns_server_add(NX_DNS *dns_ptr, NXD_ADDRESS *dns_server_address)
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s) and       */
+/*                                            simplified branches,        */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dns_server_add_internal(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
@@ -1004,15 +994,17 @@ UINT        i;
 
 #ifndef NX_DISABLE_IPV4
             /* Is there a match? */
-            if ((server_address -> nxd_ip_version == NX_IP_VERSION_V4) &&
-                (dns_ptr -> nx_dns_server_ip_array[i].nxd_ip_address.v4 == server_address -> nxd_ip_address.v4))
+            if (server_address -> nxd_ip_version == NX_IP_VERSION_V4) 
             {
+                if (dns_ptr -> nx_dns_server_ip_array[i].nxd_ip_address.v4 == server_address -> nxd_ip_address.v4)
+                {
 
-                /* Error, release the mutex and return.  */
-                tx_mutex_put(&(dns_ptr -> nx_dns_mutex));
+                    /* Error, release the mutex and return.  */
+                    tx_mutex_put(&(dns_ptr -> nx_dns_mutex));
 
-                /* Yes, no need to add to the table, just return the 'error' status. */
-                return NX_DNS_DUPLICATE_ENTRY;
+                    /* Yes, no need to add to the table, just return the 'error' status. */
+                    return NX_DNS_DUPLICATE_ENTRY;
+                }
             }
 #else
             /* Error, release the mutex and return.  */
@@ -1028,16 +1020,18 @@ UINT        i;
 
 #ifdef FEATURE_NX_IPV6
             /* Is there a match? */
-            if ((server_address -> nxd_ip_version == NX_IP_VERSION_V6) &&
-                CHECK_IPV6_ADDRESSES_SAME(&dns_ptr -> nx_dns_server_ip_array[i].nxd_ip_address.v6[0], 
-                                          &(server_address -> nxd_ip_address.v6[0])))
+            if (server_address -> nxd_ip_version == NX_IP_VERSION_V6) 
             {
+                if (CHECK_IPV6_ADDRESSES_SAME(&dns_ptr -> nx_dns_server_ip_array[i].nxd_ip_address.v6[0], 
+                                          &(server_address -> nxd_ip_address.v6[0])))
+                {
 
-                /* Error, release the mutex and return.  */
-                tx_mutex_put(&(dns_ptr -> nx_dns_mutex));
+                    /* Error, release the mutex and return.  */
+                    tx_mutex_put(&(dns_ptr -> nx_dns_mutex));
 
-                /* Yes, no need to add to the table, just return the 'error' status. */
-                return NX_DNS_DUPLICATE_ENTRY;
+                    /* Yes, no need to add to the table, just return the 'error' status. */
+                    return NX_DNS_DUPLICATE_ENTRY;
+                }
             }
 #else
             /* Error, release the mutex and return.  */
@@ -1244,7 +1238,7 @@ NXD_ADDRESS dns_server_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_dns_server_remove                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1279,6 +1273,10 @@ NXD_ADDRESS dns_server_address;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s) and       */
+/*                                            simplified check for        */ 
+/*                                            invalid address types,      */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxde_dns_server_remove(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
@@ -1290,14 +1288,6 @@ UINT    status;
     if ((dns_ptr == NX_NULL) || (server_address == NX_NULL) || (dns_ptr -> nx_dns_id != NX_DNS_ID))
     {
         return(NX_PTR_ERROR);
-    }
-
-    /* Check for an invalid address type. */
-    if ((server_address -> nxd_ip_version != NX_IP_VERSION_V4) && 
-        (server_address -> nxd_ip_version != NX_IP_VERSION_V6))
-    {
-
-        return NX_DNS_INVALID_ADDRESS_TYPE;
     }
 
     /* Check if the server address is unspecified (::). */
@@ -1334,6 +1324,10 @@ UINT    status;
         /* Unsupported address type. */
         return NX_DNS_INVALID_ADDRESS_TYPE;
 #endif /* NX_DISABLE_IPV4 */
+    }
+    else
+    {
+        return NX_DNS_INVALID_ADDRESS_TYPE;
     }
 
     /* Check for appropriate caller.  */
@@ -1406,7 +1400,7 @@ UINT  _nxd_dns_server_remove(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_server_remove_internal                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1444,6 +1438,9 @@ UINT  _nxd_dns_server_remove(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s) and       */
+/*                                            removed null IP checks,     */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_server_remove_internal(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
@@ -1488,50 +1485,24 @@ UINT            found_match;
         }
 #else
         {
-             /* Check for a null address. */
-            if (!CHECK_UNSPECIFIED_ADDRESS(&DNSserver_array[i].nxd_ip_address.v6[0]))
+            /* Determine if this entry matches the specified DNS server.  */
+            if (CHECK_IPV6_ADDRESSES_SAME(&DNSserver_array[i].nxd_ip_address.v6[0], &(server_address -> nxd_ip_address.v6[0])))
             {
     
-                /* No null; Determine if this entry matches the specified DNS server.  */
-                if (CHECK_IPV6_ADDRESSES_SAME(&DNSserver_array[i].nxd_ip_address.v6[0], &(server_address -> nxd_ip_address.v6[0])))
-                {
-    
-                    found_match = NX_TRUE;
-                    break;
-                }
-            }
-            /* Check for a null address. */
-            else
-            {
-
-                /* Error, release the mutex and return.  */
-                tx_mutex_put(&(dns_ptr -> nx_dns_mutex));
-                return NX_DNS_BAD_ADDRESS_ERROR;
+                found_match = NX_TRUE;
+                break;
             }
         }
 #endif         
         else if (DNSserver_array[i].nxd_ip_version == NX_IP_VERSION_V4)
 #ifndef NX_DISABLE_IPV4
         {
-
-            /* Check for a null address. */
-            if (DNSserver_array[i].nxd_ip_address.v4 != IP_ADDRESS(0, 0, 0, 0))
+            /* Determine if this entry matches the specified DNS server.  */
+            if (DNSserver_array[i].nxd_ip_address.v4 == server_address -> nxd_ip_address.v4)
             {
-            
-                /* Determine if this entry matches the specified DNS server.  */
-                if (DNSserver_array[i].nxd_ip_address.v4 == server_address -> nxd_ip_address.v4)
-                {
     
-                    found_match = NX_TRUE;
-                    break;
-                }
-            }
-            else
-            {
-
-                /* Error, release the mutex and return.  */
-                tx_mutex_put(&(dns_ptr -> nx_dns_mutex));
-                return NX_DNS_INVALID_ADDRESS_TYPE;
+                found_match = NX_TRUE;
+                break;
             }
         }
 #else

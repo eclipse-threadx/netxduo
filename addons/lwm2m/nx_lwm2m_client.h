@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_lwm2m_client.h                                   PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -45,6 +45,11 @@
 /*                                            token and processing        */
 /*                                            confirmable response,       */
 /*                                            resulting in version 6.1.10 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed compiler errors when  */
+/*                                            TX_SAFETY_CRITICAL is       */
+/*                                            enabled,                    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -62,9 +67,14 @@ extern   "C" {
 #endif
 
 /* Bypass NetX API error checking for internal calls.  */
+#include "tx_port.h"
 
 #ifdef NX_LWM2M_CLIENT_SOURCE_CODE
-
+#ifndef TX_SAFETY_CRITICAL
+#ifndef TX_DISABLE_ERROR_CHECKING
+#define TX_DISABLE_ERROR_CHECKING
+#endif
+#endif
 #ifndef NX_DISABLE_ERROR_CHECKING
 #define NX_DISABLE_ERROR_CHECKING
 #endif

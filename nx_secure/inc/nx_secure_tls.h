@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -85,6 +85,15 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            enabled AEAD for TLS 1.3,   */
 /*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            updated product constants,  */
+/*                                            fixed compiler errors when  */
+/*                                            TX_SAFETY_CRITICAL is       */
+/*                                            enabled, increased default  */
+/*                                            pre-master sec size for PSK,*/
+/*                                            updated alert message for   */
+/*                                            downgrade protection,       */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -105,10 +114,13 @@ extern   "C" {
 #endif
 
 /* Include the ThreadX and port-specific data type file.  */
+#include "tx_port.h"
 
 #ifdef NX_SECURE_SOURCE_CODE
+#ifndef TX_SAFETY_CRITICAL
 #ifndef TX_DISABLE_ERROR_CHECKING
 #define TX_DISABLE_ERROR_CHECKING
+#endif
 #endif
 #ifndef NX_DISABLE_ERROR_CHECKING
 #define NX_DISABLE_ERROR_CHECKING
@@ -145,7 +157,7 @@ extern   "C" {
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
 #define NETX_SECURE_MINOR_VERSION                       1
-#define NETX_SECURE_PATCH_VERSION                       11
+#define NETX_SECURE_PATCH_VERSION                       12
 
 /* The following symbols are defined for backward compatibility reasons. */
 #define EL_PRODUCT_NETX_SECURE
@@ -289,6 +301,7 @@ extern   "C" {
 #define NX_SECURE_TLS_RECORD_OVERFLOW                   0x151       /* Received a TLSCiphertext record that had a length too long. */
 #define NX_SECURE_TLS_HANDSHAKE_FRAGMENT_RECEIVED       0x152       /* Received a fragmented handshake message - take appropriate action at a higher level of the state machine. */
 #define NX_SECURE_TLS_TRANSMIT_LOCKED                   0x153       /* Another thread is transmitting. */
+#define NX_SECURE_TLS_DOWNGRADE_DETECTED                0x154       /* Detected an inappropriate TLS version downgrade by TLS 1.3 client. */
 
 /* NX_CONTINUE is a symbol defined in NetX Duo 5.10.  For backward compatibility, this symbol is defined here */
 #if ((__NETXDUO_MAJOR_VERSION__ == 5) && (__NETXDUO_MINOR_VERSION__ == 9))
@@ -648,16 +661,8 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
 #define NX_SECURE_TLS_TRANSCRIPT_IDX_CLIENT_FINISHED       (3)
 #define NX_SECURE_TLS_TRANSCRIPT_IDX_SERVER_FINISHED       (4)
 
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
-#ifndef NX_SECURE_TLS_PREMASTER_SIZE
-#define NX_SECURE_TLS_PREMASTER_SIZE                       (68)  /* The pre-master secret should be at least 66 bytes for ECDH/ECDHE with secp521r1. */
-#endif
-#else /* !NX_SECURE_ENABLE_ECC_CIPHERSUITE */
-#ifndef NX_SECURE_TLS_PREMASTER_SIZE
-#define NX_SECURE_TLS_PREMASTER_SIZE                       (48)  /* The pre-master secret is 48 bytes, except for PSK ciphersuites for which it may be more. */
-#endif
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 #define NX_SECURE_TLS_RSA_PREMASTER_SIZE                   (48)  /* The size of RSA encrypted pre-master secret. */
+#define NX_SECURE_TLS_EC_PREMASTER_SIZE                    (68)  /* The size of pre-master secret for EC. */
 #define NX_SECURE_TLS_MASTER_SIZE                          (48)  /* The master secret is also 48 bytes. */
 #define NX_SECURE_TLS_MAX_KEY_SIZE                         (32)  /* Maximum size of a session key in bytes. */
 #define NX_SECURE_TLS_MAX_IV_SIZE                          (16)  /* Maximum size of a session initialization vector in bytes. */
@@ -722,6 +727,9 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
 #define NX_SECURE_TLS_MAX_PSK_NONCE_SIZE                   (255)
 #endif
 
+/* The pre-master secret size should be at least (2 * NX_SECURE_TLS_MAX_PSK_SIZE + 4) bytes for PSK cipher suites. */
+#define NX_SECURE_TLS_MIN_PREMASTER_SIZE_PSK               (2 * NX_SECURE_TLS_MAX_PSK_SIZE + 4)
+
 /* This structure holds the data for Pre-Shared Keys (PSKs) for use with
    the TLS PSK ciphersuites. The actual keys are generated from this data
    as part of the TLS handshake, but the user must provide this seed and
@@ -776,6 +784,28 @@ typedef struct NX_SECURE_TLS_PSK_STORE_STRUCT
 } NX_SECURE_TLS_PSK_STORE;
 #endif /* defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) */
 
+
+#ifndef NX_SECURE_TLS_PREMASTER_SIZE
+
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#define NX_SECURE_TLS_MIN_PREMASTER_SIZE                   NX_SECURE_TLS_EC_PREMASTER_SIZE  /* The pre-master secret should be at least 66 bytes for ECDH/ECDHE with secp521r1. */
+#else
+#define NX_SECURE_TLS_MIN_PREMASTER_SIZE                   NX_SECURE_TLS_RSA_PREMASTER_SIZE /* The pre-master secret should be at least 48 bytes. */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+
+#if defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE)
+
+#if NX_SECURE_TLS_MIN_PREMASTER_SIZE_PSK > NX_SECURE_TLS_MIN_PREMASTER_SIZE
+#define NX_SECURE_TLS_PREMASTER_SIZE                       NX_SECURE_TLS_MIN_PREMASTER_SIZE_PSK /* The pre-master secret should be at least NX_SECURE_TLS_MIN_PREMASTER_SIZE_PSK bytes for PSK cipher suites. */
+#else
+#define NX_SECURE_TLS_PREMASTER_SIZE                       NX_SECURE_TLS_MIN_PREMASTER_SIZE
+#endif
+
+#else
+#define NX_SECURE_TLS_PREMASTER_SIZE                       NX_SECURE_TLS_MIN_PREMASTER_SIZE
+#endif /* defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) || (NX_SECURE_TLS_TLS_1_3_ENABLED) */
+
+#endif
 
 /* TLS Ciphersuite lookup table. Contains all pertinent information for ciphersuites used in TLS operations.
  * The lookup is based on the first field, which will contain the defined TLS value for the ciphersuite. */
@@ -834,13 +864,13 @@ typedef struct NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA_STRUCT
     USHORT nx_secure_tls_ecdhe_private_key_length;
 
     /* Private key for ECDHE. */
-    UCHAR nx_secure_tls_ecdhe_private_key[NX_SECURE_TLS_PREMASTER_SIZE];
+    UCHAR nx_secure_tls_ecdhe_private_key[NX_SECURE_TLS_EC_PREMASTER_SIZE];
 
     /* Length of the public key. */
     USHORT nx_secure_tls_ecdhe_public_key_length;
 
     /* Public key for ECDHE. */
-    UCHAR nx_secure_tls_ecdhe_public_key[4 * NX_SECURE_TLS_PREMASTER_SIZE];
+    UCHAR nx_secure_tls_ecdhe_public_key[4 * NX_SECURE_TLS_EC_PREMASTER_SIZE];
 
 } NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA;
 

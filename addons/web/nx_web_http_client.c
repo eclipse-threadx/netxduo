@@ -2614,7 +2614,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_client_request_packet_send             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2651,6 +2651,9 @@ UINT        status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            the invalid release issue,  */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_web_http_client_request_packet_send(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, UINT more_data, ULONG wait_option)
@@ -2692,9 +2695,6 @@ UINT        length = packet_ptr -> nx_packet_length;
     {
 
         /* No, send was not successful.  */
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
 
         /* Disconnect and unbind the socket.  */
         _nx_web_http_client_error_exit(client_ptr, wait_option);
@@ -5824,7 +5824,7 @@ UINT         header_size;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_client_put_packet                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5863,6 +5863,9 @@ UINT         header_size;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            the invalid release issue,  */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_web_http_client_put_packet(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, ULONG wait_option)
@@ -5943,9 +5946,6 @@ UINT        status;
     {
 
         /* No, send was not successful.  */
-        
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
 
         /* Disconnect and unbind the socket.  */
         _nx_web_http_client_error_exit(client_ptr, wait_option);

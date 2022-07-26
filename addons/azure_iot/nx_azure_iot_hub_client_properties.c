@@ -187,7 +187,7 @@ UINT system_component;
         return(NX_AZURE_IOT_INVALID_PARAMETER);
     }
 
-    component_name = az_span_create((UCHAR *)component_name_pptr, (INT)*component_name_length_ptr);
+    component_name = az_span_create((UCHAR *)*component_name_pptr, (INT)*component_name_length_ptr);
     core_message_type = (message_type == NX_AZURE_IOT_HUB_PROPERTIES) ? AZ_IOT_HUB_CLIENT_PROPERTIES_MESSAGE_TYPE_GET_RESPONSE :
                         AZ_IOT_HUB_CLIENT_PROPERTIES_MESSAGE_TYPE_WRITABLE_UPDATED;
     core_property_type = (property_type == NX_AZURE_IOT_HUB_CLIENT_PROPERTY_REPORTED_FROM_DEVICE) ? AZ_IOT_HUB_CLIENT_PROPERTY_REPORTED_FROM_DEVICE :
