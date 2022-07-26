@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */ 
 /*    nxd_dhcpv6_client.h                                 PORTABLE C      */ 
-/*                                                           6.1.9        */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -49,6 +49,9 @@
 /*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
 /*                                            necessary header file,      */
 /*                                            resulting in version 6.1.9  */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            adding user options,        */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -757,6 +760,9 @@ typedef struct NX_DHCPV6_STRUCT
        option the status is referring to e.g. IA Address.  */
     VOID (*nx_dhcpv6_server_error_handler)(struct NX_DHCPV6_STRUCT *dhcpv6_ptr, UINT op_code, UINT status_code, UINT message_type);
 
+    /* Define the callback function for adding specific DHCPv6 user option.  */
+    UINT (*nx_dhcpv6_user_option_add)(struct NX_DHCPV6_STRUCT *dhcpv6_ptr, UINT interface_index, UINT message_type, UCHAR *user_option_ptr, UINT *user_option_length);
+
 } NX_DHCPV6;
 
                                           
@@ -833,6 +839,7 @@ typedef struct NX_DHCPV6_CLIENT_RECORD_STRUCT
 #define nx_dhcpv6_stop                                      _nx_dhcpv6_stop
 #define nx_dhcpv6_suspend                                   _nx_dhcpv6_suspend
 #define nx_dhcpv6_resume                                    _nx_dhcpv6_resume   
+#define nx_dhcpv6_user_option_add_callback_set              _nx_dhcpv6_user_option_add_callback_set
 #ifdef NX_DHCPV6_CLIENT_RESTORE_STATE                                     
 #define nx_dhcpv6_client_get_record                         _nx_dhcpv6_client_get_record
 #define nx_dhcpv6_client_restore_record                     _nx_dhcpv6_client_restore_record
@@ -876,6 +883,7 @@ typedef struct NX_DHCPV6_CLIENT_RECORD_STRUCT
 #define nx_dhcpv6_stop                                      _nxe_dhcpv6_stop
 #define nx_dhcpv6_suspend                                   _nxe_dhcpv6_suspend
 #define nx_dhcpv6_resume                                    _nxe_dhcpv6_resume   
+#define nx_dhcpv6_user_option_add_callback_set              _nxe_dhcpv6_user_option_add_callback_set
 #ifdef NX_DHCPV6_CLIENT_RESTORE_STATE                                     
 #define nx_dhcpv6_client_get_record                         _nxe_dhcpv6_client_get_record
 #define nx_dhcpv6_client_restore_record                     _nxe_dhcpv6_client_restore_record
@@ -920,6 +928,7 @@ UINT        nx_dhcpv6_start(NX_DHCPV6 *dhcpv6_ptr);
 UINT        nx_dhcpv6_stop(NX_DHCPV6 *dhcpv6_ptr);
 UINT        nx_dhcpv6_suspend(NX_DHCPV6 *dhcpv6_ptr);
 UINT        nx_dhcpv6_resume(NX_DHCPV6 *dhcpv6_ptr);  
+UINT        nx_dhcpv6_user_option_add_callback_set(NX_DHCPV6 *dhcpv6_ptr, UINT (*dhcpv6_user_option_add)(NX_DHCPV6 *dhcpv6_ptr, UINT interface_index, UINT message_type, UCHAR *user_option_ptr, UINT *user_option_length));
 #ifdef NX_DHCPV6_CLIENT_RESTORE_STATE
 UINT        nx_dhcpv6_client_get_record(NX_DHCPV6 *dhcpv6_ptr, NX_DHCPV6_CLIENT_RECORD *client_record_ptr);  
 UINT        nx_dhcpv6_client_restore_record(NX_DHCPV6 *dhcpv6_ptr, NX_DHCPV6_CLIENT_RECORD *client_record_ptr, ULONG time_elapsed);
@@ -999,7 +1008,9 @@ UINT        _nx_dhcpv6_stop(NX_DHCPV6 *dhcpv6_ptr);
 UINT        _nxe_dhcpv6_suspend(NX_DHCPV6 *dhcpv6_ptr);
 UINT        _nx_dhcpv6_suspend(NX_DHCPV6 *dhcpv6_ptr);
 UINT        _nxe_dhcpv6_resume(NX_DHCPV6 *dhcpv6_ptr);
-UINT        _nx_dhcpv6_resume(NX_DHCPV6 *dhcpv6_ptr);   
+UINT        _nx_dhcpv6_resume(NX_DHCPV6 *dhcpv6_ptr);
+UINT        _nxe_dhcpv6_user_option_add_callback_set(NX_DHCPV6 *dhcpv6_ptr, UINT (*dhcpv6_user_option_add)(NX_DHCPV6 *dhcpv6_ptr, UINT interface_index, UINT message_type, UCHAR *user_option_ptr, UINT *user_option_length));
+UINT        _nx_dhcpv6_user_option_add_callback_set(NX_DHCPV6 *dhcpv6_ptr, UINT (*dhcpv6_user_option_add)(NX_DHCPV6 *dhcpv6_ptr, UINT interface_index, UINT message_type, UCHAR *user_option_ptr, UINT *user_option_length));
 #ifdef NX_DHCPV6_CLIENT_RESTORE_STATE
 UINT        _nxe_dhcpv6_client_get_record(NX_DHCPV6 *dhcpv6_ptr, NX_DHCPV6_CLIENT_RECORD *client_record_ptr);     
 UINT        _nx_dhcpv6_client_get_record(NX_DHCPV6 *dhcpv6_ptr, NX_DHCPV6_CLIENT_RECORD *client_record_ptr);  

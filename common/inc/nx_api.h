@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_api.h                                            PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -88,6 +88,12 @@
 /*                                            added internal ip address   */
 /*                                            change notification,        */
 /*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            updated product constants,  */
+/*                                            fixed compiler errors when  */
+/*                                            TX_SAFETY_CRITICAL is       */
+/*                                            enabled,                    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -112,10 +118,13 @@ extern   "C" {
 
 
 /* Bypass ThreadX API error checking for internal NetX calls.  */
+#include "tx_port.h"
 
 #ifdef NX_SOURCE_CODE
+#ifndef TX_SAFETY_CRITICAL
 #ifndef TX_DISABLE_ERROR_CHECKING
 #define TX_DISABLE_ERROR_CHECKING
+#endif
 #endif
 #endif
 
@@ -501,7 +510,7 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 #define AZURE_RTOS_NETXDUO
 #define NETXDUO_MAJOR_VERSION                    6
 #define NETXDUO_MINOR_VERSION                    1
-#define NETXDUO_PATCH_VERSION                    11
+#define NETXDUO_PATCH_VERSION                    12
 
 /* Define the following symbols for backward compatibility */
 #define EL_PRODUCT_NETXDUO

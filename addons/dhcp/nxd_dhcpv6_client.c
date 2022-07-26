@@ -8315,7 +8315,7 @@ UCHAR     original_state;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_send_request                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8374,6 +8374,9 @@ UCHAR     original_state;
 /*                                            verified memcpy use cases,  */
 /*                                            fixed compiler warnings,    */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), supported*/
+/*                                            adding user options,        */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_send_request(NX_DHCPV6 *dhcpv6_ptr)
@@ -8387,6 +8390,8 @@ UINT        index;
 NX_INTERFACE     *interface_ptr;
 NXD_IPV6_ADDRESS *ipv6_address;
 ULONG             available_payload;
+UCHAR            *user_option_ptr;
+UINT              user_option_length;
 
 
     /* Initialize local variables. */
@@ -9020,11 +9025,36 @@ ULONG             available_payload;
         }
     }
 
+    /* Add any user supplied options to the buffer.  */
+    if (dhcpv6_ptr -> nx_dhcpv6_user_option_add)
+    {
+
+        /* Set the pointer for adding user option.  */
+        user_option_ptr = buffer + index;
+
+        /* Calculate the available length for user options.  */
+        user_option_length = (UINT)(packet_ptr -> nx_packet_data_end - user_option_ptr);
+
+        /* Add the specific DHCP option user wanted.  */
+        if (dhcpv6_ptr -> nx_dhcpv6_user_option_add(dhcpv6_ptr, dhcpv6_ptr -> nx_dhcpv6_client_interface_index, dhcpv6_ptr -> nx_dhcpv6_message_hdr.nx_message_type, user_option_ptr, &user_option_length) == NX_TRUE)
+        {
+
+            /* Update the index to include the user options.  */
+            index += user_option_length;
+        }
+        else
+        {
+
+            /* Invalid user options. Release the packet.  */
+            nx_packet_release(packet_ptr);
+            return(NX_DHCPV6_UNKNOWN_OPTION);
+        }
+    }
+
     /* Setup the packet pointers.  */
     packet_ptr -> nx_packet_length = index;
 
     packet_ptr -> nx_packet_append_ptr = packet_ptr -> nx_packet_prepend_ptr + index;
-
 
     /* Select Client Source address:
        1. When a client sends a DHCP message to the All_DHCP_Relay_Agents_and_Servers address,
@@ -12079,6 +12109,124 @@ UINT _nx_dhcpv6_update_retransmit_info(NX_DHCPV6 *dhcpv6_ptr)
 
     /* Can retransmit the request. */
     return NX_SUCCESS;
+}
+
+
+/**************************************************************************/ 
+/*                                                                        */ 
+/*  FUNCTION                                               RELEASE        */ 
+/*                                                                        */ 
+/*    _nxe_dhcpv6_user_option_add_callback_set             PORTABLE C     */ 
+/*                                                           6.1.12       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */ 
+/*                                                                        */ 
+/*    This function performs error checking on the user option add        */ 
+/*    callback set service.                                               */ 
+/*                                                                        */ 
+/*  INPUT                                                                 */ 
+/*                                                                        */ 
+/*    dhcpv6_ptr                            Pointer to DHCPv6 instance    */ 
+/*    dhcpv6_user_option_add                Pointer to application's      */ 
+/*                                            option add function         */ 
+/*                                                                        */ 
+/*  OUTPUT                                                                */ 
+/*                                                                        */ 
+/*    status                                Completion status             */ 
+/*                                                                        */ 
+/*  CALLS                                                                 */ 
+/*                                                                        */ 
+/*    _nx_dhcpv6_user_option_add_callback_set Actual user option callback */ 
+/*                                            set service                 */ 
+/*                                                                        */ 
+/*  CALLED BY                                                             */ 
+/*                                                                        */ 
+/*    Application Code                                                    */ 
+/*                                                                        */ 
+/*  RELEASE HISTORY                                                       */ 
+/*                                                                        */ 
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  07-29-2022     Yuxin Zhou               Initial Version 6.1.12        */
+/*                                                                        */
+/**************************************************************************/
+UINT _nxe_dhcpv6_user_option_add_callback_set(NX_DHCPV6 *dhcpv6_ptr, UINT (*dhcpv6_user_option_add)(NX_DHCPV6 *dhcpv6_ptr, UINT interface_index, UINT message_type,
+                                                                                                    UCHAR *user_option_ptr, UINT *user_option_length))
+{
+
+UINT    status;
+
+    /* Check for invalid input. */
+    if ((dhcpv6_ptr == NX_NULL) || (dhcpv6_user_option_add == NX_NULL))
+    {
+        return(NX_PTR_ERROR);
+    }
+
+    /* Call actual DHCPv6 user option callback set service.  */
+    status =  _nx_dhcpv6_user_option_add_callback_set(dhcpv6_ptr, dhcpv6_user_option_add);
+
+    /* Return status.  */
+    return(status);
+}
+
+
+/**************************************************************************/ 
+/*                                                                        */ 
+/*  FUNCTION                                               RELEASE        */ 
+/*                                                                        */ 
+/*    _nx_dhcpv6_user_option_add_callback_set             PORTABLE C      */ 
+/*                                                           6.1.12       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */ 
+/*                                                                        */ 
+/*    This function sets the user option add callback.                    */ 
+/*                                                                        */ 
+/*  INPUT                                                                 */ 
+/*                                                                        */ 
+/*    dhcpv6_ptr                            Pointer to DHCPv6 instance    */ 
+/*    dhcpv6_user_option_add                Pointer to application's      */ 
+/*                                            option add function         */ 
+/*                                                                        */ 
+/*  OUTPUT                                                                */ 
+/*                                                                        */ 
+/*    status                                Completion status             */ 
+/*                                                                        */ 
+/*  CALLS                                                                 */ 
+/*                                                                        */ 
+/*    None                                                                */ 
+/*                                                                        */ 
+/*  CALLED BY                                                             */ 
+/*                                                                        */ 
+/*    Application Code                                                    */ 
+/*                                                                        */ 
+/*  RELEASE HISTORY                                                       */ 
+/*                                                                        */ 
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  07-29-2022     Yuxin Zhou               Initial Version 6.1.12        */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_dhcpv6_user_option_add_callback_set(NX_DHCPV6 *dhcpv6_ptr, UINT (*dhcpv6_user_option_add)(NX_DHCPV6 *dhcpv6_ptr, UINT interface_index, UINT message_type,
+                                                                                                   UCHAR *user_option_ptr, UINT *user_option_length))
+{
+
+    /* Obtain DHCPv6 Client protection mutex. */
+    tx_mutex_get(&(dhcpv6_ptr -> nx_dhcpv6_client_mutex), TX_WAIT_FOREVER);
+
+    /* Set the callback.  */
+    dhcpv6_ptr -> nx_dhcpv6_user_option_add = dhcpv6_user_option_add;
+
+    /* Release the mutex.  */
+    tx_mutex_put(&(dhcpv6_ptr -> nx_dhcpv6_client_mutex));
+
+    /* Return a successful status.  */
+    return(NX_SUCCESS);
 }
 
 

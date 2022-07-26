@@ -352,7 +352,7 @@ UINT            status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcpserver_tls_setup                              PORTABLE C     */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -436,6 +436,10 @@ UINT            status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the index of the  */
+/*                                            remote certificate list,    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -530,7 +534,7 @@ UINT status;
             for(cert_count = 0; cert_count < remote_certs_num; ++cert_count)
             {
                 /* Allocate a remote certificate from the provided array. */
-                status = nx_secure_tls_remote_certificate_allocate(tls_session, remote_certificates[i],
+                status = nx_secure_tls_remote_certificate_allocate(tls_session, remote_certificates[cert_count],
                                                                    session_cert_buffer, session_cert_buffer_size);
 
                 if(status != NX_SUCCESS)

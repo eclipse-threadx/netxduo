@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_send_record                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -86,6 +86,9 @@
 /*                                            verified memcpy use cases,  */
 /*                                            released packet securely,   */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            checked seq number overflow,*/
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_send_record(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *send_packet,
@@ -169,6 +172,14 @@ UCHAR                  epoch_seq_num[8];
     {
         /* Check for overflow of the 32-bit number. */
         tls_session -> nx_secure_tls_local_sequence_number[1]++;
+
+        if (tls_session -> nx_secure_tls_local_sequence_number[1] == 0)
+        {
+
+            /* Check for overflow of the 64-bit unsigned number. As it should not reach here
+               in practical, we return a general error to prevent overflow theoretically. */
+            return(NX_NOT_SUCCESSFUL);
+        }
     }
     tls_session -> nx_secure_tls_local_sequence_number[0]++;
 

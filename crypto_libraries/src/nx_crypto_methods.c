@@ -51,7 +51,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_methods                                   PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -91,6 +91,9 @@
 /*                                            obsolete DES/3DES,          */
 /*                                            added x25519 curve,         */
 /*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            added x448 curve,           */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -533,6 +536,21 @@ NX_CRYPTO_METHOD crypto_method_ec_x25519 =
     NX_CRYPTO_NULL,                           /* Cleanup routine, not used.             */
     _nx_crypto_method_ec_x25519_operation,    /* Operation                              */
 };
+
+/* Declare a placeholder for EC x448. */
+NX_CRYPTO_METHOD crypto_method_ec_x448 =
+{
+    NX_CRYPTO_EC_X448,                        /* EC placeholder                         */
+    448,                                      /* Key size in bits                       */
+    0,                                        /* IV size in bits                        */
+    0,                                        /* ICV size in bits, not used.            */
+    0,                                        /* Block size in bytes.                   */
+    0,                                        /* Metadata size in bytes                 */
+    NX_CRYPTO_NULL,                           /* Initialization routine.                */
+    NX_CRYPTO_NULL,                           /* Cleanup routine, not used.             */
+    _nx_crypto_method_ec_x448_operation,      /* Operation                              */
+};
+
 #endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */
 
 /* Declare the public NULL cipher (not to be confused with the NULL methods above). This

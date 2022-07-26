@@ -30,8 +30,8 @@
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_secure_tls_server_handshake                     PORTABLE C      */
-/*                                                           6.1.4        */
+/*    _nx_secure_tls_1_3_server_handshake                 PORTABLE C      */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -59,7 +59,6 @@
 /*    _nx_secure_tls_generate_keys          Generate session keys         */
 /*    _nx_secure_tls_handshake_hash_init    Initialize Finished hash      */
 /*    _nx_secure_tls_handshake_hash_update  Update Finished hash          */
-/*    _nx_secure_tls_map_error_to_alert     Map internal error to alert   */
 /*    _nx_secure_tls_packet_allocate        Allocate internal TLS packet  */
 /*    _nx_secure_tls_process_client_key_exchange                          */
 /*                                          Process ClientKeyExchange     */
@@ -69,7 +68,6 @@
 /*                                          Process handshake header      */
 /*    _nx_secure_tls_process_remote_certificate                           */
 /*                                          Process server certificate    */
-/*    _nx_secure_tls_send_alert             Send TLS alert                */
 /*    _nx_secure_tls_send_certificate       Send TLS certificate          */
 /*    _nx_secure_tls_send_certificate_request                             */
 /*                                          Send TLS CertificateRequest   */
@@ -107,6 +105,9 @@
 /*                                            support for fragmented TLS  */
 /*                                            Handshake messages,         */
 /*                                            resulting in version 6.1.4  */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed duplicated alert,   */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -121,9 +122,6 @@ UINT                                  message_length;
 NX_PACKET                            *send_packet;
 NX_PACKET_POOL                       *packet_pool;
 UCHAR                                *packet_start;
-UINT                                  error_number;
-UINT                                  alert_number;
-UINT                                  alert_level;
 NX_SECURE_TLS_SERVER_STATE            old_server_state;
 
     /* Basic state machine for handshake:
@@ -604,38 +602,6 @@ NX_SECURE_TLS_SERVER_STATE            old_server_state;
            be set to NX_SECURE_TLS_SERVER_STATE_ERROR if status indicates an error. */
         NX_ASSERT(status != NX_SUCCESS);
         break;
-    }
-
-
-    /* If we have an error at this point, we have experienced a problem in processing or sending
-       handshake messages, which is some type of internal issue. Send an alert
-       back to the remote host indicating the error. */
-    if (status != NX_SUCCESS)
-    {
-        /* Get our alert number and level from our status. */
-        error_number = status;
-        _nx_secure_tls_map_error_to_alert(error_number, &alert_number, &alert_level);
-
-        /* Release the protection before suspending on nx_packet_allocate. */
-        tx_mutex_put(&_nx_secure_tls_protection);
-
-        status = _nx_secure_tls_packet_allocate(tls_session, packet_pool, &send_packet, wait_option);
-
-        /* Get the protection after nx_packet_allocate. */
-        tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-        if (status == NX_SUCCESS)
-        {
-            _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-            status = _nx_secure_tls_send_record(tls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
-
-            if (status != NX_SECURE_TLS_SUCCESS)
-            {
-                nx_secure_tls_packet_release(send_packet);
-            }
-        }
-
-        return(error_number);
     }
 
     return(status);

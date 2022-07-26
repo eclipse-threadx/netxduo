@@ -38,7 +38,7 @@ static UCHAR decrypted_signature[512];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_server_key_exchange           PORTABLE C     */
-/*                                                           6.1.11       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -87,6 +87,9 @@ static UCHAR decrypted_signature[512];
 /*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            removed unnecessary code,   */
 /*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_server_key_exchange(NX_SECURE_TLS_SESSION *tls_session,
@@ -226,6 +229,11 @@ UINT                                  i;
 
         tls_session -> nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_SERVER_KEY_EXCHANGE;
 
+        if (message_length < 4)
+        {
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+        }
+
         /* Make sure curve type is named_curve (3). */
         if (packet_buffer[0] != 3)
         {
@@ -268,6 +276,11 @@ UINT                                  i;
             tls_session -> nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_1)
 #endif /* NX_SECURE_ENABLE_DTLS */
         {
+            if ((UINT)pubkey_length + 6 > message_length)
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+
             hash_algorithm = NX_SECURE_TLS_HASH_ALGORITHM_SHA1;
             if (server_certificate -> nx_secure_x509_public_algorithm == NX_SECURE_TLS_X509_TYPE_EC)
             {
@@ -281,6 +294,11 @@ UINT                                  i;
         else
 #endif /* NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED */
         {
+            if ((UINT)pubkey_length + 8 > message_length)
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+
             hash_algorithm = current_buffer[0];
             signature_algorithm = current_buffer[1];
             current_buffer += 2;
@@ -611,6 +629,30 @@ UINT                                  i;
         signature_length = (USHORT)((current_buffer[0] << 8) + current_buffer[1]);
         current_buffer += 2;
 
+#if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
+#ifdef NX_SECURE_ENABLE_DTLS
+        if (tls_session->nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_0 ||
+            tls_session->nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_1 ||
+            tls_session->nx_secure_tls_protocol_version == NX_SECURE_DTLS_VERSION_1_0)
+#else
+        if (tls_session->nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_0 ||
+            tls_session->nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_1)
+#endif /* NX_SECURE_ENABLE_DTLS */
+        {
+            if ((UINT)signature_length + pubkey_length + 6 > message_length)
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+        }
+        else
+#endif
+        {
+            if ((UINT)signature_length + pubkey_length + 8 > message_length)
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+        }
+
         /* Verify the signature. */
         auth_method = ciphersuite -> nx_secure_tls_public_auth;
 
@@ -782,11 +824,6 @@ UINT                                  i;
             if (status != NX_CRYPTO_SUCCESS)
             {
                 return(status);
-            }
-
-            if (packet_buffer + message_length < current_buffer + signature_length)
-            {
-                return(NX_SECURE_TLS_SIGNATURE_VERIFICATION_ERROR);
             }
 
             status = auth_method -> nx_crypto_operation(NX_CRYPTO_VERIFY, handler,

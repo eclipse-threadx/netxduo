@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_key_material_init                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -61,31 +61,16 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            cleared all key material,   */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_key_material_init(NX_SECURE_TLS_KEY_MATERIAL *key_material)
 {
-    /* Clear out key blocks individually - we may need to keep some key data
-     * around in the future for things like session re-negotiation/resumption. */
 
-    NX_SECURE_MEMSET(key_material -> nx_secure_tls_client_random, 0, NX_SECURE_TLS_RANDOM_SIZE);
-
-    NX_SECURE_MEMSET(key_material -> nx_secure_tls_server_random, 0, NX_SECURE_TLS_RANDOM_SIZE);
-
-    NX_SECURE_MEMSET(key_material -> nx_secure_tls_pre_master_secret, 0, NX_SECURE_TLS_PREMASTER_SIZE);
-    key_material -> nx_secure_tls_pre_master_secret_size = 0;
-
-    NX_SECURE_MEMSET(key_material -> nx_secure_tls_master_secret, 0, NX_SECURE_TLS_MASTER_SIZE);
-
-    NX_SECURE_MEMSET(key_material -> nx_secure_tls_key_material_data, 0, NX_SECURE_TLS_KEY_MATERIAL_SIZE);
-    NX_SECURE_MEMSET(key_material -> nx_secure_tls_new_key_material_data, 0, NX_SECURE_TLS_KEY_MATERIAL_SIZE);
-
-#if(NX_SECURE_TLS_TLS_1_3_ENABLED)
-    NX_SECURE_MEMSET(&key_material->nx_secure_tls_key_secrets, 0, sizeof(NX_SECURE_TLS_KEY_SECRETS));
-    NX_SECURE_MEMSET(key_material->nx_secure_tls_ecc_key_data, 0, sizeof(key_material->nx_secure_tls_ecc_key_data));
-    key_material->nx_secure_tls_handshake_cache_length = 0;
-#endif
-
+    /* Clear out the entire key material. */
+    NX_SECURE_MEMSET(key_material, 0, sizeof(NX_SECURE_TLS_KEY_MATERIAL));
 
     return(NX_SECURE_TLS_SUCCESS);
 }

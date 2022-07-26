@@ -968,7 +968,7 @@ NX_CRYPTO_EC *curve;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ecdh_setup_x25519_448                    PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1012,6 +1012,9 @@ NX_CRYPTO_EC *curve;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            added x448 curve,           */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_setup_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
@@ -1051,8 +1054,8 @@ NX_CRYPTO_EC_POINT    public_key;
                      sizeof(ecdh_ptr -> nx_crypto_ecdh_private_key_buffer));
 
     /* Generate Key Pair. */
-    status = _nx_crypto_ec_key_pair_generation_x25519(curve, &curve -> nx_crypto_ec_g, &private_key,
-                                                      &public_key, scratch_buf_ptr);
+    status = _nx_crypto_ec_key_pair_generation_x25519_448(curve, &curve -> nx_crypto_ec_g, &private_key,
+                                                          &public_key, scratch_buf_ptr);
     if (status)
     {
         return(status);

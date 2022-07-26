@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_receive                     PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -82,7 +82,11 @@
 /*                                            resulting in version 6.1    */
 /*  01-31-2022     Timothy Stapko           Modified comment(s),          */
 /*                                            fixed out-of-order handling,*/
-/*                                            resulting in version 6.1.10 */   
+/*                                            resulting in version 6.1.10 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            IPv4 is disabled,           */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_receive(NX_SECURE_DTLS_SESSION *dtls_session,
@@ -230,6 +234,7 @@ UINT                   source_port;
             }
             else
             {
+#ifndef NX_DISABLE_IPV4
                 if (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_version == NX_IP_VERSION_V4)
                 {
 
@@ -239,8 +244,10 @@ UINT                   source_port;
                         status = NX_CONTINUE;
                     }
                 }
+#endif /* !NX_DISABLE_IPV4  */
+
 #ifdef FEATURE_NX_IPV6
-                else if (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_version == NX_IP_VERSION_V6)
+                if (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_version == NX_IP_VERSION_V6)
                 {
 
                     /* Compare the IPv6 address.  */

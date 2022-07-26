@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_crypto_ec.h                                      PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -50,6 +50,9 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            added x25519 curve,         */
 /*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            added x448 curve,           */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -632,12 +635,14 @@ UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
 
 #ifdef NX_CRYPTO_ENABLE_CURVE25519_448
 extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_x25519;
+extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_x448;
+
 VOID _nx_crypto_ec_cswap(UINT swap, NX_CRYPTO_HUGE_NUMBER *h1, NX_CRYPTO_HUGE_NUMBER *h2);
-VOID _nx_crypto_ec_x25519_multiple(NX_CRYPTO_EC *curve,
-                                   NX_CRYPTO_EC_POINT *u,
-                                   NX_CRYPTO_HUGE_NUMBER *k,
-                                   NX_CRYPTO_EC_POINT *r,
-                                   HN_UBASE *scratch);
+VOID _nx_crypto_ec_x25519_448_multiple(NX_CRYPTO_EC *curve,
+                                       NX_CRYPTO_EC_POINT *u,
+                                       NX_CRYPTO_HUGE_NUMBER *k,
+                                       NX_CRYPTO_EC_POINT *r,
+                                       HN_UBASE *scratch);
 UINT _nx_crypto_method_ec_x25519_operation(UINT op,
                                            VOID *handle,
                                            struct NX_CRYPTO_METHOD_STRUCT *method,
@@ -648,11 +653,21 @@ UINT _nx_crypto_method_ec_x25519_operation(UINT op,
                                            VOID *crypto_metadata, ULONG crypto_metadata_size,
                                            VOID *packet_ptr,
                                            VOID (*nx_crypto_hw_process_callback)(VOID *, UINT));
-UINT _nx_crypto_ec_key_pair_generation_x25519(NX_CRYPTO_EC *curve,
-                                              NX_CRYPTO_EC_POINT *g,
-                                              NX_CRYPTO_HUGE_NUMBER *private_key,
-                                              NX_CRYPTO_EC_POINT *public_key,
-                                              HN_UBASE *scratch);
+UINT _nx_crypto_method_ec_x448_operation(UINT op,
+                                         VOID *handle,
+                                         struct NX_CRYPTO_METHOD_STRUCT *method,
+                                         UCHAR *key, NX_CRYPTO_KEY_SIZE key_size_in_bits,
+                                         UCHAR *input, ULONG input_length_in_byte,
+                                         UCHAR *iv_ptr,
+                                         UCHAR *output, ULONG output_length_in_byte,
+                                         VOID *crypto_metadata, ULONG crypto_metadata_size,
+                                         VOID *packet_ptr,
+                                         VOID (*nx_crypto_hw_process_callback)(VOID *, UINT));
+UINT _nx_crypto_ec_key_pair_generation_x25519_448(NX_CRYPTO_EC *curve,
+                                                  NX_CRYPTO_EC_POINT *g,
+                                                  NX_CRYPTO_HUGE_NUMBER *private_key,
+                                                  NX_CRYPTO_EC_POINT *public_key,
+                                                  HN_UBASE *scratch);
 UINT _nx_crypto_ec_extract_fixed_size_le(NX_CRYPTO_HUGE_NUMBER *number,
                                          UCHAR *byte_stream, UINT byte_stream_size);
 #endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */

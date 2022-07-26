@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_send                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -69,6 +69,10 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            IPv4 is disabled,           */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_send(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *packet_ptr,
@@ -98,32 +102,41 @@ UINT status;
         /* IP address and port don't match - probably caller error. */
         return(NX_SECURE_TLS_SEND_ADDRESS_MISMATCH);
     }
-    else if (ip_address -> nxd_ip_version == NX_IP_VERSION_V4)
+    else
     {
-        if (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_address.v4 != ip_address -> nxd_ip_address.v4)
+#ifndef NX_DISABLE_IPV4
+        if (ip_address -> nxd_ip_version == NX_IP_VERSION_V4)
         {
+            if (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_address.v4 != ip_address -> nxd_ip_address.v4)
+            {
 
-            /* Release the protection. */
-            tx_mutex_put(&_nx_secure_tls_protection);
+                /* Release the protection. */
+                tx_mutex_put(&_nx_secure_tls_protection);
 
-            /* IP address and port don't match - probably caller error. */
-            return(NX_SECURE_TLS_SEND_ADDRESS_MISMATCH);
+                /* IP address and port don't match - probably caller error. */
+                return(NX_SECURE_TLS_SEND_ADDRESS_MISMATCH);
+            }
         }
-    }
+#endif /* !NX_DISABLE_IPV4  */
+
 #ifdef FEATURE_NX_IPV6
-    else if ((dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[0] != ip_address -> nxd_ip_address.v6[0]) ||
-             (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[1] != ip_address -> nxd_ip_address.v6[1]) ||
-             (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[2] != ip_address -> nxd_ip_address.v6[2]) ||
-             (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[3] != ip_address -> nxd_ip_address.v6[3]))
-    {
+        if (ip_address -> nxd_ip_version == NX_IP_VERSION_V6)
+        {
+            if ((dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[0] != ip_address -> nxd_ip_address.v6[0]) ||
+                (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[1] != ip_address -> nxd_ip_address.v6[1]) ||
+                (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[2] != ip_address -> nxd_ip_address.v6[2]) ||
+                (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[3] != ip_address -> nxd_ip_address.v6[3]))
+            {
 
-        /* Release the protection. */
-        tx_mutex_put(&_nx_secure_tls_protection);
+                /* Release the protection. */
+                tx_mutex_put(&_nx_secure_tls_protection);
 
-        /* IP address and port don't match - probably caller error. */
-        return(NX_SECURE_TLS_SEND_ADDRESS_MISMATCH);
-    }
+                /* IP address and port don't match - probably caller error. */
+                return(NX_SECURE_TLS_SEND_ADDRESS_MISMATCH);
+            }
+        }
 #endif /* FEATURE_NX_IPV6 */
+    }
 
     status = _nx_secure_dtls_send_record(dtls_session, packet_ptr, NX_SECURE_TLS_APPLICATION_DATA, NX_WAIT_FOREVER);
 

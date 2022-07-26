@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_connection_reset                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -81,6 +81,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the logic of      */
+/*                                            flushing receive queue.     */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_socket_connection_reset(NX_TCP_SOCKET *socket_ptr)
@@ -101,15 +105,6 @@ UINT saved_state;
 
         /* Release all transmit packets.  */
         _nx_tcp_socket_transmit_queue_flush(socket_ptr);
-    }
-
-    /* Check for queued receive packets and if found they need
-       to be released.  */
-    if (socket_ptr -> nx_tcp_socket_receive_queue_count)
-    {
-
-        /* Release all received packets.  */
-        _nx_tcp_socket_receive_queue_flush(socket_ptr);
     }
 
     /* Clear all receive thread suspensions on this socket.  */

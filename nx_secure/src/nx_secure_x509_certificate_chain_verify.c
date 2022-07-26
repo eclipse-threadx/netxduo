@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_chain_verify            PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -76,10 +76,14 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            reorganized internal logic, */
 /*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            checked expiration for all  */
+/*                                            the certs in the chain,     */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_chain_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
-                                              NX_SECURE_X509_CERT *certificate)
+                                              NX_SECURE_X509_CERT *certificate, ULONG current_time)
 {
 UINT                 status;
 NX_SECURE_X509_CERT *current_certificate;
@@ -101,7 +105,15 @@ INT                  compare_result;
     {
 
         /* Check the certificate expiration against the current time. */
+        if (current_time != 0)
+        {
+            status = _nx_secure_x509_expiration_check(current_certificate, current_time);
 
+            if (status != NX_SECURE_X509_SUCCESS)
+            {
+                return(status);
+            }
+        }
 
         /* See if the certificate is self-signed or not. */
         compare_result = _nx_secure_x509_distinguished_name_compare(&current_certificate -> nx_secure_x509_distinguished_name,

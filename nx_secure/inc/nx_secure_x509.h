@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_x509.h                                    PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -55,6 +55,10 @@
 /*                                            ignored public key in EC    */
 /*                                            private key,                */
 /*                                            resulting in version 6.1.10 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            checked expiration for all  */
+/*                                            the certs in the chain,     */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -936,7 +940,7 @@ UINT _nx_secure_x509_certificate_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
 
 /* Verify a given certificate chain to see if the end-entity certificate can be traced through the chain to a trust anchor. */
 UINT _nx_secure_x509_certificate_chain_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
-                                              NX_SECURE_X509_CERT *certificate);
+                                              NX_SECURE_X509_CERT *certificate, ULONG current_time);
 
 /* Parse an OID string, returning an internally-used constant (defined above) for use in other parsing. */
 VOID _nx_secure_x509_oid_parse(const UCHAR *oid, ULONG length, UINT *oid_value);

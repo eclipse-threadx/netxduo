@@ -31,7 +31,7 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_record                       PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -97,6 +97,11 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            removed unnecessary code,   */
 /*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            checked seq number overflow,*/
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
@@ -323,6 +328,14 @@ NX_PACKET *decrypted_packet;
                     {
                         /* Check for overflow of the 32-bit unsigned number. */
                         tls_session -> nx_secure_tls_remote_sequence_number[1]++;
+
+                        if (tls_session -> nx_secure_tls_remote_sequence_number[1] == 0)
+                        {
+
+                            /* Check for overflow of the 64-bit unsigned number. As it should not reach here
+                               in practical, we return a general error to prevent overflow theoretically. */
+                            return(NX_NOT_SUCCESSFUL);
+                        }
                     }
                     tls_session -> nx_secure_tls_remote_sequence_number[0]++;
                 }
@@ -440,6 +453,13 @@ NX_PACKET *decrypted_packet;
 
             break;
         case NX_SECURE_TLS_ALERT:
+
+            if (message_length < 2)
+            {
+                status = NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH;
+                break;
+            }
+
             /* We have received an alert. Check what the alert was and take appropriate action. */
             /* The alert level is the first octet in the alert. The alert number is the second. */
             if(packet_data[0] == NX_SECURE_TLS_ALERT_LEVEL_FATAL)

@@ -52,7 +52,7 @@ static UINT _nxd_mqtt_client_create_internal(NXD_MQTT_CLIENT *client_ptr, CHAR *
                                              CHAR *client_id, UINT client_id_length,
                                              NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr,
                                              VOID *stack_ptr, ULONG stack_size, UINT mqtt_thread_priority);
-static UINT _nxd_mqtt_packet_allocate(NXD_MQTT_CLIENT *client_ptr, NX_PACKET **packet_ptr);
+static UINT _nxd_mqtt_packet_allocate(NXD_MQTT_CLIENT *client_ptr, NX_PACKET **packet_ptr, ULONG wait_option);
 static UINT _nxd_mqtt_copy_transmit_packet(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PACKET **new_packet_ptr,
                                            USHORT packet_id, UCHAR set_duplicate_flag, UINT wait_option);
 static VOID _nxd_mqtt_release_transmit_packet(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PACKET *previous_packet_ptr);
@@ -246,7 +246,7 @@ ULONG  bytes_copied;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_sub_unsub                          PORTABLE C      */
-/*                                                           6.1.2        */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -302,6 +302,9 @@ ULONG  bytes_copied;
 /*  11-09-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            added packet id parameter,  */
 /*                                            resulting in version 6.1.2  */
+/*  07-29-2022     Spencer McDonough        Modified comment(s),          */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_sub_unsub(NXD_MQTT_CLIENT *client_ptr, UINT op,
@@ -332,7 +335,7 @@ UCHAR               temp_data[2];
         return(NXD_MQTT_NOT_CONNECTED);
     }
 
-    status = _nxd_mqtt_packet_allocate(client_ptr, &packet_ptr);
+    status = _nxd_mqtt_packet_allocate(client_ptr, &packet_ptr, NX_WAIT_FOREVER);
     if (status)
     {
         tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
@@ -492,7 +495,7 @@ UCHAR               temp_data[2];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_packet_allocate                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -539,9 +542,12 @@ UCHAR               temp_data[2];
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Spencer McDonough        Modified comment(s), and      */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
-static UINT _nxd_mqtt_packet_allocate(NXD_MQTT_CLIENT *client_ptr, NX_PACKET **packet_ptr)
+static UINT _nxd_mqtt_packet_allocate(NXD_MQTT_CLIENT *client_ptr, NX_PACKET **packet_ptr, ULONG wait_option)
 {
 UINT status = NXD_MQTT_SUCCESS;
 
@@ -551,7 +557,7 @@ UINT status = NXD_MQTT_SUCCESS;
         /* Use TLS packet allocate.  The TLS packet allocate is able to count for 
            TLS-related header space including crypto initial vector area. */
         status = nx_secure_tls_packet_allocate(&client_ptr -> nxd_mqtt_tls_session, client_ptr -> nxd_mqtt_client_packet_pool_ptr,
-                                               packet_ptr, TX_WAIT_FOREVER);
+                                               packet_ptr, wait_option);
     }
     /* Allocate a packet  */
     else
@@ -560,12 +566,12 @@ UINT status = NXD_MQTT_SUCCESS;
         if (client_ptr -> nxd_mqtt_client_socket.nx_tcp_socket_connect_ip.nxd_ip_version == NX_IP_VERSION_V4)
         {
             status = nx_packet_allocate(client_ptr -> nxd_mqtt_client_packet_pool_ptr, packet_ptr, NX_IPv4_TCP_PACKET,
-                                        TX_WAIT_FOREVER);
+                                        wait_option);
         }
         else
         {
             status = nx_packet_allocate(client_ptr -> nxd_mqtt_client_packet_pool_ptr, packet_ptr, NX_IPv6_TCP_PACKET,
-                                        TX_WAIT_FOREVER);
+                                        wait_option);
         }
 #ifdef NX_SECURE_ENABLE
     }
@@ -1372,7 +1378,7 @@ ULONG                         bytes_copied;
 
     /* Send out proper ACKs for QoS 1 and 2 messages. */
     /* Allocate a new packet so we can send out a response. */
-    status = _nxd_mqtt_packet_allocate(client_ptr, &packet_ptr);
+    status = _nxd_mqtt_packet_allocate(client_ptr, &packet_ptr, NX_WAIT_FOREVER);
     if (status)
     {
         /* Packet allocation fails. */
@@ -1573,7 +1579,7 @@ USHORT                        transmit_packet_id;
                     /* Send PUBCOMP */
 
                     /* Allocate a packet to send the response. */
-                    ret = _nxd_mqtt_packet_allocate(client_ptr, &response_packet);
+                    ret = _nxd_mqtt_packet_allocate(client_ptr, &response_packet, NX_WAIT_FOREVER);
                     if (ret)
                     {
                         return(1);
@@ -3113,7 +3119,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_create_internal                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3160,6 +3166,9 @@ UINT    status;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            corrected mqtt client state,*/
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Spencer McDonough        Modified comment(s), and      */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_client_create_internal(NXD_MQTT_CLIENT *client_ptr, CHAR *client_name,
@@ -3167,7 +3176,9 @@ static UINT _nxd_mqtt_client_create_internal(NXD_MQTT_CLIENT *client_ptr, CHAR *
                                              NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr,
                                              VOID *stack_ptr, ULONG stack_size, UINT mqtt_thread_priority)
 {
+#ifndef NXD_MQTT_CLOUD_ENABLE
 UINT                status;
+#endif /* NXD_MQTT_CLOUD_ENABLE */
 
 #ifdef NXD_MQTT_CLOUD_ENABLE
     NX_PARAMETER_NOT_USED(stack_ptr);
@@ -3229,26 +3240,10 @@ UINT                status;
     client_ptr -> nxd_mqtt_client_name = client_name;
 
     /* Create the socket. */
-    status = nx_tcp_socket_create(client_ptr -> nxd_mqtt_client_ip_ptr, &(client_ptr -> nxd_mqtt_client_socket), client_ptr -> nxd_mqtt_client_name,
-                                  NX_IP_NORMAL, NX_DONT_FRAGMENT, 0x80, NXD_MQTT_CLIENT_SOCKET_WINDOW_SIZE,
-                                  NX_NULL, _mqtt_client_disconnect_callback);
+    nx_tcp_socket_create(client_ptr -> nxd_mqtt_client_ip_ptr, &(client_ptr -> nxd_mqtt_client_socket), client_ptr -> nxd_mqtt_client_name,
+                         NX_IP_NORMAL, NX_DONT_FRAGMENT, 0x80, NXD_MQTT_CLIENT_SOCKET_WINDOW_SIZE,
+                         NX_NULL, _mqtt_client_disconnect_callback);
 
-    /* Determine if an error occurred. */
-    if (status != NX_SUCCESS)
-    {
-#ifndef NXD_MQTT_CLOUD_ENABLE
-        /* Delete the mutex. */
-        tx_mutex_delete(&client_ptr -> nxd_mqtt_protection);
-
-        /* Delete the event flags. */
-        tx_event_flags_delete(&(client_ptr -> nxd_mqtt_events));
-
-        /* Delete the thread. */
-        tx_thread_delete(&(client_ptr -> nxd_mqtt_thread));
-#endif /* NXD_MQTT_CLOUD_ENABLE */
-
-        return(NXD_MQTT_INTERNAL_ERROR);
-    }
 
     /* Record the client_ptr in the socket structure. */
     client_ptr -> nxd_mqtt_client_socket.nx_tcp_socket_reserved_ptr = (VOID *)client_ptr;
@@ -3701,7 +3696,7 @@ UCHAR               fixed_header;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_connect                            PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3768,6 +3763,9 @@ UCHAR               fixed_header;
 /*                                            corrected the logic for     */
 /*                                            non-blocking mode,          */
 /*                                            resulting in version 6.1.8  */
+/*  07-29-2022     Spencer McDonough        Modified comment(s), and      */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_connect(NXD_MQTT_CLIENT *client_ptr, NXD_ADDRESS *server_ip, UINT server_port,
@@ -3818,6 +3816,7 @@ UINT                 old_priority;
             nx_secure_tls_session_delete(&(client_ptr -> nxd_mqtt_tls_session));
         }
 #endif /* NX_SECURE_ENABLE */
+        tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
         return(NXD_MQTT_INVALID_STATE);
     }
 
@@ -3840,20 +3839,8 @@ UINT                 old_priority;
         client_ptr -> nxd_mqtt_ping_timeout = NXD_MQTT_PING_TIMEOUT_DELAY;
 
         /* Create timer */
-        status = tx_timer_create(&(client_ptr -> nxd_mqtt_timer), "MQTT Timer", _nxd_mqtt_periodic_timer_entry, (ULONG)client_ptr,
-                                 client_ptr -> nxd_mqtt_timer_value, client_ptr -> nxd_mqtt_timer_value, TX_AUTO_ACTIVATE);
-        if (status)
-        {
-#ifdef NX_SECURE_ENABLE
-            if (client_ptr -> nxd_mqtt_client_use_tls)
-            {
-                nx_secure_tls_session_delete(&(client_ptr -> nxd_mqtt_tls_session));
-            }
-#endif /* NX_SECURE_ENABLE */
-
-            tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
-            return(NXD_MQTT_INTERNAL_ERROR);
-        }
+        tx_timer_create(&(client_ptr -> nxd_mqtt_timer), "MQTT Timer", _nxd_mqtt_periodic_timer_entry, (ULONG)client_ptr,
+                        client_ptr -> nxd_mqtt_timer_value, client_ptr -> nxd_mqtt_timer_value, TX_AUTO_ACTIVATE);
     }
     else
     {
@@ -3867,21 +3854,7 @@ UINT                 old_priority;
     /* Set TCP connection establish notify for non-blocking mode.  */
     if (wait_option == 0)
     {
-        status = nx_tcp_socket_establish_notify(&client_ptr -> nxd_mqtt_client_socket, _nxd_mqtt_tcp_establish_notify);
-
-        /* Check status.  */
-        if (status != NX_SUCCESS)
-        {
-#ifdef NX_SECURE_ENABLE
-            if (client_ptr -> nxd_mqtt_client_use_tls)
-            {
-                nx_secure_tls_session_delete(&(client_ptr -> nxd_mqtt_tls_session));
-            }
-#endif /* NX_SECURE_ENABLE */
-            tx_timer_delete(&(client_ptr -> nxd_mqtt_timer));
-            tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
-            return(status);
-        }
+        nx_tcp_socket_establish_notify(&client_ptr -> nxd_mqtt_client_socket, _nxd_mqtt_tcp_establish_notify);
 
         /* Set the receive callback. */
         nx_tcp_socket_receive_notify(&client_ptr -> nxd_mqtt_client_socket, _nxd_mqtt_receive_callback);
@@ -3897,19 +3870,7 @@ UINT                 old_priority;
     tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
 
     /* First attempt to bind the client socket. */
-    status = nx_tcp_client_socket_bind(&(client_ptr -> nxd_mqtt_client_socket), NX_ANY_PORT, wait_option);
-
-    if (status != NX_SUCCESS)
-    {
-#ifdef NX_SECURE_ENABLE
-        if (client_ptr -> nxd_mqtt_client_use_tls)
-        {
-            nx_secure_tls_session_delete(&(client_ptr -> nxd_mqtt_tls_session));
-        }
-#endif /* NX_SECURE_ENABLE */
-        tx_timer_delete(&(client_ptr -> nxd_mqtt_timer));
-        return(NXD_MQTT_INTERNAL_ERROR);
-    }
+    nx_tcp_client_socket_bind(&(client_ptr -> nxd_mqtt_client_socket), NX_ANY_PORT, wait_option);
 
     /* Obtain the mutex. */
     tx_mutex_get(client_ptr -> nxd_mqtt_client_mutex_ptr, NX_WAIT_FOREVER);
@@ -3946,7 +3907,7 @@ UINT                 old_priority;
     }
 
     /* Just return for non-blocking mode.  */
-    if ((status == NX_IN_PROGRESS) || (wait_option == 0))
+    if (wait_option == 0)
     {
         return(NX_IN_PROGRESS);
     }
@@ -3993,7 +3954,6 @@ UINT                 old_priority;
 
         /* End connection. */
         _nxd_mqtt_client_connection_end(client_ptr, NX_NO_WAIT);
-
         return(NXD_MQTT_CONNECT_FAILURE);
     }
 
@@ -4044,7 +4004,7 @@ UINT                 old_priority;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_connect_packet_send                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4090,6 +4050,9 @@ UINT                 old_priority;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Spencer McDonough        Modified comment(s),          */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_connect_packet_send(NXD_MQTT_CLIENT *client_ptr, ULONG wait_option)
@@ -4167,10 +4130,10 @@ UINT                 keepalive = (client_ptr -> nxd_mqtt_keepalive/NX_IP_PERIODI
         return(NXD_MQTT_INTERNAL_ERROR);
     }
 
-    status = _nxd_mqtt_packet_allocate(client_ptr, &packet_ptr);
+    status = _nxd_mqtt_packet_allocate(client_ptr, &packet_ptr, wait_option);
+
     if (status)
     {
-
         return(status);
     }
 
@@ -4182,21 +4145,18 @@ UINT                 keepalive = (client_ptr -> nxd_mqtt_keepalive/NX_IP_PERIODI
 
     if (ret)
     {
-
         /* Release the packet. */
         nx_packet_release(packet_ptr);
-
         return(NXD_MQTT_PACKET_POOL_FAILURE);
     }
-
+    
+    /* Fill in protocol name. */
     ret = _nxd_mqtt_client_append_message(client_ptr, packet_ptr, "MQTT", 4, wait_option);
 
     if (ret)
     {
-
         /* Release the packet. */
         nx_packet_release(packet_ptr);
-
         return(NXD_MQTT_PACKET_POOL_FAILURE);
     }
 
@@ -4598,7 +4558,7 @@ UINT       ret = NXD_MQTT_SUCCESS;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_publish                            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4647,6 +4607,9 @@ UINT       ret = NXD_MQTT_SUCCESS;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Spencer McDonough        Modified comment(s),          */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_publish(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UINT topic_name_length,
@@ -4672,7 +4635,7 @@ UINT       ret = NXD_MQTT_SUCCESS;
         return(NXD_MQTT_NOT_CONNECTED);
     }
 
-    status = _nxd_mqtt_packet_allocate(client_ptr, &packet_ptr);
+    status = _nxd_mqtt_packet_allocate(client_ptr, &packet_ptr, wait_option);
 
     if (status != NXD_MQTT_SUCCESS)
     {
@@ -4925,7 +4888,7 @@ UINT _nxd_mqtt_client_unsubscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_send_simple_message                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4967,6 +4930,9 @@ UINT _nxd_mqtt_client_unsubscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name,
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Spencer McDonough        Modified comment(s),          */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_send_simple_message(NXD_MQTT_CLIENT *client_ptr, UCHAR header_value)
@@ -4977,7 +4943,7 @@ UINT       status;
 UINT       status_mutex;
 UCHAR     *byte;
 
-    status = _nxd_mqtt_packet_allocate(client_ptr, &packet_ptr);
+    status = _nxd_mqtt_packet_allocate(client_ptr, &packet_ptr, NX_WAIT_FOREVER);
     if (status)
     {
         return(NXD_MQTT_INTERNAL_ERROR);

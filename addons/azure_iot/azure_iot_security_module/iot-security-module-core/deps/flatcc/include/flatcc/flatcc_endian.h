@@ -97,11 +97,11 @@ extern "C" {
 
 /* flatcc/portable/pendian.h sets LITTLE/BIG flags if possible, and always defines le16toh. */
 #ifndef flatbuffers_is_native_pe
-#if defined(__LITTLE_ENDIAN__) || FLATBUFFERS_LITTLEENDIAN
+#if (__LITTLE_ENDIAN__==1) || FLATBUFFERS_LITTLEENDIAN
 #undef FLATBUFFERS_LITTLEENDIAN
 #define FLATBUFFERS_LITTLEENDIAN 1
 #define flatbuffers_is_native_pe() (FLATBUFFERS_PROTOCOL_IS_LE)
-#elif defined(__BIG_ENDIAN__) || (defined(FLATBUFFERS_LITTLEENDIAN) && !FLATBUFFERS_LITTLEENDIAN)
+#elif (__BIG_ENDIAN__==1) || (defined(FLATBUFFERS_LITTLEENDIAN) && !FLATBUFFERS_LITTLEENDIAN)
 #undef FLATBUFFERS_LITTLEENDIAN
 #define FLATBUFFERS_LITTLEENDIAN 0
 #define flatbuffers_is_native_pe() (FLATBUFFERS_PROTOCOL_IS_BE)

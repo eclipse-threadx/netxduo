@@ -31,7 +31,7 @@ static UCHAR _nx_secure_client_padded_pre_master[600];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_client_key_exchange          PORTABLE C      */
-/*                                                           6.1.7        */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -84,6 +84,9 @@ static UCHAR _nx_secure_client_padded_pre_master[600];
 /*                                            supported hardware EC       */
 /*                                            private key,                */
 /*                                            resulting in version 6.1.7  */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_client_key_exchange(NX_SECURE_TLS_SESSION *tls_session,
@@ -180,7 +183,7 @@ UINT                                  private_key_length;
         {
             length = packet_buffer[0];
 
-            if (length > message_length)
+            if ((UINT)length + 1 > message_length)
             {
                 /* The public key length is larger than the header indicated. */
                 return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
@@ -324,11 +327,16 @@ UINT                                  private_key_length;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
         {       /* Certificate-based authentication. */
 
+            if (message_length < 2)
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+
             /* Get pre-master-secret length. */
             length = (USHORT)((packet_buffer[0] << 8) + (USHORT)packet_buffer[1]);
             packet_buffer += 2;
 
-            if (length > message_length)
+            if ((UINT)length + 2 > message_length)
             {
                 /* The payload is larger than the header indicated. */
                 return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
@@ -503,6 +511,11 @@ UINT                                  private_key_length;
                             return(status);
                         }                                                     
                     }
+                }
+
+                if (length < NX_SECURE_TLS_RSA_PREMASTER_SIZE + 3)
+                {
+                    return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
                 }
 
                 /* Check padding - first 2 bytes should be 0x00, 0x02 for PKCS#1 padding. A 0x00 byte should immediately

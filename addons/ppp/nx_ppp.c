@@ -24,13 +24,16 @@
 
 
 /* Force error checking to be disabled in this module */
+#include "tx_port.h"
 
 #ifndef NX_DISABLE_ERROR_CHECKING
 #define NX_DISABLE_ERROR_CHECKING
 #endif
 
+#ifndef TX_SAFETY_CRITICAL
 #ifndef TX_DISABLE_ERROR_CHECKING
 #define TX_DISABLE_ERROR_CHECKING
+#endif
 #endif
 
 

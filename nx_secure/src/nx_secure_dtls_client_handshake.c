@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_client_handshake                    PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -72,7 +72,6 @@
 /*    _nx_secure_tls_generate_premaster_secret                            */
 /*                                          Generate premaster secret     */
 /*    _nx_secure_tls_handshake_hash_update  Update Finished hash          */
-/*    _nx_secure_tls_map_error_to_alert     Map internal error to alert   */
 /*    _nx_secure_tls_process_certificate_request                          */
 /*                                          Process certificate request   */
 /*    _nx_secure_tls_process_finished       Process Finished message      */
@@ -81,7 +80,6 @@
 /*    _nx_secure_tls_process_server_key_exchange                          */
 /*                                          Process ServerKeyExchange     */
 /*    _nx_secure_tls_process_serverhello    Process ServerHello           */
-/*    _nx_secure_tls_send_alert             Send DTLS alert               */
 /*    _nx_secure_tls_send_certificate       Send DTLS certificate         */
 /*    _nx_secure_tls_send_certificate_verify                              */
 /*                                          Send certificate verify       */
@@ -118,6 +116,9 @@
 /*  01-31-2022     Timothy Stapko           Modified comment(s),          */
 /*                                            fixed out-of-order handling,*/
 /*                                            resulting in version 6.1.10 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed duplicated alert,   */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_client_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
@@ -131,9 +132,6 @@ UINT                   message_length;
 UCHAR                 *data_start = NX_NULL;
 NX_PACKET             *send_packet = NX_NULL;
 NX_PACKET_POOL        *packet_pool;
-UINT                   error_number;
-UINT                   alert_number;
-UINT                   alert_level;
 UINT                   message_seq;
 UINT                   fragment_offset;
 UINT                   fragment_length;
@@ -362,24 +360,8 @@ NX_SECURE_TLS_SESSION *tls_session;
         /* Check for errors in processing messages. */
         if (status != NX_SECURE_TLS_SUCCESS)
         {
-            /* Get our alert number and level from our status. */
-            error_number = status;
-            _nx_secure_tls_map_error_to_alert(error_number, &alert_number, &alert_level);
 
-            /* Release the protection before suspending on nx_packet_allocate. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-
-            status = _nx_secure_dtls_packet_allocate(dtls_session, packet_pool, &send_packet, wait_option);
-
-            /* Get the protection after nx_packet_allocate. */
-            tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-            if (status == NX_SUCCESS)
-            {
-                _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-                _nx_secure_dtls_send_record(dtls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
-            }
-            return(error_number);
+            return(status);
         }
 
         /* Now take any actions based on state set in the message processing. */
@@ -593,29 +575,11 @@ NX_SECURE_TLS_SESSION *tls_session;
         }
 
         /* If we have an error at this point, we have experienced a problem in sending
-           handshake messages, which is some type of internal issue. Send an alert
-           back to the remote host indicating the error. */
+           handshake messages, which is some type of internal issue. */
         if (status != NX_SUCCESS)
         {
-            /* Get our alert number and level from our status. */
-            error_number = status;
-            _nx_secure_tls_map_error_to_alert(error_number, &alert_number, &alert_level);
 
-            /* Release the protection before suspending on nx_packet_allocate. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-
-            status = _nx_secure_dtls_packet_allocate(dtls_session, packet_pool, &send_packet, wait_option);
-
-            /* Get the protection after nx_packet_allocate. */
-            tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-            if (status == NX_SUCCESS)
-            {
-                _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-                _nx_secure_dtls_send_record(dtls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
-            }
-
-            return(error_number);
+            return(status);
         }
 
         /* Advance the buffer pointer past the fragment. */

@@ -35,7 +35,7 @@ static UINT _nx_secure_x509_crl_parse_entry(const UCHAR *buffer, ULONG length, U
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_crl_revocation_check                PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -97,6 +97,10 @@ static UINT _nx_secure_x509_crl_parse_entry(const UCHAR *buffer, ULONG length, U
 /*                                            modified to improve code    */
 /*                                            coverage result,            */
 /*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            checked expiration for all  */
+/*                                            the certs in the chain,     */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_crl_revocation_check(const UCHAR *crl_data, UINT crl_length,
@@ -146,7 +150,7 @@ UINT                 serial_number_length;
     }
 
     /* Now, check that the issuer is valid. */
-    status = _nx_secure_x509_certificate_chain_verify(store, issuer_certificate);
+    status = _nx_secure_x509_certificate_chain_verify(store, issuer_certificate, 0);
 
     if (status != NX_SECURE_X509_SUCCESS)
     {

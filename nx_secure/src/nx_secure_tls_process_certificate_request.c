@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_certificate_request          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_certificate_request(NX_SECURE_TLS_SESSION *tls_session,
@@ -181,6 +184,11 @@ UINT extension_type;
     if (tls_session -> nx_secure_tls_1_3)
     {
 
+        if (message_length < 1 || (UINT)packet_buffer[0] + 3 > message_length)
+        {
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+        }
+
         /* Skip certificate request context.  */
         length = length + 1 + packet_buffer[length];
 
@@ -225,7 +233,7 @@ UINT extension_type;
         length += 1;
 
         /* Make sure what we extracted makes sense. */
-        if (cert_types_length > message_length)
+        if (cert_types_length + 1 > message_length)
         {
             return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
         }
@@ -259,6 +267,11 @@ UINT extension_type;
     if (tls_session -> nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_2)
 #endif /* NX_SECURE_ENABLE_DTLS */
     {
+        if (length + 2 > message_length)
+        {
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+        }
+
         /* Extract the count of algorithms from the incoming data. */
         sign_algs_length = (UINT)((packet_buffer[length] << 8) + packet_buffer[length + 1]);
         length = length + 2;
