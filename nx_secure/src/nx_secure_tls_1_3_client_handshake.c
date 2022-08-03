@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_client_handshake                 PORTABLE C      */
-/*                                                           6.1.4        */
+/*                                                           6.1.11a      */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -116,6 +116,10 @@
 /*                                            support for fragmented TLS  */
 /*                                            Handshake messages,         */
 /*                                            resulting in version 6.1.4  */
+/*  07-19-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            updated alert message for   */
+/*                                            downgrade protection,       */
+/*                                            resulting in version 6.1.11a*/
 /*                                                                        */
 /**************************************************************************/
 
@@ -286,7 +290,7 @@ const UCHAR    *server_random;
                 if (NX_SECURE_MEMCMP(&(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random[24]),
                                      server_random, 8) == 0)
                 {
-                    status = NX_SECURE_TLS_UNKNOWN_TLS_VERSION;
+                    status = NX_SECURE_TLS_DOWNGRADE_DETECTED;
                 }
                 else
                 {

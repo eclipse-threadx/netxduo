@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_map_error_to_alert                   PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.11a      */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,6 +74,10 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            updated X.509 return value, */
 /*                                            resulting in version 6.1.6  */
+/*  07-19-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            updated alert message for   */
+/*                                            downgrade protection,       */
+/*                                            resulting in version 6.1.11a*/
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_secure_tls_map_error_to_alert(UINT error_number, UINT *alert_number, UINT *alert_level)
@@ -176,6 +180,7 @@ VOID _nx_secure_tls_map_error_to_alert(UINT error_number, UINT *alert_number, UI
     case NX_SECURE_TLS_BAD_COMPRESSION_METHOD:        /* Deliberate fall-through. */
     case NX_SECURE_TLS_1_3_UNKNOWN_CIPHERSUITE:
     case NX_SECURE_TLS_BAD_SERVERHELLO_KEYSHARE:
+    case NX_SECURE_TLS_DOWNGRADE_DETECTED:
         *alert_number = NX_SECURE_TLS_ALERT_ILLEGAL_PARAMETER;
         *alert_level = NX_SECURE_TLS_ALERT_LEVEL_FATAL;
         break;

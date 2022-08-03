@@ -32,7 +32,7 @@ static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_verify_mac                           PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.11a      */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -79,6 +79,9 @@ static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            reorganized internal logic, */
 /*                                            resulting in version 6.1.11 */
+/*  07-19-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            checked seq number overflow,*/
+/*                                            resulting in version 6.1.11a*/
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_verify_mac(NX_SECURE_TLS_SESSION *tls_session, UCHAR *header_data,
@@ -132,6 +135,15 @@ ULONG  bytes_copied;
             {
                 /* Check for overflow of the 32-bit unsigned number. */
                 tls_session -> nx_secure_tls_remote_sequence_number[1]++;
+
+                if (tls_session -> nx_secure_tls_remote_sequence_number[1] == 0)
+                {
+
+                    /* Check for overflow of the 64-bit unsigned number. As it should not reach here
+                       in practical, we return a general error to prevent overflow theoretically. */
+                    return(NX_NOT_SUCCESSFUL);
+                }
+
             }
             tls_session -> nx_secure_tls_remote_sequence_number[0]++;
 
@@ -165,6 +177,15 @@ ULONG  bytes_copied;
     {
         /* Check for overflow of the 32-bit unsigned number. */
         tls_session -> nx_secure_tls_remote_sequence_number[1]++;
+
+        if (tls_session -> nx_secure_tls_remote_sequence_number[1] == 0)
+        {
+
+            /* Check for overflow of the 64-bit unsigned number. As it should not reach here
+               in practical, we return a general error to prevent overflow theoretically. */
+            return(NX_NOT_SUCCESSFUL);
+        }
+
     }
     tls_session -> nx_secure_tls_remote_sequence_number[0]++;
 
