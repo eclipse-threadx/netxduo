@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_verify            PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.1.11a      */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -81,6 +81,10 @@
 /*                                            improved code coverage      */
 /*                                            results,                    */
 /*                                            resulting in version 6.1.10 */
+/*  07-19-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            checked expiration for all  */
+/*                                            the certs in the chain,     */
+/*                                            resulting in version 6.1.11a*/
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_remote_certificate_verify(NX_SECURE_TLS_SESSION *tls_session)
@@ -123,19 +127,11 @@ ULONG                             current_time;
     {
         /* Get the current time from our callback. */
         current_time = tls_session -> nx_secure_tls_session_time_function();
-
-        /* Check the remote certificate against the current time. */
-        status = _nx_secure_x509_expiration_check(remote_certificate, current_time);
-
-        if (status != NX_SUCCESS)
-        {
-            return(status);
-        }
     }
 
     /* Now verify our remote certificate chain. If the certificate can be linked to an issuer in the trusted store
        through an issuer chain, this function will return NX_SUCCESS. */
-    status = _nx_secure_x509_certificate_chain_verify(store, remote_certificate);
+    status = _nx_secure_x509_certificate_chain_verify(store, remote_certificate, current_time);
 
     if (status != NX_SUCCESS)
     {

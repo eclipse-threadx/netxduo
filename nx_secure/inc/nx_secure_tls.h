@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.11a      */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -85,6 +85,10 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            enabled AEAD for TLS 1.3,   */
 /*                                            resulting in version 6.1.11 */
+/*  07-19-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            updated alert message for   */
+/*                                            downgrade protection,       */
+/*                                            resulting in version 6.1.11a*/
 /*                                                                        */
 /**************************************************************************/
 
@@ -289,6 +293,7 @@ extern   "C" {
 #define NX_SECURE_TLS_RECORD_OVERFLOW                   0x151       /* Received a TLSCiphertext record that had a length too long. */
 #define NX_SECURE_TLS_HANDSHAKE_FRAGMENT_RECEIVED       0x152       /* Received a fragmented handshake message - take appropriate action at a higher level of the state machine. */
 #define NX_SECURE_TLS_TRANSMIT_LOCKED                   0x153       /* Another thread is transmitting. */
+#define NX_SECURE_TLS_DOWNGRADE_DETECTED                0x154       /* Detected an inappropriate TLS version downgrade by TLS 1.3 client. */
 
 /* NX_CONTINUE is a symbol defined in NetX Duo 5.10.  For backward compatibility, this symbol is defined here */
 #if ((__NETXDUO_MAJOR_VERSION__ == 5) && (__NETXDUO_MINOR_VERSION__ == 9))
