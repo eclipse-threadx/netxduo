@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_http_server.h                                   PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -53,6 +53,10 @@
 /*                                            improved the logic of       */
 /*                                            converting number to string,*/
 /*                                            resulting in version 6.1.8  */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
+/*                                                                        */
 /*                                                                        */
 /**************************************************************************/
 
@@ -179,6 +183,24 @@ extern   "C" {
 #ifndef NX_HTTP_SERVER_RETRY_SHIFT
 #define NX_HTTP_SERVER_RETRY_SHIFT          1           /* Every retry is twice as long                        */
 #endif
+
+#ifndef NX_HTTP_SERVER_NONCE_SIZE
+#define NX_HTTP_SERVER_NONCE_SIZE           32          /* The size of nonce for digest authtentication        */
+#endif
+
+#ifndef NX_HTTP_SERVER_NONCE_MAX
+#define NX_HTTP_SERVER_NONCE_MAX            2           /* The size of nonce for digest authtentication        */
+#endif
+
+#ifndef NX_HTTP_SERVER_NONCE_TIMEOUT
+#define NX_HTTP_SERVER_NONCE_TIMEOUT        (10 * NX_IP_PERIODIC_RATE)
+#endif
+
+/* Define the state of the nonce.  */
+
+#define NX_HTTP_SERVER_NONCE_INVALID        0
+#define NX_HTTP_SERVER_NONCE_VALID          1
+#define NX_HTTP_SERVER_NONCE_ACCEPTED       2
 
 /* NX_HTTP_MAX_STRING is base64 of "name:password" and plus 1 if an extra conversion is needed and plus 2 pad if needed. */
 #define NX_HTTP_MAX_STRING                  ((NX_HTTP_MAX_NAME + NX_HTTP_MAX_PASSWORD + 1) * 4 / 3 + 1 + 2)
@@ -311,6 +333,17 @@ typedef struct NX_HTTP_SERVER_DATE_STRUCT
     UCHAR           nx_http_server_weekday;                         /* Weekday              */
 } NX_HTTP_SERVER_DATE;
 
+
+/* Define the nonce structure.  */
+
+typedef struct NX_HTTP_SERVER_NONCE_STRUCT
+{
+    UINT            nonce_state;                                    /* The state of the nonce               */
+    UINT            nonce_timestamp;                                /* The time when the nonce is created   */
+    UCHAR           nonce_buffer[NX_HTTP_SERVER_NONCE_SIZE];        /* Nonce for digest authetication       */
+} NX_HTTP_SERVER_NONCE;
+
+
 /* Define the multipart context data structure.  */
 
 typedef struct NX_HTTP_SERVER_MULTIPART_STRUCT
@@ -369,6 +402,8 @@ typedef struct NX_HTTP_SERVER_STRUCT
     TX_THREAD       nx_http_server_thread;                          /* HTTP server thread                   */
 #ifdef  NX_HTTP_DIGEST_ENABLE
     NX_MD5          nx_http_server_md5data;                         /* HTTP server MD5 work area            */
+    NX_HTTP_SERVER_NONCE
+                    nx_http_server_nonces[NX_HTTP_SERVER_NONCE_MAX];/* Nonce for digest authetication       */
 #endif /* NX_HTTP_DIGEST_ENABLE */
 
 #ifdef  NX_HTTP_MULTIPART_ENABLE
@@ -583,12 +618,14 @@ UINT        _nx_http_server_retrieve_resource(NX_PACKET *packet_ptr, CHAR *desti
 UINT        _nx_http_server_calculate_content_offset(NX_PACKET *packet_ptr);
 UINT        _nx_http_server_type_get(NX_HTTP_SERVER *server_ptr, CHAR *name, CHAR *http_type_string);
 UINT        _nx_http_server_type_get_extended(NX_HTTP_SERVER *server_ptr, CHAR *name, UINT name_length, CHAR *http_type_string, UINT http_type_string_max_size);
+UINT        _nx_http_server_disconnect(NX_HTTP_SERVER *http_server_ptr, UINT wait_option);
 
 #ifdef  NX_HTTP_DIGEST_ENABLE
 UINT        _nx_http_server_digest_authenticate(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *name_ptr, UINT name_length, CHAR *password_ptr, UINT password_length, CHAR *realm_ptr, UINT realm_length, UINT *auth_request_present);
 VOID        _nx_http_server_digest_response_calculate(NX_HTTP_SERVER *server_ptr, CHAR *username, UINT username_length, CHAR *realm, UINT realm_length, CHAR *password, UINT password_length, CHAR *nonce, CHAR *method, CHAR *uri, CHAR *nc, CHAR *cnonce, CHAR *result);
-UINT        _nx_http_server_retrieve_digest_authorization(NX_PACKET *packet_ptr, CHAR *response, CHAR *uri, CHAR *nc, CHAR *cnonce);
+UINT        _nx_http_server_retrieve_digest_authorization(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *response, CHAR *uri, CHAR *nc, CHAR *cnonce, NX_HTTP_SERVER_NONCE **nonce_ptr);
 VOID        _nx_http_server_hex_ascii_convert(CHAR *source, UINT source_length, CHAR *destination);
+UINT        _nx_http_server_nonce_allocate(NX_HTTP_SERVER *server_ptr, NX_HTTP_SERVER_NONCE **nonce_ptr);
 #endif
 
 #ifdef  NX_HTTP_MULTIPART_ENABLE

@@ -352,6 +352,7 @@ static NX_SECURE_X509_CERT remote_certificate, remote_issuer;
 static UCHAR remote_cert_buffer[2000];
 static UCHAR remote_issuer_buffer[2000];
 
+/* For TLS Web servers, define NX_SECURE_ENABLE_AEAD_CIPHER in NetX Crypto to allow web browsers to connect using AES_128_GCM cipher suites. */
 extern const NX_SECURE_TLS_CRYPTO nx_crypto_tls_ciphers;
 
 #endif /*NX_WEB_HTTPS_ENABLE */

@@ -11,9 +11,10 @@
 
 #ifndef _IEVENT_LOOP_H_
 #define _IEVENT_LOOP_H_
-#include <asc_config.h>
 
 #include <stdbool.h>
+
+#include <asc_config.h>
 
 #define EVENT_LOOP_DEFAULT_MAX_COUNT_RUN_UNTIL 100
 

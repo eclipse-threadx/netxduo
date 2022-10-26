@@ -11,9 +11,10 @@
 
 #ifndef __COMPONENT_INFO_H__
 #define __COMPONENT_INFO_H__
-#include <asc_config.h>
 
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/asc_result.h"
 

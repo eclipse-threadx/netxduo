@@ -11,10 +11,11 @@
 
 #ifndef __LIST_H__
 #define __LIST_H__
-#include <asc_config.h>
 
 #include <stdbool.h>
 #include <stddef.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/utils/collection/collection.h"
 

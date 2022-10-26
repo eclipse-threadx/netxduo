@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_create_ext                   PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -89,6 +89,9 @@
 /*                                            added null pointer checking,*/
 /*                                            removed unused code,        */
 /*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), and added*/
+/*                                            custom secret generation,   */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -966,6 +969,33 @@ ULONG metadata_size_sha256 = 0;
         tls_session -> nx_secure_tls_renegotation_enabled = NX_TRUE;
     }
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
+
+    /* Set the secret generation functions to the default implementation. */
+    tls_session -> nx_secure_generate_premaster_secret = _nx_secure_generate_premaster_secret;
+    tls_session -> nx_secure_generate_master_secret = _nx_secure_generate_master_secret;
+    tls_session -> nx_secure_generate_session_keys = _nx_secure_generate_session_keys;
+    tls_session -> nx_secure_session_keys_set = _nx_secure_session_keys_set;
+#ifndef NX_SECURE_TLS_CLIENT_DISABLED
+    tls_session -> nx_secure_process_server_key_exchange = _nx_secure_process_server_key_exchange;
+    tls_session -> nx_secure_generate_client_key_exchange = _nx_secure_generate_client_key_exchange;
+#endif
+#ifndef NX_SECURE_TLS_SERVER_DISABLED
+    tls_session -> nx_secure_process_client_key_exchange = _nx_secure_process_client_key_exchange;
+    tls_session -> nx_secure_generate_server_key_exchange = _nx_secure_generate_server_key_exchange;
+#endif
+    tls_session -> nx_secure_verify_mac = _nx_secure_verify_mac;
+    tls_session -> nx_secure_remote_certificate_verify = _nx_secure_remote_certificate_verify;
+    tls_session -> nx_secure_trusted_certificate_add = _nx_secure_trusted_certificate_add;
+
+#ifdef NX_SECURE_CUSTOM_SECRET_GENERATION
+
+    /* Customized secret generation functions can be set by the user in nx_secure_custom_secret_generation_init. */
+    status = nx_secure_custom_secret_generation_init(tls_session);
+    if (status != NX_SUCCESS)
+    {
+        return(status);
+    }
+#endif
 
     /* Set ID to check initialization status. */
     tls_session -> nx_secure_tls_id = NX_SECURE_TLS_ID;

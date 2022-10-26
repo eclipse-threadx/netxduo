@@ -67,7 +67,16 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_session_sliding_window_check.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_session_sliding_window_update.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_verify_mac.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_generate_client_key_exchange.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_generate_master_secret.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_generate_premaster_secret.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_generate_server_key_exchange.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_generate_session_keys.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_module_hash_compute.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_process_client_key_exchange.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_process_server_key_exchange.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_remote_certificate_verify.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_session_keys_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_1_3_client_handshake.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_1_3_crypto_init.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_1_3_finished_hash_generate.c
@@ -165,6 +174,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_session_iv_size_get.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_session_keys_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_session_packet_buffer_set.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_session_packet_pool_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_session_protocol_version_override.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_session_receive.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_session_receive_records.c
@@ -182,6 +192,8 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_trusted_certificate_add.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_trusted_certificate_remove.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_tls_verify_mac.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_trusted_certificate_add.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_verify_mac.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_x509.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_x509_asn1_tlv_block_parse.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_x509_certificate_chain_verify.c
@@ -272,6 +284,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_tls_session_delete.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_tls_session_end.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_tls_session_packet_buffer_set.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_tls_session_packet_pool_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_tls_session_protocol_version_override.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_tls_session_receive.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_tls_session_renegotiate.c

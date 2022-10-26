@@ -11,9 +11,10 @@
 
 #ifndef HASHSET_H
 #define HASHSET_H
-#include <asc_config.h>
 
 #include <string.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/utils/collection/collection.h"
 

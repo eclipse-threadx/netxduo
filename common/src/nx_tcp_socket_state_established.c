@@ -28,6 +28,9 @@
 #include "nx_api.h"
 #include "nx_ip.h"
 #include "nx_tcp.h"
+#ifdef NX_ENABLE_HTTP_PROXY
+#include "nx_http_proxy_client.h"
+#endif /* NX_ENABLE_HTTP_PROXY */
 
 
 /**************************************************************************/
@@ -35,7 +38,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_established                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -74,6 +77,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported HTTP Proxy,       */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_socket_state_established(NX_TCP_SOCKET *socket_ptr)
@@ -127,14 +133,28 @@ NX_IP *ip_ptr;
         /* Send ACK message.  */
         _nx_tcp_packet_send_ack(socket_ptr, socket_ptr -> nx_tcp_socket_tx_sequence);
 
-        /* If given, call the application's disconnect callback function
-           for disconnect.  */
-        if (socket_ptr -> nx_tcp_disconnect_callback)
+#ifdef NX_ENABLE_HTTP_PROXY
+        if ((ip_ptr -> nx_ip_http_proxy_enable) &&
+            (socket_ptr -> nx_tcp_socket_http_proxy_state == NX_HTTP_PROXY_STATE_CONNECTING))
         {
 
-            /* Call the application's disconnect handling function.  It is
-               responsible for calling the socket disconnect function.  */
-            (socket_ptr -> nx_tcp_disconnect_callback)(socket_ptr);
+            /* If received FIN before HTTP Proxy connection established, disconnect the TCP connection
+               and don't notify the application.  */
+            _nx_tcp_socket_disconnect(socket_ptr, NX_NO_WAIT);
+        }
+        else
+#endif /* NX_ENABLE_HTTP_PROXY */
+        {
+
+            /* If given, call the application's disconnect callback function
+               for disconnect.  */
+            if (socket_ptr -> nx_tcp_disconnect_callback)
+            {
+
+                /* Call the application's disconnect handling function.  It is
+                   responsible for calling the socket disconnect function.  */
+                (socket_ptr -> nx_tcp_disconnect_callback)(socket_ptr);
+            }
         }
     }
 }

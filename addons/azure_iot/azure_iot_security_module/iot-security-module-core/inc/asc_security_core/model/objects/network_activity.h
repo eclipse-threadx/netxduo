@@ -11,9 +11,10 @@
 
 #ifndef OBJECT_NETWORK_ACTIVITY_H
 #define OBJECT_NETWORK_ACTIVITY_H
-#include <asc_config.h>
 
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/model/objects/transport_protocol.h"
 #include "asc_security_core/utils/collection/collection.h"

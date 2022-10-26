@@ -11,10 +11,11 @@
 
 #ifndef STRING_UTILS_H
 #define STRING_UTILS_H
-#include <asc_config.h>
 
 #include <stdint.h>
 #include <stdbool.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/asc_result.h"
 

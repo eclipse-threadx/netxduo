@@ -11,10 +11,11 @@
 
 #ifndef STACK_H
 #define STACK_H
-#include <asc_config.h>
 
 #include <stdbool.h>
 #include <stddef.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/utils/collection/collection.h"
 

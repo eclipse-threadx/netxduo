@@ -11,9 +11,10 @@
 
 #ifndef _COLLECTORS_INFO_H_
 #define _COLLECTORS_INFO_H_
-#include <asc_config.h>
 
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #define COLLECTORS_INFO_SIZE COLLECTORS_COUNT
 

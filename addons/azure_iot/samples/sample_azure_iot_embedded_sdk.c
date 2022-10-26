@@ -233,6 +233,15 @@ UINT iothub_device_id_length = sizeof(DEVICE_ID) - 1;
     }
 #endif /* USE_DEVICE_CERTIFICATE */
 
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+
+    /* Enable MQTT over WebSocket to connect to IoT Hub  */
+    else if ((status = nx_azure_iot_hub_client_websocket_enable(iothub_client_ptr)))
+    {
+        printf("Failed on nx_azure_iot_hub_client_websocket_enable!\r\n");
+    }
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
+
     /* Set connection status callback.  */
     else if ((status = nx_azure_iot_hub_client_connection_status_callback_set(iothub_client_ptr,
                                                                               connection_status_callback)))
@@ -456,6 +465,15 @@ UINT status;
         printf("Failed on nx_azure_iot_hub_client_symmetric_key_set!: error code = 0x%08x\r\n", status);
     }
 #endif /* USE_DEVICE_CERTIFICATE */
+
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+
+    /* Enable MQTT over WebSocket.  */
+    else if ((status = nx_azure_iot_provisioning_client_websocket_enable(&prov_client)))
+    {
+        printf("Failed on nx_azure_iot_provisioning_client_websocket_enable!\r\n");
+    }
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
 
     /* Register device */
     else if ((status = nx_azure_iot_provisioning_client_register(&prov_client, NX_WAIT_FOREVER)))

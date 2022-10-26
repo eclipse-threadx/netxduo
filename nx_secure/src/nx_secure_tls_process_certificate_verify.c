@@ -39,7 +39,7 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_certificate_verify           PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -94,6 +94,9 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            removed unnecessary code,   */
 /*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
+/*                                            updated parameters list,    */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_certificate_verify(NX_SECURE_TLS_SESSION *tls_session,
@@ -222,7 +225,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
               -  The content to be signed
          */
 
-         UCHAR *transcript_hash = tls_session->nx_secure_tls_key_material.nx_secure_tls_transcript_hashes[NX_SECURE_TLS_TRANSCRIPT_IDX_CERTIFICATE];
+         UCHAR *transcript_hash = tls_session -> nx_secure_tls_key_material.nx_secure_tls_transcript_hashes[NX_SECURE_TLS_TRANSCRIPT_IDX_CERTIFICATE];
 
          /* Set octet padding bytes. */
          NX_SECURE_MEMSET(&handshake_hash[0], 0x20, 64);
@@ -357,7 +360,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
 
         /* Generate a hash of all sent and received handshake messages to this point (not a Finished hash!). */
         /* Copy over the handshake hash state into a local structure to do the intermediate calculation. */
-        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch, /*  lgtm[cpp/banned-api-usage-required-any] */
                                       tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
                                       tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
 
@@ -478,7 +481,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
             /* Something failed in the hash calculation. */
 #ifdef NX_SECURE_KEY_CLEAR
             NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
-#endif /* NX_SECURE_KEY_CLEAR  */                
+#endif /* NX_SECURE_KEY_CLEAR  */
             return(status);
         }
     }
@@ -768,7 +771,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
         ec_pubkey = &client_certificate -> nx_secure_x509_public_key.ec_public_key;
 
         /* Find out which named curve the remote certificate is using. */
-        status = _nx_secure_tls_find_curve_method(tls_session, (USHORT)(ec_pubkey -> nx_secure_ec_named_curve), &curve_method_cert, NX_NULL);
+        status = _nx_secure_tls_find_curve_method(&tls_session -> nx_secure_tls_ecc, (USHORT)(ec_pubkey -> nx_secure_ec_named_curve), &curve_method_cert, NX_NULL);
 
         if (status != NX_SUCCESS)
         {
@@ -858,7 +861,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
 #ifdef NX_SECURE_KEY_CLEAR
                 NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
                 NX_SECURE_MEMSET(_nx_secure_decrypted_signature, 0, sizeof(_nx_secure_decrypted_signature));
-#endif /* NX_SECURE_KEY_CLEAR  */                
+#endif /* NX_SECURE_KEY_CLEAR  */
                 return(status);
             }
         }
@@ -867,7 +870,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
     else
     {
-        /* Unknown or unsupported public-key operation. 
+        /* Unknown or unsupported public-key operation.
            No secrets to clear. */
         return(NX_SECURE_TLS_UNSUPPORTED_PUBLIC_CIPHER);
     }

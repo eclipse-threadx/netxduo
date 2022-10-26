@@ -279,6 +279,21 @@ UINT nx_azure_iot_hub_client_component_add(NX_AZURE_IOT_HUB_CLIENT *hub_client_p
                                            const UCHAR *component_name_ptr,
                                            USHORT component_name_length);
 
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+/**
+ * @brief Enable using MQTT over WebSocket to connect to IoTHub.
+ *
+ * @param[in] hub_client_ptr A pointer to a #NX_AZURE_IOT_HUB_CLIENT.
+ * @return A `UINT` with the result of the API.
+ *   @retval #NX_AZURE_IOT_SUCCESS Successful if MQTT over WebSocket is enabled.
+ *   @retval #NX_AZURE_IOT_INVALID_PARAMETER Fail to enable C2D message receiving due to invalid parameter.
+ *   @retval NXD_MQTT_NOT_CONNECTED Fail to enable C2D message receiving due to MQTT not connected.
+ *   @retval NXD_MQTT_PACKET_POOL_FAILURE Fail to enable C2D message receiving due to no available packet in pool.
+ *   @retval NXD_MQTT_COMMUNICATION_FAILURE Fail to enable C2D message receiving due to TCP/TLS error.
+ */
+UINT nx_azure_iot_hub_client_websocket_enable(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr);
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
+
 /**
  * @brief Connect to IoT Hub.
  *

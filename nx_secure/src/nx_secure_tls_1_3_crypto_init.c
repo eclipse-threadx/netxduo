@@ -33,7 +33,7 @@ extern NX_SECURE_TLS_ECC _nx_secure_tls_ecc_info;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_crypto_init                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,9 @@ extern NX_SECURE_TLS_ECC _nx_secure_tls_ecc_info;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
+/*                                            updated parameters list,    */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -103,17 +106,24 @@ NX_SECURE_TLS_ECC                    *ecc_info;
         ecdhe_data = &tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[i];
 
         /* Save off the curve ID so we can select the server's chosen key/curve later. */
-        ecdhe_data->nx_secure_tls_ecdhe_named_curve = ecc_info -> nx_secure_tls_ecc_supported_groups[i];
+        ecdhe_data -> nx_secure_tls_ecdhe_named_curve = ecc_info -> nx_secure_tls_ecc_supported_groups[i];
 
         /* Output the public key to our handshake data structure - we need the length of that buffer. */
-        length = sizeof(ecdhe_data->nx_secure_tls_ecdhe_public_key);
+        length = sizeof(ecdhe_data -> nx_secure_tls_ecdhe_public_key);
 
         /* Generate ECC keys and store in our TLS session. */
-        status = _nx_secure_tls_ecc_generate_keys(tls_session, ecdhe_data -> nx_secure_tls_ecdhe_named_curve, NX_FALSE,
-                                                  ecdhe_data->nx_secure_tls_ecdhe_public_key, &length, ecdhe_data);
+        status = _nx_secure_tls_ecc_generate_keys(tls_session -> nx_secure_tls_session_ciphersuite, tls_session -> nx_secure_tls_protocol_version,
+                                                  tls_session -> nx_secure_tls_1_3, tls_session -> nx_secure_tls_crypto_table,
+                                                  &tls_session -> nx_secure_tls_handshake_hash, ecc_info, &tls_session -> nx_secure_tls_key_material,
+                                                  &tls_session -> nx_secure_tls_credentials, ecdhe_data -> nx_secure_tls_ecdhe_named_curve, NX_FALSE,
+                                                  ecdhe_data -> nx_secure_tls_ecdhe_public_key, &length, ecdhe_data,
+                                                  tls_session -> nx_secure_public_cipher_metadata_area,
+                                                  tls_session -> nx_secure_public_cipher_metadata_size,
+                                                  tls_session -> nx_secure_public_auth_metadata_area,
+                                                  tls_session -> nx_secure_public_auth_metadata_size);
 
         /* Set the actual length of the generated key. */
-        ecdhe_data->nx_secure_tls_ecdhe_public_key_length = (USHORT)length;
+        ecdhe_data -> nx_secure_tls_ecdhe_public_key_length = (USHORT)length;
 
         if (status != NX_SUCCESS)
         {

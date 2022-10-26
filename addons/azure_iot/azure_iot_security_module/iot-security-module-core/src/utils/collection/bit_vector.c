@@ -8,11 +8,10 @@
 /* and in the root directory of this software.                                 */
 /*                                                                             */
 /*******************************************************************************/
-
-#include <asc_config.h>
-
 #include <stdbool.h>
 #include <string.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/utils/collection/bit_vector.h"
 

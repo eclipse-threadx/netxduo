@@ -34,10 +34,12 @@ static UINT _nx_secure_tls_send_clienthello_sig_extension(NX_SECURE_TLS_SESSION 
                                                           UCHAR *packet_buffer, ULONG *packet_offset,
                                                           USHORT *extension_length,
                                                           ULONG available_size);
+#ifndef NX_SECURE_TLS_SNI_EXTENSION_DISABLED
 static UINT _nx_secure_tls_send_clienthello_sni_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                           UCHAR *packet_buffer, ULONG *packet_offset,
                                                           USHORT *extension_length,
                                                           ULONG available_size);
+#endif
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
 static UINT _nx_secure_tls_send_clienthello_sec_spf_extensions(NX_SECURE_TLS_SESSION *tls_session,
                                                                UCHAR *packet_buffer, ULONG *packet_offset,
@@ -1430,7 +1432,7 @@ UINT   data_length;
     offset += 2;
 
     /* Write the name into the packet. */
-    NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_sni_extension_server_name -> nx_secure_x509_dns_name, data_length); /* Use case of memcpy is verified. */
+    NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_sni_extension_server_name -> nx_secure_x509_dns_name, data_length); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
     offset += data_length;
 
     /* Return the amount of data we wrote. */
@@ -1605,7 +1607,7 @@ UINT   data_length;
         offset++;
 
         /* Copy the verify data into the packet. */
-        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_local_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_local_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
         offset += NX_SECURE_TLS_FINISHED_HASH_SIZE;
     }
 

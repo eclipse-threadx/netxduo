@@ -103,7 +103,7 @@ ULONG  bytes_to_copy;
 
         /* Copy data to destination. */
         /* Note: The buffer size must be not less than packet_ptr -> nx_packet_length.  */
-        memcpy(destination_ptr, packet_ptr -> nx_packet_prepend_ptr, bytes_to_copy); /* Use case of memcpy is verified. The buffer is provided by user.  */
+        memcpy(destination_ptr, packet_ptr -> nx_packet_prepend_ptr, bytes_to_copy); /* Use case of memcpy is verified. The buffer is provided by user.  lgtm[cpp/banned-api-usage-required-any] */
 
         remaining_bytes -= bytes_to_copy;
         destination_ptr += bytes_to_copy;

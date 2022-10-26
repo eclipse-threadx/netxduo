@@ -142,6 +142,7 @@ UINT nx_azure_iot_log(UCHAR *type_ptr, UINT type_len, UCHAR *msg_ptr, UINT msg_l
 
 #define NX_AZURE_IOT_EMPTY_JSON                           0x20016
 #define NX_AZURE_IOT_SAS_TOKEN_EXPIRED                    0x20017
+#define NX_AZURE_IOT_NO_MORE_ENTRIES                      0x20018
 
 /* Resource type managed by AZ_IOT.  */
 #define NX_AZURE_IOT_RESOURCE_IOT_HUB                     0x1

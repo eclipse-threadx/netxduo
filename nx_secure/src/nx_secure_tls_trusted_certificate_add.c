@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_trusted_certificate_add              PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -58,8 +58,8 @@
 /*                                                                        */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
-/*    _nx_secure_x509_store_certificate_add Add certificate to trusted    */
-/*                                           store                        */
+/*    [nx_secure_trusted_certificate_add]   Add certificate to trusted    */
+/*                                            store                       */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -75,6 +75,9 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            updated X.509 return value, */
 /*                                            resulting in version 6.1.6  */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
+/*                                            custom secret generation,   */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_trusted_certificate_add(NX_SECURE_TLS_SESSION *tls_session,
@@ -101,18 +104,10 @@ UINT status;
 
 
     /* Add the certificate to the TLS session credentials X509 store. */
-    status = _nx_secure_x509_store_certificate_add(certificate, &tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store,
-                                                   NX_SECURE_X509_CERT_LOCATION_TRUSTED);
-
+    status = tls_session -> nx_secure_trusted_certificate_add(&tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store, certificate);
 
     /* Release the protection. */
     tx_mutex_put(&_nx_secure_tls_protection);
-
-    /* Translate some X.509 return values into TLS return values. */
-    if (status == NX_SECURE_X509_CERT_ID_DUPLICATE)
-    {
-        return(NX_SECURE_TLS_CERT_ID_DUPLICATE);
-    }
 
     return(status);
 }

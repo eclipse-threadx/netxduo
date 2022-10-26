@@ -141,7 +141,7 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
         /* Use the caller-supplied buffer for the certificate. */
         certificate -> nx_secure_x509_certificate_raw_buffer_size = buffer_size;
         certificate -> nx_secure_x509_certificate_raw_data = raw_data_buffer;
-        NX_SECURE_MEMCPY(certificate -> nx_secure_x509_certificate_raw_data, certificate_data, length); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(certificate -> nx_secure_x509_certificate_raw_data, certificate_data, length); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
     }
 
     /* Parse the DER-encoded X509 certificate to extract the public key data.

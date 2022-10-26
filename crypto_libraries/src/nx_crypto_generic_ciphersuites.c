@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_generic_ciphersuites                      PORTABLE C      */
-/*                                                           6.1.12       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -72,6 +72,8 @@
 /*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            added x448 curves,          */
 /*                                            resulting in version 6.1.12 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -115,6 +117,7 @@ extern NX_CRYPTO_METHOD crypto_method_hmac;
 
 /* Ciphersuite table without ECC. */
 /* Lookup table used to map ciphersuites to cryptographic routines. */
+/* For TLS Web servers, define NX_SECURE_ENABLE_AEAD_CIPHER to allow web browsers to connect using AES_128_GCM cipher suites. */
 NX_SECURE_TLS_CIPHERSUITE_INFO _nx_crypto_ciphersuite_lookup_table[] =
 {
     /* Ciphersuite,                           public cipher,            public_auth,              session cipher & cipher mode,   iv size, key size,  hash method,                    hash size, TLS PRF */
@@ -218,6 +221,7 @@ const UINT _nx_crypto_ciphersuite_lookup_table_tls_1_3_size = sizeof(_nx_crypto_
 /* Ciphersuite table with ECC. */
 /* Lookup table used to map ciphersuites to cryptographic routines. */
 /* Ciphersuites are negotiated IN ORDER - top priority first. Ciphersuites lower in the list are considered less secure. */
+/* For TLS Web servers, define NX_SECURE_ENABLE_AEAD_CIPHER to allow web browsers to connect using AES_128_GCM cipher suites. */
 NX_SECURE_TLS_CIPHERSUITE_INFO _nx_crypto_ciphersuite_lookup_table_ecc[] =
 {
     /* Ciphersuite,                           public cipher,            public_auth,              session cipher & cipher mode,   iv size, key size,  hash method,                    hash size, TLS PRF */

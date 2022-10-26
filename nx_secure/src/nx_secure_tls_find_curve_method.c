@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_find_curve_method                    PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -87,21 +87,24 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s), added    */
 /*                                            ECC curve table in X509,    */
 /*                                            resulting in version 6.1.6  */
+/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
+/*                                            updated parameters list,    */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_secure_tls_find_curve_method(NX_SECURE_TLS_SESSION *tls_session,
-                                      USHORT named_curve, const NX_CRYPTO_METHOD **curve_method, UINT *curve_priority)
+UINT _nx_secure_tls_find_curve_method(NX_SECURE_TLS_ECC *tls_ecc, USHORT named_curve,
+                                      const NX_CRYPTO_METHOD **curve_method, UINT *curve_priority)
 {
 USHORT i;
 
     *curve_method = NX_NULL;
 
     /* Find out the curve method for the named curve. */
-    for (i = 0; i < tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups_count; i++)
+    for (i = 0; i < tls_ecc -> nx_secure_tls_ecc_supported_groups_count; i++)
     {
-        if (named_curve == tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups[i])
+        if (named_curve == tls_ecc -> nx_secure_tls_ecc_supported_groups[i])
         {
-            *curve_method = tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_curves[i];
+            *curve_method = tls_ecc -> nx_secure_tls_ecc_curves[i];
 
             /* The index in the supported list is the curve priority: lower value == higher priority. */
             if(curve_priority != NX_NULL)

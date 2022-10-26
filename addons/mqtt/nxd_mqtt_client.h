@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_mqtt_client.h                                   PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -55,6 +55,9 @@
 /*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
 /*                                            necessary header file,      */
 /*                                            resulting in version 6.1.9  */
+/*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
+/*                                            mqtt over websocket,        */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -87,10 +90,17 @@ extern   "C" {
 #endif /* NX_SECURE_ENABLE */
 #endif /* NXD_MQTT_REQUIRE_TLS */
 
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+#include "nx_websocket_client.h"
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
+
 /* Defined, MQTT transmit queue depth is enabled. It must be positive integer.  */
 /*
 #define NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH                          20
 */
+
+/* Define MQTT protocol for websocket.  */
+#define NXD_MQTT_OVER_WEBSOCKET_PROTOCOL                               "mqtt"
 
 /* Define memcpy, memset and memcmp functions used internal. */
 #ifndef NXD_MQTT_SECURE_MEMCPY
@@ -158,6 +168,9 @@ extern   "C" {
 
 /* Define the default MQTT TLS (secure) port number */
 #define NXD_MQTT_TLS_PORT                                              8883
+
+/* Define the default MQTT TLS (secure) over WebSocket port number */
+#define NXD_MQTT_OVER_WEBSOCKET_TLS_PORT                               443
 
 
 #define MQTT_PROTOCOL_LEVEL                                            4
@@ -368,6 +381,14 @@ typedef struct NXD_MQTT_CLIENT_STRUCT
     NX_SECURE_TLS_SESSION          nxd_mqtt_tls_session;
     UINT                           nxd_mqtt_tls_in_progress;
 #endif
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+    UINT                           nxd_mqtt_client_use_websocket;
+    NX_WEBSOCKET_CLIENT            nxd_mqtt_client_websocket;
+    UCHAR                         *nxd_mqtt_client_websocket_host;
+    UINT                           nxd_mqtt_client_websocket_host_length;
+    UCHAR                         *nxd_mqtt_client_websocket_uri_path;
+    UINT                           nxd_mqtt_client_websocket_uri_path_length;
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
 } NXD_MQTT_CLIENT;
 
 
@@ -396,6 +417,9 @@ typedef struct NXD_MQTT_CLIENT_STRUCT
 #define nxd_mqtt_client_receive_notify_set    _nxd_mqtt_client_receive_notify_set
 #define nxd_mqtt_client_message_get           _nxd_mqtt_client_message_get
 #define nxd_mqtt_client_disconnect_notify_set _nxd_mqtt_client_disconnect_notify_set
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+#define nxd_mqtt_client_websocket_set         _nxd_mqtt_client_websocket_set
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
 #else /* if !NXD_MQTT_CLIENT_SOURCE_CODE */
 
 #define nxd_mqtt_client_create                _nxde_mqtt_client_create
@@ -411,6 +435,9 @@ typedef struct NXD_MQTT_CLIENT_STRUCT
 #define nxd_mqtt_client_receive_notify_set    _nxde_mqtt_client_receive_notify_set
 #define nxd_mqtt_client_message_get           _nxde_mqtt_client_message_get
 #define nxd_mqtt_client_disconnect_notify_set _nxde_mqtt_client_disconnect_notify_set
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+#define nxd_mqtt_client_websocket_set         _nxde_mqtt_client_websocket_set
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
 #endif /* NX_DISABLE_ERROR_CHECKING */
 
 
@@ -444,6 +471,9 @@ UINT nxd_mqtt_client_disconnect(NXD_MQTT_CLIENT *client_ptr);
 
 UINT nxd_mqtt_client_delete(NXD_MQTT_CLIENT *client_ptr);
 UINT nxd_mqtt_client_disconnect_notify_set(NXD_MQTT_CLIENT *client_ptr, VOID (*disconnect_notify)(NXD_MQTT_CLIENT *));
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+UINT nxd_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length);
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
 
 #else /* ifdef NXD_MQTT_CLIENT_SOURCE_CODE */
 
@@ -516,6 +546,12 @@ UINT _nxde_mqtt_client_secure_connect(NXD_MQTT_CLIENT *client_ptr, NXD_ADDRESS *
                                                         NX_SECURE_X509_CERT *, NX_SECURE_X509_CERT *),
                                       UINT keepalive, UINT clean_session, ULONG timeout);
 #endif /* NX_SECURE_ENABLE */
+
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+UINT _nxd_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length);
+UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length);
+VOID _nxd_mqtt_client_websocket_connection_status_callback(NX_WEBSOCKET_CLIENT *websocket_client_ptr, VOID *context, UINT status);
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
 
 #endif /* ifndef NXD_MQTT_CLIENT_SOURCE_CODE */
 

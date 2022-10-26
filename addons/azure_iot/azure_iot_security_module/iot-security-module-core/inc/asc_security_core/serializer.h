@@ -11,10 +11,11 @@
 
 #ifndef SERIALIZER_H
 #define SERIALIZER_H
-#include <asc_config.h>
 
 #include <stddef.h>
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/asc_result.h"
 #include "asc_security_core/model/objects/objects.h"

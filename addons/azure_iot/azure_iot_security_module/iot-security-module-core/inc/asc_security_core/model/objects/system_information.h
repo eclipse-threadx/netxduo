@@ -11,9 +11,10 @@
 
 #ifndef OBJECT_SYSTEM_INFORMATION_H
 #define OBJECT_SYSTEM_INFORMATION_H
-#include <asc_config.h>
 
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/utils/collection/collection.h"
 

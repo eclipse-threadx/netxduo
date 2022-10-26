@@ -8,12 +8,11 @@
 /* and in the root directory of this software.                                 */
 /*                                                                             */
 /*******************************************************************************/
-
-#include <asc_config.h>
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/model/security_message.h"
 

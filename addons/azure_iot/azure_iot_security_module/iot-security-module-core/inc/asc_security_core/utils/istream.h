@@ -11,11 +11,12 @@
 
 #ifndef __ISTREAM_H__
 #define __ISTREAM_H__
-#include <asc_config.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/asc_result.h"
 

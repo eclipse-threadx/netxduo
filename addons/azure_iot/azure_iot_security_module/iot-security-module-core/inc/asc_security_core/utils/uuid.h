@@ -11,10 +11,10 @@
 
 #ifndef IUUID_H
 #define IUUID_H
-#include <asc_config.h>
 
 #include <stdint.h>
 
+#include <asc_config.h>
 
 /**
  * @brief Generate a binary uuid

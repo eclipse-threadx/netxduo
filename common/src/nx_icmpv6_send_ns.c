@@ -226,13 +226,13 @@ NX_IP_DRIVER  driver_request;
         /* Fill in the source MAC address */
         mac_addr = &nd_options ->  nx_icmpv6_option_data;
         mac_addr[0] = (USHORT)(outgoing_address -> nxd_ipv6_address_attached -> nx_interface_physical_address_msw);
-        mac_addr[1] = (USHORT)((outgoing_address -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0xFFFF0000) >> 16);
-        mac_addr[2] = (USHORT)(outgoing_address -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0x0000FFFF);
+        mac_addr[1] = (USHORT)((outgoing_address -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0xFFFF0000) >> 16); /* lgtm[cpp/overflow-buffer] */
+        mac_addr[2] = (USHORT)(outgoing_address -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0x0000FFFF); /* lgtm[cpp/overflow-buffer] */
 
         /* Byte swapping. */
         NX_CHANGE_USHORT_ENDIAN(mac_addr[0]);
-        NX_CHANGE_USHORT_ENDIAN(mac_addr[1]);
-        NX_CHANGE_USHORT_ENDIAN(mac_addr[2]);
+        NX_CHANGE_USHORT_ENDIAN(mac_addr[1]); /* lgtm[cpp/overflow-buffer] */
+        NX_CHANGE_USHORT_ENDIAN(mac_addr[2]); /* lgtm[cpp/overflow-buffer] */
     }
 
 #ifdef NX_DISABLE_ICMPV6_TX_CHECKSUM

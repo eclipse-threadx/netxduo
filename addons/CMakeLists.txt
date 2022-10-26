@@ -35,6 +35,7 @@ set(SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/web/nx_tcpserver.c
 	${CMAKE_CURRENT_LIST_DIR}/web/nx_web_http_client.c
 	${CMAKE_CURRENT_LIST_DIR}/web/nx_web_http_server.c
+	${CMAKE_CURRENT_LIST_DIR}/websocket/nx_websocket_client.c
 
     # {{END_TARGET_SOURCES}}
 )
@@ -55,6 +56,8 @@ if(NXD_ENABLE_AZURE_IOT)
          ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_json_reader.c
          ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_json_writer.c
          ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_provisioning_client.c
+         ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_adu_agent.c
+         ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_adu_root_key.c
     )
     set(ENV{AZ_SDK_C_NO_SAMPLES} TRUE)
     set(NX_AZURE_DISABLE_IOT_SECURITY_MODULE OFF CACHE BOOL "Disable Azure IoT Security Module (default is OFF)")
@@ -101,4 +104,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/telnet
     ${CMAKE_CURRENT_LIST_DIR}/tftp
     ${CMAKE_CURRENT_LIST_DIR}/web
+    ${CMAKE_CURRENT_LIST_DIR}/websocket
 )

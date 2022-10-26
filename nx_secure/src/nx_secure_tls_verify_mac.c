@@ -24,15 +24,12 @@
 
 #include "nx_secure_tls.h"
 
-static UCHAR _generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
-static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
-
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_verify_mac                           PORTABLE C      */
-/*                                                           6.1.12       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -60,7 +57,7 @@ static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    _nx_secure_tls_hash_record            Generate payload data hash    */
+/*    [nx_secure_verify_mac]                Verify record MAC checksum    */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -82,18 +79,16 @@ static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            checked seq number overflow,*/
 /*                                            resulting in version 6.1.12 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
+/*                                            custom secret generation,   */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_verify_mac(NX_SECURE_TLS_SESSION *tls_session, UCHAR *header_data,
                                USHORT header_length, NX_PACKET *packet_ptr, ULONG offset, UINT *length)
 {
 UCHAR *mac_secret;
-USHORT hash_size;
-INT    compare_result;
-USHORT data_length;
-UINT   hash_length;
-UCHAR  header[6];
-ULONG  bytes_copied;
+UINT status;
 
     if (tls_session -> nx_secure_tls_session_ciphersuite == NX_NULL)
     {
@@ -101,9 +96,6 @@ ULONG  bytes_copied;
         /* Likely internal error since at this point ciphersuite negotiation was theoretically completed. */
         return(NX_SECURE_TLS_UNKNOWN_CIPHERSUITE);
     }
-
-    /* Get the hash size and MAC secret for our current session. */
-    hash_size = tls_session -> nx_secure_tls_session_ciphersuite -> nx_secure_tls_hash_size;
 
     /* Select our proper MAC secret for hashing. */
     if (tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_SERVER)
@@ -117,120 +109,9 @@ ULONG  bytes_copied;
         mac_secret = tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_write_mac_secret;
     }
 
-    /* Check for 0-length records. With nothing to hash, don't continue to hash generation. */
-    if (hash_size >= *length)
-    {
-
-        if (header_data[0] == (UCHAR)(NX_SECURE_TLS_APPLICATION_DATA) &&
-            *length == hash_size)
-        {
-            /* BEAST attack mitigation. In TLS 1.0 and SSLv3, the implicit IV enables the BEAST
-               attack. Some implementations counter the attack by sending an empty record which
-               has the effect of resetting the IVs. We normally don't allow empty records since there
-               is no data to hash, but in this case we want to allow it. */
-            *length = 0;
-
-            /* Increment the sequence number. */
-            if ((tls_session -> nx_secure_tls_remote_sequence_number[0] + 1) == 0)
-            {
-                /* Check for overflow of the 32-bit unsigned number. */
-                tls_session -> nx_secure_tls_remote_sequence_number[1]++;
-
-                if (tls_session -> nx_secure_tls_remote_sequence_number[1] == 0)
-                {
-
-                    /* Check for overflow of the 64-bit unsigned number. As it should not reach here
-                       in practical, we return a general error to prevent overflow theoretically. */
-                    return(NX_NOT_SUCCESSFUL);
-                }
-
-            }
-            tls_session -> nx_secure_tls_remote_sequence_number[0]++;
-
-            return(NX_SUCCESS);
-        }
-
-        /* The record data was smaller than the selected hash... Error. */
-        return(NX_SECURE_TLS_HASH_MAC_VERIFY_FAILURE);
-    }
-
-    /* Adjust our length so we only hash the record data, not the hash as well. */
-    data_length = (USHORT)(*length - hash_size);
-
-    /* Copy the header data into our local buffer so we can change it if we need to. */
-    if (header_length > sizeof(header))
-    {
-        return(NX_SECURE_TLS_HASH_MAC_VERIFY_FAILURE);
-    }
-    NX_SECURE_MEMCPY(header, header_data, header_length); /* Use case of memcpy is verified. */
-
-    /* Adjust the length in the header to match the length of the data before the hash was added. */
-    header[3] = (UCHAR)((data_length >> 8) & 0x00FF);
-    header[4] = (UCHAR)(data_length & 0x00FF);
-
-    /* Generate the hash on the plaintext data. */
-    _nx_secure_tls_hash_record(tls_session, tls_session -> nx_secure_tls_remote_sequence_number, header, header_length,
-                               packet_ptr, offset, data_length, _generated_hash, &hash_length, mac_secret);
-
-    /* Increment the sequence number. */
-    if ((tls_session -> nx_secure_tls_remote_sequence_number[0] + 1) == 0)
-    {
-        /* Check for overflow of the 32-bit unsigned number. */
-        tls_session -> nx_secure_tls_remote_sequence_number[1]++;
-
-        if (tls_session -> nx_secure_tls_remote_sequence_number[1] == 0)
-        {
-
-            /* Check for overflow of the 64-bit unsigned number. As it should not reach here
-               in practical, we return a general error to prevent overflow theoretically. */
-            return(NX_NOT_SUCCESSFUL);
-        }
-
-    }
-    tls_session -> nx_secure_tls_remote_sequence_number[0]++;
-
-    if (hash_size == 0)
-    {
-
-        /* For ciphersuite without explict hash, just return success. */
-        return(NX_SECURE_TLS_SUCCESS);
-    }
-
-    /* Now, compare the hash we generated to the one we received. */
-    if (nx_packet_data_extract_offset(packet_ptr,
-                                      offset + data_length,
-                                      _received_hash, hash_size, &bytes_copied))
-                                      
-    {
-
-        /* The record data was smaller than the selected hash... Error. */
-        return(NX_SECURE_TLS_PADDING_CHECK_FAILED);
-    }
-
-    if (bytes_copied != hash_size)
-    {
-
-        /* The record data was smaller than the selected hash... Error. */
-        return(NX_SECURE_TLS_PADDING_CHECK_FAILED);
-    }
-
-    compare_result = NX_SECURE_MEMCMP(_received_hash, _generated_hash, hash_size);
-
-#ifdef NX_SECURE_KEY_CLEAR
-    NX_SECURE_MEMSET(_generated_hash, 0, sizeof(_generated_hash));
-#endif /* NX_SECURE_KEY_CLEAR  */
-
-    /* Before we return, adjust our data size so the caller will only see data, not the hash. */
-    *length = data_length;
-
-    /* If the hashes match, we are all good. Otherwise we have a problem. */
-    if (compare_result == 0)
-    {
-        return(NX_SECURE_TLS_SUCCESS);
-    }
-    else
-    {
-        return(NX_SECURE_TLS_HASH_MAC_VERIFY_FAILURE);
-    }
+    status = tls_session -> nx_secure_verify_mac(tls_session -> nx_secure_tls_session_ciphersuite, mac_secret, tls_session -> nx_secure_tls_remote_sequence_number,
+                                                 header_data, header_length, packet_ptr, offset, length,
+                                                 tls_session -> nx_secure_hash_mac_metadata_area, tls_session -> nx_secure_hash_mac_metadata_size);
+    return(status);
 }
 

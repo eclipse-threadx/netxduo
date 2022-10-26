@@ -11,10 +11,11 @@
 
 #ifndef SECURITY_MESSAGE_H
 #define SECURITY_MESSAGE_H
-#include <asc_config.h>
 
 #include <stdbool.h>
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/asc_result.h"
 

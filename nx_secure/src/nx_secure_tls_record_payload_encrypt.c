@@ -203,7 +203,7 @@ UCHAR                                *icv_ptr = NX_NULL;
                 {
 
                     /* New IV is the last encrypted block of the output. */
-                    NX_SECURE_MEMCPY(iv, &current_packet -> nx_packet_prepend_ptr[current_length + data_offset - iv_size],
+                    NX_SECURE_MEMCPY(iv, &current_packet -> nx_packet_prepend_ptr[current_length + data_offset - iv_size], /*  lgtm[cpp/banned-api-usage-required-any] */
                                      iv_size); /* Use case of memcpy is verified. */
                 }
             }
@@ -260,7 +260,7 @@ UCHAR                                *icv_ptr = NX_NULL;
                  */
 
                 /* Offset for remainder bytes is rounded_length + data_offset. */
-                NX_SECURE_MEMCPY(&_nx_secure_tls_record_block_buffer[0],
+                NX_SECURE_MEMCPY(&_nx_secure_tls_record_block_buffer[0], /*  lgtm[cpp/banned-api-usage-required-any] */
                                  &current_packet -> nx_packet_prepend_ptr[rounded_length + data_offset],
                                  remainder_length); /* Use case of memcpy is verified. */
                 copy_length = (ULONG)(current_packet -> nx_packet_next -> nx_packet_append_ptr -
@@ -269,7 +269,7 @@ UCHAR                                *icv_ptr = NX_NULL;
                 {
                     copy_length = (ULONG)(block_size - remainder_length);
                 }
-                NX_SECURE_MEMCPY(&_nx_secure_tls_record_block_buffer[remainder_length],
+                NX_SECURE_MEMCPY(&_nx_secure_tls_record_block_buffer[remainder_length], /* lgtm[cpp/banned-api-usage-required-any] */
                                  current_packet -> nx_packet_next -> nx_packet_prepend_ptr,
                                  copy_length); /* Use case of memcpy is verified. */
 
@@ -298,9 +298,9 @@ UCHAR                                *icv_ptr = NX_NULL;
                 }
 
                 /* Copy data from temporary buffer back into packets. */
-                NX_SECURE_MEMCPY(&current_packet -> nx_packet_prepend_ptr[rounded_length + data_offset],
+                NX_SECURE_MEMCPY(&current_packet -> nx_packet_prepend_ptr[rounded_length + data_offset], /*  lgtm[cpp/banned-api-usage-required-any] */
                                  &_nx_secure_tls_record_block_buffer[0], remainder_length); /* Use case of memcpy is verified. */
-                NX_SECURE_MEMCPY(current_packet -> nx_packet_next -> nx_packet_prepend_ptr,
+                NX_SECURE_MEMCPY(current_packet -> nx_packet_next -> nx_packet_prepend_ptr, /* lgtm[cpp/banned-api-usage-required-any] */
                                  &_nx_secure_tls_record_block_buffer[remainder_length],
                                  copy_length); /* Use case of memcpy is verified. */
 
@@ -309,7 +309,7 @@ UCHAR                                *icv_ptr = NX_NULL;
                 {
 
                     /* New IV is the last encrypted block of the output. */
-                    NX_SECURE_MEMCPY(iv, &_nx_secure_tls_record_block_buffer, iv_size); /* Use case of memcpy is verified. */
+                    NX_SECURE_MEMCPY(iv, &_nx_secure_tls_record_block_buffer, iv_size); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
                 }
 
 #ifdef NX_SECURE_KEY_CLEAR
@@ -655,7 +655,7 @@ UINT                                  message_length;
 
             /* IV size is equal to the AES block size. Copy our IV into our data buffer
                at the head of the payload. */
-            NX_SECURE_MEMCPY(send_packet -> nx_packet_prepend_ptr, iv, iv_size); /* Use case of memcpy is verified. */
+            NX_SECURE_MEMCPY(send_packet -> nx_packet_prepend_ptr, iv, iv_size); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
             *data_offset = iv_size;
         }
 

@@ -8,9 +8,9 @@
 /* and in the root directory of this software.                                 */
 /*                                                                             */
 /*******************************************************************************/
-#include <asc_config.h>
-
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/logger.h"
 #include "asc_security_core/model/schema/message_builder.h"

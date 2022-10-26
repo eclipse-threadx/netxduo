@@ -4849,7 +4849,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_display_date_time           PORTABLE C      */ 
-/*                                                           6.1.8        */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4896,6 +4896,9 @@ UINT status;
 /*                                            improved the logic of       */
 /*                                            converting number to string,*/
 /*                                            resulting in version 6.1.8  */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            the typo of August string,  */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_sntp_client_utility_display_date_time(NX_SNTP_CLIENT *client_ptr, CHAR *buffer, UINT length)
@@ -4906,7 +4909,7 @@ UINT                offset;
 UINT                return_length;
 NX_SNTP_DATE_TIME   DisplayTime;
 const CHAR         *months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                                  "Jul", "Aud", "Sep", "Oct", "Nov", "Dec"};
+                                  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 
 #ifndef  NX_SNTP_CURRENT_YEAR  

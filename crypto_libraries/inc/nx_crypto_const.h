@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_crypto_const.h                                  PORTABLE C       */
-/*                                                           6.1.11       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -50,6 +50,9 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), added    */
 /*                                            x25519 and x448 curves,     */
 /*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
+/*                                            EC curve type macro,        */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -212,6 +215,11 @@ extern   "C" {
 #define NX_CRYPTO_EC_POINT_UNCOMPRESSED              0
 #define NX_CRYPTO_EC_POINT_ANSIX962_COMPRESSED_PRIME 1
 #define NX_CRYPTO_EC_POINT_ANSIX962_COMPRESSED_CHAR2 2
+
+/* Elliptic curve type definitions. */
+#define NX_CRYPTO_EC_CURVE_TYPE_EXPLICIT_PRIME       1
+#define NX_CRYPTO_EC_CURVE_TYPE_EXPLICIT_CHAR2       2
+#define NX_CRYPTO_EC_CURVE_TYPE_NAMED_CURVE          3
 
 /* Define crypto ICV bits size. */
 #define NX_CRYPTO_AUTHENTICATION_ICV_TRUNC_BITS  96

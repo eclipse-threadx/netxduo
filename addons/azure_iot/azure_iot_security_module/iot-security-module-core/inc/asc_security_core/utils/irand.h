@@ -11,9 +11,10 @@
 
 #ifndef IRAND_H
 #define IRAND_H
-#include <asc_config.h>
 
 #include <stdint.h>
+
+#include <asc_config.h>
 
 /**
  * @brief Initialize the seed for rand generator.

@@ -11,9 +11,10 @@
 
 #ifndef ICONV_H
 #define ICONV_H
-#include <asc_config.h>
 
 #include <stdint.h>
+
+#include <asc_config.h>
 
 typedef struct {
     int code;

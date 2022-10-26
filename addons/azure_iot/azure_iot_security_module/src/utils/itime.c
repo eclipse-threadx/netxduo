@@ -8,10 +8,9 @@
 /*       and in the root directory of this software.                      */
 /*                                                                        */
 /**************************************************************************/
+#include <string.h>
 
 #include <asc_config.h>
-
-#include <string.h>
 
 #include "asc_security_core/utils/itime.h"
 

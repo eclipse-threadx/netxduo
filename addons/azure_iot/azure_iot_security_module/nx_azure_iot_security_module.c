@@ -8,11 +8,10 @@
 /*       and in the root directory of this software.                      */
 /*                                                                        */
 /**************************************************************************/
-
-#include <asc_config.h>
-
 #include <stdbool.h>
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #include "nx_azure_iot_hub_client.h"
 #include "nx_azure_iot_security_module.h"

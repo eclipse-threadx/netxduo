@@ -1,6 +1,5 @@
 #ifndef FLATCC_ALLOC_H
 #define FLATCC_ALLOC_H
-#include <asc_config.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,6 +45,7 @@ extern "C" {
 
 #include <stdlib.h>
 
+#include <asc_config.h>
 /* ASC Disable memory allocation usage */
 #ifdef ASC_SERIALIZER_USE_CUSTOM_ALLOCATOR
 #define FLATCC_ALLOC(n) NULL

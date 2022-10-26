@@ -238,7 +238,7 @@ UINT              i;
         /*lint -e{927} suppress cast of pointer to pointer, since it is necessary  */
         /*lint -e{644} suppress variable might not be initialized, since "nd_entry" was initialized in _nx_nd_cache_find_entry. */
         lla = (USHORT *)nd_entry -> nx_nd_cache_mac_addr;
-        if ((new_lla[0] == lla[0]) && (new_lla[1] == lla[1]) && (new_lla[2] == lla[2]))
+        if ((new_lla[0] == lla[0]) && (new_lla[1] == lla[1]) && (new_lla[2] == lla[2])) /* lgtm[cpp/overflow-buffer] */
         {
 
             /* No change in LLA. */
@@ -391,8 +391,8 @@ UINT              i;
             /*lint -e{927} suppress cast of pointer to pointer, since it is necessary  */
             lla = (USHORT *)nd_entry -> nx_nd_cache_mac_addr;
             lla[0] = new_lla[0];
-            lla[1] = new_lla[1];
-            lla[2] = new_lla[2];
+            lla[1] = new_lla[1]; /* lgtm[cpp/overflow-buffer] */
+            lla[2] = new_lla[2]; /* lgtm[cpp/overflow-buffer] */
         }
         if (nd_ptr -> nx_icmpv6_nd_flag & 0x40000000) /* S bit is set, force cache entry to REACHABLE */
         {

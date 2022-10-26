@@ -11,6 +11,12 @@
 
 #ifndef LOGGER_H
 #define LOGGER_H
+
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
+
 #include <asc_config.h>
 
 #define LOG_LEVEL_NOTSET 0
@@ -34,11 +40,6 @@
     #define logger_set_timestamp(_s)
     #define logger_get_system_log_level() (LOG_LEVEL_NOTSET)
 #else
-    #include <stdio.h>
-    #include <string.h>
-    #include <stdbool.h>
-    #include <stdint.h>
-
     #include "asc_security_core/utils/macros.h"
     #include "asc_security_core/component_id.h"
 

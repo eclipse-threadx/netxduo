@@ -187,7 +187,7 @@ NX_PACKET *working_packet_ptr;
         }
 
         /* Copy data from this packet.  */
-        memcpy(destination_ptr, source_ptr, bytes_to_copy); /* Use case of memcpy is verified. */
+        memcpy(destination_ptr, source_ptr, bytes_to_copy); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
 
         /* Update the pointers. */
         destination_ptr += bytes_to_copy;

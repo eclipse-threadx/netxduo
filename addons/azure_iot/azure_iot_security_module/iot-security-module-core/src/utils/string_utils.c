@@ -8,12 +8,12 @@
 /* and in the root directory of this software.                                 */
 /*                                                                             */
 /*******************************************************************************/
-#include <asc_config.h>
-
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/logger.h"
 #include "asc_security_core/utils/string_utils.h"

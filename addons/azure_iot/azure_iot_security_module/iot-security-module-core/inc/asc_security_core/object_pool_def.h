@@ -11,9 +11,10 @@
 
 #ifndef OBJECT_POOL_DEF_H
 #define OBJECT_POOL_DEF_H
-#include <asc_config.h>
 
 #include <stddef.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/utils/collection/stack.h"
 

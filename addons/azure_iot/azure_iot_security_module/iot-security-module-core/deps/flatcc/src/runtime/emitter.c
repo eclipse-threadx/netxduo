@@ -1,6 +1,6 @@
-#include <asc_config.h>
-
 #include <stdlib.h>
+
+#include <asc_config.h>
 
 #ifdef ASC_SERIALIZER_USE_CUSTOM_ALLOCATOR
 #include "asc_security_core/serializer/page_allocator.h"

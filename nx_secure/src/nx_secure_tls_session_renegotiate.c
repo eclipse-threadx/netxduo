@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_renegotiate                  PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -97,6 +97,10 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), changed  */
 /*                                            an error to assert,         */
 /*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), and      */
+/*                                            fixed renegotiation when    */
+/*                                            receiving in non-block mode,*/
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
@@ -154,6 +158,7 @@ NX_PACKET *send_packet;
 
         /* This is a renegotiation handshake so indicate that to the stack. */
         tls_session -> nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_RENEGOTIATING;
+        tls_session -> nx_secure_tls_local_initiated_renegotiation = NX_TRUE;
 
         /* On a session resumption free all certificates for the new session.
          * SESSION RESUMPTION: if session resumption is enabled, don't free!!
@@ -211,6 +216,12 @@ NX_PACKET *send_packet;
         {
             nx_secure_tls_packet_release(incoming_packet);
         }
+
+        if (tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HANDSHAKE_FINISHED)
+        {
+            tls_session -> nx_secure_tls_local_initiated_renegotiation = NX_FALSE;
+            tls_session -> nx_secure_tls_renegotiation_handshake = NX_FALSE;
+        }
     }
 #endif
 
@@ -239,6 +250,8 @@ NX_PACKET *send_packet;
         /* Populate our packet with HelloRequest data. */
         status = _nx_secure_tls_send_hellorequest(tls_session, send_packet);
         NX_ASSERT(status == NX_SUCCESS);
+
+        tls_session -> nx_secure_tls_local_initiated_renegotiation = NX_TRUE;
 
         /* Send the HelloRequest to kick things off. */
         status = _nx_secure_tls_send_handshake_record(tls_session, send_packet, NX_SECURE_TLS_HELLO_REQUEST, wait_option);
@@ -278,6 +291,12 @@ NX_PACKET *send_packet;
         if (incoming_packet != NX_NULL)
         {
             nx_secure_tls_packet_release(incoming_packet);
+        }
+
+        if (tls_session -> nx_secure_tls_server_state == NX_SECURE_TLS_SERVER_STATE_HANDSHAKE_FINISHED)
+        {
+            tls_session -> nx_secure_tls_local_initiated_renegotiation = NX_FALSE;
+            tls_session -> nx_secure_tls_renegotiation_handshake = NX_FALSE;
         }
     }
 #endif

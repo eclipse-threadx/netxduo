@@ -2167,7 +2167,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_aes_ccm_operation                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2215,6 +2215,9 @@ UINT    status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_ccm_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -2278,7 +2281,7 @@ UINT    status;
                 break;
             }
 
-            if (input_length_in_byte < (method -> nx_crypto_ICV_size_in_bits >> 3) ||
+            if (input_length_in_byte < (ULONG)(method -> nx_crypto_ICV_size_in_bits >> 3) ||
                 output_length_in_byte < input_length_in_byte - (method -> nx_crypto_ICV_size_in_bits >> 3))
             {
                 status = NX_CRYPTO_INVALID_BUFFER_SIZE;

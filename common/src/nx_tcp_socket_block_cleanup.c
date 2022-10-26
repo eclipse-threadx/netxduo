@@ -28,13 +28,16 @@
 #include "nx_api.h"
 #include "nx_tcp.h"
 #include "nx_ipv6.h"
+#ifdef NX_ENABLE_HTTP_PROXY
+#include "nx_http_proxy_client.h"
+#endif /* NX_ENABLE_HTTP_PROXY */
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_block_cleanup                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -53,7 +56,7 @@
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    None                                                                */
+/*    _nx_http_proxy_client_cleanup         Clean up HTTP Proxy           */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -70,6 +73,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported HTTP Proxy,       */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_socket_block_cleanup(NX_TCP_SOCKET *socket_ptr)
@@ -109,6 +115,15 @@ VOID  _nx_tcp_socket_block_cleanup(NX_TCP_SOCKET *socket_ptr)
 
         /* Client socket, return to a CLOSED state.  */
         socket_ptr -> nx_tcp_socket_state =  NX_TCP_CLOSED;
+
+#ifdef NX_ENABLE_HTTP_PROXY
+        if (socket_ptr -> nx_tcp_socket_ip_ptr -> nx_ip_http_proxy_enable)
+        {
+
+            /* Clean up the HTTP Proxy.  */
+            _nx_http_proxy_client_cleanup(socket_ptr);
+        }
+#endif /* NX_ENABLE_HTTP_PROXY */
     }
     else
     {

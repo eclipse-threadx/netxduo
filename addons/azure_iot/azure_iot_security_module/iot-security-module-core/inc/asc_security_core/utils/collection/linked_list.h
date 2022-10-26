@@ -11,12 +11,14 @@
 
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
-#include <asc_config.h>
 
-#include "asc_security_core/utils/collection/collection.h"
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+
+#include <asc_config.h>
+
+#include "asc_security_core/utils/collection/collection.h"
 
 #define LINKED_LIST_DECLARATIONS(type) \
 typedef void (*linked_list_##type##_deinit_function)(type *item);\

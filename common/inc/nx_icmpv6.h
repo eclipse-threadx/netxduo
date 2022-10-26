@@ -212,7 +212,7 @@ typedef struct NX_ICMPV6_OPTION_STRUCT
     /* Size of the option. */
     UCHAR   nx_icmpv6_option_length;
 
-    /* Option data. */
+    /* Option data. This field is used to retrieve starting address of option. The size is decided by option length. */
     USHORT  nx_icmpv6_option_data;
 } NX_ICMPV6_OPTION;
 

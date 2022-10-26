@@ -132,7 +132,7 @@ UINT         offset;
             }
 
             /* Name and lengths check out, save off the name data. */
-            NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, &data_ptr[offset], dns_name -> nx_secure_x509_dns_name_length); /* Use case of memcpy is verified. */
+            NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, &data_ptr[offset], dns_name -> nx_secure_x509_dns_name_length); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
 
             /* Success! */
             return(NX_SUCCESS);

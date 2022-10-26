@@ -11,9 +11,10 @@
 
 #ifndef __COMPONENTS_FACTORY__TYPE_H__
 #define __COMPONENTS_FACTORY__TYPE_H__
-#include <asc_config.h>
 
 #include <stdbool.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/asc_result.h"
 #include "asc_security_core/component_info.h"

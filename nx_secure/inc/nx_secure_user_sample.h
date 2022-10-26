@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */
 /*                                                                        */
 /*    nx_secure_user.h                                    PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.2.0        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -55,6 +55,9 @@
 /*                                            initiated renegotiation for */
 /*                                            TLS server instances,       */
 /*                                            resulting in version 6.1.9  */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
+/*                                            macro to custom secret size,*/
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -259,10 +262,22 @@
    #define NX_SECURE_TLS_MINIMUM_MESSAGE_BUFFER_SIZE 4000
 */
 
-/* NX_SECURE_TLS_PREMASTER_SIZE defines the sie of pre-master secret.
+/* NX_SECURE_TLS_PREMASTER_SIZE defines the size of pre-master secret.
    The default value is 48. */
 /*
    #define NX_SECURE_TLS_PREMASTER_SIZE 48
+*/
+
+/* NX_SECURE_TLS_MASTER_SIZE defines the size of master secret.
+   The default value is 48. */
+/*
+   #define NX_SECURE_TLS_MASTER_SIZE 48
+*/
+
+/* NX_SECURE_TLS_KEY_MATERIAL_SIZE defines the size of key material.
+   The default value is (2 * (NX_SECURE_TLS_MAX_HASH_SIZE + NX_SECURE_TLS_MAX_KEY_SIZE + NX_SECURE_TLS_MAX_IV_SIZE)). */
+/*
+   #define NX_SECURE_TLS_KEY_MATERIAL_SIZE (2 * (NX_SECURE_TLS_MAX_HASH_SIZE + NX_SECURE_TLS_MAX_KEY_SIZE + NX_SECURE_TLS_MAX_IV_SIZE))
 */
 
 /* NX_SECURE_TLS_CLIENT_DISABLED disables TLS server. By default TLS server is enabled. */
@@ -300,8 +315,14 @@
    vulnerability. */
 /*
   #define NX_SECURE_TLS_DISABLE_CLIENT_INITIATED_RENEGOTIATION
- */
+*/
 
+/* NX_SECURE_CUSTOM_SECRET_GENERATION enables the user to pass pointers of customized secret generation functions to
+   TLS in the user defined nx_secure_custom_secret_generation_init function. This will allow TLS to use customized
+   secret generation functions. */
+/*
+  #define NX_SECURE_CUSTOM_SECRET_GENERATION
+*/
 
 /* NX_SECURE_X509_DISABLE_CRL disables X509 Certificate Revocation List check.
    By default this feature is enabled. */
