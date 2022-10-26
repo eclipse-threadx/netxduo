@@ -8,9 +8,10 @@
 /* and in the root directory of this software.                                 */
 /*                                                                             */
 /*******************************************************************************/
-#include <asc_config.h>
 
 #include <stdlib.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/components_factory_declarations.h"
 #include "asc_security_core/components_manager.h"

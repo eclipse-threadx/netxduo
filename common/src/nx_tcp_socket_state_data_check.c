@@ -27,6 +27,9 @@
 #include "nx_packet.h"
 #include "nx_ip.h"
 #include "nx_tcp.h"
+#ifdef NX_ENABLE_HTTP_PROXY
+#include "nx_http_proxy_client.h"
+#endif /* NX_ENABLE_HTTP_PROXY */
 
 
 /**************************************************************************/
@@ -34,7 +37,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_data_trim                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -69,6 +72,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported HTTP Proxy,       */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_tcp_socket_state_data_trim(NX_PACKET *packet_ptr, ULONG amount)
@@ -276,7 +282,7 @@ ULONG      work_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_data_check                     PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -324,6 +330,9 @@ ULONG      work_length;
 /*                                            fixed unsigned integers     */
 /*                                            comparison,                 */
 /*                                            resulting in version 6.1.10 */
+/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported HTTP Proxy,       */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_state_data_check(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr)
@@ -1091,7 +1100,11 @@ NX_IP         *ip_ptr;
        packet is already queued.  */
 
     /* Any packets for receiving? */
-    while (acked_packets && socket_ptr -> nx_tcp_socket_receive_suspension_list)
+    while (acked_packets && socket_ptr -> nx_tcp_socket_receive_suspension_list
+#ifdef NX_ENABLE_HTTP_PROXY
+           && (socket_ptr -> nx_tcp_socket_http_proxy_state != NX_HTTP_PROXY_STATE_CONNECTING)
+#endif /* NX_ENABLE_HTTP_PROXY */
+          )
     {
 
         /* Setup a pointer to the first queued packet.  */
@@ -1171,13 +1184,22 @@ NX_IP         *ip_ptr;
 #endif /* NX_ENABLE_TCPIP_OFFLOAD */
        )
     {
-        /* Determine if there is a socket receive notification function specified.  */
-        if (socket_ptr -> nx_tcp_receive_callback)
+
+#ifdef NX_ENABLE_HTTP_PROXY
+
+        /* If HTTP Proxy is connecting, the data is the response from HTTP Proxy server, don't need to notify application.  */
+        if (socket_ptr -> nx_tcp_socket_http_proxy_state != NX_HTTP_PROXY_STATE_CONNECTING)
+#endif /* NX_ENABLE_HTTP_PROXY */
         {
 
-            /* Yes, notification is requested.  Call the application's receive notification
-               function for this socket.  */
-            (socket_ptr -> nx_tcp_receive_callback)(socket_ptr);
+            /* Determine if there is a socket receive notification function specified.  */
+            if (socket_ptr -> nx_tcp_receive_callback)
+            {
+
+                /* Yes, notification is requested.  Call the application's receive notification
+                   function for this socket.  */
+                (socket_ptr -> nx_tcp_receive_callback)(socket_ptr);
+            }
         }
 
 #ifdef NX_TCP_ACK_EVERY_N_PACKETS

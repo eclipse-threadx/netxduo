@@ -154,7 +154,7 @@ NX_PACKET      *work_ptr;
         }
 
         /* Firstly, append the overflowing data to the new packet.. */
-        memcpy(work_ptr -> nx_packet_prepend_ptr, data_start, append_size); /* Use case of memcpy is verified. */
+        memcpy(work_ptr -> nx_packet_prepend_ptr, data_start, append_size); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
         work_ptr -> nx_packet_append_ptr = (UCHAR *)((ALIGN_TYPE)work_ptr -> nx_packet_prepend_ptr + append_size);
 
         /* Secondly, calculate the shift data size.  */

@@ -11,10 +11,11 @@
 
 #ifndef SERIALIZER_PRIVATE_H
 #define SERIALIZER_PRIVATE_H
-#include <asc_config.h>
 
 #include <stdbool.h>
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #include "flatcc/flatcc_builder.h"
 

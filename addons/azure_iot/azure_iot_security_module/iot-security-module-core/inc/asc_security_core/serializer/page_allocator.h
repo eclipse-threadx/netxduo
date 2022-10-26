@@ -11,9 +11,10 @@
 
 #ifndef PAGE_ALLOCATOR_H
 #define PAGE_ALLOCATOR_H
-#include <asc_config.h>
 
 #include <stddef.h>
+
+#include <asc_config.h>
 
 #ifdef ASC_COLLECTOR_PROCESS_ENABLED
 #include "asc_security_core/model/objects/process.h"

@@ -8,14 +8,15 @@
 /* and in the root directory of this software.                                 */
 /*                                                                             */
 /*******************************************************************************/
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdbool.h>
+
 #include <asc_config.h>
 #include "asc_security_core/components_manager.h"
 // #define ASC_TIME_H_SUPPORT
 
 #if ASC_LOG_LEVEL != LOG_LEVEL_NOTSET
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdbool.h>
 
 #ifdef ASC_TIME_H_SUPPORT
 #include <time.h>

@@ -44,7 +44,7 @@
 #define SAMPLE_COMMAND_ERROR_STATUS                                     (500)
 #define SAMPLE_COMMAND_NOT_FOUND_STATUS                                 (404)
 
-#define SAMPLE_PNP_MODEL_ID                                             "dtmi:com:example:TemperatureController;1"
+#define SAMPLE_PNP_MODEL_ID                                             "dtmi:com:example:TemperatureController;3"
 #define SAMPLE_PNP_DPS_PAYLOAD                                          "{\"modelId\":\"" SAMPLE_PNP_MODEL_ID "\"}"
 
 /* Generally, IoTHub Client and DPS Client do not run at the same time, user can use union as below to
@@ -137,6 +137,11 @@ static UCHAR scratch_buffer[256];
 /* Include the connection monitor function from sample_azure_iot_embedded_sdk_connect.c.  */
 extern VOID sample_connection_monitor(NX_IP *ip_ptr, NX_AZURE_IOT_HUB_CLIENT *iothub_client_ptr, UINT connection_status,
                                       UINT (*iothub_init)(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr));
+
+#ifndef DISABLE_ADU_SAMPLE
+/* Include the adu start function from sample_azure_iot_embedded_sdk_adu.c.  */
+extern VOID sample_adu_start(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr);
+#endif /* DISABLE_ADU_SAMPLE */
 
 static UINT sample_pnp_temp_controller_reboot_command(NX_AZURE_IOT_JSON_READER *json_reader_ptr,
                                                       NX_AZURE_IOT_JSON_WRITER *out_json_writer_ptr)
@@ -338,6 +343,11 @@ static VOID sample_connected_action(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr)
 {
 UINT status;
 
+#ifndef DISABLE_ADU_SAMPLE
+    /* Start adu agent.   */
+    sample_adu_start(hub_client_ptr);
+#endif /* DISABLE_ADU_SAMPLE */
+
     /* Request all properties.  */
     if ((status = nx_azure_iot_hub_client_properties_request(hub_client_ptr, NX_WAIT_FOREVER)))
     {
@@ -440,6 +450,15 @@ UINT iothub_device_id_length = sizeof(DEVICE_ID) - 1;
         printf("Failed on nx_azure_iot_hub_client_symmetric_key_set! error: 0x%08x\r\n", status);
     }
 #endif /* USE_DEVICE_CERTIFICATE */
+
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+
+    /* Enable MQTT over WebSocket to connect to IoT Hub  */
+    else if ((status = nx_azure_iot_hub_client_websocket_enable(iothub_client_ptr)))
+    {
+        printf("Failed on nx_azure_iot_hub_client_websocket_enable!\r\n");
+    }
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
 
     /* Enable command and properties features.  */
     else if ((status = nx_azure_iot_hub_client_command_enable(iothub_client_ptr)))
@@ -912,6 +931,16 @@ UINT status;
         printf("Failed on nx_azure_iot_hub_client_symmetric_key_set!: error code = 0x%08x\r\n", status);
     }
 #endif /* USE_DEVICE_CERTIFICATE */
+
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+
+    /* Enable MQTT over WebSocket.  */
+    else if ((status = nx_azure_iot_provisioning_client_websocket_enable(prov_client_ptr)))
+    {
+        printf("Failed on nx_azure_iot_provisioning_client_websocket_enable!\r\n");
+    }
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
+
     else if ((status = nx_azure_iot_provisioning_client_registration_payload_set(prov_client_ptr, (UCHAR *)SAMPLE_PNP_DPS_PAYLOAD,
                                                                                  sizeof(SAMPLE_PNP_DPS_PAYLOAD) - 1)))
     {

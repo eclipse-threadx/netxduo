@@ -31,6 +31,9 @@
 #include "nx_ipv6.h"
 #include "nx_ipv4.h"
 #include "nx_ip.h"
+#ifdef NX_ENABLE_HTTP_PROXY
+#include "nx_http_proxy_client.h"
+#endif /* NX_ENABLE_HTTP_PROXY */
 
 
 #ifdef NX_ENABLE_TCPIP_OFFLOAD
@@ -188,7 +191,7 @@ NX_IP        *ip_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_tcp_client_socket_connect                     PORTABLE C       */
-/*                                                           6.1.8        */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -218,6 +221,7 @@ NX_IP        *ip_ptr;
 /*                                            interface.                  */
 /*    tx_mutex_get                          Obtain protection             */
 /*    tx_mutex_put                          Release protection            */
+/*    _nx_http_proxy_client_initialize      Initialize the HTTP Proxy     */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -233,6 +237,9 @@ NX_IP        *ip_ptr;
 /*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            supported TCP/IP offload,   */
 /*                                            resulting in version 6.1.8  */
+/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported HTTP Proxy,       */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tcp_client_socket_connect(NX_TCP_SOCKET *socket_ptr,
@@ -255,6 +262,15 @@ ULONG         ip_address_log = 0;
 
     /* Setup IP pointer.  */
     ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
+
+#ifdef NX_ENABLE_HTTP_PROXY
+    if (ip_ptr -> nx_ip_http_proxy_enable)
+    {
+
+        /* Initialize the HTTP Proxy info and replace the peer IP and port with HTTP proxy server's IP and port.  */
+        _nx_http_proxy_client_initialize(socket_ptr, &server_ip, &server_port);
+    }
+#endif /* NX_ENABLE_HTTP_PROXY */
 
     /* Make sure the server IP address is accesible. */
 #ifndef NX_DISABLE_IPV4
@@ -476,6 +492,15 @@ ULONG         ip_address_log = 0;
         /* Send the SYN message.  */
         _nx_tcp_packet_send_syn(socket_ptr, (socket_ptr -> nx_tcp_socket_tx_sequence - 1));
     }
+
+#ifdef NX_ENABLE_HTTP_PROXY
+    if (ip_ptr -> nx_ip_http_proxy_enable)
+    {
+
+        /* Set HTTP Proxy state as waiting for TCP connection.  */
+        socket_ptr -> nx_tcp_socket_http_proxy_state = NX_HTTP_PROXY_STATE_WAITING;
+    }
+#endif /* NX_ENABLE_HTTP_PROXY */
 
     /* Optionally suspend the thread.  If timeout occurs, return a connection timeout status.  If
        immediate response is selected, return a connection in progress status.  Only on a real

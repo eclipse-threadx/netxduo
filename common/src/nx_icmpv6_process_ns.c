@@ -285,7 +285,7 @@ ULONG             dest_address[4];
                 mac_lsw = ((ULONG)(nd_entry -> nx_nd_cache_mac_addr[2]) << 24) | ((ULONG)(nd_entry -> nx_nd_cache_mac_addr[3]) << 16) |
                           ((ULONG)(nd_entry -> nx_nd_cache_mac_addr[4]) << 8) | nd_entry -> nx_nd_cache_mac_addr[5];
                 new_msw = ((ULONG)(new_mac[0]) << 8) | (new_mac[1]);
-                new_lsw = ((ULONG)(new_mac[2]) << 24) | ((ULONG)(new_mac[3]) << 16) | ((ULONG)(new_mac[4]) << 8) | new_mac[5];
+                new_lsw = ((ULONG)(new_mac[2]) << 24) | ((ULONG)(new_mac[3]) << 16) | ((ULONG)(new_mac[4]) << 8) | new_mac[5]; /* lgtm[cpp/overflow-buffer] */
                 if ((mac_msw != new_msw) || (mac_lsw != new_lsw)) /* If the new MAC is different from what we have in the table. */
                 {
 
@@ -410,12 +410,12 @@ ULONG             dest_address[4];
     mac_addr = &option_ptr -> nx_icmpv6_option_data;
 
     mac_addr[0] = (USHORT)(interface_addr -> nxd_ipv6_address_attached -> nx_interface_physical_address_msw);
-    mac_addr[1] = (USHORT)((interface_addr -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0xFFFF0000) >> 16);
-    mac_addr[2] = (USHORT)(interface_addr -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0x0000FFFF);
+    mac_addr[1] = (USHORT)((interface_addr -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0xFFFF0000) >> 16); /* lgtm[cpp/overflow-buffer] */
+    mac_addr[2] = (USHORT)(interface_addr -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0x0000FFFF); /* lgtm[cpp/overflow-buffer] */
 
     NX_CHANGE_USHORT_ENDIAN(mac_addr[0]);
-    NX_CHANGE_USHORT_ENDIAN(mac_addr[1]);
-    NX_CHANGE_USHORT_ENDIAN(mac_addr[2]);
+    NX_CHANGE_USHORT_ENDIAN(mac_addr[1]); /* lgtm[cpp/overflow-buffer] */
+    NX_CHANGE_USHORT_ENDIAN(mac_addr[2]); /* lgtm[cpp/overflow-buffer] */
 
 #ifdef NX_DISABLE_ICMPV6_TX_CHECKSUM
     compute_checksum = 0;

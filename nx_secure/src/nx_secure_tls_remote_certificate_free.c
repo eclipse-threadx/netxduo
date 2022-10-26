@@ -100,7 +100,7 @@ NX_SECURE_X509_CERT              *certificate;
     status = _nx_secure_x509_certificate_list_find(&list_head, name, 0, &certificate);
 
     /* Now status can only be NX_SECURE_X509_CERTIFICATE_NOT_FOUND or NX_SECURE_X509_SUCCESS as
-       “&list_head” and “&certificate” are not NULL.
+       "&list_head" and "&certificate" are not NULL.
        Translate X.509 return values into TLS return values. */
     if (status == NX_SECURE_X509_CERTIFICATE_NOT_FOUND)
     {

@@ -119,7 +119,7 @@ UINT             is_server;
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
         /* If we are doing secure renegotiation as per RFC 5746, we need to save off the generated
            verify data now. For TLS 1.0-1.2 this is 12 bytes. If SSLv3 is ever used, it will be 36 bytes. */
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_local_verify_data, send_packet -> nx_packet_append_ptr, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_local_verify_data, send_packet -> nx_packet_append_ptr, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
 #endif
 
         /* The finished verify data is always 12 bytes for TLS 1.2 and earlier. */

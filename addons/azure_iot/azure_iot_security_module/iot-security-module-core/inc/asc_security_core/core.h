@@ -11,10 +11,11 @@
 
 #ifndef CORE_H
 #define CORE_H
-#include <asc_config.h>
 
 #include <stdbool.h>
 #include <limits.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/asc_result.h"
 #include "asc_security_core/collector_collection.h"

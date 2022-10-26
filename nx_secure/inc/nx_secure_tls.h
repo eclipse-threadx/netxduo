@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.1.12       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -94,6 +94,13 @@
 /*                                            updated alert message for   */
 /*                                            downgrade protection,       */
 /*                                            resulting in version 6.1.12 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), and added*/
+/*                                            custom secret generation,   */
+/*                                            fixed renegotiation when    */
+/*                                            receiving in non-block mode,*/
+/*                                            added function to set packet*/
+/*                                            pool,                       */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -156,8 +163,8 @@ extern   "C" {
 
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
-#define NETX_SECURE_MINOR_VERSION                       1
-#define NETX_SECURE_PATCH_VERSION                       12
+#define NETX_SECURE_MINOR_VERSION                       2
+#define NETX_SECURE_PATCH_VERSION                       0
 
 /* The following symbols are defined for backward compatibility reasons. */
 #define EL_PRODUCT_NETX_SECURE
@@ -663,7 +670,9 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
 
 #define NX_SECURE_TLS_RSA_PREMASTER_SIZE                   (48)  /* The size of RSA encrypted pre-master secret. */
 #define NX_SECURE_TLS_EC_PREMASTER_SIZE                    (68)  /* The size of pre-master secret for EC. */
+#ifndef NX_SECURE_TLS_MASTER_SIZE
 #define NX_SECURE_TLS_MASTER_SIZE                          (48)  /* The master secret is also 48 bytes. */
+#endif
 #define NX_SECURE_TLS_MAX_KEY_SIZE                         (32)  /* Maximum size of a session key in bytes. */
 #define NX_SECURE_TLS_MAX_IV_SIZE                          (16)  /* Maximum size of a session initialization vector in bytes. */
 #define NX_SECURE_TLS_SESSION_ID_SIZE                      (256) /* Maximum size of a session ID value used for renegotiation in bytes. */
@@ -704,7 +713,9 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
  * get the actual key values. We need to size the key material according to the maximum amount of
  * key material needed by any of the supported ciphersuites, times 2 because there are separate keys for
  * client and server. */
+#ifndef NX_SECURE_TLS_KEY_MATERIAL_SIZE
 #define NX_SECURE_TLS_KEY_MATERIAL_SIZE                    (2 * (NX_SECURE_TLS_MAX_HASH_SIZE + NX_SECURE_TLS_MAX_KEY_SIZE + NX_SECURE_TLS_MAX_IV_SIZE))
+#endif
 
 /* PSK-specific defines. If PSK is disabled, don't bring PSK types into the build. */
 #if defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) || (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -1262,6 +1273,9 @@ typedef struct NX_SECURE_TLS_SESSION_STRUCT
 
     /* Flag to enable/disable session renegotiation at application's choosing. */
     USHORT nx_secure_tls_renegotation_enabled;
+
+    /* Flag to indicate that the local host initiated the renegotiation. */
+    USHORT nx_secure_tls_local_initiated_renegotiation;
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 
 #ifndef NX_SECURE_TLS_SERVER_DISABLED
@@ -1369,6 +1383,54 @@ typedef struct NX_SECURE_TLS_SESSION_STRUCT
 
     UINT nx_secure_tls_signature_algorithm;
 #endif
+
+    /* Functions that can be replaced to implement custom key generation. */
+    UINT (*nx_secure_generate_premaster_secret)(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,
+                                                NX_SECURE_TLS_CREDENTIALS *tls_credentials, UINT session_type, USHORT *received_remote_credentials,
+                                                VOID *public_cipher_metadata, ULONG public_cipher_metadata_size, VOID *tls_ecc_curves);
+    UINT (*nx_secure_generate_master_secret)(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version,
+                                             const NX_CRYPTO_METHOD *session_prf_method, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,
+                                             UCHAR *pre_master_sec, UINT pre_master_sec_size, UCHAR *master_sec,
+                                             VOID *prf_metadata, ULONG prf_metadata_size);
+    UINT (*nx_secure_generate_session_keys)(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version,
+                                            const NX_CRYPTO_METHOD *session_prf_method, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,
+                                            UCHAR *master_sec, VOID *prf_metadata, ULONG prf_metadata_size);
+    UINT (*nx_secure_session_keys_set)(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,
+                                       UINT key_material_data_size, UINT is_client, UCHAR *session_cipher_initialized,
+                                       VOID *session_cipher_metadata, VOID **session_cipher_handler, ULONG session_cipher_metadata_size);
+#ifndef NX_SECURE_TLS_CLIENT_DISABLED
+    UINT(*nx_secure_process_server_key_exchange)(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, NX_SECURE_TLS_CRYPTO *tls_crypto_table,
+                                                 USHORT protocol_version, UCHAR *packet_buffer, UINT message_length,
+                                                 NX_SECURE_TLS_KEY_MATERIAL *tls_key_material, NX_SECURE_TLS_CREDENTIALS *tls_credentials,
+                                                 NX_SECURE_TLS_HANDSHAKE_HASH *tls_handshake_hash,
+                                                 VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
+                                                 VOID *public_auth_metadata, ULONG public_auth_metadata_size, VOID *tls_ecc_curves);
+    UINT(*nx_secure_generate_client_key_exchange)(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite,
+                                                  NX_SECURE_TLS_KEY_MATERIAL *tls_key_material, NX_SECURE_TLS_CREDENTIALS *tls_credentials,
+                                                  UCHAR *data_buffer, ULONG buffer_length, ULONG *output_size,
+                                                  VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
+                                                  VOID *public_auth_metadata, ULONG public_auth_metadata_size);
+#endif
+#ifndef NX_SECURE_TLS_SERVER_DISABLED
+    UINT(*nx_secure_process_client_key_exchange)(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version,
+                                                 UCHAR *packet_buffer, UINT message_length, USHORT *received_remote_credentials,
+                                                 NX_SECURE_TLS_KEY_MATERIAL *tls_key_material, NX_SECURE_TLS_CREDENTIALS *tls_credentials,
+                                                 VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
+                                                 VOID *public_auth_metadata, ULONG public_auth_metadata_size, VOID *tls_ecc_curves);
+    UINT(*nx_secure_generate_server_key_exchange)(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version, UCHAR tls_1_3,
+                                                  NX_SECURE_TLS_CRYPTO *tls_crypto_table, NX_SECURE_TLS_HANDSHAKE_HASH *tls_handshake_hash,
+                                                  NX_SECURE_TLS_KEY_MATERIAL *tls_key_material, NX_SECURE_TLS_CREDENTIALS *tls_credentials,
+                                                  UCHAR *data_buffer, ULONG buffer_length, ULONG *output_size,
+                                                  VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
+                                                  VOID *public_auth_metadata, ULONG public_auth_metadata_size, VOID *tls_ecc_curves);
+#endif
+    UINT (*nx_secure_verify_mac)(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, UCHAR *mac_secret, ULONG sequence_num[NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE],
+                                 UCHAR *header_data, USHORT header_length, NX_PACKET *packet_ptr, ULONG offset, UINT *length,
+                                 VOID *hash_mac_metadata, ULONG hash_mac_metadata_size);
+    UINT (*nx_secure_remote_certificate_verify)(NX_SECURE_X509_CERTIFICATE_STORE *store,
+                                                NX_SECURE_X509_CERT *certificate, ULONG current_time);
+    UINT (*nx_secure_trusted_certificate_add)(NX_SECURE_X509_CERTIFICATE_STORE *store,
+                                              NX_SECURE_X509_CERT *certificate);
 } NX_SECURE_TLS_SESSION;
 
 /* TLS record types. */
@@ -1451,11 +1513,11 @@ UINT _nx_secure_tls_handshake_hash_init(NX_SECURE_TLS_SESSION *tls_session);
 UINT _nx_secure_tls_handshake_hash_update(NX_SECURE_TLS_SESSION *tls_session, UCHAR *data,
                                           UINT length);
 UINT _nx_secure_tls_handshake_process(NX_SECURE_TLS_SESSION *tls_session, UINT wait_option);
-UINT _nx_secure_tls_hash_record(NX_SECURE_TLS_SESSION *tls_session,
+UINT _nx_secure_tls_hash_record(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite,
                                 ULONG sequence_num[NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE],
                                 UCHAR *header, UINT header_length, NX_PACKET *packet_ptr,
                                 ULONG offset, UINT length, UCHAR *record_hash, UINT *hash_length,
-                                UCHAR *mac_secret);
+                                UCHAR *mac_secret, VOID *metadata, ULONG metadata_size);
 UINT _nx_secure_tls_key_material_init(NX_SECURE_TLS_KEY_MATERIAL *key_material);
 VOID _nx_secure_tls_map_error_to_alert(UINT error_number, UINT *alert_number,
                                        UINT *alert_level);
@@ -1564,10 +1626,15 @@ UINT _nx_secure_tls_session_receive_records(NX_SECURE_TLS_SESSION *tls_session,
 UINT _nx_secure_tls_verify_mac(NX_SECURE_TLS_SESSION *tls_session, UCHAR *header_data,
                                USHORT header_length, NX_PACKET *packet_ptr, ULONG offset, UINT *length);
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
-UINT _nx_secure_tls_ecc_generate_keys(NX_SECURE_TLS_SESSION *tls_session, UINT ecc_named_curve, USHORT sign_key,
-                                      UCHAR *public_key, UINT *public_key_size, NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA *ecc_data);
-UINT _nx_secure_tls_find_curve_method(NX_SECURE_TLS_SESSION *tls_session,
-                                      USHORT named_curve, const NX_CRYPTO_METHOD **curve_method, UINT *curve_priority);
+UINT _nx_secure_tls_ecc_generate_keys(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version, UCHAR tls_1_3,
+                                      NX_SECURE_TLS_CRYPTO *tls_crypto_table, NX_SECURE_TLS_HANDSHAKE_HASH *tls_handshake_hash,
+                                      NX_SECURE_TLS_ECC *tls_ecc_curves, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,
+                                      NX_SECURE_TLS_CREDENTIALS *tls_credentials, UINT ecc_named_curve, USHORT sign_key,
+                                      UCHAR *public_key, UINT *public_key_size, NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA *ecc_data,
+                                      VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
+                                      VOID *public_auth_metadata, ULONG public_auth_metadata_size);
+UINT _nx_secure_tls_find_curve_method(NX_SECURE_TLS_ECC *tls_ecc, USHORT named_curve,
+                                      const NX_CRYPTO_METHOD **curve_method, UINT *curve_priority);
 UINT _nx_secure_tls_proc_clienthello_sec_sa_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                       NX_SECURE_TLS_HELLO_EXTENSION *exts,
                                                       UINT num_extensions,
@@ -1637,6 +1704,8 @@ UINT _nx_secure_tls_session_delete(NX_SECURE_TLS_SESSION *tls_session);
 UINT _nx_secure_tls_session_end(NX_SECURE_TLS_SESSION *tls_session, UINT wait_option);
 UINT _nx_secure_tls_session_packet_buffer_set(NX_SECURE_TLS_SESSION *session_ptr,
                                               UCHAR *buffer_ptr, ULONG buffer_size);
+UINT _nx_secure_tls_session_packet_pool_set(NX_SECURE_TLS_SESSION *tls_session,
+                                            NX_PACKET_POOL *packet_pool);
 UINT _nx_secure_tls_session_protocol_version_override(NX_SECURE_TLS_SESSION *tls_session,
                                                       USHORT protocol_version);
 UINT _nx_secure_tls_session_receive(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET **packet_ptr_ptr,
@@ -1670,7 +1739,7 @@ UINT _nx_secure_tls_packet_allocate(NX_SECURE_TLS_SESSION *tls_session, NX_PACKE
 #if defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE)
 UINT _nx_secure_tls_psk_add(NX_SECURE_TLS_SESSION *tls_session, UCHAR *pre_shared_key, UINT psk_length,
                             UCHAR *psk_identity, UINT identity_length, UCHAR *hint, UINT hint_length);
-UINT _nx_secure_tls_psk_find(NX_SECURE_TLS_SESSION *tls_session, UCHAR **psk_data, UINT *psk_length,
+UINT _nx_secure_tls_psk_find(NX_SECURE_TLS_CREDENTIALS *tls_credentials, UCHAR **psk_data, UINT *psk_length,
                              UCHAR *psk_identity_hint, UINT identity_length, UINT *psk_store_index);
 UINT _nx_secure_tls_client_psk_set(NX_SECURE_TLS_SESSION *tls_session, UCHAR *pre_shared_key, UINT psk_length,
                                    UCHAR *psk_identity, UINT identity_length, UCHAR *hint, UINT hint_length);
@@ -1729,6 +1798,8 @@ UINT _nxe_secure_tls_session_delete(NX_SECURE_TLS_SESSION *tls_session);
 UINT _nxe_secure_tls_session_end(NX_SECURE_TLS_SESSION *tls_session, UINT wait_option);
 UINT _nxe_secure_tls_session_packet_buffer_set(NX_SECURE_TLS_SESSION *session_ptr,
                                                UCHAR *buffer_ptr, ULONG buffer_size);
+UINT _nxe_secure_tls_session_packet_pool_set(NX_SECURE_TLS_SESSION *tls_session,
+                                             NX_PACKET_POOL *packet_pool);
 UINT _nxe_secure_tls_session_protocol_version_override(NX_SECURE_TLS_SESSION *tls_session,
                                                        USHORT protocol_version);
 UINT _nxe_secure_tls_session_receive(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET **packet_ptr_ptr,
@@ -1766,6 +1837,52 @@ UINT _nxe_secure_tls_psk_find(NX_SECURE_TLS_SESSION *tls_session, UCHAR **psk_da
                               UCHAR *psk_identity, UINT identity_length);
 UINT _nxe_secure_tls_client_psk_set(NX_SECURE_TLS_SESSION *tls_session, UCHAR *pre_shared_key, UINT psk_length,
                                     UCHAR *psk_identity, UINT identity_length, UCHAR *hint, UINT hint_length);
+#endif
+
+UINT _nx_secure_process_server_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, NX_SECURE_TLS_CRYPTO *tls_crypto_table,
+                                            USHORT protocol_version, UCHAR *packet_buffer, UINT message_length,
+                                            NX_SECURE_TLS_KEY_MATERIAL *tls_key_material, NX_SECURE_TLS_CREDENTIALS *tls_credentials,
+                                            NX_SECURE_TLS_HANDSHAKE_HASH *tls_handshake_hash,
+                                            VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
+                                            VOID *public_auth_metadata, ULONG public_auth_metadata_size, VOID *tls_ecc_curves);
+UINT _nx_secure_process_client_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version,
+                                            UCHAR *packet_buffer, UINT message_length, USHORT *received_remote_credentials,
+                                            NX_SECURE_TLS_KEY_MATERIAL *tls_key_material, NX_SECURE_TLS_CREDENTIALS *tls_credentials,
+                                            VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
+                                            VOID *public_auth_metadata, ULONG public_auth_metadata_size, VOID *tls_ecc_curves);
+UINT _nx_secure_generate_premaster_secret(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,
+                                          NX_SECURE_TLS_CREDENTIALS *tls_credentials, UINT session_type, USHORT *received_remote_credentials,
+                                          VOID *public_cipher_metadata, ULONG public_cipher_metadata_size, VOID *tls_ecc_curves);
+UINT _nx_secure_generate_client_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite,
+                                             NX_SECURE_TLS_KEY_MATERIAL *tls_key_material, NX_SECURE_TLS_CREDENTIALS *tls_credentials,
+                                             UCHAR *data_buffer, ULONG buffer_length, ULONG *output_size,
+                                             VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
+                                             VOID *public_auth_metadata, ULONG public_auth_metadata_size);
+UINT _nx_secure_generate_server_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version, UCHAR tls_1_3,
+                                             NX_SECURE_TLS_CRYPTO *tls_crypto_table, NX_SECURE_TLS_HANDSHAKE_HASH *tls_handshake_hash,
+                                             NX_SECURE_TLS_KEY_MATERIAL *tls_key_material, NX_SECURE_TLS_CREDENTIALS *tls_credentials,
+                                             UCHAR *data_buffer, ULONG buffer_length, ULONG *output_size,
+                                             VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
+                                             VOID *public_auth_metadata, ULONG public_auth_metadata_size, VOID *tls_ecc_curves);
+UINT _nx_secure_generate_master_secret(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version,
+                                       const NX_CRYPTO_METHOD *session_prf_method, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,
+                                       UCHAR *pre_master_sec, UINT pre_master_sec_size, UCHAR *master_sec,
+                                       VOID *prf_metadata, ULONG prf_metadata_size);
+UINT _nx_secure_generate_session_keys(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version,
+                                      const NX_CRYPTO_METHOD *session_prf_method, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,
+                                      UCHAR *master_sec, VOID *prf_metadata, ULONG prf_metadata_size);
+UINT _nx_secure_session_keys_set(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,
+                                 UINT key_material_data_size, UINT is_client, UCHAR *session_cipher_initialized,
+                                 VOID *session_cipher_metadata, VOID **session_cipher_handler, ULONG session_cipher_metadata_size);
+UINT _nx_secure_verify_mac(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, UCHAR *mac_secret, ULONG sequence_num[NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE],
+                           UCHAR *header_data, USHORT header_length, NX_PACKET *packet_ptr, ULONG offset, UINT *length,
+                           VOID *hash_mac_metadata, ULONG hash_mac_metadata_size);
+UINT _nx_secure_remote_certificate_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
+                                          NX_SECURE_X509_CERT *certificate, ULONG current_time);
+UINT _nx_secure_trusted_certificate_add(NX_SECURE_X509_CERTIFICATE_STORE *store,
+                                        NX_SECURE_X509_CERT *certificate);
+#ifdef NX_SECURE_CUSTOM_SECRET_GENERATION
+UINT nx_secure_custom_secret_generation_init(NX_SECURE_TLS_SESSION *tls_session);
 #endif
 
 /* TLS component data declarations follow.  */

@@ -10,14 +10,15 @@
 /**************************************************************************/
 
 /* Version: 6.1 */
+#include <stdio.h>
+#include <stdarg.h>
 
-#include "nx_azure_iot.h"
+
 #ifndef NX_AZURE_DISABLE_IOT_SECURITY_MODULE
 #include "nx_azure_iot_security_module.h"
 #endif /* NX_AZURE_DISABLE_IOT_SECURITY_MODULE */
 
-#include <stdio.h>
-#include <stdarg.h>
+#include "nx_azure_iot.h"
 
 #include "azure/core/internal/az_log_internal.h"
 

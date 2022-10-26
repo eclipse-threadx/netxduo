@@ -265,7 +265,7 @@ NX_PACKET *work_ptr;               /* Working packet pointer     */
 #endif /* NX_DISABLE_PACKET_CHAIN */
 
         /* Copy the data into the current packet buffer.  */
-        memcpy(work_ptr -> nx_packet_append_ptr, source_ptr, copy_size); /* Use case of memcpy is verified. */
+        memcpy(work_ptr -> nx_packet_append_ptr, source_ptr, copy_size); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
 
         /* Adjust the remaining data size.  */
         data_size =  data_size - copy_size;

@@ -230,7 +230,7 @@ ULONG                cert_buf_size;
 
             /* Copy the certificate from the packet buffer into our allocated certificate space. */
             certificate -> nx_secure_x509_certificate_raw_data_length = cert_length;
-            NX_SECURE_MEMCPY(certificate -> nx_secure_x509_certificate_raw_data, &packet_buffer[length], cert_length); /* Use case of memcpy is verified. */
+            NX_SECURE_MEMCPY(certificate -> nx_secure_x509_certificate_raw_data, &packet_buffer[length], cert_length); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
         }
         length += cert_length;
         
@@ -376,7 +376,7 @@ ULONG                cert_buf_size;
 
         /* Copy the certificate data to the end of the certificate buffer or use an allocated certificate. */
         certificate -> nx_secure_x509_certificate_raw_data_length = endpoint_length;
-        NX_SECURE_MEMCPY(certificate->nx_secure_x509_certificate_raw_data, endpoint_raw_ptr, endpoint_length); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(certificate->nx_secure_x509_certificate_raw_data, endpoint_raw_ptr, endpoint_length); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
         
         /* Release the protection. */
         tx_mutex_put(&_nx_secure_tls_protection);

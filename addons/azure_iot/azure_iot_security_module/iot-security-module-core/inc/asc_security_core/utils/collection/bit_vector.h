@@ -12,9 +12,9 @@
 #ifndef __BIT_VECTOR_H__
 #define __BIT_VECTOR_H__
 
-#include <asc_config.h>
-
 #include <stdbool.h>
+
+#include <asc_config.h>
 
 #define __BV_VEC_IND(index) (index>>3)
 #define __BV_VEC_SHIFT(index) (index & 0x07)

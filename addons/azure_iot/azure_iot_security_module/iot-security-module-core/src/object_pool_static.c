@@ -9,11 +9,10 @@
 /* and in the root directory of this software.                                 */
 /*                                                                             */
 /*******************************************************************************/
-
-#include <asc_config.h>
-
 #include <stddef.h>
 #include <stdbool.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/logger.h"
 #include "asc_security_core/object_pool_static.h"

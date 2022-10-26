@@ -25,6 +25,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_arp_static_entry_create.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_arp_static_entry_delete.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_arp_static_entry_delete_internal.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_http_proxy_client.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_icmp_cleanup.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_icmp_enable.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_icmp_info_get.c

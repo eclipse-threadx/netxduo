@@ -8,10 +8,9 @@
 /*       and in the root directory of this software.                      */
 /*                                                                        */
 /**************************************************************************/
+#include <stdlib.h>
 
 #include <asc_config.h>
-
-#include <stdlib.h>
 
 #include "nx_api.h"
 #include "nx_ip.h"

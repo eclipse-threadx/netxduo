@@ -41,10 +41,9 @@
 #endif
 
 #ifdef  NX_HTTP_DIGEST_ENABLE
-/* Define the default nonce, used only for MD5 authentication.  For security reasons, this ASCII value should
-   change over time.  */
 
-CHAR  _nx_http_server_nonce[] =  "a4b8c8d7e0f6a7b2c3d2e4f5a4b7c5d2e7f";
+/* Use for mapping random nonces to printable characters.  */
+static CHAR _nx_http_server_base64_array[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 #endif
 
 /* Define date strings. */
@@ -1539,7 +1538,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_delete                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1561,9 +1560,8 @@ UINT    status;
 /*  CALLS                                                                 */
 /*                                                                        */
 /*    nx_tcp_socket_delete                  Delete the HTTP server socket */
-/*    nx_tcp_socket_disconnect              Disconnect HTTP server socket */
-/*    nx_tcp_socket_unaccept                Unaccept HTTP server connect  */
-/*    nx_tcp_socket_unlisten                Unlisten on the HTTP port     */
+/*    _nx_http_server_disconnect            Disconnect HTTP server socket */
+/*    nx_tcp_server_socket_unlisten         Unlisten on the HTTP port     */
 /*    tx_thread_delete                      Delete the HTTP server thread */
 /*    tx_thread_suspend                     Suspend the HTTP server thread*/
 /*    tx_thread_terminate                   Terminate the HTTP server     */
@@ -1580,6 +1578,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_delete(NX_HTTP_SERVER *http_server_ptr)
@@ -1590,10 +1591,7 @@ UINT  _nx_http_server_delete(NX_HTTP_SERVER *http_server_ptr)
     http_server_ptr -> nx_http_server_id =  0;
 
     /* Disconnect the TCP socket.  */
-    nx_tcp_socket_disconnect(&(http_server_ptr -> nx_http_server_socket), NX_HTTP_SERVER_TIMEOUT_DISCONNECT);
-
-    /* Unaccept any remaining connection on the TCP socket.  */
-    nx_tcp_server_socket_unaccept(&(http_server_ptr -> nx_http_server_socket));
+    _nx_http_server_disconnect(http_server_ptr, NX_HTTP_SERVER_TIMEOUT_DISCONNECT);
 
     /* Delete the TCP socket.  */
     nx_tcp_socket_delete(&(http_server_ptr -> nx_http_server_socket));
@@ -2247,7 +2245,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_stop                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2268,6 +2266,8 @@ UINT    status;
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
+/*    _nx_http_server_disconnect            Disconnect HTTP server socket */
+/*    nx_tcp_server_socket_unlisten         Unlisten on the HTTP port     */
 /*    tx_thread_suspend                     Suspend the HTTP server thread*/
 /*                                                                        */
 /*  CALLED BY                                                             */
@@ -2281,19 +2281,90 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_stop(NX_HTTP_SERVER *http_server_ptr)
 {
 
     /* Disconnect the TCP socket.  */
-    nx_tcp_socket_disconnect(&(http_server_ptr -> nx_http_server_socket), NX_NO_WAIT);
-
-    /* Unaccept any remaining connection on the TCP socket.  */
-    nx_tcp_server_socket_unaccept(&(http_server_ptr -> nx_http_server_socket));
+    _nx_http_server_disconnect(http_server_ptr, NX_NO_WAIT);
 
     /* Unlisten on the HTTP server port.  */
     nx_tcp_server_socket_unlisten(http_server_ptr -> nx_http_server_ip_ptr, NX_HTTP_SERVER_PORT);
+
+    /* Suspend the HTTP server thread.  */
+    tx_thread_suspend(&(http_server_ptr -> nx_http_server_thread));
+
+    /* Return successful completion.  */
+    return(NX_SUCCESS);
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_http_server_disconnect                          PORTABLE C      */
+/*                                                           6.2.0        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function disconnects the HTTP server socket.                   */
+/*                                                                        */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    http_server_ptr                       Pointer to HTTP server        */
+/*    wait_option                           Wait option                   */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_tcp_socket_disconnect              Disconnect HTTP server socket */
+/*    nx_tcp_socket_unaccept                Unaccept HTTP server connect  */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  10-31-2022     Yuxin Zhou               Initial Version 6.2.0         */
+/*                                                                        */
+/**************************************************************************/
+UINT  _nx_http_server_disconnect(NX_HTTP_SERVER *http_server_ptr, UINT wait_option)
+{
+
+#ifdef NX_HTTP_DIGEST_ENABLE
+UINT i;
+
+    /* Once the nonce has been accepted, set the state as invalid. */
+    for (i = 0; i < NX_HTTP_SERVER_NONCE_MAX; i++)
+    {
+        if (http_server_ptr -> nx_http_server_nonces[i].nonce_state == NX_HTTP_SERVER_NONCE_ACCEPTED)
+        {
+            http_server_ptr -> nx_http_server_nonces[i].nonce_state = NX_HTTP_SERVER_NONCE_INVALID;
+            break;
+        }
+    }
+#endif /* NX_HTTP_DIGEST_ENABLE  */
+
+    /* Disconnect the TCP socket.  */
+    nx_tcp_socket_disconnect(&(http_server_ptr -> nx_http_server_socket), wait_option);
+
+    /* Unaccept any remaining connection on the TCP socket.  */
+    nx_tcp_server_socket_unaccept(&(http_server_ptr -> nx_http_server_socket));
 
     /* Return successful completion.  */
     return(NX_SUCCESS);
@@ -2829,7 +2900,7 @@ NX_HTTP_SERVER *server_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_thread_entry                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2857,10 +2928,9 @@ NX_HTTP_SERVER *server_ptr;
 /*    _nx_http_server_response_send         Send HTTP Server response     */
 /*    nx_packet_release                     Release request packet        */
 /*    nx_tcp_server_socket_accept           Accept HTTP client connect    */
-/*    nx_tcp_socket_disconnect              Disconnect from HTTP client   */
+/*    _nx_http_server_disconnect            Disconnect HTTP server socket */
 /*    nx_tcp_server_socket_relisten         Relisten for another HTTP     */
 /*                                            client connection           */
-/*    nx_tcp_server_socket_unaccept         Unaccept HTTP client connect  */
 /*    tx_thread_preemption_change           Disable/restore preemption    */
 /*    tx_thread_suspend                     Self suspend HTTP thread      */
 /*                                                                        */
@@ -2875,6 +2945,9 @@ NX_HTTP_SERVER *server_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_http_server_thread_entry(ULONG http_server)
@@ -2960,10 +3033,7 @@ UINT                    loop_endlessly = NX_TRUE;
             }
 
             /* Disconnect from the current connection.  */
-            nx_tcp_socket_disconnect(&(server_ptr -> nx_http_server_socket), NX_HTTP_SERVER_TIMEOUT_DISCONNECT);
-
-            /* Unaccept the connection.  */
-            nx_tcp_server_socket_unaccept(&(server_ptr -> nx_http_server_socket));
+            _nx_http_server_disconnect(server_ptr, NX_HTTP_SERVER_TIMEOUT_DISCONNECT);
 
             /* Relisten on the HTTP Server port.  */
             nx_tcp_server_socket_relisten(server_ptr -> nx_http_server_ip_ptr, NX_HTTP_SERVER_PORT,
@@ -3087,10 +3157,7 @@ UINT                    loop_endlessly = NX_TRUE;
         nx_packet_release(packet_ptr);
 
         /* Disconnect from the current connection.  */
-        nx_tcp_socket_disconnect(&(server_ptr -> nx_http_server_socket), NX_HTTP_SERVER_TIMEOUT_DISCONNECT);
-
-        /* Unaccept the connection.  */
-        nx_tcp_server_socket_unaccept(&(server_ptr -> nx_http_server_socket));
+        _nx_http_server_disconnect(server_ptr, NX_HTTP_SERVER_TIMEOUT_DISCONNECT);
 
         /* Relisten on the HTTP Server port.  */
         nx_tcp_server_socket_relisten(server_ptr -> nx_http_server_ip_ptr, NX_HTTP_SERVER_PORT,
@@ -4701,7 +4768,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_basic_authenticate                  PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4754,6 +4821,10 @@ NX_PACKET   *packet_ptr;
 /*                                            improved the logic of       */
 /*                                            parsing base64,             */
 /*                                            resulting in version 6.1.6  */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            the issue of processing     */
+/*                                            empty password,             */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_basic_authenticate(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *name_ptr, CHAR *password_ptr, CHAR *realm_ptr, UINT realm_length, UINT *auth_request_present)
@@ -4835,7 +4906,9 @@ UINT        authorization_decoded_size;
             }
 
             /* Determine if we have a match.  */
-            if (match && (i == authorization_decoded_size) && (authorization_decoded[i] == (CHAR) NX_NULL))
+            if (match && (i == authorization_decoded_size) && 
+                (authorization_decoded[i] == (CHAR) NX_NULL) && 
+                (password_ptr[j] == (CHAR) NX_NULL))
             {
 
                 /* Yes, we have successful authorization!!  */
@@ -5711,8 +5784,102 @@ UINT    temp_name_length;
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
+/*    _nx_http_server_nonce_allocate                      PORTABLE C      */
+/*                                                           6.2.0        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function allocate a new nonce for digest authentication.       */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    server_ptr                            HTTP Server pointer           */
+/*    nonce_ptr                             Allocated nonce pointer       */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    tx_time_get                           Get system time               */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_http_server_digest_authenticate   Digest authentication         */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  10-31-2022     Yuxin Zhou               Initial Version 6.2.0         */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_http_server_nonce_allocate(NX_HTTP_SERVER *server_ptr, NX_HTTP_SERVER_NONCE **nonce_ptr)
+{
+UINT i;
+UCHAR random_value;
+NX_HTTP_SERVER_NONCE *nonces_list = server_ptr -> nx_http_server_nonces;
+
+
+    /* Search if there is free entry for new nonce.  */
+    for (i = 0; i < NX_HTTP_SERVER_NONCE_MAX; i++)
+    {
+        if (nonces_list[i].nonce_state == NX_HTTP_SERVER_NONCE_INVALID)
+        {
+            *nonce_ptr = &(nonces_list[i]);
+            break;
+        }
+    }
+
+    if (i == NX_HTTP_SERVER_NONCE_MAX)
+    {
+
+        /* If no free entry, check the timeout of allocated nonces.  */
+        for (i = 0; i < NX_HTTP_SERVER_NONCE_MAX; i++)
+        {
+            if (nonces_list[i].nonce_state == NX_HTTP_SERVER_NONCE_VALID)
+            {
+                if (tx_time_get() > nonces_list[i].nonce_timestamp + NX_HTTP_SERVER_NONCE_TIMEOUT)
+                {
+
+                    /* If this nonce is timed out, free up this entry for new nonce.  */
+                    *nonce_ptr = &(nonces_list[i]);
+                    break;
+                }
+            }
+        }
+
+        /* If no entry can be allocated, return error.  */
+        if (i == NX_HTTP_SERVER_NONCE_MAX)
+        {
+            return(NX_NOT_FOUND);
+        }
+    }
+
+    /* Generate new nonce for digest authentication. */
+    for (i = 0; i < NX_HTTP_SERVER_NONCE_SIZE; i++)
+    {
+        random_value = (UCHAR)NX_RAND() % (sizeof(_nx_http_server_base64_array) - 1);
+        (*nonce_ptr) -> nonce_buffer[i] = (UCHAR)_nx_http_server_base64_array[random_value];
+    }
+
+    /* Reset the timestamp and state for the new nonce.  */
+    (*nonce_ptr) -> nonce_timestamp = tx_time_get();
+    (*nonce_ptr) -> nonce_state = NX_HTTP_SERVER_NONCE_VALID;
+
+    return(NX_SUCCESS);
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
 /*    _nx_http_server_digest_authenticate                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5763,6 +5930,9 @@ UINT    temp_name_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_http_server_digest_authenticate(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *name_ptr, UINT name_length, CHAR *password_ptr, UINT password_length, CHAR *realm_ptr, UINT realm_length, UINT *auth_request_present)
@@ -5779,6 +5949,8 @@ UINT        status, status1, callback_status;
 CHAR        crlf[2] = {13,10};
 CHAR        authorization_nc[NX_HTTP_MAX_RESOURCE + 1];
 CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
+NX_HTTP_SERVER_NONCE *nonce_ptr = NX_NULL;
+
 
     /* Default to no authentication request detected. */
     *auth_request_present =  NX_FALSE;
@@ -5787,7 +5959,7 @@ CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
     status =  NX_HTTP_DIGEST_AUTHENTICATE;
 
     /* Is the authorization request present?  */
-    if (_nx_http_server_retrieve_digest_authorization(packet_ptr, authorization_response, authorization_uri, authorization_nc, authorization_cnonce))
+    if (_nx_http_server_retrieve_digest_authorization(server_ptr, packet_ptr, authorization_response, authorization_uri, authorization_nc, authorization_cnonce, &nonce_ptr))
     {
 
         /* Yes, an authorization request is present.  */
@@ -5822,7 +5994,7 @@ CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
 
 
         /* Calculate what the MD5 should be.  */
-        _nx_http_server_digest_response_calculate(server_ptr, name_ptr, name_length, realm_ptr, realm_length, password_ptr, password_length, _nx_http_server_nonce, method, authorization_uri, authorization_nc, authorization_cnonce, calculated_response);
+        _nx_http_server_digest_response_calculate(server_ptr, name_ptr, name_length, realm_ptr, realm_length, password_ptr, password_length, (CHAR *)(nonce_ptr -> nonce_buffer), method, authorization_uri, authorization_nc, authorization_cnonce, calculated_response);
 
         /* Determine if the calculated response is the same as the received response.  */
         i =  0;
@@ -5840,6 +6012,17 @@ CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
             /* Otherwise, look at next character.  */
             i++;
         }
+
+        /* If the response is authenticated, mark the nonce as accepted.  */
+        if (status == NX_SUCCESS)
+        {
+            nonce_ptr -> nonce_state = NX_HTTP_SERVER_NONCE_ACCEPTED;
+        }
+        else
+        {
+            nonce_ptr -> nonce_state = NX_HTTP_SERVER_NONCE_INVALID;
+        }
+
         /* If digest authenticate callback function returns non-success value, the request is 
            considered unauthenticated. */
         if(callback_status != NX_SUCCESS)
@@ -5849,6 +6032,24 @@ CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
     /* Determine if we need to send back an unauthorized request.  */
     if (status == NX_HTTP_DIGEST_AUTHENTICATE)
     {
+
+        /* Allocate a new nonce for digest authentication.  */
+        status1 = _nx_http_server_nonce_allocate(server_ptr, &nonce_ptr);
+
+        /* Determine if an error occurred in the packet allocation.  */
+        if (status1)
+        {
+
+            /* Send response back to HTTP Client.  */
+            _nx_http_server_response_send(server_ptr, NX_HTTP_STATUS_INTERNAL_ERROR, sizeof(NX_HTTP_STATUS_INTERNAL_ERROR) - 1, 
+                                          "NetX HTTP Server Internal Error", sizeof("NetX HTTP Server Internal Error") - 1, NX_NULL, 0);
+
+            /* Indicate an allocation error occurred.  */
+            server_ptr -> nx_http_server_allocation_errors++;
+
+            /* Return the internal NetX error.  */
+            return(status1);
+        }
 
         /* We need authorization so build the HTTP 401 Unauthorized message to send to the server.  */
 
@@ -5926,7 +6127,7 @@ CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
                                         server_ptr -> nx_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
 
         /* Place the nonce string into the buffer.  */
-        nx_packet_data_append(packet_ptr, _nx_http_server_nonce, sizeof(_nx_http_server_nonce) - 1,
+        nx_packet_data_append(packet_ptr, nonce_ptr -> nonce_buffer, NX_HTTP_SERVER_NONCE_SIZE,
                                         server_ptr -> nx_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
 
         /* Insert the double quote.  */
@@ -5935,6 +6136,14 @@ CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
 
         /* Place the qop="auth" parameter string into the buffer.  */
         nx_packet_data_append(packet_ptr, ", qop=\"auth\"", 12,
+                                        server_ptr -> nx_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
+
+        /* Place the <cr,lf> into the buffer.  */
+        nx_packet_data_append(packet_ptr, crlf, 2,
+                                        server_ptr -> nx_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
+
+        /* Set Content-Length as 0.  */
+        nx_packet_data_append(packet_ptr, "Content-Length: 0", 17,
                                         server_ptr -> nx_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
 
         /* Place the <cr,lf> into the buffer.  */
@@ -5970,7 +6179,7 @@ CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_digest_response_calculate           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6016,6 +6225,9 @@ CHAR        authorization_cnonce[NX_HTTP_MAX_RESOURCE + 1];
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_http_server_digest_response_calculate(NX_HTTP_SERVER *server_ptr, CHAR *username, UINT username_length, CHAR *realm, UINT realm_length, CHAR *password, UINT password_length, CHAR *nonce, CHAR *method, CHAR *uri, CHAR *nc, CHAR *cnonce, CHAR *result)
@@ -6026,14 +6238,12 @@ CHAR    ha1_string[NX_HTTP_MAX_ASCII_MD5 + 1];
 CHAR    ha2_string[NX_HTTP_MAX_ASCII_MD5 + 1];
 UINT    method_length;
 UINT    uri_length;
-UINT    nonce_length;
 UINT    nc_length;
 UINT    cnonce_length;
 
     /* Check string length.  */
     if (_nx_utility_string_length_check(method, &method_length, 7) ||
         _nx_utility_string_length_check(uri, &uri_length, NX_HTTP_MAX_RESOURCE) ||
-        _nx_utility_string_length_check(nonce, &nonce_length, sizeof(_nx_http_server_nonce) - 1) ||
         _nx_utility_string_length_check(nc, &nc_length, NX_HTTP_MAX_RESOURCE) ||
         _nx_utility_string_length_check(cnonce, &cnonce_length, NX_HTTP_MAX_RESOURCE))
     {
@@ -6067,7 +6277,7 @@ UINT    cnonce_length;
     _nx_md5_initialize(&(server_ptr -> nx_http_server_md5data));
     _nx_md5_update(&(server_ptr -> nx_http_server_md5data), (unsigned char *) ha1_string, sizeof(ha1_string) - 1);
     _nx_md5_update(&(server_ptr -> nx_http_server_md5data), (unsigned char *) ":", 1);
-    _nx_md5_update(&(server_ptr -> nx_http_server_md5data), (unsigned char *) nonce, nonce_length);
+    _nx_md5_update(&(server_ptr -> nx_http_server_md5data), (unsigned char *) nonce, NX_HTTP_SERVER_NONCE_SIZE);
 
     /* Start of Internet Explorer bug work-around.  */
     _nx_md5_update(&(server_ptr -> nx_http_server_md5data), (unsigned char *) ":", 1);
@@ -6092,7 +6302,7 @@ UINT    cnonce_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_http_server_retrieve_digest_authorization       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6104,11 +6314,13 @@ UINT    cnonce_length;
 /*                                                                        */
 /*  INPUT                                                                 */
 /*                                                                        */
+/*    server_ptr                            HTTP Server pointer           */
 /*    packet_ptr                            Request packet pointer        */
 /*    response                              Digest response pointer       */
 /*    uri                                   URI from response pointer     */
 /*    nc                                    Nonce count string            */
 /*    cnonce                                Client nonce string           */
+/*    nonce_ptr                             Server nonce pointer          */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
@@ -6131,15 +6343,20 @@ UINT    cnonce_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
-UINT  _nx_http_server_retrieve_digest_authorization(NX_PACKET *packet_ptr, CHAR *response, CHAR *uri, CHAR *nc, CHAR *cnonce)
+UINT  _nx_http_server_retrieve_digest_authorization(NX_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *response, CHAR *uri, CHAR *nc, CHAR *cnonce, NX_HTTP_SERVER_NONCE **nonce_ptr)
 {
 
 UINT    length;
 UINT    found;
 CHAR    *buffer_ptr;
 CHAR    *saved_buffer_ptr;
+UCHAR   *nonce_buffer;
+UINT    i;
 
 
     /* Set the found flag to false.  */
@@ -6259,6 +6476,86 @@ CHAR    *saved_buffer_ptr;
     /* Save current buffer pointer, so each parameter search always starts from here.  */
     saved_buffer_ptr =  buffer_ptr;
 
+    while (((buffer_ptr + 6) < (CHAR *) packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != (CHAR) 0))
+    {
+
+        /* Check for the uri token.  */
+        if (((*(buffer_ptr) ==  'n') || (*(buffer_ptr) ==  'N')) &&
+            ((*(buffer_ptr+1) ==  'o') || (*(buffer_ptr+1) ==  'O')) &&
+            ((*(buffer_ptr+2) ==  'n') || (*(buffer_ptr+2) ==  'N')) &&
+            ((*(buffer_ptr+3) ==  'c') || (*(buffer_ptr+3) ==  'C')) &&
+            ((*(buffer_ptr+4) ==  'e') || (*(buffer_ptr+4) ==  'E')) &&
+            (*(buffer_ptr+5) == '='))
+        {
+
+            /* Move the pointer up to the actual nonce string.  */
+            buffer_ptr =  buffer_ptr + 6;
+            found = NX_TRUE;
+
+            break;
+        }
+
+        /* Move the pointer up to the next character.  */
+        buffer_ptr++;
+    }
+
+    /* Check if nonce is found.  */
+    if (!found)
+    {
+        return(0);
+    }
+
+    /* Now remove any extra blanks and quotes.  */
+    while ((buffer_ptr < (CHAR *) packet_ptr -> nx_packet_append_ptr) && ((*buffer_ptr == ' ') || (*buffer_ptr == (CHAR) 0x22)))
+    {
+
+        /* Move the pointer up one character.  */
+        buffer_ptr++;
+    }
+
+    /* Now pickup the nonce string.  */
+    length =  0;
+    nonce_buffer = (UCHAR *)buffer_ptr;
+    while ((buffer_ptr < (CHAR *) packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != (CHAR) 0) && (*buffer_ptr != ' ') && (*buffer_ptr != (CHAR) 13))
+    {
+
+        /* Determine if the ending quote is present.  */
+        if (*buffer_ptr == (CHAR) 0x22)
+        {
+            break;
+        }
+
+        /* Increase the length.  */
+        length++;
+        buffer_ptr++;
+    }
+
+    /* Check the nonce size.  */
+    if (length != NX_HTTP_SERVER_NONCE_SIZE)
+    {
+        return(0);
+    }
+
+    /* Check if the nonce is valid.  */
+    for (i = 0; i < NX_HTTP_SERVER_NONCE_MAX; i++)
+    {
+        if ((server_ptr -> nx_http_server_nonces[i].nonce_state != NX_HTTP_SERVER_NONCE_INVALID) &&
+            (memcmp(server_ptr -> nx_http_server_nonces[i].nonce_buffer, nonce_buffer, NX_HTTP_SERVER_NONCE_SIZE) == 0)) /* Use case of memcmp is verified. */
+        {
+            *nonce_ptr = &(server_ptr -> nx_http_server_nonces[i]);
+            break;
+        }
+    }
+
+    /* If the nonca is invalid, just return.  */
+    if (i == NX_HTTP_SERVER_NONCE_MAX)
+    {
+        return(0);
+    }
+
+    /* Get saved buffer pointer.  */
+    buffer_ptr =  saved_buffer_ptr;
+
     /* Now look for the nc in the digest response.  */
     while (((buffer_ptr+3) < (CHAR *) packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != (CHAR) 0))
     {
@@ -6318,9 +6615,9 @@ CHAR    *saved_buffer_ptr;
         if (((*buffer_ptr ==      'c') || (*buffer_ptr ==      'C')) &&
             ((*(buffer_ptr+1) ==  'n') || (*(buffer_ptr+1) ==  'N')) &&
             ((*(buffer_ptr+2) ==  'o') || (*(buffer_ptr+2) ==  'O')) &&
-            ((*(buffer_ptr+3) ==  'n') || (*(buffer_ptr+2) ==  'N')) &&
-            ((*(buffer_ptr+4) ==  'c') || (*(buffer_ptr+2) ==  'C')) &&
-            ((*(buffer_ptr+5) ==  'e') || (*(buffer_ptr+2) ==  'E')) &&
+            ((*(buffer_ptr+3) ==  'n') || (*(buffer_ptr+3) ==  'N')) &&
+            ((*(buffer_ptr+4) ==  'c') || (*(buffer_ptr+4) ==  'C')) &&
+            ((*(buffer_ptr+5) ==  'e') || (*(buffer_ptr+5) ==  'E')) &&
             (*(buffer_ptr+6) == '='))
         {
 
@@ -6425,11 +6722,11 @@ CHAR    *saved_buffer_ptr;
         if (((*buffer_ptr ==      'r') || (*buffer_ptr ==      'R')) &&
             ((*(buffer_ptr+1) ==  'e') || (*(buffer_ptr+1) ==  'E')) &&
             ((*(buffer_ptr+2) ==  's') || (*(buffer_ptr+2) ==  'S')) &&
-            ((*(buffer_ptr+3) ==  'p') || (*(buffer_ptr+2) ==  'P')) &&
-            ((*(buffer_ptr+4) ==  'o') || (*(buffer_ptr+2) ==  'O')) &&
-            ((*(buffer_ptr+5) ==  'n') || (*(buffer_ptr+2) ==  'N')) &&
-            ((*(buffer_ptr+6) ==  's') || (*(buffer_ptr+2) ==  'S')) &&
-            ((*(buffer_ptr+7) ==  'e') || (*(buffer_ptr+2) ==  'E')) &&
+            ((*(buffer_ptr+3) ==  'p') || (*(buffer_ptr+3) ==  'P')) &&
+            ((*(buffer_ptr+4) ==  'o') || (*(buffer_ptr+4) ==  'O')) &&
+            ((*(buffer_ptr+5) ==  'n') || (*(buffer_ptr+5) ==  'N')) &&
+            ((*(buffer_ptr+6) ==  's') || (*(buffer_ptr+6) ==  'S')) &&
+            ((*(buffer_ptr+7) ==  'e') || (*(buffer_ptr+7) ==  'E')) &&
             (*(buffer_ptr+8) == '='))
         {
 

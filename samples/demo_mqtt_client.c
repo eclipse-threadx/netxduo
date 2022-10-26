@@ -111,7 +111,17 @@ UINT topic_length, message_length;
         printf("Error in creating MQTT client: 0x%02x\n", status);
         error_counter++;
     }
-    
+
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+    status = nxd_mqtt_client_websocket_set(&mqtt_client, (UCHAR *)"test.mosquitto.org", sizeof("test.mosquitto.org") - 1,
+                                           (UCHAR *)"/mqtt", sizeof("/mqtt") - 1);
+    if (status)
+    {
+        printf("Error in setting MQTT over WebSocket: 0x%02x\r\n", status);
+        error_counter++;
+    }
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
+
     /* Register the disconnect notification function. */
     nxd_mqtt_client_disconnect_notify_set(&mqtt_client, my_disconnect_func);
     

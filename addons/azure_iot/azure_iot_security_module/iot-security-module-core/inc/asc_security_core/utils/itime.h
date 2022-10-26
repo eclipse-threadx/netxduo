@@ -11,9 +11,10 @@
 
 #ifndef ITIME_H
 #define ITIME_H
-#include <asc_config.h>
 
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #define SEC_MIN (60)
 #define SEC_HOUR (SEC_MIN * 60)

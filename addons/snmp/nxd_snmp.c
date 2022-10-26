@@ -15145,7 +15145,7 @@ UCHAR   encoding_started;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_object_data_get                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -15182,6 +15182,9 @@ UCHAR   encoding_started;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_object_data_get(UCHAR *buffer_ptr, NX_SNMP_OBJECT_DATA *object_data, INT buffer_length)
@@ -15189,9 +15192,9 @@ UINT  _nx_snmp_utility_object_data_get(UCHAR *buffer_ptr, NX_SNMP_OBJECT_DATA *o
 
 
 UINT    i;
-UINT    length;
+UINT    length = 0;
 LONG    data;
-UINT    total;
+UINT    total = 0;
 CHAR    byte;
 LONG    temp = 0;
 USHORT  tlv_type, tlv_tag_class;

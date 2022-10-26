@@ -24,7 +24,7 @@
 
 #include "nx_secure_tls.h"
 
-#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION)
 static UINT _nx_secure_tls_proc_clienthello_sec_reneg_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                                 UCHAR *packet_buffer,
                                                                 UINT extension_length);
@@ -157,12 +157,12 @@ USHORT supported_version = tls_session -> nx_secure_tls_protocol_version;
         if((offset + extension_length) > message_length)
         {
             return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
-        }            
+        }
 
         /* Parse the extension. */
         switch (extension_id)
         {
-#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION)
         case NX_SECURE_TLS_EXTENSION_SECURE_RENEGOTIATION:
             status = _nx_secure_tls_proc_clienthello_sec_reneg_extension(tls_session,
                                                                          &packet_buffer[offset],
@@ -177,7 +177,7 @@ USHORT supported_version = tls_session -> nx_secure_tls_protocol_version;
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
         case NX_SECURE_TLS_EXTENSION_KEY_SHARE:
-            if(tls_session->nx_secure_tls_1_3)
+            if(tls_session -> nx_secure_tls_1_3)
             {
                 /* If TLS 1.3, process the key share extension. */
                 status = _nx_secure_tls_proc_clienthello_keyshare_extension(tls_session,
@@ -192,7 +192,7 @@ USHORT supported_version = tls_session -> nx_secure_tls_protocol_version;
             /* TLS 1.2 and earlier: ignore extension. */
             break;
         case NX_SECURE_TLS_EXTENSION_SUPPORTED_VERSIONS:
-            if(tls_session->nx_secure_tls_1_3)
+            if(tls_session -> nx_secure_tls_1_3)
             {
 
                 /* Process the TLS 1.3 supported_versions extension. */
@@ -211,7 +211,7 @@ USHORT supported_version = tls_session -> nx_secure_tls_protocol_version;
             break;
 #ifdef NX_SECURE_ENABLE_PSK_CIPHERSUITES
         case NX_SECURE_TLS_EXTENSION_PRE_SHARED_KEY:
-            if(tls_session->nx_secure_tls_1_3)
+            if(tls_session -> nx_secure_tls_1_3)
             {
 
                 /* Process the TLS 1.3 PSK extension. */
@@ -258,7 +258,7 @@ USHORT supported_version = tls_session -> nx_secure_tls_protocol_version;
     }
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
-    if((tls_session->nx_secure_tls_1_3) && (supported_version != NX_SECURE_TLS_VERSION_TLS_1_3))
+    if((tls_session -> nx_secure_tls_1_3) && (supported_version != NX_SECURE_TLS_VERSION_TLS_1_3))
     {
 
         /* Negotiate a version of TLS prior to TLS 1.3. */
@@ -333,7 +333,7 @@ USHORT supported_version = tls_session -> nx_secure_tls_protocol_version;
 /*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
-#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION)
 static UINT _nx_secure_tls_proc_clienthello_sec_reneg_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                                 UCHAR *packet_buffer,
                                                                 UINT extension_length)
@@ -445,7 +445,7 @@ INT    compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_clienthello_sec_sa_extension    PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -492,6 +492,9 @@ INT    compare_value;
 /*                                            TLS 1.3 and disabling TLS   */
 /*                                            server,                     */
 /*                                            resulting in version 6.1.9  */
+/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
+/*                                            updated parameters list,    */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
@@ -531,7 +534,7 @@ UCHAR expected_signature = 0;
 
     if (cert_curve)
     {
-        status = _nx_secure_tls_find_curve_method(tls_session, cert_curve, &curve_method, NX_NULL);
+        status = _nx_secure_tls_find_curve_method(&tls_session -> nx_secure_tls_ecc, cert_curve, &curve_method, NX_NULL);
         if (status == NX_SUCCESS && curve_method != NX_NULL)
         {
             *cert_curve_supported = NX_TRUE;
@@ -544,7 +547,7 @@ UCHAR expected_signature = 0;
         {
             expected_signature = NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA;
         }
-        else if (cert->nx_secure_x509_public_algorithm == NX_SECURE_TLS_X509_TYPE_RSA)
+        else if (cert -> nx_secure_x509_public_algorithm == NX_SECURE_TLS_X509_TYPE_RSA)
         {
             expected_signature = NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA;
         }
@@ -574,7 +577,7 @@ UCHAR expected_signature = 0;
             {
                 group = (USHORT)((groups[j] << 8) + groups[j + 1]);
 
-                status = _nx_secure_tls_find_curve_method(tls_session, group, &curve_method, &new_curve_priority);
+                status = _nx_secure_tls_find_curve_method(&tls_session -> nx_secure_tls_ecc, group, &curve_method, &new_curve_priority);
 
                 if ((status == NX_CRYTPO_MISSING_ECC_CURVE) || (new_curve_priority > curve_priority))
                 {
@@ -602,7 +605,7 @@ UCHAR expected_signature = 0;
                         for (k = 0; k < ecc_info -> nx_secure_tls_ecc_supported_groups_count; k++)
                         {
                             /* Find the matching group in the keys we generated and saved. */
-                            if(group == tls_session->nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[k].nx_secure_tls_ecdhe_named_curve)
+                            if(group == tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[k].nx_secure_tls_ecdhe_named_curve)
                             {
 
                                 /* Store selected ECDHE key data index. */
@@ -636,7 +639,7 @@ UCHAR expected_signature = 0;
                                                                                exts[i].nx_secure_tls_extension_data_length);
                 signature_algorithm_exist = NX_TRUE;
             }
-            else 
+            else
 #endif
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
             if (tls_session -> nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_2)
@@ -691,8 +694,8 @@ UCHAR expected_signature = 0;
     }
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
-    /* RFC8446 4.2.3: If a server is authenticating via a certificate and 
-       the client has not sent a "signature_algorithms" extension, 
+    /* RFC8446 4.2.3: If a server is authenticating via a certificate and
+       the client has not sent a "signature_algorithms" extension,
        then the server MUST abort the handshake with a "missing_extension" alert. */
     if ((cert != NX_NULL) && (tls_session -> nx_secure_tls_1_3))
     {
@@ -718,7 +721,7 @@ UCHAR expected_signature = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_clienthello_keyshare_extension  PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -761,6 +764,9 @@ UCHAR expected_signature = 0;
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), removed  */
 /*                                            public key format checking, */
 /*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
+/*                                            updated parameters list,    */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
@@ -778,7 +784,7 @@ USHORT key_share_length;
 USHORT key_group;
 USHORT key_length;
 NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecc_key_data;
-UCHAR                                *pubkey;
+UCHAR                                *pubkey = NX_NULL;
 UCHAR                                *private_key;
 UINT                                  private_key_length;
 NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
@@ -820,12 +826,12 @@ NX_SECURE_TLS_ECC *ecc_info;
     /* Get the key share length. */
     key_share_length = (USHORT)((packet_buffer[offset] << 8) + packet_buffer[offset + 1]);
     offset = (USHORT)(offset + 2);
-    
+
     if(offset + key_share_length > extension_length)
     {
         return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
     }
-    
+
     /* Loop through the list of keys looking for a supported group. */
     while(offset < extension_length && ecc_key_data == NX_NULL)
     {
@@ -854,10 +860,10 @@ NX_SECURE_TLS_ECC *ecc_info;
         for (i = 0; i < ecc_info -> nx_secure_tls_ecc_supported_groups_count; i++)
         {
             /* Find the matching group in the keys we generated and saved. */
-            if(key_group == tls_session->nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[i].nx_secure_tls_ecdhe_named_curve)
+            if(key_group == tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[i].nx_secure_tls_ecdhe_named_curve)
             {
                 /* Got a matching key/curve combo, get a pointer to the selected key data. */
-                ecc_key_data = &tls_session->nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[i];
+                ecc_key_data = &tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[i];
 
                 /* Extract the remote public key from our packet. */
                 pubkey = &packet_buffer[offset];
@@ -881,7 +887,7 @@ NX_SECURE_TLS_ECC *ecc_info;
     }
 
     /* Get the curve method to initialize the remote public key data. */
-    _nx_secure_tls_find_curve_method(tls_session, key_group, &curve_method, NX_NULL);
+    _nx_secure_tls_find_curve_method(&tls_session -> nx_secure_tls_ecc, key_group, &curve_method, NX_NULL);
 
     if (curve_method == NX_NULL)
     {
@@ -926,8 +932,8 @@ NX_SECURE_TLS_ECC *ecc_info;
     }
 
     /* Import the private key to the ECDH context. */
-    private_key = &ecc_key_data->nx_secure_tls_ecdhe_private_key[0];
-    private_key_length = ecc_key_data->nx_secure_tls_ecdhe_private_key_length;
+    private_key = &ecc_key_data -> nx_secure_tls_ecdhe_private_key[0];
+    private_key_length = ecc_key_data -> nx_secure_tls_ecdhe_private_key_length;
 
     status = ecdhe_method -> nx_crypto_operation(NX_CRYPTO_DH_KEY_PAIR_IMPORT, handler,
                                                 (NX_CRYPTO_METHOD*)ecdhe_method,
@@ -1349,7 +1355,7 @@ static UINT _nx_secure_tls_process_clienthello_psk_extension(NX_SECURE_TLS_SESSI
                                                       USHORT extension_length, const UCHAR *client_hello_buffer, UINT client_hello_length)
 {
 UINT list_length;
-UCHAR                                *psk_data;
+UCHAR                                *psk_data = NX_NULL;
 UINT                                  psk_length;
 UCHAR   binder_len;
 UINT psk_index;
@@ -1440,7 +1446,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
     }
 
     /* Get our PSK store for easy access. */
-    psk_store = tls_session->nx_secure_tls_credentials.nx_secure_tls_psk_store;
+    psk_store = tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store;
     binder_total = 0;
     psk_index = 0;
 
@@ -1470,7 +1476,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
         age = (UINT)((packet_buffer[offset]     << 24) + (packet_buffer[offset + 1] << 16) +
                      (packet_buffer[offset + 2] <<  8) +  packet_buffer[offset + 3]);
         offset += 4;
-        
+
         /* Only support external PSKs (no session resumption). */
         if(age != 0)
         {
@@ -1545,7 +1551,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
         {
             return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
         }
-        
+
         /* Subtract the binder length and field from the total. */
         binder_total--;
         binder_total -= binder_len;
@@ -1642,8 +1648,8 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
     }
 
     /* Make sure the Client PSK is initialized for later key generation. */
-    NX_SECURE_MEMCPY(tls_session->nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_data, psk_data, psk_length); /* Use case of memcpy is verified. */
-    tls_session->nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_data_size = psk_length;
+    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_data, psk_data, psk_length); /* Use case of memcpy is verified. */
+    tls_session -> nx_secure_tls_credentials.nx_secure_tls_client_psk.nx_secure_tls_psk_data_size = psk_length;
 
     return(NX_SUCCESS);
 }

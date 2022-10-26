@@ -1,6 +1,5 @@
 #ifndef FLATCC_EMITTER_H
 #define FLATCC_EMITTER_H
-#include <asc_config.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +18,8 @@ extern "C" {
 
 #include <stdlib.h>
 #include <string.h>
+
+#include <asc_config.h>
 
 #include "flatcc/flatcc_types.h"
 #include "flatcc/flatcc_iov.h"

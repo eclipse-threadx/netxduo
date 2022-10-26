@@ -872,7 +872,7 @@ UINT original_offset = offset;
 
     if (session_cipher_method -> nx_crypto_operation == NX_NULL)
     {
-        NX_SECURE_MEMCPY(output, input, length); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(output, input, length); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
     }
     else
     {

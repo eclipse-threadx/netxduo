@@ -242,7 +242,7 @@ ULONG   needed_fill_bytes;
 
         /* Copy the appropriate portion of the input buffer into the internal 
            buffer of the context.  */
-        memcpy((void *) &(context -> nx_md5_buffer[current_bytes]), (void *) input_ptr, needed_fill_bytes); /* Use case of memcpy is verified.  */
+        memcpy((void *) &(context -> nx_md5_buffer[current_bytes]), (void *) input_ptr, needed_fill_bytes); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
 
         /* Process the 64-byte (512 bit) buffer.  */
         _nx_md5_process_buffer(context, context -> nx_md5_buffer);
@@ -273,7 +273,7 @@ ULONG   needed_fill_bytes;
 
         /* Save the remaining bytes in the internal buffer after any remaining bytes
            that it is processed later.  */
-        memcpy((void *) &(context -> nx_md5_buffer[current_bytes]), (void *) input_ptr, input_length); /* Use case of memcpy is verified.  */
+        memcpy((void *) &(context -> nx_md5_buffer[current_bytes]), (void *) input_ptr, input_length); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
     }
 
     /* Return success.  */

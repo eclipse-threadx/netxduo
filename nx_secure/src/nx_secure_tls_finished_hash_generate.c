@@ -136,7 +136,7 @@ UINT                                  hash_size = 0;
 #endif /* NX_SECURE_ENABLE_DTLS */
     {
         /* Copy over the handshake hash state into scratch space to do the intermediate calculation. */
-        NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+    NX_SECURE_HASH_METADATA_CLONE(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch, /* lgtm[cpp/banned-api-usage-required-any] */
                                       tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata,
                                       tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size); /* Use case of memcpy is verified. */
 

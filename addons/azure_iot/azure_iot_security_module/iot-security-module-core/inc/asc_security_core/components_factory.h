@@ -11,11 +11,11 @@
 
 #ifndef __COMPONENTS_FACTORY_H__
 #define __COMPONENTS_FACTORY_H__
-#include <asc_config.h>
 
 #include <stdint.h>
 #include <string.h>
 
+#include <asc_config.h>
 
 #include "asc_security_core/logger.h"
 #include "asc_security_core/utils/string_utils.h"

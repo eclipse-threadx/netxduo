@@ -17,6 +17,21 @@
 #include "nxd_sntp_client.h"
 #include "nx_secure_tls_api.h"
 
+/* Defined, HTTP proxy is enabled.  */
+/*
+#define SAMPLE_HTTP_PROXY_ENABLE
+*/
+
+#ifdef SAMPLE_HTTP_PROXY_ENABLE
+#ifndef NX_ENABLE_HTTP_PROXY
+#error "SYMBOL NX_ENABLE_HTTP_PROXY must be defined. "
+#endif /* NX_ENABLE_HTTP_PROXY */
+#endif /* SAMPLE_HTTP_PROXY_ENABLE */
+
+#if defined(SAMPLE_HTTP_PROXY_ENABLE)
+#include "nx_http_proxy_client.h"
+#endif /* SAMPLE_HTTP_PROXY_ENABLE */
+
 /* Include the sample.  */
 extern VOID sample_entry(NX_IP* ip_ptr, NX_PACKET_POOL* pool_ptr, NX_DNS* dns_ptr, UINT (*unix_time_callback)(ULONG *unix_time));
 
@@ -101,6 +116,24 @@ extern VOID sample_entry(NX_IP* ip_ptr, NX_PACKET_POOL* pool_ptr, NX_DNS* dns_pt
 
 /* Seconds between Unix Epoch (1/1/1970) and NTP Epoch (1/1/1999) */
 #define SAMPLE_UNIX_TO_NTP_EPOCH_SECOND 0x83AA7E80
+
+#if defined(SAMPLE_HTTP_PROXY_ENABLE)
+#ifndef SAMPLE_HTTP_PROXY_SERVER
+#define SAMPLE_HTTP_PROXY_SERVER        IP_ADDRESS(192, 168, 100, 6)
+#endif /* SAMPLE_HTTP_PROXY_SERVER  */
+
+#ifndef SAMPLE_HTTP_PROXY_SERVER_PORT
+#define SAMPLE_HTTP_PROXY_SERVER_PORT   8888
+#endif /* SAMPLE_HTTP_PROXY_SERVER_PORT  */
+
+#ifndef SAMPLE_HTTP_PROXY_USER_NAME
+#define SAMPLE_HTTP_PROXY_USER_NAME     ""
+#endif /* SAMPLE_HTTP_PROXY_USER_NAME  */
+
+#ifndef SAMPLE_HTTP_PROXY_PASSWORD
+#define SAMPLE_HTTP_PROXY_PASSWORD      ""
+#endif /* SAMPLE_HTTP_PROXY_PASSWORD  */
+#endif /* SAMPLE_HTTP_PROXY_ENABLE  */
 
 static TX_THREAD        sample_helper_thread;
 static NX_PACKET_POOL   pool_0;
@@ -285,8 +318,26 @@ ULONG   dns_server_address[3];
 #ifndef SAMPLE_DHCP_DISABLE
 UINT    dns_server_address_size = sizeof(dns_server_address);
 #endif
+#if defined(SAMPLE_HTTP_PROXY_ENABLE)
+NXD_ADDRESS proxy_server_address;
+#endif /* SAMPLE_HTTP_PROXY_ENABLE */
 
     NX_PARAMETER_NOT_USED(parameter);
+
+#if defined(SAMPLE_HTTP_PROXY_ENABLE)
+
+    /* Enabled HTTP proxy.  */
+    proxy_server_address.nxd_ip_version = NX_IP_VERSION_V4;
+    proxy_server_address.nxd_ip_address.v4 = SAMPLE_HTTP_PROXY_SERVER;
+    status = nx_http_proxy_client_enable(&ip_0, &proxy_server_address, SAMPLE_HTTP_PROXY_SERVER_PORT,
+                                         SAMPLE_HTTP_PROXY_USER_NAME, sizeof(SAMPLE_HTTP_PROXY_USER_NAME) - 1,
+                                         SAMPLE_HTTP_PROXY_PASSWORD, sizeof(SAMPLE_HTTP_PROXY_PASSWORD) - 1);
+    if (status)
+    {
+        printf("Failed to enable HTTP proxy!\r\n");
+        return;
+    }
+#endif /* SAMPLE_HTTP_PROXY_ENABLE  */
 
 #ifndef SAMPLE_DHCP_DISABLE
     if (dhcp_wait())

@@ -11,6 +11,7 @@
 * [nx_azure_iot_hub_client_trusted_cert_add](#nx_azure_iot_hub_client_trusted_cert_add)
 * [nx_azure_iot_hub_client_device_cert_set](#nx_azure_iot_hub_client_device_cert_set)
 * [nx_azure_iot_hub_client_symmetric_key_set](#nx_azure_iot_hub_client_symmetric_key_set)
+* [nx_azure_iot_hub_client_websocket_enable](#nx_azure_iot_hub_client_websocket_enable)
 * [nx_azure_iot_hub_client_connect](#nx_azure_iot_hub_client_connect)
 * [nx_azure_iot_hub_client_disconnect](#nx_azure_iot_hub_client_disconnect)
 * [nx_azure_iot_hub_client_connection_status_callback_set](#nx_azure_iot_hub_client_connection_status_callback_set)
@@ -317,6 +318,39 @@ UINT nx_azure_iot_hub_client_component_add(NX_AZURE_IOT_HUB_CLIENT *hub_client_p
 **Return Values**
 * NX_AZURE_IOT_SUCCESS Successfully set device certificate to AZ IoT Hub Instance.
 * NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to add the component name due to out of memory.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_websocket_enable**
+***
+<div style="text-align: right"> Enables MQTT over WebSocket to connect to IoT Hub</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_websocket_enable(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr);
+```
+**Description**
+
+<p>This routine enables MQTT over WebSocket to connect to the Azure IoT Hub.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT` |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if MQTT over Websocket is enabled.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to enable MQTT over WebSocket due to invalid parameter.
 
 **Allowed From**
 

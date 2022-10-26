@@ -138,7 +138,7 @@ UINT       buffer_offset;
             if (handshake_type == NX_SECURE_TLS_CLIENT_HELLO)
 #endif /* (NX_SECURE_TLS_TLS_1_3_ENABLED) */
             {
-                NX_SECURE_MEMCPY(&tls_session->nx_secure_tls_key_material.nx_secure_tls_handshake_cache[buffer_offset],
+                NX_SECURE_MEMCPY(&tls_session->nx_secure_tls_key_material.nx_secure_tls_handshake_cache[buffer_offset], /* lgtm[cpp/banned-api-usage-required-any] */
                                  current_packet -> nx_packet_prepend_ptr, (UINT)length); /* Use case of memcpy is verified. */
 
                 /* Advance the length. */

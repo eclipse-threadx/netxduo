@@ -185,7 +185,7 @@ USHORT                                supported_version = tls_session -> nx_secu
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
         case NX_SECURE_TLS_EXTENSION_KEY_SHARE:
 
-            if(tls_session->nx_secure_tls_1_3)
+            if (tls_session -> nx_secure_tls_1_3)
             {
                 /* Process the TLS 1.3 key share extension. */
                 status = _nx_secure_tls_proc_serverhello_keyshare_extension(tls_session, &packet_buffer[offset], &extension_length, message_length - offset);
@@ -209,7 +209,7 @@ USHORT                                supported_version = tls_session -> nx_secu
             break;
 #endif
         case NX_SECURE_TLS_EXTENSION_SUPPORTED_VERSIONS:
-            if(tls_session->nx_secure_tls_1_3)
+            if (tls_session -> nx_secure_tls_1_3)
             {
 
                 /* Process the TLS 1.3 supported_versions extension. */
@@ -242,7 +242,7 @@ USHORT                                supported_version = tls_session -> nx_secu
             }
 
             /* Store the pointer of cookie. */
-            /* Note: Cookie data is stored in ServerHello packet buffer. This buffer should not be released 
+            /* Note: Cookie data is stored in ServerHello packet buffer. This buffer should not be released
                or overwrote before Cookie is copied to ClientHello. */
             if (tls_session -> nx_secure_tls_1_3)
             {
@@ -340,7 +340,7 @@ USHORT                                supported_version = tls_session -> nx_secu
 #endif /* NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE */
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-    if(tls_session->nx_secure_tls_1_3)
+    if (tls_session -> nx_secure_tls_1_3)
     {
         if (supported_version != NX_SECURE_TLS_VERSION_TLS_1_3)
         {
@@ -373,14 +373,14 @@ USHORT                                supported_version = tls_session -> nx_secu
 #endif
 
     return(status);
-#else    
-    /* If Client TLS is disabled and we recieve a server key exchange, error! */    
+#else
+    /* If Client TLS is disabled and we recieve a server key exchange, error! */
     NX_PARAMETER_NOT_USED(tls_session);
     NX_PARAMETER_NOT_USED(packet_buffer);
     NX_PARAMETER_NOT_USED(message_length);
     NX_PARAMETER_NOT_USED(extensions);
     NX_PARAMETER_NOT_USED(num_extensions);
-    
+
     return(NX_SECURE_TLS_UNEXPECTED_MESSAGE);
 #endif
 }
@@ -762,7 +762,7 @@ INT    compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_serverhello_keyshare_extension  PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -802,6 +802,9 @@ INT    compare_value;
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), removed  */
 /*                                            public key format checking, */
 /*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
+/*                                            updated parameters list,    */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -860,7 +863,7 @@ NX_SECURE_TLS_ECC *ecc_info;
     for (i = 0; i < ecc_info -> nx_secure_tls_ecc_supported_groups_count; i++)
     {
         /* Find the matchin group in the keys we generated and saved. */
-        if(key_group != tls_session->nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[i].nx_secure_tls_ecdhe_named_curve)
+        if (key_group != tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[i].nx_secure_tls_ecdhe_named_curve)
         {
             continue;
         }
@@ -876,7 +879,7 @@ NX_SECURE_TLS_ECC *ecc_info;
         }
 
         /* Got a matching key/curve combo, get a pointer to the selected key data. */
-        ecc_key_data = tls_session->nx_secure_tls_key_material.nx_secure_tls_ecc_key_data;
+        ecc_key_data = tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data;
 
         if (*extension_length < 4)
         {
@@ -895,7 +898,7 @@ NX_SECURE_TLS_ECC *ecc_info;
         pubkey = &packet_buffer[offset];
 
         /* Get the curve method to initialize the remote public key data. */
-        _nx_secure_tls_find_curve_method(tls_session, key_group, &curve_method, NX_NULL);
+        _nx_secure_tls_find_curve_method(&tls_session -> nx_secure_tls_ecc, key_group, &curve_method, NX_NULL);
 
         if (curve_method == NX_NULL)
         {

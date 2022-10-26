@@ -85,7 +85,7 @@ UINT _nx_secure_x509_dns_name_initialize(NX_SECURE_X509_DNS_NAME *dns_name,
     }
 
     /* Copy the name string into the entry structure. */
-    NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, name_string, length); /* Use case of memcpy is verified. */
+    NX_SECURE_MEMCPY(dns_name -> nx_secure_x509_dns_name, name_string, length); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
 
     dns_name -> nx_secure_x509_dns_name_length = length;
 

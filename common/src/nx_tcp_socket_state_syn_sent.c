@@ -27,6 +27,9 @@
 
 #include "nx_api.h"
 #include "nx_tcp.h"
+#ifdef NX_ENABLE_HTTP_PROXY
+#include "nx_http_proxy_client.h"
+#endif /* NX_ENABLE_HTTP_PROXY */
 
 
 /**************************************************************************/
@@ -34,7 +37,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_syn_sent                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -62,6 +65,7 @@
 /*    _nx_tcp_packet_send_syn               Send SYN packet               */
 /*    _nx_tcp_packet_send_rst               Send RST packet               */
 /*    _nx_tcp_socket_thread_resume          Resume suspended thread       */
+/*    _nx_http_proxy_client_connect         Connect with HTTP Proxy       */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -74,6 +78,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported HTTP Proxy,       */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_socket_state_syn_sent(NX_TCP_SOCKET *socket_ptr, NX_TCP_HEADER *tcp_header_ptr, NX_PACKET *packet_ptr)
@@ -185,17 +192,6 @@ VOID  _nx_tcp_socket_state_syn_sent(NX_TCP_SOCKET *socket_ptr, NX_TCP_HEADER *tc
         /* Clear the socket timeout.  */
         socket_ptr -> nx_tcp_socket_timeout =  0;
 
-#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
-
-        /* Is a connection completion callback registered with the TCP socket?  */
-        if (socket_ptr -> nx_tcp_establish_notify)
-        {
-
-            /* Call the application's establish callback function.    */
-            (socket_ptr -> nx_tcp_establish_notify)(socket_ptr);
-        }
-#endif
-
 #ifdef NX_ENABLE_TCP_KEEPALIVE
         /* Is the keepalive feature enabled on this socket? */
         if (socket_ptr -> nx_tcp_socket_keepalive_enabled)
@@ -206,12 +202,37 @@ VOID  _nx_tcp_socket_state_syn_sent(NX_TCP_SOCKET *socket_ptr, NX_TCP_HEADER *tc
         }
 #endif
 
-        /* Determine if we need to wake a thread suspended on the connection.  */
-        if (socket_ptr -> nx_tcp_socket_connect_suspended_thread)
+#ifdef NX_ENABLE_HTTP_PROXY
+
+        /* Check if the HTTP Proxy is started and waiting for TCP socket connection.  */
+        if ((socket_ptr -> nx_tcp_socket_ip_ptr -> nx_ip_http_proxy_enable) && 
+            (socket_ptr -> nx_tcp_socket_http_proxy_state == NX_HTTP_PROXY_STATE_WAITING))
         {
 
-            /* Resume the suspended thread.  */
-            _nx_tcp_socket_thread_resume(&(socket_ptr -> nx_tcp_socket_connect_suspended_thread), NX_SUCCESS);
+            /* TCP connection established, start the HTTP Proxy connection.  */
+            _nx_http_proxy_client_connect(socket_ptr);
+        }
+        else
+#endif /* NX_ENABLE_HTTP_PROXY */
+        {
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+
+            /* Is a connection completion callback registered with the TCP socket?  */
+            if (socket_ptr -> nx_tcp_establish_notify)
+            {
+
+                /* Call the application's establish callback function.    */
+                (socket_ptr -> nx_tcp_establish_notify)(socket_ptr);
+            }
+#endif
+
+            /* Determine if we need to wake a thread suspended on the connection.  */
+            if (socket_ptr -> nx_tcp_socket_connect_suspended_thread)
+            {
+
+                /* Resume the suspended thread.  */
+                _nx_tcp_socket_thread_resume(&(socket_ptr -> nx_tcp_socket_connect_suspended_thread), NX_SUCCESS);
+            }
         }
     }
     else if ((tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_SYN_BIT) &&

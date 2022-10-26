@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_sni_extension_set            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -66,15 +66,25 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
+/*                                            fix compile error,          */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_sni_extension_set(NX_SECURE_TLS_SESSION *tls_session,
                                               NX_SECURE_X509_DNS_NAME *dns_name)
 {
+#ifndef NX_SECURE_TLS_SNI_EXTENSION_DISABLED
 
     /* Set the pointer to the SNI DNS name so it can be sent in the ClientHello. */
     tls_session -> nx_secure_tls_sni_extension_server_name = dns_name;
 
     return(NX_SUCCESS);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(dns_name);
+
+    return(NX_NOT_ENABLED);
+#endif
 }
 

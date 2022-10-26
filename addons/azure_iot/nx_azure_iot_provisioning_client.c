@@ -33,6 +33,8 @@
 #define NX_AZURE_IOT_PROVISIONING_CLIENT_PAYLOAD_END                  "}"
 #define NX_AZURE_IOT_PROVISIONING_CLIENT_POLICY_NAME                  "registration"
 
+#define NX_AZURE_IOT_PROVISIONING_CLIENT_WEB_SOCKET_PATH              "/$iothub/websocket"
+
 /* Set the default retry to Provisioning service.  */
 #ifndef NX_AZURE_IOT_PROVISIONING_CLIENT_DEFAULT_RETRY
 #define NX_AZURE_IOT_PROVISIONING_CLIENT_DEFAULT_RETRY                (3)
@@ -134,6 +136,7 @@ UINT status;
 NXD_ADDRESS server_address;
 NXD_MQTT_CLIENT *mqtt_client_ptr;
 NX_AZURE_IOT_RESOURCE *resource_ptr;
+UINT server_port;
 
     /* Resolve the host name.  */
     status = nxd_dns_host_by_name_get(prov_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_dns_ptr,
@@ -161,8 +164,21 @@ NX_AZURE_IOT_RESOURCE *resource_ptr;
         return(status);
     }
 
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+    if (mqtt_client_ptr -> nxd_mqtt_client_use_websocket == NX_TRUE)
+    {
+        server_port = NXD_MQTT_OVER_WEBSOCKET_TLS_PORT;
+    }
+    else
+    {
+        server_port = NXD_MQTT_TLS_PORT;
+    }
+#else
+    server_port = NXD_MQTT_TLS_PORT;
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
+
     /* Start MQTT connection.  */
-    status = nxd_mqtt_client_secure_connect(mqtt_client_ptr, &server_address, NXD_MQTT_TLS_PORT,
+    status = nxd_mqtt_client_secure_connect(mqtt_client_ptr, &server_address, server_port,
                                             nx_azure_iot_mqtt_tls_setup, NX_AZURE_IOT_MQTT_KEEP_ALIVE,
                                             NX_FALSE, wait_option);
 
@@ -1091,6 +1107,24 @@ NX_AZURE_IOT_RESOURCE *resource_ptr;
     }
 }
 
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+UINT nx_azure_iot_provisioning_client_websocket_enable(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr)
+{
+NX_AZURE_IOT_RESOURCE *resource_ptr;
+
+    if (prov_client_ptr == NX_NULL)
+    {
+        LogError(LogLiteralArgs("IoTProvisioning client WebSocket enable fail: INVALID POINTER"));
+        return(NX_AZURE_IOT_INVALID_PARAMETER);
+    }
+
+    /* Set resource pointer.  */
+    resource_ptr = &(prov_client_ptr -> nx_azure_iot_provisioning_client_resource);
+
+    return(nxd_mqtt_client_websocket_set(&(resource_ptr -> resource_mqtt), (UCHAR *)resource_ptr -> resource_hostname, resource_ptr -> resource_hostname_length, 
+                                         (UCHAR *)NX_AZURE_IOT_PROVISIONING_CLIENT_WEB_SOCKET_PATH, sizeof(NX_AZURE_IOT_PROVISIONING_CLIENT_WEB_SOCKET_PATH) - 1));
+}
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
 
 static VOID nx_azure_iot_provisioning_client_event_process(NX_AZURE_IOT *nx_azure_iot_ptr,
                                                            ULONG common_events, ULONG module_own_events)

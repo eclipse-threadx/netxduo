@@ -11,11 +11,12 @@
 
 #ifndef __HASHTABLE_H__
 #define __HASHTABLE_H__
-#include <asc_config.h>
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/utils/collection/collection.h"
 

@@ -11,10 +11,11 @@
 
 #ifndef COLLECTOR_H
 #define COLLECTOR_H
-#include <asc_config.h>
 
 #include <assert.h>
 #include <stdbool.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/asc_result.h"
 #include "asc_security_core/component_info.h"

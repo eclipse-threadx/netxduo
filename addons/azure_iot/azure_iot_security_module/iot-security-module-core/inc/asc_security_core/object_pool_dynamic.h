@@ -11,9 +11,10 @@
 
 #ifndef OBJECT_POOL_DYNAMIC_H
 #define OBJECT_POOL_DYNAMIC_H
-#include <asc_config.h>
 
 #include <stdint.h>
+
+#include <asc_config.h>
 
 #include "asc_security_core/object_pool_def.h"
 

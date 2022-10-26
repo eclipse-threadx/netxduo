@@ -4,7 +4,7 @@ CONF_DEFINE_BASE(${g_core_config_path} base_dist.cmake)
 # DIST: overwrite configuration for specific distribution
 set(SECURITY_MODULE_VERSION_MAJOR 3)
 set(SECURITY_MODULE_VERSION_MINOR 5)
-set(SECURITY_MODULE_VERSION_PATCH 3)
+set(SECURITY_MODULE_VERSION_PATCH 4)
 
 set(ASC_COMPONENT_CONFIGURATION OFF)
 

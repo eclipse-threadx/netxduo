@@ -455,7 +455,7 @@ UINT                          interface_index;
                 mac_lsw = ((ULONG)(nd_entry -> nx_nd_cache_mac_addr[2]) << 24) | ((ULONG)(nd_entry -> nx_nd_cache_mac_addr[3]) << 16) |
                     ((ULONG)(nd_entry -> nx_nd_cache_mac_addr[4]) << 8) | nd_entry -> nx_nd_cache_mac_addr[5];
                 new_msw = ((ULONG)(new_mac[0]) << 8) | (new_mac[1]);
-                new_lsw = ((ULONG)(new_mac[2]) << 24) | ((ULONG)(new_mac[3]) << 16) | ((ULONG)(new_mac[4]) << 8) | new_mac[5];
+                new_lsw = ((ULONG)(new_mac[2]) << 24) | ((ULONG)(new_mac[3]) << 16) | ((ULONG)(new_mac[4]) << 8) | new_mac[5]; /* lgtm[cpp/overflow-buffer] */
                 if ((mac_msw != new_msw) || (mac_lsw != new_lsw))
                 {
 

@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_receive                      PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.2.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,15 +73,16 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), added    */
 /*                                            conditional TLS 1.3 build,  */
 /*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), and      */
+/*                                            fixed renegotiation when    */
+/*                                            receiving in non-block mode,*/
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_session_receive(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET **packet_ptr_ptr,
                                      ULONG wait_option)
 {
 UINT status;
-#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
-UINT local_initiated_renegotiation = NX_FALSE;
-#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 
     /* Session receive logic:
      * 1. Receive incoming packets
@@ -93,24 +94,6 @@ UINT local_initiated_renegotiation = NX_FALSE;
      */
 
 
-#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
-#ifndef NX_SECURE_TLS_CLIENT_DISABLED
-    if (tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_CLIENT &&
-        tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_RENEGOTIATING)
-    {
-        local_initiated_renegotiation = NX_TRUE;
-    }
-#endif
-
-#ifndef NX_SECURE_TLS_SERVER_DISABLED
-    if (tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_SERVER &&
-        tls_session -> nx_secure_tls_server_state == NX_SECURE_TLS_SERVER_STATE_HELLO_REQUEST)
-    {
-        local_initiated_renegotiation = NX_TRUE;
-    }
-#endif
-#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
-
     /* Try receiving records from the remote host. */
     status = _nx_secure_tls_session_receive_records(tls_session, packet_ptr_ptr, wait_option);
 
@@ -120,9 +103,6 @@ UINT local_initiated_renegotiation = NX_FALSE;
     if (status == NX_SUCCESS && tls_session -> nx_secure_tls_renegotiation_handshake)
     {
 
-        /* Clear flag to prevent infinite recursion. */
-        tls_session -> nx_secure_tls_renegotiation_handshake = NX_FALSE;
-
         /* Process the handshake. */
         status = _nx_secure_tls_handshake_process(tls_session, wait_option);
 
@@ -131,13 +111,17 @@ UINT local_initiated_renegotiation = NX_FALSE;
             return(status);
         }
 
+        /* Clear flag to prevent infinite recursion. */
+        tls_session -> nx_secure_tls_renegotiation_handshake = NX_FALSE;
+
         /* If this renegotiation was initiated by us, don't receive additional data as
            that will be up to the application. */
-        if (!local_initiated_renegotiation)
+        if (!tls_session -> nx_secure_tls_local_initiated_renegotiation)
         {
             /* Handle any data that followed the re-negotiation handshake. */
             status = _nx_secure_tls_session_receive_records(tls_session, packet_ptr_ptr, wait_option);
         }
+        tls_session -> nx_secure_tls_local_initiated_renegotiation = NX_FALSE;
     }
     else
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
