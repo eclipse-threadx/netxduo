@@ -1220,8 +1220,14 @@ UINT        status;
 #endif  /* NX_DISABLE_PACKET_CHAIN */
 
             /* Remove the HDLC header.  */
-            packet_head_ptr -> nx_packet_prepend_ptr += 3;
-            packet_head_ptr -> nx_packet_length -= 3;
+            if (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0xff && packet_head_ptr -> nx_packet_prepend_ptr[2] == 0x03) {
+               packet_head_ptr -> nx_packet_prepend_ptr += 3;
+               packet_head_ptr -> nx_packet_length -= 3;
+            }
+            else {
+                packet_head_ptr -> nx_packet_prepend_ptr += 1;
+                packet_head_ptr -> nx_packet_length -= 1;
+            }
 
             /* Return the pointer.  */
             *return_packet_ptr =  packet_head_ptr;
@@ -1280,8 +1286,9 @@ UINT        status;
         else if ((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
                  (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0xff) &&
                  (packet_head_ptr -> nx_packet_prepend_ptr[2] == 0x03) &&
-                 (packet_head_ptr -> nx_packet_prepend_ptr[3] == 0x00) &&
-                 (packet_head_ptr -> nx_packet_prepend_ptr[4] == 0x21)) /* 0x0021 is NX_PPP_DATA */
+                 ((packet_head_ptr -> nx_packet_prepend_ptr[3] == 0x00) &&
+                 (packet_head_ptr -> nx_packet_prepend_ptr[4] == 0x21)) ||
+                 (packet_head_ptr -> nx_packet_prepend_ptr[3] == 0x21)) /* 0x0021 is NX_PPP_DATA */
         {
 
             /* We need to move to the next packet and chain them.  */
@@ -1452,6 +1459,7 @@ UINT        status;
 void  _nx_ppp_receive_packet_process(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
 
+UINT        index;
 UINT        protocol;
 UINT        ppp_ipcp_state;
 UINT        code;
@@ -1476,7 +1484,15 @@ UINT        length;
     }
 
     /* Pickup the protocol type.  */
-    protocol =  (((UINT) packet_ptr -> nx_packet_prepend_ptr[0]) << 8) | ((UINT) packet_ptr -> nx_packet_prepend_ptr[1]);
+    if ((((UINT) packet_ptr -> nx_packet_prepend_ptr[0]) & 0x01) == 0) {
+        protocol =  (((UINT) packet_ptr -> nx_packet_prepend_ptr[0]) << 8) | ((UINT) packet_ptr -> nx_packet_prepend_ptr[1]);
+        index = 2;
+    }
+    else
+    {
+        protocol =  (UINT) packet_ptr -> nx_packet_prepend_ptr[0];
+        index = 1;
+    }
 
     /* Check protocol.  */
     if (protocol != NX_PPP_DATA)
@@ -1508,7 +1524,7 @@ UINT        length;
         }
 
         /* Get the message length.  */
-        length = (((UINT) packet_ptr -> nx_packet_prepend_ptr[4]) << 8) | ((UINT) packet_ptr -> nx_packet_prepend_ptr[5]);
+        length = (((UINT) packet_ptr -> nx_packet_prepend_ptr[index + 2]) << 8) | ((UINT) packet_ptr -> nx_packet_prepend_ptr[index + 3]);
 
         /* Check if the packet length is equal to message length plus 2 bytes protocal type.  */
         if ((length + 2) != packet_ptr -> nx_packet_length)
@@ -1527,7 +1543,7 @@ UINT        length;
     {
 
         /* Pickup the type of received LCP code.  */
-        code =  packet_ptr -> nx_packet_prepend_ptr[2];
+        code =  packet_ptr -> nx_packet_prepend_ptr[index];
 
         /* Process the LCP message, updating the LCP state machine.  */
         _nx_ppp_lcp_state_machine_update(ppp_ptr, packet_ptr);
@@ -1923,11 +1939,19 @@ ULONG   offset;
     /* Add the incoming interface pointer.  */
     packet_ptr -> nx_packet_ip_interface =  ppp_ptr -> nx_ppp_interface_ptr;
 
-    /* Remove the PPP header [00,21] in the front of the IP packet.  */
-    packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + 2;
-
-    /* Adjust the packet length.  */
-    packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length - 2;
+    /* Remove the PPP header [00,21] or [21] in the front of the IP packet.  */
+    if ((packet_ptr -> nx_packet_prepend_ptr[0] & 0x01) == 0)
+    {
+        packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + 2;
+        /* Adjust the packet length.  */
+        packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length - 2;
+    }
+    else
+    {
+        packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + 1;
+        /* Adjust the packet length.  */
+        packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length - 1;
+    }
 
     /* Calculate the offset for four byte alignment.  */
     offset = (((ULONG)packet_ptr -> nx_packet_prepend_ptr) & 3);
