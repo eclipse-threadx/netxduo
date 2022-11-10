@@ -2469,8 +2469,8 @@ NX_AZURE_IOT_ADU_AGENT_COMPATIBILITY *compatibility = &(update_manifest_content 
 
                         /* Device manufacturer.  */
                         if (nx_azure_iot_json_reader_token_is_text_equal(&json_reader,
-                                                                         (UCHAR *)NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_DEVICE_MANUFACTURER,
-                                                                         sizeof(NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_DEVICE_MANUFACTURER) - 1))
+                                                                         (UCHAR *)NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_MANUFACTURER,
+                                                                         sizeof(NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_MANUFACTURER) - 1))
                         {
                             if (nx_azure_iot_json_reader_next_token(&json_reader) ||
                                 nx_azure_iot_json_reader_token_string_get(&json_reader,
@@ -2488,8 +2488,8 @@ NX_AZURE_IOT_ADU_AGENT_COMPATIBILITY *compatibility = &(update_manifest_content 
 
                         /* Device model.  */
                         else if (nx_azure_iot_json_reader_token_is_text_equal(&json_reader,
-                                                                              (UCHAR *)NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_DEVICE_MODEL,
-                                                                              sizeof(NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_DEVICE_MODEL) - 1))
+                                                                              (UCHAR *)NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_MODEL,
+                                                                              sizeof(NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_MODEL) - 1))
                         {
                             if (nx_azure_iot_json_reader_next_token(&json_reader) ||
                                 nx_azure_iot_json_reader_token_string_get(&json_reader,

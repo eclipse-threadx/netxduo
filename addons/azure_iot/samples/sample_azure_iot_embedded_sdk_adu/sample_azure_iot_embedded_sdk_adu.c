@@ -90,7 +90,7 @@ VOID sample_adu_start(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr)
             return;
         }
 
-        printf("Device Properties: manufacturer: %s, model: %s, installed criteria: %s.\r\n", SAMPLE_DEVICE_MANUFACTURER, SAMPLE_DEVICE_MODEL, SAMPLE_DEVICE_INSTALLED_CRITERIA);
+        printf("Manufacturer: %s, Model: %s, Installed Criteria: %s.\r\n", SAMPLE_DEVICE_MANUFACTURER, SAMPLE_DEVICE_MODEL, SAMPLE_DEVICE_INSTALLED_CRITERIA);
 
 #if (NX_AZURE_IOT_ADU_AGENT_PROXY_UPDATE_COUNT >= 1)
         /* Enable proxy update for leaf device.  */
@@ -104,7 +104,7 @@ VOID sample_adu_start(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr)
             return;
         }
 
-        printf("Leaf Device Properties: manufacturer: %s, model: %s, installed criteria: %s.\r\n", SAMPLE_LEAF_DEVICE_MANUFACTURER, SAMPLE_LEAF_DEVICE_MODEL, SAMPLE_LEAF_DEVICE_INSTALLED_CRITERIA);
+        printf("Manufacturer: %s, Model: %s, Installed Criteria: %s.\r\n", SAMPLE_LEAF_DEVICE_MANUFACTURER, SAMPLE_LEAF_DEVICE_MODEL, SAMPLE_LEAF_DEVICE_INSTALLED_CRITERIA);
 #endif /* NX_AZURE_IOT_ADU_AGENT_PROXY_UPDATE_COUNT */
 
         adu_agent_started = NX_TRUE;
