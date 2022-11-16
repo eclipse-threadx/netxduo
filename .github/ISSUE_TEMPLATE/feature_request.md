@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea or enhancement to existing feature for Azure RTOS.
 title: ''
-labels: ''
+labels: feature
 assignees: ''
 
 ---
