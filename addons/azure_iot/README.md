@@ -95,12 +95,12 @@ So the total additional connection traffic will be:
 
 ## APIs
 
-* [nx_azure_iot](./azure_rtos_iot.md)    
-* [nx_azure_iot_hub_client](./azure_rtos_iot_hub_client.md)
-* [nx_azure_iot_hub_client_properties](./azure_rtos_iot_hub_client_properties.md)
-* [nx_azure_iot_provisioning_client](./azure_rtos_iot_provisioning_client.md)
-* [nx_azure_iot_json](./azure_rtos_iot_json.md)
-* [nx_azure_iot_adu_agent](./azure_rtos_iot_adu_agent.md)
+* [nx_azure_iot](./docs/azure_rtos_iot.md)    
+* [nx_azure_iot_hub_client](./docs/azure_rtos_iot_hub_client.md)
+* [nx_azure_iot_hub_client_properties](./docs/azure_rtos_iot_hub_client_properties.md)
+* [nx_azure_iot_provisioning_client](./docs/azure_rtos_iot_provisioning_client.md)
+* [nx_azure_iot_json](./docs/azure_rtos_iot_json.md)
+* [nx_azure_iot_adu_agent](./docs/azure_rtos_iot_adu_agent.md)
 * [nx_azure_iot_security_module](../azure_iot_security_module/docs/nx_azure_iot_security_module.md)
 
 ## Need Help?
