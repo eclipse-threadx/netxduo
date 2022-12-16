@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */ 
 /*                                                                        */ 
 /*    nx_port.h                                         Cortex-R5/GNU     */ 
-/*                                                           6.1        */
+/*                                                           6.x          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -43,6 +43,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  09-30-2020     Yuxin Zhou               Initial Version 6.1           */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            removed duplicated macros,  */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -65,16 +68,6 @@
 
 #define NX_LITTLE_ENDIAN    1
 
-
-/* By default IPv6 is enabled. */
-
-#ifndef FEATURE_NX_IPV6
-#define FEATURE_NX_IPV6
-#endif /* FEATURE_NX_IPV6 */
-
-#ifdef NX_DISABLE_IPV6 
-#undef FEATURE_NX_IPV6 
-#endif /* !NX_DISABLE_IPV6 */
 
 #include <stdio.h>
 #include <string.h>

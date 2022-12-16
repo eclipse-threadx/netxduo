@@ -115,6 +115,50 @@ void    nx_iperf_entry(NX_PACKET_POOL *pool_ptr, NX_IP *ip_ptr, UCHAR *http_stac
 {
 UINT status;
 
+    /* Create a TCP server socket.  */
+    status =  nx_tcp_socket_create(nx_iperf_test_ip, &tcp_server_socket, "TCP Server Socket",
+                                   NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, 32 * 1024,
+                                   NX_NULL, nx_iperf_tcp_rx_disconnect_received);
+
+    /* Check for error.  */
+    if (status)
+    {
+        nx_iperf_test_error_counter++;
+        return;
+    }
+
+    /* Create a TCP client socket.  */
+    status =  nx_tcp_socket_create(nx_iperf_test_ip, &tcp_client_socket, "TCP Client Socket",
+                                   NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, 32 * 1024,
+                                   NX_NULL, NX_NULL);
+
+    /* Check for error.  */
+    if (status)
+    {
+        nx_iperf_test_error_counter++;
+        return;
+    }
+
+    /* Create a UDP server socket.  */
+    status = nx_udp_socket_create(nx_iperf_test_ip, &udp_server_socket, "UDP Server Socket", NX_IP_NORMAL, NX_FRAGMENT_OKAY, 0x80, 5);
+
+    /* Check status.  */
+    if (status)
+    {
+        nx_iperf_test_error_counter++;
+        return;
+    }
+
+    /* Create a UDP client socket.  */
+    status = nx_udp_socket_create(nx_iperf_test_ip, &udp_client_socket, "UDP Client Socket", NX_IP_NORMAL, NX_FRAGMENT_OKAY, 0x80, 5);
+
+    /* Check status.  */
+    if (status)
+    {
+        nx_iperf_test_error_counter++;
+        return;
+    }
+
     /* Create the HTTP Server.  */
     status =  nx_web_http_server_create(&nx_iperf_web_server, "My HTTP Server", ip_ptr, NX_WEB_HTTP_SERVER_PORT, &nx_iperf_ram_disk, http_stack, http_stack_size, pool_ptr, nx_iperf_authentication_check, nx_iperf_get_notify);
 
@@ -1580,25 +1624,12 @@ ULONG       port;
         return;
     }
 
-    /* Create a socket.  */
-    status =  nx_tcp_socket_create(nx_iperf_test_ip, &tcp_server_socket, "TCP Server Socket",
-                                   NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, 32 * 1024,
-                                   NX_NULL, nx_iperf_tcp_rx_disconnect_received);
-
-    /* Check for error.  */
-    if (status)
-    {
-        error_counter++;
-        return;
-    }
-
     /* Setup this thread to listen.  */
     status =  nx_tcp_server_socket_listen(nx_iperf_test_ip, NX_IPERF_TCP_RX_PORT, &tcp_server_socket, 5, nx_iperf_tcp_rx_connect_received);
 
     /* Check for error.  */
     if (status)
     {
-        nx_tcp_socket_delete(&tcp_server_socket);
         error_counter++;
         return;
     }
@@ -1613,7 +1644,6 @@ ULONG       port;
     if (status)
     {
         nx_tcp_server_socket_unlisten(nx_iperf_test_ip, NX_IPERF_TCP_RX_PORT);
-        nx_tcp_socket_delete(&tcp_server_socket);
         error_counter++;
         return;
     }
@@ -1624,7 +1654,6 @@ ULONG       port;
     {
         nx_tcp_server_socket_unaccept(&tcp_server_socket);
         nx_tcp_server_socket_unlisten(nx_iperf_test_ip, NX_IPERF_TCP_RX_PORT);
-        nx_tcp_socket_delete(&tcp_server_socket);
         error_counter++;
         return;
     }
@@ -1710,9 +1739,6 @@ ULONG       port;
     {
         ctrlInfo_ptr -> ErrorCode = error_counter;
     }
-
-    /* Delete the socket.  */
-    nx_tcp_socket_delete(&tcp_server_socket);
 }
 
 void  nx_iperf_tcp_rx_connect_received(NX_TCP_SOCKET *socket_ptr, UINT port)
@@ -1738,7 +1764,6 @@ void nx_iperf_tcp_rx_cleanup(void)
     nx_tcp_socket_disconnect(&tcp_server_socket, NX_NO_WAIT);
     nx_tcp_server_socket_unaccept(&tcp_server_socket);
     nx_tcp_server_socket_unlisten(nx_iperf_test_ip, NX_IPERF_TCP_RX_PORT);
-    nx_tcp_socket_delete(&tcp_server_socket);
 
     tx_thread_terminate(&thread_tcp_rx_iperf);
     tx_thread_delete(&thread_tcp_rx_iperf);
@@ -1814,25 +1839,12 @@ NXD_ADDRESS server_ip;
     /* TCP Transmit Test Starts in 2 seconds.  */
     tx_thread_sleep(200);
 
-    /* Create the socket.  */
-    status =  nx_tcp_socket_create(nx_iperf_test_ip, &tcp_client_socket, "TCP Client Socket",
-                                   NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, 32 * 1024,
-                                   NX_NULL, NX_NULL);
-
-    /* Check for error.  */
-    if (status)
-    {
-        error_counter++;
-        return;
-    }
-
     /* Bind the socket.  */
     status =  nx_tcp_client_socket_bind(&tcp_client_socket, NX_ANY_PORT, NX_WAIT_FOREVER);
 
     /* Check for error.  */
     if (status)
     {
-        nx_tcp_socket_delete(&tcp_client_socket);
         error_counter++;
         return;
     }
@@ -1844,7 +1856,6 @@ NXD_ADDRESS server_ip;
     if (status)
     {
         nx_tcp_client_socket_unbind(&tcp_client_socket);
-        nx_tcp_socket_delete(&tcp_client_socket);
         error_counter++;
         return;
     }
@@ -1867,7 +1878,6 @@ NXD_ADDRESS server_ip;
     {
         nx_tcp_socket_disconnect(&tcp_client_socket, NX_NO_WAIT);
         nx_tcp_client_socket_unbind(&tcp_client_socket);
-        nx_tcp_socket_delete(&tcp_client_socket);
         error_counter++;
         return;
     }
@@ -1995,16 +2005,12 @@ NXD_ADDRESS server_ip;
     {
         ctrlInfo_ptr -> ErrorCode = error_counter;
     }
-
-    /* Delete the socket.  */
-    nx_tcp_socket_delete(&tcp_client_socket);
 }
 
 void nx_iperf_tcp_tx_cleanup(void)
 {
     nx_tcp_socket_disconnect(&tcp_client_socket, NX_NO_WAIT);
     nx_tcp_client_socket_unbind(&tcp_client_socket);
-    nx_tcp_socket_delete(&tcp_client_socket);
 
     tx_thread_terminate(&thread_tcp_tx_iperf);
     tx_thread_delete(&thread_tcp_tx_iperf);
@@ -2056,23 +2062,12 @@ NXD_ADDRESS source_ip_address;
     ctrlInfo_ptr -> RunTime = 0;
     ctrlInfo_ptr -> ErrorCode = 0;
 
-    /* Create a UDP socket.  */
-    status = nx_udp_socket_create(nx_iperf_test_ip, &udp_server_socket, "UDP Server Socket", NX_IP_NORMAL, NX_FRAGMENT_OKAY, 0x80, 5);
-
-    /* Check status.  */
-    if (status)
-    {
-        error_counter++;
-        return;
-    }
-
     /* Bind the UDP socket to the IP port.  */
     status = nx_udp_socket_bind(&udp_server_socket, NX_IPERF_UDP_RX_PORT, TX_WAIT_FOREVER);
 
     /* Check status.  */
     if (status)
     {
-        nx_udp_socket_delete(&udp_server_socket);
         error_counter++;
         return;
     }
@@ -2087,7 +2082,6 @@ NXD_ADDRESS source_ip_address;
     if (status)
     {
         nx_udp_socket_unbind(&udp_server_socket);
-        nx_udp_socket_delete(&udp_server_socket);
         error_counter++;
         return;
     }
@@ -2236,9 +2230,8 @@ NXD_ADDRESS source_ip_address;
     ctrlInfo_ptr -> idleTime = (ULONG)((unsigned long long)idle_time * 100 / ((unsigned long long)thread_time + (unsigned long long)isr_time + (unsigned long long)idle_time));
 #endif
 
-    /* Unbind and Delete the socket.  */
+    /* Unbind the socket.  */
     nx_udp_socket_unbind(&udp_server_socket);
-    nx_udp_socket_delete(&udp_server_socket);
 
     /* Check error counter.  */
     if (error_counter)
@@ -2250,7 +2243,6 @@ NXD_ADDRESS source_ip_address;
 void nx_iperf_udp_rx_cleanup(void)
 {
     nx_udp_socket_unbind(&udp_server_socket);
-    nx_udp_socket_delete(&udp_server_socket);
 
     tx_thread_terminate(&thread_udp_rx_iperf);
     tx_thread_delete(&thread_udp_rx_iperf);
@@ -2362,23 +2354,12 @@ long       udp_id;
     /* UDP Transmit Test Starts in 2 seconds.  */
     tx_thread_sleep(200);
 
-    /* Create a UDP socket.  */
-    status = nx_udp_socket_create(nx_iperf_test_ip, &udp_client_socket, "UDP Client Socket", NX_IP_NORMAL, NX_FRAGMENT_OKAY, 0x80, 5);
-
-    /* Check status.  */
-    if (status)
-    {
-        error_counter++;
-        return;
-    }
-
     /* Bind the UDP socket to the IP port.  */
     status =  nx_udp_socket_bind(&udp_client_socket, NX_ANY_PORT, TX_WAIT_FOREVER);
 
     /* Check status.  */
     if (status)
     {
-        nx_udp_socket_delete(&udp_client_socket);
         error_counter++;
         return;
     }
@@ -2443,15 +2424,13 @@ long       udp_id;
         }
     }
 
-    /* Unbind and Delete the socket.  */
+    /* Unbind the socket.  */
     nx_udp_socket_unbind(&udp_client_socket);
-    nx_udp_socket_delete(&udp_client_socket);
 }
 
 void nx_iperf_udp_tx_cleanup(void)
 {
     nx_udp_socket_unbind(&udp_client_socket);
-    nx_udp_socket_delete(&udp_client_socket);
     tx_thread_terminate(&thread_udp_tx_iperf);
     tx_thread_delete(&thread_udp_tx_iperf);
 }

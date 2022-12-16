@@ -595,7 +595,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_telnet_server_disconnect                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -631,6 +631,10 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), and      */
+/*                                            corrected the processing of */
+/*                                            disconnection,              */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_telnet_server_disconnect(NX_TELNET_SERVER *server_ptr, UINT logical_connection)
@@ -650,14 +654,6 @@ NX_TELNET_CLIENT_REQUEST   *client_ptr;
         /* Disconnect the socket.  */
         nx_tcp_socket_disconnect(&(client_ptr -> nx_telnet_client_request_socket), NX_TELNET_SERVER_TIMEOUT);
 
-        /* Call the application's end connection callback routine.  */
-        if (server_ptr -> nx_telnet_connection_end)
-        {
-
-            /* Yes, there is a connection end callback routine - call it!  */
-            (server_ptr -> nx_telnet_connection_end)(server_ptr, client_ptr -> nx_telnet_client_request_connection);
-        }
-
         /* Unaccept this socket.  */
         nx_tcp_server_socket_unaccept(&(client_ptr -> nx_telnet_client_request_socket));
 
@@ -667,6 +663,14 @@ NX_TELNET_CLIENT_REQUEST   *client_ptr;
 
         /* Clear the client request activity timeout.  */
         client_ptr -> nx_telnet_client_request_activity_timeout =  0;
+
+        /* Call the application's end connection callback routine.  */
+        if (server_ptr -> nx_telnet_connection_end)
+        {
+
+            /* Yes, there is a connection end callback routine - call it!  */
+            (server_ptr -> nx_telnet_connection_end)(server_ptr, client_ptr -> nx_telnet_client_request_connection);
+        }
     }
     else
     {

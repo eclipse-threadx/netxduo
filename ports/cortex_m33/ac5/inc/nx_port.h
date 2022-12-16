@@ -12,7 +12,7 @@
 
 /**************************************************************************/
 /**************************************************************************/
-/**                                                                       */ 
+/**                                                                       */
 /** NetX Component                                                        */
 /**                                                                       */
 /**   Port Specific                                                       */
@@ -21,31 +21,34 @@
 /**************************************************************************/
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  PORT SPECIFIC C INFORMATION                            RELEASE        */ 
-/*                                                                        */ 
-/*    nx_port.h                                          Cortex-M33/AC5   */ 
-/*                                                            6.1.11      */
+/**************************************************************************/
+/*                                                                        */
+/*  PORT SPECIFIC C INFORMATION                            RELEASE        */
+/*                                                                        */
+/*    nx_port.h                                          Cortex-M33/AC5   */
+/*                                                            6.x         */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*    This file contains data type definitions that make the NetX         */ 
-/*    real-time TCP/IP function identically on a variety of different     */ 
-/*    processor architectures.                                            */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This file contains data type definitions that make the NetX         */
+/*    real-time TCP/IP function identically on a variety of different     */
+/*    processor architectures.                                            */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            renamed temporary variable, */
 /*                                            resulting in version 6.1.11 */
+/*  xx-xx-xxxx     Scott Larson             Modified comment(s), and      */
+/*                                            fixed whitespace,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -57,7 +60,7 @@
 #ifdef NX_INCLUDE_USER_DEFINE_FILE
 
 
-/* Yes, include the user defines in nx_user.h. The defines in this file may 
+/* Yes, include the user defines in nx_user.h. The defines in this file may
    alternately be defined on the command line.  */
 
 #include "nx_user.h"
@@ -74,12 +77,12 @@
 #include <stdlib.h>
 
 
-/* Define various constants for the port.  */ 
+/* Define various constants for the port.  */
 
 #ifndef NX_IP_PERIODIC_RATE
-#define NX_IP_PERIODIC_RATE 100             /* Default IP periodic rate of 1 second for 
-                                               ports with 10ms timer interrupts.  This 
-                                               value may be defined instead at the 
+#define NX_IP_PERIODIC_RATE 100             /* Default IP periodic rate of 1 second for
+                                               ports with 10ms timer interrupts.  This
+                                               value may be defined instead at the
                                                command line and this value will not be
                                                used.  */
 #endif
@@ -107,7 +110,7 @@
 
 
 #define __SWAP32__(val) ((((val) & 0xFF000000) >> 24 ) | (((val) & 0x00FF0000) >> 8) \
-			 | (((val) & 0x0000FF00) << 8) | (((val) & 0x000000FF) << 24))
+                        | (((val) & 0x0000FF00) << 8) | (((val) & 0x000000FF) << 24))
 
 #define __SWAP16__(val) ((((val) & 0xFF00) >> 8) | (((val) & 0x00FF) << 8))
 
@@ -203,8 +206,8 @@
 /* Define the version ID of NetX.  This may be utilized by the application.  */
 
 #ifdef NX_SYSTEM_INIT
-CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M33/AC5 Version 6.2.0 *";
+CHAR                            _nx_version_id[] =
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M33/AC5 Version 6.x *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif
