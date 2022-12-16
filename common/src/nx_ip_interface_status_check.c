@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_interface_status_check                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -79,6 +79,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            added driver entry check,   */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ip_interface_status_check(NX_IP *ip_ptr, UINT interface_index, ULONG needed_status,
@@ -185,6 +188,14 @@ ULONG                  trace_timestamp;
             NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_IO_DRIVER_GET_STATUS, ip_ptr, 0, 0, 0, NX_TRACE_INTERNAL_EVENTS, 0, 0);
 
             /* Call link level driver.  */
+            if(ip_ptr -> nx_ip_interface[interface_index].nx_interface_link_driver_entry == NX_NULL)
+            {
+
+                /* Release mutex protection.  */
+                tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+                return(NX_NOT_SUCCESSFUL);
+            }
             (ip_ptr -> nx_ip_interface[interface_index].nx_interface_link_driver_entry)(&driver_request);
 
             /* If the driver does not recognize this keyword, we fall back to reading the IP link status.*/
@@ -254,6 +265,14 @@ ULONG                  trace_timestamp;
             NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_IO_DRIVER_GET_STATUS, ip_ptr, 0, 0, 0, NX_TRACE_INTERNAL_EVENTS, 0, 0);
 
             /* Call link level driver.  */
+            if(ip_ptr -> nx_ip_interface[interface_index].nx_interface_link_driver_entry == NX_NULL)
+            {
+
+                /* Release mutex protection.  */
+                tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+                return(NX_NOT_SUCCESSFUL);
+            }
             (ip_ptr -> nx_ip_interface[interface_index].nx_interface_link_driver_entry)(&driver_request);
 
             /* If the driver does not recognize this keyword, we fall back to reading the IP link status.*/

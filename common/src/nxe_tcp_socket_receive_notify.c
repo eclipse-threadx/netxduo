@@ -38,7 +38,7 @@ NX_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_tcp_socket_receive_notify                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -75,6 +75,9 @@ NX_CALLER_CHECKING_EXTERNS
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            removed invalid check,      */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_tcp_socket_receive_notify(NX_TCP_SOCKET *socket_ptr,
@@ -85,12 +88,6 @@ UINT status;
 
     /* Check for invalid input pointers.  */
     if ((socket_ptr == NX_NULL) || (socket_ptr -> nx_tcp_socket_id != NX_TCP_ID))
-    {
-        return(NX_PTR_ERROR);
-    }
-
-    /* Check for invalid input pointers.  */
-    if (tcp_receive_notify == NX_NULL)
     {
         return(NX_PTR_ERROR);
     }

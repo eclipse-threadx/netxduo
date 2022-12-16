@@ -892,7 +892,7 @@ ULONG           registered_event;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_cloud_module_event_clear                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -914,7 +914,7 @@ ULONG           registered_event;
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    _nx_cloud_module_event_set            Actual cloud module event     */
+/*    _nx_cloud_module_event_clear          Actual cloud module event     */
 /*                                            clear function              */
 /*                                                                        */
 /*  CALLED BY                                                             */
@@ -926,6 +926,9 @@ ULONG           registered_event;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  09-30-2020     Yuxin Zhou               Initial Version 6.1           */
+/*  xx-xx-xxxx     Bo Chen                  Modified comment(s), fixed    */
+/*                                            event clear function,       */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_cloud_module_event_clear(NX_CLOUD_MODULE *cloud_module, ULONG module_own_event)
@@ -945,8 +948,8 @@ UINT status;
         return(NX_CLOUD_MODULE_EVENT_INVALID);
     }
 
-    /* Call actual cloud module event set function.  */
-    status = _nx_cloud_module_event_set(cloud_module, module_own_event);
+    /* Call actual cloud module event clear function.  */
+    status = _nx_cloud_module_event_clear(cloud_module, module_own_event);
 
     /* Return completion status.  */
     return(status);

@@ -12,7 +12,7 @@
 
 /**************************************************************************/
 /**************************************************************************/
-/**                                                                       */ 
+/**                                                                       */
 /** NetX Component                                                        */
 /**                                                                       */
 /**   Port Specific                                                       */
@@ -21,28 +21,31 @@
 /**************************************************************************/
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  PORT SPECIFIC C INFORMATION                            RELEASE        */ 
-/*                                                                        */ 
-/*    nx_port.h                                         Cortex-M33/IAR    */ 
-/*                                                           6.1.3        */
+/**************************************************************************/
+/*                                                                        */
+/*  PORT SPECIFIC C INFORMATION                            RELEASE        */
+/*                                                                        */
+/*    nx_port.h                                         Cortex-M33/IAR    */
+/*                                                           6.x          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*    This file contains data type definitions that make the NetX         */ 
-/*    real-time TCP/IP function identically on a variety of different     */ 
-/*    processor architectures.                                            */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This file contains data type definitions that make the NetX         */
+/*    real-time TCP/IP function identically on a variety of different     */
+/*    processor architectures.                                            */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Scott Larson             Modified comment(s), and      */
+/*                                            fixed whitespace,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -54,7 +57,7 @@
 #ifdef NX_INCLUDE_USER_DEFINE_FILE
 
 
-/* Yes, include the user defines in nx_user.h. The defines in this file may 
+/* Yes, include the user defines in nx_user.h. The defines in this file may
    alternately be defined on the command line.  */
 
 #include "nx_user.h"
@@ -71,12 +74,12 @@
 #include <stdlib.h>
 
 
-/* Define various constants for the port.  */ 
+/* Define various constants for the port.  */
 
 #ifndef NX_IP_PERIODIC_RATE
-#define NX_IP_PERIODIC_RATE 100             /* Default IP periodic rate of 1 second for 
-                                               ports with 10ms timer interrupts.  This 
-                                               value may be defined instead at the 
+#define NX_IP_PERIODIC_RATE 100             /* Default IP periodic rate of 1 second for
+                                               ports with 10ms timer interrupts.  This
+                                               value may be defined instead at the
                                                command line and this value will not be
                                                used.  */
 #endif
@@ -180,8 +183,8 @@
 /* Define the version ID of NetX.  This may be utilized by the application.  */
 
 #ifdef NX_SYSTEM_INIT
-CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M33/IAR Version 6.2.0 *";
+CHAR                            _nx_version_id[] =
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M33/IAR Version 6.x *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif
