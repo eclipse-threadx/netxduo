@@ -29,18 +29,18 @@
 extern NX_CRYPTO_METHOD crypto_method_ec_secp256;
 #endif /* NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE */
 
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_info,
                                               NX_SECURE_X509_CERT *cert, UINT selected_curve,
                                               UINT cert_curve_supported);
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_clienthello                 PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -94,6 +94,10 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 /*                                            improved buffer length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.3  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_clienthello(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
@@ -125,14 +129,14 @@ UCHAR                                 supported_ec_match, ec_point_formats_match
 const NX_CRYPTO_METHOD               *crypto_method;
 NX_SECURE_TLS_PSK_STORE              *psk_store;
 #endif /* NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE */
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 NX_SECURE_X509_CERT                  *cert;
 UINT                                  selected_curve;
 UINT                                  cert_curve;
 UINT                                  cert_curve_supported;
 NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
 NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 
     /* Structure of ClientHello:
@@ -310,7 +314,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
         }
     }
 
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 
     /* Get the local certificate. */
     if (tls_session -> nx_secure_tls_credentials.nx_secure_tls_active_certificate != NX_NULL)
@@ -368,7 +372,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
         ecdhe_data -> nx_secure_tls_ecdhe_signature_algorithm =
             (USHORT)((ecdhe_data -> nx_secure_tls_ecdhe_signature_algorithm & 0xFF00) | NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA);
     }
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
     /* Set our initial priority to the maximum value - the size of our ciphersuite crypto table. */
     ciphersuite_priority = (USHORT)(0xFFFFFFFF); 
@@ -382,9 +386,9 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
 
         if (status == NX_SUCCESS && (new_ciphersuite_priority < ciphersuite_priority))
         {
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
             if (NX_SUCCESS == _nx_secure_dtls_check_ciphersuite(ciphersuite_info, cert, selected_curve, cert_curve_supported))
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
             {
                 tls_session -> nx_secure_tls_session_ciphersuite = ciphersuite_info;
                 ciphersuite_priority = new_ciphersuite_priority;
@@ -654,7 +658,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_info,
                                               NX_SECURE_X509_CERT *cert, UINT selected_curve,
                                               UINT cert_curve_supported)
@@ -760,7 +764,7 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 
     return(NX_SUCCESS);
 }
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 #endif /* NX_SECURE_ENABLE_DTLS */
 

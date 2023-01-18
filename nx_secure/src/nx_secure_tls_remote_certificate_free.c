@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_free              PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,11 +80,16 @@
 /*                                            improved code coverage      */
 /*                                            results,                    */
 /*                                            resulting in version 6.1.10 */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_remote_certificate_free(NX_SECURE_TLS_SESSION *tls_session,
                                             NX_SECURE_X509_DISTINGUISHED_NAME *name)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT                              status;
 NX_SECURE_X509_CERT              *list_head;
 NX_SECURE_X509_CERTIFICATE_STORE *store;
@@ -135,5 +140,11 @@ NX_SECURE_X509_CERT              *certificate;
 
     /* Return completion status.  */
     return(status);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(name);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }
 

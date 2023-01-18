@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_certificate_request          PORTABLE C      */
-/*                                                           6.1.12       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,11 +74,16 @@
 /*  07-29-2022     Yuxin Zhou               Modified comment(s), improved */
 /*                                            buffer length verification, */
 /*                                            resulting in version 6.1.12 */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_certificate_request(NX_SECURE_TLS_SESSION *tls_session,
                                                 UCHAR *packet_buffer, UINT message_length)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT  length;
 UINT  cert_types_length;
 UCHAR cert_type;
@@ -326,5 +331,12 @@ UINT extension_type;
 
     return(NX_SUCCESS);
 #endif
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(packet_buffer);
+    NX_PARAMETER_NOT_USED(message_length);
+
+    return(NX_NOT_SUPPORTED);
+#endif /* NX_SECURE_DISABLE_X509 */
 }
 

@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_remote_certificate           PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -87,12 +87,17 @@
 /*  04-25-2022     Timothy Stapko           Modified comment(s),          */
 /*                                            removed unnecessary code,   */
 /*                                            resulting in version 6.1.11 */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_remote_certificate(NX_SECURE_TLS_SESSION *tls_session,
                                                UCHAR *packet_buffer, UINT message_length,
                                                UINT data_length)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT                 length;
 UINT                 total_length;
 UINT                 cert_length = 0;
@@ -407,6 +412,14 @@ ULONG                cert_buf_size;
     tls_session -> nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_SERVER_CERTIFICATE;
 
     return(status);
+#endif
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(packet_buffer);
+    NX_PARAMETER_NOT_USED(message_length);
+    NX_PARAMETER_NOT_USED(data_length);
+
+    return(NX_NOT_SUPPORTED);
 #endif
 }
 

@@ -30,17 +30,17 @@
 
 #ifndef NX_SECURE_TLS_CLIENT_DISABLED
 
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 static UCHAR hash[64]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256, SHA-384, SHA512. */
 static UCHAR decrypted_signature[512];
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_process_server_key_exchange               PORTABLE C     */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yanwu Cai, Microsoft Corporation                                    */
@@ -92,6 +92,10 @@ static UCHAR decrypted_signature[512];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2022     Yanwu Cai                Initial Version 6.2.0         */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_process_server_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, NX_SECURE_TLS_CRYPTO *tls_crypto_table,
@@ -105,15 +109,15 @@ UINT _nx_secure_process_server_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INFO
 #ifdef NX_SECURE_ENABLE_PSK_CIPHERSUITES
 USHORT                                length;
 #endif /* NX_SECURE_ENABLE_PSK_CIPHERSUITES */
-#if defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) || \
-   (defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE))
+#if defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) || \
+   (defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509))
 UINT                                  status;
-
-#endif /* defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) */
-#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE)
+#endif
+#if (defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)) || \
+    defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE)
 VOID                                 *handler = NX_NULL;
 #endif
-#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE)
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 const NX_CRYPTO_METHOD               *curve_method;
 const NX_CRYPTO_METHOD               *ecdh_method;
 NX_SECURE_X509_CERT                  *certificate;
@@ -138,9 +142,10 @@ USHORT                                signature_algorithm_id;
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
 UINT                                  i;
 #endif /* NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED */
-#endif /* defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) */
+#endif /* defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509) */
 
-#if !defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) || (!NX_SECURE_TLS_TLS_1_0_ENABLED && !NX_SECURE_TLS_TLS_1_1_ENABLED)
+#if !defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) || defined(NX_SECURE_DISABLE_X509) || \
+    (!NX_SECURE_TLS_TLS_1_0_ENABLED && !NX_SECURE_TLS_TLS_1_1_ENABLED)
     NX_PARAMETER_NOT_USED(tls_crypto_table);
     NX_PARAMETER_NOT_USED(protocol_version);
     NX_PARAMETER_NOT_USED(ciphersuite);
@@ -230,7 +235,7 @@ UINT                                  i;
     }
 #endif
 
-#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE)
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 #ifndef NX_SECURE_TLS_CLIENT_DISABLED
     if ((ciphersuite -> nx_secure_tls_public_cipher -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_ECDHE))
     {

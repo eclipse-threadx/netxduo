@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_renegotiate                  PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -101,6 +101,10 @@
 /*                                            fixed renegotiation when    */
 /*                                            receiving in non-block mode,*/
 /*                                            resulting in version 6.2.0  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
@@ -160,6 +164,7 @@ NX_PACKET *send_packet;
         tls_session -> nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_RENEGOTIATING;
         tls_session -> nx_secure_tls_local_initiated_renegotiation = NX_TRUE;
 
+#ifndef NX_SECURE_DISABLE_X509
         /* On a session resumption free all certificates for the new session.
          * SESSION RESUMPTION: if session resumption is enabled, don't free!!
          */
@@ -171,6 +176,7 @@ NX_PACKET *send_packet;
             tx_mutex_put(&_nx_secure_tls_protection);
             return(status);
         }
+#endif
 
         /* Populate our packet with clienthello data. */
         status = _nx_secure_tls_send_clienthello(tls_session, send_packet);

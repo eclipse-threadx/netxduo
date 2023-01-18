@@ -445,7 +445,7 @@ INT    compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_clienthello_sec_sa_extension    PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -495,9 +495,13 @@ INT    compare_value;
 /*  10-31-2022     Yanwu Cai                Modified comment(s),          */
 /*                                            updated parameters list,    */
 /*                                            resulting in version 6.2.0  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 UINT _nx_secure_tls_proc_clienthello_sec_sa_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                       NX_SECURE_TLS_HELLO_EXTENSION *exts,
                                                       UINT num_extensions,
@@ -713,7 +717,7 @@ UCHAR expected_signature = 0;
 
     return(status);
 }
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 
 /**************************************************************************/

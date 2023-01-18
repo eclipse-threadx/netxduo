@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_buffer_allocate   PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -85,10 +85,15 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), added    */
 /*                                            assert to check for zero,   */
 /*                                            resulting in version 6.1.11 */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_remote_certificate_buffer_allocate(NX_SECURE_TLS_SESSION *tls_session, UINT certs_number, VOID *certificate_buffer, ULONG buffer_size)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT status;
 UINT metadata_size;
 UINT cert_buffer_size;
@@ -140,5 +145,13 @@ UINT count;
     }
     /* Return completion status.  */
     return(NX_SUCCESS);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(certs_number);
+    NX_PARAMETER_NOT_USED(certificate_buffer);
+    NX_PARAMETER_NOT_USED(buffer_size);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }
 

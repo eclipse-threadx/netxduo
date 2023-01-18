@@ -25,15 +25,16 @@
 
 #include "nx_secure_tls.h"
 
+#ifndef NX_SECURE_DISABLE_X509
 static UCHAR _nx_secure_client_padded_pre_master[600];
-
+#endif
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_process_client_key_exchange               PORTABLE C     */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yanwu Cai, Microsoft Corporation                                    */
@@ -85,6 +86,10 @@ static UCHAR _nx_secure_client_padded_pre_master[600];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2022     Yanwu Cai                Initial Version 6.2.0         */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_process_client_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version,
@@ -93,16 +98,26 @@ UINT _nx_secure_process_client_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INFO
                                             VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
                                             VOID *public_auth_metadata, ULONG public_auth_metadata_size, VOID *tls_ecc_curves)
 {
+#if !defined(NX_SECURE_DISABLE_X509) || \
+    (defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509))
 USHORT                              length;
-UINT                                status;
-UCHAR                              *encrypted_pre_master_secret;
+#endif
+UINT                                status = NX_SECURE_TLS_UNEXPECTED_MESSAGE;
+#if defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) || !defined(NX_SECURE_DISABLE_X509)
 const NX_CRYPTO_METHOD             *public_cipher_method;
+#endif
+#if defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) || !defined(NX_SECURE_DISABLE_X509) || \
+    (defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509))
+VOID                               *handler = NX_NULL;
+#endif
+#ifndef NX_SECURE_DISABLE_X509
+UCHAR                              *encrypted_pre_master_secret;
 NX_SECURE_X509_CERT                *local_certificate;
 UINT                                user_defined_key;
-VOID                               *handler = NX_NULL;
 UCHAR                               rand_byte;
 UINT                                i;
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#endif
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 NX_SECURE_EC_PRIVATE_KEY           *ec_privkey;
 NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA *ecdhe_data;
 NX_CRYPTO_EXTENDED_OUTPUT           extended_output;
@@ -110,13 +125,18 @@ const NX_CRYPTO_METHOD             *curve_method;
 const NX_CRYPTO_METHOD             *ecdh_method;
 UCHAR                              *private_key;
 UINT                                private_key_length;
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 #ifndef NX_SECURE_ENABLE_PSK_CIPHERSUITES
     NX_PARAMETER_NOT_USED(received_remote_credentials);
 #endif /* NX_SECURE_ENABLE_PSK_CIPHERSUITES */
-#ifndef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if !defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) || defined(NX_SECURE_DISABLE_X509)
     NX_PARAMETER_NOT_USED(tls_ecc_curves);
+#endif
+#if !(defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)) && \
+    !defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) && defined(NX_SECURE_DISABLE_X509)
+    NX_PARAMETER_NOT_USED(packet_buffer);
+    NX_PARAMETER_NOT_USED(message_length);
 #endif
     NX_PARAMETER_NOT_USED(protocol_version);
     NX_PARAMETER_NOT_USED(public_auth_metadata);
@@ -179,7 +199,7 @@ UINT                                private_key_length;
         }
         else
 #endif
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
         if (ciphersuite -> nx_secure_tls_public_cipher -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_ECDH ||
             ciphersuite -> nx_secure_tls_public_cipher -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_ECDHE)
         {
@@ -326,9 +346,9 @@ UINT                                private_key_length;
             }
         }
         else
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
         {       /* Certificate-based authentication. */
-
+#ifndef NX_SECURE_DISABLE_X509
             if (message_length < 2)
             {
                 return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
@@ -560,12 +580,13 @@ UINT                                private_key_length;
                 /* Unknown or invalid public cipher. */
                 return(NX_SECURE_TLS_UNSUPPORTED_PUBLIC_CIPHER);
             }
+#endif /* !NX_SECURE_DISABLE_X509 */
         }
     }
-#ifdef NX_SECURE_KEY_CLEAR
+#if defined(NX_SECURE_KEY_CLEAR) && !defined(NX_SECURE_DISABLE_X509)
     NX_SECURE_MEMSET(_nx_secure_client_padded_pre_master, 0, sizeof(_nx_secure_client_padded_pre_master));
-#endif /* NX_SECURE_KEY_CLEAR  */
+#endif /* NX_SECURE_KEY_CLEAR && !NX_SECURE_DISABLE_X509 */
 
-    return(NX_SUCCESS);
+    return(status);
 }
 

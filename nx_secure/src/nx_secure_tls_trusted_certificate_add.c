@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_trusted_certificate_add              PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -78,11 +78,16 @@
 /*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
 /*                                            custom secret generation,   */
 /*                                            resulting in version 6.2.0  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_trusted_certificate_add(NX_SECURE_TLS_SESSION *tls_session,
                                             NX_SECURE_X509_CERT *certificate)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT status;
 
 
@@ -110,5 +115,11 @@ UINT status;
     tx_mutex_put(&_nx_secure_tls_protection);
 
     return(status);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(certificate);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }
 

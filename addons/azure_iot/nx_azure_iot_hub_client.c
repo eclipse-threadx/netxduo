@@ -512,6 +512,7 @@ UINT            server_port;
     }
     else
     {
+        resource_ptr -> resource_mqtt_sas_token = NX_NULL;
         resource_ptr ->  resource_mqtt_sas_token_length = 0;
     }
 

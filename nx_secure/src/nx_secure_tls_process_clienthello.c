@@ -24,19 +24,19 @@
 
 #include "nx_secure_tls.h"
 
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_info,
                                              NX_SECURE_X509_CERT *cert, UINT selected_curve,
                                              UINT cert_curve_supported);
 
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_clienthello                  PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -102,6 +102,10 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*  10-31-2022     Yanwu Cai                Modified comment(s), fixed    */
 /*                                            TLS 1.3 version negotiation,*/
 /*                                            resulting in version 6.2.0  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_clienthello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -123,14 +127,14 @@ USHORT                                new_ciphersuite_priority = 0;
 NX_SECURE_TLS_HELLO_EXTENSION         extension_data[NX_SECURE_TLS_HELLO_EXTENSIONS_MAX];
 UINT                                  num_extensions = NX_SECURE_TLS_HELLO_EXTENSIONS_MAX;
 UCHAR                                *ciphersuite_list;
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 NX_SECURE_X509_CERT                  *cert;
 UINT                                  selected_curve;
 UINT                                  cert_curve;
 UINT                                  cert_curve_supported;
 NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
 NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3;
 USHORT                                no_extension = NX_FALSE;
@@ -177,6 +181,8 @@ USHORT                                no_extension = NX_FALSE;
         {
             tls_session -> nx_secure_tls_renegotiation_handshake = NX_TRUE;
 
+#ifndef NX_SECURE_DISABLE_X509
+
             /* On a session resumption free all certificates for the new session.
              * SESSION RESUMPTION: if session resumption is enabled, don't free!!
              */
@@ -186,6 +192,7 @@ USHORT                                no_extension = NX_FALSE;
             {
                 return(status);
             }
+#endif
 
             /* Invoke user callback to notify application of renegotiation request. */
             if (tls_session -> nx_secure_tls_session_renegotiation_callback != NX_NULL)
@@ -412,7 +419,7 @@ USHORT                                no_extension = NX_FALSE;
     tls_session -> nx_secure_tls_secure_renegotiation_verified = NX_FALSE;
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 
     /* Get the local certificate. */
     if (tls_session -> nx_secure_tls_credentials.nx_secure_tls_active_certificate != NX_NULL)
@@ -468,7 +475,7 @@ USHORT                                no_extension = NX_FALSE;
             return(NX_SECURE_TLS_NO_SUPPORTED_CIPHERS);
         }
     }
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
     /* Set our initial priority to the maximum value - the size of our ciphersuite crypto table. */
     ciphersuite_priority = (USHORT)(0xFFFFFFFF);
@@ -493,7 +500,7 @@ USHORT                                no_extension = NX_FALSE;
         /* Save the first ciphersuite we find - assume cipher table is in priority order. */
         if ((status == NX_SUCCESS) && (new_ciphersuite_priority < ciphersuite_priority))
         {
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
             if (NX_SUCCESS == _nx_secure_tls_check_ciphersuite(ciphersuite_info, cert, selected_curve, cert_curve_supported))
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
             {
@@ -615,7 +622,7 @@ USHORT                                no_extension = NX_FALSE;
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_info,
                                              NX_SECURE_X509_CERT *cert, UINT selected_curve,
                                              UINT cert_curve_supported)
@@ -719,4 +726,4 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 
     return(NX_SUCCESS);
 }
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
