@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_active_certificate_set               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -75,16 +75,26 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_active_certificate_set(NX_SECURE_TLS_SESSION *tls_session,
                                            NX_SECURE_X509_CERT *certificate)
 {
+#ifdef NX_SECURE_DISABLE_X509
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(certificate);
 
+    return(NX_NOT_SUPPORTED);
+#else
     /* Set the active certificate (should be in the store). */
     tls_session -> nx_secure_tls_credentials.nx_secure_tls_active_certificate = certificate;
 
     /* Return completion status.  */
     return(NX_SUCCESS);
+#endif
 }
 

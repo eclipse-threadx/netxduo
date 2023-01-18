@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_x509_client_verify_configure PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -97,10 +97,15 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_session_x509_client_verify_configure(NX_SECURE_TLS_SESSION *tls_session, UINT certs_number, VOID *certificate_buffer, ULONG buffer_size)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT status = NX_SUCCESS;
 
     /* Signal the TLS stack to request and verify remote Client certificates. */
@@ -113,5 +118,13 @@ UINT status = NX_SUCCESS;
     }
 
     return(status);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(certs_number);
+    NX_PARAMETER_NOT_USED(certificate_buffer);
+    NX_PARAMETER_NOT_USED(buffer_size);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }
 

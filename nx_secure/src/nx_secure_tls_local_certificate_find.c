@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_local_certificate_find               PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,12 +73,17 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            updated X.509 return value, */
 /*                                            resulting in version 6.1.6  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_local_certificate_find(NX_SECURE_TLS_SESSION *tls_session,
                                             NX_SECURE_X509_CERT **certificate, UCHAR *common_name,
                                             UINT name_length)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT                              status;
 NX_SECURE_X509_CERT              *list_head;
 NX_SECURE_X509_CERTIFICATE_STORE *store;
@@ -108,5 +113,13 @@ NX_SECURE_X509_DISTINGUISHED_NAME name;
 
     /* Return completion status.  */
     return(status);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(certificate);
+    NX_PARAMETER_NOT_USED(common_name);
+    NX_PARAMETER_NOT_USED(name_length);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }
 

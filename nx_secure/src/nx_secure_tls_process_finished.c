@@ -31,7 +31,7 @@ static UCHAR generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_finished                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,6 +74,10 @@ static UCHAR generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_finished(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -177,6 +181,8 @@ UINT              is_server;
     }
 #endif
 
+#ifndef NX_SECURE_DISABLE_X509
+
     /* Now that we are done with the handshake, free all remote certificates - we don't need them anymore. */
     status = _nx_secure_tls_remote_certificate_free_all(tls_session);
 
@@ -184,6 +190,7 @@ UINT              is_server;
     {
         return(status);
     }
+#endif
 
     return(NX_SECURE_TLS_SUCCESS);
 }

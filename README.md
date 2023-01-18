@@ -38,6 +38,53 @@ Also there is dedicated [learning path of Azure RTOS NetX Duo](https://learn.mic
 
 The master branch has the most recent code with all new features and bug fixes. It does not represent the latest General Availability (GA) release of the library. Each official release (preview or GA) will be tagged to mark the commit and push it into the Github releases tab, e.g. `v6.2-rel`.
 
+> When you see xx-xx-xxxx, 6.x or x.x in function header, this means the file is not officially released yet. They will be updated in the next release. See example below.
+```
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _tx_initialize_low_level                          Cortex-M23/GNU    */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Scott Larson, Microsoft Corporation                                 */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function is responsible for any low-level processor            */
+/*    initialization, including setting up interrupt vectors, setting     */
+/*    up a periodic timer interrupt source, saving the system stack       */
+/*    pointer for use in ISR processing later, and finding the first      */
+/*    available RAM memory address for tx_application_define.             */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _tx_initialize_kernel_enter           ThreadX entry function        */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  09-30-2020      Scott Larson            Initial Version 6.1           */
+/*  xx-xx-xxxx      Scott Larson            Include tx_user.h,            */
+/*                                            resulting in version 6.x    */
+/*                                                                        */
+/**************************************************************************/ 
+```
+
 ## Protocols and connectivity
 
 Protocols and connectivity support are provided as addon modules within NetX Duo in `addons` folder. Some key modules are: [**azure_iot**](https://github.com/azure-rtos/netxduo/tree/master/addons/azure_iot), [**dhcp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-dhcp-client/chapter1), [**dns**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-dns/chapter1), [**ftp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-dns/chapter1), [**http**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-http/chapter1), [**mqtt**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-mqtt/chapter1), [**pop3**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-pop3-client/chapter1), [**lwm2m**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-lwm2m/chapter1), [**ppp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-ppp/chapter1), [**sntp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-sntp-client/chapter1), and [**web**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-web-http/chapter1). For a full list of NetX Duo addons, you can find in the same [Azure RTOS NetX Duo documentation](https://learn.microsoft.com/azure/rtos/netx-duo/).

@@ -29,6 +29,7 @@
 
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
 
+#ifndef NX_SECURE_DISABLE_X509
 static UCHAR hash[64]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256, SHA-384, SHA512. */
 static UCHAR _nx_secure_padded_signature[512];
 /* DER encodings (with OIDs for common algorithms) from RFC 8017.
@@ -39,7 +40,7 @@ static const UCHAR _NX_CRYPTO_DER_OID_SHA_224[]     =  {0x30, 0x2d, 0x30, 0x0d, 
 static const UCHAR _NX_CRYPTO_DER_OID_SHA_256[]     =  {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
 static const UCHAR _NX_CRYPTO_DER_OID_SHA_384[]     =  {0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00, 0x04, 0x30};
 static const UCHAR _NX_CRYPTO_DER_OID_SHA_512[]     =  {0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40};
-
+#endif
 
 
 /**************************************************************************/
@@ -47,7 +48,7 @@ static const UCHAR _NX_CRYPTO_DER_OID_SHA_512[]     =  {0x30, 0x51, 0x30, 0x0d, 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_ecc_generate_keys                    PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -113,6 +114,10 @@ static const UCHAR _NX_CRYPTO_DER_OID_SHA_512[]     =  {0x30, 0x51, 0x30, 0x0d, 
 /*  10-31-2022     Yanwu Cai                Modified comment(s),          */
 /*                                            updated parameters list,    */
 /*                                            resulting in version 6.2.0  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_ecc_generate_keys(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version, UCHAR tls_1_3,
@@ -123,26 +128,28 @@ UINT _nx_secure_tls_ecc_generate_keys(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciph
                                       VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
                                       VOID *public_auth_metadata, ULONG public_auth_metadata_size)
 {
-UINT                                  length;
-UINT                                  output_size;
-UINT                                  status;
-NX_CRYPTO_EXTENDED_OUTPUT extended_output;
-USHORT                                signature_length;
-UINT                                  signature_offset;
-const UCHAR                          *der_encoding = NX_NULL;
-UINT                                  der_encoding_length = 0;
-UINT                                  hash_length;
-const NX_CRYPTO_METHOD               *curve_method;
-const NX_CRYPTO_METHOD               *curve_method_cert;
-const NX_CRYPTO_METHOD               *ecdhe_method;
-const NX_CRYPTO_METHOD               *hash_method;
-const NX_CRYPTO_METHOD               *auth_method;
-VOID                                 *handler = NX_NULL;
-NX_SECURE_X509_CERT                  *certificate;
-NX_SECURE_X509_CRYPTO                *crypto_methods;
-NX_SECURE_EC_PRIVATE_KEY             *ec_privkey;
-NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
-USHORT                                signature_algorithm_id;
+UINT                       length;
+UINT                       output_size;
+UINT                       status;
+NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
+VOID                      *handler = NX_NULL;
+const NX_CRYPTO_METHOD    *curve_method;
+const NX_CRYPTO_METHOD    *ecdhe_method;
+#ifndef NX_SECURE_DISABLE_X509
+USHORT                     signature_length;
+UINT                       signature_offset;
+const UCHAR               *der_encoding = NX_NULL;
+UINT                       der_encoding_length = 0;
+UINT                       hash_length;
+const NX_CRYPTO_METHOD    *curve_method_cert;
+const NX_CRYPTO_METHOD    *hash_method;
+const NX_CRYPTO_METHOD    *auth_method;
+NX_SECURE_X509_CERT       *certificate;
+NX_SECURE_X509_CRYPTO     *crypto_methods;
+NX_SECURE_EC_PRIVATE_KEY  *ec_privkey;
+NX_SECURE_EC_PUBLIC_KEY   *ec_pubkey;
+USHORT                     signature_algorithm_id;
+#endif
 
 #if !(NX_SECURE_TLS_TLS_1_0_ENABLED) && !(NX_SECURE_TLS_TLS_1_1_ENABLED)
     NX_PARAMETER_NOT_USED(protocol_version);
@@ -151,6 +158,14 @@ USHORT                                signature_algorithm_id;
 #if !(NX_SECURE_TLS_TLS_1_3_ENABLED) || (!(NX_SECURE_TLS_TLS_1_0_ENABLED) && !(NX_SECURE_TLS_TLS_1_1_ENABLED))
     NX_PARAMETER_NOT_USED(tls_1_3);
     NX_PARAMETER_NOT_USED(tls_crypto_table);
+#endif
+#ifdef NX_SECURE_DISABLE_X509
+    NX_PARAMETER_NOT_USED(tls_handshake_hash);
+    NX_PARAMETER_NOT_USED(tls_key_material);
+    NX_PARAMETER_NOT_USED(tls_credentials);
+    NX_PARAMETER_NOT_USED(sign_key);
+    NX_PARAMETER_NOT_USED(public_auth_metadata);
+    NX_PARAMETER_NOT_USED(public_auth_metadata_size);
 #endif
 
 
@@ -299,6 +314,8 @@ USHORT                                signature_algorithm_id;
             return(status);
         }
     }
+
+#ifndef NX_SECURE_DISABLE_X509
 
     /* If signing the key, generate the signature now using the local device certificate (if available). */
     if(sign_key == NX_TRUE)
@@ -890,6 +907,7 @@ USHORT                                signature_algorithm_id;
             return(NX_SECURE_TLS_UNSUPPORTED_SIGNATURE_ALGORITHM);
         }
     }
+#endif
 
     /* Return the length of our generated data. */
     *public_key_size = length;

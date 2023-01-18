@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_certificate                     PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -79,10 +79,16 @@
 /*  04-25-2022     Zhen Kong                Modified comment(s), removed  */
 /*                                            unreachable error code,     */
 /*                                            resulting in version 6.1.11 */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
+/*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_certificate(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
                                      ULONG wait_option)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT                 length;
 UINT                 total_length;
 UCHAR                length_buffer[3];
@@ -265,4 +271,11 @@ UINT                 extensions_length;
     record_start[2] = (UCHAR)(total_length & 0xFF);
 
     return(NX_SUCCESS);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(send_packet);
+    NX_PARAMETER_NOT_USED(wait_option);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }

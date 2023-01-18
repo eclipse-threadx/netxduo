@@ -25,14 +25,16 @@
 
 #include "nx_secure_tls.h"
 
+#ifndef NX_SECURE_DISABLE_X509
 static UCHAR _nx_secure_client_padded_pre_master[600];
+#endif
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_generate_client_key_exchange             PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yanwu Cai, Microsoft Corporation                                    */
@@ -78,6 +80,10 @@ static UCHAR _nx_secure_client_padded_pre_master[600];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2022     Yanwu Cai                Initial Version 6.2.0         */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_generate_client_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite,
@@ -86,14 +92,18 @@ UINT _nx_secure_generate_client_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INF
                                              VOID *public_cipher_metadata, ULONG public_cipher_metadata_size,
                                              VOID *public_auth_metadata, ULONG public_auth_metadata_size)
 {
+#if defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) || !defined(NX_SECURE_DISABLE_X509)
 UINT                                  status;
+const NX_CRYPTO_METHOD               *public_cipher_method;
+VOID                                 *handler = NX_NULL;
+#endif
 UINT                                  data_size;
 UCHAR                                *encrypted_data_ptr;
+#ifndef NX_SECURE_DISABLE_X509
 UCHAR                                 rand_byte;
 UINT                                  i;
-const NX_CRYPTO_METHOD               *public_cipher_method;
 NX_SECURE_X509_CERT                  *remote_certificate;
-VOID                                 *handler = NX_NULL;
+#endif
 #ifdef NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE
 NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
 #endif /* NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE */
@@ -111,6 +121,11 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
 #ifndef NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE
     NX_PARAMETER_NOT_USED(public_auth_metadata);
     NX_PARAMETER_NOT_USED(public_auth_metadata_size);
+#endif
+#ifdef NX_SECURE_DISABLE_X509
+    NX_PARAMETER_NOT_USED(tls_key_material);
+    NX_PARAMETER_NOT_USED(public_cipher_metadata);
+    NX_PARAMETER_NOT_USED(public_cipher_metadata_size);
 #endif
 
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
@@ -194,7 +209,7 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
         else
 #endif
         {
-
+#ifndef NX_SECURE_DISABLE_X509
             /* Extract the data to be verified from the remote certificate processed earlier. */
             status = _nx_secure_x509_remote_endpoint_certificate_get(&tls_credentials -> nx_secure_tls_certificate_store,
                                                                      &remote_certificate);
@@ -307,15 +322,18 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
             data_buffer[1] = (UCHAR)(data_size & 0x00FF);
 
             data_size += 2;
+#else
+            return(NX_NOT_SUPPORTED);
+#endif /* NX_SECURE_DISABLE_X509 */
         }
     }
 
     /* Let the caller know how many bytes we wrote. +2 for the length we just added. */
     *output_size = data_size;
 
-#ifdef NX_SECURE_KEY_CLEAR
+#if defined(NX_SECURE_KEY_CLEAR) && !defined(NX_SECURE_DISABLE_X509)
     NX_SECURE_MEMSET(_nx_secure_client_padded_pre_master, 0, sizeof(_nx_secure_client_padded_pre_master));
-#endif /* NX_SECURE_KEY_CLEAR  */
+#endif /* NX_SECURE_KEY_CLEAR && !NX_SECURE_DISABLE_X509 */
 
     return(NX_SECURE_TLS_SUCCESS);
 }

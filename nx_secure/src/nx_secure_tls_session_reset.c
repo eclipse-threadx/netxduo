@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_reset                        PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -82,6 +82,10 @@
 /*                                            fixed renegotiation when    */
 /*                                            receiving in non-block mode,*/
 /*                                            resulting in version 6.2.0  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_reset(NX_SECURE_TLS_SESSION *session_ptr)
@@ -156,12 +160,16 @@ UINT temp_status;
     NX_SECURE_MEMSET(session_ptr -> nx_secure_tls_local_sequence_number, 0, sizeof(session_ptr -> nx_secure_tls_local_sequence_number));
     NX_SECURE_MEMSET(session_ptr -> nx_secure_tls_remote_sequence_number, 0, sizeof(session_ptr -> nx_secure_tls_remote_sequence_number));
 
+#ifndef NX_SECURE_DISABLE_X509
+
     /* Clear out all remote certificates. */
     status = _nx_secure_tls_remote_certificate_free_all(session_ptr);
 
     /* Clear out the active certificate so if the session is reused it will return to the default (local cert). */
     session_ptr -> nx_secure_tls_credentials.nx_secure_tls_active_certificate = NX_NULL;
-
+#else
+    status = NX_SECURE_TLS_SUCCESS;
+#endif
 
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
     session_ptr -> nx_secure_tls_secure_renegotiation = NX_FALSE;

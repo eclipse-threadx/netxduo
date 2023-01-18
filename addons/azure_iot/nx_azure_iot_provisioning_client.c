@@ -154,10 +154,22 @@ UINT server_port;
     mqtt_client_ptr = &(resource_ptr -> resource_mqtt);
 
     /* Set login info.  */
-    status = nxd_mqtt_client_login_set(mqtt_client_ptr, (CHAR *)resource_ptr -> resource_mqtt_user_name,
-                                       resource_ptr -> resource_mqtt_user_name_length,
-                                       (CHAR *)resource_ptr -> resource_mqtt_sas_token,
-                                       resource_ptr -> resource_mqtt_sas_token_length);
+    if (resource_ptr -> resource_mqtt_sas_token_length == 0)
+    {
+
+        /* X509 authentication. Set NULL for password.  */
+        status = nxd_mqtt_client_login_set(mqtt_client_ptr, (CHAR *)resource_ptr -> resource_mqtt_user_name,
+                                        resource_ptr -> resource_mqtt_user_name_length,
+                                        NX_NULL, 0);
+    }
+    else
+    {
+        status = nxd_mqtt_client_login_set(mqtt_client_ptr, (CHAR *)resource_ptr -> resource_mqtt_user_name,
+                                        resource_ptr -> resource_mqtt_user_name_length,
+                                        (CHAR *)resource_ptr -> resource_mqtt_sas_token,
+                                        resource_ptr -> resource_mqtt_sas_token_length);
+    }
+
     if (status)
     {
         LogError(LogLiteralArgs("IoTProvisioning client connect fail: MQTT CLIENT LOGIN SET FAIL status: %d"), status);

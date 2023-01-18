@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_client_handshake                     PORTABLE C      */
-/*                                                           6.1.12       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -119,6 +119,10 @@
 /*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            removed duplicated alert,   */
 /*                                            resulting in version 6.1.12 */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_client_handshake(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -275,6 +279,8 @@ const NX_CRYPTO_METHOD
                 {
                     tls_session -> nx_secure_tls_renegotiation_handshake = NX_TRUE;
 
+#ifndef NX_SECURE_DISABLE_X509
+
                     /* On a session resumption free all certificates for the new session.
                      * SESSION RESUMPTION: if session resumption is enabled, don't free!!
                      */
@@ -284,6 +290,9 @@ const NX_CRYPTO_METHOD
                     {
                         return(status);
                     }
+#else
+                    status = NX_SECURE_TLS_SUCCESS;
+#endif
                 }
                 else
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */

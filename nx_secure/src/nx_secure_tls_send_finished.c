@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_finished                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +70,10 @@
 /*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_finished(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet)
@@ -135,8 +139,11 @@ UINT             is_server;
         return(status);
     }
 
+#ifndef NX_SECURE_DISABLE_X509
+
     /* Finished with the handshake - we can free certificates now. */
     status = _nx_secure_tls_remote_certificate_free_all(tls_session);
+#endif
 
     return(status);
 }

@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_local_certificate_add                PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,11 +73,16 @@
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            updated X.509 return value, */
 /*                                            resulting in version 6.1.6  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_local_certificate_add(NX_SECURE_TLS_SESSION *tls_session,
                                           NX_SECURE_X509_CERT *certificate)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT status;
 
     /* Get the protection. */
@@ -109,5 +114,11 @@ UINT status;
     }
 
     return(status);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(certificate);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }
 

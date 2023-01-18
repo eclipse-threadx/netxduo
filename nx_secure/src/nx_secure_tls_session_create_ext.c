@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_create_ext                   PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -92,6 +92,10 @@
 /*  10-31-2022     Yanwu Cai                Modified comment(s), and added*/
 /*                                            custom secret generation,   */
 /*                                            resulting in version 6.2.0  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -362,21 +366,21 @@ const UCHAR all_found =     sig_found | key_ex_found | symm_found | hash_found |
 }
 
 
-
+#ifndef NX_SECURE_DISABLE_X509
 static UINT _map_x509_ciphersuites(NX_SECURE_TLS_SESSION *tls_session,
                                   const NX_CRYPTO_METHOD **crypto_array, UINT crypto_array_size,
                                   const NX_CRYPTO_CIPHERSUITE **cipher_map, UINT cipher_map_size, UINT *metadata_size)
 {
-NX_CRYPTO_ROLE_ENTRY            current_cipher;
-const NX_CRYPTO_METHOD                *cipher_method;
-NX_SECURE_X509_CRYPTO          *cert_crypto;
-NX_SECURE_TLS_CRYPTO *          crypto_table;
-UINT                            cipher_id;
-UINT                            suite;
-UINT                            cipher_counter;
-UINT                            status;
-UINT                            remaining_size;
-UCHAR                           crypto_found;
+NX_CRYPTO_ROLE_ENTRY    current_cipher;
+const NX_CRYPTO_METHOD *cipher_method;
+NX_SECURE_X509_CRYPTO  *cert_crypto;
+NX_SECURE_TLS_CRYPTO   *crypto_table;
+UINT                    cipher_id;
+UINT                    suite;
+UINT                    cipher_counter;
+UINT                    status;
+UINT                    remaining_size;
+UCHAR                   crypto_found;
 
 /* Constants for marking ciphers as found. */
 const UCHAR pub_key_found = 0x1;
@@ -465,7 +469,7 @@ const UCHAR all_found =     pub_key_found | hash_found;
 
     return(NX_SUCCESS);
 }
-
+#endif
 
 
 UINT _nx_secure_tls_session_create_ext(NX_SECURE_TLS_SESSION *tls_session,
@@ -494,8 +498,10 @@ NX_SECURE_TLS_CRYPTO *          crypto_table;
 
 NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_table;
 USHORT                          ciphersuite_table_size;
-NX_SECURE_X509_CRYPTO           *cert_crypto;
+#ifndef NX_SECURE_DISABLE_X509
+NX_SECURE_X509_CRYPTO          *cert_crypto;
 USHORT                          cert_crypto_size;
+#endif
 
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
 NX_CRYPTO_METHOD              **curve_crypto_list = NX_NULL;
@@ -586,6 +592,8 @@ ULONG metadata_size_sha256 = 0;
         metadata_size -= cipher_table_bytes;
         cipher_table_bytes = metadata_size;
 
+#ifndef NX_SECURE_DISABLE_X509
+
         /* Carve out space for our dynamic X.509 ciphersuite table. */
         crypto_table->nx_secure_tls_x509_cipher_table = (NX_SECURE_X509_CRYPTO*)(&metadata_area[0]);
         crypto_table->nx_secure_tls_x509_cipher_table_size = 0;
@@ -598,9 +606,11 @@ ULONG metadata_size_sha256 = 0;
             return(status);
         }
 
+
         /* Advance the metadata area past the end of the crypto table. */
         metadata_area += cipher_table_bytes;
         metadata_size -= cipher_table_bytes;
+#endif
 
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
         curve_crypto_list = (NX_CRYPTO_METHOD **)(&metadata_area[0]);
@@ -655,9 +665,6 @@ ULONG metadata_size_sha256 = 0;
     /* Get working pointers to our crypto methods. */
     ciphersuite_table = crypto_table -> nx_secure_tls_ciphersuite_lookup_table;
     ciphersuite_table_size = crypto_table -> nx_secure_tls_ciphersuite_lookup_table_size;
-
-    cert_crypto = crypto_table -> nx_secure_tls_x509_cipher_table;
-    cert_crypto_size = crypto_table -> nx_secure_tls_x509_cipher_table_size;
 
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
     crypto_method_md5 = crypto_table -> nx_secure_tls_handshake_hash_md5_method;
@@ -742,6 +749,10 @@ ULONG metadata_size_sha256 = 0;
     tls_session -> nx_secure_tls_1_3 = tls_session -> nx_secure_tls_1_3_supported;
 #endif
 
+#ifndef NX_SECURE_DISABLE_X509
+    cert_crypto = crypto_table->nx_secure_tls_x509_cipher_table;
+    cert_crypto_size = crypto_table->nx_secure_tls_x509_cipher_table_size;
+
     /* Loop through the certificate cipher table as well. */
     for (i = 0; i < cert_crypto_size; ++i)
     {
@@ -760,6 +771,7 @@ ULONG metadata_size_sha256 = 0;
             max_handshake_hash_scratch_size = cert_crypto[i].nx_secure_x509_hash_method -> nx_crypto_metadata_area_size;
         }
     }
+#endif
 
     /* We also need metadata space for the TLS handshake hash, so add that into the total.
        We need some scratch space to copy the handshake hash metadata during final hash generation
@@ -861,12 +873,14 @@ ULONG metadata_size_sha256 = 0;
     /* Get the protection. */
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 
+#ifndef NX_SECURE_DISABLE_X509
 
     /* Clear out the X509 certificate stores when we create a new TLS Session. */
     tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store.nx_secure_x509_remote_certificates = NX_NULL;
     tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store.nx_secure_x509_local_certificates = NX_NULL;
     tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store.nx_secure_x509_trusted_certificates = NX_NULL;
     tls_session -> nx_secure_tls_credentials.nx_secure_tls_active_certificate = NX_NULL;
+#endif
 
     /* Release the protection. */
     tx_mutex_put(&_nx_secure_tls_protection);

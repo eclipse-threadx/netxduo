@@ -27,20 +27,21 @@
 #include "nx_secure_dtls.h"
 #endif /* NX_SECURE_ENABLE_DTLS */
 
+#ifndef NX_SECURE_DISABLE_X509
 static UCHAR handshake_hash[64 + 34 + 32]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256. */
 static UCHAR _nx_secure_padded_signature[600];
 
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
 static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
 #endif
-
+#endif
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_certificate_verify              PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -104,11 +105,16 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  10-31-2022     Yanwu Cai                Modified comment(s),          */
 /*                                            updated parameters list,    */
 /*                                            resulting in version 6.2.0  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_certificate_verify(NX_SECURE_TLS_SESSION *tls_session,
                                             NX_PACKET *send_packet)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT                       length = 0;
 UINT                       data_size = 0;
 USHORT                     signature_algorithm;
@@ -916,5 +922,11 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
     send_packet -> nx_packet_length = send_packet -> nx_packet_length + (USHORT)(length);
 
     return(NX_SECURE_TLS_SUCCESS);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(send_packet);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }
 

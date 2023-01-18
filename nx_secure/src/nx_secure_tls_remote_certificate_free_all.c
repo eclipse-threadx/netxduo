@@ -32,7 +32,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_free_all          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,17 +71,22 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_remote_certificate_free_all(NX_SECURE_TLS_SESSION *tls_session)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT                              status = NX_SUCCESS;
 NX_SECURE_X509_CERTIFICATE_STORE *store;
 NX_SECURE_X509_CERT              *certificate;
 
 
     /* Reset the packet buffer if we allocated certificates from it. */
-    tls_session->nx_secure_tls_packet_buffer_size = tls_session->nx_secure_tls_packet_buffer_original_size;
+    tls_session -> nx_secure_tls_packet_buffer_size = tls_session -> nx_secure_tls_packet_buffer_original_size;
 
     /* Get the remote certificate store from our TLS session. */
     store = &tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store;
@@ -105,5 +110,10 @@ NX_SECURE_X509_CERT              *certificate;
 
     /* Return completion status.  */
     return(status);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }
 
