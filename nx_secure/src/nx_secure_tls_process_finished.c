@@ -31,7 +31,7 @@ static UCHAR generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_finished                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11b      */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,6 +74,9 @@ static UCHAR generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  02-03-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            corrected hash cleanup,     */
+/*                                            resulting in version 6.1.11b*/
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_finished(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -107,9 +110,13 @@ UINT              is_server;
         else
         {
             
-            /* Compare to see if the Finished hash matches the recevied hash. */
+            /* Compare to see if the Finished hash matches the received hash. */
             compare_result = (UINT)NX_SECURE_MEMCMP(generated_hash, packet_buffer, hash_size);
         }
+
+#ifdef NX_SECURE_KEY_CLEAR
+        NX_SECURE_MEMSET(generated_hash, 0, sizeof(generated_hash));
+#endif /* NX_SECURE_KEY_CLEAR  */
     }
     else
 #endif
@@ -160,7 +167,7 @@ UINT              is_server;
         NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_remote_verify_data, generated_hash, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. */
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 
-        /* The finished verify data is always 12 bytes (*except for SSLv3) - compare to see if the Finished hash matches the recevied hash. */
+        /* The finished verify data is always 12 bytes (*except for SSLv3) - compare to see if the Finished hash matches the received hash. */
         compare_result = (UINT)NX_SECURE_MEMCMP(generated_hash, packet_buffer, NX_SECURE_TLS_FINISHED_HASH_SIZE);
     }
 

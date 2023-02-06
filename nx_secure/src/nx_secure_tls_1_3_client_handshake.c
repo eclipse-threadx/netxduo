@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_client_handshake                 PORTABLE C      */
-/*                                                           6.1.11a      */
+/*                                                           6.1.11b      */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -120,6 +120,9 @@
 /*                                            updated alert message for   */
 /*                                            downgrade protection,       */
 /*                                            resulting in version 6.1.11a*/
+/*  02-03-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            corrected metadata cleanup, */
+/*                                            resulting in version 6.1.11b*/
 /*                                                                        */
 /**************************************************************************/
 
@@ -357,13 +360,6 @@ const UCHAR    *server_random;
 
             /* Update the transcript hash with the Finished.  */
             _nx_secure_tls_handshake_hash_update(tls_session, packet_start, message_length + header_bytes);
-
-            /* For client, cleanup hash handler after received the finished message from server. */
-            method_ptr = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_sha256_method;
-            if (method_ptr -> nx_crypto_cleanup != NX_NULL)
-            {
-                status = method_ptr -> nx_crypto_cleanup(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata);
-            }
             break;
         case NX_SECURE_TLS_CERTIFICATE_VERIFY:
             /* Handle server-sent certificate verify. */
@@ -678,6 +674,12 @@ const UCHAR    *server_random;
                 break;
             }
 
+            /* For client, cleanup hash handler after sent the finished message to server. */
+            method_ptr = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_sha256_method;
+            if (method_ptr -> nx_crypto_cleanup != NX_NULL)
+            {
+                status = method_ptr -> nx_crypto_cleanup(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata);
+            }
 
             break;
 /*      Cases not handled in TLS 1.3 (for reference):
