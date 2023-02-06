@@ -31,7 +31,7 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_record                       PORTABLE C      */
-/*                                                           6.1.11a      */
+/*                                                           6.1.11b      */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -100,6 +100,9 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*  07-19-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            checked seq number overflow,*/
 /*                                            resulting in version 6.1.11a*/
+/*  02-03-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            corrected data cleanup,     */
+/*                                            resulting in version 6.1.11b*/
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
@@ -579,7 +582,8 @@ NX_PACKET *decrypted_packet;
         }
 
 #ifdef NX_SECURE_KEY_CLEAR
-        if (message_type != NX_SECURE_TLS_APPLICATION_DATA)
+        if ((message_type != NX_SECURE_TLS_APPLICATION_DATA) &&
+            (status != NX_CONTINUE))
         {
             NX_SECURE_MEMSET(packet_data, 0, message_length);
         }
