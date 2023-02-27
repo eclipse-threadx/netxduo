@@ -43,7 +43,7 @@
 #define SAMPLE_COMMAND_SUCCESS_STATUS                                   (200)
 #define SAMPLE_COMMAND_ERROR_STATUS                                     (500)
 
-#define SAMPLE_PNP_MODEL_ID                                             "dtmi:com:example:Thermostat;3"
+#define SAMPLE_PNP_MODEL_ID                                             "dtmi:com:example:Thermostat;4"
 #define SAMPLE_PNP_DPS_PAYLOAD                                          "{\"modelId\":\"" SAMPLE_PNP_MODEL_ID "\"}"
 
 /* Generally, IoTHub Client and DPS Client do not run at the same time, user can use union as below to

@@ -9,8 +9,6 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* Version: 6.1 */
-
 /**
  * @file nx_azure_iot_adu_agent.h
  *
@@ -44,8 +42,8 @@ extern   "C" {
 /* Define the ADU agent component name.  */
 #define NX_AZURE_IOT_ADU_AGENT_COMPONENT_NAME                           "deviceUpdate"
 
-/* Define the ADU agent interface ID.  */
-#define NX_AZURE_IOT_ADU_AGENT_INTERFACE_ID                             "dtmi:azure:iot:deviceUpdate;1"
+/* Define the ADU agent contract model ID.  */
+#define NX_AZURE_IOT_ADU_AGENT_CONTRACT_MODEL_ID                        "dtmi:azure:iot:deviceUpdateContractModel;2"
 
 /* Define the compatibility value.  */
 #define NX_AZURE_IOT_ADU_AGENT_PROPERTY_VALUE_COMPATIBILITY             "manufacturer,model"
@@ -56,7 +54,7 @@ extern   "C" {
 #define NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_DEVICEPROPERTIES           "deviceProperties"
 #define NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_MANUFACTURER               "manufacturer"
 #define NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_MODEL                      "model"
-#define NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_INTERFACE_ID               "interfaceId"
+#define NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_CONTRACT_MODEL_ID          "contractModelId"
 #define NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_ADU_VERSION                "aduVer"
 #define NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_DO_VERSION                 "doVer"
 

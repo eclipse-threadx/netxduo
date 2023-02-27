@@ -56,7 +56,7 @@ static UINT _nx_secure_tls_send_serverhello_psk_extension(NX_SECURE_TLS_SESSION 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello_extensions          PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -99,6 +99,9 @@ static UINT _nx_secure_tls_send_serverhello_psk_extension(NX_SECURE_TLS_SESSION 
 /*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            removed unused code,        */
 /*                                            resulting in version 6.1.11 */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_serverhello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -113,9 +116,9 @@ USHORT extension_length = 0;
 USHORT total_extensions_length;
 UINT   status = NX_SUCCESS;
 
-#if defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) && (!NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) || (!NX_SECURE_TLS_TLS_1_3_ENABLED)
     NX_PARAMETER_NOT_USED(tls_session);
-#endif /* defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) && (!NX_SECURE_TLS_TLS_1_3_ENABLED) */
+#endif /* defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) || (!NX_SECURE_TLS_TLS_1_3_ENABLED) */
 
     if (available_size < (*packet_offset + 2u))
     {

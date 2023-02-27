@@ -9,9 +9,15 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* Version: 6.1 */
-
 #include "nx_azure_iot_adu_agent.h"
+
+/* ADU Version e.g: AzureRTOS;agent/x.x.x */
+#define NX_AZURE_IOT_ADU_AGENT_STR(C)                                   #C
+#define NX_AZURE_IOT_ADU_AGENT_TO_STR(x)                                NX_AZURE_IOT_ADU_AGENT_STR(x)
+#define NX_AZURE_IOT_ADU_AGENT_VERSION                                  "AzureRTOS;agent/" \
+                                                                        NX_AZURE_IOT_ADU_AGENT_TO_STR(NETXDUO_MAJOR_VERSION) "." \
+                                                                        NX_AZURE_IOT_ADU_AGENT_TO_STR(NETXDUO_MINOR_VERSION) "." \
+                                                                        NX_AZURE_IOT_ADU_AGENT_TO_STR(NETXDUO_PATCH_VERSION)
 
 /* Update buffer pointer and buffer size.  */
 #define NX_AZURE_IOT_ADU_AGENT_PTR_UPDATE(a, b, c, d)                   { \
@@ -500,6 +506,9 @@ NX_AZURE_IOT_ADU_AGENT *adu_agent_ptr = (NX_AZURE_IOT_ADU_AGENT *)args;
 
             /* Reset the state.  */
             adu_agent_ptr -> nx_azure_iot_adu_agent_state = NX_AZURE_IOT_ADU_AGENT_STATE_IDLE;
+
+            /* Report idle state to server.  */
+            nx_azure_iot_adu_agent_reported_properties_state_send(adu_agent_ptr);
 
             LogInfo(LogLiteralArgs("Cancel Command received"));
             return(NX_AZURE_IOT_SUCCESS);
@@ -3006,10 +3015,15 @@ UINT response_status;
                                                                     sizeof(NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_MODEL) - 1,
                                                                     device_properties -> model, device_properties -> model_length)) ||
         (nx_azure_iot_json_writer_append_property_with_string_value(&json_writer,
-                                                                    (const UCHAR *)NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_INTERFACE_ID,
-                                                                    sizeof(NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_INTERFACE_ID) - 1,
-                                                                    (const UCHAR *)NX_AZURE_IOT_ADU_AGENT_INTERFACE_ID,
-                                                                    sizeof(NX_AZURE_IOT_ADU_AGENT_INTERFACE_ID) - 1)) ||
+                                                                    (const UCHAR *)NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_CONTRACT_MODEL_ID,
+                                                                    sizeof(NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_CONTRACT_MODEL_ID) - 1,
+                                                                    (const UCHAR *)NX_AZURE_IOT_ADU_AGENT_CONTRACT_MODEL_ID,
+                                                                    sizeof(NX_AZURE_IOT_ADU_AGENT_CONTRACT_MODEL_ID) - 1)) ||
+        (nx_azure_iot_json_writer_append_property_with_string_value(&json_writer,
+                                                                    (const UCHAR *)NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_ADU_VERSION,
+                                                                    sizeof(NX_AZURE_IOT_ADU_AGENT_PROPERTY_NAME_ADU_VERSION) - 1,
+                                                                    (const UCHAR *)NX_AZURE_IOT_ADU_AGENT_VERSION,
+                                                                    sizeof(NX_AZURE_IOT_ADU_AGENT_VERSION) - 1)) ||
         (nx_azure_iot_json_writer_append_end_object(&json_writer)))
     {
         nx_packet_release(packet_ptr);

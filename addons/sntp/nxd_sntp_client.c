@@ -85,7 +85,7 @@ static ULONG process_timerticks = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_create                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -126,6 +126,9 @@ static ULONG process_timerticks = 0;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s),          */
+/*                                            checked the client ID,      */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_create(NX_SNTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT iface_index, NX_PACKET_POOL *packet_pool_ptr,   
@@ -143,6 +146,14 @@ UINT status;
 
         /* Return error status.  */
        return(NX_PTR_ERROR);
+    }
+
+    /* Check for the client ID.  */
+    if ((client_ptr == NX_NULL) || (client_ptr -> nx_sntp_client_id == NXD_SNTP_ID))
+    {
+
+        /* Return error status.  */
+        return(NX_PTR_ERROR);
     }
 
     /* Check for invalid network interface input. */
@@ -449,7 +460,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_delete                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -489,10 +500,16 @@ UINT status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s),          */
+/*                                            cleared the client ID,      */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_delete(NX_SNTP_CLIENT *client_ptr)
 {
+
+    /* Clear the client ID.  */
+    client_ptr -> nx_sntp_client_id = 0;
 
     /* Suspend the SNTP Client thread.  */
     tx_thread_suspend(&client_ptr -> nx_sntp_client_thread);

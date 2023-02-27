@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_finished_hash_generate           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -72,6 +72,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            corrected hash cleanup,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -251,11 +254,6 @@ NX_SECURE_TLS_KEY_SECRETS *secrets;
     {
         return(NX_SECURE_TLS_MISSING_CRYPTO_ROUTINE);
     }
-
-
-#ifdef NX_SECURE_KEY_CLEAR
-    NX_SECURE_MEMSET(finished_hash, 0, *hash_size);
-#endif /* NX_SECURE_KEY_CLEAR  */
 
     return(NX_SUCCESS);
 }

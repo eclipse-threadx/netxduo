@@ -5266,7 +5266,7 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    ioctl                                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5308,6 +5308,9 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), corrected*/
+/*                                            the result of FIONREAD,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 INT  ioctl(INT sockID,  INT command, INT *result)
@@ -5385,6 +5388,10 @@ UINT                status;
                     /* Error in the native NetX call.  */
                     NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
                     return(NX_SOC_ERROR); 
+                }
+                else
+                {
+                    *result += (INT)(bsd_socket_ptr -> nx_bsd_socket_received_byte_count);
                 }
             }
             else if (udp_socket_ptr)
