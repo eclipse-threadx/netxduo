@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_receive_records              PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,6 +80,9 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), added    */
 /*                                            conditional TLS 1.3 build,  */
 /*                                            resulting in version 6.1.11 */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), fixed    */
+/*                                            packet leak in TLS 1.3,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_session_receive_records(NX_SECURE_TLS_SESSION *tls_session,
@@ -228,7 +231,11 @@ UCHAR          handshake_finished = NX_FALSE;
         }
 #endif /* NX_SECURE_TLS_CLIENT_DISABLED */
 
-        if (handshake_finished)
+        if (handshake_finished
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+            && status != NX_SECURE_TLS_POST_HANDSHAKE_RECEIVED
+#endif /* (NX_SECURE_TLS_TLS_1_3_ENABLED) */
+            )
         {
             if (tls_session -> nx_secure_record_decrypted_packet == NX_NULL)
             {

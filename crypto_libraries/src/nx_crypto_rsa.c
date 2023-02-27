@@ -85,6 +85,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), aligned  */
+/*                                            buffer size of huge number, */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_rsa_operation(const UCHAR *exponent, UINT exponent_length, const UCHAR *modulus, UINT modulus_length,
@@ -92,7 +95,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_rsa_operation(const UCHAR *exponent, UINT expone
                                               const UCHAR *input, UINT input_length, UCHAR *output,
                                               USHORT *scratch_buf_ptr, UINT scratch_buf_length)
 {
-UCHAR                *scratch;
+HN_UBASE             *scratch;
 UINT                  mod_length;
 NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
 
@@ -100,27 +103,19 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
 
     /* The RSA operation is reversible so both encryption and decryption can be done with the same operation. */
     /* Local pointer for pointer arithmetic. */
-    scratch = (UCHAR *)scratch_buf_ptr;
+    scratch = (HN_UBASE *)scratch_buf_ptr;
 
     /* Set up each of the buffers - point into the scratch buffer at increments of the DH buffer size. */
-    modulus_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-    scratch += modulus_length;
-    modulus_hn.nx_crypto_huge_buffer_size = modulus_length;
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&modulus_hn, scratch, modulus_length);
 
     /* Input buffer(and scratch). */
-    input_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-    scratch += modulus_length;
-    input_hn.nx_crypto_huge_buffer_size = modulus_length;
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&input_hn, scratch, modulus_length);
 
     /* Exponent  buffer (and scratch). */
-    exponent_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-    scratch += modulus_length;
-    exponent_hn.nx_crypto_huge_buffer_size = modulus_length;
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&exponent_hn, scratch, modulus_length);
 
     /* Output buffer (and scratch). */
-    output_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-    scratch += modulus_length * 2;
-    output_hn.nx_crypto_huge_buffer_size = modulus_length * 2;
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&output_hn, scratch, modulus_length << 1);
 
     /* Copy the exponent from the caller's buffer. */
     _nx_crypto_huge_number_setup(&exponent_hn, exponent, exponent_length);
@@ -134,13 +129,9 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
     if (p && q)
     {
 
-        p_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-        scratch += (modulus_length >> 1);
-        p_hn.nx_crypto_huge_buffer_size = (modulus_length >> 1);
+        NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&p_hn, scratch, modulus_length >> 1);
 
-        q_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-        scratch += (modulus_length >> 1);
-        q_hn.nx_crypto_huge_buffer_size = (modulus_length >> 1);
+        NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&q_hn, scratch, modulus_length >> 1);
 
         /* Copy the prime p and q from the caller's buffer. */
         _nx_crypto_huge_number_setup(&p_hn, p, p_length);
@@ -151,7 +142,7 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
            where the "**" denotes exponentiation. */
         _nx_crypto_huge_number_crt_power_modulus(&input_hn, &exponent_hn, &p_hn, &q_hn,
                                                  &modulus_hn, &output_hn,
-                                                 (HN_UBASE *)scratch);
+                                                 scratch);
     }
     else
     {
@@ -160,7 +151,7 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
            The actual calculation is "shared_secret = (public_key**private_key) % modulus"
            where the "**" denotes exponentiation. */
         _nx_crypto_huge_number_mont_power_modulus(&input_hn, &exponent_hn, &modulus_hn,
-                                                  &output_hn, (HN_UBASE *)scratch);
+                                                  &output_hn, scratch);
     }
 
     /* Copy the shared secret into the return buffer. */

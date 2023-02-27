@@ -9,8 +9,6 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* Version: 6.1 */
-
 #include "nx_azure_iot_provisioning_client.h"
 
 #include "azure/core/az_span.h"

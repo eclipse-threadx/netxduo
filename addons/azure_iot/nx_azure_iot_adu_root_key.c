@@ -9,8 +9,6 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* Version: 6.1 */
-
 #include "nx_azure_iot_adu_agent.h"
 
 /* Update manifest is meant for ADU devices to know what files are needed to be downloaded and installed.

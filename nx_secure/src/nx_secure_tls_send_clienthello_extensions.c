@@ -511,7 +511,7 @@ UCHAR sig_algo = 0;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_supported_versions_extension        */
 /*                                                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -549,6 +549,9 @@ UCHAR sig_algo = 0;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -562,8 +565,10 @@ ULONG  offset;
 USHORT ext;
 UINT   data_length;
 UINT   id = NX_SECURE_TLS;
+#ifndef NX_SECURE_TLS_DISABLE_PROTOCOL_VERSION_DOWNGRADE
 USHORT protocol_version;
 INT    i;
+#endif /* NX_SECURE_TLS_DISABLE_PROTOCOL_VERSION_DOWNGRADE */
 
     /* Supported Versions Extension structure:
      * |     2      |         2          |      1       | <list length> |

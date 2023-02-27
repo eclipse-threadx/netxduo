@@ -9,8 +9,6 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* Version: 6.1 */
-
 #include "nx_azure_iot_hub_client_properties.h"
 
 extern UINT nx_azure_iot_hub_client_adjust_payload(NX_PACKET *packet_ptr);

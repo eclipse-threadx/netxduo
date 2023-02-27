@@ -567,7 +567,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_telnet_client_delete                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -600,6 +600,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s),          */
+/*                                            cleared the client ID,      */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_telnet_client_delete(NX_TELNET_CLIENT *client_ptr)
@@ -612,6 +615,9 @@ UINT  _nx_telnet_client_delete(NX_TELNET_CLIENT *client_ptr)
         /* Still connected, return an error.  */
         return(NX_TELNET_NOT_DISCONNECTED);
     }
+
+    /* Clear the client ID.  */
+    client_ptr -> nx_telnet_client_id = 0;
 
     /* Delete the socket.  */
     nx_tcp_socket_delete(&(client_ptr -> nx_telnet_client_socket));

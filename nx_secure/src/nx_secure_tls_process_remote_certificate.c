@@ -90,6 +90,8 @@
 /*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
+/*                                            initialized metadata for    */
+/*                                            remote certificate,         */
 /*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
@@ -382,6 +384,17 @@ ULONG                cert_buf_size;
         /* Copy the certificate data to the end of the certificate buffer or use an allocated certificate. */
         certificate -> nx_secure_x509_certificate_raw_data_length = endpoint_length;
         NX_SECURE_MEMCPY(certificate->nx_secure_x509_certificate_raw_data, endpoint_raw_ptr, endpoint_length); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
+
+        /* Assign the TLS Session metadata areas to the certificate for later use. */
+        certificate -> nx_secure_x509_public_cipher_metadata_area = tls_session -> nx_secure_public_cipher_metadata_area;
+        certificate -> nx_secure_x509_public_cipher_metadata_size = tls_session -> nx_secure_public_cipher_metadata_size;
+
+        certificate -> nx_secure_x509_hash_metadata_area = tls_session -> nx_secure_hash_mac_metadata_area;
+        certificate -> nx_secure_x509_hash_metadata_size = tls_session -> nx_secure_hash_mac_metadata_size;
+
+        /* Assign the cipher table from the parent TLS session. */
+        certificate -> nx_secure_x509_cipher_table = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table;
+        certificate -> nx_secure_x509_cipher_table_size = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table_size;
         
         /* Release the protection. */
         tx_mutex_put(&_nx_secure_tls_protection);
