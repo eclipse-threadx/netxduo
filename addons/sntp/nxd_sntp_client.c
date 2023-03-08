@@ -85,7 +85,7 @@ static ULONG process_timerticks = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_create                             PORTABLE C      */ 
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -126,9 +126,9 @@ static ULONG process_timerticks = 0;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s),          */
+/*  03-08-2023     Wenhui Xie               Modified comment(s),          */
 /*                                            checked the client ID,      */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_create(NX_SNTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT iface_index, NX_PACKET_POOL *packet_pool_ptr,   
@@ -460,7 +460,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_delete                              PORTABLE C      */ 
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -500,9 +500,9 @@ UINT status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s),          */
+/*  03-08-2023     Wenhui Xie               Modified comment(s),          */
 /*                                            cleared the client ID,      */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_delete(NX_SNTP_CLIENT *client_ptr)

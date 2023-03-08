@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */ 
 /*                                                                        */ 
 /*    nx_port.h                                           RXv2/CCRX       */ 
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -46,9 +46,9 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            renamed temporary variable, */
 /*                                            resulting in version 6.1.11 */
-/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*  03-08-2023     Yajun Xia                Modified comment(s),          */
 /*                                            removed duplicated macros,  */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -208,7 +208,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo RXv2/CCRX Version 6.2.0 *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo RXv2/CCRX Version 6.2.1 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

@@ -39,7 +39,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_packet_checksum_compute                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -75,6 +75,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ip_packet_checksum_compute(NX_PACKET *packet_ptr)
@@ -84,15 +87,17 @@ UCHAR            *org_prepend_ptr;
 ULONG             checksum;
 ULONG             val;
 UCHAR             is_done = NX_FALSE;
-ULONG             ip_header_length;
 ULONG             ip_src_addr[4];
 ULONG             ip_dst_addr[4];
 ULONG             data_length = 0;
-NX_IPV4_HEADER   *ip_header_ptr;
 NX_TCP_HEADER    *tcp_header_ptr;
 NX_UDP_HEADER    *udp_header_ptr;
+#ifndef NX_DISABLE_IPV4
+ULONG             ip_header_length;
+NX_IPV4_HEADER   *ip_header_ptr;
 NX_ICMP_HEADER   *icmpv4_header_ptr;
 NX_IGMP_HEADER   *igmp_header_ptr;
+#endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
 USHORT            short_val;
 NX_ICMPV6_HEADER *icmpv6_header_ptr;
@@ -100,14 +105,14 @@ NX_IPV6_HEADER   *ipv6_header_ptr;
 #endif
 
     /* Get IP version. */
-#ifdef FEATURE_NX_IPV6
+#ifndef NX_DISABLE_IPV4
     if (packet_ptr -> nx_packet_ip_version == NX_IP_VERSION_V4)
     {
-#endif
         next_protocol = NX_PROTOCOL_IPV4;
-#ifdef FEATURE_NX_IPV6
     }
-    else
+#endif /* NX_DISABLE_IPV4 */
+#ifdef FEATURE_NX_IPV6
+    if (packet_ptr -> nx_packet_ip_version == NX_IP_VERSION_V6)
     {
         next_protocol = NX_PROTOCOL_IPV6;
     }
@@ -121,6 +126,7 @@ NX_IPV6_HEADER   *ipv6_header_ptr;
     {
         switch (next_protocol)
         {
+#ifndef NX_DISABLE_IPV4
         case NX_PROTOCOL_IPV4:
         {
 
@@ -178,6 +184,7 @@ NX_IPV6_HEADER   *ipv6_header_ptr;
             data_length = packet_ptr -> nx_packet_length - (ip_header_length << 2);
             break;
         }
+#endif /* NX_DISABLE_IPV4 */
 
         case NX_PROTOCOL_TCP:
         {
@@ -241,6 +248,7 @@ NX_IPV6_HEADER   *ipv6_header_ptr;
             break;
         }
 
+#ifndef NX_DISABLE_IPV4
         case NX_PROTOCOL_ICMP:
         {
 
@@ -316,6 +324,7 @@ NX_IPV6_HEADER   *ipv6_header_ptr;
             is_done = NX_TRUE;
             break;
         }
+#endif /* NX_DISABLE_IPV4 */
 
 #ifdef FEATURE_NX_IPV6
         case NX_PROTOCOL_ICMPV6:
@@ -382,7 +391,7 @@ NX_IPV6_HEADER   *ipv6_header_ptr;
     }
 
 
-    /* Restore origianl prepend_ptr. */
+    /* Restore original prepend_ptr. */
     packet_ptr -> nx_packet_prepend_ptr = org_prepend_ptr;
     return;
 }

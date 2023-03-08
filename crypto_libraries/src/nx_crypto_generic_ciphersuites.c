@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_generic_ciphersuites                      PORTABLE C      */
-/*                                                           6.x         */
+/*                                                           6.2.1       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,10 +74,10 @@
 /*                                            resulting in version 6.1.12 */
 /*  10-31-2022     Yanwu Cai                Modified comment(s),          */
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 

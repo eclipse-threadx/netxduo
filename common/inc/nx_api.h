@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_api.h                                            PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -97,6 +97,9 @@
 /*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
 /*                                            supported HTTP Proxy,       */
 /*                                            resulting in version 6.2.0  */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            updated product constants,  */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -513,7 +516,7 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 #define AZURE_RTOS_NETXDUO
 #define NETXDUO_MAJOR_VERSION                    6
 #define NETXDUO_MINOR_VERSION                    2
-#define NETXDUO_PATCH_VERSION                    0
+#define NETXDUO_PATCH_VERSION                    1
 
 /* Define the following symbols for backward compatibility */
 #define EL_PRODUCT_NETXDUO

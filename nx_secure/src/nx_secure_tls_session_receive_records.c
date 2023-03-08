@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_receive_records              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,9 +80,9 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), added    */
 /*                                            conditional TLS 1.3 build,  */
 /*                                            resulting in version 6.1.11 */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), fixed    */
+/*  03-08-2023     Yanwu Cai                Modified comment(s), fixed    */
 /*                                            packet leak in TLS 1.3,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_tls_session_receive_records(NX_SECURE_TLS_SESSION *tls_session,

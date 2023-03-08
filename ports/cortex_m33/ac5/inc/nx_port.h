@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */
 /*                                                                        */
 /*    nx_port.h                                          Cortex-M33/AC5   */
-/*                                                            6.x         */
+/*                                                            6.2.1       */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -46,9 +46,9 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            renamed temporary variable, */
 /*                                            resulting in version 6.1.11 */
-/*  xx-xx-xxxx     Scott Larson             Modified comment(s), and      */
+/*  03-08-2023     Scott Larson             Modified comment(s), and      */
 /*                                            fixed whitespace,           */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -207,7 +207,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] =
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M33/AC5 Version 6.x *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M33/AC5 Version 6.2.1 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

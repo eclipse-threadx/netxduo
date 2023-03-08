@@ -31,7 +31,7 @@ static UCHAR generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_finished                     PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,11 +74,11 @@ static UCHAR generated_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
 /*                                            corrected hash cleanup,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_finished(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,

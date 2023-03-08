@@ -31,7 +31,7 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_record                       PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -102,9 +102,9 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*                                            improved buffer length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.12 */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            corrected data cleanup,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,

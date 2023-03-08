@@ -56,7 +56,7 @@ static UINT _nx_secure_tls_send_serverhello_psk_extension(NX_SECURE_TLS_SESSION 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello_extensions          PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -99,9 +99,9 @@ static UINT _nx_secure_tls_send_serverhello_psk_extension(NX_SECURE_TLS_SESSION 
 /*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            removed unused code,        */
 /*                                            resulting in version 6.1.11 */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s),          */
 /*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_serverhello_extensions(NX_SECURE_TLS_SESSION *tls_session,

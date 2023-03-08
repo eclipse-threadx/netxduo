@@ -567,7 +567,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_telnet_client_delete                            PORTABLE C      */ 
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -600,9 +600,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s),          */
+/*  03-08-2023     Wenhui Xie               Modified comment(s),          */
 /*                                            cleared the client ID,      */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_telnet_client_delete(NX_TELNET_CLIENT *client_ptr)

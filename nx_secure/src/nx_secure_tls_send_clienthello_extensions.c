@@ -86,7 +86,7 @@ static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SE
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions          PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -138,10 +138,10 @@ static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SE
 /*  04-25-2022     Yajun Xia                Modified comment(s),          */
 /*                                            added exception case,       */
 /*                                            resulting in version 6.1.11 */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_clienthello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -511,7 +511,7 @@ UCHAR sig_algo = 0;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_supported_versions_extension        */
 /*                                                        PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -549,9 +549,9 @@ UCHAR sig_algo = 0;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s),          */
 /*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)

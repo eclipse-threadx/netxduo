@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */ 
 /*                                                                        */ 
 /*    nx_port.h                                         Cortex-M7/GNU     */ 
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -47,9 +47,9 @@
 /*                                            corrected the code of       */
 /*                                            getting system state,       */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*  03-08-2023     Yajun Xia                Modified comment(s),          */
 /*                                            removed duplicated macros,  */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -187,7 +187,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M7/GNU Version 6.2.0 *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M7/GNU Version 6.2.1 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif
