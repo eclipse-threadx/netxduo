@@ -38,7 +38,7 @@ NX_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_tcp_socket_receive_notify                      PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -75,9 +75,9 @@ NX_CALLER_CHECKING_EXTERNS
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*  03-08-2023     Yajun Xia                Modified comment(s),          */
 /*                                            removed invalid check,      */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_tcp_socket_receive_notify(NX_TCP_SOCKET *socket_ptr,

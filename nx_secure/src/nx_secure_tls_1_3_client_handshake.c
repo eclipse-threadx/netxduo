@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_client_handshake                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -120,9 +120,9 @@
 /*                                            updated alert message for   */
 /*                                            downgrade protection,       */
 /*                                            resulting in version 6.1.12 */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            corrected metadata cleanup, */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 

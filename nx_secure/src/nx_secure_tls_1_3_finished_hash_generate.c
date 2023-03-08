@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_finished_hash_generate           PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -72,9 +72,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            corrected hash cleanup,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)

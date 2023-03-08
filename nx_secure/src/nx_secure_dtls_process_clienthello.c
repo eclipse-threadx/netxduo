@@ -40,7 +40,7 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_process_clienthello                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -94,10 +94,10 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 /*                                            improved buffer length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.3  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_clienthello(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,

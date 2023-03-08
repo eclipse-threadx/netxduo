@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_verify            PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -86,10 +86,10 @@
 /*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
 /*                                            custom secret generation,   */
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_remote_certificate_verify(NX_SECURE_TLS_SESSION *tls_session)

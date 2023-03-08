@@ -41,7 +41,7 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_certificate_verify           PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -99,10 +99,10 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  10-31-2022     Yanwu Cai                Modified comment(s),          */
 /*                                            updated parameters list,    */
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_certificate_verify(NX_SECURE_TLS_SESSION *tls_session,

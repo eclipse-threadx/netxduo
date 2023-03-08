@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_create_ext                   PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -92,10 +92,10 @@
 /*  10-31-2022     Yanwu Cai                Modified comment(s), and added*/
 /*                                            custom secret generation,   */
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 

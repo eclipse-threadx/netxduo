@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_certificate                     PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -79,10 +79,10 @@
 /*  04-25-2022     Zhen Kong                Modified comment(s), removed  */
 /*                                            unreachable error code,     */
 /*                                            resulting in version 6.1.11 */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_certificate(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,

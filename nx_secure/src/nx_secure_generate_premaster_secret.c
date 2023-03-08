@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_generate_premaster_secret                PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yanwu Cai, Microsoft Corporation                                    */
@@ -73,10 +73,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2022     Yanwu Cai                Initial Version 6.2.0         */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_generate_premaster_secret(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,

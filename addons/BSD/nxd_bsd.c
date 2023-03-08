@@ -5266,7 +5266,7 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    ioctl                                               PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5308,9 +5308,9 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), corrected*/
+/*  03-08-2023     Wenhui Xie               Modified comment(s), corrected*/
 /*                                            the result of FIONREAD,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 INT  ioctl(INT sockID,  INT command, INT *result)

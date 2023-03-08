@@ -892,7 +892,7 @@ ULONG           registered_event;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_cloud_module_event_clear                       PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -926,9 +926,9 @@ ULONG           registered_event;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  09-30-2020     Yuxin Zhou               Initial Version 6.1           */
-/*  xx-xx-xxxx     Bo Chen                  Modified comment(s), fixed    */
+/*  03-08-2023     Bo Chen                  Modified comment(s), fixed    */
 /*                                            event clear function,       */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_cloud_module_event_clear(NX_CLOUD_MODULE *cloud_module, ULONG module_own_event)

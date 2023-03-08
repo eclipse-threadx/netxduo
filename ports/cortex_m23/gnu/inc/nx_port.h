@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */ 
 /*                                                                        */ 
 /*    nx_port.h                                         Cortex-M23/GNU    */ 
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -43,9 +43,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*  03-08-2023     Yajun Xia                Modified comment(s),          */
 /*                                            removed duplicated macros,  */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -183,7 +183,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M23/GNU Version 6.2.0 *";
+                                    "Copyright (c) Microsoft Corporation. All rights reserved.  *  NetX Duo Cortex-M23/GNU Version 6.2.1 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

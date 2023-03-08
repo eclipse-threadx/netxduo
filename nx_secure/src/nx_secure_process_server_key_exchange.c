@@ -40,7 +40,7 @@ static UCHAR decrypted_signature[512];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_process_server_key_exchange               PORTABLE C     */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yanwu Cai, Microsoft Corporation                                    */
@@ -92,10 +92,10 @@ static UCHAR decrypted_signature[512];
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2022     Yanwu Cai                Initial Version 6.2.0         */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_process_server_key_exchange(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, NX_SECURE_TLS_CRYPTO *tls_crypto_table,

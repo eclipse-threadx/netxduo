@@ -2167,7 +2167,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_aes_ccm_operation                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.2.1        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2215,9 +2215,9 @@ UINT    status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_ccm_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */

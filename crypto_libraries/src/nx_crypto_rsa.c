@@ -85,9 +85,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), aligned  */
+/*  03-08-2023     Yanwu Cai                Modified comment(s), aligned  */
 /*                                            buffer size of huge number, */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_rsa_operation(const UCHAR *exponent, UINT exponent_length, const UCHAR *modulus, UINT modulus_length,
