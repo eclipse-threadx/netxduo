@@ -6992,7 +6992,7 @@ UINT            name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_client_send_with_zero_source_address       PORTABLE C      */ 
-/*                                                           6.1.12       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7039,6 +7039,9 @@ UINT            name_length;
 /*                                            udp socket send and ip      */
 /*                                            header add,                 */
 /*                                            resulting in version 6.1.12 */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*                                            supported random IP id,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_client_send_with_zero_source_address(NX_DHCP *dhcp_ptr, UINT iface_index, NX_PACKET *packet_ptr)
@@ -7177,7 +7180,11 @@ NX_IP_DRIVER    driver_request;
     ip_header_ptr -> nx_ip_header_word_0 =  (NX_IP_VERSION | socket_ptr -> nx_udp_socket_type_of_service | (0xFFFF & packet_ptr -> nx_packet_length));
 
     /* Build the second 32-bit word of the IP header.  */
+#ifdef NX_ENABLE_IP_ID_RANDOMIZATION
+    ip_header_ptr -> nx_ip_header_word_1 =  (((ULONG)NX_RAND()) << NX_SHIFT_BY_16) | socket_ptr -> nx_udp_socket_fragment_enable;
+#else
     ip_header_ptr -> nx_ip_header_word_1 =  (ip_ptr -> nx_ip_packet_id++ << NX_SHIFT_BY_16) | socket_ptr -> nx_udp_socket_fragment_enable;
+#endif /* NX_ENABLE_IP_ID_RANDOMIZATION */
 
     /* Build the third 32-bit word of the IP header.  */
     ip_header_ptr -> nx_ip_header_word_2 =  ((socket_ptr -> nx_udp_socket_time_to_live << NX_IP_TIME_TO_LIVE_SHIFT) | NX_IP_UDP);
