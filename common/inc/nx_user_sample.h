@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */
 /*                                                                        */
 /*    nx_user.h                                           PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.x          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -52,6 +52,9 @@
 /*                                            resulting in version 6.1.8  */
 /*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1.11 */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*                                            supported random IP id,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -124,6 +127,11 @@
 /* This define specifies the size of IP routing table. The default value is 8. */
 /*
 #define NX_IP_ROUTING_TABLE_SIZE 8
+*/
+
+/* Defined, this option enables random IP id. By default IP id is increased by one for each packet. */
+/*
+#define NX_ENABLE_IP_ID_RANDOMIZATION
 */
 
 /* This define specifies the maximum number of multicast groups that can be joined.

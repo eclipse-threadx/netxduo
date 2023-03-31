@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_api.h                                            PORTABLE C      */
-/*                                                           6.2.1        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -100,6 +100,9 @@
 /*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            updated product constants,  */
 /*                                            resulting in version 6.2.1  */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*                                            supported random IP id,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -2582,8 +2585,10 @@ typedef struct NX_IP_STRUCT
 #endif
 #endif /* !NX_DISABLE_IPV4  */
 
+#ifndef NX_ENABLE_IP_ID_RANDOMIZATION
     /* Define the packet ID.  */
     ULONG       nx_ip_packet_id;
+#endif /* NX_ENABLE_IP_ID_RANDOMIZATION */
 
     /* Define the default packet pool.  */
     struct NX_PACKET_POOL_STRUCT

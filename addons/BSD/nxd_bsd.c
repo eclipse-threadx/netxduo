@@ -3072,7 +3072,7 @@ struct sockaddr_in6 peer6_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_bsd_send_internal                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3103,7 +3103,7 @@ struct sockaddr_in6 peer6_address;
 /*    set_errno                             Sets the BSD errno            */
 /*    nx_packet_allocate                    Allocate a packet             */
 /*    nx_packet_data_append                 Append data to the packet     */
-/*    tx_mutex_get                          Get Mutex protction           */
+/*    tx_mutex_get                          Get Mutex protection          */
 /*    tx_mutex_put                          Release Mutex protection      */
 /*    nx_packet_release                     Release the packet on error   */
 /*    nx_udp_socket_send                    UDP packet send               */
@@ -3128,6 +3128,9 @@ struct sockaddr_in6 peer6_address;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*                                            supported random IP id,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static INT nx_bsd_send_internal(INT sockID, const CHAR *msg, INT msgLength, INT flags,
@@ -3382,8 +3385,14 @@ ULONG               data_sent = (ULONG)msgLength;
                    (*(packet_ptr -> nx_packet_prepend_ptr + 5) == 0))
                 {                    
 
+#ifdef NX_ENABLE_IP_ID_RANDOMIZATION
+                    ULONG rand_id = (ULONG)NX_RAND();
+                    *(packet_ptr -> nx_packet_prepend_ptr + 4) = (UCHAR)((rand_id & 0xFFFF) >> 8);
+                    *(packet_ptr -> nx_packet_prepend_ptr + 5) = (UCHAR)(rand_id & 0xFF);
+#else
                     *(packet_ptr -> nx_packet_prepend_ptr + 4) = (UCHAR)(((nx_bsd_default_ip -> nx_ip_packet_id) & 0xFFFF) >> 8);
                     *(packet_ptr -> nx_packet_prepend_ptr + 5) = (UCHAR)((nx_bsd_default_ip -> nx_ip_packet_id) & 0xFF);
+#endif /* NX_ENABLE_IP_ID_RANDOMIZATION */
                 }
                 
                 /* Clear the checksum field. */

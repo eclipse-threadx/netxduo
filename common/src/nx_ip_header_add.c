@@ -39,7 +39,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_header_add                                   PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -83,6 +83,9 @@
 /*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            supported TCP/IP offload,   */
 /*                                            resulting in version 6.1.8  */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*                                            supported random IP id,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ip_header_add(NX_IP *ip_ptr, NX_PACKET *packet_ptr, ULONG source_ip, ULONG destination_ip,
@@ -95,6 +98,10 @@ ULONG           checksum;
 UINT            compute_checksum = 1;
 #endif /* defined(NX_DISABLE_IP_TX_CHECKSUM) || defined(NX_ENABLE_INTERFACE_CAPABILITY) || defined(NX_IPSEC_ENABLE) */
 ULONG           val;
+
+#ifdef NX_ENABLE_IP_ID_RANDOMIZATION
+    NX_PARAMETER_NOT_USED(ip_ptr);
+#endif /* NX_ENABLE_IP_ID_RANDOMIZATION */
 
 #ifndef NX_DISABLE_IGMPV2
     /* Check IGMPv2 protocol. */
@@ -152,7 +159,11 @@ ULONG           val;
     }
 
     /* Build the second 32-bit word of the IP header.  */
+#ifdef NX_ENABLE_IP_ID_RANDOMIZATION
+    ip_header_ptr -> nx_ip_header_word_1 =  (((ULONG)NX_RAND()) << NX_SHIFT_BY_16) | fragment;
+#else
     ip_header_ptr -> nx_ip_header_word_1 =  (ip_ptr -> nx_ip_packet_id++ << NX_SHIFT_BY_16) | fragment;
+#endif /* NX_ENABLE_IP_ID_RANDOMIZATION */
 
     /* Build the third 32-bit word of the IP header.  */
     ip_header_ptr -> nx_ip_header_word_2 =  ((time_to_live << NX_IP_TIME_TO_LIVE_SHIFT) | protocol);

@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_create                                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -82,6 +82,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*                                            supported random IP id,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ip_create(NX_IP *ip_ptr, CHAR *name, ULONG ip_address, ULONG network_mask,
@@ -195,7 +198,9 @@ TX_THREAD *current_thread;
     ip_ptr -> nx_ip_name =  name;
 
     /* Set the initial IP packet ID.  */
+#ifndef NX_ENABLE_IP_ID_RANDOMIZATION
     ip_ptr -> nx_ip_packet_id =  NX_INIT_PACKET_ID;
+#endif /* NX_ENABLE_IP_ID_RANDOMIZATION */
 
     /* Setup the default packet pool for this IP instance.  */
     ip_ptr -> nx_ip_default_packet_pool =  default_pool;
