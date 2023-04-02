@@ -1977,6 +1977,8 @@ UINT                         ga_address_index;
         {
             break;
         }
+
+        i++;
     }
 
     if (i == NX_DHCPV6_MAX_LEASES)
