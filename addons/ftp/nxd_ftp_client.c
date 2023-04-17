@@ -5522,7 +5522,7 @@ ULONG       temp =        0;
 
         /* Skip non numeric text and whitespace.  */
         i = 3;
-        while (((buffer_ptr[i] > '9') || (buffer_ptr[i] < '0')) && (i < packet_ptr -> nx_packet_length))
+        while ((i < packet_ptr -> nx_packet_length) && ((buffer_ptr[i] > '9') || (buffer_ptr[i] < '0')))
         {
             i++;
         }
