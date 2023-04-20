@@ -134,6 +134,7 @@ extern   "C" {
 #define NX_AZURE_IOT_ADU_AGENT_UPDATE_RECEIVED                          0
 #define NX_AZURE_IOT_ADU_AGENT_UPDATE_DOWNLOADED                        1
 #define NX_AZURE_IOT_ADU_AGENT_UPDATE_INSTALLED                         2
+#define NX_AZURE_IOT_ADU_AGENT_UPDATE_FAILED                            255
 
 /* FIXME: status codes should be defined in iothub client.  */
 /* Status codes, closely mapping to HTTP status. */

@@ -783,7 +783,7 @@ UINT            i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_get                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -820,6 +820,10 @@ UINT            i;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported processing        */
+/*                                            compressed data,            */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_receive_packet_get(NX_PPP *ppp_ptr, NX_PACKET **return_packet_ptr)
@@ -1134,8 +1138,65 @@ UINT        status;
             /* Check the CRC of the packet.  */
             status =  _nx_ppp_check_crc(packet_head_ptr);
 
-            /* Determine if there was an error.  */
-            if (status != NX_SUCCESS)
+            if (status == NX_SUCCESS)
+            {
+
+                /* Remove the FCS (2 bytes) and Flag (1 byte).  */
+                packet_head_ptr -> nx_packet_length =  packet_head_ptr -> nx_packet_length - 3;  
+                packet_ptr -> nx_packet_append_ptr =  packet_ptr -> nx_packet_append_ptr - 3;
+
+#ifndef NX_DISABLE_PACKET_CHAIN
+                /* Check for the condition where there is essentially no data in the last packet. */
+                if (packet_ptr -> nx_packet_append_ptr <= packet_ptr -> nx_packet_prepend_ptr)
+                {
+                    ULONG diff = (ULONG)(packet_ptr -> nx_packet_prepend_ptr - packet_ptr -> nx_packet_append_ptr);
+
+                    packet_ptr -> nx_packet_append_ptr =  packet_ptr -> nx_packet_prepend_ptr;
+
+                    if (packet_head_ptr != packet_ptr)
+                    {
+
+
+                        NX_PACKET *tmp_packet_ptr = packet_head_ptr;  
+                        NX_PACKET *prev_packet_ptr = tmp_packet_ptr;
+                        while (tmp_packet_ptr -> nx_packet_next != 0x0)
+                        {
+                            prev_packet_ptr = tmp_packet_ptr;
+                            tmp_packet_ptr = tmp_packet_ptr -> nx_packet_next;
+                        }
+
+                        nx_packet_release(tmp_packet_ptr);
+                        prev_packet_ptr -> nx_packet_next = NX_NULL;
+                        prev_packet_ptr -> nx_packet_append_ptr -= diff;
+                    }
+                }
+#endif  /* NX_DISABLE_PACKET_CHAIN */
+
+#ifdef NX_PPP_COMPRESSION_ENABLE
+                if (((UINT)(packet_head_ptr -> nx_packet_append_ptr - packet_head_ptr -> nx_packet_prepend_ptr) < 3) ||
+                    (packet_head_ptr -> nx_packet_prepend_ptr[1] != 0xff) ||
+                    (packet_head_ptr -> nx_packet_prepend_ptr[2] != 0x03))
+                {
+
+                    /* Address and control fields are compressed. Remove the compressed HDLC header.  */
+                    packet_head_ptr -> nx_packet_prepend_ptr++;
+                    packet_head_ptr -> nx_packet_length--;
+                }
+#else
+                if ((UINT)(packet_head_ptr -> nx_packet_append_ptr - packet_head_ptr -> nx_packet_prepend_ptr) < 3)
+                {
+                    status = NX_PPP_BAD_PACKET;
+                }
+#endif /* NX_PPP_COMPRESSION_ENABLE */
+                else
+                {
+
+                    /* Remove the HDLC header.  */
+                    packet_head_ptr -> nx_packet_prepend_ptr += 3;
+                    packet_head_ptr -> nx_packet_length -= 3;
+                }
+            }
+            else
             {
 
                 /* CRC error is present, just give up on the current frame.  */
@@ -1145,6 +1206,11 @@ UINT        status;
                 /* Increment the frame CRC error counter.  */
                 ppp_ptr -> nx_ppp_frame_crc_errors++;
 #endif
+            }
+
+            /* Determine if there was an error.  */
+            if (status != NX_SUCCESS)
+            {
 
                 /* Release the current packet.  */
                 nx_packet_release(packet_head_ptr);
@@ -1187,41 +1253,6 @@ UINT        status;
 
                 break;
             }
-
-            /* Remove the FCS (2 bytes) and Flag (1 byte).  */
-            packet_head_ptr -> nx_packet_length =  packet_head_ptr -> nx_packet_length - 3;  
-            packet_ptr -> nx_packet_append_ptr =  packet_ptr -> nx_packet_append_ptr - 3;
-
-#ifndef NX_DISABLE_PACKET_CHAIN
-            /* Check for the condition where there is essentially no data in the last packet. */
-            if (packet_ptr -> nx_packet_append_ptr <= packet_ptr -> nx_packet_prepend_ptr)
-            {
-                ULONG diff = (ULONG)(packet_ptr -> nx_packet_prepend_ptr - packet_ptr -> nx_packet_append_ptr);
-
-                packet_ptr -> nx_packet_append_ptr =  packet_ptr -> nx_packet_prepend_ptr;
-
-                if (packet_head_ptr != packet_ptr)
-                {
-
-
-                    NX_PACKET *tmp_packet_ptr = packet_head_ptr;  
-                    NX_PACKET *prev_packet_ptr = tmp_packet_ptr;
-                    while (tmp_packet_ptr -> nx_packet_next != 0x0)
-                    {
-                        prev_packet_ptr = tmp_packet_ptr;
-                        tmp_packet_ptr = tmp_packet_ptr -> nx_packet_next;
-                    }
-
-                    nx_packet_release(tmp_packet_ptr);
-                    prev_packet_ptr -> nx_packet_next = NX_NULL;
-                    prev_packet_ptr -> nx_packet_append_ptr -= diff;
-                }
-            }
-#endif  /* NX_DISABLE_PACKET_CHAIN */
-
-            /* Remove the HDLC header.  */
-            packet_head_ptr -> nx_packet_prepend_ptr += 3;
-            packet_head_ptr -> nx_packet_length -= 3;
 
             /* Return the pointer.  */
             *return_packet_ptr =  packet_head_ptr;
@@ -1277,11 +1308,23 @@ UINT        status;
 
         /* We need to perform packet chaining at this point, but only for IP data frames. Non PPP data and
            the other PPP protocol packets must fit within the payload of one packet.  */
-        else if ((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
-                 (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0xff) &&
-                 (packet_head_ptr -> nx_packet_prepend_ptr[2] == 0x03) &&
-                 (packet_head_ptr -> nx_packet_prepend_ptr[3] == 0x00) &&
-                 (packet_head_ptr -> nx_packet_prepend_ptr[4] == 0x21)) /* 0x0021 is NX_PPP_DATA */
+        else if (((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
+                  (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0xff) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[2] == 0x03) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[3] == 0x00) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[4] == 0x21)) /* 0x0021 is NX_PPP_DATA */
+#ifdef NX_PPP_COMPRESSION_ENABLE
+              || ((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
+                  (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0xff) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[2] == 0x03) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[3] == 0x21)) /* Protocol field is compressed */
+              || ((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
+                  (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0x00) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[2] == 0x21)) /* Address and Control fields are compressed */
+              || ((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
+                  (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0x21)) /* Protocol, Address and Control fields are compressed */
+#endif /* NX_PPP_COMPRESSION_ENABLE */
+                 )
         {
 
             /* We need to move to the next packet and chain them.  */
@@ -1404,7 +1447,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_process                      PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1447,6 +1490,10 @@ UINT        status;
 /*                                            improved packet length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.2  */
+/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported processing        */
+/*                                            compressed data,            */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_receive_packet_process(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -1463,9 +1510,16 @@ UINT        length;
     /* Increment the number of IP frames sent.  */
     ppp_ptr -> nx_ppp_total_frames_received++;
 #endif
+    
+#ifdef NX_PPP_COMPRESSION_ENABLE
+
+    /* Check for valid packet length for Protocol (if compressed, it should be 1 byte).  */
+    if (packet_ptr -> nx_packet_length < 1)
+#else
 
     /* Check for valid packet length for Protocol (2 bytes).  */
     if (packet_ptr -> nx_packet_length < 2)
+#endif /* NX_PPP_COMPRESSION_ENABLE */
     {
 
         /* Release the packet. */
@@ -1475,8 +1529,22 @@ UINT        length;
         return;
     }
 
+#ifdef NX_PPP_COMPRESSION_ENABLE
+
     /* Pickup the protocol type.  */
-    protocol =  (((UINT) packet_ptr -> nx_packet_prepend_ptr[0]) << 8) | ((UINT) packet_ptr -> nx_packet_prepend_ptr[1]);
+    if (packet_ptr -> nx_packet_prepend_ptr[0] & NX_PPP_PROTOCOL_LSB_MARK)
+    {
+
+        /* The protocol field is compressed to 1 byte.  */
+        protocol =  (UINT) packet_ptr -> nx_packet_prepend_ptr[0];
+    }
+    else
+#endif /* NX_PPP_COMPRESSION_ENABLE */
+    {
+
+        /* The protocol field is 2 bytes.  */
+        protocol =  (((UINT) packet_ptr -> nx_packet_prepend_ptr[0]) << 8) | ((UINT) packet_ptr -> nx_packet_prepend_ptr[1]);
+    }
 
     /* Check protocol.  */
     if (protocol != NX_PPP_DATA)
@@ -1873,7 +1941,7 @@ NX_PPP  *ppp_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_netx_packet_transfer                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1908,6 +1976,10 @@ NX_PPP  *ppp_ptr;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported processing        */
+/*                                            compressed data,            */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 void _nx_ppp_netx_packet_transfer(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -1923,11 +1995,29 @@ ULONG   offset;
     /* Add the incoming interface pointer.  */
     packet_ptr -> nx_packet_ip_interface =  ppp_ptr -> nx_ppp_interface_ptr;
 
-    /* Remove the PPP header [00,21] in the front of the IP packet.  */
-    packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + 2;
+#ifdef NX_PPP_COMPRESSION_ENABLE
 
-    /* Adjust the packet length.  */
-    packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length - 2;
+    /* Check whether the protocol field is 1 byte or 2 bytes.  */
+    if (packet_ptr -> nx_packet_prepend_ptr[0] & NX_PPP_PROTOCOL_LSB_MARK)
+    {
+
+        /* Remove the PPP header [21] in the front of the IP packet.  */
+        packet_ptr -> nx_packet_prepend_ptr = packet_ptr -> nx_packet_prepend_ptr + 1;
+
+        /* Adjust the packet length.  */
+        packet_ptr -> nx_packet_length = packet_ptr -> nx_packet_length - 1;
+
+    }
+    else
+#endif /* NX_PPP_COMPRESSION_ENABLE */
+    {
+
+        /* Remove the PPP header [00,21] in the front of the IP packet.  */
+        packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + 2;
+
+        /* Adjust the packet length.  */
+        packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length - 2;
+    }
 
     /* Calculate the offset for four byte alignment.  */
     offset = (((ULONG)packet_ptr -> nx_packet_prepend_ptr) & 3);
@@ -3254,7 +3344,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_configure_request_send                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3287,13 +3377,18 @@ NX_PACKET   *packet_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported processing        */
+/*                                            compressed data,            */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_configure_request_send(NX_PPP *ppp_ptr)
 {
-    
 UINT        status;
 NX_PACKET   *packet_ptr;
+UINT        index = 0;
+UINT        length_index = 0;
 
 
     /* Allocate a packet for the PPP packet.  */
@@ -3317,52 +3412,58 @@ NX_PACKET   *packet_ptr;
     ppp_ptr -> nx_ppp_transmit_id++;
 
     /* Build the configuration request.  */
-    packet_ptr -> nx_packet_prepend_ptr[0] =  (NX_PPP_LCP_PROTOCOL & 0xFF00) >> 8;
-    packet_ptr -> nx_packet_prepend_ptr[1] =  NX_PPP_LCP_PROTOCOL & 0xFF;
-    packet_ptr -> nx_packet_prepend_ptr[2] =  NX_PPP_LCP_CONFIGURE_REQUEST;
-    packet_ptr -> nx_packet_prepend_ptr[3] =  ppp_ptr -> nx_ppp_transmit_id;
-    packet_ptr -> nx_packet_prepend_ptr[4] =  0;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  (NX_PPP_LCP_PROTOCOL & 0xFF00) >> 8;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  NX_PPP_LCP_PROTOCOL & 0xFF;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  NX_PPP_LCP_CONFIGURE_REQUEST;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  ppp_ptr -> nx_ppp_transmit_id;
+
+    /* Store the index of length field and skip the length field.  */
+    length_index = index;
+    index += 2;
 
     /* Load the MRU.  */
-    packet_ptr -> nx_packet_prepend_ptr[6] =  1;
-    packet_ptr -> nx_packet_prepend_ptr[7] =  4;
-    packet_ptr -> nx_packet_prepend_ptr[8] =  (UCHAR) ((NX_PPP_MRU) >> 8);
-    packet_ptr -> nx_packet_prepend_ptr[9] =  (UCHAR) ((NX_PPP_MRU) & 0xff);
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  1;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  4;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  (UCHAR) ((NX_PPP_MRU) >> 8);
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  (UCHAR) ((NX_PPP_MRU) & 0xff);
 
     /* Load the authentication protocol type. */
     if ((ppp_ptr -> nx_ppp_verify_authentication_protocol == NX_PPP_PAP_PROTOCOL) && (ppp_ptr -> nx_ppp_pap_verify_login))
     {
 
-        /* Set the length for PAP authentication protocol.  */
-        packet_ptr -> nx_packet_prepend_ptr[5] =   12;
-
-        packet_ptr -> nx_packet_prepend_ptr[10] =  3;
-        packet_ptr -> nx_packet_prepend_ptr[11] =  4;
-        packet_ptr -> nx_packet_prepend_ptr[12] =  (NX_PPP_PAP_PROTOCOL & 0xFF00) >> 8;
-        packet_ptr -> nx_packet_prepend_ptr[13] =  NX_PPP_PAP_PROTOCOL & 0xFF;
+        /* Set the PAP authentication protocol.  */
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  3;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  4;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  (NX_PPP_PAP_PROTOCOL & 0xFF00) >> 8;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  NX_PPP_PAP_PROTOCOL & 0xFF;
     }
     else if ((ppp_ptr -> nx_ppp_verify_authentication_protocol == NX_PPP_CHAP_PROTOCOL) && 
              (ppp_ptr -> nx_ppp_chap_get_challenge_values) && (ppp_ptr -> nx_ppp_chap_get_verification_values))
     {
 
-        /* Set the length for CHAP authentication protocol.  */
-        packet_ptr -> nx_packet_prepend_ptr[5] =   13;
-
-        packet_ptr -> nx_packet_prepend_ptr[10] =  3;
-        packet_ptr -> nx_packet_prepend_ptr[11] =  5;
-        packet_ptr -> nx_packet_prepend_ptr[12] =  (NX_PPP_CHAP_PROTOCOL & 0xFF00) >> 8;
-        packet_ptr -> nx_packet_prepend_ptr[13] =   NX_PPP_CHAP_PROTOCOL & 0xFF;
-        packet_ptr -> nx_packet_prepend_ptr[14] =  0x05;
+        /* Set the CHAP authentication protocol.  */
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  3;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  5;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  (NX_PPP_CHAP_PROTOCOL & 0xFF00) >> 8;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =   NX_PPP_CHAP_PROTOCOL & 0xFF;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  0x05;
     }
-    else
-    {
 
-        /* Set the length for no authentication protocol.  */
-        packet_ptr -> nx_packet_prepend_ptr[5] =  8;
-    }
+#ifdef NX_PPP_COMPRESSION_ENABLE
+
+    /* Add PFC and ACFC options.  */
+    packet_ptr -> nx_packet_prepend_ptr[index++] = 7;
+    packet_ptr -> nx_packet_prepend_ptr[index++] = 2;
+    packet_ptr -> nx_packet_prepend_ptr[index++] = 8;
+    packet_ptr -> nx_packet_prepend_ptr[index++] = 2;
+#endif /* NX_PPP_COMPRESSION_ENABLE */
+
+    /* Update the length field.  */
+    packet_ptr -> nx_packet_prepend_ptr[length_index] = (UCHAR)((index - 2) >> 8);
+    packet_ptr -> nx_packet_prepend_ptr[length_index + 1] = (UCHAR)((index - 2) & 0xff);
 
     /* Setup the append pointer and the packet length (LCP length + PPP header).  */
-    packet_ptr -> nx_packet_length =  (ULONG)(packet_ptr -> nx_packet_prepend_ptr[5] + 2);
+    packet_ptr -> nx_packet_length =  (ULONG)(index);
     packet_ptr -> nx_packet_append_ptr =  packet_ptr -> nx_packet_prepend_ptr + packet_ptr -> nx_packet_length;
 
 #ifndef NX_PPP_DISABLE_INFO
