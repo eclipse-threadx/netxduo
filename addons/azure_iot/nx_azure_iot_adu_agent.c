@@ -1717,6 +1717,7 @@ UINT   i = 0;
 
 static VOID nx_azure_iot_adu_agent_step_state_update(NX_AZURE_IOT_ADU_AGENT *adu_agent_ptr, UINT step_state)
 {
+NX_AZURE_IOT_ADU_AGENT_UPDATE_MANIFEST_CONTENT *update_manifest_content = &(adu_agent_ptr -> nx_azure_iot_adu_agent_update_manifest_content);
 
     /* Update state.  */
     adu_agent_ptr -> nx_azure_iot_adu_agent_current_step -> state = step_state;
@@ -1730,6 +1731,21 @@ static VOID nx_azure_iot_adu_agent_step_state_update(NX_AZURE_IOT_ADU_AGENT *adu
 
         /* Report state to server.  */
         nx_azure_iot_adu_agent_reported_properties_state_send(adu_agent_ptr);
+
+        /* Check if set the update notify.  */
+        if (adu_agent_ptr -> nx_azure_iot_adu_agent_update_notify)
+        {
+
+            /* Notify the user and let users control the update.   */
+            adu_agent_ptr -> nx_azure_iot_adu_agent_update_notify(adu_agent_ptr,
+                                                                  NX_AZURE_IOT_ADU_AGENT_UPDATE_FAILED,
+                                                                  (UCHAR *)update_manifest_content -> update_id.provider,
+                                                                  update_manifest_content -> update_id.provider_length,
+                                                                  (UCHAR *)update_manifest_content -> update_id.name,
+                                                                  update_manifest_content -> update_id.name_length,
+                                                                  (UCHAR *)update_manifest_content -> update_id.version,
+                                                                  update_manifest_content -> update_id.version_length);
+        }
     }
     else if (step_state == NX_AZURE_IOT_ADU_AGENT_STEP_STATE_MANIFEST_DOWNLOAD_SUCCEEDED)
     {

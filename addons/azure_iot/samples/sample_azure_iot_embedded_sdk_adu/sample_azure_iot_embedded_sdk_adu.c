@@ -40,6 +40,7 @@
 
 static NX_AZURE_IOT_ADU_AGENT adu_agent;
 static UINT adu_agent_started = NX_FALSE;
+static NX_AZURE_IOT_HUB_CLIENT *iothub_client;
 
 VOID sample_adu_start(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr);
 
@@ -71,10 +72,19 @@ static void adu_agent_update_notify(NX_AZURE_IOT_ADU_AGENT *adu_agent_ptr,
         /* Start to apply update immediately for testing.  */
         nx_azure_iot_adu_agent_update_apply(adu_agent_ptr);
     }
+    else if(update_state == NX_AZURE_IOT_ADU_AGENT_UPDATE_FAILED)
+    {
+        printf("Failed to deploy new update, trying again...\r\n\r\n");
+
+        /* Failed to deploy new update, try again for testing.  */
+        nx_azure_iot_hub_client_properties_request(iothub_client, NX_NO_WAIT);
+    }
 }
 
 VOID sample_adu_start(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr)
 {
+    iothub_client = hub_client_ptr;
+
     if (adu_agent_started == NX_FALSE)
     {
 
