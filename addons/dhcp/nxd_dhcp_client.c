@@ -3552,7 +3552,7 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcp_state_change_notify                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3586,6 +3586,9 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s), and      */
+/*                                            corrected caller checking,  */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_state_change_notify(NX_DHCP *dhcp_ptr, VOID (*dhcp_state_change_notify)(NX_DHCP *dhcp_ptr, UCHAR new_state))
@@ -3599,7 +3602,7 @@ UINT    status;
         return(NX_PTR_ERROR);
     
     /* Check for appropriate caller.  */
-    NX_THREADS_ONLY_CALLER_CHECKING
+    NX_INIT_AND_THREADS_CALLER_CHECKING
 
     /* Call actual DHCP notify service.  */
     status =  _nx_dhcp_state_change_notify(dhcp_ptr, dhcp_state_change_notify);

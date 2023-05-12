@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_certificate                     PORTABLE C      */
-/*                                                           6.2.1        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -83,6 +83,9 @@
 /*                                            fixed compiler errors when  */
 /*                                            x509 is disabled,           */
 /*                                            resulting in version 6.2.1  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed packet buffer overrun,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_certificate(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
@@ -97,7 +100,7 @@ NX_SECURE_X509_CERT *cert;
 INT                  compare_result = 0;
 UCHAR               *record_start;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-UINT                 extensions_length;
+USHORT               extensions_length;
 #endif
 
 
@@ -222,17 +225,21 @@ UINT                 extensions_length;
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
         /* Check for TLS 1.3 extensions following each certificate. */
-        if(tls_session->nx_secure_tls_1_3)
+        if (tls_session -> nx_secure_tls_1_3)
         {
             extensions_length = 0;
+            NX_CHANGE_USHORT_ENDIAN(extensions_length);
 
             /* Add extension length to packet. */
-            send_packet -> nx_packet_append_ptr[0] = (UCHAR)((extensions_length & 0xFF00) >> 8);
-            send_packet -> nx_packet_append_ptr[1] = (UCHAR)(extensions_length & 0x00FF);
+            status = nx_packet_data_append(send_packet, &extensions_length,
+                                           sizeof(extensions_length),
+                                           tls_session -> nx_secure_tls_packet_pool,
+                                           wait_option);
+            if (status != NX_SUCCESS)
+            {
+                return(status);
+            }
 
-            /* Adjust pointer and length in packet according to extensions sent. */
-            send_packet -> nx_packet_append_ptr = send_packet -> nx_packet_append_ptr + 2;
-            send_packet -> nx_packet_length = send_packet -> nx_packet_length + (USHORT)(2);
             total_length += 2;
         }
 #endif

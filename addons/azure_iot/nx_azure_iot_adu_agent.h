@@ -127,6 +127,8 @@ extern   "C" {
 /* Define the result code value. Interaction between agent and server.  */
 #define NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_FAILURE                      0
 #define NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_IDLE_SUCCESS                 200
+#define NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_DOWNLOAD_SUCCESS             500
+#define NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_INSTALL_SUCCESS              600
 #define NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_APPLY_SUCCESS                700
 #define NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_APPLY_INPROGRESS             701
 
