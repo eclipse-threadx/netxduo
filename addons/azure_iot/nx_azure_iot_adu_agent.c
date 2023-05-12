@@ -1036,6 +1036,7 @@ UINT i;
 
 static VOID nx_azure_iot_adu_agent_apply_event_process(NX_AZURE_IOT_ADU_AGENT *adu_agent_ptr)
 {
+UINT status;
 NX_AZURE_IOT_ADU_AGENT_UPDATE_MANIFEST_CONTENT *manifest_content = &(adu_agent_ptr -> nx_azure_iot_adu_agent_update_manifest_content);
 NX_AZURE_IOT_ADU_AGENT_STEP *step;
 UINT i;
@@ -1055,9 +1056,20 @@ UINT step_fail = NX_FALSE;
             LogInfo(LogLiteralArgs("Model: %s"), step -> device  -> device_properties.model, step -> device  -> device_properties.model_length);
 
             /* Apply the update.  */
-            nx_azure_iot_adu_agent_method_apply(adu_agent_ptr, manifest_content -> steps[i].device -> device_driver_entry);
+            status = nx_azure_iot_adu_agent_method_apply(adu_agent_ptr, step -> device -> device_driver_entry);
+
+            /* Check status.  */
+            if (status == NX_AZURE_IOT_SUCCESS)
+            {
+                step -> state = NX_AZURE_IOT_ADU_AGENT_STEP_STATE_FIRMWARE_APPLY_SUCCEEDED;
+            }
+            else
+            {
+                step -> state = NX_AZURE_IOT_ADU_AGENT_STEP_STATE_FAILED;
+            }
         }
-        else if (manifest_content -> steps[i].state == NX_AZURE_IOT_ADU_AGENT_STEP_STATE_FAILED)
+
+        if (step -> state == NX_AZURE_IOT_ADU_AGENT_STEP_STATE_FAILED)
         {
             step_fail = NX_TRUE;
             break;
@@ -3325,6 +3337,28 @@ UINT update_id_length;
                 return(NX_NOT_SUCCESSFUL);
             }
             step_property_name_size += step_size;
+
+            /* Check the state of each step.  */
+            if (manifest_content -> steps[i].state == NX_AZURE_IOT_ADU_AGENT_STEP_STATE_FAILED)
+            {
+                result_code = NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_FAILURE;
+            }
+            else if (manifest_content -> steps[i].state == NX_AZURE_IOT_ADU_AGENT_STEP_STATE_FIRMWARE_DOWNLOAD_SUCCEEDED)
+            {
+                result_code = NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_DOWNLOAD_SUCCESS;
+            }
+            else if (manifest_content -> steps[i].state == NX_AZURE_IOT_ADU_AGENT_STEP_STATE_FIRMWARE_INSTALL_SUCCEEDED)
+            {
+                result_code = NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_INSTALL_SUCCESS;
+            }
+            else if (manifest_content -> steps[i].state == NX_AZURE_IOT_ADU_AGENT_STEP_STATE_FIRMWARE_APPLY_SUCCEEDED)
+            {
+                result_code = NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_APPLY_SUCCESS;
+            }
+            else
+            {
+                result_code = NX_AZURE_IOT_ADU_AGENT_RESULT_CODE_IDLE_SUCCESS;
+            }
 
             if ((nx_azure_iot_json_writer_append_property_name(&json_writer,
                                                                (const UCHAR *)step_property_name,
