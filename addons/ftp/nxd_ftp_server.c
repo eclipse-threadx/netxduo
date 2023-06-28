@@ -5359,7 +5359,13 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 
                 /* Yes, activity timeout has been exceeded.  Tear down and cleanup the
                    entire client request structure.  */
-
+               /* save client IP and port for the application cb notification */
+#ifndef NX_DISABLE_IPV4
+            	ULONG IPv4IP = client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_ip.nxd_ip_address.v4;
+#endif /* NX_DISABLE_IPV4 */
+            	NXD_ADDRESS  IPv6IP = client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_ip;
+            	UINT port = client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_port;
+               
                 /* Increment the activity timeout counter.  */
                 ftp_server_ptr -> nx_ftp_server_activity_timeouts++;
 
@@ -5395,6 +5401,34 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
                    clients were in use at the time of the last relisten.  */
                 nx_tcp_server_socket_relisten(ftp_server_ptr -> nx_ftp_server_ip_ptr, NX_FTP_SERVER_CONTROL_PORT,
                                                     &(client_req_ptr -> nx_ftp_client_request_control_socket));
+                /* call the application cb to notify about the timed out client connection  */
+#ifndef NX_DISABLE_IPV4
+                /* Does this server have an IPv4 login function? */
+                if (ftp_server_ptr -> nx_ftp_logout_ipv4)
+                {
+                    /* Call the logout which takes IPv4 address input. */
+                    (ftp_server_ptr -> nx_ftp_logout_ipv4)(ftp_server_ptr,
+                                   IPv4IP,
+								           port,
+                                   client_req_ptr -> nx_ftp_client_request_username,
+                                   client_req_ptr -> nx_ftp_client_request_password, NX_NULL);
+                }
+#endif /* NX_DISABLE_IPV4 */
+                if (ftp_server_ptr -> nx_ftp_logout)
+                {
+                 /* Call the 'duo' logout function which takes IPv6 or IPv4 IP addresses. */
+                    (ftp_server_ptr -> nx_ftp_logout)(ftp_server_ptr,
+                                                        &IPv6IP,
+                        		                          port,
+                                                        client_req_ptr -> nx_ftp_client_request_username,
+                                                         client_req_ptr -> nx_ftp_client_request_password, NX_NULL);
+                }
+
+                /* Set the login as FALSE.  */
+                client_req_ptr -> nx_ftp_client_request_login = NX_FALSE;
+
+                /* Clear authentication.  */
+                client_req_ptr -> nx_ftp_client_request_authenticated =  NX_FALSE;               
             }
         }
     }
