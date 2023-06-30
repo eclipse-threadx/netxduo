@@ -36,7 +36,7 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_secure_tls_session_send                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,9 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), added    */
+/*                                            record length checking,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_secure_tls_session_send(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
@@ -94,9 +97,15 @@ UINT status;
     }
 
     /* Make sure the session is initialized. */
-    if(tls_session -> nx_secure_tls_id != NX_SECURE_TLS_ID)
+    if (tls_session -> nx_secure_tls_id != NX_SECURE_TLS_ID)
     {
         return(NX_SECURE_TLS_SESSION_UNINITIALIZED);
+    }
+
+    /* Check the plaintext length as the fragmentation is not supported currently. */
+    if (packet_ptr -> nx_packet_length > NX_SECURE_TLS_MAX_PLAINTEXT_LENGTH)
+    {
+        return(NX_SECURE_TLS_RECORD_OVERFLOW);
     }
 
     /* Check for appropriate caller.  */

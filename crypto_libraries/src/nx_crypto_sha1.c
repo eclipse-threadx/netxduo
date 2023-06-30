@@ -667,7 +667,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha1_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha1_operation                   PORTABLE C       */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -716,6 +716,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha1_cleanup(VOID *crypto_metadata)
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha1_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -753,7 +755,7 @@ NX_CRYPTO_SHA1  metadata;
         return(NX_CRYPTO_PTR_ERROR);
     }
 
-    /* Verify the metadata addrsss is 4-byte aligned. */
+    /* Verify the metadata address is 4-byte aligned. */
     if (crypto_metadata == NX_CRYPTO_NULL)
     {
 #ifdef NX_IPSEC_ENABLE

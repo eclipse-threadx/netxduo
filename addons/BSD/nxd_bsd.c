@@ -105,7 +105,7 @@ TX_BLOCK_POOL           nx_bsd_addrinfo_block_pool;
  * 3 blocks for addrinfo) + 1 block for IP adddress = 4 blocks */
  
 static ULONG            nx_bsd_addrinfo_pool_memory[(NX_BSD_IPV4_ADDR_MAX_NUM + NX_BSD_IPV6_ADDR_MAX_NUM) * 4 
-                                                    *(sizeof(struct addrinfo) + sizeof(VOID *)) / sizeof(ULONG)];
+                                                    *(sizeof(struct nx_bsd_addrinfo) + sizeof(VOID *)) / sizeof(ULONG)];
 
 #ifdef NX_BSD_ENABLE_DNS
 
@@ -169,13 +169,13 @@ static ULONG _nx_bsd_string_length(CHAR * string);
 
 #ifdef NX_BSD_RAW_PPPOE_SUPPORT
 static INT   nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, 
-                                          INT flags,  struct sockaddr* destAddr, INT destAddrLen);
+                                          INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen);
 static UINT  nx_bsd_socket_create_id = 0;
 #endif /* NX_BSD_RAW_PPPOE_SUPPORT */
 
 #ifdef NX_BSD_RAW_SUPPORT
 static INT   _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, 
-                                              INT flags,  struct sockaddr* destAddr, INT destAddrLen);
+                                              INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen);
 static VOID  _nx_bsd_hardware_packet_received(NX_PACKET *packet_ptr, UCHAR *consumed);
 #endif /* NX_BSD_RAW_SUPPORT */
 static VOID  _nx_bsd_fast_periodic_timer_entry(ULONG id);
@@ -205,7 +205,7 @@ static struct NX_BSD_SERVICE_LIST  *_nx_bsd_serv_list_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    bsd_initialize                                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -255,9 +255,12 @@ static struct NX_BSD_SERVICE_LIST  *_nx_bsd_serv_list_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  bsd_initialize(NX_IP *default_ip, NX_PACKET_POOL *default_pool, CHAR *bsd_thread_stack_area, 
+INT  nx_bsd_initialize(NX_IP *default_ip, NX_PACKET_POOL *default_pool, CHAR *bsd_thread_stack_area, 
                     ULONG bsd_thread_stack_size, UINT bsd_thread_priority)
 {
 
@@ -287,7 +290,7 @@ ULONG       info;
     }
 
     /* Create a block pool for dynamically allocating addrinfo. */
-    status = tx_block_pool_create(&nx_bsd_addrinfo_block_pool, "NetX BSD Addrinfo Block Pool", sizeof(struct addrinfo),
+    status = tx_block_pool_create(&nx_bsd_addrinfo_block_pool, "NetX BSD Addrinfo Block Pool", sizeof(struct nx_bsd_addrinfo),
                                   nx_bsd_addrinfo_pool_memory, sizeof(nx_bsd_addrinfo_pool_memory));
 
     /* Determine if the pool was created. */
@@ -664,7 +667,7 @@ VOID nx_bsd_thread_entry(ULONG info)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    socket                                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -709,9 +712,12 @@ VOID nx_bsd_thread_entry(ULONG info)
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  socket(INT protocolFamily, INT type, INT protocol)
+INT  nx_bsd_socket(INT protocolFamily, INT type, INT protocol)
 {
 
 INT             i;
@@ -750,7 +756,7 @@ UINT            index;
     {
 
         /* Set the socket error. */
-        set_errno(EAFNOSUPPORT);
+        nx_bsd_set_errno(EAFNOSUPPORT);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR); 
@@ -765,7 +771,7 @@ UINT            index;
     {
 
         /* Set the socket error. */
-        set_errno(EPROTOTYPE);
+        nx_bsd_set_errno(EPROTOTYPE);
 
         /* Invalid type.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -778,7 +784,7 @@ UINT            index;
     if((protocolFamily == AF_PACKET) && (type != SOCK_RAW))
     {
         /* Set the socket error. */
-        set_errno(EPROTOTYPE);
+        nx_bsd_set_errno(EPROTOTYPE);
 
         /* Invalid type.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -795,7 +801,7 @@ UINT            index;
     {
 
         /* Set the socket error. */
-        set_errno(EACCES);
+        nx_bsd_set_errno(EACCES);
 
         /* Error getting the protection mutex.  */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -859,7 +865,7 @@ UINT            index;
         /* No, set the error status and return. */
 
         /* Set the socket error. */
-        set_errno(ENFILE);
+        nx_bsd_set_errno(ENFILE);
 
         /* Release the mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
@@ -899,7 +905,7 @@ UINT            index;
         {
     
             /* Set the socket error. */
-            set_errno(ENOMEM); 
+            nx_bsd_set_errno(ENOMEM); 
     
             /* Clear the allocated internal BSD socket.  */
             bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_IN_USE);
@@ -951,7 +957,7 @@ UINT            index;
             {
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
 
                 /* Release the allocated socket memory block.  */
                 tx_block_release(socket_memory);
@@ -1033,7 +1039,7 @@ UINT            index;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
     
                 /* Error getting NetX socket memory.  */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1066,7 +1072,7 @@ UINT            index;
                 /* Release the mutex.  */
                 tx_mutex_put(nx_bsd_protection_ptr);
 
-                set_errno(EPROTONOSUPPORT);
+                nx_bsd_set_errno(EPROTONOSUPPORT);
 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR; 
@@ -1089,7 +1095,7 @@ UINT            index;
                 /* Release the mutex.  */
                 tx_mutex_put(nx_bsd_protection_ptr);
 
-                set_errno(EPROTONOSUPPORT);
+                nx_bsd_set_errno(EPROTONOSUPPORT);
 
                 /* No, return error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1145,7 +1151,7 @@ UINT            index;
     else  
     {
         /* Not a supported socket type.   */
-       set_errno(EOPNOTSUPP);
+       nx_bsd_set_errno(EOPNOTSUPP);
 
         /* Invalid type.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1181,7 +1187,7 @@ UINT            index;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         /* Error present, return error code.  */
         NX_BSD_ERROR(status, __LINE__);
@@ -1201,7 +1207,7 @@ UINT            index;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    connect                                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1259,9 +1265,12 @@ UINT            index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  connect(INT sockID, struct sockaddr *remoteAddress, INT addressLength)
+INT  nx_bsd_connect(INT sockID, struct nx_bsd_sockaddr *remoteAddress, INT addressLength)
 {
 UINT                status;
 NX_TCP_SOCKET       *tcp_socket_ptr;
@@ -1275,7 +1284,7 @@ ULONG               actual_status;
     {
 
         /* Set the socket error. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1293,7 +1302,7 @@ ULONG               actual_status;
     {
     
         /* Set the socket error. */
-        set_errno(EFAULT);
+        nx_bsd_set_errno(EFAULT);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1310,7 +1319,7 @@ ULONG               actual_status;
         /* Socket is no longer in use.   */
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1325,7 +1334,7 @@ ULONG               actual_status;
     {
         
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         /* Return an error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -1362,7 +1371,7 @@ ULONG               actual_status;
             /* Release the mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EAFNOSUPPORT);
+            nx_bsd_set_errno(EAFNOSUPPORT);
 
             /* Return an error. */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1373,8 +1382,8 @@ ULONG               actual_status;
 
     /* Check if the remote address family matches the local BSD socket address family. */
     if((remoteAddress -> sa_family != bsd_socket_ptr -> nx_bsd_socket_family) ||
-       ((remoteAddress -> sa_family == AF_INET) && (addressLength != sizeof(struct sockaddr_in))) ||
-       ((remoteAddress -> sa_family == AF_INET6) && (addressLength != sizeof(struct sockaddr_in6))))
+       ((remoteAddress -> sa_family == AF_INET) && (addressLength != sizeof(struct nx_bsd_sockaddr_in))) ||
+       ((remoteAddress -> sa_family == AF_INET6) && (addressLength != sizeof(struct nx_bsd_sockaddr_in6))))
     {
         
         /* Mismatch! */
@@ -1383,7 +1392,7 @@ ULONG               actual_status;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EAFNOSUPPORT);  
+        nx_bsd_set_errno(EAFNOSUPPORT);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(ERROR);
@@ -1401,8 +1410,8 @@ ULONG               actual_status;
         /* NetX API expects multi byte values to be in host byte order. 
            Therefore ntohl/s are used to make the conversion. */
         bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_version = NX_IP_VERSION_V4;
-        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v4 =  htonl(((struct sockaddr_in *) remoteAddress ) -> sin_addr.s_addr);  
-        bsd_socket_ptr -> nx_bsd_socket_peer_port =  htons(((struct sockaddr_in *) remoteAddress ) -> sin_port);
+        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v4 =  htonl(((struct nx_bsd_sockaddr_in *) remoteAddress ) -> sin_addr.s_addr);  
+        bsd_socket_ptr -> nx_bsd_socket_peer_port =  htons(((struct nx_bsd_sockaddr_in *) remoteAddress ) -> sin_port);
     }
     else
 #endif /* NX_DISABLE_IPV4 */
@@ -1416,12 +1425,12 @@ ULONG               actual_status;
         /* NetX API expects multi byte values to be in host byte order. 
            Therefore ntohl/s are used to make the conversion. */
         /* Get remote address and port. */
-        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[0] = htonl(((struct sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[0]);
-        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[1] = htonl(((struct sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[1]);
-        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[2] = htonl(((struct sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[2]);
-        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[3] = htonl(((struct sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[3]);
+        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[0] = htonl(((struct nx_bsd_sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[0]);
+        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[1] = htonl(((struct nx_bsd_sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[1]);
+        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[2] = htonl(((struct nx_bsd_sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[2]);
+        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[3] = htonl(((struct nx_bsd_sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[3]);
 
-        bsd_socket_ptr -> nx_bsd_socket_peer_port =  htons(((struct sockaddr_in6 *) remoteAddress ) -> sin6_port);
+        bsd_socket_ptr -> nx_bsd_socket_peer_port =  htons(((struct nx_bsd_sockaddr_in6 *) remoteAddress ) -> sin6_port);
 
     }
     else
@@ -1434,7 +1443,7 @@ ULONG               actual_status;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EAFNOSUPPORT);  
+        nx_bsd_set_errno(EAFNOSUPPORT);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(ERROR);
@@ -1523,7 +1532,7 @@ ULONG               actual_status;
         }
 
         /* Already connected. */
-        set_errno(EISCONN);
+        nx_bsd_set_errno(EISCONN);
         
         tx_mutex_put(nx_bsd_protection_ptr);
                 
@@ -1538,7 +1547,7 @@ ULONG               actual_status;
     {
         
 
-        set_errno(EALREADY);
+        nx_bsd_set_errno(EALREADY);
         
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);            
@@ -1560,7 +1569,7 @@ ULONG               actual_status;
         bsd_socket_ptr -> nx_bsd_socket_status_flags = 
             bsd_socket_ptr -> nx_bsd_socket_status_flags & ((ULONG)(~NX_BSD_SOCKET_ERROR)); 
                                                                              
-        set_errno(errcode);                                                  
+        nx_bsd_set_errno(errcode);                                                  
                                                                              
         /* Release the protection mutex.  */                                  
         tx_mutex_put(nx_bsd_protection_ptr);                                     
@@ -1652,7 +1661,7 @@ ULONG               actual_status;
             /* The socket is no longer in use. */
 
             /* Set the socket error code. */
-            set_errno(EBADF);
+            nx_bsd_set_errno(EBADF);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -1745,7 +1754,7 @@ ULONG               actual_status;
     tx_mutex_put(nx_bsd_protection_ptr);
 
     /* Set the socket error. */
-    set_errno(EINTR); 
+    nx_bsd_set_errno(EINTR); 
 
     /* Return an error.  */        
     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1757,7 +1766,7 @@ ULONG               actual_status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    bind                                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1801,9 +1810,12 @@ ULONG               actual_status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  bind(INT sockID, struct sockaddr *localAddress, INT addressLength)     
+INT  nx_bsd_bind(INT sockID, const struct nx_bsd_sockaddr *localAddress, INT addressLength)     
 {
 
 INT                 local_port = 0;
@@ -1820,7 +1832,7 @@ INT                 address_conflict;
     {
 
         /* Set the socket error. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Error, invalid socket ID.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1832,17 +1844,17 @@ INT                 address_conflict;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EFAULT);
+        nx_bsd_set_errno(EFAULT);
 
         /* Error, invalid local address. */ 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
     }
 
-    if (((localAddress -> sa_family == AF_INET) && (addressLength != sizeof(struct sockaddr_in))) ||
-        ((localAddress -> sa_family == AF_INET6) && (addressLength != sizeof(struct sockaddr_in6))))
+    if (((localAddress -> sa_family == AF_INET) && (addressLength != sizeof(struct nx_bsd_sockaddr_in))) ||
+        ((localAddress -> sa_family == AF_INET6) && (addressLength != sizeof(struct nx_bsd_sockaddr_in6))))
     {
-        set_errno(EAFNOSUPPORT);
+        nx_bsd_set_errno(EAFNOSUPPORT);
             
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1860,7 +1872,7 @@ INT                 address_conflict;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);
+        nx_bsd_set_errno(EACCES);
 
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
         return(NX_SOC_ERROR); 
@@ -1879,7 +1891,7 @@ INT                 address_conflict;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1894,7 +1906,7 @@ INT                 address_conflict;
         bsd_socket_ptr -> nx_bsd_socket_status_flags = 
             bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
                                                                              
-        set_errno(bsd_socket_ptr -> nx_bsd_socket_error_code);
+        nx_bsd_set_errno(bsd_socket_ptr -> nx_bsd_socket_error_code);
 
         /* Clear the error code. */
         bsd_socket_ptr -> nx_bsd_socket_error_code = 0;
@@ -1916,7 +1928,7 @@ INT                 address_conflict;
     /* Check the address family. */
     if (bsd_socket_ptr -> nx_bsd_socket_family != localAddress -> sa_family)
     {
-        set_errno(EAFNOSUPPORT);
+        nx_bsd_set_errno(EAFNOSUPPORT);
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
             
@@ -1932,7 +1944,7 @@ INT                 address_conflict;
         /* It is. */
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);
+        nx_bsd_set_errno(EINVAL);
 
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
@@ -1953,10 +1965,10 @@ INT                 address_conflict;
     INT if_index;
 
         /* Pickup the local port.  */
-        local_port = ntohs(((struct sockaddr_in *) localAddress) -> sin_port);
+        local_port = ntohs(((struct nx_bsd_sockaddr_in *) localAddress) -> sin_port);
     
         /* Pick up the local IP address */
-        local_addr = ntohl(((struct sockaddr_in*)localAddress) -> sin_addr.s_addr);
+        local_addr = ntohl(((struct nx_bsd_sockaddr_in*)localAddress) -> sin_addr.s_addr);
         
         if(local_addr == INADDR_ANY)
         {
@@ -1990,12 +2002,12 @@ INT                 address_conflict;
     INT if_index;
 
         /* Pickup the local port.  */
-        local_port = ntohs(((struct sockaddr_in6 *) localAddress) -> sin6_port);
+        local_port = ntohs(((struct nx_bsd_sockaddr_in6 *) localAddress) -> sin6_port);
 
-        ipv6_addr[0] = ntohl((((struct sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[0]);
-        ipv6_addr[1] = ntohl((((struct sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[1]);
-        ipv6_addr[2] = ntohl((((struct sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[2]);
-        ipv6_addr[3] = ntohl((((struct sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[3]);
+        ipv6_addr[0] = ntohl((((struct nx_bsd_sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[0]);
+        ipv6_addr[1] = ntohl((((struct nx_bsd_sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[1]);
+        ipv6_addr[2] = ntohl((((struct nx_bsd_sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[2]);
+        ipv6_addr[3] = ntohl((((struct nx_bsd_sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[3]);
         
         if((ipv6_addr[0] | ipv6_addr[1] | ipv6_addr[2] | ipv6_addr[3]) == 0)
         {
@@ -2025,7 +2037,7 @@ INT                 address_conflict;
     }
 #endif
 #ifdef NX_BSD_RAW_SUPPORT
-    if ((localAddress -> sa_family == AF_PACKET) && (addressLength == sizeof(struct sockaddr_ll)))
+    if ((localAddress -> sa_family == AF_PACKET) && (addressLength == sizeof(struct nx_bsd_sockaddr_ll)))
     {
     UINT if_index;
 
@@ -2043,7 +2055,7 @@ INT                 address_conflict;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EADDRNOTAVAIL);
+        nx_bsd_set_errno(EADDRNOTAVAIL);
         
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -2268,7 +2280,7 @@ INT                 address_conflict;
         tx_mutex_put(nx_bsd_protection_ptr);
         
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EADDRINUSE);
+        nx_bsd_set_errno(EADDRINUSE);
         
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -2355,7 +2367,7 @@ INT                 address_conflict;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    listen                                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2400,9 +2412,12 @@ INT                 address_conflict;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  listen(INT sockID, INT backlog)
+INT  nx_bsd_listen(INT sockID, INT backlog)
 {
 
 UINT                status;
@@ -2417,7 +2432,7 @@ INT                 ret;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2435,7 +2450,7 @@ INT                 ret;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);
+        nx_bsd_set_errno(EACCES);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -2450,7 +2465,7 @@ INT                 ret;
     {
     
         /* The underlying protocol is not TCP, therefore it does not support the listen operation. */
-        set_errno(EOPNOTSUPP);
+        nx_bsd_set_errno(EOPNOTSUPP);
         
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
@@ -2465,7 +2480,7 @@ INT                 ret;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);  
+        nx_bsd_set_errno(EBADF);  
         
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
@@ -2487,7 +2502,7 @@ INT                 ret;
         bsd_socket_ptr -> nx_bsd_socket_status_flags = 
             bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
                                                                              
-        set_errno(errcode);                                                  
+        nx_bsd_set_errno(errcode);                                                  
                                                                              
         /* Release the protection mutex.  */                                  
         tx_mutex_put(nx_bsd_protection_ptr);                                     
@@ -2513,7 +2528,7 @@ INT                 ret;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2530,7 +2545,7 @@ INT                 ret;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EOPNOTSUPP);  
+        nx_bsd_set_errno(EOPNOTSUPP);  
 
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2545,7 +2560,7 @@ INT                 ret;
        tx_mutex_put(nx_bsd_protection_ptr);
 
        /* Set the socket error code. */
-       set_errno(EDESTADDRREQ);  
+       nx_bsd_set_errno(EDESTADDRREQ);  
 
        /* Return error code.  */
        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2602,7 +2617,7 @@ INT                 ret;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    accept                                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2654,9 +2669,12 @@ INT                 ret;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  accept(INT sockID, struct sockaddr *ClientAddress, INT *addressLength)
+INT  nx_bsd_accept(INT sockID, struct nx_bsd_sockaddr *ClientAddress, INT *addressLength)
 {
 /* Define the accept function if NetX BSD accept() is not set to asynchronous (on automatic callback). */
 
@@ -2669,10 +2687,12 @@ INT                 connected = 0;
 ULONG               requested_events;
 INT                 secondary_socket_id = 0;
 #ifndef NX_DISABLE_IPV4
-struct sockaddr_in  peer4_address;
+struct nx_bsd_sockaddr_in
+                    peer4_address;
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
-struct sockaddr_in6 peer6_address;
+struct nx_bsd_sockaddr_in6
+                    peer6_address;
 #endif
 
 
@@ -2681,7 +2701,7 @@ struct sockaddr_in6 peer6_address;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);  
+        nx_bsd_set_errno(EBADF);  
 
         /* Return an error.*/
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2702,7 +2722,7 @@ struct sockaddr_in6 peer6_address;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         /* Return an error.*/
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -2717,7 +2737,7 @@ struct sockaddr_in6 peer6_address;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);  
+        nx_bsd_set_errno(EBADF);  
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2737,7 +2757,7 @@ struct sockaddr_in6 peer6_address;
         bsd_socket_ptr -> nx_bsd_socket_status_flags = 
             bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
                                                                              
-        set_errno(errcode);                                                  
+        nx_bsd_set_errno(errcode);                                                  
                                                                              
         /* Release the protection mutex.  */                                  
         tx_mutex_put(nx_bsd_protection_ptr);                                     
@@ -2764,7 +2784,7 @@ struct sockaddr_in6 peer6_address;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EOPNOTSUPP);  
+        nx_bsd_set_errno(EOPNOTSUPP);  
 
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2781,7 +2801,7 @@ struct sockaddr_in6 peer6_address;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2799,7 +2819,7 @@ struct sockaddr_in6 peer6_address;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);  
+        nx_bsd_set_errno(EBADF);  
 
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2867,7 +2887,7 @@ struct sockaddr_in6 peer6_address;
                 tx_mutex_put(nx_bsd_protection_ptr);
                 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EWOULDBLOCK);  
+                nx_bsd_set_errno(EWOULDBLOCK);  
                 
                 /* Return an error. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2889,7 +2909,7 @@ struct sockaddr_in6 peer6_address;
                 /* The socket is no longer in use. */
 
                 /* Set the socket error code. */
-                set_errno(EBADF);
+                nx_bsd_set_errno(EBADF);
                 
                 /* Release the protection mutex.  */
                 tx_mutex_put(nx_bsd_protection_ptr);
@@ -2913,7 +2933,7 @@ struct sockaddr_in6 peer6_address;
         bsd_secondary_socket -> nx_bsd_socket_status_flags = 
             bsd_secondary_socket -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
                                                                              
-        set_errno(errcode);                                                  
+        nx_bsd_set_errno(errcode);                                                  
                                                                              
         /* Return an error.  */                                               
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
@@ -2974,11 +2994,11 @@ struct sockaddr_in6 peer6_address;
          
             /* Copy the peer address/port info to the ClientAddress.  Truncate if
                addressLength is smaller than the size of struct sockaddr_in */
-            if(*addressLength > (INT)sizeof(struct sockaddr_in))
+            if(*addressLength > (INT)sizeof(struct nx_bsd_sockaddr_in))
             {
 
-                memcpy(ClientAddress, &peer4_address, sizeof(struct sockaddr_in)); /* Use case of memcpy is verified. */
-                *addressLength = sizeof(struct sockaddr_in);
+                memcpy(ClientAddress, &peer4_address, sizeof(struct nx_bsd_sockaddr_in)); /* Use case of memcpy is verified. */
+                *addressLength = sizeof(struct nx_bsd_sockaddr_in);
             }
             else
             {
@@ -3021,7 +3041,7 @@ struct sockaddr_in6 peer6_address;
             tx_mutex_put(nx_bsd_protection_ptr);
             
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);  
+            nx_bsd_set_errno(EINVAL);  
 
             /* Make sure this thread is still the owner.  */
             if (bsd_socket_ptr -> nx_bsd_socket_busy == tx_thread_identify())
@@ -3208,7 +3228,7 @@ ULONG               data_sent = (ULONG)msgLength;
     if(packet_type == 0)
     {
         /* Set the socket error.  */
-        set_errno(EINVAL);
+        nx_bsd_set_errno(EINVAL);
 
         /* Return an error status.*/
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -3240,7 +3260,7 @@ ULONG               data_sent = (ULONG)msgLength;
     {
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
@@ -3257,7 +3277,7 @@ ULONG               data_sent = (ULONG)msgLength;
         nx_packet_release(packet_ptr);
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
@@ -3276,7 +3296,7 @@ ULONG               data_sent = (ULONG)msgLength;
         nx_packet_release(packet_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         /* Return an error status.*/
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -3291,7 +3311,7 @@ ULONG               data_sent = (ULONG)msgLength;
         nx_packet_release(packet_ptr);
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
         
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
@@ -3469,20 +3489,20 @@ ULONG               data_sent = (ULONG)msgLength;
         {
 
             case NX_IP_ADDRESS_ERROR:
-                set_errno(EDESTADDRREQ);
+                nx_bsd_set_errno(EDESTADDRREQ);
                 break;
 
             case NX_NOT_ENABLED:
-                set_errno(EPROTONOSUPPORT);
+                nx_bsd_set_errno(EPROTONOSUPPORT);
                 break;
 
             case NX_NOT_CONNECTED:
-                set_errno(ENOTCONN);
+                nx_bsd_set_errno(ENOTCONN);
                 break;
 
             case NX_NO_PACKET:
             case NX_UNDERFLOW:
-                set_errno(ENOBUFS);
+                nx_bsd_set_errno(ENOBUFS);
                 break;
 
             case NX_WINDOW_OVERFLOW:
@@ -3490,16 +3510,16 @@ ULONG               data_sent = (ULONG)msgLength;
             case NX_TX_QUEUE_DEPTH:
                 if ((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING) ||
                     (flags & MSG_DONTWAIT))
-                    set_errno( EWOULDBLOCK);
+                    nx_bsd_set_errno( EWOULDBLOCK);
                 else
-                    set_errno(ETIMEDOUT);
+                    nx_bsd_set_errno(ETIMEDOUT);
                 break;
 
             default:
                 /* NX_NOT_BOUND */
                 /* NX_PTR_ERROR */
                 /* NX_INVALID_PACKET */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
                 break;
         }
 
@@ -3523,7 +3543,7 @@ ULONG               data_sent = (ULONG)msgLength;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    send                                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3581,9 +3601,12 @@ ULONG               data_sent = (ULONG)msgLength;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  send(INT sockID, const CHAR *msg, INT msgLength, INT flags)
+INT  nx_bsd_send(INT sockID, const CHAR *msg, INT msgLength, INT flags)
 {
 
 NX_BSD_SOCKET *bsd_socket_ptr;
@@ -3594,7 +3617,7 @@ NX_BSD_SOCKET *bsd_socket_ptr;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error status.*/
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -3619,7 +3642,7 @@ NX_BSD_SOCKET *bsd_socket_ptr;
         bsd_socket_ptr -> nx_bsd_socket_status_flags = 
             bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
                                                                              
-        set_errno(errcode);                                                  
+        nx_bsd_set_errno(errcode);                                                  
                                                                              
         /* Return an error.  */                                               
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
@@ -3641,7 +3664,7 @@ NX_BSD_SOCKET *bsd_socket_ptr;
         if(bsd_socket_ptr -> nx_bsd_socket_family == AF_PACKET)
         {
             /* Set the socket error */
-            set_errno(ENOTCONN);
+            nx_bsd_set_errno(ENOTCONN);
 
             /* Return an error status.*/
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -3654,7 +3677,7 @@ NX_BSD_SOCKET *bsd_socket_ptr;
         if(!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_TX_HDR_INCLUDE))
         {
             /* Set the socket error */
-            set_errno(ENOTCONN);
+            nx_bsd_set_errno(ENOTCONN);
             
             /* Return an error status.*/
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -3675,7 +3698,7 @@ NX_BSD_SOCKET *bsd_socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    sendto                                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3729,9 +3752,12 @@ NX_BSD_SOCKET *bsd_socket_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  sendto(INT sockID, CHAR *msg, INT msgLength, INT flags,  struct sockaddr *destAddr, INT destAddrLen)
+INT  nx_bsd_sendto(INT sockID, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr *destAddr, INT destAddrLen)
 {
 UINT                 status;
 NX_BSD_SOCKET       *bsd_socket_ptr;
@@ -3743,7 +3769,7 @@ USHORT               peer_port = 0;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error status. */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -3765,7 +3791,7 @@ USHORT               peer_port = 0;
         bsd_socket_ptr -> nx_bsd_socket_status_flags = 
             bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
                                                                              
-        set_errno(errcode);                                                  
+        nx_bsd_set_errno(errcode);                                                  
                                                                              
         /* Return an error.  */                                               
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
@@ -3782,7 +3808,7 @@ USHORT               peer_port = 0;
     {
         if((bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED) == 0)
         {
-            set_errno(ENOTCONN);
+            nx_bsd_set_errno(ENOTCONN);
             
             /* Return an error.  */                                               
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
@@ -3825,7 +3851,7 @@ USHORT               peer_port = 0;
             {
             
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return(NX_SOC_ERROR);
@@ -3834,7 +3860,7 @@ USHORT               peer_port = 0;
             /* Validate the destination address. */
             if(bsd_socket_ptr -> nx_bsd_socket_family != destAddr -> sa_family)
             {
-                set_errno(EAFNOSUPPORT);
+                nx_bsd_set_errno(EAFNOSUPPORT);
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 
@@ -3850,7 +3876,7 @@ USHORT               peer_port = 0;
                 status = nx_udp_socket_bind(bsd_socket_ptr -> nx_bsd_socket_udp_socket, NX_ANY_PORT, NX_NO_WAIT);
                 if((status != NX_SUCCESS) && (status != NX_ALREADY_BOUND))
                 {
-                    set_errno(EINVAL);
+                    nx_bsd_set_errno(EINVAL);
 
                     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
 
@@ -3876,8 +3902,8 @@ USHORT               peer_port = 0;
 
                 /* This is for an IPv4 packet. */
                 peer_ip_address.nxd_ip_version = NX_IP_VERSION_V4; 
-                peer_ip_address.nxd_ip_address.v4 = htonl(((struct sockaddr_in *) destAddr) -> sin_addr.s_addr);
-                peer_port = htons(((struct sockaddr_in *) destAddr) -> sin_port);
+                peer_ip_address.nxd_ip_address.v4 = htonl(((struct nx_bsd_sockaddr_in *) destAddr) -> sin_addr.s_addr);
+                peer_port = htons(((struct nx_bsd_sockaddr_in *) destAddr) -> sin_port);
 
                 /* Local interface ID is set to invalid value, so the send routine needs to 
                    find the best interface to send the packet based on destination IP address. */
@@ -3891,12 +3917,12 @@ USHORT               peer_port = 0;
                 /* This is for an IPv6 packet. Set the NetX Duo IP address version. */
                 peer_ip_address.nxd_ip_version = NX_IP_VERSION_V6;
 
-                peer_ip_address.nxd_ip_address.v6[0] = ntohl(((struct sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[0]);
-                peer_ip_address.nxd_ip_address.v6[1] = ntohl(((struct sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[1]);
-                peer_ip_address.nxd_ip_address.v6[2] = ntohl(((struct sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[2]);
-                peer_ip_address.nxd_ip_address.v6[3] = ntohl(((struct sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[3]);
+                peer_ip_address.nxd_ip_address.v6[0] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[0]);
+                peer_ip_address.nxd_ip_address.v6[1] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[1]);
+                peer_ip_address.nxd_ip_address.v6[2] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[2]);
+                peer_ip_address.nxd_ip_address.v6[3] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[3]);
 
-                peer_port = htons(((struct sockaddr_in6 *) destAddr) -> sin6_port);
+                peer_port = htons(((struct nx_bsd_sockaddr_in6 *) destAddr) -> sin6_port);
                 
             }
 #endif
@@ -3918,7 +3944,7 @@ USHORT               peer_port = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    recv                                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3980,9 +4006,12 @@ USHORT               peer_port = 0;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags)
+INT  nx_bsd_recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags)
 {
 
 UINT                status;
@@ -4003,7 +4032,7 @@ ULONG               start_time = nx_bsd_system_clock;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -4044,7 +4073,7 @@ ULONG               start_time = nx_bsd_system_clock;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         /* Return an error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -4064,7 +4093,7 @@ ULONG               start_time = nx_bsd_system_clock;
         bsd_socket_ptr -> nx_bsd_socket_status_flags = 
             bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
                                                                              
-        set_errno(errcode);                                                  
+        nx_bsd_set_errno(errcode);                                                  
 
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);     
@@ -4092,7 +4121,7 @@ ULONG               start_time = nx_bsd_system_clock;
         {
 
             /* Set the socket error if extended options enabled. */
-            set_errno(EBADF);
+            nx_bsd_set_errno(EBADF);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -4140,7 +4169,7 @@ ULONG               start_time = nx_bsd_system_clock;
                     }
 
                     /* Set the socket status (not really an error).  */
-                    set_errno(ENOTCONN); 
+                    nx_bsd_set_errno(ENOTCONN); 
         
                     /* Return an error.  */
                     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -4199,9 +4228,9 @@ ULONG               start_time = nx_bsd_system_clock;
             if ((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING) || 
                 (wait_option == NX_WAIT_FOREVER) ||
                 (flags & MSG_DONTWAIT))
-                set_errno(EWOULDBLOCK);  
+                nx_bsd_set_errno(EWOULDBLOCK);  
             else
-                set_errno (EAGAIN);  
+                nx_bsd_set_errno(EAGAIN);  
 
             /* Return an error.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -4211,7 +4240,7 @@ ULONG               start_time = nx_bsd_system_clock;
         {
         
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);  
+            nx_bsd_set_errno(EINVAL);  
 
             /* Return an error.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -4226,7 +4255,7 @@ ULONG               start_time = nx_bsd_system_clock;
         {
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EACCES);  
+            nx_bsd_set_errno(EACCES);  
 
             /* Return an error.  */
             NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -4238,7 +4267,7 @@ ULONG               start_time = nx_bsd_system_clock;
             /* The socket is no longer in use. */
 
             /* Set the socket error code. */
-            set_errno(EBADF);
+            nx_bsd_set_errno(EBADF);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -4270,7 +4299,7 @@ ULONG               start_time = nx_bsd_system_clock;
         {
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -4400,7 +4429,7 @@ ULONG               start_time = nx_bsd_system_clock;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL); 
+        nx_bsd_set_errno(EINVAL); 
         
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
@@ -4474,7 +4503,7 @@ ULONG               start_time = nx_bsd_system_clock;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    recvfrom                                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4525,18 +4554,23 @@ ULONG               start_time = nx_bsd_system_clock;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  recvfrom(INT sockID, CHAR *rcvBuffer, INT bufferLength, INT flags, struct sockaddr *fromAddr, INT *fromAddrLen)
+INT  nx_bsd_recvfrom(INT sockID, CHAR *rcvBuffer, INT bufferLength, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen)
 {
 
 INT                  bytes_received;
 NX_BSD_SOCKET       *bsd_socket_ptr;
 #ifndef NX_DISABLE_IPV4
-struct sockaddr_in  peer4_address;
+struct nx_bsd_sockaddr_in
+                     peer4_address;
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
-struct sockaddr_in6 peer6_address;
+struct nx_bsd_sockaddr_in6
+                     peer6_address;
 #endif
 
     /* Check for a valid socket ID. */
@@ -4544,7 +4578,7 @@ struct sockaddr_in6 peer6_address;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -4556,7 +4590,7 @@ struct sockaddr_in6 peer6_address;
     /* Socket error checking is done inside recv() call. */
 
     /* Call the equivalent recv() function. */
-    bytes_received = recv(sockID, rcvBuffer, bufferLength, flags);
+    bytes_received = nx_bsd_recv(sockID, rcvBuffer, bufferLength, flags);
 
     /* Check for error. */
     if (bytes_received < 0)
@@ -4598,9 +4632,9 @@ struct sockaddr_in6 peer6_address;
             }
             /* Copy the peer address/port info to the ClientAddress.  Truncate if
                addressLength is smaller than the size of struct sockaddr_in */
-            if(*fromAddrLen > (INT)sizeof(struct sockaddr_in))
+            if(*fromAddrLen > (INT)sizeof(struct nx_bsd_sockaddr_in))
             {
-                *fromAddrLen = sizeof(struct sockaddr_in);
+                *fromAddrLen = sizeof(struct nx_bsd_sockaddr_in);
             }
             memcpy(fromAddr, &peer4_address, (UINT)(*fromAddrLen)); /* Use case of memcpy is verified. */
         }
@@ -4647,9 +4681,9 @@ struct sockaddr_in6 peer6_address;
 #if defined(NX_BSD_RAW_PPPOE_SUPPORT) || defined(NX_BSD_RAW_SUPPORT)
         if(bsd_socket_ptr -> nx_bsd_socket_family == AF_PACKET)
         {
-            if(*fromAddrLen >= (INT)sizeof(struct sockaddr_ll))
+            if(*fromAddrLen >= (INT)sizeof(struct nx_bsd_sockaddr_ll))
             {
-                struct sockaddr_ll *sockaddr = (struct sockaddr_ll*)fromAddr;
+                struct nx_bsd_sockaddr_ll *sockaddr = (struct nx_bsd_sockaddr_ll*)fromAddr;
                 INT i;
                 sockaddr -> sll_family = AF_PACKET;
                 sockaddr -> sll_protocol = bsd_socket_ptr -> nx_bsd_socket_sll_protocol;
@@ -4659,7 +4693,7 @@ struct sockaddr_in6 peer6_address;
                 sockaddr -> sll_halen = 6;
                 for(i = 0; i < 6; i++)
                     sockaddr -> sll_addr[i] = bsd_socket_ptr -> nx_bsd_socket_sll_addr[i];
-                *fromAddrLen = sizeof(struct sockaddr_ll);
+                *fromAddrLen = sizeof(struct nx_bsd_sockaddr_ll);
             }
 
         }
@@ -4671,7 +4705,7 @@ struct sockaddr_in6 peer6_address;
             tx_mutex_put(nx_bsd_protection_ptr);
             
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);  
+            nx_bsd_set_errno(EINVAL);  
             
             /* Error, IPv6 support is not enabled.  */
             NX_BSD_ERROR(ERROR, __LINE__);
@@ -4689,7 +4723,7 @@ struct sockaddr_in6 peer6_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    soc_close                                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4746,9 +4780,12 @@ struct sockaddr_in6 peer6_address;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  soc_close(INT sockID)
+INT  nx_bsd_soc_close(INT sockID)
 {
 
 NX_BSD_SOCKET       *bsd_socket_ptr;
@@ -4770,7 +4807,7 @@ UINT                 index;
     {
 
         /* Set the socket error. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Error, invalid socket ID.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -4806,7 +4843,7 @@ UINT                 index;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         /* Return error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -4871,7 +4908,7 @@ UINT                 index;
                 /* The socket is no longer in use. */
                 
                 /* Set the socket error code. */
-                set_errno(EBADF);
+                nx_bsd_set_errno(EBADF);
                 
                 /* Release the protection mutex.  */
                 tx_mutex_put(nx_bsd_protection_ptr);
@@ -4968,7 +5005,7 @@ UINT                 index;
                             /* The socket is no longer in use. */
 
                             /* Set the socket error code. */
-                            set_errno(EBADF);
+                            nx_bsd_set_errno(EBADF);
 
                             /* Release the protection mutex.  */
                             tx_mutex_put(nx_bsd_protection_ptr);
@@ -5150,7 +5187,7 @@ UINT                 index;
     tx_mutex_put(nx_bsd_protection_ptr);
     
     /* Set the socket error if extended socket options enabled. */
-    set_errno(EINVAL);  
+    nx_bsd_set_errno(EINVAL);  
     
     /* Return error.  */
     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -5165,7 +5202,7 @@ UINT                 index;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    fcntl                                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5204,9 +5241,12 @@ UINT                 index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT fcntl(INT sockID, UINT flag_type, UINT f_options)
+INT nx_bsd_fcntl(INT sockID, UINT flag_type, UINT f_options)
 {
 
 NX_BSD_SOCKET   *bsd_socket_ptr;
@@ -5216,7 +5256,7 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
 
@@ -5258,7 +5298,7 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
     /* Flag_type is not the one we support */
 
     /* Set the socket error if extended socket options enabled. */
-    set_errno(EINVAL);  
+    nx_bsd_set_errno(EINVAL);  
     
     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
     
@@ -5275,7 +5315,7 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    ioctl                                               PORTABLE C      */
-/*                                                           6.2.1        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5320,9 +5360,12 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  03-08-2023     Wenhui Xie               Modified comment(s), corrected*/
 /*                                            the result of FIONREAD,     */
 /*                                            resulting in version 6.2.1  */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  ioctl(INT sockID,  INT command, INT *result)
+INT  nx_bsd_ioctl(INT sockID,  INT command, INT *result)
 {
 
 NX_BSD_SOCKET       *bsd_socket_ptr;
@@ -5374,7 +5417,7 @@ UINT                status;
             {
                 tx_mutex_put(nx_bsd_protection_ptr); 
 
-                set_errno(EFAULT);
+                nx_bsd_set_errno(EFAULT);
 
                 /* Error, invalid address. */ 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -5401,7 +5444,7 @@ UINT                status;
                 else
                 {
                     *result += (INT)(bsd_socket_ptr -> nx_bsd_socket_received_byte_count);
-                }
+            }
             }
             else if (udp_socket_ptr)
             {
@@ -5421,7 +5464,7 @@ UINT                status;
             {
                 tx_mutex_put(nx_bsd_protection_ptr); 
 
-                set_errno(EFAULT);
+                nx_bsd_set_errno(EFAULT);
 
                 /* Error, invalid address. */ 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -5467,7 +5510,7 @@ UINT                status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    inet_ntoa                                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5504,9 +5547,12 @@ UINT                status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-CHAR *inet_ntoa(struct in_addr address_to_convert)
+CHAR *nx_bsd_inet_ntoa(struct nx_bsd_in_addr address_to_convert)
 {
 UINT status;
 
@@ -5634,7 +5680,7 @@ UINT    size;
 /*  FUNCTION                                               RELEASE        */  
 /*                                                                        */  
 /*    inet_aton                                           PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5672,9 +5718,12 @@ UINT    size;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT inet_aton(const CHAR *address_buffer_ptr, struct in_addr *addr)
+INT nx_bsd_inet_aton(const CHAR *address_buffer_ptr, struct nx_bsd_in_addr *addr)
 {
 ULONG value;
 INT   base = 10, ip_address_index;
@@ -5915,7 +5964,7 @@ UINT  dot_flag;
 /*  FUNCTION                                               RELEASE        */  
 /*                                                                        */  
 /*    inet_addr                                           PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5950,15 +5999,18 @@ UINT  dot_flag;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-in_addr_t inet_addr(const CHAR *buffer) 
+nx_bsd_in_addr_t nx_bsd_inet_addr(const CHAR *buffer) 
 {
 
-struct  in_addr ip_address;
+struct  nx_bsd_in_addr ip_address;
 UINT    status;
 
-    status = (UINT)inet_aton(buffer, &ip_address);
+    status = (UINT)nx_bsd_inet_aton(buffer, &ip_address);
 
     if (status == 0)
     {
@@ -5974,7 +6026,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */  
 /*                                                                        */  
 /*    getsockopt                                          PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6014,21 +6066,24 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  getsockopt(INT sockID, INT option_level, INT option_name, VOID *option_value, INT *option_length)
+INT  nx_bsd_getsockopt(INT sockID, INT option_level, INT option_name, VOID *option_value, INT *option_length)
 {
 
 TX_INTERRUPT_SAVE_AREA
 
-INT             status;
-NX_BSD_SOCKET   *bsd_socket_ptr;
-struct          sock_errno      *so_errno;
-struct          sock_keepalive  *so_keepalive;
-struct          sock_reuseaddr  *so_reuseaddr;
-struct          timeval         *so_rcvtimeval;
-struct          sock_winsize    *soc_window_size;
-ULONG           ticks;
+INT                                     status;
+NX_BSD_SOCKET                           *bsd_socket_ptr;
+struct          nx_bsd_sock_errno       *so_errno;
+struct          nx_bsd_sock_keepalive   *so_keepalive;
+struct          nx_bsd_sock_reuseaddr   *so_reuseaddr;
+struct          nx_bsd_timeval          *so_rcvtimeval;
+struct          nx_bsd_sock_winsize     *soc_window_size;
+ULONG                                   ticks;
 
 
     /* Check for valid socket ID/descriptor. */
@@ -6036,7 +6091,7 @@ ULONG           ticks;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -6047,7 +6102,7 @@ ULONG           ticks;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return NX_SOC_ERROR;
@@ -6062,7 +6117,7 @@ ULONG           ticks;
             /* Error, one or more invalid arguments.  */
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOPROTOOPT);              
+            nx_bsd_set_errno(ENOPROTOOPT);              
             
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return NX_SOC_ERROR;
@@ -6077,7 +6132,7 @@ ULONG           ticks;
             /* Error, one or more invalid arguments.  */
             
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOPROTOOPT);  
+            nx_bsd_set_errno(ENOPROTOOPT);  
             
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return NX_SOC_ERROR;
@@ -6089,7 +6144,7 @@ ULONG           ticks;
         /* Error, one or more invalid arguments.  */
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return NX_SOC_ERROR;
@@ -6106,7 +6161,7 @@ ULONG           ticks;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
         return(NX_SOC_ERROR); 
@@ -6129,13 +6184,13 @@ ULONG           ticks;
                tx_mutex_put(nx_bsd_protection_ptr);
 
                /* Set the socket error if extended socket options enabled. */
-               set_errno(EINVAL);  
+               nx_bsd_set_errno(EINVAL);  
 
                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                return(NX_SOC_ERROR); 
            }
 
-           so_errno = (struct sock_errno *)option_value;
+           so_errno = (struct nx_bsd_sock_errno *)option_value;
 
            TX_DISABLE
            if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) 
@@ -6153,7 +6208,7 @@ ULONG           ticks;
            TX_RESTORE
 
            /* Set the actual size of the data returned. */ 
-           *option_length = sizeof(struct sock_errno);
+           *option_length = sizeof(struct nx_bsd_sock_errno);
 
         }
 
@@ -6170,19 +6225,19 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return(NX_SOC_ERROR); 
             }
             
-            so_keepalive = (struct sock_keepalive *)option_value;
+            so_keepalive = (struct nx_bsd_sock_keepalive *)option_value;
 #ifndef NX_ENABLE_TCP_KEEPALIVE
             so_keepalive -> keepalive_enabled = NX_FALSE;
 #else
             so_keepalive -> keepalive_enabled = (INT)(bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled);
 #endif /* NX_ENABLE_TCP_KEEPALIVE */
-            *option_length = sizeof(struct sock_keepalive);
+            *option_length = sizeof(struct nx_bsd_sock_keepalive);
 
         break;
 
@@ -6194,27 +6249,27 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return(NX_SOC_ERROR); 
 
             }
 
-            so_rcvtimeval = (struct timeval *)option_value;
+            so_rcvtimeval = (struct nx_bsd_timeval *)option_value;
 
             ticks = bsd_socket_ptr -> nx_bsd_option_receive_timeout;
 
 
-            so_rcvtimeval -> tv_usec = (suseconds_t)(ticks * NX_MICROSECOND_PER_CPU_TICK) % 1000000;
-            so_rcvtimeval -> tv_sec = (time_t)((ticks * NX_MICROSECOND_PER_CPU_TICK) / 1000000);
+            so_rcvtimeval -> tv_usec = (nx_bsd_suseconds_t)(ticks * NX_MICROSECOND_PER_CPU_TICK) % 1000000;
+            so_rcvtimeval -> tv_sec = (nx_bsd_time_t)((ticks * NX_MICROSECOND_PER_CPU_TICK) / 1000000);
             *option_length = sizeof(so_rcvtimeval);
 
         break;
 
         case SO_RCVBUF:
 
-            soc_window_size = (struct sock_winsize *)option_value;
+            soc_window_size = (struct nx_bsd_sock_winsize *)option_value;
             soc_window_size -> winsize = (INT)(bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_rx_window_default);
             *option_length = sizeof(soc_window_size);
 
@@ -6229,15 +6284,15 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return(NX_SOC_ERROR); 
             }
             
-            so_reuseaddr= (struct sock_reuseaddr *)option_value;
+            so_reuseaddr= (struct nx_bsd_sock_reuseaddr *)option_value;
             so_reuseaddr -> reuseaddr_enabled = bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_REUSEADDR;
-            *option_length = sizeof(struct sock_reuseaddr);
+            *option_length = sizeof(struct nx_bsd_sock_reuseaddr);
 
         break;
 
@@ -6250,7 +6305,7 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
@@ -6263,7 +6318,7 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EBADF);  
+                nx_bsd_set_errno(EBADF);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
@@ -6276,7 +6331,7 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
                
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
+                nx_bsd_set_errno(ENOPROTOOPT);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
@@ -6291,7 +6346,7 @@ ULONG           ticks;
             tx_mutex_put(nx_bsd_protection_ptr);
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOPROTOOPT);  
+            nx_bsd_set_errno(ENOPROTOOPT);  
 
             /* Unsupported or unknown option. */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6309,7 +6364,7 @@ ULONG           ticks;
 /*  FUNCTION                                               RELEASE        */  
 /*                                                                        */  
 /*    setsockopt                                          PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6348,20 +6403,24 @@ ULONG           ticks;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  setsockopt(INT sockID, INT option_level, INT option_name, const VOID *option_value, INT option_length)
+INT  nx_bsd_setsockopt(INT sockID, INT option_level, INT option_name, const VOID *option_value, INT option_length)
 {
-UINT            reuse_enabled;
-NX_BSD_SOCKET   *bsd_socket_ptr;
-ULONG           window_size;
-ULONG           timer_ticks;
-struct timeval *time_val;
+UINT                    reuse_enabled;
+NX_BSD_SOCKET           *bsd_socket_ptr;
+ULONG                   window_size;
+ULONG                   timer_ticks;
+struct nx_bsd_timeval   *time_val;
 #if defined(NX_ENABLE_IP_RAW_PACKET_FILTER) || !defined(NX_DISABLE_IPV4)
 INT             i;
 #endif /* defined(NX_ENABLE_IP_RAW_PACKET_FILTER) || !defined(NX_DISABLE_IPV4) */
 #ifndef NX_DISABLE_IPV4
-struct ip_mreq *mreq;
+struct nx_bsd_ip_mreq
+               *mreq;
 UINT            mcast_interface;
 UINT            status;
 #endif /* NX_DISABLE_IPV4 */
@@ -6374,7 +6433,7 @@ UINT            status;
         /* Error, invalid socket ID.  */
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -6387,7 +6446,7 @@ UINT            status;
         /* Error, one or more invalid arguments.  */
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return NX_SOC_ERROR;
@@ -6402,7 +6461,7 @@ UINT            status;
             /* Error, one or more invalid arguments.  */
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOPROTOOPT);              
+            nx_bsd_set_errno(ENOPROTOOPT);              
             
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return NX_SOC_ERROR;
@@ -6417,8 +6476,23 @@ UINT            status;
             /* Error, one or more invalid arguments.  */
             
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOPROTOOPT);  
+            nx_bsd_set_errno(ENOPROTOOPT);  
             
+            NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+            return NX_SOC_ERROR;
+        }
+    }
+    else if (option_level == IPPROTO_TCP)
+    {
+
+        if ((option_name > TCP_NOOPT) ||
+            (option_name < TCP_NODELAY))
+        {
+            /* Error, one or more invalid arguments.  */
+
+            /* Set the socket error if extended socket options enabled. */
+            nx_bsd_set_errno(ENOPROTOOPT);
+
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return NX_SOC_ERROR;
         }
@@ -6428,7 +6502,7 @@ UINT            status;
         /* Error, one or more invalid arguments.  */
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return NX_SOC_ERROR;
@@ -6458,7 +6532,7 @@ UINT            status;
 #ifndef NX_ENABLE_TCP_KEEPALIVE
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
+                nx_bsd_set_errno(ENOPROTOOPT);  
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6468,7 +6542,7 @@ UINT            status;
 
                 /* Update the BSD socket with this attribute. */
                 bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled = 
-                                        (UINT)(((struct sock_keepalive *)option_value) -> keepalive_enabled);
+                                        (UINT)(((struct nx_bsd_sock_keepalive *)option_value) -> keepalive_enabled);
 
                 if (bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled == NX_TRUE)
                 {
@@ -6489,7 +6563,7 @@ UINT            status;
                 /* Not a TCP socket. */
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
+                nx_bsd_set_errno(ENOPROTOOPT);  
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6506,7 +6580,7 @@ UINT            status;
 
         case SO_SNDTIMEO:
 
-            time_val =  (struct timeval *)option_value;
+            time_val =  (struct nx_bsd_timeval *)option_value;
 
             /* Calculate ticks for the ThreadX Timer.  */
             timer_ticks = (ULONG)(time_val -> tv_usec)/NX_MICROSECOND_PER_CPU_TICK  + (ULONG)(time_val -> tv_sec) * NX_IP_PERIODIC_RATE;
@@ -6517,7 +6591,7 @@ UINT            status;
 
         case SO_RCVTIMEO:
 
-            time_val =  (struct timeval *)option_value;
+            time_val =  (struct nx_bsd_timeval *)option_value;
 
             /* Calculate ticks for the ThreadX Timer.  */
             timer_ticks = (ULONG)(time_val -> tv_usec)/NX_MICROSECOND_PER_CPU_TICK  + (ULONG)(time_val -> tv_sec) * NX_IP_PERIODIC_RATE;
@@ -6533,7 +6607,7 @@ UINT            status;
             {
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
+                nx_bsd_set_errno(ENOPROTOOPT);  
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6541,7 +6615,7 @@ UINT            status;
             }
 
 
-            window_size = (ULONG)(((struct sock_winsize *)option_value) -> winsize);
+            window_size = (ULONG)(((struct nx_bsd_sock_winsize *)option_value) -> winsize);
 
 #ifdef NX_ENABLE_TCP_WINDOW_SCALING
 
@@ -6563,7 +6637,7 @@ UINT            status;
 
         case SO_REUSEADDR:
 
-            reuse_enabled = (UINT)(((struct sock_reuseaddr *)option_value) -> reuseaddr_enabled);
+            reuse_enabled = (UINT)(((struct nx_bsd_sock_reuseaddr *)option_value) -> reuseaddr_enabled);
 
             if(reuse_enabled)
                 bsd_socket_ptr -> nx_bsd_socket_option_flags |= NX_BSD_SOCKET_ENABLE_OPTION_REUSEADDR;
@@ -6582,11 +6656,11 @@ UINT            status;
         case IP_MULTICAST_TTL:
 
             /* Validate the option length. */
-            if(option_length != sizeof(UCHAR))
+            if(option_length != sizeof(UCHAR) && option_length != sizeof(INT))
             {
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
@@ -6597,7 +6671,7 @@ UINT            status;
             {
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EBADF);  
+                nx_bsd_set_errno(EBADF);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
@@ -6607,13 +6681,33 @@ UINT            status;
             if(bsd_socket_ptr -> nx_bsd_socket_udp_socket == NX_NULL)
             {
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
+                nx_bsd_set_errno(ENOPROTOOPT);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
+
             /* Set the TTL value. */
-            bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live = *(UCHAR*)option_value;
+            if (option_length == sizeof(UCHAR))
+            {
+                bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live = *(UCHAR*)option_value;
+            }
+            else
+            {
+                bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live = (UCHAR)(*(INT*)option_value);
+            }
+        break;
+
+        case IP_MULTICAST_LOOP:
+
+            /* This is not supported yet. */
+
+        break;
+
+        case IP_MULTICAST_IF:
+
+            /* This is not supported yet. */
+
         break;
 
             
@@ -6641,7 +6735,7 @@ UINT            status;
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
             {
 
-                set_errno(EINVAL);
+                nx_bsd_set_errno(EINVAL);
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6680,7 +6774,7 @@ UINT            status;
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
             {
 
-                set_errno(EINVAL);
+                nx_bsd_set_errno(EINVAL);
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6697,23 +6791,23 @@ UINT            status;
         case IP_DROP_MEMBERSHIP:
 
             /* Validate the option length */
-            if(option_length != sizeof(struct ip_mreq))
+            if(option_length != sizeof(struct nx_bsd_ip_mreq))
             {
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
             
-            mreq = (struct ip_mreq*)option_value;
+            mreq = (struct nx_bsd_ip_mreq*)option_value;
 
             /* Make sure the multicast group address is valid. */
             if((mreq -> imr_multiaddr.s_addr & ntohl(NX_IP_CLASS_D_TYPE)) != ntohl(NX_IP_CLASS_D_TYPE))
             {
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
@@ -6723,7 +6817,7 @@ UINT            status;
             if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
             {
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EBADF);  
+                nx_bsd_set_errno(EBADF);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
@@ -6733,7 +6827,7 @@ UINT            status;
             if(bsd_socket_ptr -> nx_bsd_socket_udp_socket == NX_NULL)
             {
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
+                nx_bsd_set_errno(ENOPROTOOPT);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
@@ -6773,7 +6867,7 @@ UINT            status;
             {
 
                 /* Did not find a matching interface. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
@@ -6801,7 +6895,7 @@ UINT            status;
             if(status != NX_SUCCESS)
             {
 
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);  
                 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
@@ -6838,7 +6932,7 @@ UINT            status;
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
             {
 
-                set_errno(EINVAL);
+                nx_bsd_set_errno(EINVAL);
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6853,7 +6947,7 @@ UINT            status;
         default:
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);  
+            nx_bsd_set_errno(EINVAL);  
 
             /* Return an error status. */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6870,7 +6964,7 @@ UINT            status;
 /*  FUNCTION                                               RELEASE        */  
 /*                                                                        */  
 /*    getsockname                                         PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6911,16 +7005,19 @@ UINT            status;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  getsockname(INT sockID, struct sockaddr *localAddress, INT *addressLength)
+INT  nx_bsd_getsockname(INT sockID, struct nx_bsd_sockaddr *localAddress, INT *addressLength)
 {
 
 #ifndef NX_DISABLE_IPV4
-struct sockaddr_in  soc_struct;
+struct nx_bsd_sockaddr_in  soc_struct;
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
-struct sockaddr_in6 soc6_struct;
+struct nx_bsd_sockaddr_in6 soc6_struct;
 #endif
 UINT                status;
 NX_BSD_SOCKET       *bsd_socket_ptr;
@@ -6931,7 +7028,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -6941,7 +7038,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
     {
     
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         /* Return error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6962,7 +7059,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
         return(NX_SOC_ERROR); 
@@ -6973,7 +7070,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
         
@@ -7004,7 +7101,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
         else if(bsd_socket_ptr -> nx_bsd_socket_local_bind_interface == 0)
         {
 
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -7022,9 +7119,9 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
         
         soc_struct.sin_family = AF_INET;
 
-        if((*addressLength) > (INT)sizeof(struct sockaddr_in))
+        if((*addressLength) > (INT)sizeof(struct nx_bsd_sockaddr_in))
         {
-            *addressLength = sizeof(struct sockaddr_in);
+            *addressLength = sizeof(struct nx_bsd_sockaddr_in);
         }
         memcpy(localAddress, &soc_struct, (UINT)(*addressLength)); /* Use case of memcpy is verified. */
     }
@@ -7045,7 +7142,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
         else if(bsd_socket_ptr -> nx_bsd_socket_local_bind_interface == 0)
         {
 
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -7068,9 +7165,9 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
 
         soc6_struct.sin6_family = AF_INET6;
 
-        if((*addressLength) > (INT)sizeof(struct sockaddr_in6))
+        if((*addressLength) > (INT)sizeof(struct nx_bsd_sockaddr_in6))
         {
-            *addressLength = sizeof(struct sockaddr_in6);
+            *addressLength = sizeof(struct nx_bsd_sockaddr_in6);
         }
         memcpy(localAddress, &soc6_struct, (UINT)(*addressLength)); /* Use case of memcpy is verified. */
 
@@ -7082,7 +7179,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
-        set_errno(EPROTONOSUPPORT);
+        nx_bsd_set_errno(EPROTONOSUPPORT);
 
         /* Return error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -7104,7 +7201,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
 /*  FUNCTION                                               RELEASE        */  
 /*                                                                        */  
 /*    getpeername                                         PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7141,18 +7238,21 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  getpeername(INT sockID, struct sockaddr *remoteAddress, INT *addressLength)
+INT  nx_bsd_getpeername(INT sockID, struct nx_bsd_sockaddr *remoteAddress, INT *addressLength)
 {
 
 UINT                status;
 NX_BSD_SOCKET       *bsd_socket_ptr;
 #ifndef NX_DISABLE_IPV4
-struct sockaddr_in  *soc_struct_ptr = NX_NULL;
+struct nx_bsd_sockaddr_in  *soc_struct_ptr = NX_NULL;
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
-struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
+struct nx_bsd_sockaddr_in6 *soc6_struct_ptr = NX_NULL;
 #endif
 
 
@@ -7161,7 +7261,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         /* Error, invalid socket ID.  */
         NX_BSD_ERROR(ERROR, __LINE__);
@@ -7176,7 +7276,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         /* Return error.  */
         NX_BSD_ERROR(ERROR, __LINE__);
@@ -7192,7 +7292,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         /* Error getting the protection mutex.  */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -7209,7 +7309,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
         /* This is an IPv4 only socket. */
 
         /* Now validate the size of remoteAddress structure. */
-        if(*addressLength < (INT)sizeof(struct sockaddr_in))
+        if(*addressLength < (INT)sizeof(struct nx_bsd_sockaddr_in))
         {
 
             /* User supplied buffer is too small .*/
@@ -7218,15 +7318,15 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
             tx_mutex_put(nx_bsd_protection_ptr);
 
             /* Set the socket error, if socket enabled with extended BSD features. */
-            set_errno(ESOCKTNOSUPPORT);
+            nx_bsd_set_errno(ESOCKTNOSUPPORT);
 
             /* Return error.  */
             NX_BSD_ERROR(ERROR, __LINE__);
             return(ERROR);
         }
         
-        soc_struct_ptr = (struct sockaddr_in*)remoteAddress;
-        *addressLength = sizeof(struct sockaddr_in);
+        soc_struct_ptr = (struct nx_bsd_sockaddr_in*)remoteAddress;
+        *addressLength = sizeof(struct nx_bsd_sockaddr_in);
     }
     else
 #endif /* NX_DISABLE_IPV4 */
@@ -7237,7 +7337,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
         /* IPv6 socket */
 
         /* Now validate the size of remoteAddress structure. */
-        if(*addressLength < (INT)sizeof(struct sockaddr_in6))
+        if(*addressLength < (INT)sizeof(struct nx_bsd_sockaddr_in6))
         {
 
             /* User supplied buffer is too small .*/
@@ -7246,15 +7346,15 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
             tx_mutex_put(nx_bsd_protection_ptr);
 
             /* Set the socket error, if socket enabled with extended BSD features. */
-            set_errno(ESOCKTNOSUPPORT);
+            nx_bsd_set_errno(ESOCKTNOSUPPORT);
 
             /* Return error.  */
             NX_BSD_ERROR(ERROR, __LINE__);
             return(ERROR);
         }
         
-        soc6_struct_ptr = (struct sockaddr_in6*)remoteAddress;
-        *addressLength = sizeof(struct sockaddr_in6);
+        soc6_struct_ptr = (struct nx_bsd_sockaddr_in6*)remoteAddress;
+        *addressLength = sizeof(struct nx_bsd_sockaddr_in6);
     }
     else
 #endif /* FEATURE_NX_IPV6 */
@@ -7265,7 +7365,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error, if socket enabled with extended BSD features. */
-        set_errno(ESOCKTNOSUPPORT);
+        nx_bsd_set_errno(ESOCKTNOSUPPORT);
 
         /* Return error.  */
         NX_BSD_ERROR(ERROR, __LINE__);
@@ -7282,7 +7382,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return error.  */
         NX_BSD_ERROR(ERROR, __LINE__);
@@ -7323,7 +7423,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
             tx_mutex_put(nx_bsd_protection_ptr);
 
             /* Set the socket error if extended options enabled. */
-            set_errno(EBADF);
+            nx_bsd_set_errno(EBADF);
 
             /* Return error.  */
             NX_BSD_ERROR(ERROR, __LINE__);
@@ -7358,7 +7458,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
             tx_mutex_put(nx_bsd_protection_ptr);
 
             /* Set the socket error, if socket enabled with extended BSD features. */
-            set_errno(ESOCKTNOSUPPORT);
+            nx_bsd_set_errno(ESOCKTNOSUPPORT);
 
             /* Return error.  */
             NX_BSD_ERROR(ERROR, __LINE__);
@@ -7373,7 +7473,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error, if socket enabled with extended BSD features. */
-        set_errno(ESOCKTNOSUPPORT);
+        nx_bsd_set_errno(ESOCKTNOSUPPORT);
 
         /* Return error.  */
         NX_BSD_ERROR(ERROR, __LINE__);
@@ -7393,7 +7493,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */  
 /*                                                                        */  
 /*    select                                              PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7473,18 +7573,21 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  select(INT nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
+INT  nx_bsd_select(INT nfds, nx_bsd_fd_set *readfds, nx_bsd_fd_set *writefds, nx_bsd_fd_set *exceptfds, struct nx_bsd_timeval *timeout)
 {
 
 INT                     i;
 UINT                    status;
 NX_BSD_SOCKET_SUSPEND   suspend_request;
 NX_PACKET               *packet_ptr;
-fd_set                  readfds_found;
-fd_set                  writefds_found;
-fd_set                  exceptfds_found;
+nx_bsd_fd_set           readfds_found;
+nx_bsd_fd_set           writefds_found;
+nx_bsd_fd_set           exceptfds_found;
 INT                     readfds_left;
 INT                     writefds_left;
 INT                     exceptfds_left;
@@ -7499,7 +7602,7 @@ INT                     ret;
     {
     
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -7511,7 +7614,7 @@ INT                     ret;
     {
 
         /* Set the socket error */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -7519,9 +7622,9 @@ INT                     ret;
     }
 
     /* Clear the read and the write selector set.  */
-    FD_ZERO(&readfds_found);
-    FD_ZERO(&writefds_found);
-    FD_ZERO(&exceptfds_found);
+    NX_BSD_FD_ZERO(&readfds_found);
+    NX_BSD_FD_ZERO(&writefds_found);
+    NX_BSD_FD_ZERO(&exceptfds_found);
 
     if(readfds)
         readfds_left = readfds -> fd_count;
@@ -7572,7 +7675,7 @@ INT                     ret;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         /* Set the socket error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -7587,7 +7690,7 @@ INT                     ret;
             break;
 
         /* Is this socket selected for read?  */
-        if (FD_ISSET((i + NX_BSD_SOCKFD_START), readfds))
+        if (NX_BSD_FD_ISSET((i + NX_BSD_SOCKFD_START), readfds))
         {
 
             /* Yes, decrement the number of read selectors left to search for.  */
@@ -7598,7 +7701,7 @@ INT                     ret;
             {
 
                 /* There is; add this socket to the read ready list.  */
-                FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
             }
 
             /* Check to see if there is a disconnection request pending.  */
@@ -7606,7 +7709,7 @@ INT                     ret;
             {
             
                 /* There is; add this socket to the read ready list.  */
-                FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
             }
 
             /* Check to see if there is a receive packet pending.  */ 
@@ -7614,7 +7717,7 @@ INT                     ret;
             {
             
                 /* Therer is; add this socket to the read ready list.  */
-                FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
             }
             /* Is this a TCP socket? */
             else if (nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket)
@@ -7639,13 +7742,13 @@ INT                     ret;
                             {
 
                                 /* Mark the FD set so the application could be notified. */
-                                FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
                             }
                         }
 
                         if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED)
                         {
-                            FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                            NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
                         }
                     }
                 }
@@ -7670,7 +7773,7 @@ INT                     ret;
                         nx_bsd_socket_array[i].nx_bsd_socket_received_packet_count++;
 
                         /* Add this socket to the read ready list.  */
-                        FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                        NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
                     }
                 }
             }
@@ -7696,7 +7799,7 @@ INT                     ret;
                     nx_bsd_socket_array[i].nx_bsd_socket_received_packet_offset =  0;
 
                     /* Add this socket to the read ready list.  */
-                    FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                    NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
                 }
             }
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
@@ -7711,7 +7814,7 @@ INT                     ret;
             break;
 
         /* Is this socket selected for write?  */
-        if (FD_ISSET(i + NX_BSD_SOCKFD_START, writefds))
+        if (NX_BSD_FD_ISSET(i + NX_BSD_SOCKFD_START, writefds))
         {
 
             /* Yes, decrement the number of read selectors left to search for.  */
@@ -7722,7 +7825,7 @@ INT                     ret;
             {
 
                 /* Yes, add this socket to the write ready list.  */
-                FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
 
             /* Check to see if there is a connection request pending.  */
@@ -7730,14 +7833,14 @@ INT                     ret;
             {
             
                 /* Yes, add this socket to the write ready list.  */
-                FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
 
             /* Check to see if there is an error.*/
             else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
             {
 
-                FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
         }
     }
@@ -7750,7 +7853,7 @@ INT                     ret;
             break;
 
         /* Is this socket selected for exceptions?  */
-        if (FD_ISSET(i + NX_BSD_SOCKFD_START, exceptfds))
+        if (NX_BSD_FD_ISSET(i + NX_BSD_SOCKFD_START, exceptfds))
         {
 
             /* Yes, decrement the number of read selectors left to search for.  */
@@ -7760,14 +7863,14 @@ INT                     ret;
             if (!(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
             {
 
-                FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
             }
 
             /* Check to see if there is an error.*/
             else if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
             {
 
-                FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
             }
         }
     }
@@ -7807,17 +7910,17 @@ INT                     ret;
     if(readfds)
         suspend_request.nx_bsd_socket_suspend_read_fd_set =  *readfds;
     else
-        FD_ZERO(&suspend_request.nx_bsd_socket_suspend_read_fd_set);
+        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_read_fd_set);
 
     if(writefds)
         suspend_request.nx_bsd_socket_suspend_write_fd_set = *writefds;
     else
-        FD_ZERO(&suspend_request.nx_bsd_socket_suspend_write_fd_set);
+        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_write_fd_set);
 
     if(exceptfds)
         suspend_request.nx_bsd_socket_suspend_exception_fd_set = *exceptfds;
     else
-        FD_ZERO(&suspend_request.nx_bsd_socket_suspend_exception_fd_set);
+        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_exception_fd_set);
     
     /* Temporarily disable preemption.  */
     tx_thread_preemption_change(current_thread_ptr, 0, &original_threshold);
@@ -7843,9 +7946,9 @@ INT                     ret;
 
             /* Determine if the effected sockets are non blocking (zero ticks for the wait option). */
             if (ticks == 0)
-                set_errno(EWOULDBLOCK);  
+                nx_bsd_set_errno(EWOULDBLOCK);  
             else
-                set_errno(ETIMEDOUT);
+                nx_bsd_set_errno(ETIMEDOUT);
 
             /* Do not handle as an error; just a timeout so return 0.  */
             return(0);
@@ -7855,7 +7958,7 @@ INT                     ret;
         
             /* Actual error.  */
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
 
             /* Error getting the protection mutex.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -8323,7 +8426,7 @@ NX_UDP_SOCKET           *udp_socket_ptr;
 /*  FUNCTION                                               RELEASE        */  
 /*                                                                        */  
 /*    FD_SET                                              PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8356,9 +8459,12 @@ NX_UDP_SOCKET           *udp_socket_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-VOID  FD_SET(INT fd, fd_set *fdset)
+VOID  NX_BSD_FD_SET(INT fd, nx_bsd_fd_set *fdset)
 {
 
 UINT    index;
@@ -8400,7 +8506,7 @@ UINT    index;
 /*  FUNCTION                                               RELEASE        */  
 /*                                                                        */  
 /*    FD_CLR                                              PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8433,9 +8539,12 @@ UINT    index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-VOID  FD_CLR(INT fd, fd_set *fdset)
+VOID  NX_BSD_FD_CLR(INT fd, nx_bsd_fd_set *fdset)
 {
 
 UINT    index;
@@ -8514,7 +8623,7 @@ UINT    index;
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-INT  FD_ISSET(INT fd, fd_set *fdset)
+INT  NX_BSD_FD_ISSET(INT fd, nx_bsd_fd_set *fdset)
 {
 
 UINT    index;
@@ -8557,7 +8666,7 @@ UINT    index;
 /*  FUNCTION                                               RELEASE        */  
 /*                                                                        */  
 /*    FD_ZERO                                             PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8589,9 +8698,12 @@ UINT    index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-VOID  FD_ZERO(fd_set *fdset)
+VOID  NX_BSD_FD_ZERO(nx_bsd_fd_set *fdset)
 {
 
 INT     i;
@@ -8829,7 +8941,7 @@ VOID  nx_bsd_raw_receive_notify(NX_IP *ip_ptr, UINT bsd_socket_index)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    nx_bsd_raw_packet_receive                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8867,6 +8979,9 @@ VOID  nx_bsd_raw_receive_notify(NX_IP *ip_ptr, UINT bsd_socket_index)
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_bsd_raw_packet_receive(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET **packet_ptr)
@@ -8877,7 +8992,7 @@ UINT nx_bsd_raw_packet_receive(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET **packet
     if (!(bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_RAW_SOCKET))
     {
         /* Set the socket error. */
-        set_errno(EPROTOTYPE);
+        nx_bsd_set_errno(EPROTOTYPE);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_NOT_ENABLED);
@@ -9637,7 +9752,7 @@ static UINT nx_bsd_isxdigit(UCHAR c)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    set_errno                                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9671,9 +9786,12 @@ static UINT nx_bsd_isxdigit(UCHAR c)
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-VOID set_errno(INT tx_errno)
+VOID nx_bsd_set_errno(INT tx_errno)
 {
 
 TX_INTERRUPT_SAVE_AREA
@@ -9755,7 +9873,7 @@ TX_THREAD       *current_thread_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    nx_bsd_select_wakeup                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9798,12 +9916,15 @@ TX_THREAD       *current_thread_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static VOID nx_bsd_select_wakeup(UINT sock_id, UINT fd_sets)
 {
 TX_INTERRUPT_SAVE_AREA
-fd_set                  local_fd;
+nx_bsd_fd_set           local_fd;
 TX_THREAD               *suspended_thread;
 ULONG                   suspended_count;
 ULONG                   original_suspended_count;
@@ -9814,8 +9935,8 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
        BSD mutex. */
 
  
-    FD_ZERO(&local_fd);
-    FD_SET((INT)sock_id + NX_BSD_SOCKFD_START, &local_fd);
+    NX_BSD_FD_ZERO(&local_fd);
+    NX_BSD_FD_SET((INT)sock_id + NX_BSD_SOCKFD_START, &local_fd);
 
     /* Disable interrupts temporarily.  */
     TX_DISABLE
@@ -9841,7 +9962,7 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
             suspend_info =  (NX_BSD_SOCKET_SUSPEND *) suspended_thread -> tx_thread_additional_suspend_info;
 
             /* Now determine if this thread was waiting for this socket.  */
-            if ((fd_sets & FDSET_READ) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set)))
+            if ((fd_sets & FDSET_READ) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set)))
             {
 
                 /* Copy the local fd over so that the return shows the receive socket.  */
@@ -9853,7 +9974,7 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
             }        
 
             /* Now determine if this thread was waiting for this socket.  */
-            if ((fd_sets & FDSET_WRITE) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set)))
+            if ((fd_sets & FDSET_WRITE) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set)))
             {
 
                 /* Copy the local fd over so that the return shows the receive socket.  */
@@ -9865,7 +9986,7 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
             }        
 
             /* Now determine if this thread was waiting for this socket.  */
-            if ((fd_sets & FDSET_EXCEPTION) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set)))
+            if ((fd_sets & FDSET_EXCEPTION) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set)))
             {
 
                 /* Copy the local fd over so that the return shows the receive socket.  */
@@ -9879,25 +10000,25 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
             /* Clear FD that is not set. */
             if (suspended_thread -> tx_thread_suspend_info == NX_BSD_RECEIVE_EVENT)
             {
-                if (!(fd_sets & FDSET_READ) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set)))
+                if (!(fd_sets & FDSET_READ) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set)))
                 {
 
                     /* Clear read FD. */
-                    FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set);
+                    NX_BSD_FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set);
                 }
 
-                if (!(fd_sets & FDSET_WRITE) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set)))
+                if (!(fd_sets & FDSET_WRITE) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set)))
                 {
 
                     /* Clear write FD. */
-                    FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set);
+                    NX_BSD_FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set);
                 }
 
-                if (!(fd_sets & FDSET_EXCEPTION) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set)))
+                if (!(fd_sets & FDSET_EXCEPTION) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set)))
                 {
 
                     /* Clear exception FD. */
-                    FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set);
+                    NX_BSD_FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set);
                 }
             }
         }
@@ -9942,7 +10063,7 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    nx_bsd_set_error_code                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9976,6 +10097,9 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static VOID nx_bsd_set_error_code(NX_BSD_SOCKET *bsd_socket_ptr, UINT status_code)
@@ -9984,35 +10108,35 @@ static VOID nx_bsd_set_error_code(NX_BSD_SOCKET *bsd_socket_ptr, UINT status_cod
     {
         case NX_NOT_CLOSED:
             /* TCP connection is not closed state. */
-            set_errno(EISCONN);
+            nx_bsd_set_errno(EISCONN);
             break;
 
         case NX_PTR_ERROR:
         case NX_INVALID_PORT:
             /* Invalid arguement. */
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
             break;
 
         case NX_MAX_LISTEN:
-            set_errno(ENOBUFS);  
+            nx_bsd_set_errno(ENOBUFS);  
             break;
 
         case NX_PORT_UNAVAILABLE:
         case NX_NO_FREE_PORTS:
-            set_errno(EADDRNOTAVAIL);
+            nx_bsd_set_errno(EADDRNOTAVAIL);
             break;
 
         case NX_ALREADY_BOUND:
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
             break;
 
         case NX_WAIT_ABORTED:
-            set_errno(ETIMEDOUT);
+            nx_bsd_set_errno(ETIMEDOUT);
             break;
 
         case NX_NOT_CONNECTED:
             /* NX TCP connect service may return NX_NOT_CONNECTED if the timeout is WAIT_FOREVER. */
-            set_errno(ECONNREFUSED);
+            nx_bsd_set_errno(ECONNREFUSED);
             break;
 
         case NX_IN_PROGRESS:
@@ -10021,25 +10145,25 @@ static VOID nx_bsd_set_error_code(NX_BSD_SOCKET *bsd_socket_ptr, UINT status_cod
             if (bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING)
             {
                 bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_CONNECTION_INPROGRESS;
-                set_errno(EINPROGRESS);
+                nx_bsd_set_errno(EINPROGRESS);
             }
             else
-                set_errno(EINTR);
+                nx_bsd_set_errno(EINTR);
             break;
 
         case NX_INVALID_INTERFACE:
         case NX_IP_ADDRESS_ERROR:
-            set_errno(ENETUNREACH);
+            nx_bsd_set_errno(ENETUNREACH);
             break;
 
         case NX_NOT_ENABLED:
-            set_errno(EPROTONOSUPPORT);
+            nx_bsd_set_errno(EPROTONOSUPPORT);
             break;
 
         case NX_NOT_BOUND:
         case NX_DUPLICATE_LISTEN:
         default:
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
             break;
     }
 
@@ -10429,7 +10553,7 @@ NX_INTERFACE   *interface_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    nx_bsd_tcp_create_listen_socket                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10467,6 +10591,9 @@ NX_INTERFACE   *interface_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static INT nx_bsd_tcp_create_listen_socket(INT master_sockid, INT backlog)
@@ -10535,7 +10662,7 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
 
             /* Error, invalid backlog.  */
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOBUFS);  
+            nx_bsd_set_errno(ENOBUFS);  
 
             /* Return error code.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -10544,14 +10671,14 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
     }
 
     /* Now create a dedicated secondary socket to listen for next client connection.  */
-    secondary_sockID =  socket((INT)(master_socket_ptr -> nx_bsd_socket_family), SOCK_STREAM, IPPROTO_TCP);
+    secondary_sockID =  nx_bsd_socket((INT)(master_socket_ptr -> nx_bsd_socket_family), SOCK_STREAM, IPPROTO_TCP);
 
     /* Determine if there was an error.  */
     if (secondary_sockID == NX_SOC_ERROR)
     {
 
         /* Secondary socket create failed. Note: The socket thread error is set in socket().  */
-        set_errno(ENOMEM);
+        nx_bsd_set_errno(ENOMEM);
         
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -12379,7 +12506,7 @@ NX_IPV6_HEADER_OPTION           *option;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_bsd_pppoe_internal_sendto                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12421,12 +12548,16 @@ NX_IPV6_HEADER_OPTION           *option;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-static INT nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct sockaddr* destAddr, INT destAddrLen)
+static INT nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
 {
 UINT                if_index;
-struct sockaddr_ll *destAddr_ll;    
+struct nx_bsd_sockaddr_ll
+                    *destAddr_ll;    
 #if 0
 ULONG               src_mac_msw;  
 ULONG               src_mac_lsw;  
@@ -12442,7 +12573,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(destAddr == NX_NULL)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
@@ -12451,27 +12582,27 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(destAddr -> sa_family != AF_PACKET)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
     }
 
-    if(destAddrLen != sizeof(struct sockaddr_ll))
+    if(destAddrLen != sizeof(struct nx_bsd_sockaddr_ll))
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
     }
 
-    destAddr_ll = (struct sockaddr_ll*)destAddr;
+    destAddr_ll = (struct nx_bsd_sockaddr_ll*)destAddr;
 
     if((destAddr_ll -> sll_protocol != ETHERTYPE_PPPOE_SESS) && (destAddr_ll -> sll_protocol != ETHERTYPE_PPPOE_DISC))
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
@@ -12482,7 +12613,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(if_index >= NX_MAX_IP_INTERFACES)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
@@ -12491,7 +12622,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(nx_bsd_default_ip -> nx_ip_interface[if_index].nx_interface_valid == 0)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
@@ -12509,7 +12640,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(msgLength > (INT)(nx_bsd_default_ip -> nx_ip_interface[if_index].nx_interface_ip_mtu_size + 14))
     {    
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
@@ -12523,7 +12654,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
     {
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
@@ -12542,7 +12673,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
         nx_packet_release(packet_ptr);
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
@@ -12568,7 +12699,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
         nx_packet_release(packet_ptr);
         
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         /* Return an error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -12742,10 +12873,11 @@ NX_BSD_SOCKET *bsd_ptr;
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-static INT _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct sockaddr* destAddr, INT destAddrLen)
+static INT _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
 {
 UINT                if_index;
-struct sockaddr_ll *destAddr_ll;    
+struct nx_bsd_sockaddr_ll
+                   *destAddr_ll;    
 UINT                status;
 NX_PACKET          *packet_ptr = NX_NULL;
 
@@ -12756,7 +12888,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(destAddr == NX_NULL)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
@@ -12765,29 +12897,29 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(destAddr -> sa_family != AF_PACKET)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
     }
 
-    if(destAddrLen != sizeof(struct sockaddr_ll))
+    if(destAddrLen != sizeof(struct nx_bsd_sockaddr_ll))
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
     }
 
-    destAddr_ll = (struct sockaddr_ll*)destAddr;
+    destAddr_ll = (struct nx_bsd_sockaddr_ll*)destAddr;
 
     /* Validate the interface ID */
     if_index = (UINT)(destAddr_ll -> sll_ifindex);
     if(if_index >= NX_MAX_IP_INTERFACES)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
@@ -12796,7 +12928,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(nx_bsd_default_ip -> nx_ip_interface[if_index].nx_interface_valid == 0)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
@@ -12806,7 +12938,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(msgLength > (INT)(nx_bsd_default_ip -> nx_ip_interface[if_index].nx_interface_ip_mtu_size + 18))
     {    
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);  
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);        
@@ -12819,7 +12951,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
     {
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
@@ -12839,7 +12971,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
         nx_packet_release(packet_ptr);
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
@@ -12860,7 +12992,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
         nx_packet_release(packet_ptr);
         
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);  
 
         /* Return an error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
@@ -12991,7 +13123,7 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    inet_pton                                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13030,9 +13162,12 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  inet_pton(INT af, const CHAR *src, VOID *dst)
+INT  nx_bsd_inet_pton(INT af, const CHAR *src, VOID *dst)
 {
 CHAR    ch;
 USHORT  value; 
@@ -13051,12 +13186,12 @@ ULONG   *dst_long_ptr;
 const CHAR    *ipv4_addr_start = src;
 UINT    n, i; 
 
-struct  in_addr ipv4_addr;
+struct  nx_bsd_in_addr ipv4_addr;
 
     if(af == AF_INET)
     {
         /* Convert IPv4 address from presentation to numeric. */
-        if(inet_aton(src, &ipv4_addr))
+        if(nx_bsd_inet_aton(src, &ipv4_addr))
         {
             /* Copy the IPv4 address to the destination. */
             *((ULONG *)dst) = ipv4_addr.s_addr;
@@ -13165,7 +13300,7 @@ struct  in_addr ipv4_addr;
                 }
 
                 /* Convert the ipv4 address from presentation to numeric. */
-                if(inet_aton(ipv4_addr_start, &ipv4_addr))
+                if(nx_bsd_inet_aton(ipv4_addr_start, &ipv4_addr))
                 {
 
                     /* Make sure the result is in network byte order. */
@@ -13258,7 +13393,7 @@ struct  in_addr ipv4_addr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    inet_ntop                                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13297,9 +13432,12 @@ struct  in_addr ipv4_addr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-const CHAR *inet_ntop(INT af, const VOID *src, CHAR *dst, socklen_t size)
+const CHAR *nx_bsd_inet_ntop(INT af, const VOID *src, CHAR *dst, nx_bsd_socklen_t size)
 {
 
 INT    shorthand_index;
@@ -13593,7 +13731,7 @@ UINT index = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    getaddrinfo                                         PORTABLE C      */ 
-/*                                                           6.1.12       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13657,9 +13795,12 @@ UINT index = 0;
 /*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed compiler warnings,    */
 /*                                            resulting in version 6.1.12 */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  getaddrinfo(const CHAR *node, const CHAR *service, const struct addrinfo *hints, struct addrinfo **res)
+INT  nx_bsd_getaddrinfo(const CHAR *node, const CHAR *service, const struct nx_bsd_addrinfo *hints, struct nx_bsd_addrinfo **res)
 {
 
 UINT            status;
@@ -13675,14 +13816,18 @@ UINT            ipv6_addr_count = 0;
 UINT            match_service_count;
 UINT            match_service_socktype[3];
 UINT            match_service_protocol[3];
-struct addrinfo *addrinfo_cur_ptr  = NX_NULL;
-struct addrinfo *addrinfo_head_ptr = NX_NULL;
-struct addrinfo *addrinfo_tail_ptr = NX_NULL;
-struct sockaddr *sockaddr_ptr      = NX_NULL;
+struct nx_bsd_addrinfo
+               *addrinfo_cur_ptr  = NX_NULL;
+struct nx_bsd_addrinfo
+               *addrinfo_head_ptr = NX_NULL;
+struct nx_bsd_addrinfo
+               *addrinfo_tail_ptr = NX_NULL;
+struct nx_bsd_sockaddr
+               *sockaddr_ptr      = NX_NULL;
 UCHAR           *cname_buffer      = NX_NULL;
 
 /* When hints is a null pointer, use the default value below. */
-static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL, NX_NULL};
+static struct nx_bsd_addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL, NX_NULL};
 
 
 
@@ -13858,7 +14003,7 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
         {
 
             /* Convert node from a string presentation to a numeric address. */
-            if(inet_pton(addr_family, node, &(nx_bsd_ipv4_addr_buffer[0])) == 1)
+            if(nx_bsd_inet_pton(addr_family, node, &(nx_bsd_ipv4_addr_buffer[0])) == 1)
             {
                 /* pton has successful completion. */
                 pton_flag = 1;
@@ -13875,7 +14020,7 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
         {
 
             /* Convert node from a string presentation to a numeric address. */
-            if(inet_pton(addr_family, node, &(nx_bsd_ipv6_addr_buffer[0])) == 1)
+            if(nx_bsd_inet_pton(addr_family, node, &(nx_bsd_ipv6_addr_buffer[0])) == 1)
             {
                 /* pton completed successfully. */
                 pton_flag = 1;
@@ -13909,7 +14054,7 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
                 if (status != TX_SUCCESS)
                 {
                     /* Set the error. */
-                    set_errno(ENOMEM); 
+                    nx_bsd_set_errno(ENOMEM); 
 
                     /* Error getting NetX socket memory.  */
                     NX_BSD_ERROR(NX_BSD_BLOCK_POOL_ERROR, __LINE__);
@@ -14079,11 +14224,11 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
         {
 
             /* Set the error. */
-            set_errno(ENOMEM); 
+            nx_bsd_set_errno(ENOMEM); 
 
             /* If head is not null, free the memory. */
             if(addrinfo_head_ptr)
-                freeaddrinfo(addrinfo_head_ptr);
+                nx_bsd_freeaddrinfo(addrinfo_head_ptr);
 
 #ifdef NX_DNS_ENABLE_EXTENDED_RR_TYPES
             if(hints -> ai_flags & AI_CANONNAME)
@@ -14098,30 +14243,30 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
         }
 
         /* Clear the  memory.  */
-        memset((VOID*)sockaddr_ptr, 0, sizeof(struct addrinfo));
+        memset((VOID*)sockaddr_ptr, 0, sizeof(struct nx_bsd_addrinfo));
 
         if(i < ipv4_addr_count)
         {
 
             /* Process IPv4 address. */
-            ((struct sockaddr_in*)sockaddr_ptr) -> sin_family = AF_INET;
-            ((struct sockaddr_in*)sockaddr_ptr) -> sin_port   = (USHORT)port;
-            ((struct sockaddr_in*)sockaddr_ptr) -> sin_addr.s_addr = nx_bsd_ipv4_addr_buffer[i];
+            ((struct nx_bsd_sockaddr_in*)sockaddr_ptr) -> sin_family = AF_INET;
+            ((struct nx_bsd_sockaddr_in*)sockaddr_ptr) -> sin_port   = (USHORT)port;
+            ((struct nx_bsd_sockaddr_in*)sockaddr_ptr) -> sin_addr.s_addr = nx_bsd_ipv4_addr_buffer[i];
             
-            NX_CHANGE_ULONG_ENDIAN(((struct sockaddr_in*)sockaddr_ptr) -> sin_addr.s_addr);
+            NX_CHANGE_ULONG_ENDIAN(((struct nx_bsd_sockaddr_in*)sockaddr_ptr) -> sin_addr.s_addr);
         }
         else
         {
 
             /* Process IPv6 address. */
-            ((struct sockaddr_in6*)sockaddr_ptr) -> sin6_family = AF_INET6;
-            ((struct sockaddr_in6*)sockaddr_ptr) -> sin6_port   = (USHORT)port;
-            memcpy(&(((struct sockaddr_in6*)sockaddr_ptr) -> sin6_addr), &nx_bsd_ipv6_addr_buffer[(i - ipv4_addr_count)*4], 16); /* Use case of memcpy is verified. */
+            ((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_family = AF_INET6;
+            ((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_port   = (USHORT)port;
+            memcpy(&(((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_addr), &nx_bsd_ipv6_addr_buffer[(i - ipv4_addr_count)*4], 16); /* Use case of memcpy is verified. */
             
-            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[0]));
-            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[1]));
-            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[2]));
-            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[3]));
+            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[0]));
+            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[1]));
+            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[2]));
+            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[3]));
 
         }
 
@@ -14136,11 +14281,11 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
             {
 
                 /* Set the error. */
-                set_errno(ENOMEM); 
+                nx_bsd_set_errno(ENOMEM); 
 
                 /* If head is not null, free the memory. */
                 if(addrinfo_head_ptr)
-                    freeaddrinfo(addrinfo_head_ptr);
+                    nx_bsd_freeaddrinfo(addrinfo_head_ptr);
 
                 tx_block_release((VOID *)sockaddr_ptr);
 
@@ -14157,21 +14302,21 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
             }
 
             /* Clear the socket memory.  */
-            memset((VOID*)addrinfo_cur_ptr, 0, sizeof(struct addrinfo));
+            memset((VOID*)addrinfo_cur_ptr, 0, sizeof(struct nx_bsd_addrinfo));
             
             if(i < ipv4_addr_count)
             {
 
                 /* IPv4 */
                 addrinfo_cur_ptr -> ai_family  = AF_INET;
-                addrinfo_cur_ptr -> ai_addrlen = sizeof(struct sockaddr_in);
+                addrinfo_cur_ptr -> ai_addrlen = sizeof(struct nx_bsd_sockaddr_in);
             }
             else
             {
 
                 /* IPv6 */
                 addrinfo_cur_ptr -> ai_family = AF_INET6;
-                addrinfo_cur_ptr -> ai_addrlen = sizeof(struct sockaddr_in6);
+                addrinfo_cur_ptr -> ai_addrlen = sizeof(struct nx_bsd_sockaddr_in6);
             }
             
             addrinfo_cur_ptr -> ai_socktype = (INT)(match_service_socktype[j]);
@@ -14204,7 +14349,7 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    freeaddrinfo                                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14236,13 +14381,16 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-VOID freeaddrinfo(struct addrinfo *res)
+VOID nx_bsd_freeaddrinfo(struct nx_bsd_addrinfo *res)
 {
 
-struct addrinfo *next_addrinfo;
-struct sockaddr *ai_addr_ptr = NX_NULL;
+struct nx_bsd_addrinfo *next_addrinfo;
+struct nx_bsd_sockaddr *ai_addr_ptr = NX_NULL;
 #ifdef NX_DNS_ENABLE_EXTENDED_RR_TYPES
 CHAR *ai_canonname_ptr = NX_NULL;
 #endif
@@ -14347,7 +14495,7 @@ static INT bsd_string_to_number(const CHAR *string, UINT *number)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    getnameinfo                                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14390,9 +14538,12 @@ static INT bsd_string_to_number(const CHAR *string, UINT *number)
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-INT  getnameinfo(const struct sockaddr *sa, socklen_t salen, char *host, size_t hostlen, char *serv, size_t servlen, int flags)
+INT  nx_bsd_getnameinfo(const struct nx_bsd_sockaddr *sa, nx_bsd_socklen_t salen, char *host, size_t hostlen, char *serv, size_t servlen, int flags)
 {
 
 UINT        i = 0;
@@ -14422,8 +14573,8 @@ const CHAR  *rt_ptr;
             /* sa isn't NULL, but family type is invalid. */
             return EAI_FAMILY;
         }
-        else if((sa -> sa_family == AF_INET && salen != sizeof(struct sockaddr_in)) ||
-                (sa -> sa_family == AF_INET6 && salen != sizeof(struct sockaddr_in6)))
+        else if((sa -> sa_family == AF_INET && salen != sizeof(struct nx_bsd_sockaddr_in)) ||
+                (sa -> sa_family == AF_INET6 && salen != sizeof(struct nx_bsd_sockaddr_in6)))
         {
 
             /* Address length is invalid. */
@@ -14515,7 +14666,7 @@ const CHAR  *rt_ptr;
 
 #ifndef NX_DISABLE_IPV4
                 /* Get host name by IPv4 address via DNS. */
-                status = nx_dns_host_by_address_get(_nx_dns_instance_ptr, ntohl(((struct sockaddr_in *)sa) -> sin_addr.s_addr), 
+                status = nx_dns_host_by_address_get(_nx_dns_instance_ptr, ntohl(((struct nx_bsd_sockaddr_in *)sa) -> sin_addr.s_addr), 
                                                     (UCHAR *)host, hostlen, NX_BSD_TIMEOUT);
 #else
                 status = NX_DNS_NO_SERVER;
@@ -14526,10 +14677,10 @@ const CHAR  *rt_ptr;
 #ifdef FEATURE_NX_IPV6
                 /* copy data from sockaddr structure to NXD_ADDRESS structure. */
                 nxd_ipv6_addr.nxd_ip_version = NX_IP_VERSION_V6;
-                nxd_ipv6_addr.nxd_ip_address.v6[0] = ntohl(((struct sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[0]);
-                nxd_ipv6_addr.nxd_ip_address.v6[1] = ntohl(((struct sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[1]);
-                nxd_ipv6_addr.nxd_ip_address.v6[2] = ntohl(((struct sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[2]);
-                nxd_ipv6_addr.nxd_ip_address.v6[3] = ntohl(((struct sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[3]);
+                nxd_ipv6_addr.nxd_ip_address.v6[0] = ntohl(((struct nx_bsd_sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[0]);
+                nxd_ipv6_addr.nxd_ip_address.v6[1] = ntohl(((struct nx_bsd_sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[1]);
+                nxd_ipv6_addr.nxd_ip_address.v6[2] = ntohl(((struct nx_bsd_sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[2]);
+                nxd_ipv6_addr.nxd_ip_address.v6[3] = ntohl(((struct nx_bsd_sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[3]);
 
                 /* Get host name by IPv6 address via DNS. */
                 status = nxd_dns_host_by_address_get(_nx_dns_instance_ptr, &nxd_ipv6_addr, 
@@ -14566,9 +14717,9 @@ const CHAR  *rt_ptr;
 
             /* Host must be numeric string. Convert IP address from numeric to presentation. */
             if(sa -> sa_family == AF_INET)
-                rt_ptr = inet_ntop(AF_INET, &((struct sockaddr_in*)sa) -> sin_addr, (CHAR *)host, hostlen);
+                rt_ptr = nx_bsd_inet_ntop(AF_INET, &((struct nx_bsd_sockaddr_in*)sa) -> sin_addr, (CHAR *)host, hostlen);
             else
-                rt_ptr = inet_ntop(AF_INET6, &((struct sockaddr_in6*)sa) -> sin6_addr, (CHAR *)host, hostlen);
+                rt_ptr = nx_bsd_inet_ntop(AF_INET6, &((struct nx_bsd_sockaddr_in6*)sa) -> sin6_addr, (CHAR *)host, hostlen);
             
             if(!rt_ptr)
                 return EAI_OVERFLOW;
@@ -14729,4 +14880,196 @@ static VOID  _nx_bsd_fast_periodic_timer_entry(ULONG id)
 
     /* Call default IP fast periodic timer entry. */
     nx_bsd_ip_fast_periodic_timer_entry(id);
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    poll                                                PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Chaoqiong Xiao, Microsoft Corporation                               */
+/*                                                                        */
+/*  DESCRIPTION                                                           */  
+/*                                                                        */
+/*    This function allows for list of sockets to be checked for incoming */
+/*    events.                                                             */
+/*                                                                        */
+/*    Before invoked, each item inside fds array should be initialized,   */
+/*    pollfd::fd must be the descriptor ID to check and pollfd::events    */
+/*    must be the events (bits) to check.                                 */
+/*                                                                        */
+/*    Returned, the pollfd::revents of each item is updated, to indicate  */
+/*    if the checked events happen.                                       */
+/*                                                                        */
+/*    The event (bit) currently supported:                                */
+/*    - POLLIN : checking socket read FD                                  */
+/*    - POLLOUT: checking socket write FD                                 */
+/*    - POLLPRI: checking socket exception FD                             */
+/*                                                                        */
+/*    NOTE:  ****** When select returns NX_SOC_ERROR it won't update      */
+/*           the fds descriptor.                                          */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    fds                                  Socket descriptor list to poll */
+/*                                           and report actual status     */
+/*    nfds                                 Number of socket descriptors   */
+/*    timeOut                              Timeout in microseconds, set   */
+/*                                         to below 0 to wait infinitely  */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_SUCCESS                            Descriptors check ends        */
+/*                                           (successful completion)      */
+/*    NX_SOC_ERROR (-1)                     Error occured                 */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    FD_ZERO                               Clear a socket ready list     */
+/*    FD_ISSET                              Check a socket is ready       */
+/*    FD_SET                                Set a socket                  */
+/*    select                                Perform checks, see select()  */
+/*    set_errno                             Set the error code            */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+INT  nx_bsd_poll(struct nx_bsd_pollfd *fds, ULONG nfds, INT timeout)
+{
+nx_bsd_fd_set           read_fds;
+nx_bsd_fd_set           write_fds;
+nx_bsd_fd_set           except_fds;
+struct nx_bsd_timeval   stime;
+struct nx_bsd_timeval   *ptime;
+INT                     n_ready_fds;
+INT                     max_fd;
+ULONG                   i;
+struct nx_bsd_pollfd    *poll_fd;
+
+    /* Check input parameter.  */
+    if (fds == NX_NULL)
+    {
+        nx_bsd_set_errno(EFAULT);
+        return(NX_SOC_ERROR);
+    }
+    if (nfds == 0)
+    {
+        nx_bsd_set_errno(EFAULT);
+        return(NX_SOC_ERROR);
+    }
+
+    /* Initialize local FDs.  */
+    NX_BSD_FD_ZERO(&read_fds);
+    NX_BSD_FD_ZERO(&write_fds);
+    NX_BSD_FD_ZERO(&except_fds);
+
+    /* Map the poll() FD to select() FDs.  */
+    max_fd = 0;
+    for(i = 0; i < nfds; i ++)
+    {
+        poll_fd = &fds[i];
+
+        /* Skip bad FDs.  */
+        if (poll_fd -> fd < 0)
+            continue;
+
+        /* POLLIN.  */
+        if (poll_fd -> events & POLLIN)
+        {
+            NX_BSD_FD_SET(poll_fd -> fd, &read_fds);
+        }
+
+        /* POLLOUT.  */
+        if (poll_fd -> events & POLLOUT)
+        {
+            NX_BSD_FD_SET(poll_fd -> fd, &write_fds);
+        }
+
+        /* POLLPRI.  */
+        if (poll_fd -> events & POLLPRI)
+        {
+            NX_BSD_FD_SET(poll_fd -> fd, &except_fds);
+        }
+
+        /* Update max FD.  */
+        if (poll_fd -> fd > max_fd)
+            max_fd = poll_fd -> fd;
+    }
+
+    /* Map the select() timeout.  */
+    if (timeout < 0)
+    {
+
+        /* select() wait infinitely.  */
+        ptime = NX_NULL;
+    }
+    else
+    {
+
+        /* select() uses timeval option.  */
+        ptime = &stime;
+
+        if (timeout == 0)
+        {
+
+            /* select() no wait.  */
+            ptime -> tv_sec = 0;
+            ptime -> tv_usec = 0;
+        }
+        else
+        {
+            
+            /* select() wait specific time in ms.  */
+            ptime -> tv_sec = (timeout / 1000);
+            ptime -> tv_usec = (timeout % 1000);
+        }
+
+    }
+
+    /* Invoke select().  */
+    n_ready_fds = nx_bsd_select(max_fd + 1, &read_fds, &write_fds, &except_fds, ptime);
+
+    /* Parse result events if FDs updated.  */
+    if (n_ready_fds)
+    {
+
+        for (i = 0; i < nfds; i ++)
+        {
+            poll_fd = &fds[i];
+
+            /* Skip bad FDs.  */
+            if (poll_fd -> fd < 0)
+                continue;
+
+            /* Exceptions.  */
+            if (NX_BSD_FD_ISSET(poll_fd -> fd, &except_fds))
+                poll_fd -> revents |= POLLPRI;
+
+            else
+            {
+
+                /* Inputs.  */
+                if (NX_BSD_FD_ISSET(poll_fd -> fd, &read_fds))
+                    poll_fd -> revents |= POLLIN;
+            }
+
+            /* Outputs.  */
+            if (NX_BSD_FD_ISSET(poll_fd -> fd, &write_fds))
+                poll_fd -> revents |= POLLOUT;
+        }
+    }
+
+    return(n_ready_fds);
 }
