@@ -11,33 +11,33 @@
 
 /**************************************************************************/
 /**************************************************************************/
-/**                                                                       */ 
-/** NetX Component                                                        */ 
 /**                                                                       */
-/** BSD 4.3 Socket API Compatible Interface to NetX Duo                   */ 
+/** NetX Component                                                        */
+/**                                                                       */
+/** BSD 4.3 Socket API Compatible Interface to NetX Duo                   */
 /**                                                                       */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  BSD DEFINITIONS                                        RELEASE        */ 
-/*                                                                        */ 
-/*    nxd_bsd.h                                           PORTABLE C      */ 
-/*                                                           6.1.9        */
+/**************************************************************************/
+/*                                                                        */
+/*  BSD DEFINITIONS                                        RELEASE        */
+/*                                                                        */
+/*    nxd_bsd.h                                           PORTABLE C      */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*    This file defines the constants, structures, etc... needed to       */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This file defines the constants, structures, etc... needed to       */
 /*    implement the BSD 4.3 Socket API Compatible Interface to NetX Duo.  */
-/*                                                                        */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -50,6 +50,10 @@
 /*                                            defined IP protocols for    */
 /*                                            ICMP, IGMP and ICMPv6,      */
 /*                                            resulting in version 6.1.9  */
+/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            added option to enable      */
+/*                                            native APIs with prefix,    */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -74,7 +78,7 @@ extern   "C" {
 #include "nx_api.h"
 
 
-/* Define the print error macro for reporting source line number.  
+/* Define the print error macro for reporting source line number.
 
 #define NX_BSD_PRINT_ERRORS
 */
@@ -104,8 +108,8 @@ extern   "C" {
 */
 
 
-/* 
-   Define the BSD socket timeout process to execute in the timer context. 
+/*
+   Define the BSD socket timeout process to execute in the timer context.
    If this option is not defined, application needs to create stack space for the BSD timeout process
    thread, and passes the stack to the BSD layer through the bsd_initialize() call.  In this configuration,
    the BSD timeout process is all done in the BSD timeout process thread context.
@@ -122,61 +126,156 @@ extern   "C" {
    * If the timer is executed in ISR context (ThreadX library is built with TX_TIMER_PROCESS_IN_ISR),
      the BSD timeout process is now executing in the ISR context;
 
-     By default NX_BSD_TIMEOUT_PROCESS_IN_TIMER is NOT defined. 
+     By default NX_BSD_TIMEOUT_PROCESS_IN_TIMER is NOT defined.
 */
 /* #define NX_BSD_TIMEOUT_PROCESS_IN_TIMER */
-                      
+
+
+/* Defined, APIs are natively named with nx_bsd_ prefix to avoid conflicting/overriding OS BSD APIs.  */
+/*
+#define NX_BSD_ENABLE_NATIVE_API
+*/
+
+
 /* Define configuration constants for the BSD compatibility layer.  Note that these can be overridden via -D or a #define somewhere else.  */
 
 #ifndef NX_BSD_TCP_WINDOW
 #define NX_BSD_TCP_WINDOW                   65535                   /* 64k is typical window size for 100Mb ethernet.                       */
-#endif 
-
-#ifndef NX_BSD_SOCKFD_START
-#define NX_BSD_SOCKFD_START                 32                      /* Logical FD starting value.                                           */ 
 #endif
 
-#ifndef NX_BSD_MAX_SOCKETS  
+#ifndef NX_BSD_SOCKFD_START
+#define NX_BSD_SOCKFD_START                 32                      /* Logical FD starting value.                                           */
+#endif
+
+#ifndef NX_BSD_MAX_SOCKETS
 #define NX_BSD_MAX_SOCKETS                  32                      /* Maximum number of total sockets available in the BSD layer. Note     */
-#endif                                                              /*   NOTE:  Must be multiple of 32!                                     */ 
+#endif                                                              /*   NOTE:  Must be multiple of 32!                                     */
 
 #ifndef NX_BSD_MAX_LISTEN_BACKLOG
-#define NX_BSD_MAX_LISTEN_BACKLOG           5                       /* Maximum listen backlog.                                              */ 
+#define NX_BSD_MAX_LISTEN_BACKLOG           5                       /* Maximum listen backlog.                                              */
 #endif
 
 #ifndef NX_MICROSECOND_PER_CPU_TICK
-#define NX_MICROSECOND_PER_CPU_TICK         (1000000/NX_IP_PERIODIC_RATE) /* Number of microseconds per timer interrupt, default 10ms.            */ 
+#define NX_MICROSECOND_PER_CPU_TICK         (1000000/NX_IP_PERIODIC_RATE) /* Number of microseconds per timer interrupt, default 10ms.            */
 #endif
 #ifndef NX_BSD_TIMEOUT
-#define NX_BSD_TIMEOUT                      (20*NX_IP_PERIODIC_RATE)      
+#define NX_BSD_TIMEOUT                      (20*NX_IP_PERIODIC_RATE)
                                                                     /* By default all internal NetX calls wait and block for 20 seconds.    */
 #endif
 
 
 #ifndef NX_BSD_TCP_SOCKET_DISCONNECT_TIMEOUT
-#define NX_BSD_TCP_SOCKET_DISCONNECT_TIMEOUT 1                      /* Timeout in timer ticks for internal NetX to disconnect the socket. 
-                                                                       The default value of 1 tick is so NetX BSD emulates native BSD 
-                                                                       socket and performs an immediate socket close without sending an RST 
-                                                                       packet.                                                              */ 
+#define NX_BSD_TCP_SOCKET_DISCONNECT_TIMEOUT 1                      /* Timeout in timer ticks for internal NetX to disconnect the socket.
+                                                                       The default value of 1 tick is so NetX BSD emulates native BSD
+                                                                       socket and performs an immediate socket close without sending an RST
+                                                                       packet.                                                              */
 #endif
 
 /* Define configurable options for BSD extended options. */
-                                                                    
 
-#ifndef NX_BSD_TIMER_RATE                 
+
+#ifndef NX_BSD_TIMER_RATE
 #define NX_BSD_TIMER_RATE                   (1 * NX_IP_PERIODIC_RATE)        /* Rate at which BSD timer runs.                                   */
-#endif                                                                      
+#endif
 
-           
+
 /* Define BSD events */
 
-#define NX_BSD_RECEIVE_EVENT                ((ULONG) 0x00000001)    /* Event flag to signal a receive packet event                          */ 
-#define NX_BSD_SELECT_EVENT                 ((ULONG) 0x00008000)    /* Event flag to signal a thread is waiting in select                   */ 
+#define NX_BSD_RECEIVE_EVENT                ((ULONG) 0x00000001)    /* Event flag to signal a receive packet event                          */
+#define NX_BSD_SELECT_EVENT                 ((ULONG) 0x00008000)    /* Event flag to signal a thread is waiting in select                   */
 #define NX_BSD_ALL_EVENTS                   ((ULONG) 0xFFFFFFFF)    /* All event flag                                                       */
 #define NX_BSD_CONNECT_EVENT                ((ULONG) 0x00000002)
 #define NX_BSD_LINGER_EVENT                 ((ULONG) 0x00000004)    /* Event flag to signal a timed linger state has expired on a socket    */
 #define NX_BSD_TIMED_WAIT_EVENT             ((ULONG) 0x00000008)    /* Event flag to signal a timed wait state has expired on a socket      */
 #define NX_BSD_TIMER_EVENT                  ((ULONG) 0x00000010)    /* Event flag to singal a BSD 1 sec timer */
+
+
+/* For BSD APIs overriding.  */
+
+#if !defined(NX_BSD_ENABLE_NATIVE_API)
+
+
+/* Overriding struct names.  */
+
+#define nx_bsd_time_t           time_t
+#define nx_bsd_suseconds_t      suseconds_t
+
+#define nx_bsd_timeval          timeval
+
+#define nx_bsd_sockaddr_storage sockaddr_storage
+
+#define nx_bsd_sockaddr         sockaddr
+
+#define nx_bsd_in6_addr         in6_addr
+
+#define nx_bsd_sockaddr_in6     sockaddr_in6
+
+#define nx_bsd_in_addr          in_addr
+#define nx_bsd_in_addr_t        in_addr_t
+#define nx_bsd_socklen_t        socklen_t
+
+#define nx_bsd_sockaddr_in      sockaddr_in
+
+#define nx_bsd_fd_set           fd_set
+
+#define nx_bsd_ip_mreq          ip_mreq
+
+#define nx_bsd_sock_errno       sock_errno
+
+#define nx_bsd_linger           linger
+
+#define nx_bsd_sock_keepalive   sock_keepalive
+
+#define nx_bsd_sock_reuseaddr   sock_reuseaddr
+
+#define nx_bsd_sock_winsize     sock_winsize
+
+#define nx_bsd_addrinfo         addrinfo
+
+#define nx_bsd_pollfd           pollfd
+
+#define nx_bsd_sockaddr_ll      sockaddr_ll
+
+
+/* Overriding function names.  */
+
+#define nx_bsd_accept           accept
+#define nx_bsd_initialize       bsd_initialize
+#define nx_bsd_bind             bind
+#define nx_bsd_connect          connect
+#define nx_bsd_getpeername      getpeername
+#define nx_bsd_getsockname      getsockname
+#define nx_bsd_ioctl            ioctl
+#define nx_bsd_inet_addr        inet_addr
+#define nx_bsd_inet_ntoa        inet_ntoa
+#define nx_bsd_inet_aton        inet_aton
+#define nx_bsd_inet_pton        inet_pton
+#define nx_bsd_inet_ntop        inet_ntop
+#define nx_bsd_listen           listen
+#define nx_bsd_recvfrom         recvfrom
+#define nx_bsd_recv             recv
+#define nx_bsd_sendto           sendto
+#define nx_bsd_send             send
+#define nx_bsd_select           select
+#define nx_bsd_soc_close        soc_close
+#define nx_bsd_socket           socket
+#define nx_bsd_fcntl            fcntl
+#define nx_bsd_getsockopt       getsockopt
+#define nx_bsd_setsockopt       setsockopt
+#define nx_bsd_getaddrinfo      getaddrinfo
+#define nx_bsd_freeaddrinfo     freeaddrinfo
+#define nx_bsd_getnameinfo      getnameinfo
+#define nx_bsd_set_errno        set_errno
+#define nx_bsd_poll             poll
+
+#define NX_BSD_FD_SET           FD_SET
+#define NX_BSD_FD_CLR           FD_CLR
+#define NX_BSD_FD_ISSET         FD_ISSET
+#define NX_BSD_FD_ZERO          FD_ZERO
+
+
+
+#endif
 
 /* For compatibility undefine the fd_set.  Then define the FD set size.  */
 
@@ -264,7 +363,7 @@ extern   "C" {
 #ifdef NX_BSD_PRINT_ERRORS
 #define NX_BSD_ERROR(status, line) printf(" NX BSD debug error message:, NX status: %x source line: %i \n", status, line)
 #else
-#define NX_BSD_ERROR(status, line) 
+#define NX_BSD_ERROR(status, line)
 #endif
 
 
@@ -290,14 +389,14 @@ extern   "C" {
 #endif
 
 /* Define the maximum number of packets that can be queued on a UDP socket or RAW socket. */
-#ifndef NX_BSD_SOCKET_QUEUE_MAX 
+#ifndef NX_BSD_SOCKET_QUEUE_MAX
 #define NX_BSD_SOCKET_QUEUE_MAX 5
 #endif
 
-/* Define the constants that determine how big the hash table is for raw socket Protocol. The 
+/* Define the constants that determine how big the hash table is for raw socket Protocol. The
    value must be a power of two, so subtracting one gives us the mask. */
 
-#ifndef NX_BSD_SOCKET_RAW_PROTOCOL_TABLE_SIZE   
+#ifndef NX_BSD_SOCKET_RAW_PROTOCOL_TABLE_SIZE
 #define NX_BSD_SOCKET_RAW_PROTOCOL_TABLE_SIZE   32
 #endif /* NX_BSD_SOCKET_RAW_PROTOCOL_TABLE_SIZE */
 
@@ -445,7 +544,7 @@ extern   "C" {
 
 
 /* List of BSD sock options from socket.h in /usr/include/asm/socket.h and asm-generic/socket.h.
-   Note: not all of these are implemented in NetX Duo Extended socket options.  
+   Note: not all of these are implemented in NetX Duo Extended socket options.
 
    The first set of socket options take the socket level (category) SOL_SOCKET. */
 
@@ -490,7 +589,7 @@ extern   "C" {
 #define IP_ADD_MEMBERSHIP   32 /* Join IPv4 multicast membership */
 #define IP_DROP_MEMBERSHIP  33 /* Leave IPv4 multicast membership */
 #define IP_HDRINCL          34 /* Raw socket IPv4 header included. */
-#define IP_RAW_RX_NO_HEADER 35 /* NetX proprietary socket option that does not include 
+#define IP_RAW_RX_NO_HEADER 35 /* NetX proprietary socket option that does not include
                                   IPv4/IPv6 header (and extension headers) on received raw sockets.*/
 #define IP_RAW_IPV6_HDRINCL 36 /* Transmitted buffer over IPv6 socket contains IPv6 header. */
 #define IP_OPTION_MAX       IP_RAW_IPV6_HDRINCL
@@ -508,34 +607,35 @@ extern   "C" {
 
 /* Define data types used in structure timeval.  */
 
-#ifdef __CCRX__
-typedef LONG        time_t;
-#endif /* __CCRX__ */
-typedef LONG        suseconds_t;
+#if defined(__CCRX__) || defined(NX_BSD_ENABLE_NATIVE_API)
+typedef LONG        nx_bsd_time_t;
+#endif /* __CCRX__ || NX_BSD_ENABLE_NATIVE_API */
+typedef LONG        nx_bsd_suseconds_t;
 
 #ifndef __SES_ARM
-struct timeval
+struct nx_bsd_timeval
 {
-    time_t          tv_sec;             /* Seconds      */
-    suseconds_t     tv_usec;            /* Microseconds */
+    nx_bsd_time_t   tv_sec;             /* Seconds      */
+    nx_bsd_suseconds_t
+                    tv_usec;            /* Microseconds */
 };
 #endif /* __SES_ARM */
 
-struct sockaddr_storage 
+struct nx_bsd_sockaddr_storage
 {
     USHORT ss_len;
     USHORT ss_family;
 };
 
-struct sockaddr
+struct nx_bsd_sockaddr
 {
     USHORT          sa_family;              /* Address family (e.g. , AF_INET).                 */
     UCHAR           sa_data[14];            /* Protocol- specific address information.          */
 };
 
-struct in6_addr 
+struct nx_bsd_in6_addr
 {
-    union 
+    union
     {
         UCHAR _S6_u8[16];
         ULONG _S6_u32[4];
@@ -545,89 +645,93 @@ struct in6_addr
 #define s6_addr     _S6_un._S6_u8
 #define s6_addr32   _S6_un._S6_u32
 
-struct sockaddr_in6 
+struct nx_bsd_sockaddr_in6
 {
     USHORT          sin6_family;                 /* AF_INET6 */
     USHORT          sin6_port;                   /* Transport layer port.  */
     ULONG           sin6_flowinfo;               /* IPv6 flow information. */
-    struct in6_addr sin6_addr;                   /* IPv6 address. */
+    struct nx_bsd_in6_addr
+                    sin6_addr;                   /* IPv6 address. */
     ULONG           sin6_scope_id;               /* set of interafces for a scope. */
 
 };
 
 /* Internet address (a structure for historical reasons).  */
 
-struct in_addr
+struct nx_bsd_in_addr
 {
-    ULONG           s_addr;             /* Internet address (32 bits).                         */        
+    ULONG           s_addr;             /* Internet address (32 bits).                         */
 };
 
-typedef ULONG       in_addr_t;
-typedef ULONG       socklen_t;
+typedef ULONG       nx_bsd_in_addr_t;
+typedef ULONG       nx_bsd_socklen_t;
 
 
-                                 
+
 /* Socket address, Internet style. */
 
-struct sockaddr_in
+struct nx_bsd_sockaddr_in
 {
     USHORT              sin_family;         /* Internet Protocol (AF_INET).                    */
     USHORT              sin_port;           /* Address port (16 bits).                         */
-    struct in_addr      sin_addr;           /* Internet address (32 bits).                     */
+    struct nx_bsd_in_addr
+                        sin_addr;           /* Internet address (32 bits).                     */
     CHAR                sin_zero[8];        /* Not used.                                       */
 };
 
 
 
 typedef struct FD_SET_STRUCT                /* The select socket array manager.                                                             */
-{ 
+{
    INT                  fd_count;           /* How many are SET?                                                                            */
    ULONG                fd_array[(NX_BSD_MAX_SOCKETS + 31)/32]; /* Bit map of SOCKET Descriptors.                                                   */
-} fd_set;
+} nx_bsd_fd_set;
 
 
 
 typedef struct NX_BSD_SOCKET_SUSPEND_STRUCT
 {
     ULONG               nx_bsd_socket_suspend_actual_flags;
-    fd_set              nx_bsd_socket_suspend_read_fd_set;
-    fd_set              nx_bsd_socket_suspend_write_fd_set;
-    fd_set              nx_bsd_socket_suspend_exception_fd_set;
+    nx_bsd_fd_set       nx_bsd_socket_suspend_read_fd_set;
+    nx_bsd_fd_set       nx_bsd_socket_suspend_write_fd_set;
+    nx_bsd_fd_set       nx_bsd_socket_suspend_exception_fd_set;
 
 } NX_BSD_SOCKET_SUSPEND;
 
 
-struct ip_mreq 
+struct nx_bsd_ip_mreq
 {
-    struct in_addr imr_multiaddr;     /* The IPv4 multicast address to join. */
-    struct in_addr imr_interface;     /* The interface to use for this group. */
+    struct nx_bsd_in_addr
+                        imr_multiaddr;     /* The IPv4 multicast address to join. */
+    struct nx_bsd_in_addr
+                        imr_interface;     /* The interface to use for this group. */
 };
 
 
 /* Define additional BSD data structures for supporting socket options.  */
 
-struct sock_errno
+struct nx_bsd_sock_errno
 {
     INT error;                              /* default = 0; */
 };
 
-struct linger
+struct nx_bsd_linger
 {
     INT l_onoff;                            /* 0 = disabled; 1 = enabled; default = 0;*/
     INT l_linger;                           /* linger time in seconds; default = 0;*/
 };
 
-struct sock_keepalive
+struct nx_bsd_sock_keepalive
 {
     INT keepalive_enabled;                  /* 0 = disabled; 1 = enabled; default = 0;*/
 };
 
-struct sock_reuseaddr
+struct nx_bsd_sock_reuseaddr
 {
     INT reuseaddr_enabled;                  /* 0 = disabled; 1 = enabled; default = 1; */
 };
 
-struct sock_winsize
+struct nx_bsd_sock_winsize
 {
     INT winsize;                            /* receive window size for TCP sockets   ; */
 };
@@ -640,16 +744,17 @@ union UNION_ID
 };
 
 
-struct addrinfo
+struct nx_bsd_addrinfo
 {
     INT             ai_flags;
     INT             ai_family;
     INT             ai_socktype;
     INT             ai_protocol;
-    socklen_t       ai_addrlen;
-    struct sockaddr *ai_addr;
+    nx_bsd_socklen_t ai_addrlen;
+    struct nx_bsd_sockaddr *ai_addr;
     CHAR            *ai_canonname;
-    struct addrinfo  *ai_next;
+    struct nx_bsd_addrinfo
+                    *ai_next;
 };
 
 struct NX_BSD_SERVICE_LIST
@@ -663,7 +768,7 @@ struct NX_BSD_SERVICE_LIST
 /* Define the Errors return by getaddrinfo. */
 
 /* The specified host doesn't have addresses in the specified address family. */
-#define EAI_ADDRFAMILY  40 
+#define EAI_ADDRFAMILY  40
 /* Name server temporary failure. */
 #define EAI_AGAIN       41
 /* hints.si_flags contains invalid flag. */
@@ -686,7 +791,7 @@ struct NX_BSD_SERVICE_LIST
 
 
 /* Define ai_flags value. */
-#define AI_PASSIVE      0x0001 
+#define AI_PASSIVE      0x0001
 /* request CNAME. */
 #define AI_CANONNAME    0x0002
 /* host must be a address string. */
@@ -698,7 +803,7 @@ struct NX_BSD_SERVICE_LIST
 #define AI_ADDRCONFIG   0x0040
 
 /* Return numeric string for hostname. */
-#define NI_NUMERICHOST  0x0001 
+#define NI_NUMERICHOST  0x0001
 /* Return numeric string for service name. */
 #define NI_NUMERICSERV  0x0002
 /* Return only hostname portion of FQDN. */
@@ -709,13 +814,37 @@ struct NX_BSD_SERVICE_LIST
 #define NI_DGRAM        0x0010
 
 
+/* Define the struct used by poll.  */
+struct nx_bsd_pollfd
+{
+    INT     fd;         /* file descriptor. */
+    SHORT   events;     /* requested events. */
+    SHORT   revents;    /* returned events. */
+};
+
+/* Define the options used by poll. */
+
+#define POLLRDNORM  0x0100
+#define POLLRDBAND  0x0200          /* Not supported.  */
+#define POLLIN      (POLLRDNORM)
+#define POLLPRI     0x0400
+
+#define POLLWRNORM  0x0010
+#define POLLOUT     (POLLWRNORM)
+#define POLLWRBAND  0x0020          /* Not supported.  */
+
+#define POLLERR     0x0001
+#define POLLHUP     0x0002
+#define POLLNVAL    0x0004
+
+
 /* Defines maximum IPv4 addresses for getaddrinfo. */
-#ifndef NX_BSD_IPV4_ADDR_MAX_NUM 
+#ifndef NX_BSD_IPV4_ADDR_MAX_NUM
 #define NX_BSD_IPV4_ADDR_MAX_NUM 5
 #endif /* NX_BSD_IPV4_ADDR_MAX_NUM  */
 
 /* Defines maximum IPv6 addresses for getaddrinfo. */
-#ifndef NX_BSD_IPV6_ADDR_MAX_NUM  
+#ifndef NX_BSD_IPV6_ADDR_MAX_NUM
 #define NX_BSD_IPV6_ADDR_MAX_NUM 5
 #endif /* NX_BSD_IPV6_ADDR_MAX_NUM  */
 
@@ -734,7 +863,7 @@ struct NX_BSD_SERVICE_LIST
 #define NX_BSD_SOCKET_ERROR                      (1 << 1)
 #define NX_BSD_SOCKET_CONNECTED                  (1 << 2)
 /* Disconnected from the stack. */
-#define NX_BSD_SOCKET_DISCONNECT_FROM_STACK      (1 << 3) 
+#define NX_BSD_SOCKET_DISCONNECT_FROM_STACK      (1 << 3)
 #define NX_BSD_SOCKET_SERVER_MASTER_SOCKET       (1 << 4)
 #define NX_BSD_SOCKET_SERVER_SECONDARY_SOCKET    (1 << 5)
 #define NX_BSD_SOCKET_TX_HDR_INCLUDE             (1 << 6)
@@ -753,7 +882,7 @@ struct NX_BSD_SERVICE_LIST
 #define NX_BSD_SOCKET_ENABLE_OPTION_REUSEADDR       (1 << 2)
 #define NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING    (1 << 3)
 
-/* Define the internal management structure for the BSD layer.  */ 
+/* Define the internal management structure for the BSD layer.  */
 
 typedef struct NX_BSD_SOCKET_STRUCT
 {
@@ -778,24 +907,24 @@ typedef struct NX_BSD_SOCKET_STRUCT
     NXD_ADDRESS         nx_bsd_socket_source_ip_address;
     NXD_ADDRESS         nx_bsd_socket_peer_ip;
 
-    /* For TCP/UDP, the local port is the port number this socket receives on. 
+    /* For TCP/UDP, the local port is the port number this socket receives on.
        For raw socket this field is not used. */
     USHORT              nx_bsd_socket_local_port;
     USHORT              nx_bsd_socket_peer_port;
     INT                 nx_bsd_option_linger_time;
-    UINT                nx_bsd_option_linger_time_closed; 
-    UINT                nx_bsd_option_linger_start_close;   
+    UINT                nx_bsd_option_linger_time_closed;
+    UINT                nx_bsd_option_linger_start_close;
     UINT                nx_bsd_socket_time_wait_remaining;
-    ULONG               nx_bsd_option_receive_timeout;  
-    ULONG               nx_bsd_option_send_timeout;     
+    ULONG               nx_bsd_option_receive_timeout;
+    ULONG               nx_bsd_option_send_timeout;
     INT                 nx_bsd_file_descriptor_flags;
     ULONG               nx_bsd_socket_status_flags;
     ULONG               nx_bsd_socket_option_flags;
     int                 nx_bsd_socket_error_code;
 
-    struct NX_BSD_SOCKET_STRUCT 
+    struct NX_BSD_SOCKET_STRUCT
                         *nx_bsd_socket_next;
-    struct NX_BSD_SOCKET_STRUCT 
+    struct NX_BSD_SOCKET_STRUCT
                         *nx_bsd_socket_previous;
 
     INT                 nx_bsd_socket_id;
@@ -813,52 +942,63 @@ typedef struct NX_BSD_SOCKET_STRUCT
 
 /* Define the BSD function prototypes for use by the application.  */
 
-INT  accept(INT sockID, struct sockaddr *ClientAddress, INT *addressLength);
-INT  bsd_initialize(NX_IP *default_ip, NX_PACKET_POOL *default_pool, CHAR *bsd_thread_stack_area, ULONG bsd_thread_stack_size, UINT bsd_thread_priority);
-INT  bind(INT sockID, struct sockaddr *localAddress, INT addressLength);
-INT  connect(INT sockID, struct sockaddr *remoteAddress, INT addressLength);
-INT  getpeername(INT sockID, struct sockaddr *remoteAddress, INT *addressLength);
-INT  getsockname(INT sockID, struct sockaddr *localAddress, INT *addressLength);
-INT  ioctl(INT sockID, INT command, INT *result); 
-in_addr_t inet_addr(const CHAR *buffer);
-CHAR *inet_ntoa(struct in_addr address_to_convert);
-INT  inet_aton(const CHAR *cp_arg, struct in_addr *addr);
-INT  inet_pton(INT af, const CHAR *src, VOID *dst);
-const CHAR *inet_ntop(INT af, const VOID *src, CHAR *dst, socklen_t size);
-INT  listen(INT sockID, INT backlog);
-#ifdef NX_ENABLE_IP_RAW_PACKET_FILTER 
+
+INT  nx_bsd_accept(INT sockID, struct nx_bsd_sockaddr *ClientAddress, INT *addressLength);
+INT  nx_bsd_initialize(NX_IP *default_ip, NX_PACKET_POOL *default_pool, CHAR *bsd_thread_stack_area, ULONG bsd_thread_stack_size, UINT bsd_thread_priority);
+INT  nx_bsd_bind(INT sockID, const struct nx_bsd_sockaddr *localAddress, INT addressLength);
+INT  nx_bsd_connect(INT sockID, struct nx_bsd_sockaddr *remoteAddress, INT addressLength);
+INT  nx_bsd_getpeername(INT sockID, struct nx_bsd_sockaddr *remoteAddress, INT *addressLength);
+INT  nx_bsd_getsockname(INT sockID, struct nx_bsd_sockaddr *localAddress, INT *addressLength);
+INT  nx_bsd_ioctl(INT sockID, INT command, INT *result);
+nx_bsd_in_addr_t nx_bsd_inet_addr(const CHAR *buffer);
+CHAR *nx_bsd_inet_ntoa(struct nx_bsd_in_addr address_to_convert);
+INT  nx_bsd_inet_aton(const CHAR *cp_arg, struct nx_bsd_in_addr *addr);
+INT  nx_bsd_inet_pton(INT af, const CHAR *src, VOID *dst);
+const CHAR *nx_bsd_inet_ntop(INT af, const VOID *src, CHAR *dst, nx_bsd_socklen_t size);
+INT  nx_bsd_listen(INT sockID, INT backlog);
+#ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
 UINT nx_bsd_raw_packet_receive(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET **packet_ptr);
 UINT nx_bsd_raw_packet_info_extract(NX_PACKET *packet_ptr, NXD_ADDRESS *nxd_address, UINT *interface_index);
 VOID nx_bsd_raw_receive_notify(NX_IP *ip_ptr, UINT bsd_socket_index);
 #endif
 UINT nx_bsd_socket_set_inherited_settings(UINT master_sock_id, UINT secondary_sock_id);
-INT  recvfrom(INT sockID, CHAR *buffer, INT buffersize, INT flags,struct sockaddr *fromAddr, INT *fromAddrLen);
-INT  recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags);
-INT  sendto(INT sockID, CHAR *msg, INT msgLength, INT flags, struct sockaddr *destAddr, INT destAddrLen);
-INT  send(INT sockID, const CHAR *msg, INT msgLength, INT flags);
-INT  select(INT nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
-INT  soc_close( INT sockID);
-INT  socket(INT protocolFamily, INT type, INT protocol);
-INT  fcntl(INT sock_ID, UINT flag_type, UINT f_options);
-INT  getsockopt(INT sockID, INT option_level, INT option_name, VOID *option_value, INT *option_length);
-INT  setsockopt(INT sockID, INT option_level, INT option_name, const VOID *option_value, INT option_length);
-INT  getaddrinfo(const CHAR *node, const CHAR *service, const struct addrinfo *hints, struct addrinfo **res);
-VOID freeaddrinfo(struct addrinfo *res);
-INT  getnameinfo(const struct sockaddr *sa, socklen_t salen, char *host, size_t hostlen, char *serv, size_t servlen, int flags);
+INT  nx_bsd_recvfrom(INT sockID, CHAR *buffer, INT buffersize, INT flags,struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen);
+INT  nx_bsd_recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags);
+INT  nx_bsd_sendto(INT sockID, CHAR *msg, INT msgLength, INT flags, struct nx_bsd_sockaddr *destAddr, INT destAddrLen);
+INT  nx_bsd_send(INT sockID, const CHAR *msg, INT msgLength, INT flags);
+INT  nx_bsd_select(INT nfds, nx_bsd_fd_set *readfds, nx_bsd_fd_set *writefds, nx_bsd_fd_set *exceptfds, struct nx_bsd_timeval *timeout);
+INT  nx_bsd_soc_close( INT sockID);
+INT  nx_bsd_socket(INT protocolFamily, INT type, INT protocol);
+INT  nx_bsd_fcntl(INT sock_ID, UINT flag_type, UINT f_options);
+INT  nx_bsd_getsockopt(INT sockID, INT option_level, INT option_name, VOID *option_value, INT *option_length);
+INT  nx_bsd_setsockopt(INT sockID, INT option_level, INT option_name, const VOID *option_value, INT option_length);
+INT  nx_bsd_getaddrinfo(const CHAR *node, const CHAR *service, const struct nx_bsd_addrinfo *hints, struct nx_bsd_addrinfo **res);
+VOID nx_bsd_freeaddrinfo(struct nx_bsd_addrinfo *res);
+INT  nx_bsd_getnameinfo(const struct nx_bsd_sockaddr *sa, nx_bsd_socklen_t salen, char *host, size_t hostlen, char *serv, size_t servlen, int flags);
 VOID nx_bsd_set_service_list(struct NX_BSD_SERVICE_LIST *serv_list_ptr, ULONG serv_list_len);
+INT  nx_bsd_poll(struct nx_bsd_pollfd *fds, ULONG nfds, INT timeout);
 
+#if !defined(NX_BSD_ENABLE_NATIVE_API)
 #undef FD_SET
 #undef FD_CLR
 #undef FD_ISSET
 #undef FD_ZERO
+#endif
 
-VOID FD_SET(INT fd, fd_set *fdset);
-VOID FD_CLR(INT fd, fd_set *fdset);
-INT  FD_ISSET(INT fd, fd_set *fdset);
-VOID FD_ZERO(fd_set *fdset);
-VOID set_errno(INT tx_errno);
-int  _nxd_get_errno(VOID);
-#define errno (_nxd_get_errno())
+VOID NX_BSD_FD_SET(INT fd, nx_bsd_fd_set *fdset);
+VOID NX_BSD_FD_CLR(INT fd, nx_bsd_fd_set *fdset);
+INT  NX_BSD_FD_ISSET(INT fd, nx_bsd_fd_set *fdset);
+VOID NX_BSD_FD_ZERO(nx_bsd_fd_set *fdset);
+VOID nx_bsd_set_errno(INT tx_errno);
+
+INT _nxd_get_errno(VOID);
+
+#if !defined(NX_BSD_ENABLE_NATIVE_API)
+#define errno (tx_thread_identify() -> bsd_errno)
+#else
+#define nx_bsd_errno (tx_thread_identify() -> bsd_errno)
+#endif
+
 
 #ifdef NX_BSD_RAW_PPPOE_SUPPORT
 
@@ -874,7 +1014,7 @@ UINT  _nx_bsd_pppoe_packet_received(NX_PACKET *packet_ptr, UINT frame_type, UINT
 
 #if defined(NX_BSD_RAW_SUPPORT) || defined(NX_BSD_RAW_PPPOE_SUPPORT)
 /* Link Layer Socket Addressing */
-struct sockaddr_ll
+struct nx_bsd_sockaddr_ll
 {
     USHORT sll_family;   /* Address Family.  Must be AF_PACKET */
     USHORT sll_protocol; /* LL frame type */

@@ -223,7 +223,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_decrypt(NX_CRYPTO_3DES *context, UCHAR sour
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_3des_init                         PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -265,6 +265,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_decrypt(NX_CRYPTO_3DES *context, UCHAR sour
 /*                                            warning supression for      */
 /*                                            obsolete DES/3DES,          */
 /*                                            resulting in version 6.1.11 */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -285,7 +287,7 @@ NX_CRYPTO_3DES *triple_des_context_ptr;
         return(NX_CRYPTO_PTR_ERROR);
     }
 
-    /* Verify the metadata addrsss is 4-byte aligned. */
+    /* Verify the metadata address is 4-byte aligned. */
     if((((ULONG)crypto_metadata) & 0x3) != 0)
     {
         return(NX_CRYPTO_PTR_ERROR);
@@ -374,7 +376,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_3des_operation                    PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -425,6 +427,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_cleanup(VOID *crypto_metadata)
 /*                                            warning supression for      */
 /*                                            obsolete DES/3DES,          */
 /*                                            resulting in version 6.1.11 */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_operation(UINT op,       /* Encrypt, Decrypt, Authenticate */
@@ -465,7 +469,7 @@ NX_CRYPTO_3DES *context;
         return(NX_CRYPTO_PTR_ERROR);
     }
 
-    /* Verify the metadata addrsss is 4-byte aligned. */
+    /* Verify the metadata address is 4-byte aligned. */
     if((((ULONG)crypto_metadata) & 0x3) != 0)
     {
         return(NX_CRYPTO_PTR_ERROR);

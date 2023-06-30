@@ -66,7 +66,11 @@ static void adu_agent_update_notify(NX_AZURE_IOT_ADU_AGENT *adu_agent_ptr,
         /* Start to download and install update immediately for testing.  */
         nx_azure_iot_adu_agent_update_download_and_install(adu_agent_ptr);
     }
-    else if(update_state == NX_AZURE_IOT_ADU_AGENT_UPDATE_INSTALLED)
+    else if ((update_state == NX_AZURE_IOT_ADU_AGENT_UPDATE_INSTALLED)
+#ifdef NX_AZURE_IOT_ADU_AGENT_SKIP_FAILED_STEP
+            || (update_state == NX_AZURE_IOT_ADU_AGENT_UPDATE_PARTIAL_INSTALLED)
+#endif /* NX_AZURE_IOT_ADU_AGENT_SKIP_FAILED_STEP */
+            )
     {
 
         /* Start to apply update immediately for testing.  */

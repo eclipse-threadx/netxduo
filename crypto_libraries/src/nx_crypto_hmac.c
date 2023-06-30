@@ -629,7 +629,7 @@ UINT   status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_init                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -668,6 +668,8 @@ UINT   status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -688,7 +690,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_init(struct  NX_CRYPTO_METHOD_STRUCT
         return(NX_CRYPTO_PTR_ERROR);
     }
 
-    /* Verify the metadata addrsss is 4-byte aligned. */
+    /* Verify the metadata address is 4-byte aligned. */
     if((((ULONG)crypto_metadata) & 0x3) != 0)
     {
         return(NX_CRYPTO_PTR_ERROR);
@@ -776,7 +778,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_operation                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -821,6 +823,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_cleanup(VOID *crypto_metadata)
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_hmac_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -848,7 +852,7 @@ UINT                 status;
 
     NX_CRYPTO_STATE_CHECK
 
-    /* Verify the metadata addrsss is 4-byte aligned. */
+    /* Verify the metadata address is 4-byte aligned. */
     if((method == NX_CRYPTO_NULL) || (crypto_metadata == NX_CRYPTO_NULL) || ((((ULONG)crypto_metadata) & 0x3) != 0))
     {
         return(NX_CRYPTO_PTR_ERROR);

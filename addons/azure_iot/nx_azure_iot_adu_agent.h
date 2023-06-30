@@ -39,6 +39,12 @@ extern   "C" {
 #define NX_AZURE_IOT_ADU_AGENT_PROXY_UPDATE_COUNT                       0
 #endif /* NX_AZURE_IOT_ADU_AGENT_PROXY_UPDATE_COUNT */
 
+/* For multiple updates. By default ADU agent stops processing next step (update) if there is an error.
+   To let agent continue all steps (updates), define NX_AZURE_IOT_ADU_AGENT_SKIP_FAILED_STEP.  */
+/*
+#define NX_AZURE_IOT_ADU_AGENT_SKIP_FAILED_STEP
+*/
+
 /* Define the ADU agent component name.  */
 #define NX_AZURE_IOT_ADU_AGENT_COMPONENT_NAME                           "deviceUpdate"
 
@@ -136,6 +142,9 @@ extern   "C" {
 #define NX_AZURE_IOT_ADU_AGENT_UPDATE_RECEIVED                          0
 #define NX_AZURE_IOT_ADU_AGENT_UPDATE_DOWNLOADED                        1
 #define NX_AZURE_IOT_ADU_AGENT_UPDATE_INSTALLED                         2
+#ifdef NX_AZURE_IOT_ADU_AGENT_SKIP_FAILED_STEP
+#define NX_AZURE_IOT_ADU_AGENT_UPDATE_PARTIAL_INSTALLED                 3
+#endif /* NX_AZURE_IOT_ADU_AGENT_SKIP_FAILED_STEP */
 #define NX_AZURE_IOT_ADU_AGENT_UPDATE_FAILED                            255
 
 /* FIXME: status codes should be defined in iothub client.  */
@@ -315,9 +324,15 @@ typedef struct NX_AZURE_IOT_ADU_AGENT_DRIVER_STRUCT
     /* Define the driver return status.  */
     UINT                                    nx_azure_iot_adu_agent_driver_status;
 
-    /* Define the firmware size for the driver to preprocess.  */
+    /* Installed criteria for the driver to check update.  */
+    const UCHAR                            *nx_azure_iot_adu_agent_driver_installed_criteria;
+    UINT                                    nx_azure_iot_adu_agent_driver_installed_criteria_length;
+
+    /* Define the firmware size and integrity for the driver to preprocess.  */
     UINT                                    nx_azure_iot_adu_agent_driver_firmware_size;
-    
+    const UCHAR                            *nx_azure_iot_adu_agent_driver_firmware_sha256;
+    UINT                                    nx_azure_iot_adu_agent_driver_firmware_sha256_length;
+
     /* Define the firmware data for the driver to write.   */
     UINT                                    nx_azure_iot_adu_agent_driver_firmware_data_offset;
     UCHAR                                  *nx_azure_iot_adu_agent_driver_firmware_data_ptr; 
@@ -325,10 +340,6 @@ typedef struct NX_AZURE_IOT_ADU_AGENT_DRIVER_STRUCT
 
     /* Define the return pointer for raw driver command requests.  */
     ULONG                                  *nx_azure_iot_adu_agent_driver_return_ptr;
-
-    /* Installed criteria.  */
-    const UCHAR                            *nx_azure_iot_adu_agent_driver_installed_criteria;
-    UINT                                    nx_azure_iot_adu_agent_driver_installed_criteria_length;
 
 } NX_AZURE_IOT_ADU_AGENT_DRIVER;
 
