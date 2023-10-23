@@ -247,7 +247,7 @@ ULONG  bytes_copied;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_sub_unsub                          PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -308,9 +308,9 @@ ULONG  bytes_copied;
 /*  10-31-2022     Bo Chen                  Modified comment(s), improved */
 /*                                            the logic of sending packet,*/
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s), improved */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
 /*                                            internal logic,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_sub_unsub(NXD_MQTT_CLIENT *client_ptr, UINT op,
@@ -489,7 +489,7 @@ UCHAR               temp_data[2];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_packet_allocate                    PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -542,9 +542,9 @@ UCHAR               temp_data[2];
 /*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
 /*                                            mqtt over websocket,        */
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s), improved */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
 /*                                            internal logic,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_packet_allocate(NXD_MQTT_CLIENT *client_ptr, NX_PACKET **packet_ptr, ULONG wait_option)
@@ -1351,7 +1351,7 @@ ULONG  bytes_copied;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_process_publish                           PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1397,9 +1397,9 @@ ULONG  bytes_copied;
 /*  10-31-2022     Bo Chen                  Modified comment(s), improved */
 /*                                            the logic of sending packet,*/
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s), improved */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
 /*                                            internal logic,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_process_publish(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr)
@@ -1611,7 +1611,7 @@ ULONG                         bytes_copied;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_process_publish_response                  PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1654,9 +1654,9 @@ ULONG                         bytes_copied;
 /*  10-31-2022     Bo Chen                  Modified comment(s), improved */
 /*                                            the logic of sending packet,*/
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s), improved */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
 /*                                            internal logic,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_process_publish_response(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr)
@@ -3877,7 +3877,7 @@ UCHAR               fixed_header;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_connect                            PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3949,8 +3949,8 @@ UCHAR               fixed_header;
 /*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
 /*                                            mqtt over websocket,        */
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s),          */
-/*                                            resulting in version 6.x    */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_connect(NXD_MQTT_CLIENT *client_ptr, NXD_ADDRESS *server_ip, UINT server_port,
@@ -4234,7 +4234,7 @@ UINT                 old_priority;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_connect_packet_send                PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4285,9 +4285,9 @@ UINT                 old_priority;
 /*  10-31-2022     Bo Chen                  Modified comment(s), improved */
 /*                                            the logic of sending packet,*/
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s), improved */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
 /*                                            internal logic,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_connect_packet_send(NXD_MQTT_CLIENT *client_ptr, ULONG wait_option)
@@ -4782,7 +4782,7 @@ UINT       ret = NXD_MQTT_SUCCESS;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_client_publish                            PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4834,9 +4834,9 @@ UINT       ret = NXD_MQTT_SUCCESS;
 /*  07-29-2022     Spencer McDonough        Modified comment(s),          */
 /*                                            improved internal logic,    */
 /*                                            resulting in version 6.1.12 */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s), improved */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
 /*                                            internal logic,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_publish(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UINT topic_name_length,
@@ -5115,7 +5115,7 @@ UINT _nxd_mqtt_client_unsubscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_mqtt_send_simple_message                       PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5162,9 +5162,9 @@ UINT _nxd_mqtt_client_unsubscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name,
 /*  10-31-2022     Bo Chen                  Modified comment(s), improved */
 /*                                            the logic of sending packet,*/
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s), improved */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
 /*                                            internal logic,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_send_simple_message(NXD_MQTT_CLIENT *client_ptr, UCHAR header_value)

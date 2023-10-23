@@ -3552,7 +3552,7 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_dhcp_state_change_notify                       PORTABLE C      */ 
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3586,9 +3586,9 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s), and      */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), and      */
 /*                                            corrected caller checking,  */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_state_change_notify(NX_DHCP *dhcp_ptr, VOID (*dhcp_state_change_notify)(NX_DHCP *dhcp_ptr, UCHAR new_state))
@@ -6995,7 +6995,7 @@ UINT            name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_client_send_with_zero_source_address       PORTABLE C      */ 
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7042,9 +7042,9 @@ UINT            name_length;
 /*                                            udp socket send and ip      */
 /*                                            header add,                 */
 /*                                            resulting in version 6.1.12 */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
 /*                                            supported random IP id,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_client_send_with_zero_source_address(NX_DHCP *dhcp_ptr, UINT iface_index, NX_PACKET *packet_ptr)

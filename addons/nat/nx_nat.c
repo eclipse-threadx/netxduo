@@ -1119,7 +1119,7 @@ NX_NAT_TRANSLATION_ENTRY *next_entry_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_nat_process_packet                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1154,7 +1154,7 @@ NX_NAT_TRANSLATION_ENTRY *next_entry_ptr;
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_ipv4_packet_receive          Netx forwards packet to NAT first  */ 
+/*    _nx_ipv4_packet_receive          NetX forwards packet to NAT first  */ 
 /*                                        if forwarding is enabled.       */
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -1164,6 +1164,9 @@ NX_NAT_TRANSLATION_ENTRY *next_entry_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            fixed packet double release,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_packet(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT packet_process)
@@ -1218,18 +1221,20 @@ NX_INTERFACE                    *interface_ptr;
     /* Check for valid packet length.  */
     if (packet_ptr -> nx_packet_length < header_size)
     {
-
+        if (packet_process == NX_TRUE)
+        {
 #ifndef NX_DISABLE_IP_INFO
-        /* Increment the IP invalid packet error.  */
-        ip_ptr -> nx_ip_invalid_packets++;
+            /* Increment the IP invalid packet error.  */
+            ip_ptr -> nx_ip_invalid_packets++;
 
-        /* Increment the IP receive packets dropped count.  */
-        ip_ptr -> nx_ip_receive_packets_dropped++;
+            /* Increment the IP receive packets dropped count.  */
+            ip_ptr -> nx_ip_receive_packets_dropped++;
 #endif
 
-        /* Invalid packet length, just release it.  */
-        _nx_packet_release(packet_ptr);
-        
+            /* Invalid packet length, just release it.  */
+            _nx_packet_release(packet_ptr);
+        }
+
         /* Return NX_TRUE to indicate this packet has been processed.  */
         return (NX_TRUE);
     }

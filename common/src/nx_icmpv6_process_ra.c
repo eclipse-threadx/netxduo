@@ -37,7 +37,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_process_ra                               PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -83,6 +83,9 @@
 /*                                            added internal ip address   */
 /*                                            change notification,        */
 /*                                            resulting in version 6.1.11 */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_icmpv6_process_ra(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -111,6 +114,26 @@ UINT                          interface_index;
 
     /* Add debug information. */
     NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
+
+    /* Check packet length is at least sizeof(NX_ICMPV6_RA). */
+#ifndef NX_DISABLE_RX_SIZE_CHECKING
+    if ((packet_ptr -> nx_packet_length < sizeof(NX_ICMPV6_RA))
+#ifndef NX_DISABLE_PACKET_CHAIN
+        || (packet_ptr -> nx_packet_next) /* Ignore chained packet.  */
+#endif /* NX_DISABLE_PACKET_CHAIN */
+        )
+    {
+#ifndef NX_DISABLE_ICMP_INFO
+
+        /* Increment the ICMP invalid message count.  */
+        ip_ptr -> nx_ip_icmp_invalid_packets++;
+#endif
+
+        /* Invalid ICMP message, just release it.  */
+        _nx_packet_release(packet_ptr);
+        return;
+    }
+#endif /* NX_DISABLE_RX_SIZE_CHECKING */
 
     /* Initialize the ND cache table entry to NULL */
     nd_entry = NX_NULL;

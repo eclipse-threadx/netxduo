@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_send_record                         PORTABLE C      */
-/*                                                           6.1.12       */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -89,6 +89,10 @@
 /*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            checked seq number overflow,*/
 /*                                            resulting in version 6.1.12 */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            removed packet release on   */
+/*                                            send failure,               */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_send_record(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *send_packet,
@@ -310,7 +314,6 @@ UCHAR                  epoch_seq_num[8];
 
     if (status != NX_SUCCESS)
     {
-        nx_secure_tls_packet_release(send_packet);
         return(NX_SECURE_TLS_TCP_SEND_FAILED);
     }
 

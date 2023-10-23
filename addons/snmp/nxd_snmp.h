@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */ 
 /*    nxd_snmp.h                                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -45,6 +45,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Modified comment(s), and      */
+/*                                            combined the functions of   */
+/*                                            processing snmp v1 and v2,  */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -867,14 +871,13 @@ UINT    _nx_snmp_utility_version_get(UCHAR *buffer_ptr, UINT *snmp_version, INT 
 UINT    _nx_snmp_utility_version_set(UCHAR *buffer_ptr, UINT snmp_version, UCHAR *buffer_end);
 UINT    _nx_snmp_utility_tlv_block_parse(UCHAR *buffer, INT buffer_length, USHORT *tlv_type, USHORT *tlv_tag_class, ULONG *tlv_length, UCHAR **tlv_data, ULONG *header_length);
 VOID    _nx_snmp_version_error_response(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr, UCHAR *request_type_ptr, UCHAR *error_string_ptr, UINT status, UINT objects);
-VOID    _nx_snmp_version_1_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr);
-VOID    _nx_snmp_version_2_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr);
+VOID    _nx_snmp_version_1_and_2_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr);
 VOID    _nx_snmp_version_3_report_send(NX_SNMP_AGENT *agent_ptr, UCHAR *buffer_ptr, UINT discovery_response, INT buffer_length);
 VOID    _nx_snmp_version_3_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr);
 UINT    _nx_snmp_agent_encrypt_pdu(NX_SNMP_AGENT *agent_ptr, UINT *response_pdu_length, UINT *response_sequence_length, UCHAR *response_encryption_size_ptr,
                                    UCHAR **response_sequence_ptr, UCHAR *response_sequence_buffer_end, UCHAR **response_buffer_ptr,UCHAR *response_privacy_ptr);
 UINT    _nx_snmp_agent_add_auth_parameter(NX_SNMP_AGENT *agent_ptr, NX_PACKET *response_packet_ptr, UCHAR *response_authentication_ptr);
-UINT    _nx_snmp_agent_decrypt_pdu(NX_SNMP_AGENT *agent_ptr, UCHAR **buffer_ptr, UCHAR *response_buffer_ptr,  UCHAR **response_encryption_size_ptr, UINT *response_length, INT buffer_length);
+UINT    _nx_snmp_agent_decrypt_pdu(NX_SNMP_AGENT *agent_ptr, UCHAR **buffer_ptr, UCHAR *response_buffer_ptr,  UCHAR **response_encryption_size_ptr, UINT *response_length, INT *buffer_length);
 VOID    _nx_snmp_agent_security_response_status(NX_SNMP_AGENT *agent_ptr, UINT *authenticate, UINT *encryption, UINT *send_reply);
 
 

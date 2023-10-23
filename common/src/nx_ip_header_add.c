@@ -39,7 +39,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_header_add                                   PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -83,9 +83,9 @@
 /*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            supported TCP/IP offload,   */
 /*                                            resulting in version 6.1.8  */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
 /*                                            supported random IP id,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ip_header_add(NX_IP *ip_ptr, NX_PACKET *packet_ptr, ULONG source_ip, ULONG destination_ip,

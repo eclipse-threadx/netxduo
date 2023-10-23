@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */ 
 /*    nx_ppp.h                                            PORTABLE C      */  
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -52,10 +52,10 @@
 /*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
 /*                                            necessary header file,      */
 /*                                            resulting in version 6.1.9  */
-/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), and      */
+/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
 /*                                            supported processing        */
 /*                                            compressed data,            */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 

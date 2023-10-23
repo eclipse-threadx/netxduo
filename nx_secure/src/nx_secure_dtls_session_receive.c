@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_receive                     PORTABLE C      */
-/*                                                           6.1.12       */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -87,6 +87,9 @@
 /*                                            fixed compiler errors when  */
 /*                                            IPv4 is disabled,           */
 /*                                            resulting in version 6.1.12 */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            released packet on failure, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_receive(NX_SECURE_DTLS_SESSION *dtls_session,
@@ -378,7 +381,12 @@ UINT                   source_port;
                     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 
                     _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-                    _nx_secure_dtls_send_record(dtls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
+                    if (_nx_secure_dtls_send_record(dtls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option) != NX_SUCCESS)
+                    {
+                        
+                        /* Release packet on send error. */
+                        nx_secure_tls_packet_release(send_packet);
+                    }
 
                     /* Release the protection. */
                     tx_mutex_put(&_nx_secure_tls_protection);

@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_mqtt_client.h                                   PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -58,10 +58,10 @@
 /*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
 /*                                            mqtt over websocket,        */
 /*                                            resulting in version 6.2.0  */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comment(s), added    */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), added    */
 /*                                            the function prototype for  */
 /*                                            packet allocation,          */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 

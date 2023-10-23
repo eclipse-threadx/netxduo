@@ -3810,7 +3810,7 @@ NXD_ADDRESS             client_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_extract_packet_information        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3862,6 +3862,10 @@ NXD_ADDRESS             client_address;
 /*                                            packet length verification, */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), and      */
+/*                                            updated client record on    */
+/*                                            each message,               */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_extract_packet_information(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT **dhcpv6_client_ptr, NX_PACKET *packet_ptr, 
@@ -4189,36 +4193,24 @@ UINT                matching;
     *dhcpv6_client_ptr = &dhcpv6_server_ptr -> nx_dhcpv6_clients[record_index];
 
     /* Was a match was found? */
-    if (!matching)
+    if (matching)
     {
 
-        /* No, this is a new record. Create a new client record. */
-        status = _nx_dhcpv6_update_client_record(dhcpv6_server_ptr, &temp_client_rec, *dhcpv6_client_ptr);
-    }
-    else
-    {
-
-        /* A match was found. Check if this is a different message request than the previous client request. */
-        if ((temp_client_rec.nx_dhcpv6_message_type != (*dhcpv6_client_ptr) -> nx_dhcpv6_message_type) &&
-            (received_message_type != NX_DHCPV6_MESSAGE_TYPE_INFORM_REQUEST))
+        /*  This is a different message from the Client. Before updating the record check the client global address 
+            to be the same as what the server assigned or is offering to assign. */
+        if (!CHECK_IPV6_ADDRESSES_SAME(&temp_client_rec.nx_dhcpv6_ia.nx_global_address.nxd_ip_address.v6[0], 
+                                       &(*dhcpv6_client_ptr )-> nx_dhcpv6_ia.nx_global_address.nxd_ip_address.v6[0]))
         {
 
-            /*  This is a different message from the Client. Before updating the record check the client global address 
-                to be the same as what the server assigned or is offering to assign. */
-            if (!CHECK_IPV6_ADDRESSES_SAME(&temp_client_rec.nx_dhcpv6_ia.nx_global_address.nxd_ip_address.v6[0], 
-                                          &(*dhcpv6_client_ptr )-> nx_dhcpv6_ia.nx_global_address.nxd_ip_address.v6[0]))
-            {
+            /* This is a different address. Disregard this message. */
+            (*dhcpv6_client_ptr) -> nx_dhcpv6_response_back_from_server = NX_DHCPV6_MESSAGE_TYPE_DHCPSILENT;
 
-                /* This is a different address. Disregard this message. */
-                (*dhcpv6_client_ptr) -> nx_dhcpv6_response_back_from_server = NX_DHCPV6_MESSAGE_TYPE_DHCPSILENT;
-
-                return NX_SUCCESS;
-            }
-
-            /* This is a valid request. Update the client record with the new data. */
-            status = _nx_dhcpv6_update_client_record(dhcpv6_server_ptr, &temp_client_rec, *dhcpv6_client_ptr);
+            return NX_SUCCESS;
         }
     }
+
+    /* Update the client record. */
+    status = _nx_dhcpv6_update_client_record(dhcpv6_server_ptr, &temp_client_rec, *dhcpv6_client_ptr);
 
     /* Yes we're done with no processing errors detected. */
     return NX_SUCCESS;
@@ -6476,7 +6468,7 @@ ULONG           data;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_process_ia                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6517,12 +6509,17 @@ ULONG           data;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
 /*                                            packet length verification, */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), and      */
+/*                                            improved to ignore valid    */
+/*                                            lifetime and preferred life */
+/*                                            time in client message,     */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_server_process_ia(NX_DHCPV6_CLIENT *dhcpv6_client_ptr, ULONG option_code, UINT option_length, UCHAR *option_data, UINT process_ia)
 {
 
-UINT  index = 0, k;
+UINT  k;
 ULONG data;
 
 
@@ -6535,7 +6532,7 @@ ULONG data;
     }
 
     /* Check option length for Ipv6 address (16 bytes), preferred-lifetime (4 bytes) and valid-lifetime (4 bytes).  */
-    if (option_length < 24)
+    if (option_length != 24)
     {
         return(NX_DHCPV6_INVALID_IA_DATA);
     }
@@ -6545,42 +6542,19 @@ ULONG data;
     {
 
         /* Copy each IPv6 address word into the IA address. */
-        _nx_dhcpv6_server_utility_get_data(option_data + index, sizeof(ULONG), &data);
+        _nx_dhcpv6_server_utility_get_data(option_data + (k * 4), sizeof(ULONG), &data);
 
         if (process_ia)
         {
             dhcpv6_client_ptr -> nx_dhcpv6_ia.nx_global_address.nxd_ip_address.v6[k] = data;
         }
-
-        /* Move to the next IPv6 address word. */
-        index += 4;
     }
 
-    /* Copy the preferred lifetime data from the client buffer to IA.*/
-    _nx_dhcpv6_server_utility_get_data(option_data + index, sizeof(ULONG), &data);
-    if (process_ia)
-    {
-        dhcpv6_client_ptr -> nx_dhcpv6_ia.nx_preferred_lifetime = data;
-    }
-    index += 4;
-    
-    /* Copy the valid lifetime data from the client buffer to IA.*/
-    _nx_dhcpv6_server_utility_get_data(option_data + index, sizeof(ULONG), &data);
-    if (process_ia)
-    {
-        dhcpv6_client_ptr -> nx_dhcpv6_ia.nx_valid_lifetime = data;
-    }
-    index += 4;
+    /* Skip 4 bytes preferred lifetime data and 4 bytes valid lifetime data from the client buffer to IA.
+       This is because in RFC 8415, page 105, it requires that the server MUST ignore any received
+       preferred-lifetime and valid-lifetime values in a message sent by a client to a server.  */
 
-    /* Check if we went past the reported size of IA address data. */
-    if (index != option_length)
-    {
-
-        /* Return an error status. Cannot accept this reply. */
-        return NX_DHCPV6_INVALID_IA_DATA;
-    }
-
-    return NX_SUCCESS;
+    return(NX_SUCCESS);
 }
 
 

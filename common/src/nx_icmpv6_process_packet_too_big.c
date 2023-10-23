@@ -45,7 +45,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_process_packet_too_big                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -87,6 +87,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_icmpv6_process_packet_too_big(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -105,7 +108,11 @@ NX_INTERFACE              *if_ptr;
     NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
 
 #ifndef NX_DISABLE_RX_SIZE_CHECKING
-    if (packet_ptr -> nx_packet_length < sizeof(NX_ICMPV6_OPTION_MTU))
+    if ((packet_ptr -> nx_packet_length < (sizeof(NX_ICMPV6_OPTION_MTU) + sizeof(NX_IPV6_HEADER)))
+#ifndef NX_DISABLE_PACKET_CHAIN
+        || (packet_ptr -> nx_packet_next) /* Ignore chained packet.  */
+#endif /* NX_DISABLE_PACKET_CHAIN */
+        )
     {
 #ifndef NX_DISABLE_ICMP_INFO
 
@@ -129,7 +136,7 @@ NX_INTERFACE              *if_ptr;
 
     /* Parse the original sender data. */
     /*lint -e{929} -e{826} -e{740} suppress cast of pointer to pointer, since it is necessary  */
-    original_ip_header_ptr = (NX_IPV6_HEADER *)(&(icmpv6_mtu_option_ptr ->  nx_icmpv6_option_mtu_message));
+    original_ip_header_ptr = (NX_IPV6_HEADER *)(packet_ptr -> nx_packet_prepend_ptr + sizeof(NX_ICMPV6_OPTION_MTU));
 
     /* Extract the original sender from the IP header. */
     packet_ptr -> nx_packet_prepend_ptr -= sizeof(NX_IPV6_HEADER);

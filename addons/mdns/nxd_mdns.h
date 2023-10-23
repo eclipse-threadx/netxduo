@@ -25,7 +25,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_mdns.h                                          PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -52,9 +52,9 @@
 /*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            fixed the issue of timer,   */
 /*                                            resulting in version 6.1.11 */
-/*  xx-xx-xxxx     Bo Chen                  Modified comment(s), and      */
+/*  10-31-2023     Bo Chen                  Modified comment(s), and      */
 /*                                            corrected the symbols check,*/
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 

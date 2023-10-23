@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_end                         PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -75,7 +75,10 @@
 /*                                            resulting in version 6.1    */
 /*  01-31-2022     Timothy Stapko           Modified comment(s),          */
 /*                                            fixed out-of-order handling,*/
-/*                                            resulting in version 6.1.10 */   
+/*                                            resulting in version 6.1.10 */  
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            handled close notify packet,*/
+/*                                            resulting in version 6.3.0  */   
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_dtls_session_end(NX_SECURE_DTLS_SESSION *dtls_session, UINT wait_option)
@@ -152,28 +155,22 @@ NX_SECURE_TLS_SESSION  *tls_session;
     /* Release the protection. */
     tx_mutex_put(&_nx_secure_tls_protection);
 
-    /* See if we recevied the CloseNotify, or if we need to wait. */
-    if(tls_session -> nx_secure_tls_received_alert_level != NX_SECURE_TLS_ALERT_LEVEL_WARNING &&
+    /* See if we received the CloseNotify, or if we need to wait. */
+    if(tls_session -> nx_secure_tls_received_alert_level != NX_SECURE_TLS_ALERT_LEVEL_WARNING ||
        tls_session -> nx_secure_tls_received_alert_value != NX_SECURE_TLS_ALERT_CLOSE_NOTIFY)
     {
-        while (status != NX_SECURE_TLS_ALERT_RECEIVED)
+        while (status == NX_SUCCESS)
         {
             /* Wait for the CloseNotify response. */
-            /* Get the protection after nx_packet_allocate. */
-            tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 
             status = _nx_secure_dtls_session_receive(dtls_session, &incoming_packet, wait_option);
 
-            /* Release the protection. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-
-            if (status == NX_SECURE_TLS_CLOSE_NOTIFY_RECEIVED)
+            if (status == NX_SUCCESS)
             {
-                status = NX_SUCCESS;
-                break;
+
+                /* Release the packet. */
+                nx_secure_tls_packet_release(incoming_packet);
             }
-            /* Release the alert packet. */
-            nx_secure_tls_packet_release(incoming_packet);
         }
     }
 

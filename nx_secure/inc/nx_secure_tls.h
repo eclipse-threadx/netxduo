@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -101,6 +101,9 @@
 /*                                            added function to set packet*/
 /*                                            pool,                       */
 /*                                            resulting in version 6.2.0  */
+/*  10-31-2022     Bo Chen                  Modified comment(s), and      */
+/*                                            updated product constants,  */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -163,7 +166,7 @@ extern   "C" {
 
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
-#define NETX_SECURE_MINOR_VERSION                       2
+#define NETX_SECURE_MINOR_VERSION                       3
 #define NETX_SECURE_PATCH_VERSION                       0
 
 /* The following symbols are defined for backward compatibility reasons. */

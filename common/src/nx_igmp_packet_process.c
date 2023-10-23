@@ -28,6 +28,7 @@
 #include "nx_api.h"
 #include "nx_packet.h"
 #include "nx_igmp.h"
+#include "nx_ip.h"
 
 
 #ifndef NX_DISABLE_IPV4
@@ -36,7 +37,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_igmp_packet_process                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -76,6 +77,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            unified checksum calculate, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_igmp_packet_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -86,11 +90,6 @@ ULONG           update_time;
 NX_IGMP_HEADER *header_ptr;
 USHORT          max_update_time;
 ULONG           checksum;
-ULONG           length;
-UCHAR          *word_ptr;
-NX_PACKET      *current_packet;
-ULONG           long_temp;
-USHORT          short_temp;
 
 
     /* Add debug information. */
@@ -107,113 +106,9 @@ USHORT          short_temp;
 
 
         /* First verify the checksum is correct. */
-
-        /* Setup the length of the packet checksum.  */
-        length =  packet_ptr -> nx_packet_length;
-
-        /* Determine if we need to add a padding byte.  */
-        if (((length / sizeof(USHORT)) * sizeof(USHORT)) != length)
-        {
-
-            /* We have single byte alignment and we need two byte alignment.  */
-            length++;
-
-#ifndef NX_DISABLE_PACKET_CHAIN
-            /* Determine if there is a last packet pointer.  */
-            if (packet_ptr -> nx_packet_last)
-            {
-
-                /* Multi-packet message, add a zero byte at the end.  */
-                *((packet_ptr -> nx_packet_last) -> nx_packet_append_ptr) =  0;
-            }
-            else
-            {
-#endif
-
-                /* Write a zero byte at the end of the first and only packet.  */
-                *(packet_ptr -> nx_packet_append_ptr) =  0;
-#ifndef NX_DISABLE_PACKET_CHAIN
-            }
-#endif
-        }
-
-        /* Setup the pointer to the start of the packet.  */
-        word_ptr =  (UCHAR *)packet_ptr -> nx_packet_prepend_ptr;
-
-        /* Initialize the current packet to the input packet pointer.  */
-        current_packet =  packet_ptr;
-
-        checksum = 0;
-
-
-        /* Loop to calculate the checksum over the entire packet.  */
-        while (length)
-        {
-            /* Determine if there is at least one ULONG left.  */
-            if ((UINT)(current_packet -> nx_packet_append_ptr - word_ptr) >= sizeof(ULONG))
-            {
-
-                /* Pickup a whole ULONG.  */
-                long_temp =  *((ULONG *)word_ptr);
-
-                /* Add upper 16-bits into checksum.  */
-                checksum =  checksum + (long_temp >> NX_SHIFT_BY_16);
-
-                /* Check for carry bits.  */
-                if (checksum & NX_CARRY_BIT)
-                {
-                    checksum =  (checksum & NX_LOWER_16_MASK) + 1;
-                }
-
-                /* Add lower 16-bits into checksum.  */
-                checksum =  checksum + (long_temp & NX_LOWER_16_MASK);
-
-                /* Check for carry bits.  */
-
-                if (checksum & NX_CARRY_BIT)
-                {
-                    checksum =  (checksum & NX_LOWER_16_MASK) + 1;
-                }
-
-                /* Move the word pointer and decrease the length.  */
-                word_ptr =  word_ptr + sizeof(ULONG);
-                length = length - (ULONG)sizeof(ULONG);
-            }
-            else
-            {
-
-                /* Pickup the 16-bit word.  */
-                short_temp =  *((USHORT *)word_ptr);
-
-                /* Add next 16-bit word into checksum.  */
-                checksum =  checksum + short_temp;
-
-                /* Check for carry bits.  */
-                if (checksum & NX_CARRY_BIT)
-                {
-                    checksum =  (checksum & NX_LOWER_16_MASK) + 1;
-                }
-
-                /* Move the word pointer and decrease the length.  */
-                word_ptr =  word_ptr + sizeof(USHORT);
-                length = length - (ULONG)sizeof(USHORT);
-            }
-
-#ifndef NX_DISABLE_PACKET_CHAIN
-            /* Determine if we are at the end of the current packet.  */
-            if ((word_ptr >= (UCHAR *)current_packet -> nx_packet_append_ptr) &&
-                (current_packet -> nx_packet_next))
-            {
-
-                /* We have crossed the packet boundary.  Move to the next packet
-                   structure.  */
-                current_packet =  current_packet -> nx_packet_next;
-
-                /* Setup the new word pointer.  */
-                word_ptr =  (UCHAR *)current_packet -> nx_packet_prepend_ptr;
-            }
-#endif
-        }
+        checksum =  _nx_ip_checksum_compute(packet_ptr, NX_IP_IGMP,
+                                            (UINT)packet_ptr -> nx_packet_length,
+                                            NX_NULL, NX_NULL);
 
         checksum = ~checksum & NX_LOWER_16_MASK;
 
