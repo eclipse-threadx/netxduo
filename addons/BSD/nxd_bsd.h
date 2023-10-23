@@ -25,7 +25,7 @@
 /*  BSD DEFINITIONS                                        RELEASE        */
 /*                                                                        */
 /*    nxd_bsd.h                                           PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -50,10 +50,10 @@
 /*                                            defined IP protocols for    */
 /*                                            ICMP, IGMP and ICMPv6,      */
 /*                                            resulting in version 6.1.9  */
-/*  xx-xx-xxxx     Chaoqiong Xiao           Modified comment(s), and      */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
 /*                                            added option to enable      */
 /*                                            native APIs with prefix,    */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 

@@ -2669,7 +2669,7 @@ CHAR *buffer;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_server_packet_process                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2714,6 +2714,10 @@ CHAR *buffer;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Modified comment(s), corrected*/
+/*                                            the logic of verifying the  */
+/*                                            incoming packet length,     */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_server_packet_process(NX_DHCP_SERVER *dhcp_ptr, NX_PACKET *packet_ptr)
@@ -2778,6 +2782,10 @@ ULONG           offset;
         return(status);
     }
 
+    /* Update the prepend pointer to make sure that the IP header and UDP header also are copied into new packet. */
+    packet_ptr -> nx_packet_prepend_ptr -= 28;
+    packet_ptr -> nx_packet_length += 28;
+
     /* Verify the incoming packet does not exceed our DHCP Server packet payload. */
     if ((ULONG)(new_packet_ptr -> nx_packet_data_end - new_packet_ptr -> nx_packet_prepend_ptr) < (packet_ptr -> nx_packet_length))
     {
@@ -2790,10 +2798,6 @@ ULONG           offset;
 
         return(NX_DHCP_INADEQUATE_PACKET_POOL_PAYLOAD);
     }
-    
-    /* Update the prepend pointer to make sure that the IP header and UDP header also are copied into new packet. */
-    packet_ptr -> nx_packet_prepend_ptr -= 28;
-    packet_ptr -> nx_packet_length += 28;
 
     /* Initialize the offset to the beginning of the packet buffer. */ 
     offset = 0;
@@ -4812,7 +4816,7 @@ UINT                            lease_time;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dhcp_server_extract_information                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4865,6 +4869,9 @@ UINT                            lease_time;
 /*                                            and write overflow,         */
 /*                                            fixed compiler warnings,    */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), and      */
+/*                                            improved internal logic,  */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_server_extract_information(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT **dhcp_client_ptr, 
@@ -4873,7 +4880,7 @@ static UINT  _nx_dhcp_server_extract_information(NX_DHCP_SERVER *dhcp_ptr, NX_DH
 
 UINT            status;
 ULONG           value;
-UINT            size = 0;
+ULONG           size = 0;
 ULONG           xid;
 UCHAR           *work_ptr;
 ULONG           client_mac_msw;
@@ -5063,7 +5070,7 @@ NX_DHCP_CLIENT  *temp_client_rec_ptr;
             work_ptr++;
 
             /* Get the option length. */
-            _nx_dhcp_server_get_data(work_ptr, 1, (ULONG *)&size);   
+            _nx_dhcp_server_get_data(work_ptr, 1, &size);
 
             /* Move up the buffer pointer to the next option. */
             work_ptr++;
@@ -5083,7 +5090,7 @@ NX_DHCP_CLIENT  *temp_client_rec_ptr;
                 {
 
                     /* Process as any other option. */
-                    _nx_dhcp_process_option_data(temp_client_rec_ptr, (CHAR *)work_ptr, (UCHAR)value, NX_TRUE, size);
+                    _nx_dhcp_process_option_data(temp_client_rec_ptr, (CHAR *)work_ptr, (UCHAR)value, NX_TRUE, (UINT)size);
                 }
             }
 

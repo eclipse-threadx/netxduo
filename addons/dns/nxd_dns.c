@@ -4704,7 +4704,7 @@ NX_PACKET  *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_dns_response_receive                             PORTABLE C     */ 
-/*                                                           6.1.4        */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4738,6 +4738,10 @@ NX_PACKET  *packet_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  02-02-2021     Yuxin Zhou               Initial Version 6.1.4         */
+/*  10-31-2023     Bo Chen                  Modified comment(s), and      */
+/*                                            reset the status to avoid   */
+/*                                            processing null packet,     */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_response_receive(NX_DNS *dns_ptr, NX_PACKET **packet_ptr, ULONG wait_option)
@@ -4778,6 +4782,9 @@ ULONG               time_remaining;
 
                 /* They do not. Discard the packet! */
                 nx_packet_release((*packet_ptr));
+
+                /* Set the status.  */
+                status = NX_DNS_BAD_ID_ERROR;
 
                 /* Continue to receive next packet.  */
                 if (time_remaining == 0)

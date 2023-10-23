@@ -115,6 +115,14 @@ void    nx_iperf_entry(NX_PACKET_POOL *pool_ptr, NX_IP *ip_ptr, UCHAR *http_stac
 {
 UINT status;
 
+    /* Set the iPerf Stack and Size.  */
+    nx_iperf_stack_area = iperf_stack;
+    nx_iperf_stack_area_size = iperf_stack_size;
+
+    /* Set the IP instance and Packet Pool.  */
+    nx_iperf_test_ip = ip_ptr;
+    nx_iperf_test_pool = pool_ptr;
+
     /* Create a TCP server socket.  */
     status =  nx_tcp_socket_create(nx_iperf_test_ip, &tcp_server_socket, "TCP Server Socket",
                                    NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, 32 * 1024,
@@ -170,14 +178,6 @@ UINT status;
         nx_iperf_test_error_counter++;
         return;
     }
-
-    /* Set the iPerf Stack and Size.  */
-    nx_iperf_stack_area = iperf_stack;
-    nx_iperf_stack_area_size = iperf_stack_size;
-
-    /* Set the IP instance and Packet Pool.  */
-    nx_iperf_test_ip = ip_ptr;
-    nx_iperf_test_pool = pool_ptr;
 
     /* Start the HTTP Server.  */
     status =  nx_web_http_server_start(&nx_iperf_web_server);

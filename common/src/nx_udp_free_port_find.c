@@ -34,7 +34,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_udp_free_port_find                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -71,6 +71,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
+/*                                            internal logic,             */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_udp_free_port_find(NX_IP *ip_ptr, UINT port, UINT *free_port_ptr)
@@ -174,6 +177,12 @@ ULONG                  trace_timestamp;
         /* Determine if we need to wrap.  */
         if (port > NX_MAX_PORT)
         {
+
+            /* Jump out if the original port is ahead of the defined search start port. */
+            if (starting_port <= NX_SEARCH_PORT_START)
+            {
+                break;
+            }
 
             /* Yes, we need to wrap around.  */
             port =  NX_SEARCH_PORT_START;

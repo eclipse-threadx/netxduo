@@ -2449,7 +2449,7 @@ NX_SNTP_TIME local_time;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_receive_time_update                 PORTABLE C      */ 
-/*                                                           6.1.12       */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2500,6 +2500,9 @@ NX_SNTP_TIME local_time;
 /*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
 /*                                            corrected the port check,   */
 /*                                            resulting in version 6.1.12 */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            fixed packet chain issue,   */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_receive_time_update(NX_SNTP_CLIENT *client_ptr, ULONG timeout)
@@ -2727,6 +2730,18 @@ NXD_ADDRESS     source_ip_address, destination_ip_address;
 
             continue;
         }
+
+#ifndef NX_DISABLE_PACKET_CHAIN
+        /* Ignore packet chain.  */
+        if (receive_packet -> nx_packet_next)
+        {
+
+            /* No further need for the receive packet. Release back to the client pool.  */
+            nx_packet_release(receive_packet);
+
+            continue;
+        }
+#endif /* NX_DISABLE_PACKET_CHAIN */
 
         memset(&(client_ptr -> nx_sntp_current_server_time_message), 0, sizeof(NX_SNTP_TIME_MESSAGE));
 

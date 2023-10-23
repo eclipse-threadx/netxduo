@@ -44,7 +44,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_packet_process                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -92,6 +92,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            validated TCP header buffer,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_packet_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -215,6 +218,22 @@ ULONG                        rwin_scale = 0xFF;
         }
     }
 
+#ifndef NX_DISABLE_RX_SIZE_CHECKING
+    /* Make sure the TCP header is in the first packet.  */
+    if ((UINT)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) < sizeof(NX_TCP_HEADER))
+    {
+
+#ifndef NX_DISABLE_TCP_INFO
+        /* Increment the TCP invalid packet error.  */
+        ip_ptr -> nx_ip_tcp_invalid_packets++;
+#endif
+
+        /* Not supported.  */
+        _nx_packet_release(packet_ptr);
+        return;
+    }
+#endif /* NX_DISABLE_RX_SIZE_CHECKING */
+
     /* Pickup the pointer to the head of the TCP packet.  */
     /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
     tcp_header_ptr =  (NX_TCP_HEADER *)packet_ptr -> nx_packet_prepend_ptr;
@@ -232,7 +251,9 @@ ULONG                        rwin_scale = 0xFF;
 
 #ifndef NX_DISABLE_RX_SIZE_CHECKING
     /* Check for valid packet length.  */
-    if (((INT)option_words < 0) || (packet_ptr -> nx_packet_length < (sizeof(NX_TCP_HEADER) + (option_words << 2))))
+    if (((INT)option_words < 0) ||
+        ((UINT)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) <
+         (sizeof(NX_TCP_HEADER) + (option_words << 2))))
     {
 
 #ifndef NX_DISABLE_TCP_INFO

@@ -223,7 +223,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_decrypt(NX_CRYPTO_3DES *context, UCHAR sour
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_3des_init                         PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -265,8 +265,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_decrypt(NX_CRYPTO_3DES *context, UCHAR sour
 /*                                            warning supression for      */
 /*                                            obsolete DES/3DES,          */
 /*                                            resulting in version 6.1.11 */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.x    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -376,7 +376,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_3des_operation                    PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -427,8 +427,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_cleanup(VOID *crypto_metadata)
 /*                                            warning supression for      */
 /*                                            obsolete DES/3DES,          */
 /*                                            resulting in version 6.1.11 */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.x    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_operation(UINT op,       /* Encrypt, Decrypt, Authenticate */

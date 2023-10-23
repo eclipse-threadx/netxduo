@@ -99,7 +99,7 @@ static TX_THREAD sample_device_twin_thread;
 static ULONG sample_device_twin_thread_stack[SAMPLE_STACK_SIZE / sizeof(ULONG)];
 #endif /* DISABLE_DEVICE_TWIN_SAMPLE */
 
-void sample_entry(NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr, NX_DNS *dns_ptr, UINT (*unix_time_callback)(ULONG *unix_time));
+void sample_entry(NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr, VOID *dns_ptr, UINT (*unix_time_callback)(ULONG *unix_time));
 #ifdef ENABLE_DPS_SAMPLE
 static UINT sample_dps_entry(UCHAR **iothub_hostname, UINT *iothub_hostname_length,
                              UCHAR **iothub_device_id, UINT *iothub_device_id_length);
@@ -283,7 +283,7 @@ static void log_callback(az_log_classification classification, UCHAR *msg, UINT 
     }
 }
 
-void sample_entry(NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr, NX_DNS *dns_ptr, UINT (*unix_time_callback)(ULONG *unix_time))
+void sample_entry(NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr, VOID *dns_ptr, UINT (*unix_time_callback)(ULONG *unix_time))
 {
 UINT status = 0;
 UINT loop = NX_TRUE;
@@ -291,7 +291,7 @@ UINT loop = NX_TRUE;
     nx_azure_iot_log_init(log_callback);
 
     /* Create Azure IoT handler.  */
-    if ((status = nx_azure_iot_create(&nx_azure_iot, (UCHAR *)"Azure IoT", ip_ptr, pool_ptr, dns_ptr,
+    if ((status = nx_azure_iot_create(&nx_azure_iot, (UCHAR *)"Azure IoT", ip_ptr, pool_ptr, (NX_DNS *)dns_ptr,
                                       nx_azure_iot_thread_stack, sizeof(nx_azure_iot_thread_stack),
                                       NX_AZURE_IOT_THREAD_PRIORITY, unix_time_callback)))
     {

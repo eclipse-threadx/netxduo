@@ -340,7 +340,7 @@ UINT  _nxd_ftp_client_connect(NX_FTP_CLIENT *ftp_client_ptr, NXD_ADDRESS *server
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ftp_client_connect_internal                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -382,6 +382,9 @@ UINT  _nxd_ftp_client_connect(NX_FTP_CLIENT *ftp_client_ptr, NXD_ADDRESS *server
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            corrected length of buffer, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_client_connect_internal(NX_FTP_CLIENT *ftp_client_ptr, NXD_ADDRESS *server_ip, CHAR *username, 
@@ -629,6 +632,7 @@ UINT        status;
 
         /* We have a packet, setup pointer to the buffer area.  */
         buffer_ptr =  packet_ptr -> nx_packet_prepend_ptr;
+        length = packet_ptr -> nx_packet_length;
 
         /* Check for 220 message.  */
         if ((packet_ptr -> nx_packet_length >= 3) && (buffer_ptr[0] == '2') && (buffer_ptr[1] == '2'))
@@ -4447,7 +4451,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ftp_client_file_write                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4484,6 +4488,9 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            fixed packet double release,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_client_file_write(NX_FTP_CLIENT *ftp_client_ptr, NX_PACKET *packet_ptr, ULONG wait_option)
@@ -4515,9 +4522,6 @@ ULONG   file_size = 0;
     /* Determine if the send was unsuccessful.  */
     if (status)
     {
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
 
         /* Return error.  */
         return(status);

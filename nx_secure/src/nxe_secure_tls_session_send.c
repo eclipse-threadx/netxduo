@@ -36,7 +36,7 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_secure_tls_session_send                        PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,9 +71,9 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), added    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s), added    */
 /*                                            record length checking,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_secure_tls_session_send(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,

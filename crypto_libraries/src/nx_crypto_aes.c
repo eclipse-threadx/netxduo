@@ -1702,7 +1702,7 @@ UINT   i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_aes_init                          PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1739,8 +1739,8 @@ UINT   i;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.x    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_init(struct NX_CRYPTO_METHOD_STRUCT *method,
@@ -1848,7 +1848,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_aes_operation                     PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1898,8 +1898,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_cleanup(VOID *crypto_metadata)
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.x    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -1998,7 +1998,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_aes_cbc_operation                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2045,8 +2045,8 @@ UINT    status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.x    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_cbc_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -2173,7 +2173,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_aes_ccm_operation                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2224,8 +2224,8 @@ UINT    status;
 /*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            fixed compiler warnings,    */
 /*                                            resulting in version 6.2.1  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.x    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_ccm_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -2475,7 +2475,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_aes_gcm_operation                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2523,8 +2523,8 @@ UINT    status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.x    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_gcm_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -2773,7 +2773,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_aes_ctr_operation                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2820,8 +2820,8 @@ UINT    status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.x    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_ctr_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -2925,7 +2925,7 @@ UINT                status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_aes_xcbc_operation                PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2972,8 +2972,8 @@ UINT                status;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.x    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_aes_xcbc_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */

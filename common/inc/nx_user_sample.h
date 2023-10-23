@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */
 /*                                                                        */
 /*    nx_user.h                                           PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -52,9 +52,9 @@
 /*                                            resulting in version 6.1.8  */
 /*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1.11 */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
 /*                                            supported random IP id,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 

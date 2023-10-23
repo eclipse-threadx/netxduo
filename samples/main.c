@@ -33,7 +33,7 @@
 #endif /* SAMPLE_HTTP_PROXY_ENABLE */
 
 /* Include the sample.  */
-extern VOID sample_entry(NX_IP* ip_ptr, NX_PACKET_POOL* pool_ptr, NX_DNS* dns_ptr, UINT (*unix_time_callback)(ULONG *unix_time));
+extern VOID sample_entry(NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr, VOID *dns_ptr, UINT (*unix_time_callback)(ULONG *unix_time));
 
 /* Define the helper thread for running Azure SDK on ThreadX (THREADX IoT Platform).  */
 #ifndef SAMPLE_HELPER_STACK_SIZE
@@ -409,7 +409,7 @@ NXD_ADDRESS proxy_server_address;
     srand(unix_time);
 
     /* Start sample.  */
-    sample_entry(&ip_0, &pool_0, &dns_0, unix_time_get);
+    sample_entry(&ip_0, &pool_0, (VOID *)&dns_0, unix_time_get);
 }
 
 #ifndef SAMPLE_DHCP_DISABLE

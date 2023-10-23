@@ -39,7 +39,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ipv6_fragment_process                           PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -84,9 +84,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s),          */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
 /*                                            supported random IP id,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_ipv6_fragment_process(struct NX_IP_DRIVER_STRUCT *driver_req_ptr, UINT mtu)

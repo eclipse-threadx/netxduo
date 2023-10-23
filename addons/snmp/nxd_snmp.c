@@ -3464,8 +3464,7 @@ UINT  _nx_snmp_agent_stop(NX_SNMP_AGENT *agent_ptr)
 /*    nx_packet_release                     Release original SNMP packet  */ 
 /*    _nx_snmp_utility_sequence_get         Get sequence number in packet */ 
 /*    _nx_snmp_utility_version_get          Get SNMP version number       */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*    nx_udp_socket_receive                 Receive SNMP request          */ 
 /*    nx_udp_source_extract                 Extract source IP and port    */ 
@@ -3637,7 +3636,7 @@ NX_PACKET               *new_packet_ptr;
                 agent_ptr -> nx_snmp_agent_current_version = version;
 
                 /* Process SNMP Version 1 request.  */
-                _nx_snmp_version_1_process(agent_ptr, packet_ptr);
+                _nx_snmp_version_1_and_2_process(agent_ptr, packet_ptr);
             }
 #else
 
@@ -3674,7 +3673,7 @@ NX_PACKET               *new_packet_ptr;
 
 
                 /* Process SNMP Version 2 request.  */
-                _nx_snmp_version_2_process(agent_ptr, packet_ptr);
+                _nx_snmp_version_1_and_2_process(agent_ptr, packet_ptr);
             }
 #else
 
@@ -13665,8 +13664,7 @@ ULONG   *value_ptr;
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_snmp_version_1_process            SNMP v1 request processing    */ 
-/*    _nx_snmp_version_2_process            SNMP v2 request processing    */ 
+/*    _nx_snmp_version_1_and_2_process      SNMP v1, v2 request processing*/ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
 /*                                                                        */ 
@@ -13836,8 +13834,7 @@ UINT    total;
 /*                                                                        */ 
 /*    _nx_snmp_agent_trap_send              Send SNMP v1 trap             */ 
 /*    _nx_snmp_agent_trapv2_send            Send SNMP v2 trap             */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
 /*                                                                        */ 
@@ -13951,8 +13948,7 @@ UINT    length;
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -14045,8 +14041,7 @@ UINT  _nx_snmp_utility_error_info_get(UCHAR *buffer_ptr, UINT *error_code, UINT 
 /*    _nx_snmp_agent_trapv2_send            Send SNMP v2 trap             */ 
 /*    _nx_snmp_agent_trapv3_send            Send SNMP v3 trap             */ 
 /*    _nx_snmp_version_error_response       Send error response to Manager*/ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
@@ -14122,8 +14117,7 @@ UINT  _nx_snmp_utility_error_info_set(UCHAR *buffer_ptr, UINT error_code, UINT e
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_object_data_get      Get object data               */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -14475,7 +14469,7 @@ UINT    string_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_object_id_set                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14507,8 +14501,7 @@ UINT    string_length;
 /*    _nx_snmp_agent_trapv2_send            SNMP v2 trap send             */ 
 /*    _nx_snmp_agent_trapv3_send            SNMP v3 trap send             */ 
 /*    _nx_snmp_utility_object_data_set      Object data set               */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -14518,6 +14511,9 @@ UINT    string_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_object_id_set(UCHAR *buffer_ptr, UCHAR *object_string, UCHAR *buffer_end)
@@ -14606,6 +14602,10 @@ UINT    object_string_length;
         /* Increment value by 40 per spec.  */
         value = value + 80;
     }
+
+    /* Check for the end of the buffer.  */
+    if (buffer_ptr >= buffer_end)
+        return(0);
 
     /* Set the first byte, which is the combination of the first two bytes.  */
     *buffer_ptr++ =  (UCHAR) value;
@@ -15171,8 +15171,7 @@ UCHAR   encoding_started;
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -15419,8 +15418,7 @@ UINT    status;
 /*    _nx_snmp_agent_trap_send              Send SNMP v1 Trap             */ 
 /*    _nx_snmp_agent_trapv2_send            Send SNMP v2 Trap             */ 
 /*    _nx_snmp_agent_trapv3_send            Send SNMP v3 Trap             */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -16071,8 +16069,7 @@ UINT    header_size;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_thread_entry           SNMP Agent's thread entry     */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -16204,8 +16201,7 @@ UCHAR   byte;
 /*    _nx_snmp_agent_trap_send              Send SNMP v1 trap             */ 
 /*    _nx_snmp_agent_trapv2_send            Send SNMP v2 trap             */ 
 /*    _nx_snmp_agent_trapv3_send            Send SNMP v3 trap             */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
@@ -16339,8 +16335,7 @@ UINT  _nx_snmp_utility_sequence_set_1byte(UCHAR *buffer_ptr, UINT sequence_value
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -16453,8 +16448,7 @@ UCHAR   byte;
 /*                                                                        */ 
 /*    _nx_snmp_agent_trapv2_send            Send SNMP v2 trap             */ 
 /*    _nx_snmp_agent_trapv3_send            Send SNMP v3 trap             */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
@@ -16593,8 +16587,7 @@ UINT    length;
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -16733,8 +16726,7 @@ UCHAR   byte;
 /*    _nx_snmp_agent_trap_send              Send SNMP v1 trap             */ 
 /*    _nx_snmp_agent_trapv2_send            Send SNMP v2 trap             */ 
 /*    _nx_snmp_agent_trapv3_send            Send SNMP v3 trap             */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
@@ -16801,8 +16793,7 @@ UINT  _nx_snmp_utility_request_type_set_1byte(UCHAR *buffer_ptr, UINT request_ty
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -16872,8 +16863,7 @@ UINT  _nx_snmp_utility_request_type_set_multibyte(UCHAR *buffer_ptr, UINT reques
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_thread_entry           SNMP Agent's thread entry     */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -16961,8 +16951,7 @@ UINT  _nx_snmp_utility_version_get(UCHAR *buffer_ptr, UINT *snmp_version, INT bu
 /*    _nx_snmp_agent_trap_send              Send SNMP v1 trap             */ 
 /*    _nx_snmp_agent_trapv2_send            Send SNMP v2 trap             */ 
 /*    _nx_snmp_agent_trapv3_send            Send SNMP v3 trap             */ 
-/*    _nx_snmp_version_1_process            Process SNMP v1 request       */ 
-/*    _nx_snmp_version_2_process            Process SNMP v2 request       */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
@@ -17035,8 +17024,7 @@ UINT  _nx_snmp_utility_version_set(UCHAR *buffer_ptr, UINT snmp_version, UCHAR *
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_snmp_version_1_process            SNMP v1 message processing    */ 
-/*    _nx_snmp_version_2_process            SNMP v2 message processing    */ 
+/*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            SNMP v3 message processing    */ 
 /*                                                                        */ 
 /*  RELEASE HISTORY                                                       */ 
@@ -17167,13 +17155,13 @@ ULONG   temp;
     return;
 }
 
-#ifndef NX_SNMP_DISABLE_V1
+#if !defined(NX_SNMP_DISABLE_V1) && !defined(NX_SNMP_DISABLE_V2)
 /**************************************************************************/ 
 /*                                                                        */ 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
-/*    _nx_snmp_version_1_process                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*    _nx_snmp_version_1_and_2_process                    PORTABLE C      */ 
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -17224,22 +17212,21 @@ ULONG   temp;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            variable len verification,  */
-/*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
-VOID  _nx_snmp_version_1_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr)
+VOID  _nx_snmp_version_1_and_2_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr)
 {
 
 UINT        sequence_length, version, request_type, request_length;
-UINT        error_code, error_index;
+UINT        non_repeaters, max_repetitions, next_object;
+#ifndef NX_SNMP_DISABLE_V2
+UINT        current_repetitions;
+#endif /* NX_SNMP_DISABLE_V2 */
 UINT        variable_list_length, variable_length;
 ULONG       request_id;
 UINT        status, length, objects;
 UCHAR       *buffer_ptr;
-UCHAR       *variable_start_ptr = NX_NULL;
 UCHAR       *error_ptr, *request_type_ptr;
 UINT        response_length;
 UINT        total_variable_length = 0;
@@ -17404,1020 +17391,6 @@ INT         buffer_length;
     /* Save a pointer to the error string.  */
     error_ptr =  buffer_ptr;
 
-
-    /* Pickup the SNMP Error information.  */
-    length =  _nx_snmp_utility_error_info_get(buffer_ptr, &error_code, &error_index, buffer_length);
-
-    /* Check for a valid packet.  */
-    if (length == 0)
-    {
-
-        /* Increment the invalid packet error counter.  */
-        agent_ptr -> nx_snmp_agent_invalid_packets++;
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-#ifndef NX_DISABLE_PACKET_CHAIN
-    /* Determine if the received packet size is too big.  */
-    if (packet_ptr -> nx_packet_next)
-    {
-
-        /* Call the error handling response routine.  */
-        _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_TOOBIG, 0);
-
-        /* Done, return to caller.  */
-        return;
-    }
-#endif /* NX_DISABLE_PACKET_CHAIN */
-
-    if (agent_ptr -> nx_snmp_agent_username_process)
-    {
-
-        status = agent_ptr -> nx_snmp_agent_username_process(agent_ptr, agent_ptr -> nx_snmp_agent_current_community_string);
-
-        /* Determine if the callback routine generated an error.  */
-        if (status != NX_SUCCESS)
-        {
-
-            /* Increment the number of community/username errors.  */
-            agent_ptr -> nx_snmp_agent_username_errors++;
-
-#ifdef NX_SNMP_V1_AUTHORIZATION_ERROR_RESPONSE
-            /* Call the error handling response routine.  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_NOSUCHNAME, 0);
-#else
-            /* Authorization error response is not supported by version 1. */
-            /* Release the packet.  */
-            nx_packet_release(packet_ptr);
-#endif
-
-            /* Done, return to caller.  */
-            return;
-        }
-    }
-
-    /* Move the buffer pointer up.  */
-    buffer_ptr =  buffer_ptr + length;
-
-    /* The buffer pointer is moved by the length. Update buffer size */
-    buffer_length -= (INT)length;
-
-    /* Pickup the SNMP Variable list length.  */
-    length =  _nx_snmp_utility_sequence_get(buffer_ptr, &variable_list_length, buffer_length);
-
-    /* Check for a valid packet.  */
-    if (length == 0)
-    {
-
-        /* Increment the invalid packet error counter.  */
-        agent_ptr -> nx_snmp_agent_invalid_packets++;
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the buffer pointer up.  */
-    buffer_ptr =  buffer_ptr + length;
-
-    /* The buffer pointer is moved by the length. Update buffer size */
-    buffer_length -= (INT)length;
-
-    /* At this point we have parsed the incoming SNMP request up to the first 
-       variable.  */
-
-    /* Now prepare response message so we can process the variables one by one.  */
-
-    /* Determine which packet type we allocate based on the destination address type.  */
-    if (agent_ptr -> nx_snmp_agent_current_manager_ip.nxd_ip_version == NX_IP_VERSION_V4)
-    {
-        packet_type = NX_IPv4_UDP_PACKET;
-    }
-    else if (agent_ptr -> nx_snmp_agent_current_manager_ip.nxd_ip_version == NX_IP_VERSION_V6)
-    {
-
-#ifndef FEATURE_NX_IPV6
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        return;
-#else
-        packet_type = NX_IPv6_UDP_PACKET;
-#endif  /* FEATURE_NX_IPV6 */
-    }
-    else
-    {
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        return;
-    }
-
-    /* Allocate the packet for the SNMP response.  */
-    status =  nx_packet_allocate(agent_ptr -> nx_snmp_agent_packet_pool_ptr, &response_packet_ptr, packet_type, NX_SNMP_AGENT_TIMEOUT);
-
-    /* Determine if a response packet was allocated.  */
-    if (status)
-    {
-
-        /* Increment the packet allocation error counter.  */
-        agent_ptr -> nx_snmp_agent_allocation_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    memset(response_packet_ptr -> nx_packet_prepend_ptr, 0, 
-           (UINT)(response_packet_ptr -> nx_packet_data_end - response_packet_ptr -> nx_packet_prepend_ptr));
-
-    /* Initialize the counters required for the length fields of the response packet.  */
-    response_sequence_length =       0; 
-    response_type_length =           0;
-    response_variable_list_length =  0;
-
-    /* Setup a pointer to the response packet's buffer area.  */
-    response_buffer_ptr =  response_packet_ptr -> nx_packet_prepend_ptr;
-
-    /* This is also the response sequence pointer. Remember it since we are going to have to
-       update it later with the actual length of the response.  */
-    response_sequence_ptr =  response_buffer_ptr;
-
-    /* First, write the sequence in the response packet.  A zero is written for now.  This will be 
-       updated later.  */
-    response_length =  _nx_snmp_utility_sequence_set(response_buffer_ptr, 0, response_packet_ptr -> nx_packet_data_end);
-
-    /* Check for a valid operation.  */
-    if (response_length == 0)
-    {
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Release the response packet too.  */
-        nx_packet_release(response_packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the response buffer pointer up.  */
-    response_buffer_ptr =  response_buffer_ptr + response_length;
-
-    /* Now set the SNMP version in the response.  */
-    response_length =  _nx_snmp_utility_version_set(response_buffer_ptr, NX_SNMP_VERSION_1, response_packet_ptr -> nx_packet_data_end);
-
-    /* Check for a valid operation.  */
-    if (response_length == 0)
-    {
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Release the response packet too.  */
-        nx_packet_release(response_packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the response buffer pointer up.  */
-    response_buffer_ptr =  response_buffer_ptr + response_length;
-
-    /* Adjust the response sequence length.  */
-    response_sequence_length =  response_sequence_length + response_length;
-
-    /* Set the SNMP community in the response message.  */
-    response_length =  _nx_snmp_utility_community_set(response_buffer_ptr, agent_ptr -> nx_snmp_agent_current_community_string, response_packet_ptr -> nx_packet_data_end);
-
-    /* Check for a valid operation.  */
-    if (response_length == 0)
-    {
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Release the response packet too.  */
-        nx_packet_release(response_packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the response buffer pointer up.  */
-    response_buffer_ptr =  response_buffer_ptr + response_length;
-
-    /* Adjust the response sequence length.  */
-    response_sequence_length =  response_sequence_length + response_length;
-
-    /* Remember the request type pointer, since it will need to be updated later.  */
-    response_type_ptr =  response_buffer_ptr;
-
-    /* Now set the request type in the response message.  */
-    response_length =  _nx_snmp_utility_request_type_set_multibyte(response_buffer_ptr, NX_SNMP_ANS1_GET_RESPONSE, 0, response_packet_ptr -> nx_packet_data_end);
-
-    /* Check for a valid operation.  */
-    if (response_length == 0)
-    {
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Release the response packet too.  */
-        nx_packet_release(response_packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the response buffer pointer up.  */
-    response_buffer_ptr =  response_buffer_ptr + response_length;
-
-    /* Adjust the response sequence length.  */
-    response_sequence_length =  response_sequence_length + response_length;
-
-    /* Now set the request ID in the response message.  */
-    response_length =  _nx_snmp_utility_request_id_set(response_buffer_ptr, request_id, response_packet_ptr -> nx_packet_data_end);
-
-    /* Check for a valid operation.  */
-    if (response_length == 0)
-    {
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Release the response packet too.  */
-        nx_packet_release(response_packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the response buffer pointer up.  */
-    response_buffer_ptr =  response_buffer_ptr + response_length;
-
-    /* Adjust the response sequence length.  */
-    response_sequence_length =  response_sequence_length + response_length;
-
-    /* Adjust the response request type length.  */
-    response_type_length =  response_type_length + response_length;
-
-    /* Set the response error information.  Assume everything is okay at this point.  */
-    response_length =  _nx_snmp_utility_error_info_set(response_buffer_ptr, 0, 0, response_packet_ptr -> nx_packet_data_end);
-
-    /* Check for a valid operation.  */
-    if (response_length == 0)
-    {
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Release the response packet too.  */
-        nx_packet_release(response_packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the response buffer pointer up.  */
-    response_buffer_ptr =  response_buffer_ptr + response_length;
-
-    /* Adjust the response sequence length.  */
-    response_sequence_length =  response_sequence_length + response_length;
-
-    /* Adjust the response request type length.  */
-    response_type_length =  response_type_length + response_length;
-
-    /* Remember the start of the response's variable list field.  */
-    response_variable_list_ptr =  response_buffer_ptr;
-
-    /* Setup the variable list response.  For now, the length will be zero.  We 
-       will overwrite this with the actual length later.  */
-    response_length =  _nx_snmp_utility_sequence_set(response_buffer_ptr, 0, response_packet_ptr -> nx_packet_data_end);
-
-    /* Check for a valid operation.  */
-    if (response_length == 0)
-    {
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Release the response packet too.  */
-        nx_packet_release(response_packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the response buffer pointer up.  */
-    response_buffer_ptr =  response_buffer_ptr + response_length;
-
-    /* Adjust the response sequence length.  */
-    response_sequence_length =  response_sequence_length + response_length;
-
-    /* Adjust the response request type length.  */
-    response_type_length =  response_type_length + response_length;
-
-    /* At this point the response buffer is setup to exactly the same position the 
-       SNMP Manager's input buffer is - right before the first variable.  We can
-       now walk through the variable list to process each request and place the
-       result in the response buffer.  */
-    objects =  0;
-    do
-    {
-
-        /* Remember the start of the variable.  */
-        variable_start_ptr =  buffer_ptr;
-
-        /* Pickup the first SNMP Variable length.  */
-        length =  _nx_snmp_utility_sequence_get(buffer_ptr, &variable_length, buffer_length);
-
-        /* Calculate the total variable size.  */
-        total_variable_length =  variable_length + length;
-
-        /* Determine if this variable will fit in the remaining length of the 
-           variable list, buffer length, and if there is integer overflow.  */
-        if ((length == 0) || (total_variable_length > variable_list_length) ||
-            (total_variable_length < variable_length) || (total_variable_length > (UINT)buffer_length))
-        {
-
-            /* Increment the invalid packet error counter.  */
-            agent_ptr -> nx_snmp_agent_invalid_packets++;
-
-            /* Release the response packet.  */
-            nx_packet_release(response_packet_ptr);
-
-            /* Send an SNMP version error response.  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_SUCCESS, objects+1);
-
-            /* Return to caller.  */
-            return;
-        }
-
-        /* Move the buffer pointer up.  */
-        buffer_ptr =  buffer_ptr + length;
-
-        /* Update the size of the remaining buffer. */
-        buffer_length -= (INT)length;
-
-        /* Now pickup the object ID.  */
-        length =  _nx_snmp_utility_object_id_get(buffer_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, buffer_length);
-
-        /* Determine if the object retrieval was successful.  */ 
-        if (length == 0) 
-        {
-
-            /* Increment the invalid packet error counter.  */
-            agent_ptr -> nx_snmp_agent_invalid_packets++;
-
-            /* Increment the internal error counter.  */
-            agent_ptr -> nx_snmp_agent_internal_errors++;
-
-            /* Release the packet.  */
-            nx_packet_release(packet_ptr);
-
-            /* Release the response packet.  */
-            nx_packet_release(response_packet_ptr);
-
-            /* Return to caller.  */
-            return;
-        }
-
-        /* Move the buffer pointer up.  */
-        buffer_ptr =  buffer_ptr + length;
-
-        /* Update the size of the remaining buffer. */
-        buffer_length -= (INT)length;
-
-        /* Default the value to NULL.  */
-        agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type =  0;
-
-        /* Determine if a value is present.  */
-        if (length != variable_length)
-        {
-
-            /* Pickup the value associated with this variable.  */
-            length =  _nx_snmp_utility_object_data_get(buffer_ptr, &(agent_ptr -> nx_snmp_agent_current_object_data), buffer_length);
-
-            /* Determine if the object value was successful.  */ 
-            if (length == 0) 
-            {
-
-                /* Increment the invalid packet error counter.  */
-                agent_ptr -> nx_snmp_agent_invalid_packets++;
-
-                /* Increment the internal error counter.  */
-                agent_ptr -> nx_snmp_agent_internal_errors++;
-
-                /* Send an SNMP version error response.  */
-                _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_BADVALUE, objects+1);
-
-                /* Release the packet.  */
-                nx_packet_release(packet_ptr);
-
-                /* Release the response packet.  */
-                nx_packet_release(response_packet_ptr);
-
-                /* Return to caller.  */
-                return;
-            }
-        }
-
-        /* At this point, we are ready to call the appropriate application request handling routine.  
-           It is responsible for extracting or placing information in the object data structure.  */
-        if (request_type == NX_SNMP_ANS1_GET_REQUEST)
-        {
-
-            /* Increment the total number of get variables.  */
-            agent_ptr -> nx_snmp_agent_total_get_variables++;
-
-            /* Call the application's GET routine.  */
-            status =  (agent_ptr -> nx_snmp_agent_get_process)(agent_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, 
-                                                               &(agent_ptr -> nx_snmp_agent_current_object_data));
-        }
-        else if (request_type == NX_SNMP_ANS1_GET_NEXT_REQUEST)
-        {
-
-            /* Increment the total number of get variables.  */
-            agent_ptr -> nx_snmp_agent_total_get_variables++;
-
-            /* Call the application's GETNEXT routine.  */
-            status =  (agent_ptr -> nx_snmp_agent_getnext_process)(agent_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, 
-                                                                   &(agent_ptr -> nx_snmp_agent_current_object_data));
-        }
-        else if (request_type == NX_SNMP_ANS1_SET_REQUEST)
-        {
-
-            /* Increment the total number of set variables.  */
-            agent_ptr -> nx_snmp_agent_total_set_variables++;
-
-            /* Call the application's SET routine.  */
-            status =  (agent_ptr -> nx_snmp_agent_set_process)(agent_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, 
-                                                               &(agent_ptr -> nx_snmp_agent_current_object_data));
-        }
-        else
-        {
-
-            /* Release the response packet.  */
-            nx_packet_release(response_packet_ptr);
-
-            /* Release the packet.  */
-            nx_packet_release(packet_ptr);
-
-            /* Increment the internal error counter.  */
-            agent_ptr -> nx_snmp_agent_internal_errors++;
-
-            /* Done, return to caller.  */
-            return;
-        }
-
-        /* Check for an error status from the agent's request processing callback routine.  */
-        if (status)
-        {
-
-            /* Release the response packet.  */
-            nx_packet_release(response_packet_ptr);
-
-            /* Per RFC2576 4.3 */
-            switch(status)
-            {
-            case NX_SNMP_SUCCESS:
-            case NX_SNMP_ERROR_TOOBIG:
-                /* Call the error handling response routine.  */
-                _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, status, objects+1);
-                break;
-            case NX_SNMP_ERROR_BADVALUE:
-            case NX_SNMP_ERROR_WRONGVALUE:
-            case NX_SNMP_ERROR_WRONGENCODING:
-            case NX_SNMP_ERROR_WRONGTYPE:
-            case NX_SNMP_ERROR_WRONGLENGTH:
-            case NX_SNMP_ERROR_INCONSISTENTVALUE:
-                /* Call the error handling response routine.  */
-                _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_BADVALUE, objects+1);
-                break;
-            case NX_SNMP_ERROR_NOSUCHNAME:
-            case NX_SNMP_ERROR_NOACCESS:
-            case NX_SNMP_ERROR_NOTWRITABLE:
-            case NX_SNMP_ERROR_NOCREATION:
-            case NX_SNMP_ERROR_INCONSISTENTNAME:
-            case NX_SNMP_ERROR_AUTHORIZATION:
-                /* Call the error handling response routine.  */
-                _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_NOSUCHNAME, objects+1);
-                break;
-            case NX_SNMP_ERROR_GENERAL:
-            case NX_SNMP_ERROR_RESOURCEUNAVAILABLE:
-            case NX_SNMP_ERROR_COMMITFAILED:
-            case NX_SNMP_ERROR_UNDOFAILED:
-                /* Call the error handling response routine.  */
-                _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_GENERAL, objects+1);
-                break;
-            default:
-                /* Release the packet.  */
-                nx_packet_release(packet_ptr);
-            }
-
-            /* Done, return to caller.  */
-            return;
-        }
-
-        /* Determine if the returning object is valid.  */
-        if ((agent_ptr -> nx_snmp_agent_current_octet_string[0] != '1') || (agent_ptr -> nx_snmp_agent_current_octet_string[1] != '.') || (agent_ptr -> nx_snmp_agent_current_octet_string[2] != '3') || (agent_ptr -> nx_snmp_agent_current_octet_string[3] != '.'))
-        {
-
-            /* Release the response packet.  */
-            nx_packet_release(response_packet_ptr);
-
-            /* Release the packet. */
-            nx_packet_release(packet_ptr);
-
-            /* Increment the internal error counter.  */
-            agent_ptr -> nx_snmp_agent_internal_errors++;
-
-            /* Done, return to caller.  */
-            return;
-        }
-
-        /* Now ensure the returning object type is supported in V1.  */
-        if ((agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_INTEGER) &&
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_OCTET_STRING) &&
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_NULL) &&
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_TIME_TICS) && 
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_GAUGE) && 
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_COUNTER) &&
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_COUNTER64) &&
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_IP_ADDRESS) &&
-#ifdef FEATURE_NX_IPV6
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_IPV6_ADDRESS) &&
-#endif
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_NSAP_ADDRESS) &&
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_OBJECT_ID))
-        {
-
-            /* Release the packet. */
-            nx_packet_release(response_packet_ptr);
-
-            /* Call the error handling response routine.  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_NOSUCHNAME, objects + 1);
-            
-            /* Increment the internal error counter.  */
-            agent_ptr -> nx_snmp_agent_internal_errors++;
-
-            /* Done, return to caller.  */
-            return;
-        }
-
-        /* Everything is okay, place the object and object data into the response buffer.  */
-
-        /* Remember the start of the variable response sequence.  */
-        response_variable_ptr =  response_buffer_ptr;
-
-        /* Clear the response variable size.  */
-        response_variable_length =  0;
-
-        /* Determine if there is enough room in the destination for the variable sequence.  */
-        if ((response_buffer_ptr + 4) >= response_packet_ptr -> nx_packet_data_end)
-        {
-
-            /* Release the response packet.  */
-            nx_packet_release(response_packet_ptr);
-
-            /* Call the error handling response routine.  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_TOOBIG, objects+1);
-
-            /* Done, return to caller.  */
-            return;
-        }
-
-        /* Setup the variable response sequence.  For now, the length will be zero.  We 
-           will overwrite this with the actual length later.  */
-        response_length =  _nx_snmp_utility_sequence_set(response_buffer_ptr, 0, response_packet_ptr -> nx_packet_data_end);
-
-        /* Check for a valid operation.  */
-        if (response_length == 0)
-        {
-
-            /* Increment the internal error counter.  */
-            agent_ptr -> nx_snmp_agent_internal_errors++;
-
-            /* Release the packet.  */
-            nx_packet_release(packet_ptr);
-
-            /* Release the response packet too.  */
-            nx_packet_release(response_packet_ptr);
-
-            /* Return to caller.  */
-            return;
-        }
-
-        /* Move the response buffer pointer up.  */
-        response_buffer_ptr =  response_buffer_ptr + response_length;
-
-        /* Adjust the response sequence length.  */
-        response_sequence_length =  response_sequence_length + response_length;
-
-        /* Adjust the response request type length.  */
-        response_type_length =  response_type_length + response_length;
-
-        /* Adjust the response variable list size.  */
-        response_variable_list_length =  response_variable_list_length + response_length;
-
-        /* Place the object into the response buffer.  */
-        response_length =  _nx_snmp_utility_object_id_set(response_buffer_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, response_packet_ptr -> nx_packet_data_end); 
-
-        /* Check for a valid operation.  */
-        if (response_length == 0)
-        {
-
-            /* Release the response packet.  */
-            nx_packet_release(response_packet_ptr);
-
-            /* Call the error handling response routine.  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_TOOBIG, objects+1);
-
-            /* Done, return to caller.  */
-            return;
-        }
-
-        /* Move the response buffer pointer up.  */
-        response_buffer_ptr =  response_buffer_ptr + response_length;
-
-        /* Adjust the response sequence length.  */
-        response_sequence_length =  response_sequence_length + response_length;
-
-        /* Adjust the response request type length.  */
-        response_type_length =  response_type_length + response_length;
-
-        /* Adjust the response variable list size.  */
-        response_variable_list_length =  response_variable_list_length + response_length;
-
-        /* Adjust the response variable size.  */
-        response_variable_length =  response_variable_length + response_length;
-
-        /* Insert the object's data into the response buffer.  */
-        response_length =  _nx_snmp_utility_object_data_set(response_buffer_ptr, &(agent_ptr -> nx_snmp_agent_current_object_data), response_packet_ptr -> nx_packet_data_end);
-
-        /* Check for a valid operation.  */
-        if (response_length == 0)
-        {
-
-            /* Release the response packet.  */
-            nx_packet_release(response_packet_ptr);
-
-            /* Call the error handling response routine.  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_TOOBIG, objects+1);
-
-            /* Done, return to caller.  */
-            return;
-        }
-
-        /* Move the response buffer pointer up.  */
-        response_buffer_ptr =  response_buffer_ptr + response_length;
-
-        /* Adjust the response sequence length.  */
-        response_sequence_length =  response_sequence_length + response_length;
-
-        /* Adjust the response request type length.  */
-        response_type_length =  response_type_length + response_length;
-
-        /* Adjust the response variable list size.  */
-        response_variable_list_length =  response_variable_list_length + response_length;
-
-        /* Adjust the response variable size.  */
-        response_variable_length =  response_variable_length + response_length;
-
-        /* Now update the response variable sequence with the actual variable length.  */
-        _nx_snmp_utility_sequence_set(response_variable_ptr, response_variable_length, response_packet_ptr -> nx_packet_data_end);
-
-        /* Adjust the pointer to the next variable.  */
-        buffer_ptr =  variable_start_ptr + total_variable_length;
-
-        /* Decrement the size of the variable list.  */
-        variable_list_length =  variable_list_length - total_variable_length;
-
-        /* Increment the object counter.  */
-        objects++;
-
-    } while (variable_list_length);
-
-    /* At this point, several response fields need to be updated with actual lengths.  */
-    _nx_snmp_utility_sequence_set(response_sequence_ptr, response_sequence_length, response_packet_ptr -> nx_packet_data_end);
-    _nx_snmp_utility_sequence_set(response_variable_list_ptr, response_variable_list_length, response_packet_ptr -> nx_packet_data_end);
-    _nx_snmp_utility_request_type_set_multibyte(response_type_ptr, NX_SNMP_ANS1_GET_RESPONSE, response_type_length, response_packet_ptr -> nx_packet_data_end);
-
-    /* Now the response packet's pointers must be setup so it can be sent.  */
-    response_packet_ptr -> nx_packet_length =  (ULONG)(response_buffer_ptr - response_packet_ptr -> nx_packet_prepend_ptr);
-    response_packet_ptr -> nx_packet_append_ptr =  response_buffer_ptr;
-
-    /* Release the original request packet.  */
-    nx_packet_release(packet_ptr);
-
-    /* Update various statistics.  */
-    agent_ptr -> nx_snmp_agent_total_bytes_received +=  packet_ptr -> nx_packet_length;
-    agent_ptr -> nx_snmp_agent_total_bytes_sent +=      response_packet_ptr -> nx_packet_length;
-    if (request_type == NX_SNMP_ANS1_GET_REQUEST)
-        agent_ptr -> nx_snmp_agent_get_requests++;
-    else if (request_type == NX_SNMP_ANS1_GET_NEXT_REQUEST)
-        agent_ptr -> nx_snmp_agent_getnext_requests++;
-    else if (request_type == NX_SNMP_ANS1_GET_BULK_REQUEST)
-        agent_ptr -> nx_snmp_agent_getbulk_requests++;
-    else if (request_type == NX_SNMP_ANS1_SET_REQUEST)
-        agent_ptr -> nx_snmp_agent_set_requests++;
-
-    /* Increment the sent packet counter.  */
-    agent_ptr -> nx_snmp_agent_packets_sent++;
-    
-    /* Increment the get responses sent counter.  */
-    agent_ptr -> nx_snmp_agent_getresponse_sent++;
-
-    /* Send the response packet back to the requesting SNMP manager.  */
-    status =  nxd_udp_socket_send(&(agent_ptr -> nx_snmp_agent_socket), response_packet_ptr, 
-                                                &(agent_ptr -> nx_snmp_agent_current_manager_ip),
-                                                agent_ptr -> nx_snmp_agent_current_manager_port);
-
-    /* Check for successful call.  */
-    if (status)
-    {
-
-        /* Release the packet.  */
-        nx_packet_release(response_packet_ptr);
-    }
-}
-#endif  /* NX_SNMP_DISABLE_V1 */
-
-
-#ifndef NX_SNMP_DISABLE_V2
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    _nx_snmp_version_2_process                          PORTABLE C      */ 
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*    This function processes the SNMP v2 request from the manager.       */ 
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    agent_ptr                             Pointer to SNMP agent         */ 
-/*    packet_ptr                            Pointer to packet containing  */ 
-/*                                            the SNMP request            */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
-/*    nx_packet_allocate                    Allocate response packet      */ 
-/*    nx_packet_release                     Release the packet            */ 
-/*    nx_udp_socket_send                    Send the UDP packet           */ 
-/*    _nx_snmp_utility_community_get        Get the community name        */ 
-/*    _nx_snmp_utility_community_set        Set the community name        */ 
-/*    _nx_snmp_utility_error_info_get       Get the error information     */ 
-/*    _nx_snmp_utility_error_info_set       Set the error information     */ 
-/*    _nx_snmp_utility_object_data_get      Get the object data           */ 
-/*    _nx_snmp_utility_object_data_set      Set the object data           */ 
-/*    _nx_snmp_utility_object_id_get        Get the object ID             */ 
-/*    _nx_snmp_utility_object_id_set        Set the object ID             */ 
-/*    _nx_snmp_utility_request_id_get       Get the request ID            */ 
-/*    _nx_snmp_utility_request_id_set       Set the request ID            */ 
-/*    _nx_snmp_utility_request_type_get     Get the request type          */ 
-/*    _nx_snmp_utility_request_type_set_multibyte                         */
-/*                                          Set trap request type         */
-/*    _nx_snmp_utility_sequence_get         Get the ANS.1 sequence        */ 
-/*    _nx_snmp_utility_sequence_set         Set the ANS.1 sequence        */ 
-/*    _nx_snmp_utility_version_get          Get the SNMP version          */ 
-/*    _nx_snmp_utility_version_set          Set the SNMP version          */ 
-/*    _nx_snmp_version_error_response       Send SNMP Manager error       */ 
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    _nx_snmp_agent_thread_entry           SNMP Agent thread             */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            variable len verification,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-VOID  _nx_snmp_version_2_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr)
-{
-
-UINT        sequence_length, version, request_type, request_length;
-UINT        non_repeaters, max_repetitions, current_repetitions, next_object;
-UINT        variable_list_length, variable_length;
-ULONG       request_id;
-UINT        status, length, objects;
-UCHAR       *buffer_ptr;
-UCHAR       *variable_start_ptr = NX_NULL;
-UCHAR       *error_ptr, *request_type_ptr;
-UINT        response_length;
-UINT        total_variable_length = 0;
-NX_PACKET   *response_packet_ptr;
-UCHAR       *response_buffer_ptr;
-UINT        response_sequence_length, response_type_length;
-UINT        response_variable_list_length, response_variable_length;
-UCHAR       *response_sequence_ptr, *response_type_ptr;
-UCHAR       *response_variable_list_ptr, *response_variable_ptr;
-UINT        packet_type;
-INT         buffer_length;
-
-    buffer_length = (INT)(packet_ptr -> nx_packet_length);
-
-    /* Setup a pointer to the buffer.  */
-    buffer_ptr =  packet_ptr -> nx_packet_prepend_ptr;
-
-    /* Pickup the SEQUENCE field.  */
-    length =  _nx_snmp_utility_sequence_get(buffer_ptr, &sequence_length, buffer_length);
-
-    /* Check for a valid packet.  */
-    if (length == 0)
-    {
-
-        /* Increment the invalid packet error counter.  */
-        agent_ptr -> nx_snmp_agent_invalid_packets++;
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the buffer pointer up.  */
-    buffer_ptr =  buffer_ptr + length;
-
-    /* The buffer pointer is moved by the length. Update buffer size */
-    buffer_length -= (INT)length;
-
-    /* Pickup the SNMP VERSION field.  */
-    length =  _nx_snmp_utility_version_get(buffer_ptr, &version, buffer_length);
-
-    /* Check for a valid packet.  */
-    if (length == 0)
-    {
-
-        /* Increment the invalid packet error counter.  */
-        agent_ptr -> nx_snmp_agent_invalid_packets++;
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the buffer pointer up.  */
-    buffer_ptr =  buffer_ptr + length;
-
-    /* The buffer pointer is moved by the length. Update buffer size */
-    buffer_length -= (INT)length;
-
-    /* Pickup the SNMP Community String field.  */
-    length =  _nx_snmp_utility_community_get(buffer_ptr,
-                                             agent_ptr -> nx_snmp_agent_current_community_string,
-                                             buffer_length);
-
-    /* Check for a valid packet.  */
-    if (length == 0)
-    {
-
-        /* Increment the invalid packet error counter.  */
-        agent_ptr -> nx_snmp_agent_invalid_packets++;
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the buffer pointer up.  */
-    buffer_ptr =  buffer_ptr + length;
-
-    /* The buffer pointer is moved by the length. Update buffer size */
-    buffer_length -= (INT)length;
-
-    /* Save the request type pointer.  */
-    request_type_ptr =  buffer_ptr;
-
-    /* Pick up the SNMP Request type.  */
-    length =  _nx_snmp_utility_request_type_get(buffer_ptr, &request_type, &request_length, buffer_length);
-
-    /* Check for a valid packet.  */
-    if (length == 0)
-    {
-
-        /* Increment the invalid packet error counter.  */
-        agent_ptr -> nx_snmp_agent_invalid_packets++;
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the buffer pointer up.  */
-    buffer_ptr =  buffer_ptr + length;
-
-    /* The buffer pointer is moved by the length. Update buffer size */
-    buffer_length -= (INT)length;
-
-    agent_ptr -> nx_snmp_agent_request_get_type =  NX_FALSE;
-    if ((request_type == NX_SNMP_GET_REQUEST) || 
-        (request_type == NX_SNMP_GET_NEXT_REQUEST) ||
-        (request_type == NX_SNMP_GET_BULK_REQUEST))
-    {
-         agent_ptr -> nx_snmp_agent_request_get_type =  NX_TRUE;
-    }
-
-    /* Pickup the SNMP Request ID.  */
-    length =  _nx_snmp_utility_request_id_get(buffer_ptr, &request_id, buffer_length);
-
-    /* Check for a valid packet.  */
-    if (length == 0)
-    {
-
-        /* Increment the invalid packet error counter.  */
-        agent_ptr -> nx_snmp_agent_invalid_packets++;
-
-        /* Increment the internal error counter.  */
-        agent_ptr -> nx_snmp_agent_internal_errors++;
-
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-
-        /* Return to caller.  */
-        return;
-    }
-
-    /* Move the buffer pointer up.  */
-    buffer_ptr =  buffer_ptr + length;
-
-    /* The buffer pointer is moved by the length. Update buffer size */
-    buffer_length -= (INT)length;
-
-    /* Save a pointer to the error string.  */
-    error_ptr =  buffer_ptr;
-
     /* Pickup the SNMP Error information.  This is actually used to derive the GETBULK
        information in SNMP V2 and above.  */
     length =  _nx_snmp_utility_error_info_get(buffer_ptr, &non_repeaters, &max_repetitions, buffer_length);
@@ -18440,7 +17413,6 @@ INT         buffer_length;
     }
 
 #ifndef NX_DISABLE_PACKET_CHAIN
-
     /* Determine if the received packet size is too big.  */
     if (packet_ptr -> nx_packet_next)
     {
@@ -18453,14 +17425,12 @@ INT         buffer_length;
     }
 #endif /* NX_DISABLE_PACKET_CHAIN */
 
-
-
     /* Check to see if there is a username processing routine.  */
     if (agent_ptr -> nx_snmp_agent_username_process)
     {
 
         /* Yes, there is a callback routine to process the community/username.  */
-        status =  (agent_ptr -> nx_snmp_agent_username_process)(agent_ptr, agent_ptr -> nx_snmp_agent_current_community_string);
+        status = agent_ptr -> nx_snmp_agent_username_process(agent_ptr, agent_ptr -> nx_snmp_agent_current_community_string);
 
         /* Determine if the callback routine generated an error.  */
         if (status != NX_SUCCESS)
@@ -18469,8 +17439,25 @@ INT         buffer_length;
             /* Increment the number of community/username errors.  */
             agent_ptr -> nx_snmp_agent_username_errors++;
 
-            /* Call the error handling response routine.  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_AUTHORIZATION, 0);
+            /* Check the version.  */
+            if (version == NX_SNMP_VERSION_1)
+            {
+
+#ifdef NX_SNMP_V1_AUTHORIZATION_ERROR_RESPONSE
+                /* Call the error handling response routine.  */
+                _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_NOSUCHNAME, 0);
+#else
+                /* Authorization error response is not supported by version 1. */
+                /* Release the packet.  */
+                nx_packet_release(packet_ptr);
+#endif
+            }
+            else
+            {
+
+                /* Call the error handling response routine.  */
+                _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_AUTHORIZATION, 0);
+            }
 
             /* Done, return to caller.  */
             return;
@@ -18530,7 +17517,6 @@ INT         buffer_length;
 #else
         packet_type = NX_IPv6_UDP_PACKET;
 #endif  /* FEATURE_NX_IPV6 */
-
     }
     else
     {
@@ -18773,18 +17759,17 @@ INT         buffer_length;
        SNMP Manager's input buffer is - right before the first variable.  We can
        now walk through the variable list to process each request and place the
        result in the response buffer.  */
-    objects =              0;
-    next_object =          NX_TRUE;
+    objects =  0;
+    next_object = NX_TRUE;
+#ifndef NX_SNMP_DISABLE_V2
     current_repetitions =  max_repetitions;
+#endif /* NX_SNMP_DISABLE_V2 */
     do
     {
 
         /* Determine if the next object should be retrieved.  */
         if (next_object)
         {
-
-            /* Remember the start of the variable.  */
-            variable_start_ptr =  buffer_ptr;
 
             /* Pickup the first SNMP Variable length.  */
             length =  _nx_snmp_utility_sequence_get(buffer_ptr, &variable_length, buffer_length);
@@ -18805,7 +17790,7 @@ INT         buffer_length;
                 nx_packet_release(response_packet_ptr);
 
                 /* Call the error handling response routine. This will release the packet  */
-                _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_SUCCESS, objects+1);
+                _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_SUCCESS, objects + 1);
 
                 /* Return to caller.  */
                 return;
@@ -18814,13 +17799,11 @@ INT         buffer_length;
             /* Move the buffer pointer up.  */
             buffer_ptr =  buffer_ptr + length;
 
-            /* The buffer pointer is moved by the length. Update buffer size */
+            /* Update the size of the remaining buffer. */
             buffer_length -= (INT)length;
 
             /* Now pickup the object ID.  */
-            length =  _nx_snmp_utility_object_id_get(buffer_ptr,
-                                                     agent_ptr -> nx_snmp_agent_current_octet_string,
-                                                     buffer_length);
+            length =  _nx_snmp_utility_object_id_get(buffer_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, buffer_length);
 
             /* Determine if the object retrieval was successful.  */ 
             if (length == 0) 
@@ -18845,7 +17828,7 @@ INT         buffer_length;
             /* Move the buffer pointer up.  */
             buffer_ptr =  buffer_ptr + length;
 
-            /* The buffer pointer is moved by the length. Update buffer size */
+            /* Update the size of the remaining buffer. */
             buffer_length -= (INT)length;
 
             /* Default the value to NULL.  */
@@ -18868,17 +17851,23 @@ INT         buffer_length;
                     /* Increment the internal error counter.  */
                     agent_ptr -> nx_snmp_agent_internal_errors++;
 
-                    /* Send an SNMP version error response.  */
-                    _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_BADVALUE, objects+1);
-
-                    /* Release the packet.  */
-                    nx_packet_release(packet_ptr);
+                    /* Send an SNMP version error response. The packet will be released in the function.  */
+                    _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_BADVALUE, objects + 1);
 
                     /* Release the response packet.  */
                     nx_packet_release(response_packet_ptr);
 
                     /* Return to caller.  */
                     return;
+                }
+                else
+                {
+
+                    /* Move the buffer pointer up.  */
+                    buffer_ptr =  buffer_ptr + length;
+
+                    /* Update the size of the remaining buffer. */
+                    buffer_length -= (INT)length;
                 }
             }
         }
@@ -18892,7 +17881,8 @@ INT         buffer_length;
             agent_ptr -> nx_snmp_agent_total_get_variables++;
 
             /* Call the application's GET routine.  */
-            status =  (agent_ptr -> nx_snmp_agent_get_process)(agent_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, &(agent_ptr -> nx_snmp_agent_current_object_data));
+            status =  (agent_ptr -> nx_snmp_agent_get_process)(agent_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, 
+                                                               &(agent_ptr -> nx_snmp_agent_current_object_data));
         }
         else if (request_type == NX_SNMP_ANS1_GET_NEXT_REQUEST)
         {
@@ -18901,9 +17891,22 @@ INT         buffer_length;
             agent_ptr -> nx_snmp_agent_total_get_variables++;
 
             /* Call the application's GETNEXT routine.  */
-            status =  (agent_ptr -> nx_snmp_agent_getnext_process)(agent_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, &(agent_ptr -> nx_snmp_agent_current_object_data));
+            status =  (agent_ptr -> nx_snmp_agent_getnext_process)(agent_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, 
+                                                                   &(agent_ptr -> nx_snmp_agent_current_object_data));
         }
-        else if (request_type == NX_SNMP_ANS1_GET_BULK_REQUEST)
+        else if (request_type == NX_SNMP_ANS1_SET_REQUEST)
+        {
+
+            /* Increment the total number of set variables.  */
+            agent_ptr -> nx_snmp_agent_total_set_variables++;
+
+            /* Call the application's SET routine.  */
+            status =  (agent_ptr -> nx_snmp_agent_set_process)(agent_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, 
+                                                               &(agent_ptr -> nx_snmp_agent_current_object_data));
+        }
+
+#ifndef NX_SNMP_DISABLE_V2
+        else if ((request_type == NX_SNMP_ANS1_GET_BULK_REQUEST) && (version != NX_SNMP_VERSION_1))
         {
         
             /* Increment the total number of get variables.  */
@@ -18944,22 +17947,14 @@ INT         buffer_length;
                 }
             }
         }
-        else if (request_type == NX_SNMP_ANS1_SET_REQUEST)
-        {
-
-            /* Increment the total number of set variables.  */
-            agent_ptr -> nx_snmp_agent_total_set_variables++;
-
-            /* Call the application's SET routine.  */
-            status =  (agent_ptr -> nx_snmp_agent_set_process)(agent_ptr, agent_ptr -> nx_snmp_agent_current_octet_string, &(agent_ptr -> nx_snmp_agent_current_object_data));
-        }
+#endif /* NX_SNMP_DISABLE_V2 */
         else
         {
 
             /* Release the response packet.  */
             nx_packet_release(response_packet_ptr);
 
-            /* Release the packet. */
+            /* Release the packet.  */
             nx_packet_release(packet_ptr);
 
             /* Increment the internal error counter.  */
@@ -18976,8 +17971,56 @@ INT         buffer_length;
             /* Release the response packet.  */
             nx_packet_release(response_packet_ptr);
 
-            /* Call the error handling response routine. This will release the packet  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, status, objects);
+#ifndef NX_SNMP_DISABLE_V1
+            /* Check the version.  */
+            if (version == NX_SNMP_VERSION_1)
+            {
+
+                /* Per RFC2576 4.3 */
+                switch(status)
+                {
+                case NX_SNMP_SUCCESS:
+                case NX_SNMP_ERROR_TOOBIG:
+                    /* Call the error handling response routine.  */
+                    _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, status, objects + 1);
+                    break;
+                case NX_SNMP_ERROR_BADVALUE:
+                case NX_SNMP_ERROR_WRONGVALUE:
+                case NX_SNMP_ERROR_WRONGENCODING:
+                case NX_SNMP_ERROR_WRONGTYPE:
+                case NX_SNMP_ERROR_WRONGLENGTH:
+                case NX_SNMP_ERROR_INCONSISTENTVALUE:
+                    /* Call the error handling response routine.  */
+                    _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_BADVALUE, objects + 1);
+                    break;
+                case NX_SNMP_ERROR_NOSUCHNAME:
+                case NX_SNMP_ERROR_NOACCESS:
+                case NX_SNMP_ERROR_NOTWRITABLE:
+                case NX_SNMP_ERROR_NOCREATION:
+                case NX_SNMP_ERROR_INCONSISTENTNAME:
+                case NX_SNMP_ERROR_AUTHORIZATION:
+                    /* Call the error handling response routine.  */
+                    _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_NOSUCHNAME, objects + 1);
+                    break;
+                case NX_SNMP_ERROR_GENERAL:
+                case NX_SNMP_ERROR_RESOURCEUNAVAILABLE:
+                case NX_SNMP_ERROR_COMMITFAILED:
+                case NX_SNMP_ERROR_UNDOFAILED:
+                    /* Call the error handling response routine.  */
+                    _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_GENERAL, objects + 1);
+                    break;
+                default:
+                    /* Release the packet.  */
+                    nx_packet_release(packet_ptr);
+                }
+            }
+            else
+#endif /* NX_SNMP_DISABLE_V1 */
+            {
+
+                /* Call the error handling response routine. This will release the packet  */
+                _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, status, objects + 1);
+            }
 
             /* Done, return to caller.  */
             return;
@@ -19013,10 +18056,14 @@ INT         buffer_length;
             (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_IPV6_ADDRESS) &&
 #endif
             (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_NSAP_ADDRESS) &&
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_OBJECT_ID) &&
+            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_OBJECT_ID)
+#ifndef NX_SNMP_DISABLE_V2
+            &&
             (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_NO_SUCH_OBJECT) &&
             (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_NO_SUCH_INSTANCE) &&
-            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_END_OF_MIB_VIEW))
+            (agent_ptr -> nx_snmp_agent_current_object_data.nx_snmp_object_data_type != NX_SNMP_ANS1_END_OF_MIB_VIEW)
+#endif /* NX_SNMP_DISABLE_V2 */
+            )
         {
 
             /* Release the response packet.  */
@@ -19047,8 +18094,8 @@ INT         buffer_length;
             /* Release the response packet.  */
             nx_packet_release(response_packet_ptr);
 
-            /* Call the error handling response routine. This will release the packet  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_TOOBIG, objects);
+            /* Call the error handling response routine. This will release the packet.  */
+            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_TOOBIG, objects + 1);
 
             /* Done, return to caller.  */
             return;
@@ -19097,8 +18144,8 @@ INT         buffer_length;
             /* Release the response packet.  */
             nx_packet_release(response_packet_ptr);
 
-            /* Call the error handling response routine. This will release the packet  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_TOOBIG, objects);
+            /* Call the error handling response routine. This will release the packet.  */
+            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_TOOBIG, objects + 1);
 
             /* Done, return to caller.  */
             return;
@@ -19129,8 +18176,8 @@ INT         buffer_length;
             /* Release the response packet.  */
             nx_packet_release(response_packet_ptr);
 
-            /* Call the error handling response routine. This will release the packet  */
-            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_TOOBIG, objects);
+            /* Call the error handling response routine. This will release the packet.  */
+            _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_TOOBIG, objects + 1);
 
             /* Done, return to caller.  */
             return;
@@ -19158,16 +18205,12 @@ INT         buffer_length;
         if (next_object)
         {
 
-            /* Adjust the pointer to the next variable.  */
-            buffer_ptr =  variable_start_ptr + total_variable_length;
-
             /* Decrement the size of the variable list.  */
             variable_list_length =  variable_list_length - total_variable_length;
 
             /* Increment the object counter.  */
             objects++;
         }
-
     } while ((variable_list_length) || (next_object == NX_FALSE));
 
     /* At this point, several response fields need to be updated with actual lengths.  */
@@ -19213,7 +18256,7 @@ INT         buffer_length;
         nx_packet_release(response_packet_ptr);
     }
 }
-#endif
+#endif  /* !NX_SNMP_DISABLE_V1 && !NX_SNMP_DISABLE_V2 */
 
 
 #ifndef NX_SNMP_DISABLE_V3
@@ -19222,7 +18265,7 @@ INT         buffer_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_version_3_process                          PORTABLE C      */ 
-/*                                                           6.1.6        */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -19291,6 +18334,10 @@ INT         buffer_length;
 /*                                            improved boundary check,    */
 /*                                            checked NULL pointer,       */
 /*                                            resulting in version 6.1.6  */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            fixed packet double release,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_version_3_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr)
@@ -19303,7 +18350,6 @@ UINT        variable_list_length, variable_length;
 ULONG       request_id;
 UINT        status, length, objects;
 UCHAR       *buffer_ptr;
-UCHAR       *variable_start_ptr = NX_NULL;
 UCHAR       *error_ptr, *request_type_ptr, *temp_ptr;
 UINT        response_length;
 UINT        total_variable_length = 0;
@@ -19548,6 +18594,9 @@ INT         buffer_length;
 
         /* Position the buffer pointer past the octet string.  */
         buffer_ptr =  buffer_ptr + 2;
+
+        /* The buffer pointer is moved. Update buffer size */
+        buffer_length -= 2;
 
         /* Pickup the sequence for the security data.  */
         length =  _nx_snmp_utility_sequence_get(buffer_ptr, &security_sequence_length, buffer_length);
@@ -20823,7 +19872,7 @@ INT         buffer_length;
         /* Save the location if we need to return an error message. */
         pdu_buffer_ptr = buffer_ptr;
 
-        status = _nx_snmp_agent_decrypt_pdu(agent_ptr, &buffer_ptr, response_buffer_ptr,  &response_encryption_size_ptr, &response_length, buffer_length);
+        status = _nx_snmp_agent_decrypt_pdu(agent_ptr, &buffer_ptr, response_buffer_ptr,  &response_encryption_size_ptr, &response_length, &buffer_length);
 
         if (status != NX_SUCCESS)
         {
@@ -20840,38 +19889,91 @@ INT         buffer_length;
             return;
         }
 
+        /* Check the packet length.  */
+        if (buffer_length < 4)
+        {
+
+            /* Increment the invalid packet error counter.  */
+            agent_ptr -> nx_snmp_agent_invalid_packets++;
+
+            /* Increment the internal error counter.  */
+            agent_ptr -> nx_snmp_agent_internal_errors++;
+
+            /* Release the packet.  */
+            nx_packet_release(packet_ptr);
+
+            /* Release the response packet too.  */
+            nx_packet_release(response_packet_ptr);
+
+            return;
+        }
+
+        UINT temp = 0;
+
         /* This is typically coded as 0x30 0x29 [or whatever length] 0x04 0x82 or [length] without
            the multi byte coding. This will also handle 0x81 "multi byte" coding. */ 
         if (buffer_ptr[3] & NX_SNMP_ANS1_MULTI_BYTES)
         {
 
             /* Get the type of length of the string */
-            UINT temp = (UINT)(buffer_ptr[3] & 0x7F);
-    
-            if (temp == 2)
+            temp = (UINT)(buffer_ptr[3] & 0x7F);
+
+            /* Check the packet length.  */
+            if (((temp != 1) && (temp !=2)) || ((UINT)buffer_length < (4 + temp)))
             {
 
-                pdu_length =  (UINT) (*(buffer_ptr+ 4) << 8) | ((UINT) *(buffer_ptr+5));
-                pdu_buffer_ptr = buffer_ptr;
+                /* Increment the invalid packet error counter.  */
+                agent_ptr -> nx_snmp_agent_invalid_packets++;
+
+                /* Increment the internal error counter.  */
+                agent_ptr -> nx_snmp_agent_internal_errors++;
+
+                /* Release the packet.  */
+                nx_packet_release(packet_ptr);
+
+                /* Release the response packet too.  */
+                nx_packet_release(response_packet_ptr);
+
+                return;
             }
-        
-            else if (temp == 1)
+
+            if (temp == 2)
             {
-                pdu_length = *(buffer_ptr + 4);
-                pdu_buffer_ptr = buffer_ptr;
+                pdu_length =  (UINT) (*(buffer_ptr+ 4) << 8) | ((UINT) *(buffer_ptr+5));
             }
             else
             {
-            
-                /* String is either null or too big, return a zero length to indicate an error.  */
-                return;
+                /* temp == 1.  */
+                pdu_length = *(buffer_ptr + 4);
             }
+
         }
         else  /* Assume one byte */
         {
             pdu_length = *(buffer_ptr + 3);
-            pdu_buffer_ptr = buffer_ptr;
         }
+
+        /* Check the pdu length.  */
+        if (pdu_length > (UINT)(buffer_length - 4 - (INT)temp))
+        {
+
+            /* Increment the invalid packet error counter.  */
+            agent_ptr -> nx_snmp_agent_invalid_packets++;
+
+            /* Increment the internal error counter.  */
+            agent_ptr -> nx_snmp_agent_internal_errors++;
+
+            /* Release the packet.  */
+            nx_packet_release(packet_ptr);
+
+            /* Release the response packet too.  */
+            nx_packet_release(response_packet_ptr);
+
+            return;
+        }
+
+        /* Set pdu_buffer_ptr.  */
+        pdu_buffer_ptr = buffer_ptr;
 
         response_length = 4; 
 
@@ -21460,9 +20562,6 @@ INT         buffer_length;
         if (next_object)
         {
 
-            /* Remember the start of the variable.  */
-            variable_start_ptr =  buffer_ptr;
-
             /* Pickup the first SNMP Variable length.  */
             length =  _nx_snmp_utility_sequence_get(buffer_ptr, &variable_length, buffer_length);
 
@@ -21541,17 +20640,23 @@ INT         buffer_length;
                     /* Increment the internal error counter.  */
                     agent_ptr -> nx_snmp_agent_internal_errors++;
 
-                    /* Send an SNMP version error response.  */
+                    /* Send an SNMP version error response. The packet will be released in the function.  */
                     _nx_snmp_version_error_response(agent_ptr, packet_ptr, request_type_ptr, error_ptr, NX_SNMP_ERROR_BADVALUE, objects+1);
-
-                    /* Release the packet.  */
-                    nx_packet_release(packet_ptr);
 
                     /* Release the response packet.  */
                     nx_packet_release(response_packet_ptr);
 
                     /* Return to caller.  */
                     return;
+                }
+                else
+                {
+
+                    /* Move the buffer pointer up.  */
+                    buffer_ptr =  buffer_ptr + length;
+
+                    /* Update the size of the remaining buffer. */
+                    buffer_length -= (INT)length;
                 }
             }
         }
@@ -21856,9 +20961,6 @@ INT         buffer_length;
         if (next_object)
         {
 
-            /* Adjust the pointer to the next variable.  */
-            buffer_ptr =  variable_start_ptr + total_variable_length;
-
             /* Decrement the size of the variable list.  */
             variable_list_length =  variable_list_length - total_variable_length;
 
@@ -21982,7 +21084,7 @@ INT         buffer_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_version_3_report_send                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -22030,6 +21132,9 @@ INT         buffer_length;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_version_3_report_send(NX_SNMP_AGENT *agent_ptr, UCHAR *buffer_ptr, UINT report_respond, INT buffer_length)
@@ -22139,7 +21244,7 @@ UCHAR               report_security_level;
     {
 
         /* We do. Decrypt the data. We need to get the PDU data, request id and other data. */
-        status = _nx_snmp_agent_decrypt_pdu(agent_ptr, &buffer_ptr, NX_NULL, &report_encryption_size_ptr, &report_length, buffer_length);
+        status = _nx_snmp_agent_decrypt_pdu(agent_ptr, &buffer_ptr, NX_NULL, &report_encryption_size_ptr, &report_length, &buffer_length);
 
         if (status != NX_SUCCESS)
         {
@@ -23451,7 +22556,7 @@ UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_encrypt_pdu                          PORTABLE C      */ 
-/*                                                           6.1.6        */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -23498,6 +22603,9 @@ UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
 /*  04-02-2021     Yuxin Zhou               Modified comment(s), improved */
 /*                                            verification of encryption, */
 /*                                            resulting in version 6.1.6  */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -23524,9 +22632,15 @@ UINT  adjusted_pdu_length;
         *response_pdu_length =  *response_pdu_length + padding;
         *response_sequence_length =  *response_sequence_length + padding;
 
+        /* Check the buffer.  */
+        if ((UINT)(response_sequence_buffer_end - (*response_buffer_ptr)) < padding)
+        {
+            return(NX_SNMP_INVALID_PDU_ENCRYPTION);
+        }
+
         /* Use a work pointer to initialize the padding buffer. */
         temp_ptr = *response_buffer_ptr;
-    
+
         /* Clear the end of the response message...  just to be nice!  */
         for (i = 0; i < padding; i++)
         {
@@ -23670,7 +22784,7 @@ UINT  adjusted_pdu_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_decrypt_pdu                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -23715,24 +22829,31 @@ UINT  adjusted_pdu_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 
 UINT _nx_snmp_agent_decrypt_pdu(NX_SNMP_AGENT *agent_ptr, UCHAR **buffer_ptr, UCHAR *response_buffer_ptr,  
-                                UCHAR **response_encryption_size_ptr, UINT *response_length, INT buffer_length)
+                                UCHAR **response_encryption_size_ptr, UINT *response_length, INT *buffer_length)
 {
 
 UINT  i, j, encrypted_size;
 UCHAR key1[NX_SNMP_DIGEST_WORKING_SIZE];
 UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
-UCHAR *temp_ptr;
 
 
     *response_length = 0;
-    temp_ptr = *buffer_ptr;
+
+    /* Check the buffer length for tag and length. */
+    if (*buffer_length < 2)
+    {
+        return(NX_SNMP_INVALID_PDU_ENCRYPTION);
+    }
 
     /* Decrypt the source PDU and setup the response to have an encryption header.  */ 
-    if (temp_ptr[0] != NX_SNMP_ANS1_OCTET_STRING)
+    if ((*buffer_ptr)[0] != NX_SNMP_ANS1_OCTET_STRING)
     {
 
 #ifdef NX_SNMPV3_PRINT_DEBUG_MESSAGE
@@ -23743,27 +22864,41 @@ UCHAR *temp_ptr;
     }
 
     /* Pickup the encrypted PDU size.  */
-    if (temp_ptr[1] & NX_SNMP_ANS1_MULTI_BYTES)
+    if ((*buffer_ptr)[1] & NX_SNMP_ANS1_MULTI_BYTES)
     {
 
-        UINT temp = temp_ptr[1] & 0x7F;
+        UINT temp = (*buffer_ptr)[1] & 0x7F;
         if (temp == 2)
         {
-        
+
+            /* Check the buffer length. */
+            if (*buffer_length < 4)
+            {
+                return(NX_SNMP_INVALID_PDU_ENCRYPTION);
+            }
+
             /* Two byte octet string.  */
-            encrypted_size =  (((UINT) temp_ptr[2]) << 8) | ((UINT) temp_ptr[3]);
+            encrypted_size =  (((UINT) (*buffer_ptr)[2]) << 8) | ((UINT) (*buffer_ptr)[3]);
 
             /* Move the buffer pointer up to the actual encrypted PDU contents.  */
-            temp_ptr =  temp_ptr + 4;
+            (*buffer_ptr) += 4;
+            *buffer_length -= 4;
         }
         else if (temp == 1)
         {
 
+            /* Check the buffer length. */
+            if (*buffer_length < 3)
+            {
+                return(NX_SNMP_INVALID_PDU_ENCRYPTION);
+            }
+
             /* One byte octet string e.g. 0x04 0x81 0xXY */
-            encrypted_size =  (UINT) temp_ptr[2];
+            encrypted_size =  (UINT) (*buffer_ptr)[2];
 
             /* Move the buffer pointer up to the actual encrypted PDU contents.  */
-            temp_ptr =  temp_ptr + 3;
+            (*buffer_ptr) +=  3;
+            (*buffer_length) -= 3;
 
         }
         else
@@ -23776,15 +22911,15 @@ UCHAR *temp_ptr;
     {
 
         /* One byte octet string.  */
-        encrypted_size =  (UINT) temp_ptr[1];
+        encrypted_size =  (UINT) (*buffer_ptr)[1];
 
         /* Move the buffer pointer up to the actual encrypted PDU contents.  */
-        temp_ptr =  temp_ptr + 2;
-
+        (*buffer_ptr) += 2;
+        (*buffer_length) -= 2;
     }
 
     /* Check for invalid buffer size. */
-    if ((INT)encrypted_size > buffer_length)
+    if ((INT)encrypted_size > *buffer_length)
     {
 
         /* Invalid buffer size. */
@@ -23813,7 +22948,7 @@ UCHAR *temp_ptr;
     _nx_des_key_set(&(agent_ptr -> nx_snmp_agent_v3_des_data), (agent_ptr -> nx_snmp_agent_v3_privacy_key) -> nx_snmp_security_key);
 
     /* Decrypt the first 8 bytes.  */
-    _nx_des_decrypt(&(agent_ptr -> nx_snmp_agent_v3_des_data), temp_ptr, key1);
+    _nx_des_decrypt(&(agent_ptr -> nx_snmp_agent_v3_des_data), (*buffer_ptr), key1);
 
     /* XOR with the IV.  */
     for (i = 0; i < 8; i++)
@@ -23829,17 +22964,17 @@ UCHAR *temp_ptr;
     {
 
         /* Decrypt the next 8-byte block.  */
-        _nx_des_decrypt(&(agent_ptr -> nx_snmp_agent_v3_des_data), &temp_ptr[j], key2);
+        _nx_des_decrypt(&(agent_ptr -> nx_snmp_agent_v3_des_data), &(*buffer_ptr)[j], key2);
 
         /* XOR with the previous encrypted 8-byte block.  */
         for (i = 0; i < 8; i++)
         {
 
             /* XOR result with previous block.  */
-            key2[i] =  key2[i] ^ temp_ptr[(j-8)+i];
+            key2[i] =  key2[i] ^ (*buffer_ptr)[(j-8)+i];
 
             /* Copy a byte of the decrypted block over the source.  */
-            temp_ptr[(j-8)+i] =  key1[i];
+            (*buffer_ptr)[(j-8)+i] =  key1[i];
 
             /* Save this byte of the new decrypted block.  */
             key1[i] =  key2[i];
@@ -23854,10 +22989,8 @@ UCHAR *temp_ptr;
     {
 
         /* Copy a byte of the decrypted block over the source.  */
-        temp_ptr[(j-8)+i] =  key1[i];
+        (*buffer_ptr)[(j-8)+i] =  key1[i];
     }
-
-    *buffer_ptr = temp_ptr;
 
      /* If the caller is going to encrypt its response it will send a non null response buffer pointer. */
      if (response_buffer_ptr != NX_NULL)

@@ -783,7 +783,7 @@ UINT            i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_get                          PORTABLE C      */ 
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -820,10 +820,10 @@ UINT            i;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), and      */
+/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
 /*                                            supported processing        */
 /*                                            compressed data,            */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_receive_packet_get(NX_PPP *ppp_ptr, NX_PACKET **return_packet_ptr)
@@ -1447,7 +1447,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_process                      PORTABLE C      */ 
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1490,10 +1490,10 @@ UINT        status;
 /*                                            improved packet length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.2  */
-/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), and      */
+/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
 /*                                            supported processing        */
 /*                                            compressed data,            */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_receive_packet_process(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -1941,7 +1941,7 @@ NX_PPP  *ppp_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_netx_packet_transfer                        PORTABLE C      */ 
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1976,10 +1976,10 @@ NX_PPP  *ppp_ptr;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), and      */
+/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
 /*                                            supported processing        */
 /*                                            compressed data,            */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 void _nx_ppp_netx_packet_transfer(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -3344,7 +3344,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_configure_request_send                  PORTABLE C      */ 
-/*                                                           6.x          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3377,10 +3377,10 @@ NX_PACKET   *packet_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Wenhui Xie               Modified comment(s), and      */
+/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
 /*                                            supported processing        */
 /*                                            compressed data,            */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_configure_request_send(NX_PPP *ppp_ptr)

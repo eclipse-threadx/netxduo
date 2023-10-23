@@ -3404,7 +3404,7 @@ UINT              first_digit_server_reply;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_smtp_utility_read_server_code                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3447,6 +3447,9 @@ UINT              first_digit_server_reply;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            avoided invalid release,    */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_smtp_utility_read_server_code(NX_SMTP_CLIENT *client_ptr, ULONG timeout, UINT  receive_all_lines)     
@@ -3518,6 +3521,7 @@ UINT         buffer_length;
 
         /* No, it wasn't. */
         nx_packet_release(packet_ptr);
+        client_ptr -> nx_smtp_server_packet = NX_NULL;
 
         /* Set session state to QUIT.  */
         client_ptr -> nx_smtp_client_rsp_state =  NX_SMTP_CLIENT_STATE_QUIT;

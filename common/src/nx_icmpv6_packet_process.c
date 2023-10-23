@@ -46,7 +46,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_packet_process                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -96,6 +96,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_icmpv6_packet_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -111,6 +114,19 @@ NX_IPV6_HEADER   *ipv6_header;
 
     /* Add debug information. */
     NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
+
+    /* Check packet length is at least sizeof(NX_ICMPV6_HEADER). */
+    if ((UINT)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) < sizeof(NX_ICMPV6_HEADER))
+    {
+#ifndef NX_DISABLE_ICMP_INFO
+
+        /* Increment the ICMP invalid packet error.  */
+        ip_ptr -> nx_ip_icmp_invalid_packets++;
+#endif
+
+        _nx_packet_release(packet_ptr);
+        return;
+    }
 
     /* Points to the ICMP message header.  */
     /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
