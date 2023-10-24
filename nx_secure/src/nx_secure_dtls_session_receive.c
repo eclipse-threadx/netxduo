@@ -23,6 +23,7 @@
 #define NX_SECURE_SOURCE_CODE
 
 #include "nx_secure_dtls.h"
+#include "nx_secure_dtls_api.h"
 
 /**************************************************************************/
 /*                                                                        */
@@ -291,6 +292,42 @@ UINT                   source_port;
                 }
             }
 #endif /* FEATURE_NX_IPV6 */
+        }
+
+        /* If packet is Chained, try to reassemble them in a single packet
+         */
+        if (packet_ptr -> nx_packet_next) {
+
+            UCHAR *reassembly_packet_buffer = dtls_session->nx_secure_dtls_tls_session.nx_secure_tls_packet_buffer;
+            UINT reassembly_packet_buffer_size = dtls_session->nx_secure_dtls_tls_session.nx_secure_tls_packet_buffer_size;
+            NX_PACKET_POOL *packet_pool = dtls_session->nx_secure_dtls_tls_session.nx_secure_tls_packet_pool;
+
+            ULONG total_size = 0;
+            UINT status = nx_packet_data_extract_offset(packet_ptr, 0,
+                                                        reassembly_packet_buffer, reassembly_packet_buffer_size,
+                                                        &total_size);
+            if ((status == NX_SUCCESS) && (total_size <= packet_pool->nx_packet_pool_payload_size)) {
+                NX_PACKET *reassembled_packet = NULL;
+                status = _nx_secure_dtls_packet_allocate(dtls_session, packet_pool, &reassembled_packet,
+                                                         NX_IP_PERIODIC_RATE);
+                if (NX_SUCCESS == status) {
+                    status = nx_packet_data_append(reassembled_packet, (void *) reassembly_packet_buffer,
+                                                   total_size, packet_pool,
+                                                   NX_IP_PERIODIC_RATE);
+                    if (NX_SUCCESS == status) {
+                        nx_packet_release(packet_ptr);
+                        packet_ptr = reassembled_packet;
+                    } else {
+                        if (reassembled_packet != NULL) {
+                            nx_packet_release(reassembled_packet);
+                        }
+                    }
+                } else {
+                    if (reassembled_packet != NULL) {
+                        nx_packet_release(reassembled_packet);
+                    }
+                }
+            }
         }
 
         /* Process all records in the packet we received - decrypt, authenticate, and
