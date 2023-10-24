@@ -334,7 +334,7 @@ UINT loop = NX_TRUE;
     }
     else if ((sample_connection_status = nx_azure_iot_hub_client_connect(&iothub_client, NX_TRUE, NX_WAIT_FOREVER)))
     {
-        printf("Failed on nx_azure_iot_hub_client_connect!\r\n");
+        printf("Failed on nx_azure_iot_hub_client_connect!: error code = 0x%08x\r\n", sample_connection_status);
     }
 
 #ifndef DISABLE_TELEMETRY_SAMPLE
