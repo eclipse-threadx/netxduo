@@ -420,6 +420,7 @@ UINT status;
     /* Do nothing if the client is not connected.  */
     if (client_ptr -> nxd_mqtt_client_state != NXD_MQTT_CLIENT_STATE_CONNECTED)
     {
+        tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
         LogError(LogLiteralArgs("MQTT NOT CONNECTED"));
         return(NX_AZURE_IOT_DISCONNECTED);
     }
