@@ -1745,8 +1745,8 @@ static UINT nx_azure_iot_adu_agent_jws_split(UCHAR *jws, UINT jws_length,
                                              UCHAR **signature, UINT *signature_length)
 {
 
-UCHAR *dot1_pointer;
-UCHAR *dot2_pointer;
+UCHAR *dot1_pointer = jws;
+UCHAR *dot2_pointer = jws;
 UINT   dot_count = 0;
 UINT   i = 0;
 

@@ -1,0 +1,4 @@
+service avahi-daemon stop
+service avahi-daemon restart
+mzclient -a IPv4 -t _smb._tcp
+for i in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 ; do { mzclient -p "_http._tcp 80 $i Simple Web Server Test For Multiple Packets"& } ; done;
