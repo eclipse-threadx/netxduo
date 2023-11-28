@@ -24,16 +24,6 @@ set(BUILD_CONFIGURATIONS
     v4_no_chain_build
     v4_link_cap_build
     v4_address_check_build
-    v4_ipsec_build
-    v4_ipsec_dual_pool_build
-    v4_ipsec_packet_pad_build
-    v4_ipsec_small_build
-    v4_ipsec_full_build
-    v4_ipsec_no_frag_build
-    v4_ipsec_no_chain_build
-    v4_ipsec_no_check_build
-    v4_ipsec_no_reset_disconn_build
-    v4_ipsec_link_cap_build
     v6_build
     v6_only_build
     v6_only_link_cap_build
@@ -55,22 +45,6 @@ set(BUILD_CONFIGURATIONS
     v6_address_change_build
     v6_multicast_build
     v6_no_rs_build
-    v6_ipsec_build
-    v6_ipsec_dual_pool_build
-    v6_ipsec_packet_pad_build
-    v6_ipsec_tahi_build
-    v6_ipsec_small_build
-    v6_ipsec_full_build
-    v6_ipsec_full_tahi_build
-    v6_ipsec_no_frag_build
-    v6_ipsec_no_chain_build
-    v6_ipsec_no_dad_build
-    v6_ipsec_no_check_build
-    v6_ipsec_no_check_tahi_build
-    v6_ipsec_no_icmpv6_error_build
-    v6_ipsec_no_reset_disconn_build
-    v6_ipsec_no_reset_disconn_tahi_build
-    v6_ipsec_link_cap_build
     v6_dhcp_tahi_build
     v6_bsd_raw_build
     v6_full_secure_build
@@ -150,9 +124,6 @@ set(BSD
 set(TAHI -DNX_TAHI_ENABLE)
 set(IPV6 -DFEATURE_NX_IPV6)
 set(IPV6_PMTU_DISCOVERY -DNX_ENABLE_IPV6_PATH_MTU_DISCOVERY)
-set(IPSEC -DNX_IPSEC_ENABLE -DNX_ENABLE_CCS -DNX_IPSEC_ANTI_REPLAY_ENABLE
-          -DNX_IPSEC_ESN_ENABLE -DNX_IPSEC_ENBALE_DEBUG_LOG)
-set(IPSEC_TAHI -DNX_IPSEC_ENABLE)
 set(NO_DAD -DNX_DISABLE_IPV6_DAD)
 set(NO_ICMPV6_ERROR -DNX_DISABLE_ICMPV6_ERROR_MESSAGE)
 set(NO_CHAIN -DNX_DISABLE_PACKET_CHAIN -DNX_DISABLE_FRAGMENTATION)
@@ -273,41 +244,6 @@ set(v4_no_chain_build ${IPV4} ${NO_CHAIN} ${MDNS_NO_SERVER})
 set(v4_link_cap_build ${IPV4} ${LINK_CAP} ${RX_INTERFACE_CAPABILITY}
                       ${MULTI_INTERFACE} ${TCPIP_OFFLOAD})
 set(v4_address_check_build ${IPV4} ${ADDRESS_CHECK})
-set(v4_ipsec_build ${IPV4} ${IPSEC} ${PACKET_DEBUG})
-set(v4_ipsec_dual_pool_build ${IPV4} ${IPSEC} ${DUAL_POOL})
-set(v4_ipsec_packet_pad_build ${IPV4} ${IPSEC} ${PACKET_PAD})
-set(v4_ipsec_small_build
-    ${IPV4}
-    ${IPSEC}
-    ${NO_INFO}
-    ${NO_FRAG}
-    ${NO_CHECK}
-    ${NO_RESET_DISCONNECT}
-    ${MDNS_NO_CLIENT})
-set(v4_ipsec_full_build
-    ${IPV4}
-    ${IPSEC}
-    ${TCP_KEEPALIVE}
-    ${TCP_KEEPALIVE_INITIAL}
-    ${TCP_KEEPALIVE_RETRY}
-    ${TCP_KEEPALIVE_RETRIES}
-    ${TCP_WINDOW}
-    ${IP_STATIC_ROUTING}
-    ${BSD}
-    ${MULTI_INTERFACE}
-    ${MULTIPART}
-    ${NAT}
-    ${PACKET_DEBUG}
-    ${DUAL_POOL}
-    ${IP_PACKET_FILTER}
-    ${DHCP_ARP_PROBE})
-set(v4_ipsec_no_frag_build ${IPV4} ${IPSEC} ${NO_FRAG})
-set(v4_ipsec_no_chain_build ${IPV4} ${IPSEC} ${NO_CHAIN})
-set(v4_ipsec_no_check_build ${IPV4} ${IPSEC} ${NO_CHECK} ${BSD}
-                            ${MULTI_INTERFACE} ${NAT})
-set(v4_ipsec_no_reset_disconn_build ${IPV4} ${IPSEC} ${NO_RESET_DISCONNECT}
-                                    ${MDNS_NO_SERVER})
-set(v4_ipsec_link_cap_build ${IPV4} ${IPSEC} ${LINK_CAP})
 set(v6_build ${IPV6})
 set(v6_only_build ${IPV6} ${NO_IPV4} ${TRACE} ${MDNS_NO_CLIENT})
 set(v6_only_link_cap_build ${IPV6} ${NO_IPV4} ${LINK_CAP})
@@ -384,101 +320,7 @@ set(v6_link_cap_build ${IPV6} ${LINK_CAP} ${TX_RX_INTERFACE_CAPABILITY}
                       ${MULTI_INTERFACE})
 set(v6_address_change_build ${IPV6} ${ADDRESS_CHANGE_NOTIFY} ${MDNS_NO_SERVER})
 set(v6_multicast_build ${IPV6} ${MULTICAST} ${MULTI_INTERFACE})
-set(v6_ipsec_build
-    ${IPV6}
-    ${IPSEC}
-    ${BSD}
-    ${BSD_DNS}
-    ${MULTI_INTERFACE}
-    ${NAT}
-    ${PACKET_DEBUG}
-    ${TCP_RX_LIMIT}
-    ${CREATE_TELNET_PACKET_POOL}
-    ${TELNET_MAX_CLIENTS}
-    ${TELNET_ACTIVITY_TIMEOUT}
-    ${TELNET_TIMEOUT_PERIOD}
-    ${LCP_PROTOCOL_RETRIES}
-    ${IPCP_PROTOCOL_RETRIES}
-    ${LOW_WATERMARK}
-    ${IP_PACKET_FILTER}
-    ${TRACE}
-    ${MDNS_IPV6})
-set(v6_ipsec_dual_pool_build ${IPV6} ${IPSEC} ${DUAL_POOL})
-set(v6_ipsec_packet_pad_build ${IPV6} ${IPSEC} ${PACKET_PAD})
-set(v6_ipsec_tahi_build
-    ${IPV6}
-    ${IPSEC_TAHI}
-    ${TAHI}
-    ${BSD}
-    ${MULTI_INTERFACE}
-    ${IPV6_PMTU_DISCOVERY}
-    ${NAT})
-set(v6_ipsec_small_build
-    ${IPV6}
-    ${IPSEC}
-    ${NO_INFO}
-    ${NO_FRAG}
-    ${NO_DAD}
-    ${NO_CHECK}
-    ${NO_ICMPV6_ERROR}
-    ${NO_RESET_DISCONNECT}
-    ${PACKET_DEBUG})
-set(v6_ipsec_full_build
-    ${IPV6}
-    ${IPSEC_TAHI}
-    ${IPV6_PMTU_DISCOVERY}
-    ${TCP_KEEPALIVE}
-    ${TCP_KEEPALIVE_INITIAL}
-    ${TCP_KEEPALIVE_RETRY}
-    ${TCP_KEEPALIVE_RETRIES}
-    ${TCP_WINDOW}
-    ${IP_STATIC_ROUTING}
-    ${TAHI}
-    ${MULTIPART}
-    ${DUAL_POOL}
-    ${LOW_WATERMARK}
-    ${IP_PACKET_FILTER}
-    ${DHCP_ARP_PROBE}
-    ${MDNS_IPV6})
-set(v6_ipsec_full_tahi_build
-    ${IPV6}
-    ${IPSEC_TAHI}
-    ${TCP_KEEPALIVE}
-    ${TCP_KEEPALIVE_INITIAL}
-    ${TCP_KEEPALIVE_RETRY}
-    ${TCP_KEEPALIVE_RETRIES}
-    ${TCP_WINDOW}
-    ${IP_STATIC_ROUTING}
-    ${TAHI}
-    ${BSD}
-    ${MULTI_INTERFACE}
-    ${STATELESS_AC}
-    ${NAT}
-    ${LOW_WATERMARK}
-    ${DHCP_ARP_PROBE}
-    ${IPV6_PMTU_DISCOVERY}
-    ${MDNS_IPV6})
-set(v6_ipsec_no_frag_build ${IPV6} ${IPSEC} ${NO_FRAG})
-set(v6_ipsec_no_chain_build ${IPV6} ${IPSEC} ${NO_CHAIN} ${MDNS_NO_CLIENT})
-set(v6_ipsec_no_dad_build ${IPV6} ${IPSEC} ${NO_DAD})
-set(v6_ipsec_no_check_build ${IPV6} ${IPSEC_TAHI} ${NO_CHECK} ${TAHI}
-                            ${IPV6_PMTU_DISCOVERY})
-set(v6_ipsec_no_check_tahi_build
-    ${IPV6}
-    ${IPSEC_TAHI}
-    ${NO_CHECK}
-    ${TAHI}
-    ${BSD}
-    ${MULTI_INTERFACE}
-    ${STATELESS_AC}
-    ${NAT})
 set(v6_no_rs_build ${IPV6} ${STATELESS_AC} ${NO_RS})
-set(v6_ipsec_no_icmpv6_error_build ${IPV6} ${IPSEC} ${NO_ICMPV6_ERROR})
-set(v6_ipsec_no_reset_disconn_build
-    ${IPV6} ${IPSEC_TAHI} ${NO_RESET_DISCONNECT} ${TAHI} ${IPV6_PMTU_DISCOVERY})
-set(v6_ipsec_no_reset_disconn_tahi_build
-    ${IPV6} ${IPSEC_TAHI} ${NO_RESET_DISCONNECT} ${TAHI} ${MDNS_NO_SERVER})
-set(v6_ipsec_link_cap_build ${IPV6} ${IPSEC} ${LINK_CAP})
 set(v6_dhcp_tahi_build ${IPV6} ${ADDRESS_CHANGE_NOTIFY} ${DHCPV6_TAHI} ${TAHI}
                        ${IPV6_PMTU_DISCOVERY})
 set(v6_bsd_raw_build ${IPV6} ${BSD_RAW} ${MULTI_INTERFACE} ${RAW_ALL_STACK})
