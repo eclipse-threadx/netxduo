@@ -11,7 +11,6 @@ set(auto_ip_test_cases
     ${SOURCE_DIR}/auto_ip_test/netx_auto_ip_arp_dest_addr_test.c
     ${SOURCE_DIR}/auto_ip_test/netx_auto_ip_basic_test.c
     ${SOURCE_DIR}/auto_ip_test/netx_auto_ip_max_conflicts_test.c
-    # ${SOURCE_DIR}/auto_ip_test/netx_auto_ip_conflicts_check_test.c
     ${SOURCE_DIR}/auto_ip_test/netx_auto_ip_announce_num_test.c)
 
 if("-DNX_BSD_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
@@ -79,13 +78,10 @@ if(PRODUCT STREQUAL netxduo)
 endif()
 
 set(dhcp_test_cases
-    # ${SOURCE_DIR}/dhcp_test/netx_dhcp_03_01_02_test.c
-    # ${SOURCE_DIR}/dhcp_test/netx_dhcp_03_01_03_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_03_01_01_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_03_02_01_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_03_02_02_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_03_02_03_test.c
-    # ${SOURCE_DIR}/dhcp_test/netx_dhcp_03_04_01_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_03_05_01_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_04_01_01_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_04_03_02_01_test.c
@@ -97,9 +93,6 @@ set(dhcp_test_cases
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_basic_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_basic_restore_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_user_option_add_test.c
-    # ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_arpprobe_fail_multiple_interface.
-    # c ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_arpprobe_multiple_interface_tes
-    # t.c ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_arpprobe_multiple_interface.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_packet_process_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_send_with_zero_source_address_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_multiple_instances_test.c
@@ -152,7 +145,6 @@ set(dns_test_cases
 
 set(ftp_test_cases
     ${SOURCE_DIR}/ftp_test/netx_ftp_access_control_commands_02_test.c
-    # ${SOURCE_DIR}/ftp_test/netx_ftp_service_commands_m_d_dir_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_access_control_commands_03_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_client_invalid_username_password_length_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_client_pasv_file_write_test.c
@@ -174,7 +166,6 @@ set(ftp_test_cases
     ${SOURCE_DIR}/ftp_test/netx_ftp_establish_data_connection_06_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_service_commands_file_write_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_establish_data_connection_03_test.c
-    # ${SOURCE_DIR}/ftp_test/netx_ftp_service_commands_dele_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_access_control_commands_01_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_control_connection_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_server_invalid_month_crash_test.c
@@ -197,14 +188,12 @@ set(http_test_cases
     ${SOURCE_DIR}/http_test/netx_http_get_put_referred_URI_test.c
     ${SOURCE_DIR}/http_test/netx_http_if_modified_since_test.c
     ${SOURCE_DIR}/http_test/netx_http_client_change_connect_port_test.c
-    # ${SOURCE_DIR}/http_test/netx_http_status_400_test.c
     ${SOURCE_DIR}/http_test/netx_http_post_basic_test.c
     ${SOURCE_DIR}/http_test/netx_http_get_contentlength_packetleak_test.c
     ${SOURCE_DIR}/http_test/netx_http_status_404_test.c
     ${SOURCE_DIR}/http_test/netx_http_basic_test.c
     ${SOURCE_DIR}/http_test/netx_http_basic_authenticate_test.c
     ${SOURCE_DIR}/http_test/netx_http_get_content_length_test.c
-    # ${SOURCE_DIR}/http_test/netx_http_status_501_test.c
     ${SOURCE_DIR}/http_test/netx_http_request_in_multiple_packets_test.c
     ${SOURCE_DIR}/http_test/netx_http_head_basic_test.c
     ${SOURCE_DIR}/http_test/netx_http_delete_basic_test.c
@@ -395,7 +384,6 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_udp_socket_unbind_test.c
     ${SOURCE_DIR}/netxduo_test/netx_arp_static_entry_create_test.c
     ${SOURCE_DIR}/netxduo_test/netx_4_28_test.c
-    # ${SOURCE_DIR}/netxduo_test/netx_18_21_test.c
     ${SOURCE_DIR}/netxduo_test/netx_6_24_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_overlapping_packet_test_14.c
     ${SOURCE_DIR}/netxduo_test/netx_icmp_tunnel_ipv4_ipv4_ping_test.c
@@ -499,7 +487,6 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_5_18_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_overlapping_packet_test_8.c
     ${SOURCE_DIR}/netxduo_test/netx_4_17_test.c
-    # ${SOURCE_DIR}/netxduo_test/netx_11_23_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_fragmentation_packet_copy_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_multicast_interface_detach_test.c
     ${SOURCE_DIR}/netxduo_test/netx_udp_socket_delete_test.c
@@ -738,7 +725,6 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_packet_data_append_test.c
     ${SOURCE_DIR}/netxduo_test/netx_igmp_interface_indirect_report_send_test.c
     ${SOURCE_DIR}/netxduo_test/netx_17_17_test.c
-    # ${SOURCE_DIR}/netxduo_test/netx_tcp_ack_before_release_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_out_of_window_control_packet_test.c
     ${SOURCE_DIR}/netxduo_test/netx_1_04_test.c
     ${SOURCE_DIR}/netxduo_test/netx_10_25_test.c
@@ -974,7 +960,6 @@ if(PRODUCT STREQUAL netxduo)
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_4_10.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_01.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_05.c
-          # ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_44.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_4_11.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_29.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_34.c
@@ -993,7 +978,6 @@ if(PRODUCT STREQUAL netxduo)
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_5.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_42.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_13.c
-          # ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_45.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_2_11.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_21.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_41.c
@@ -1020,7 +1004,6 @@ if(PRODUCT STREQUAL netxduo)
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_11.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_2_08.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_4_8.c
-          # ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_43.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_23.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_3_36.c
           ${SOURCE_DIR}/tahi_test/netx_tahi_test_2_03.c
