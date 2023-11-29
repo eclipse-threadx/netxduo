@@ -10,7 +10,7 @@ extern void test_control_return(UINT);
 
 #if !defined(NX_DISABLE_IPV4) && defined(NX_PPP_PPPOE_ENABLE) && defined(NX_PPPOE_SERVER_INITIALIZE_DRIVER_ENABLE) && defined(NX_PPPOE_CLIENT_INITIALIZE_DRIVER_ENABLE) && (NX_PHYSICAL_HEADER >= 24)
 
-/* Defined NX_PPP_PPPOE_ENABLE if use Express Logic's PPP, since PPP module has been modified to match PPPoE moduler under this definition.  */
+/* Defined NX_PPP_PPPOE_ENABLE if use PPP, since PPP module has been modified to match PPPoE moduler under this definition.  */
                 
 /* If the driver is not initialized in other module, define NX_PPPOE_SERVER_INITIALIZE_DRIVER_ENABLE to initialize the driver in PPPoE module .  
    In this demo, the driver has been initialized in IP module.  */
@@ -58,11 +58,11 @@ extern void    _nx_ppp_driver(NX_IP_DRIVER *driver_req_ptr);
 /***** Substitute your Ethernet driver entry function here *********/ 
 extern void    _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr);
 
-/* Define the porting layer function for Express Logic's PPP.  
+/* Define the porting layer function for PPP.  
    Functions to be provided by PPP for calling by the PPPoE Stack.  */
 static void    ppp_server_packet_send(NX_PACKET *packet_ptr);
 
-/* Define the porting layer function for Express Logic's PPP.  
+/* Define the porting layer function for PPP.  
    Functions to be provided by PPP for calling by the PPPoE Stack.  */
 static void    ppp_client_packet_send(NX_PACKET *packet_ptr);
 static void    pppoe_client_packet_receive(NX_PACKET *packet_ptr);
@@ -501,7 +501,7 @@ NX_PACKET   *packet_ptr;
 static void    ppp_server_packet_send(NX_PACKET *packet_ptr)
 {      
 
-/* For Express Logic's PPP test, the session should be the first session, so set interfaceHandle as 0.  */
+/* For PPP test, the session should be the first session, so set interfaceHandle as 0.  */
 UINT    interfaceHandle = 0;  
 
 #ifdef NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE
