@@ -365,7 +365,7 @@ NX_PACKET   *my_packet;
 UINT         i;
 
     /* Print out test information banner.  */
-    printf("NetX Test:   DHCP Client Interface 0 Only Test.........................\n"); // jlc remove the \n
+    printf("NetX Test:   DHCP Client Interface 0 Only Test.........................\n");
 
     /* Check for earlier error. */
     if(error_counter)

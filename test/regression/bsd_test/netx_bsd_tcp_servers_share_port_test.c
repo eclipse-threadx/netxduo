@@ -74,7 +74,7 @@ UINT    status;
     /* Create a thread for the IPv4 server.  */
     status= tx_thread_create(&thread_server, "BSD App IPv4 Server", thread_server_entry, 0,  
             pointer, DEMO_STACK_SIZE, 
-            8, 8, TX_NO_TIME_SLICE, TX_AUTO_START); /* jlc TX_AUTO_START */
+            8, 8, TX_NO_TIME_SLICE, TX_AUTO_START);
     
     pointer =  pointer + DEMO_STACK_SIZE;
 
@@ -149,7 +149,7 @@ UINT    status;
     /* Create a thread for IPv4 client.  */
     status= tx_thread_create(&thread_client, "BSD App IPpv4 Client", thread_client_entry, 0,  
             pointer, DEMO_STACK_SIZE, 
-            16, 16, TX_NO_TIME_SLICE, TX_AUTO_START);/* jlc TX_AUTO_START */
+            16, 16, TX_NO_TIME_SLICE, TX_AUTO_START);
     
     pointer =  pointer + DEMO_STACK_SIZE;
 

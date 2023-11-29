@@ -1,5 +1,4 @@
-/* This NetX test concentrates on the ARP static entry may be updated by ARP packet.
- * JIRA: https://expresslogic.atlassian.net/projects/NETXDUO/issues/NETXDUO-222.  */
+/* This NetX test concentrates on the ARP static entry may be updated by ARP packet.  */
 
 #include   "tx_api.h"
 #include   "nx_api.h"

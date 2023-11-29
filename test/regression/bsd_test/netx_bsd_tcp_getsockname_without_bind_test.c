@@ -1,5 +1,3 @@
-/* This NetX test verifies the issue report by JIRA: https://expresslogic.atlassian.net/projects/NETXDUO/issues/NETXDUO-223.  */
-
 #include   "tx_api.h"
 #include   "nx_api.h"
 #if defined(NX_BSD_ENABLE) && !defined(NX_DISABLE_IPV4)

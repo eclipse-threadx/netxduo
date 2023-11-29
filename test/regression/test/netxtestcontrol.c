@@ -337,7 +337,6 @@ void    netx_rarp_branch_test_application_define(void*);
 void    netx_tcp_duplicate_accept_test_application_define(void *);
 void    netx_tcp_ack_check_for_syn_message_test_application_define(void *);
 void    netx_tcp_ack_check_issue_test_application_define(void *);
-void    netx_tcp_ack_before_release_test_application_define(void *);
 void    netx_tcp_basic_processing_test_application_define(void *);
 void    netx_tcp_zero_window_test_application_define(void *);
 void    netx_tcp_zero_window_probe_test_application_define(void *);
@@ -373,7 +372,7 @@ void    netx_tcp_fast_disconnect_test_application_define(void *);
 void    netx_tcp_loopback_test_application_define(void *);
 void    netx_tcp_out_of_order_packet_test_application_define(void *);
 void    netx_tcp_out_of_order_ack_test_application_define(void *);
-// jlc temporarily omitting this one void    netx_tcp_out_of_order_packet_max_test_application_define(void *);
+void    netx_tcp_out_of_order_packet_max_test_application_define(void *);
 void    netx_tcp_small_window_preempt_test_application_define(void *);
 void    netx_tcp_small_window_test_application_define(void *);
 void    netx_tcp_ipv4_interface2_mss_test_application_define(void *); 
@@ -598,7 +597,6 @@ void    netx_10_25_application_define(void *);
 void    netx_10_26_application_define(void *);
 void    netx_11_18_application_define(void *);
 void    netx_11_19_application_define(void *);
-void    netx_11_23_application_define(void *);
 void    netx_11_24_application_define(void *);
 void    netx_11_25_application_define(void *);
 void    netx_11_26_application_define(void *);
@@ -640,7 +638,6 @@ void    netx_16_19_application_define(void *);
 void    netx_16_21_application_define(void *);
 void    netx_16_22_application_define(void *);
 void    netx_17_17_application_define(void *);
-void    netx_18_21_application_define(void *);
 void    netx_23_02_01_application_define(void *);
 void    netx_23_02_02_application_define(void *);
 void    netx_23_02_03_application_define(void *);
@@ -664,111 +661,12 @@ void    netx_106_17_application_define(void *);
 
 /* Application tests do not support for 64-bit mode yet.  */
 #ifndef XWARE_64
-/* IPSec specific function and encryption algorithm */
-void    netx_ipsec_esp_transport_icmp_ipv4_icv_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_icmp_ipv4_multiple_sas_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_icmp_ipv4_key_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_icmp_ipv4_spi_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_selector_port_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_retransmit_test_application_define(void *);
-void    netx_ipsec_esp_transport_icmp_ipv4_selector_next_layer_protocol_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_icmp_ipv4_selector_policy_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_icmp_ipv4_selector_type_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_icmp_ipv4_selector_address_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_3des_basic_test_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_3des_interface_test_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_basic_test_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_interface_test_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_cbc_256_sha1_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_3des_null_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_3des_aes_xcbc_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_3des_md5_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_3des_sha1_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_cbc_128_sha1_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_cbc_192_sha1_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_cbc_128_aes_xcbc_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_cbc_128_md5_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_ctr_128_sha1_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_ctr_192_sha1_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_ctr_256_sha1_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_ctr_128_aes_xcbc_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv4_aes_ctr_128_md5_test_define_application_define(void *);
-
-/* Combination of IPsec function and TCP/UDP/ICMP.. function. */
-void    netx_ipsec_esp_transport_tcp_ipv4_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_udp_ipv4_test_define_application_define(void *); 
-void    netx_ipsec_esp_transport_udp_ipv4_selector_test_application_define(void *);
-void    netx_ipsec_esp_transport_icmp_ipv4_test_define_application_define(void *);
-
-void    netx_ipsec_esp_tunnel_tcp_ipv4_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_udp_ipv4_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_icmp_ipv4_test_define_application_define(void *);
-
-void    netx_ipsec_esp_transport_tcp_ipv4_interface2_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_tcp_ipv4_interface2_test_define_application_define(void *);
-
-void    netx_ipsec_ah_transport_tcp_ipv4_basic_test_application_define(void *);
-void    netx_ipsec_ah_transport_tcp_ipv4_retransmit_test_application_define(void *);
-void    netx_ipsec_ah_transport_tcp_ipv4_test_define_application_define(void *);
-void    netx_ipsec_ah_transport_udp_ipv4_selector_test_application_define(void *);
-void    netx_ipsec_ah_transport_udp_ipv4_test_define_application_define(void *);
-void    netx_ipsec_ah_transport_icmp_ipv4_test_define_application_define(void *);
-
-void    netx_ipsec_ah_tunnel_tcp_ipv4_test_define_application_define(void *);
-void    netx_ipsec_ah_tunnel_udp_ipv4_test_define_application_define(void *);
-void    netx_ipsec_ah_tunnel_icmp_ipv4_test_define_application_define(void *);
-
-
-/* IPsec with IPv6 address.*/
-void    netx_ipsec_esp_transport_tcp_ipv6_3des_interface_test_application_define(void*);
-void    netx_ipsec_esp_transport_tcp_ipv6_aes_interface_test_application_define(void*);
-void    netx_ipsec_esp_transport_tcp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv6_global_address_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_udp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_udp_ipv6_global_address_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_icmp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_icmp_ipv6_global_address_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv6_interface2_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_tcp_ipv6_interface2_global_address_test_define_application_define(void *);
-
-void    netx_ipsec_esp_tunnel_tcp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_tcp_ipv6_global_address_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_udp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_udp_ipv6_global_address_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_icmp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_icmp_ipv6_global_address_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_tcp_ipv6_interface2_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_tcp_ipv6_interface2_global_address_test_define_application_define(void *);
-
-void    netx_ipsec_ah_transport_tcp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_ah_transport_tcp_ipv6_global_address_test_define_application_define(void *);
-void    netx_ipsec_ah_transport_udp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_ah_transport_udp_ipv6_global_address_test_define_application_define(void *);
-void    netx_ipsec_ah_transport_icmp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_ah_transport_icmp_ipv6_global_address_test_define_application_define(void *);
-
-void    netx_ipsec_ah_tunnel_tcp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_ah_tunnel_tcp_ipv6_global_address_test_define_application_define(void *);
-void    netx_ipsec_ah_tunnel_udp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_ah_tunnel_udp_ipv6_global_address_test_define_application_define(void *);
-void    netx_ipsec_ah_tunnel_icmp_ipv6_linklocal_address_test_define_application_define(void *);
-void    netx_ipsec_ah_tunnel_icmp_ipv6_global_address_test_define_application_define(void *);
-
-/* IPsec with Fragment function. */
-void    netx_ipsec_esp_transport_udp_ipv6_linklocal_address_fragment_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_udp_ipv6_global_address_fragment_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_udp_ipv6_linklocal_address_fragment_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_udp_ipv6_global_address_fragment_test_define_application_define(void *);
-void    netx_ipsec_esp_transport_udp_ipv4_fragment_test_define_application_define(void *);
-void    netx_ipsec_esp_tunnel_udp_ipv4_fragment_test_define_application_define(void *);
-
 
 /* AUTO IP.  */
 void    netx_auto_ip_basic_test_application_define(void *);
 void    netx_auto_ip_address_check_test_application_define(void *);
 void    netx_auto_ip_announce_num_test_application_define(void *);
 void    netx_auto_ip_arp_dest_addr_test_application_define(void *);
-void    netx_auto_ip_conflicts_check_test_application_define(void *);
 void    netx_auto_ip_max_conflicts_test_application_define(void *);
 
 
@@ -789,13 +687,11 @@ void    netx_websocket_send_chain_packets_test_application_define(void *);
 
 /* HTTP.  */
 void    netx_http_basic_test_application_define(void *);
-void    netx_http_status_501_test_application_define(void *);
 void    netx_http_if_modified_since_test_application_define(void *);
 void    netx_http_head_basic_test_application_define(void *);
 void    netx_http_post_basic_test_application_define(void *);
 void    netx_http_delete_basic_test_application_define(void *);
 void    netx_http_basic_authenticate_test_application_define(void *);
-void    netx_http_status_400_test_application_define(void *);
 void    netx_http_status_404_test_application_define(void *);
 void    netx_http_multipart_fragment_test_application_define(void *);
 void    netx_http_multipart_underflow_test_application_define(void *);
@@ -831,8 +727,6 @@ void    netx_ftp_establish_data_connection_03_test_application_define(void *);
 void    netx_ftp_establish_data_connection_05_test_application_define(void *);
 void    netx_ftp_establish_data_connection_06_test_application_define(void *);
 void    netx_ftp_establish_data_connection_08_test_application_define(void *);
-void    netx_ftp_service_commands_dele_test_application_define(void *);
-void    netx_ftp_service_commands_m_d_dir_test_application_define(void *);
 void    netx_ftp_service_commands_nlist_test_application_define(void *);
 void    netx_ftp_service_commands_rename_test_application_define(void *);
 void    netx_ftp_service_commands_RETR_STOR_test_application_define(void *);
@@ -986,12 +880,9 @@ void    netx_dhcp_unicast_test_application_define(void *);
 void    netx_dhcp_user_option_add_test_application_define(void *);
 void    netx_dhcp_server_improper_term_test_application_define(void *);
 void    netx_dhcp_03_01_01_test_application_define(void *);
-void    netx_dhcp_03_01_02_test_application_define(void *);
-void    netx_dhcp_03_01_03_test_application_define(void *);
 void    netx_dhcp_03_02_01_test_application_define(void *);
 void    netx_dhcp_03_02_02_test_application_define(void *);
 void    netx_dhcp_03_02_03_test_application_define(void *);
-void    netx_dhcp_03_04_01_test_application_define(void *);
 void    netx_dhcp_03_05_01_test_application_define(void *);
 void    netx_dhcp_04_01_01_test_application_define(void *);
 void    netx_dhcp_04_03_02_01_test_application_define(void *);
@@ -1022,8 +913,6 @@ void    netx_dhcp_client_ntp_option_test_application_define(void *);
 void    netx_dhcp_skip_discover_test_application_define(void *);
 void    netx_dhcp_coverage_test_applicaiton_define(void*);
 void    netx_dhcp_client_nxe_api_test_application_define(void*);
-//void    netx_dhcp_client_arp_probe_fail_multiple_interface_test_application_define(void *);
-//void    netx_dhcp_client_decline_test_application_define(void *);
 void    netx_dhcp_server_test_application_define(void *);
 void    netx_dhcp_server_second_interface_test_application_define(void *);
 void    netx_dhcp_server_options_test_application_define(void *);
@@ -1192,18 +1081,6 @@ void    netx_cloud_module_event_test_application_define(void*);
 #endif /* XWARE_64  */
 
 #if defined(NX_TAHI_ENABLE) && defined(FEATURE_NX_IPV6) 
-
-#ifndef XWARE_64
-#ifdef NX_IPSEC_ENABLE
-
-/* IPsec TAHI test.*/
-void    netx_tahi_test_ipsec_define(void *);
-void    netx_tahi_test_ipsec_2_define(void *);
-void    netx_tahi_test_ipsec_udp_define(void *);
-void    netx_tahi_test_ipsec_udp_2_define(void *);
-
-#endif
-#endif /* XWARE_64  */
 
 #ifdef NX_ENABLE_IPV6_PATH_MTU_DISCOVERY
 /* IPv6 TAHI test*/
@@ -1702,10 +1579,6 @@ TEST_ENTRY  test_control_tests[] =
     {netx_tcp_duplicate_accept_test_application_define, TEST_TIMEOUT_LOW},
     {netx_tcp_ack_check_for_syn_message_test_application_define, TEST_TIMEOUT_LOW},
     {netx_tcp_ack_check_issue_test_application_define, TEST_TIMEOUT_LOW},
-#if 0
-    /* The logic has been fixed in TCP layer. Driver will release the packet after it is transmitted. */
-    {netx_tcp_ack_before_release_test_application_define, TEST_TIMEOUT_LOW},
-#endif
     {netx_tcp_basic_processing_test_application_define, TEST_TIMEOUT_LOW},
     {netx_tcp_zero_window_test_application_define, TEST_TIMEOUT_MID},
     {netx_tcp_zero_window_probe_test_application_define, TEST_TIMEOUT_MID},
@@ -1759,7 +1632,7 @@ TEST_ENTRY  test_control_tests[] =
     {netx_tcp_loopback_test_application_define, TEST_TIMEOUT_LOW},
     {netx_tcp_out_of_order_packet_test_application_define, TEST_TIMEOUT_LOW},
     {netx_tcp_out_of_order_ack_test_application_define, TEST_TIMEOUT_LOW},
-// jlc temporarily omitting this one    {netx_tcp_out_of_order_packet_max_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_tcp_out_of_order_packet_max_test_application_define, TEST_TIMEOUT_LOW},
     {netx_tcp_small_window_preempt_test_application_define, TEST_TIMEOUT_LOW},
     {netx_tcp_small_window_test_application_define, TEST_TIMEOUT_LOW},
     {netx_tcp_ipv4_interface2_mss_test_application_define, TEST_TIMEOUT_LOW}, 
@@ -1988,9 +1861,6 @@ TEST_ENTRY  test_control_tests[] =
     {netx_10_26_application_define, TEST_TIMEOUT_LOW},
     {netx_11_18_application_define, TEST_TIMEOUT_LOW},
     {netx_11_19_application_define, TEST_TIMEOUT_LOW},
-#if 0 /* The warning test case does not help. */
-    {netx_11_23_application_define, TEST_TIMEOUT_LOW},
-#endif
     {netx_11_24_application_define, TEST_TIMEOUT_LOW},
     {netx_11_25_application_define, TEST_TIMEOUT_LOW},
     {netx_11_26_application_define, TEST_TIMEOUT_LOW},
@@ -2032,9 +1902,6 @@ TEST_ENTRY  test_control_tests[] =
     {netx_16_21_application_define, TEST_TIMEOUT_LOW},
     {netx_16_22_application_define, TEST_TIMEOUT_LOW},
     {netx_17_17_application_define, TEST_TIMEOUT_LOW},
-#if 0 /* The warning test case does not help. */
-    {netx_18_21_application_define, TEST_TIMEOUT_LOW},
-#endif
     {netx_23_02_01_application_define, TEST_TIMEOUT_LOW},
     {netx_23_02_02_application_define, TEST_TIMEOUT_LOW},
     {netx_23_02_03_application_define, TEST_TIMEOUT_LOW},
@@ -2063,9 +1930,6 @@ TEST_ENTRY  test_control_tests[] =
     {netx_auto_ip_address_check_test_application_define, TEST_TIMEOUT_LOW},
     {netx_auto_ip_announce_num_test_application_define, TEST_TIMEOUT_LOW},
     {netx_auto_ip_arp_dest_addr_test_application_define, TEST_TIMEOUT_LOW},
-#if 0 /* This test case makes no sense but output warning. Remove it temporary. */
-    {netx_auto_ip_conflicts_check_test_application_define, TEST_TIMEOUT_LOW},
-#endif
     {netx_auto_ip_max_conflicts_test_application_define, TEST_TIMEOUT_MID},
 
     /* Websocket test. */
@@ -2083,11 +1947,6 @@ TEST_ENTRY  test_control_tests[] =
     {netx_websocket_send_chain_packets_test_application_define, TEST_TIMEOUT_LOW},
 
     /* Http test. */
-    /* Not support, or Error. */
-#if 0
-    {netx_http_status_501_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_http_status_400_test_application_define, TEST_TIMEOUT_LOW},
-#endif
     {netx_http_if_modified_since_test_application_define, TEST_TIMEOUT_LOW},
     {netx_http_basic_test_application_define, TEST_TIMEOUT_LOW},
     {netx_http_status_404_test_application_define, TEST_TIMEOUT_LOW},
@@ -2121,10 +1980,6 @@ TEST_ENTRY  test_control_tests[] =
     {netx_ftp_service_commands_rename_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_service_commands_nlist_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_service_commands_file_write_test_application_define, TEST_TIMEOUT_LOW},
-#if 0
-    {netx_ftp_service_commands_m_d_dir_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ftp_service_commands_dele_test_application_define, TEST_TIMEOUT_LOW},
-#endif
     {netx_ftp_establish_data_connection_08_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_establish_data_connection_06_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_establish_data_connection_03_test_application_define, TEST_TIMEOUT_LOW},
@@ -2254,13 +2109,6 @@ TEST_ENTRY  test_control_tests[] =
     {netx_dhcp_server_improper_term_test_application_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_coverage_test_applicaiton_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_client_nxe_api_test_application_define, TEST_TIMEOUT_LOW},
-
-    /* Not support. */
-#if 0
-    {netx_dhcp_03_04_01_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_dhcp_03_01_03_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_dhcp_03_01_02_test_application_define, TEST_TIMEOUT_LOW},
-#endif
     {netx_dhcp_04_04_01_02_test_application_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_04_04_01_01_test_application_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_04_03_05_01_test_application_define, TEST_TIMEOUT_LOW},
@@ -2292,8 +2140,6 @@ TEST_ENTRY  test_control_tests[] =
     {netx_dhcp_client_server_source_port_test_application_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_client_parameter_request_test_application_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_client_ntp_option_test_application_define, TEST_TIMEOUT_LOW},
-    //{netx_dhcp_client_arp_probe_fail_multiple_interface_test_application_define, TEST_TIMEOUT_MID}, 
-    //{netx_dhcp_client_decline_test_application_define, TEST_TIMEOUT_MID},
     {netx_dhcp_server_test_application_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_server_second_interface_test_application_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_server_options_test_application_define, TEST_TIMEOUT_LOW},
@@ -2396,107 +2242,6 @@ TEST_ENTRY  test_control_tests[] =
     {netx_mdns_ram_test_define, TEST_TIMEOUT_MID},
 #endif /* __PRODUCT_NETXDUO__ && !NX_DISABLE_IPV4  */
 
-#ifdef NX_IPSEC_ENABLE
-    /* IPSec specific function and encryption algorithm */
-    {netx_ipsec_esp_transport_icmp_ipv4_icv_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_icmp_ipv4_multiple_sas_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_icmp_ipv4_key_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_icmp_ipv4_spi_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_icmp_ipv4_selector_next_layer_protocol_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_icmp_ipv4_selector_policy_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_icmp_ipv4_selector_type_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_icmp_ipv4_selector_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_selector_port_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_retransmit_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_3des_basic_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_3des_interface_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_basic_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_interface_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_cbc_256_sha1_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_3des_null_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_3des_aes_xcbc_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_3des_md5_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_3des_sha1_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_cbc_128_sha1_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_cbc_192_sha1_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_cbc_128_aes_xcbc_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_cbc_128_md5_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_ctr_128_sha1_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_ctr_192_sha1_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_ctr_256_sha1_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_ctr_128_aes_xcbc_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_aes_ctr_128_md5_test_define_application_define, TEST_TIMEOUT_LOW},
-
-    /* Combination of IPsec function and TCP/UDP/ICMP.. function. */
-    {netx_ipsec_esp_transport_tcp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_udp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW}, 
-    {netx_ipsec_esp_transport_udp_ipv4_selector_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_icmp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv4_interface2_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_udp_ipv4_fragment_test_define_application_define, TEST_TIMEOUT_LOW},
-
-    {netx_ipsec_esp_tunnel_tcp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_udp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_icmp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_tcp_ipv4_interface2_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_udp_ipv4_fragment_test_define_application_define, TEST_TIMEOUT_LOW},
-
-    /* IPsec with IPv6 address.*/
-    {netx_ipsec_esp_transport_tcp_ipv6_3des_interface_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv6_aes_interface_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_udp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_udp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_icmp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_icmp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv6_interface2_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_tcp_ipv6_interface2_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-
-    {netx_ipsec_esp_tunnel_tcp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_tcp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_udp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_udp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_icmp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_icmp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_tcp_ipv6_interface2_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_tcp_ipv6_interface2_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-
-    {netx_ipsec_ah_transport_tcp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_transport_tcp_ipv4_basic_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_transport_tcp_ipv4_retransmit_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_transport_udp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_transport_udp_ipv4_selector_test_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_transport_icmp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-
-    {netx_ipsec_ah_tunnel_tcp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_tunnel_udp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_tunnel_icmp_ipv4_test_define_application_define, TEST_TIMEOUT_LOW},
-
-    {netx_ipsec_ah_transport_tcp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_transport_tcp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_transport_udp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_transport_udp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_transport_icmp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_transport_icmp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-
-    /* IPsec with Fragment function. */
-    {netx_ipsec_esp_transport_udp_ipv6_linklocal_address_fragment_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_transport_udp_ipv6_global_address_fragment_test_define_application_define, TEST_TIMEOUT_LOW},
-
-
-    {netx_ipsec_ah_tunnel_tcp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_tunnel_tcp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_tunnel_udp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_tunnel_udp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_tunnel_icmp_ipv6_linklocal_address_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_ah_tunnel_icmp_ipv6_global_address_test_define_application_define, TEST_TIMEOUT_LOW},
-
-    /* IPsec with Fragment function. */
-    {netx_ipsec_esp_tunnel_udp_ipv6_linklocal_address_fragment_test_define_application_define, TEST_TIMEOUT_LOW},
-    {netx_ipsec_esp_tunnel_udp_ipv6_global_address_fragment_test_define_application_define, TEST_TIMEOUT_LOW},
-#endif /* NX_IPSEC_ENABLE */
-
 /* BSD Test */
 #ifdef NX_BSD_ENABLE
     {netx_bsd_getaddrinfo_test_application_define, TEST_TIMEOUT_MID}, 
@@ -2593,17 +2338,6 @@ TEST_ENTRY  test_control_tests[] =
 
 #if defined(NX_TAHI_ENABLE) && defined(FEATURE_NX_IPV6)
 
-#ifndef XWARE_64
-#ifdef NX_IPSEC_ENABLE
-    /* IPsec TAHI test. */
-    {netx_tahi_test_ipsec_define, TEST_TIMEOUT_MID},
-    {netx_tahi_test_ipsec_2_define, TEST_TIMEOUT_MID},
-    {netx_tahi_test_ipsec_udp_define, TEST_TIMEOUT_MID},
-    {netx_tahi_test_ipsec_udp_2_define, TEST_TIMEOUT_MID},
-
-#endif
-#endif /* XWARE_64  */
-
 #ifdef NX_ENABLE_IPV6_PATH_MTU_DISCOVERY
     /* IPv6 TAHI test*/
     {netx_tahi_test_1_define, TEST_TIMEOUT_HIGH},
@@ -2661,15 +2395,7 @@ TEST_ENTRY  test_control_tests[] =
     {netx_tahi_test_3_39_define, TEST_TIMEOUT_HIGH},
     {netx_tahi_test_3_40_define, TEST_TIMEOUT_HIGH},
     {netx_tahi_test_3_41_define, TEST_TIMEOUT_HIGH},
-    {netx_tahi_test_3_42_define, TEST_TIMEOUT_HIGH},
-
-    /* Remove 2 hours test. */
-#if 0
-    {netx_tahi_test_3_43_define, TEST_TIMEOUT_HIGH},
-    {netx_tahi_test_3_44_define, TEST_TIMEOUT_HIGH},
-    {netx_tahi_test_3_45_define, TEST_TIMEOUT_HIGH},
-#endif
-    
+    {netx_tahi_test_3_42_define, TEST_TIMEOUT_HIGH},    
     {netx_tahi_test_4_2_define, TEST_TIMEOUT_HIGH},
     {netx_tahi_test_4_3_define, TEST_TIMEOUT_HIGH},
     {netx_tahi_test_4_4_define, TEST_TIMEOUT_HIGH},
@@ -2903,12 +2629,6 @@ int main()
     printf("IPv6 is built-in.\n");
 #else
     printf("IPv6 is not built-in.\n");
-#endif
-
-#ifdef NX_IPSEC_ENABLE
-    printf("IPsec is built-in.\n");
-#else
-    printf("IPsec is not built-in.\n");
 #endif
 
 #ifdef NX_TUNNEL_ENABLE

@@ -1,5 +1,3 @@
-// JLC THIS TEST IS BADLY DONE,  TEST IT PROPERLY, NOT BYTE BY BYTE!
-
 /* This NetX test is a simple contact between agent and browser with no security.  Note that 
    NX_SNMP_FUNCTION_TESTING must be defined in nxd_snmp.c or else timer tick data (boot time, SysTimerTick, will not match the 
    'pre-recorded' data that the NetX SNMP Agent responses re compared with, and the test will fail. 
@@ -19,7 +17,7 @@ extern void    test_control_return(UINT);
 
 #if !defined(NX_DISABLE_IPV4)
 
-#define VERBOSE // jlc disable
+#define VERBOSE
 #define     DEMO_STACK_SIZE         2048
 
 UCHAR      *current_object_requested;

@@ -1,7 +1,3 @@
-// JLC THIS TEST IS OBSOLETE. Several other tests do the exact same thing. REMOVE IT. Removed
-// references to "v3" and handshake protocol. This is a V2 query and there is no handshaking
-// 
-
 /* This NetX test concentrates on the SNMPv2 get bulk request.  The first exchange is to 'contact'
    the SNMP agent. Then the manager makes a bulk request.  The test is successful if the internal
    statistics show the correct number of variables requested, requests received, and bulk responses

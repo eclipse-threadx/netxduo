@@ -1,5 +1,4 @@
 /* This case tests the Telnet server on handling RST packet.
- * JIRA: https://expresslogic.atlassian.net/browse/NETXDUO-235
  */
 #include  "tx_api.h"
 #include  "nx_api.h"

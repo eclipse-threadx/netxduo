@@ -1,6 +1,4 @@
-/* This case tests the FTP server on handling two session listen situation.
- * JIRA: https://expresslogic.atlassian.net/browse/NETXDUO-238
- */
+/* This case tests the FTP server on handling two session listen situation. */
 #include  "tx_api.h"
 #include  "fx_api.h" 
 #include  "nx_api.h"

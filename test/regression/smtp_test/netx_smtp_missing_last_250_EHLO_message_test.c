@@ -393,7 +393,7 @@ ULONG      actual_status;
 
 #ifdef FEATURE_NX_IPV6
     /* Sleep 5 seconds to finish DAD.  */
-   // jlc restore  tx_thread_sleep(5 * NX_IP_PERIODIC_RATE);
+    tx_thread_sleep(5 * NX_IP_PERIODIC_RATE);
 #endif /* FEATURE_NX_IPV6 */
 
     /* Ensure the IP instance has been initialized.  */

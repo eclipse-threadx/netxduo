@@ -1,23 +1,11 @@
-/**************************************************************************/ 
-/*                                                                        */ 
-/*            Copyright (c) 1996-2005 by Express Logic Inc.               */ 
-/*                                                                        */ 
-/*  This software is copyrighted by and is the sole property of Express   */ 
-/*  Logic, Inc.  All rights, title, ownership, or other interests         */ 
-/*  in the software remain the property of Express Logic, Inc.  This      */ 
-/*  software may only be used in accordance with the corresponding        */ 
-/*  license agreement.  Any unauthorized use, duplication, transmission,  */ 
-/*  distribution, or disclosure of this software is expressly forbidden.  */ 
+/**************************************************************************/
 /*                                                                        */
-/*  This Copyright notice may not be removed or modified without prior    */ 
-/*  written consent of Express Logic, Inc.                                */ 
-/*                                                                        */ 
-/*  Express Logic, Inc. reserves the right to modify this software        */ 
-/*  without notice.                                                       */ 
-/*                                                                        */ 
-/*  Express Logic, Inc.                     info@expresslogic.com         */
-/*  11423 West Bernardo Court               http://www.expresslogic.com   */
-/*  San Diego, CA  92127                                                  */
+/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
+/*                                                                        */
+/*       This software is licensed under the Microsoft Software License   */
+/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
+/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
+/*       and in the root directory of this software.                      */
 /*                                                                        */
 /**************************************************************************/
 
@@ -197,10 +185,10 @@ UINT write_pcap_file(NX_PACKET *packet_ptr);
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_set_pool                     PORTABLE C      */ 
-/*                                                           5.8          */ 
+/*                                                           6.x          */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
-/*    William E. Lamie, Express Logic, Inc.                               */ 
+/*    Wenhui Xie, Microsoft Corporation                                   */
 /*                                                                        */ 
 /*  DESCRIPTION                                                           */ 
 /*                                                                        */ 
@@ -226,7 +214,7 @@ UINT write_pcap_file(NX_PACKET *packet_ptr);
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx        Yuxin Zhou            Initial Version 5.8           */
+/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */
 /*                                                                        */ 
 /**************************************************************************/ 
 UINT _nx_ram_network_driver_set_pool(NX_PACKET_POOL *pool_ptr)
@@ -241,10 +229,10 @@ UINT _nx_ram_network_driver_set_pool(NX_PACKET_POOL *pool_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_reset                        PORTABLE C      */ 
-/*                                                           5.8          */ 
+/*                                                           6.x          */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
-/*    William E. Lamie, Express Logic, Inc.                               */ 
+/*    Wenhui Xie, Microsoft Corporation                                   */ 
 /*                                                                        */ 
 /*  DESCRIPTION                                                           */ 
 /*                                                                        */ 
@@ -270,7 +258,7 @@ UINT _nx_ram_network_driver_set_pool(NX_PACKET_POOL *pool_ptr)
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx        Yuxin Zhou            Initial Version 5.8           */
+/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */
 /*                                                                        */ 
 /**************************************************************************/ 
 void _nx_ram_network_driver_reset(void)
@@ -299,10 +287,10 @@ void _nx_ram_network_driver_reset(void)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_delay_entry                  PORTABLE C      */ 
-/*                                                           2.1b         */ 
+/*                                                           6.x          */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
-/*    William E. Lamie, Express Logic, Inc.                               */ 
+/*    Wenhui Xie, Microsoft Corporation                                   */ 
 /*                                                                        */ 
 /*  DESCRIPTION                                                           */ 
 /*                                                                        */ 
@@ -327,7 +315,7 @@ void _nx_ram_network_driver_reset(void)
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     William E. Lamie         Initial Version 2.0           */ 
+/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_delay_entry(ULONG timer_input)
@@ -361,10 +349,10 @@ NX_IP_DRIVER *driver_req;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_timer_clean                  PORTABLE C      */ 
-/*                                                           2.1b         */ 
+/*                                                           6.x          */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
-/*    William E. Lamie, Express Logic, Inc.                               */ 
+/*    Wenhui Xie, Microsoft Corporation                                   */ 
 /*                                                                        */ 
 /*  DESCRIPTION                                                           */ 
 /*                                                                        */ 
@@ -387,7 +375,7 @@ NX_IP_DRIVER *driver_req;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     William E. Lamie         Initial Version 2.0           */ 
+/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_timer_clean(VOID)
@@ -411,10 +399,10 @@ VOID _nx_ram_network_driver_timer_clean(VOID)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_internal                     PORTABLE C      */ 
-/*                                                           5.8          */ 
+/*                                                           6.x          */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
-/*    William E. Lamie, Express Logic, Inc.                               */ 
+/*    Wenhui Xie, Microsoft Corporation                                   */ 
 /*                                                                        */ 
 /*  DESCRIPTION                                                           */ 
 /*                                                                        */ 
@@ -443,7 +431,7 @@ VOID _nx_ram_network_driver_timer_clean(VOID)
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx       Yuxin Zhou             Initial Version 5.8           */
+/*  xx-xx-xxxx       Wenhui Xie             Initial Version 6.x           */
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID  _nx_ram_network_driver_internal(NX_IP_DRIVER *driver_req_ptr, UINT mtu_size)
@@ -1123,10 +1111,10 @@ UINT            old_threshold = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver                              PORTABLE C      */
-/*                                                           5.8          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
-/*    William E. Lamie, Express Logic, Inc.                               */
+/*    Wenhui Xie, Microsoft Corporation                                   */
 /*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
@@ -1152,7 +1140,7 @@ UINT            old_threshold = 0;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Yuxin Zhou             Initial Version 5.8           */
+/*  xx-xx-xxxx       Wenhui Xie             Initial Version 6.x           */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr)
@@ -1653,10 +1641,10 @@ UINT            old_threshold = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_output                       PORTABLE C      */ 
-/*                                                           5.8          */ 
+/*                                                           6.x          */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
-/*    William E. Lamie, Express Logic, Inc.                               */ 
+/*    Wenhui Xie, Microsoft Corporation                                   */ 
 /*                                                                        */ 
 /*  DESCRIPTION                                                           */ 
 /*                                                                        */ 
@@ -1688,7 +1676,7 @@ UINT            old_threshold = 0;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx       Yuxin Zhou             Initial Version 5.8           */ 
+/*  xx-xx-xxxx       Wenhui Xie             Initial Version 6.x           */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID  _nx_ram_network_driver_output(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -1913,10 +1901,10 @@ UINT        j;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_receive                      PORTABLE C      */ 
-/*                                                           5.8          */ 
+/*                                                           6.x          */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
-/*    William E. Lamie, Express Logic, Inc.                               */ 
+/*    Wenhui Xie, Microsoft Corporation                                   */ 
 /*                                                                        */ 
 /*  DESCRIPTION                                                           */ 
 /*                                                                        */ 
@@ -1953,7 +1941,7 @@ UINT        j;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     Yuxin Zhou               Initial Version 5.8           */ 
+/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -2077,10 +2065,10 @@ UINT    packet_type;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_calculate_checksum           PORTABLE C      */ 
-/*                                                           2.1b         */ 
+/*                                                           6.x          */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
-/*    William E. Lamie, Express Logic, Inc.                               */ 
+/*    Wenhui Xie, Microsoft Corporation                                   */ 
 /*                                                                        */ 
 /*  DESCRIPTION                                                           */ 
 /*                                                                        */ 
@@ -2109,7 +2097,7 @@ UINT    packet_type;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     William E. Lamie         Initial Version 2.1b          */ 
+/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 UINT  _nx_ram_network_driver_calculate_checksum(NX_INTERFACE *interface_ptr, NX_PACKET *packet_ptr, UCHAR is_check)
@@ -2616,10 +2604,10 @@ NX_IPV6_HEADER         *ipv6_header_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    get_time_of_day                                    PORTABLE C       */
-/*                                                           5.8          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
-/*    William E. Lamie, Express Logic, Inc.                               */
+/*    Wenhui Xie, Microsoft Corporation                                   */
 /*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
@@ -2644,7 +2632,7 @@ NX_IPV6_HEADER         *ipv6_header_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Yuxin Zhou             Initial Version 5.10          */
+/*  xx-xx-xxxx       Wenhui Xie             Initial Version 6.x           */
 /*                                                                        */
 /**************************************************************************/
 VOID get_time_of_day(NX_TIME_VALUE *time_value) 
@@ -2679,10 +2667,10 @@ ULONG64     time;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    create_pcap_file                                     PORTABLE C     */
-/*                                                           5.10         */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
-/*    William E. Lamie, Express Logic, Inc.                               */
+/*    Wenhui Xie, Microsoft Corporation                                   */
 /*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
@@ -2709,7 +2697,7 @@ ULONG64     time;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Yuxin Zhou               Initial Version 5.10        */
+/*  xx-xx-xxxx       Wenhui Xie               Initial Version 6.x         */
 /*                                                                        */
 /**************************************************************************/
 UINT create_pcap_file(CHAR *file_name) 
@@ -2744,10 +2732,10 @@ NX_PCAP_FILE_HEADER     pcap_file_header;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    write_pcap_file                                     PORTABLE C      */
-/*                                                           5.10         */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
-/*    William E. Lamie, Express Logic, Inc.                               */
+/*    Wenhui Xie, Microsoft Corporation                                   */
 /*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
@@ -2774,7 +2762,7 @@ NX_PCAP_FILE_HEADER     pcap_file_header;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Yuxin Zhou            Initial Version 5.10           */
+/*  xx-xx-xxxx       Wenhui Xie            Initial Version 6.x            */
 /*                                                                        */
 /**************************************************************************/
 UINT write_pcap_file(NX_PACKET *packet_ptr)
@@ -2818,10 +2806,10 @@ ULONG                   data_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    close_pcap_file                                     PORTABLE C      */
-/*                                                           5.10         */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
-/*    William E. Lamie, Express Logic, Inc.                               */
+/*    Wenhui Xie, Microsoft Corporation                                   */
 /*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
@@ -2845,7 +2833,7 @@ ULONG                   data_length;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Yuxin Zhou            Initial Version 5.10           */
+/*  xx-xx-xxxx       Wenhui Xie            Initial Version 6.x            */
 /*                                                                        */
 /**************************************************************************/
 VOID close_pcap_file()

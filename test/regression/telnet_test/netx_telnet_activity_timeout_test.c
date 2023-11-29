@@ -450,7 +450,7 @@ UINT        packets_sent= 0;
         nx_packet_release(my_packet);
     
         /* Pickup the Server echo of the character.  */
-        status =  nx_telnet_client_packet_receive(&my_client1, &my_packet, 4000); // jlc TELNET_TIMEOUT);
+        status =  nx_telnet_client_packet_receive(&my_client1, &my_packet, 4000);
         if (status)
             error_counter++;
     
