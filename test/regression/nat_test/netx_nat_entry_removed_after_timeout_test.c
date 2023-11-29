@@ -363,7 +363,7 @@ NX_NAT_TRANSLATION_ENTRY *entry_ptr;
             }   
         
             /* Attempt to connect the socket to the external host on a destination port higher than the last entry in the table.  */
-            status =  nx_tcp_client_socket_connect(&tcp_socket, NX_NAT_EXTERNAL_HOST, peer_port, TIME_SLICE); // jlc use symbols
+            status =  nx_tcp_client_socket_connect(&tcp_socket, NX_NAT_EXTERNAL_HOST, peer_port, TIME_SLICE);
 
             /* Unbind the socket.  */
             status =  nx_tcp_client_socket_unbind(&tcp_socket);

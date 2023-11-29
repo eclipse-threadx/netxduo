@@ -1,5 +1,4 @@
 /* This case tests the FTP server on handling RST packet.
- * JIRA: https://expresslogic.atlassian.net/browse/NETXDUO-235
  */
 #include  "tx_api.h"
 #include  "fx_api.h" 

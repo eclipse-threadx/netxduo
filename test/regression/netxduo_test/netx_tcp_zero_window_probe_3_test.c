@@ -1,6 +1,4 @@
-/* This case verifies bug reported by work item #2252. 
-   https://expresslogic.visualstudio.com/X-Ware/_workitems/edit/2252/
-*/
+/* This case verifies bug reported by work item #2252. */
 
 #include   "tx_api.h"
 #include   "nx_api.h"

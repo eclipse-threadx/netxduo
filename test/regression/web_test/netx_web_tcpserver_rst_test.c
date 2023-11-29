@@ -1,6 +1,4 @@
-/* This case tests the tcpserver on handling RST packet.
- * JIRA: https://expresslogic.atlassian.net/browse/NETXDUO-235
- */
+/* This case tests the tcpserver on handling RST packet. */
 #include    "nx_api.h"
 #include    "nx_tcpserver.h"
 

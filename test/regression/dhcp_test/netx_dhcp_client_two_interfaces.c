@@ -19,7 +19,7 @@
 #define     DEMO_STACK_SIZE         4096
 #define     PACKET_PAYLOAD          1518
 
-extern NX_PACKET *packet_copy; // jlc ram testing
+extern NX_PACKET *packet_copy;
                   
 /* Define the ThreadX, NetX object control blocks...  */
 
@@ -568,11 +568,6 @@ UINT        status;
     {
         tx_thread_sleep(100);
     }
-
-    // jlc add status_interface check on IP address
-    // then wait for ****; if renews[0] != 1; error
-    // then wait for expire, and ***; if rebounds != 1 error
-
 }
 
 /* Define the helper DHCP server thread on interface 0.  */
@@ -584,7 +579,7 @@ NX_PACKET   *my_packet;
 UINT         i, j, k;
 
     /* Print out test information banner.  */
-    printf("NetX Test:   DHCP Client Two Interface Test............................\n"); // jlc remove the \n
+    printf("NetX Test:   DHCP Client Two Interface Test............................\n");
 
     /* Check for earlier error. */
     if(error_counter)
@@ -618,7 +613,7 @@ UINT         i, j, k;
 
     /* Wait for Client requests */
     //while (i < 3)  //  Reduce this to see client packet retransmissions
-    while (i < NUM_RESPONSES) // jlc this let's the DHCP protocol complete.
+    while (i < NUM_RESPONSES)
     {
         
         status =  nx_udp_socket_receive(&server_socket0, &my_packet, 10 * NX_IP_PERIODIC_RATE);

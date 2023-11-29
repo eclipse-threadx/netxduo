@@ -1,5 +1,4 @@
-/* This NetX test concentrates TCP client packet leak issue
- * JIRA: https://expresslogic.atlassian.net/browse/NETXDUO-144.  */
+/* This NetX test concentrates TCP client packet leak issue. */
 
 #include   "nx_api.h"
 extern void    test_control_return(UINT status);

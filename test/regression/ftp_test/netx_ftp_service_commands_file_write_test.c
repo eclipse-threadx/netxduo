@@ -202,7 +202,7 @@ UCHAR   c;
                             1,                               /* Number of FATs              */
                             32,                              /* Directory Entries           */
                             0,                               /* Hidden sectors              */
-                            25,                             /* Total sectors               */ // jlc restore to 24
+                            25,                              /* Total sectors               */
                             128,                             /* Sector size                 */
                             1,                               /* Sectors per cluster         */
                             1,                               /* Heads                       */

@@ -5,11 +5,6 @@
    set state change callback, before setting the interface to 1. The DHCP Client should
    transfer those attributes to the new active interface, and clear them on the old interface.*/
 
-   // jlc to do
-   // confirm BOUND state is achieved
-   // test on a real network to verify probe timeouts are correct. 
-   // need a way to 'stop' the client test. Right now it spins endlessly.
-
 
 #include    "tx_api.h"
 #include    "nx_api.h"
@@ -376,11 +371,6 @@ UINT        skip_discover_message = NX_FALSE;
 
     nx_dhcp_release(&dhcp_client);
 
-    // jlc add status_interface check on IP address
-    // then wait for ****; 
-    // if declines != 1; error
-    // if state != INIT/SELECTING error
-
 }
 
 
@@ -393,7 +383,7 @@ NX_PACKET   *my_packet;
 UINT         i;
 
     /* Print out test information banner.  */
-    printf("NetX Test:   DHCP Client ARP Probe Multiple Interface Test1............\n"); // jlc remove the \n
+    printf("NetX Test:   DHCP Client ARP Probe Multiple Interface Test1............\n");
 
     /* Check for earlier error. */
     if(error_counter)

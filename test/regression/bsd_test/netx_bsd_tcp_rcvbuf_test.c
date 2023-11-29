@@ -1,5 +1,4 @@
-/* This NetX test concentrates on the basic BSD TCP window size when window scaling is used.
- * JIRA: https://expresslogic.atlassian.net/browse/NETXDUO-284 */
+/* This NetX test concentrates on the basic BSD TCP window size when window scaling is used. */
 
 #include   "tx_api.h"
 #include   "nx_api.h"

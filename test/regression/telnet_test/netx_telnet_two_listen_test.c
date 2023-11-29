@@ -1,5 +1,4 @@
 /* This case tests the Telnet server on handling two session listen situation.
- * JIRA: https://expresslogic.atlassian.net/browse/NETXDUO-238
  */
 #include  "tx_api.h"
 #include  "nx_api.h"

@@ -1,6 +1,4 @@
-/* This case tests the tcpserver on handling two session listen situation.
- * JIRA: https://expresslogic.atlassian.net/browse/NETXDUO-238
- */
+/* This case tests the tcpserver on handling two session listen situation. */
 #include    "nx_api.h"
 #include    "nx_tcpserver.h"
 
