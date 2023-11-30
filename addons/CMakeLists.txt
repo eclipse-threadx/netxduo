@@ -14,7 +14,6 @@ set(SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/ftp/nxd_ftp_server.c
 	${CMAKE_CURRENT_LIST_DIR}/http/nxd_http_client.c
 	${CMAKE_CURRENT_LIST_DIR}/http/nxd_http_server.c
-	${CMAKE_CURRENT_LIST_DIR}/lwm2m/nx_lwm2m_client.c
 	${CMAKE_CURRENT_LIST_DIR}/mdns/nxd_mdns.c
 	${CMAKE_CURRENT_LIST_DIR}/mqtt/nxd_mqtt_client.c
 	${CMAKE_CURRENT_LIST_DIR}/nat/nx_nat.c
@@ -92,7 +91,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/dns
     ${CMAKE_CURRENT_LIST_DIR}/ftp
     ${CMAKE_CURRENT_LIST_DIR}/http
-    ${CMAKE_CURRENT_LIST_DIR}/lwm2m
     ${CMAKE_CURRENT_LIST_DIR}/mdns
     ${CMAKE_CURRENT_LIST_DIR}/mqtt
     ${CMAKE_CURRENT_LIST_DIR}/nat
