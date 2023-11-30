@@ -8,11 +8,7 @@
 
 #include   "tx_api.h"
 #include   "nx_api.h"
-#if defined(__PRODUCT_NETXDUO__) 
 #include   "nxd_snmp.h"
-#else
-#include   "nx_snmp.h"
-#endif
 #include "small_mib_helper.h" // was demo_snmp_helper.h in the old MIB
 
 extern void    test_control_return(UINT);

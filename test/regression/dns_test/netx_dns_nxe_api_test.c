@@ -4,11 +4,7 @@
 #include   "nx_api.h"
 #include   "nx_udp.h"
 #include   "nx_ip.h"
-#ifdef __PRODUCT_NETXDUO__
 #include   "nxd_dns.h"
-#else    
-#include   "nx_dns.h"
-#endif
 
 extern void    test_control_return(UINT status);
 

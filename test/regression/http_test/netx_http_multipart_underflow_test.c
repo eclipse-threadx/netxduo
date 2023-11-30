@@ -44,13 +44,8 @@ test5(repeat 54times)
 
 extern void test_control_return(UINT);
 #if defined(NX_HTTP_MULTIPART_ENABLE) && !defined(NX_DISABLE_IPV4)
-#ifdef __PRODUCT_NETXDUO__
 #include    "nxd_http_client.h"
 #include    "nxd_http_server.h"
-#else
-#include    "nx_http_client.h"
-#include    "nx_http_server.h"
-#endif
 
 #define     DEMO_STACK_SIZE         4096
 

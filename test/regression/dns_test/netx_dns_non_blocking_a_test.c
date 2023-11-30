@@ -3,11 +3,7 @@
 #include   "tx_api.h"
 #include   "nx_api.h"
 #include   "nx_udp.h"
-#ifdef __PRODUCT_NETXDUO__
 #include   "nxd_dns.h"
-#else    
-#include   "nx_dns.h"
-#endif
 #include   "nx_ram_network_driver_test_1500.h"
                                 
 extern void    test_control_return(UINT status);

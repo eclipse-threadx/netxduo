@@ -8,14 +8,9 @@
 #ifdef FEATURE_NX_IPV6
 #include   "nx_ipv6.h"
 #endif
-#ifdef __PRODUCT_NETXDUO__
 #include   "nx_icmpv6.h"
 #include   "nx_ipv4.h"
 #include   "nxd_bsd.h"
-#else
-#include   "nx_ip.h"
-#include   "nx_bsd.h"
-#endif
 #define     DEMO_STACK_SIZE         4096
 
 

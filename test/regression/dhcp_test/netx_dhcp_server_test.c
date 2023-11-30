@@ -4,13 +4,8 @@
 extern void    test_control_return(UINT status);
 
 #if !defined(NX_DISABLE_UDP_TX_CHECKSUM) && !defined(NX_DISABLE_IPV4)
-#ifdef __PRODUCT_NETXDUO__
 #include   "nxd_dhcp_client.h"
 #include   "nxd_dhcp_server.h"
-#else
-#include   "nx_dhcp.h"
-#include   "nx_dhcp_server.h"
-#endif
 
 #define     DEMO_STACK_SIZE             4096
 #define     NX_PACKET_SIZE              1536

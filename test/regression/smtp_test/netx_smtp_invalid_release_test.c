@@ -10,11 +10,7 @@ extern void test_control_return(UINT status);
 
 #if !defined(NX_DISABLE_IPV4)
 
-#if defined(__PRODUCT_NETXDUO__) 
 #include   "nxd_smtp_client.h"
-#else
-#include   "nx_smtp_client.h"
-#endif
 
 #define     DEMO_STACK_SIZE         2048
 #define     SERVER_IPADR            IP_ADDRESS(10, 0, 0, 1)
