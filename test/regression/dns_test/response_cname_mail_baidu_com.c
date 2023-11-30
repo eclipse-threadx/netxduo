@@ -1,0 +1,48 @@
+/*
+No.     Time        Source                Destination           Protocol    Length      Info
+165    19.285254000    192.168.0.1             192.168.0.105             DNS        100            Standard query response 0x0002 CNAME www.a.shifen.com
+
+Frame 165: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+Ethernet II, Src: TendaTec_60:4b:46 (c8:3a:35:60:4b:46), Dst: Dell_33:c1:bd (18:03:73:33:c1:bd)
+Internet Protocol Version 4, Src: 192.168.0.1 (192.168.0.1), Dst: 192.168.0.105 (192.168.0.105)
+User Datagram Protocol, Src Port: domain (53), Dst Port: 50976 (50976)
+Domain Name System (response)
+    Request In: 164
+    Time: 0.036077000 seconds
+    Transaction ID: 0x0002
+    Flags: 0x8180 (Standard query response, No error)
+    Questions: 1
+    Answer RRs: 1
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        www.baidu.com: type CNAME, class IN
+            Name: www.baidu.com
+            Type: CNAME (Canonical name for an alias)
+            Class: IN (0x0001)
+    Answers
+        www.baidu.com: type CNAME, class IN, cname www.a.shifen.com
+            Name: www.baidu.com
+            Type: CNAME (Canonical name for an alias)
+            Class: IN (0x0001)
+            Time to live: 8 minutes, 7 seconds
+            Data length: 15
+            Primaryname: www.a.shifen.com
+*/
+
+char response_cname_www_baidu_com_pkt[100] = {
+0x18, 0x03, 0x73, 0x33, 0xc1, 0xbd, 0xc8, 0x3a, 
+0x35, 0x60, 0x4b, 0x46, 0x08, 0x00, 0x45, 0x00, 
+0x00, 0x56, 0xa6, 0x10, 0x00, 0x00, 0x40, 0x11, 
+0x52, 0xcc, 0xc0, 0xa8, 0x00, 0x01, 0xc0, 0xa8, 
+0x00, 0x69, 0x00, 0x35, 0xc7, 0x20, 0x00, 0x42, 
+0x1b, 0x3d, 0x00, 0x02, 0x81, 0x80, 0x00, 0x01, 
+0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x03, 0x77, 
+0x77, 0x77, 0x05, 0x62, 0x61, 0x69, 0x64, 0x75, 
+0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x05, 0x00,
+0x01, 0xc0, 0x0c, 0x00, 0x05, 0x00, 0x01, 0x00,
+0x00, 0x01, 0xe7, 0x00, 0x0f, 0x03, 0x77, 0x77,
+0x77, 0x01, 0x61, 0x06, 0x73, 0x68, 0x69, 0x66, 
+0x65, 0x6e, 0xc0, 0x16 };
+
+int response_cname_www_baidu_com_pkt_size = sizeof(response_cname_www_baidu_com_pkt);
