@@ -4,14 +4,9 @@
 #include   "tx_api.h"
 #include   "nx_api.h"
 #ifdef NX_BSD_ENABLE
-#ifdef __PRODUCT_NETXDUO__
 #include   "nx_icmpv6.h"
 #include   "nxd_bsd.h"
 #include   "nxd_dns.h"
-#else
-#include   "nx_bsd.h"
-#include   "nx_dns.h"
-#endif
 #define     DEMO_STACK_SIZE         4096
 
 

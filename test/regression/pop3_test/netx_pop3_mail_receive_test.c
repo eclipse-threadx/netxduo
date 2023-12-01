@@ -10,11 +10,7 @@
 #include  "tx_api.h"
 #include  "nx_api.h"
 #include    "nx_ram_network_driver_test_1500.h"
-#ifdef __PRODUCT_NETXDUO__
 #include  "nxd_pop3_client.h"
-#else
-#include  "nx_pop3_client.h"
-#endif
 extern   void  test_control_return(UINT);
 #if !defined(NX_DISABLE_IPV4)
 

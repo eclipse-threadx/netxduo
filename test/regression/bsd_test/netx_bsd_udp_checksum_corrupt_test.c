@@ -4,11 +4,7 @@
 #include   "nx_api.h"
 #ifdef NX_BSD_ENABLE
 #include   "nx_udp.h"
-#ifdef __PRODUCT_NETXDUO__
 #include   "nxd_bsd.h"
-#else
-#include   "nx_bsd.h"
-#endif
 #define     DEMO_STACK_SIZE         4096
 
 #define BSD_THREAD_PRIORITY    2

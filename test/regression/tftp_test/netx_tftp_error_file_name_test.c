@@ -1,13 +1,8 @@
 
 #include    "tx_api.h"
 #include    "nx_api.h"
-#ifdef __PRODUCT_NETXDUO__
 #include    "nxd_tftp_client.h"
 #include    "nxd_tftp_server.h"
-#else
-#include    "nx_tftp_client.h"
-#include    "nx_tftp_server.h"
-#endif
 #include    "fx_api.h"
 
 extern void     test_control_return(UINT);

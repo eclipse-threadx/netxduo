@@ -6,16 +6,10 @@
 #include   "tx_api.h"
 #include   "nx_api.h"
 #include   "nx_udp.h"
-#ifdef __PRODUCT_NETXDUO__
 #include   "nx_ipv4.h"
 #include   "nx_ip.h"
 #include   "nxd_dhcp_client.h"
 #include   "nxd_dhcp_server.h"
-#else
-#include   "nx_ip.h"
-#include   "nx_dhcp.h"
-#include   "nx_dhcp_server.h"
-#endif
 #include   "nx_ram_network_driver_test_1500.h"   
 #include   "netx_dhcp_clone_function.h"
 

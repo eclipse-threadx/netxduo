@@ -11,13 +11,8 @@
 #include    "tx_api.h"
 #include    "nx_api.h"
 #include    "fx_api.h"
-#ifdef __PRODUCT_NETXDUO__
 #include    "nxd_http_client.h"
 #include    "nxd_http_server.h"
-#else
-#include    "nx_http_client.h"
-#include    "nx_http_server.h"
-#endif
 
 extern void test_control_return(UINT);
 

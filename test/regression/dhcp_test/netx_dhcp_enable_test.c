@@ -1,13 +1,8 @@
 
 #include   "tx_api.h"
 #include   "nx_api.h"
-#ifdef __PRODUCT_NETXDUO__
 #include   "nxd_dhcp_client.h"
 #include   "nxd_dhcp_server.h"
-#else
-#include   "nx_dhcp.h"
-#include   "nx_dhcp_server.h"
-#endif
 
 extern void    test_control_return(UINT status);
 

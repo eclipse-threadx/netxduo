@@ -11,13 +11,8 @@
 #include    "tx_api.h"
 #include    "fx_api.h" 
 #include    "nx_api.h"
-#ifdef __PRODUCT_NETXDUO__
 #include    "nxd_ftp_client.h"
 #include    "nxd_ftp_server.h"
-#else
-#include    "nx_ftp_client.h"
-#include    "nx_ftp_server.h"
-#endif
 #include    "nx_tcp.h"
 
 extern void     test_control_return(UINT);
