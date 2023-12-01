@@ -51,7 +51,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    needs: [NetXDuo Web]
+    needs: [NetXDuo, Web]
     uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
     with:
       skip_test: true
