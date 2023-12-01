@@ -28,6 +28,21 @@ jobs:
       cmake_path: ./test/cmake/netxduo
       result_affix: NetXDuo
       skip_deploy: true
+  Web:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_web.sh
+      test_script: ./scripts/test_web.sh
+      cmake_path: ./test/cmake/web
+      result_affix: Web
+      skip_deploy: true
   Deploy:
     permissions:
       contents: read
@@ -36,8 +51,8 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    needs: [NetXDuo]
+    needs: [NetXDuo Web]
     uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
     with:
       skip_test: true
-      deploy_list: "NetXDuo"
+      deploy_list: "NetXDuo Web"
