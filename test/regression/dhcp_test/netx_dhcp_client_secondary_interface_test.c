@@ -11,11 +11,7 @@
 #include    "tx_api.h"
 #include    "nx_api.h"
 #include    "nx_ram_network_driver_test_1500.h"
-#ifdef __PRODUCT_NETXDUO__
 #include    "nxd_dhcp_client.h"
-#else
-#include     "nx_dhcp.h"
-#endif
 
 
 extern  void  test_control_return(UINT);

@@ -10,13 +10,8 @@ extern void    test_control_return(UINT);
 
 
 
-#ifdef __PRODUCT_NETXDUO__
 #include  "nxd_telnet_client.h"
 #include  "nxd_telnet_server.h"
-#else
-#include  "nx_telnet_client.h"
-#include  "nx_telnet_server.h"
-#endif
 
 #define     DEMO_STACK_SIZE         4096    
 

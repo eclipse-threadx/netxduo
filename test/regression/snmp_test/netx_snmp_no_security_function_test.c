@@ -5,11 +5,7 @@
 
 #include   "tx_api.h"
 #include   "nx_api.h"
-#ifdef __PRODUCT_NETXDUO__
 #include   "nxd_snmp.h"
-#else
-#include   "nx_snmp.h" 
-#endif
 #include   "nx_udp.h"
 
 

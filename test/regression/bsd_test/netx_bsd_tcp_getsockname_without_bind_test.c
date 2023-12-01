@@ -1,12 +1,8 @@
 #include   "tx_api.h"
 #include   "nx_api.h"
 #if defined(NX_BSD_ENABLE) && !defined(NX_DISABLE_IPV4)
-#ifdef __PRODUCT_NETXDUO__
 #include   "nx_icmpv6.h"
 #include   "nxd_bsd.h"
-#else
-#include   "nx_bsd.h"
-#endif
 #define     DEMO_STACK_SIZE         4096
 
 

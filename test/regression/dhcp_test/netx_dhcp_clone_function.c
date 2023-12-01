@@ -1,12 +1,7 @@
                                  
 #include   "netx_dhcp_clone_function.h"           
-#ifdef __PRODUCT_NETXDUO__
 #include   "nxd_dhcp_client.h"
 #include   "nxd_dhcp_server.h"
-#else
-#include   "nx_dhcp.h"
-#include   "nx_dhcp_server.h"
-#endif
                                                         
 
 UINT  dhcp_get_option_value(UCHAR *bootp_message, UINT option, ULONG *value, UINT length)

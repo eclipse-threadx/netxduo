@@ -7,15 +7,9 @@
 #include   "tx_api.h"
 #include   "nx_api.h"
 #include   "netx_dhcp_clone_function.h"
-#ifdef __PRODUCT_NETXDUO__
 #include   "nx_ipv4.h"
 #include   "nxd_dhcp_client.h"
 #include   "nxd_dhcp_server.h" 
-#else
-#include   "nx_ip.h"
-#include   "nx_dhcp.h"
-#include   "nx_dhcp_server.h" 
-#endif
 
 extern void    test_control_return(UINT status);
 

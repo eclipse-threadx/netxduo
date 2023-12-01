@@ -5,11 +5,7 @@
 #include   "nx_api.h"
 #if defined(__PRODUCT_NETXDUO__) && !defined(NX_DISABLE_IPV4)
 #ifdef NX_BSD_ENABLE
-#ifdef __PRODUCT_NETX__
-#include   "nx_bsd.h"
-#else
 #include   "nxd_bsd.h"
-#endif
 
 #ifdef FEATURE_NX_IPV6
 #include "nx_ipv6.h"

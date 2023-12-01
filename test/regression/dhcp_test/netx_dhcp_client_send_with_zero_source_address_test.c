@@ -2,13 +2,8 @@
 #include   "tx_api.h"
 #include   "nx_api.h"
 #include   "nx_api.h"
-#ifdef __PRODUCT_NETXDUO__
 #include   "nxd_dhcp_client.h"
 #include   "nxd_dhcp_server.h"
-#else
-#include   "nx_dhcp.h"
-#include   "nx_dhcp_server.h"
-#endif
 #include "tx_timer.h"
 #include "tx_thread.h"
 #include "tx_mutex.h"

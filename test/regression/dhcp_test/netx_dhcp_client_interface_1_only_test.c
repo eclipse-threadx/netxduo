@@ -7,11 +7,7 @@
 
 #include    "tx_api.h"
 #include    "nx_api.h"
-#ifdef __PRODUCT_NETXDUO__
 #include    "nxd_dhcp_client.h"
-#else
-#include     "nx_dhcp.h"
-#endif
 
 #define     DEMO_STACK_SIZE         4096
 #define     PACKET_PAYLOAD          1518

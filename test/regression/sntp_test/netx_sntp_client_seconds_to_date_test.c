@@ -1,10 +1,6 @@
 #include <time.h>
 #include "nx_api.h"
-#ifdef __PRODUCT_NETXDUO__
 #include "nxd_sntp_client.h"
-#else
-#include "nx_sntp_client.h"
-#endif
                  
 extern void      test_control_return(UINT status);
 
