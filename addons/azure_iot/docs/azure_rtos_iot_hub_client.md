@@ -31,6 +31,8 @@
 * [nx_azure_iot_hub_client_telemetry_component_set](#nx_azure_iot_hub_client_telemetry_component_set)
 * [nx_azure_iot_hub_client_telemetry_property_add](#nx_azure_iot_hub_client_telemetry_property_add)
 * [nx_azure_iot_hub_client_telemetry_send](#nx_azure_iot_hub_client_telemetry_send)
+* [nx_azure_iot_hub_client_telemetry_send_extended](#nx_azure_iot_hub_client_telemetry_send_extended)
+* [nx_azure_iot_hub_client_telemetry_ack_callback_set](#nx_azure_iot_hub_client_telemetry_ack_callback_set)
 
 ### Command
 
@@ -724,6 +726,89 @@ Threads
 **Example**
 
 **See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_telemetry_send_extended**
+***
+<div style="text-align: right"> Sends telemetry message to IoTHub, and return the packet id</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_telemetry_send_extended(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                     NX_PACKET *packet_ptr,
+                                                     const UCHAR *telemetry_data, UINT data_size,
+                                                     USHORT *packet_id, UINT wait_option);
+```
+**Description**
+
+<p>This routine sends telemetry to IoTHub, with packet_ptr containing all the properties. On successful return of this function, ownership of `NX_PACKET` is released, and packet id is returned to caller. User also can use nx_azure_iot_hub_client_telemetry_ack_callback_set() to register the callback for tracking the telemetry ack, packet_id ties the correlation between telemetry send and ack.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| packet_ptr [in]    | A pointer to telemetry property packet. |
+| telemetry_data [in]    | Pointer to telemetry data. |
+| data_size [in]    | Size of telemetry data. |
+| packet_id [out]   | Packet id of telemetry message. |
+| wait_option [in]    | Ticks to wait for message to be sent. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if telemetry message is sent out.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to send telemetry message due to invalid parameter.
+* NX_AZURE_IOT_INVALID_PACKET Fail to send telemetry message due to packet is invalid.
+* NXD_MQTT_PACKET_POOL_FAILURE Fail to send telemetry message due to no available packet in pool.
+* NXD_MQTT_COMMUNICATION_FAILURE Fail to send telemetry message due to TCP/TLS error.
+* NX_NO_PACKET Fail to send telemetry message due to no available packet in pool.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_telemetry_ack_callback_set**
+***
+<div style="text-align: right">Sets telemetry ack callback function</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_telemetry_ack_callback_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                        VOID (*callback_ptr)(
+                                                              NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                              USHORT packet_id));
+```
+**Description**
+
+<p>This routine sets the telemetry ack receive callback function. This callback function is invoked when a telemetry ack is received from Azure IoT hub. Setting the callback function to NULL disables the callback function.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| callback_ptr [in]    | Pointer to a callback function invoked. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if callback function is set.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to set callback due to invalid parameter.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
 
 <div style="page-break-after: always;"></div>
 

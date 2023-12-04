@@ -136,6 +136,9 @@ typedef struct NX_AZURE_IOT_HUB_CLIENT_STRUCT
     VOID                                  (*nx_azure_iot_hub_client_connection_status_callback)(
                                            struct NX_AZURE_IOT_HUB_CLIENT_STRUCT *hub_client_ptr,
                                            UINT status);
+    VOID                                  (*nx_azure_iot_hub_client_telemetry_ack_callback)(
+                                           struct NX_AZURE_IOT_HUB_CLIENT_STRUCT *hub_client_ptr,
+                                           USHORT packet_id);
     UINT                                  (*nx_azure_iot_hub_client_token_refresh)(
                                            struct NX_AZURE_IOT_HUB_CLIENT_STRUCT *hub_client_ptr,
                                            ULONG expiry_time_secs, const UCHAR *key, UINT key_len,
@@ -474,6 +477,45 @@ UINT nx_azure_iot_hub_client_telemetry_property_add(NX_PACKET *packet_ptr,
  */
 UINT nx_azure_iot_hub_client_telemetry_send(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr, NX_PACKET *packet_ptr,
                                             const UCHAR *telemetry_data, UINT data_size, UINT wait_option);
+
+/**
+ * @brief Sends telemetry message to IoTHub, and return the packet id.
+ * @details This routine sends telemetry to IoTHub, with `packet_ptr` containing all the properties.
+ *          On successful return of this function, ownership of `NX_PACKET` is released.
+ *
+ * @param[in] hub_client_ptr A pointer to a #NX_AZURE_IOT_HUB_CLIENT.
+ * @param[in] packet_ptr A pointer to telemetry property packet.
+ * @param[in] telemetry_data Pointer to telemetry data.
+ * @param[in] data_size Size of telemetry data.
+ * @param[out] packet_id_ptr Return packet id of telemetry message on success..
+ * @param[in] wait_option Ticks to wait for message to be sent.
+ * @return A `UINT` with the result of the API.
+ *   @retval #NX_AZURE_IOT_SUCCESS Successful if telemetry message is sent out.
+ *   @retval #NX_AZURE_IOT_INVALID_PARAMETER Fail to send telemetry message due to invalid parameter.
+ *   @retval #NX_AZURE_IOT_INVALID_PACKET Fail to send telemetry message due to packet is invalid.
+ *   @retval NXD_MQTT_PACKET_POOL_FAILURE Fail to send telemetry message due to no available packet in pool.
+ *   @retval NXD_MQTT_COMMUNICATION_FAILURE Fail to send telemetry message due to TCP/TLS error.
+ *   @retval NX_NO_PACKET Fail to send telemetry message due to no available packet in pool.
+ */
+UINT nx_azure_iot_hub_client_telemetry_send_extended(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr, NX_PACKET *packet_ptr,
+                                                     const UCHAR *telemetry_data, UINT data_size, USHORT *packet_id_ptr, UINT wait_option);
+
+/**
+ * @brief Sets the telemetry ack callback function.
+ * @details This routine sets the telemetry callback function. This callback function is invoked when a telemetry
+            is sent from device or a telemetry ack is received from Azure IoT hub. Setting the callback function
+ *          to 'NULL' disables the callback function.
+ *
+ * @param[in] hub_client_ptr A pointer to a #NX_AZURE_IOT_HUB_CLIENT.
+ * @param[in] callback_ptr Pointer to a callback function invoked.
+ * @return A `UINT` with the result of the API.
+ *   @retval #NX_AZURE_IOT_SUCCESS Successful if callback function is set.
+ *   @retval #NX_AZURE_IOT_INVALID_PARAMETER Fail to set callback due to invalid parameter.
+ */
+UINT nx_azure_iot_hub_client_telemetry_ack_callback_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                        VOID (*callback_ptr)(
+                                                              NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                              USHORT packet_id));
 
 /**
  * @brief Enable receiving C2D message from IoTHub.
