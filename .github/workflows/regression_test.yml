@@ -58,6 +58,21 @@ jobs:
       cmake_path: ./test/cmake/mqtt
       result_affix: MQTT
       skip_deploy: true
+  NetXDuo64:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_nxd64.sh
+      test_script: ./scripts/test_nxd64.sh
+      cmake_path: ./test/cmake/netxduo64
+      result_affix: NetXDuo64
+      skip_deploy: true
   Deploy:
     permissions:
       contents: read
@@ -66,8 +81,8 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    needs: [NetXDuo, Web, MQTT]
+    needs: [NetXDuo, Web, MQTT, NetXDuo64]
     uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
     with:
       skip_test: true
-      deploy_list: "NetXDuo Web MQTT"
+      deploy_list: "NetXDuo Web MQTT NetXDuo64"
