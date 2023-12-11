@@ -22,7 +22,6 @@ foreach(
   addons/cloud
   addons/ftp
   addons/http
-  addons/lwm2m
   addons/mdns
   addons/mqtt
   addons/nat
