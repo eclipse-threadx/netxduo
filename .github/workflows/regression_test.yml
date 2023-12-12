@@ -104,7 +104,7 @@ jobs:
       cmake_path: ./test/cmake/azure_iot
       result_affix: Azure_IoT
       skip_deploy: true
-  Azure_IoT_Win32:
+  Azure_IoT_Windows:
     permissions:
       contents: read
       issues: read
