@@ -73,7 +73,7 @@ jobs:
       cmake_path: ./test/cmake/netxduo64
       result_affix: NetXDuo64
       skip_deploy: true
-  NetXDuo_fast:
+  NetXDuo_Fast:
     permissions:
       contents: read
       issues: read
@@ -86,7 +86,7 @@ jobs:
       build_script: ./scripts/build_nxd_fast.sh
       test_script: ./scripts/test_nxd_fast.sh
       cmake_path: ./test/cmake/netxduo_fast
-      result_affix: NetXDuo_fast
+      result_affix: NetXDuo_Fast
       skip_deploy: true
       skip_coverage: true
   Azure_IoT:
@@ -136,8 +136,8 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_fast, Azure_IoT]
+    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Azure_IoT]
     uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
     with:
       skip_test: true
-      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_fast Azure_IoT"
+      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Azure_IoT"
