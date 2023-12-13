@@ -128,6 +128,21 @@ jobs:
       run: |
         cd build
         cmake --build .
+  Secure:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_secure.sh
+      test_script: ./scripts/test_secure.sh
+      cmake_path: ./test/cmake/secure
+      result_affix: Secure
+      skip_deploy: true
   Deploy:
     permissions:
       contents: read
@@ -136,8 +151,8 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Azure_IoT]
+    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Azure_IoT, Secure]
     uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
     with:
       skip_test: true
-      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Azure_IoT"
+      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Azure_IoT Secure"
