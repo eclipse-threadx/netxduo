@@ -73,7 +73,7 @@ jobs:
       cmake_path: ./test/cmake/netxduo64
       result_affix: NetXDuo64
       skip_deploy: true
-  NetXDuo_fast:
+  NetXDuo_Fast:
     permissions:
       contents: read
       issues: read
@@ -86,9 +86,48 @@ jobs:
       build_script: ./scripts/build_nxd_fast.sh
       test_script: ./scripts/test_nxd_fast.sh
       cmake_path: ./test/cmake/netxduo_fast
-      result_affix: NetXDuo_fast
+      result_affix: NetXDuo_Fast
       skip_deploy: true
       skip_coverage: true
+  Azure_IoT:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_azure_iot.sh
+      test_script: ./scripts/test_azure_iot.sh
+      cmake_path: ./test/cmake/azure_iot
+      result_affix: Azure_IoT
+      skip_deploy: true
+  Azure_IoT_Windows:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+    runs-on: windows-2019
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Checkout submodules
+      run: |
+        if (!(Test-Path ./test/cmake/threadx)) {git clone https://github.com/azure-rtos/threadx.git ./test/cmake/threadx --depth 1}
+    - name: CMake
+      run: |
+        mkdir build
+        cd build
+        cmake ../test/cmake/azure_iot -A Win32
+    - name: Build
+      run: |
+        cd build
+        cmake --build .
   Deploy:
     permissions:
       contents: read
@@ -97,8 +136,8 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_fast]
+    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Azure_IoT]
     uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
     with:
       skip_test: true
-      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_fast"
+      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Azure_IoT"
