@@ -143,6 +143,21 @@ jobs:
       cmake_path: ./test/cmake/secure
       result_affix: Secure
       skip_deploy: true
+  Crypto:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_crypto.sh
+      test_script: ./scripts/test_crypto.sh
+      cmake_path: ./test/cmake/crypto
+      result_affix: Crypto
+      skip_deploy: true
   Deploy:
     permissions:
       contents: read
@@ -151,8 +166,8 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Azure_IoT, Secure]
+    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Azure_IoT, Secure, Crypto]
     uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
     with:
       skip_test: true
-      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Azure_IoT Secure"
+      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Azure_IoT Secure Crypto"

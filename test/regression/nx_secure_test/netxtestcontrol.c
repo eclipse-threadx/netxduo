@@ -117,7 +117,6 @@ void nx_secure_x509_pkcs7_decode_coverage_test_application_define(void *);
 void nx_secure_rsa_test_application_define(void *);
 void nx_secure_aes_test_application_define(void *first_unused_memory);
 void nx_secure_aes_ccm_test_application_define(void *first_unused_memory);
-void nx_secure_aes_gcm_test_application_define(void *first_unused_memory);
 void nx_secure_des_test_application_define(void *first_unused_memory);
 void nx_secure_3des_test_application_define(void *first_unused_memory);
 void nx_secure_tls_handshake_header_test_application_define(void *);
@@ -173,10 +172,6 @@ void nx_secure_tls_ecc_packet_chain_test_application_define(void *first_unused_m
 void nx_secure_tls_ecc_point_format_test_application_define(void *first_unused_memory);
 void nx_secure_tls_shutdown_test_application_define(void *first_unused_memory);
 void nx_secure_distingushed_name_compare_test_application_define(void *first_unused_memory);
-void nx_secure_fips_aes_test_application_define(void *first_unused_memory);
-void nx_secure_fips_sha_test_application_define(void *first_unused_memory);
-void nx_secure_fips_3des_test_application_define(void *first_unused_memory);
-void nx_secure_fips_drbg_test_application_define(void *first_unused_memory);
 void nx_secure_dtls_nxe_api_test_application_define(void *);
 void nx_secure_dtls_basic_test_application_define(void *);
 void nx_secure_dtls_error_checking_test_application_define(void *first_unused_memory);
@@ -438,7 +433,6 @@ TEST_ENTRY  test_control_tests[] =
     {nx_secure_rsa_test_application_define, TEST_TIMEOUT_MID},
     {nx_secure_aes_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_aes_ccm_test_application_define, TEST_TIMEOUT_LOW},
-    {nx_secure_aes_gcm_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_des_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_3des_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_phash_prf_test_application_define, TEST_TIMEOUT_LOW},
@@ -448,10 +442,6 @@ TEST_ENTRY  test_control_tests[] =
     {nx_secure_ecdh_self_test_application_define, TEST_TIMEOUT_MID},
     {nx_secure_ecdh_test_application_define, TEST_TIMEOUT_MID},
     {nx_secure_ecdsa_test_application_define, TEST_TIMEOUT_MID},
-    {nx_secure_fips_aes_test_application_define, TEST_TIMEOUT_LOW},
-    {nx_secure_fips_sha_test_application_define, TEST_TIMEOUT_LOW},
-    {nx_secure_fips_3des_test_application_define, TEST_TIMEOUT_LOW},
-    {nx_secure_fips_drbg_test_application_define, TEST_TIMEOUT_LOW},
 #endif /* CERT_BUILD */
     {nx_secure_crypto_method_cleanup_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_payload_size_test_application_define, TEST_TIMEOUT_LOW},
