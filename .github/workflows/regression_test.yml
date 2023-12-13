@@ -140,7 +140,7 @@ jobs:
     with:
       build_script: ./scripts/build_secure.sh
       test_script: ./scripts/test_secure.sh
-      cmake_path: ./test/cmake/secure
+      cmake_path: ./test/cmake/nx_secure
       result_affix: Secure
       skip_deploy: true
   Crypto:
