@@ -1,0 +1,26 @@
+set( tls_test_frame_FILE_LIST
+tls_test_get_external_test_process_output.c
+tls_test_launch_external_test_process.c
+tls_test_launch_external_test_process_in_background.c
+tls_test_director_clean_all.c
+tls_test_director_cleanup_registered_instances.c
+tls_test_director_create.c
+tls_test_director_destroy.c
+tls_test_director_register_test_instance.c
+tls_test_director_test_start.c
+tls_test_instance_attributes_access.c
+tls_test_instance_append.c
+tls_test_instance_create.c
+tls_test_instance_destroy.c
+tls_test_instance_find_next.c
+tls_test_instance_set_exit_status.c
+tls_test_instance_shared_buffer_manipulate.c
+tls_test_kill_external_test_process.c
+tls_test_semaphore_create.c
+tls_test_semaphore_destroy.c
+tls_test_semaphore_post.c
+tls_test_semaphore_wait.c
+tls_test_wait_all_child_process.c
+tls_test_wait_external_test_process.c
+tls_test_uninterruptable_wait.c
+)

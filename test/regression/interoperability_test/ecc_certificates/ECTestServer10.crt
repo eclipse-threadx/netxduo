@@ -1,0 +1,52 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 12 (0xc)
+    Signature Algorithm: ecdsa-with-SHA1
+        Issuer: C=CN, ST=SH, L=SH, O=EL, OU=EL, CN=ECCA2
+        Validity
+            Not Before: Jun  8 07:58:44 2018 GMT
+            Not After : Jun  8 07:58:44 2019 GMT
+        Subject: C=CN, ST=SH, O=EL, OU=EL, CN=ECTestServer10
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit)
+                pub: 
+                    04:f9:1a:1d:20:7d:9a:66:4e:7e:ba:6b:46:32:c5:
+                    9b:cf:1a:e8:d7:39:53:26:86:b9:86:e9:92:d4:0b:
+                    17:89:fa:9c:91:1b:d4:6c:20:96:a5:c2:50:ad:0c:
+                    23:18:1b:a5:33:93:58:41:15:23:01:c4:e4:99:99:
+                    40:5f:1c:85:18
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Authority Key Identifier: 
+                DirName:/C=CN/ST=SH/L=SH/O=EL/OU=EL/CN=ECCA2
+                serial:A6:7D:85:34:93:36:D5:3B
+
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: 
+                Digital Signature, Non Repudiation, Key Encipherment, Data Encipherment, Key Agreement
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication, TLS Web Client Authentication, Code Signing, E-mail Protection, Time Stamping
+    Signature Algorithm: ecdsa-with-SHA1
+         30:45:02:21:00:df:12:00:97:b8:c2:d2:68:6f:fd:81:a9:e5:
+         e9:01:b5:4d:c2:50:c3:83:11:f1:7c:96:fc:16:71:30:81:9a:
+         c4:02:20:5d:d9:2d:ed:92:bb:c7:55:ee:bd:df:1b:3e:3b:b8:
+         c7:1a:d9:32:e0:0b:05:f0:56:3b:df:17:70:d3:b9:bb:14
+-----BEGIN CERTIFICATE-----
+MIICUTCCAfigAwIBAgIBDDAJBgcqhkjOPQQBMFExCzAJBgNVBAYTAkNOMQswCQYD
+VQQIDAJTSDELMAkGA1UEBwwCU0gxCzAJBgNVBAoMAkVMMQswCQYDVQQLDAJFTDEO
+MAwGA1UEAwwFRUNDQTIwHhcNMTgwNjA4MDc1ODQ0WhcNMTkwNjA4MDc1ODQ0WjBN
+MQswCQYDVQQGEwJDTjELMAkGA1UECAwCU0gxCzAJBgNVBAoMAkVMMQswCQYDVQQL
+DAJFTDEXMBUGA1UEAwwORUNUZXN0U2VydmVyMTAwWTATBgcqhkjOPQIBBggqhkjO
+PQMBBwNCAAT5Gh0gfZpmTn66a0YyxZvPGujXOVMmhrmG6ZLUCxeJ+pyRG9RsIJal
+wlCtDCMYG6Uzk1hBFSMBxOSZmUBfHIUYo4HFMIHCMGsGA1UdIwRkMGKhVaRTMFEx
+CzAJBgNVBAYTAkNOMQswCQYDVQQIDAJTSDELMAkGA1UEBwwCU0gxCzAJBgNVBAoM
+AkVMMQswCQYDVQQLDAJFTDEOMAwGA1UEAwwFRUNDQTKCCQCmfYU0kzbVOzAJBgNV
+HRMEAjAAMAsGA1UdDwQEAwID+DA7BgNVHSUENDAyBggrBgEFBQcDAQYIKwYBBQUH
+AwIGCCsGAQUFBwMDBggrBgEFBQcDBAYIKwYBBQUHAwgwCQYHKoZIzj0EAQNIADBF
+AiEA3xIAl7jC0mhv/YGp5ekBtU3CUMODEfF8lvwWcTCBmsQCIF3ZLe2Su8dV7r3f
+Gz47uMca2TLgCwXwVjvfF3DTubsU
+-----END CERTIFICATE-----
