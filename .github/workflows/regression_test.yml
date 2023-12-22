@@ -187,7 +187,7 @@ jobs:
       install_script: ./scripts/install_mqtt.sh
       build_script: ./scripts/build_mqtt_interoperability.sh
       test_script: ./scripts/test_mqtt_interoperability.sh
-      cmake_path: ./test/cmake/nx_mqtt_interoperability
+      cmake_path: ./test/cmake/mqtt_interoperability
       result_affix: MQTT_Interoperability
       skip_deploy: true
   Deploy:
