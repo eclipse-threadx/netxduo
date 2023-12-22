@@ -1,0 +1,52 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1 (0x1)
+    Signature Algorithm: ecdsa-with-SHA256
+        Issuer: C=CN, ST=SH, L=SH, O=EL, OU=EL, CN=ECCA2
+        Validity
+            Not Before: May 17 01:54:18 2018 GMT
+            Not After : May 17 01:54:18 2019 GMT
+        Subject: C=CN, ST=SH, O=EL, OU=EL, CN=ECTestServer2
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit)
+                pub: 
+                    04:46:5f:dc:06:e4:83:8f:2a:24:4d:ef:fb:81:d4:
+                    c7:87:b4:6f:34:98:fe:ce:0d:9e:83:ed:0f:15:5b:
+                    7e:73:65:23:94:e9:d7:b5:05:17:93:02:50:0f:d0:
+                    ba:93:ae:45:28:72:fa:88:50:74:bd:b1:d2:ee:47:
+                    26:e8:ba:2c:21
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Authority Key Identifier: 
+                DirName:/C=CN/ST=SH/L=SH/O=EL/OU=EL/CN=ECCA2
+                serial:A6:7D:85:34:93:36:D5:3B
+
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: 
+                Digital Signature, Non Repudiation, Key Encipherment, Data Encipherment, Key Agreement
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication, TLS Web Client Authentication, Code Signing, E-mail Protection, Time Stamping
+    Signature Algorithm: ecdsa-with-SHA256
+         30:46:02:21:00:f8:ed:34:8e:e7:a5:20:bf:2b:15:97:02:16:
+         98:8b:0f:2a:f6:ee:5c:e9:f7:64:91:ed:59:7e:5f:51:a1:cf:
+         f3:02:21:00:a1:07:cb:e1:86:6a:01:eb:39:48:e0:55:ed:09:
+         bb:74:8f:d4:59:3c:71:cc:a7:01:77:72:84:7d:a7:f6:0e:64
+-----BEGIN CERTIFICATE-----
+MIICUzCCAfigAwIBAgIBATAKBggqhkjOPQQDAjBRMQswCQYDVQQGEwJDTjELMAkG
+A1UECAwCU0gxCzAJBgNVBAcMAlNIMQswCQYDVQQKDAJFTDELMAkGA1UECwwCRUwx
+DjAMBgNVBAMMBUVDQ0EyMB4XDTE4MDUxNzAxNTQxOFoXDTE5MDUxNzAxNTQxOFow
+TDELMAkGA1UEBhMCQ04xCzAJBgNVBAgMAlNIMQswCQYDVQQKDAJFTDELMAkGA1UE
+CwwCRUwxFjAUBgNVBAMMDUVDVGVzdFNlcnZlcjIwWTATBgcqhkjOPQIBBggqhkjO
+PQMBBwNCAARGX9wG5IOPKiRN7/uB1MeHtG80mP7ODZ6D7Q8VW35zZSOU6de1BReT
+AlAP0LqTrkUocvqIUHS9sdLuRybouiwho4HFMIHCMGsGA1UdIwRkMGKhVaRTMFEx
+CzAJBgNVBAYTAkNOMQswCQYDVQQIDAJTSDELMAkGA1UEBwwCU0gxCzAJBgNVBAoM
+AkVMMQswCQYDVQQLDAJFTDEOMAwGA1UEAwwFRUNDQTKCCQCmfYU0kzbVOzAJBgNV
+HRMEAjAAMAsGA1UdDwQEAwID+DA7BgNVHSUENDAyBggrBgEFBQcDAQYIKwYBBQUH
+AwIGCCsGAQUFBwMDBggrBgEFBQcDBAYIKwYBBQUHAwgwCgYIKoZIzj0EAwIDSQAw
+RgIhAPjtNI7npSC/KxWXAhaYiw8q9u5c6fdkke1Zfl9Roc/zAiEAoQfL4YZqAes5
+SOBV7Qm7dI/UWTxxzKcBd3KEfaf2DmQ=
+-----END CERTIFICATE-----

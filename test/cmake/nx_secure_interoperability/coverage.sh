@@ -1,0 +1,1 @@
+../nx_secure/coverage.sh
