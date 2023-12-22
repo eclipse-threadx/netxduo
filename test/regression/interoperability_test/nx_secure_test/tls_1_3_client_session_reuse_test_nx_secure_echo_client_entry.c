@@ -180,10 +180,11 @@ NX_PARAMETER_NOT_USED(thread_input);
 
     /* Wait for the semaphore. */
     tls_test_semaphore_wait(semaphore_echo_server_prepared);
-    tx_thread_sleep(100);
 
     for (i = 0; i < 5; i++)
     {
+
+        tx_thread_sleep(100);
 
         /* Attempt to connect the echo server. */
         status = nx_tcp_client_socket_connect(&tcp_socket, REMOTE_IP_ADDRESS_NUMBER, DEVICE_SERVER_PORT, NX_WAIT_FOREVER);
