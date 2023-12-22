@@ -1,0 +1,95 @@
+#!/bin/bash
+# Derek Moore <derek.moore@gmail.com>
+
+usage() {
+    echo "Usage: $0 -c CERT"
+    echo "Revokes a certificate issued by this CA"
+    echo
+    echo "Options:"
+    echo "    -c CERT  Path the the certificate file to be revoked"
+    echo
+    exit 2
+}
+
+CERT=
+
+while getopts c: FLAG; do
+    case $FLAG in
+        c) CERT=${OPTARG} ;;
+        *) usage ;;
+    esac
+done
+
+if [ "${CERT}" == "" ]; then
+    usage
+fi
+
+BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source ${BIN_DIR}/functions
+source ${BIN_DIR}/defaults.conf
+
+echo
+echo "Revoking certificate '${CERT}'"
+echo
+
+if [ ! -f "${CERT}" ]; then
+    echo "Could not read certificate '${CERT}', exiting."
+    exit 1
+fi
+
+# Fully-qualify path to cert
+CERT=$( fullpath ${CERT} )
+
+pushd ${BIN_DIR}/.. > /dev/null
+
+echo "Reason for revocation: "
+echo
+echo "1. unspecified"
+echo "2. keyCompromise"
+echo "3. CACompromise"
+echo "4. affiliationChanged"
+echo "5. superseded"
+echo "6. cessationOfOperation"
+echo "7. certificateHold"
+echo
+echo -n "Enter 1-7 [1]: "
+read INDEX
+
+[ -z "${INDEX}" ] && INDEX="1"
+
+case $INDEX in
+    1) REASON="unspecified" ;;
+    2) REASON="keyCompromise" ;;
+    3) REASON="CACompromise" ;;
+    4) REASON="affiliationChanged" ;;
+    5) REASON="superseded" ;;
+    6) REASON="cessationOfOperation" ;;
+    7) REASON="certificateHold" ;;
+    8) echo "Unknown reason, exiting."; exit 1 ;;
+esac
+
+echo "You are about to revoke this certificate with reason '${REASON}'."
+echo -n "Are you SURE you wish to continue? [y/N]: "
+read SURE
+if [ "${SURE}" != "y" -a "${SURE}" != "Y" ]; then
+    echo "Exiting."
+    exit 1
+fi
+
+# Revoke the certificate
+openssl ca \
+           -config conf/ca.conf \
+           -revoke ${CERT} \
+           -crl_reason ${REASON}
+
+# Regenerate the CRL
+openssl ca -gencrl \
+           -config conf/ca.conf \
+           -out crl/ca.crl
+
+popd > /dev/null
+
+echo
+echo "Server certificate revoked."
+echo
+

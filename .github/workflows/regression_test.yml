@@ -174,6 +174,22 @@ jobs:
       cmake_path: ./test/cmake/nx_secure_interoperability
       result_affix: Secure_Interoperability
       skip_deploy: true
+  MQTT_Interoperability:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
+    with:
+      install_script: ./scripts/install_mqtt.sh
+      build_script: ./scripts/build_mqtt_interoperability.sh
+      test_script: ./scripts/test_mqtt_interoperability.sh
+      cmake_path: ./test/cmake/nx_mqtt_interoperability
+      result_affix: MQTT_Interoperability
+      skip_deploy: true
   Deploy:
     permissions:
       contents: read
@@ -182,8 +198,8 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Azure_IoT, Secure, Crypto, Secure_Interoperability]
+    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Azure_IoT, Secure, Crypto, Secure_Interoperability, MQTT_Interoperability]
     uses: azure-rtos/threadx/.github/workflows/regression_template.yml@master
     with:
       skip_test: true
-      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Azure_IoT Secure Crypto Secure_Interoperability"
+      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Azure_IoT Secure Crypto Secure_Interoperability MQTT_Interoperability"

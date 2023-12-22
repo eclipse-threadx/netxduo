@@ -1,0 +1,115 @@
+#!/bin/bash
+# Derek Moore <derek.moore@gmail.com>
+
+usage() {
+    echo "Usage: $0 -d CA_DIR"
+    echo "Initializes a new signing sub-CA in CA_DIR"
+    echo
+    echo "Options:"
+    echo "    -d CA_DIR  Target directory to be created and initialized"
+    echo
+    exit 2
+}
+
+CA_DIR=
+
+while getopts d: FLAG; do
+    case $FLAG in
+        d) CA_DIR=${OPTARG} ;;
+        *) usage ;;
+    esac
+done
+
+if [ "${CA_DIR}" == "" ]; then
+    usage
+fi
+
+BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source ${BIN_DIR}/functions
+source ${BIN_DIR}/defaults.conf
+
+HOME=$CA_DIR
+PARENT=${BIN_DIR}/..
+CA_NAME=$( basename "${HOME}" )
+
+echo
+echo "Creating new signing sub-CA in '${HOME}'"
+echo
+
+init_ca_home ${HOME}
+generate_conf ${HOME}/bin/defaults.conf
+source ${HOME}/bin/defaults.conf
+
+echo
+echo -n "Enter passphase for encrypting signing CA key: "
+read -s PASS1
+echo
+echo -n "Verifying - Enter passphase for encrypting signing CA key: "
+read -s PASS2
+echo
+
+if [ "${PASS1}" != "${PASS2}" ]; then
+    echo "Passphrases did not match, exiting."
+    exit 1
+fi
+export CA_PASS=${PASS1}
+
+echo
+
+echo -n "Enter passphase for root CA key: "
+read -s PARENT_PASS
+echo
+export CA_PARENT_PASS=${PARENT_PASS}
+
+# Fully-qualify home to we can return to it later
+HOME=$( cd "${HOME}" && pwd )
+
+pushd ${HOME} > /dev/null
+
+# Generate the signing CA openssl config
+template "${BIN_DIR}/templates/signing.tpl" "conf/ca.conf"
+
+# Create the signing CA key
+openssl genrsa -out ca/private/ca.key -passout env:CA_PASS 2048
+chmod 0400 ca/private/ca.key
+
+# Create the signing CA csr
+openssl req -new -batch \
+            -config conf/ca.conf \
+            -key ca/private/ca.key \
+            -out ca/ca.csr \
+            -passin env:CA_PASS
+
+# Create the signing CA certificate
+pushd ${PARENT} > /dev/null
+openssl ca -batch -notext \
+           -config conf/ca.conf \
+           -in ${HOME}/ca/ca.csr \
+           -out ${HOME}/ca/ca.crt \
+           -days 3652 \
+           -extensions signing_ca_ext \
+           -passin env:CA_PARENT_PASS
+popd > /dev/null
+
+# Create the signing CRL
+openssl ca -gencrl -batch \
+           -config conf/ca.conf \
+           -out crl/ca.crl
+
+# Create the chain bundle if this is a sub-CA
+if [ -f "${PARENT}/ca/chain.pem" ]; then
+    cat ${PARENT}/ca/chain.pem > ca/chain.pem
+fi
+cat ca/ca.crt >> ca/chain.pem
+
+for BIN in ${BINARIES}; do
+    cp ${BIN_DIR}/${BIN} bin/
+done
+cp -r ${BIN_DIR}/templates bin/
+
+popd > /dev/null
+
+echo
+echo "Signing sub-CA initialized."
+echo
+

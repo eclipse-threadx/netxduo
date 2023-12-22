@@ -1,0 +1,169 @@
+#!/bin/bash
+# Derek Moore <derek@ripple.com>
+
+# Binaries copied during install
+BINARIES="
+create-root-ca
+create-signing-ca
+create-server
+create-client
+revoke-cert
+functions
+"
+
+
+override() {
+    target=${1#USER_}
+    NAME=`echo $2 | sed 's/[^A-Za-z0-9-]/-/g'`
+    eval "${target}=\$${1}"
+}
+
+
+fullpath() {
+    cd $(dirname $1)
+    echo $PWD/$(basename $1)
+}
+
+##
+## template TEMPLATE_FILE DESTINATION_FILE
+##
+## Performs variable interpolation on TEMPLATE_FILE and copies
+## the result to DESTINATION_FILE. All strings in TEMPLATE_FILE
+## that match {{CA_*}} will be replaced with the contents of the
+## environment variable with the same name.
+##
+template() {
+    local REGEX=""
+    for VAR in ${!CA_*}; do
+        REGEX="${REGEX}s#{{\s*${VAR}\s*}}#${!VAR}#g; "
+    done
+    sed -e "${REGEX}" < $1 > $2
+}
+
+
+##
+## init_ca_home CA_PATH
+##
+## Initializes a CA directory skeleton at PATH
+##
+init_ca_home() {
+    HOME=$1
+
+    # Ensure we're initializing an empty directory
+    if [ -d "${HOME}" ]; then
+	echo "${HOME} already exists, exiting"
+	exit 1
+    fi
+
+    if ! mkdir -p "${HOME}"; then
+        echo "Unable to create ${HOME}, exiting"
+	exit 1
+    fi
+
+    pushd ${HOME} > /dev/null
+
+    # Create top-level CA structure
+    mkdir -p ca
+    mkdir -p ca/db
+    mkdir -p ca/private
+
+    mkdir -p archive
+    mkdir -p bin
+    mkdir -p certs
+    mkdir -p crl
+    mkdir -p conf
+    mkdir -p csr
+    mkdir -p private
+
+    # Secure key directories
+    chmod 0700 ca/private
+    chmod 0700 private
+
+    # Create empty databases
+    touch ca/db/certificate.db
+    touch ca/db/certificate.db.attr
+    echo 01 > ca/db/crt.srl
+    echo 01 > ca/db/crl.srl
+
+    popd > /dev/null
+}
+
+##
+## generate_conf CONF
+##
+## Generate the ca.conf for new root and signing CAs
+##
+generate_conf() {
+    DEST=$1
+
+    echo -n "Short label for new CA [${CA_NAME}]: "
+    read NAME
+    if [ -n "${NAME}" ]; then
+        CA_NAME=${NAME}
+        CA_NAME=`echo ${CA_NAME} | sed 's/[^A-Za-z0-9-]/-/g'`
+    fi
+
+    echo -n "Domain name for new CA [${CA_DOMAIN}]: "
+    read DOMAIN
+    if [ -n "${DOMAIN}" ]; then
+        CA_DOMAIN=${DOMAIN}
+    elif [ -z "${CA_DOMAIN}" ]; then
+        echo "Domain is required."
+        exit 1
+    fi
+
+    echo
+    echo "CRL URL will be http://${CA_DOMAIN}/ca/${CA_NAME}.crl"
+    echo
+
+    echo -n "Default country code for new certificates [${CA_CERT_C}]: "
+    read CERT_C
+    if [ -n "${CERT_C}" ]; then
+        CA_CERT_C=${CERT_C}
+    fi
+
+    echo -n "Default state for new certificates [${CA_CERT_ST}]: "
+    read CERT_ST
+    if [ -n "${CERT_ST}" ]; then
+        CA_CERT_ST=${CERT_ST}
+    fi
+
+    echo -n "Default city for new certificates [${CA_CERT_L}]: "
+    read CERT_L
+    if [ -n "${CERT_L}" ]; then
+        CA_CERT_L=${CERT_L}
+    fi
+
+    echo -n "Default org for new certificates [${CA_CERT_O}]: "
+    read CERT_O
+    if [ -n "${CERT_O}" ]; then
+        CA_CERT_O=${CERT_O}
+    fi
+
+    echo -n "Default org unit for new certificates [${CA_CERT_OU}]: "
+    read CERT_OU
+    if [ -n "${CERT_OU}" ]; then
+        CA_CERT_OU=${CERT_OU}
+    fi
+
+    echo
+
+    CA_CERT_CN="${CA_CERT_O} Certificate Authority"
+    echo -n "Common Name for CA certificate [${CA_CERT_CN}]: "
+    read CERT_CN
+    if [ -n "${CERT_CN}" ]; then
+        CA_CERT_CN=${CERT_CN}
+    fi
+
+    cat > ${DEST} << EOF
+CA_DOMAIN="${CA_DOMAIN}"
+CA_NAME="${CA_NAME}"
+
+CA_CERT_C="${CA_CERT_C}"
+CA_CERT_ST="${CA_CERT_ST}"
+CA_CERT_L="${CA_CERT_L}"
+CA_CERT_O="${CA_CERT_O}"
+CA_CERT_OU="${CA_CERT_OU}"
+CA_CERT_CN="${CA_CERT_CN}"
+EOF
+}
