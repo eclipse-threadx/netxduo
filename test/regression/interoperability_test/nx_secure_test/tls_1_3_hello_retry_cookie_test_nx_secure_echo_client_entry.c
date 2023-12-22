@@ -188,7 +188,7 @@ NX_PARAMETER_NOT_USED(thread_input);
 
     /* Wait for the semaphore. */
     tls_test_semaphore_wait(semaphore_echo_server_prepared);
-    tx_thread_sleep(100);
+    tx_thread_sleep(20 * NX_IP_PERIODIC_RATE);
 
     /* Test client receives a second HelloRetryRequest. */
     nx_secure_tls_session_client_callback_set(&tls_session, client_callback);
