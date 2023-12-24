@@ -283,7 +283,7 @@ void NX_Secure_TLS_SendCertificateVerifyTest_Test_1()
 
 UINT status;
 NX_PACKET *packet;
-NX_SECURE_TLS_SESSION session;
+NX_SECURE_TLS_SESSION session = {0};
 UCHAR header_buffer[6];
 UCHAR header_data[6];
 USHORT header_size;
@@ -503,7 +503,7 @@ void NX_Secure_TLS_SendCertificateVerifyTest_Test_2()
 
 UINT status;
 NX_PACKET *packet;
-NX_SECURE_TLS_SESSION session;
+NX_SECURE_TLS_SESSION session = {0};
 UCHAR header_buffer[6];
 UCHAR header_data[6];
 USHORT header_size;
@@ -653,7 +653,7 @@ void NX_Secure_TLS_SendCertificateVerifyTest_Test_3()
 
 UINT status;
 NX_PACKET *packet;
-NX_SECURE_TLS_SESSION session;
+NX_SECURE_TLS_SESSION session = {0};
 UCHAR header_buffer[6];
 UCHAR header_data[6];
 USHORT header_size;
@@ -843,7 +843,7 @@ void NX_Secure_TLS_SendCertificateVerifyTest_Test_4()
 
 UINT status;
 NX_PACKET *packet;
-NX_SECURE_TLS_SESSION session;
+NX_SECURE_TLS_SESSION session = {0};
 UCHAR header_buffer[6];
 UCHAR header_data[6];
 USHORT header_size;
@@ -1067,7 +1067,7 @@ void NX_Secure_TLS_SendCertificateVerifyTest_Test_ECC()
 
 UINT status;
 NX_PACKET *packet;
-NX_SECURE_TLS_SESSION session;
+NX_SECURE_TLS_SESSION session = {0};
 UCHAR header_buffer[6];
 UCHAR header_data[6];
 USHORT header_size;
@@ -1284,7 +1284,7 @@ void NX_Secure_TLS_SendClientKeyExchangeTest()
 
 UINT status;
 NX_PACKET *packet;
-NX_SECURE_TLS_SESSION session;
+NX_SECURE_TLS_SESSION session = {0};
 UCHAR header_buffer[6];
 UCHAR header_data[6];
 USHORT header_size;
