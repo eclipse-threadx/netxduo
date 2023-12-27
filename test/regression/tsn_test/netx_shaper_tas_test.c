@@ -52,14 +52,6 @@ extern UINT nx_cbs_driver(NX_SHAPER_DRIVER_PARAMETER *params);
 /***** Substitute your ethernet driver entry function here *********/
 void _nx_ram_network_driver(struct NX_IP_DRIVER_STRUCT *driver_req);
 
-/* Define main entry point.  */
-int main()
-{
-
-    /* Enter the ThreadX kernel.  */
-    tx_kernel_enter();
-}
-
 /* Define what the initial system looks like.  */
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
