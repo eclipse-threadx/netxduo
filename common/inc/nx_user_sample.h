@@ -771,5 +771,13 @@
 #define NX_ENABLE_TCPIP_OFFLOAD
 */
 
+/* Defined, the VLAN feature is enabled.
+   Note: Require driver support to use APIs from this file.
+         A quick check in driver is to search for
+         NX_LINK_RAW_PACKET_SEND. VLAN APIs are not supported if not found. */
+/*
+#define NX_ENABLE_VLAN
+*/
+
 #endif
 

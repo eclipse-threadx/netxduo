@@ -44,7 +44,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_driver_send                          PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -77,6 +77,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN,             */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_tcp_socket_driver_send(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr, ULONG wait_option)
@@ -917,6 +920,13 @@ UINT            compute_checksum = 1;
             socket_ptr -> nx_tcp_socket_packets_sent++;
             socket_ptr -> nx_tcp_socket_bytes_sent += send_packet -> nx_packet_length - (ULONG)sizeof(NX_TCP_HEADER);
 #endif /* NX_DISABLE_TCP_INFO */
+
+#ifdef NX_ENABLE_VLAN
+            if (socket_ptr -> nx_tcp_socket_vlan_priority != NX_VLAN_PRIORITY_INVALID)
+            {
+                send_packet -> nx_packet_vlan_priority = socket_ptr -> nx_tcp_socket_vlan_priority;
+            }
+#endif /* NX_ENABLE_VLAN */
 
             /* If trace is enabled, insert this event into the trace buffer.  */
             NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_TCP_DATA_SEND, ip_ptr, socket_ptr, send_packet, socket_ptr -> nx_tcp_socket_tx_sequence - (send_packet -> nx_packet_length - sizeof(NX_TCP_HEADER)), NX_TRACE_INTERNAL_EVENTS, 0, 0);

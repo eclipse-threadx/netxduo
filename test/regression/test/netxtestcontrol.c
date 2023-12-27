@@ -1319,6 +1319,15 @@ void netx_tahi_dhcpv6_test_07_025_define(void * );
 void netx_tahi_dhcpv6_test_07_026_define(void * );
 void netx_tahi_dhcpv6_test_07_027_define(void * );
 #endif /* NX_DHCPV6_TAHI_ENABLE*/
+
+#ifdef NX_ENABLE_VLAN
+    /* TSN related tests.  */
+void netx_ip_link_status_test2_application_define(void *);
+void netx_shaper_cbs_test_application_define(void *);
+void netx_shaper_tas_test_application_define(void *);
+void netx_mrp_state_machine_test_application_define(void *);
+#endif /* NX_ENABLE_VLAN */
+
 void test_application_define(void * );
 
 
@@ -1920,6 +1929,14 @@ TEST_ENTRY  test_control_tests[] =
     {netx_104_17_application_define, TEST_TIMEOUT_LOW},
     {netx_106_17_application_define, TEST_TIMEOUT_LOW},
 #endif /* SNMP_ONLY  */
+
+#ifdef NX_ENABLE_VLAN
+    /* TSN related tests.  */
+    {netx_ip_link_status_test2_application_define, TEST_TIMEOUT_LOW},
+    {netx_shaper_cbs_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_shaper_tas_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_mrp_state_machine_test_application_define, TEST_TIMEOUT_LOW},
+#endif /* NX_ENABLE_VLAN */
 
 #if !defined CERT_BUILD && !defined (SNMP_ONLY) 
 

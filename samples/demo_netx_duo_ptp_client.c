@@ -9,6 +9,10 @@
 #include "nx_api.h"
 #include "nxd_ptp_client.h"
 
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET == 1
+#define SAMPLE_DHCP_DISABLE
+#endif
+
 #ifndef SAMPLE_DHCP_DISABLE
 #include "nxd_dhcp_client.h"
 #endif /* SAMPLE_DHCP_DISABLE */
@@ -166,6 +170,13 @@ void    thread_0_entry(ULONG thread_input)
 
 NX_PTP_TIME tm;
 NX_PTP_DATE_TIME date;
+UINT port_specific;
+
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET == 1
+    port_specific = NX_PTP_TRANSPORT_SPECIFIC_802;
+#else
+    port_specific = NX_PTP_TRANSPORT_SPECIFIC_NON_802;
+#endif
 
 #ifndef SAMPLE_DHCP_DISABLE
     dhcp_wait();
@@ -176,8 +187,17 @@ NX_PTP_DATE_TIME date;
                          PTP_THREAD_PRIORITY, (UCHAR *)ptp_stack, sizeof(ptp_stack),
                          CLOCK_CALLBACK, NX_NULL);
 
+    /* enable the PTP master */
+#if defined(NX_PTP_ENABLE_MASTER)
+    nx_ptp_client_master_enable(&ptp_client, NX_PTP_CLIENT_ROLE_SLAVE_AND_MASTER,
+                                NX_PTP_CLIENT_MASTER_PRIORITY, NX_PTP_CLIENT_MASTER_PRIORITY,
+                                NX_PTP_CLIENT_MASTER_CLOCK_CLASS, NX_PTP_CLIENT_MASTER_ACCURACY,
+                                NX_PTP_CLIENT_MASTER_CLOCK_VARIANCE, NX_PTP_CLIENT_MASTER_CLOCK_STEPS_REMOVED,
+                                NX_PTP_MASTER_TIME_SRC_INTERNAL_OSCILLATOR);
+#endif
+
     /* start the PTP client */
-    nx_ptp_client_start(&ptp_client, NX_NULL, 0, 0, 0, ptp_event_callback, NX_NULL);
+    nx_ptp_client_start(&ptp_client, NX_NULL, 0, 0, port_specific, ptp_event_callback, NX_NULL);
 
     while(1)
     {

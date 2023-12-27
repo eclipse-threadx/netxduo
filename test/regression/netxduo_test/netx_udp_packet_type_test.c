@@ -194,7 +194,7 @@ NX_PACKET   *my_packet;
     /**************************/
 
     /* Allocate a packet that can fill the UDP header, IPv4 header and physical header.  */
-    status =  nx_packet_allocate(&pool_0, &my_packet, 8 + 20 + 16, TX_WAIT_FOREVER);
+    status =  nx_packet_allocate(&pool_0, &my_packet, 8 + 20 + NX_PHYSICAL_HEADER, TX_WAIT_FOREVER);
 
     /* Check status.  */
     if (status != NX_SUCCESS) 
@@ -328,7 +328,7 @@ NX_PACKET   *my_packet;
     /**************************/
 
     /* Allocate a packet that can fill the UDP header, IPv6 header and physical header.  */
-    status =  nx_packet_allocate(&pool_0, &my_packet,  8 + 40 + 16, TX_WAIT_FOREVER);
+    status =  nx_packet_allocate(&pool_0, &my_packet,  8 + 40 + NX_PHYSICAL_HEADER, TX_WAIT_FOREVER);
 
     /* Check status.  */
     if (status != NX_SUCCESS) 

@@ -41,8 +41,8 @@
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_tcp_packet_send_ack                             PORTABLE C      */
-/*                                                           6.1          */
+/*    _nx_tcp_packet_send_control                         PORTABLE C      */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -85,6 +85,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN,             */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_packet_send_control(NX_TCP_SOCKET *socket_ptr, ULONG control_bits, ULONG tx_sequence,
@@ -170,6 +173,13 @@ ULONG          window_size;
         }
     }
 #endif /* NX_ENABLE_DUAL_PACKET_POOL */
+
+#ifdef NX_ENABLE_VLAN
+    if (socket_ptr -> nx_tcp_socket_vlan_priority != NX_VLAN_PRIORITY_INVALID)
+    {
+        packet_ptr -> nx_packet_vlan_priority = socket_ptr -> nx_tcp_socket_vlan_priority;
+    }
+#endif /* NX_ENABLE_VLAN */
 
     /* Check to see if the packet has enough room to fill with the max TCP header (SYN + probe data).  */
     if ((UINT)(packet_ptr -> nx_packet_data_end - packet_ptr -> nx_packet_prepend_ptr) < (NX_TCP_SYN_SIZE + 1))

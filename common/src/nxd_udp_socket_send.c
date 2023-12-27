@@ -44,7 +44,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_udp_socket_driver_send                          PORTABLE C      */
-/*                                                           6.1.10       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -82,6 +82,9 @@
 /*  01-31-2022     Yuxin Zhou               Modified comment(s), corrected*/
 /*                                            the logic for queued packet,*/
 /*                                            resulting in version 6.1.10 */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN,             */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_udp_socket_driver_send(NX_UDP_SOCKET *socket_ptr,
@@ -604,6 +607,13 @@ UINT           compute_checksum = 1;
         return(_nx_udp_socket_driver_send(socket_ptr, packet_ptr, &ip_src_address, ip_address, port));
     }
 #endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
+#ifdef NX_ENABLE_VLAN
+    if (socket_ptr -> nx_udp_socket_vlan_priority != NX_VLAN_PRIORITY_INVALID)
+    {
+        packet_ptr -> nx_packet_vlan_priority = socket_ptr -> nx_udp_socket_vlan_priority;
+    }
+#endif /* NX_ENABLE_VLAN */
 
 #ifndef NX_DISABLE_IPV4
     /* Send the UDP packet to the IPv4 component.  */

@@ -34,7 +34,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_transmit_configure                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -78,6 +78,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            fixed compiler warning,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_transmit_configure(NX_TCP_SOCKET *socket_ptr, ULONG max_queue_depth,
@@ -99,7 +102,7 @@ NX_IP *ip_ptr;
     /* Setup the socket with the new transmit parameters.  */
     socket_ptr -> nx_tcp_socket_timeout_rate =                    timeout;
     socket_ptr -> nx_tcp_socket_timeout_max_retries =             max_retries;
-    socket_ptr -> nx_tcp_socket_timeout_shift =                   timeout_shift;
+    socket_ptr -> nx_tcp_socket_timeout_shift =                   (UCHAR)timeout_shift;
     socket_ptr -> nx_tcp_socket_transmit_queue_maximum_default =  max_queue_depth;
     socket_ptr -> nx_tcp_socket_transmit_queue_maximum =          max_queue_depth;
 

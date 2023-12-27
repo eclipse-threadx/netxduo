@@ -10,6 +10,7 @@ set(BUILD_CONFIGURATIONS
     default_build_coverage
     dhcp_default_build_coverage
     dns_default_build_coverage
+    tsn_build_coverage
     v4_build
     v4_dns_cache_build
     v4_no_checksum_build
@@ -190,7 +191,7 @@ set(PPP_COMPRESSION -DNX_PPP_COMPRESSION_ENABLE)
 set(v4_build ${IPV4} ${PACKET_DEBUG})
 set(v4_dns_cache_build ${IPV4} ${DNS_CACHE})
 set(v4_no_checksum_build ${IPV4} ${DISABLE_TX_CHECKSUM} ${DISABLE_RX_CHECKSUM})
-set(v4_physical_48_build ${IPV4} ${PHY_HEADER} ${MDNS_NO_CLIENT} ${PPPOE})
+set(v4_physical_48_build ${IPV4} ${PHY_HEADER} ${MDNS_NO_CLIENT} ${PPPOE} ${MULTI_INTERFACE})
 set(v4_small_build
     ${IPV4}
     ${NO_INFO}
@@ -328,6 +329,7 @@ set(default_build_coverage -DNX_TAHI_ENABLE -DNX_MAX_PHYSICAL_INTERFACES=4 -DNX_
 set(optimize_build ${default_build_coverage} -O3)
 set(dhcp_default_build_coverage ${default_build_coverage} -DNX_DHCP_CLIENT_USER_CREATE_PACKET_POOL -DNX_DISABLE_ASSERT)
 set(dns_default_build_coverage ${default_build_coverage}  -DNX_DNS_CLIENT_USER_CREATE_PACKET_POOL -DNX_DNS_CLIENT_CLEAR_QUEUE)
+set(tsn_build_coverage ${default_build_coverage} ${PHY_HEADER} -DNX_ENABLE_VLAN)
 
 if($ENV{ENABLE_64})
   message(STATUS "Building for 64bit")

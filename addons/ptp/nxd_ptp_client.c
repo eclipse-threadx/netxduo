@@ -24,7 +24,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_ptp_client.c                                    PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -39,6 +39,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            supported master clock,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -52,21 +56,25 @@
 #define NX_PTP_SOURCE_CODE
 
 #include "nxd_ptp_client.h"
+#if NX_PTP_CLIENT_TRANSPORT_UDP
 #include "nx_udp.h"
 #include "nx_ipv4.h"
 #if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
 #include "nx_ipv6.h"
 #endif
+#endif
 #include "tx_timer.h"
 
 /* #define NX_PTP_DEBUG */
 /* #define NX_PTP_DEBUG_OFFSET */
-#if defined(NX_PTP_DEBUG) || defined(NX_PTP_DEBUG_OFFSET)
+/* #define NX_PTP_DEBUG_DELAY */
+/* #define NX_PTP_DEBUG_RATE_RATIO */
+#if defined(NX_PTP_DEBUG) || defined(NX_PTP_DEBUG_OFFSET) || defined(NX_PTP_DEBUG_DELAY) || defined(NX_PTP_DEBUG_RATE_RATIO)
 #include <stdio.h>
 #endif
 #ifdef NX_PTP_DEBUG
 #ifndef NX_PTP_DEBUG_PRINTF
-#define NX_PTP_DEBUG_PRINTF(x)             printf x
+#define NX_PTP_DEBUG_PRINTF(x) printf x
 #endif
 #else
 #define NX_PTP_DEBUG_PRINTF(x)
@@ -77,59 +85,101 @@
 NX_CALLER_CHECKING_EXTERNS
 
 /* number of nanoseconds per second */
-#define NX_PTP_NANOSECONDS_PER_SEC         1000000000L
+#define NX_PTP_NANOSECONDS_PER_SEC             1000000000L
 
 /* Define the PTP version */
-#define NX_PTP_VERSION                     2
+#define NX_PTP_VERSION                         2
 
 /* Define the UDP ports */
-#define NX_PTP_EVENT_UDP_PORT              319
-#define NX_PTP_GENERAL_UDP_PORT            320
+#define NX_PTP_EVENT_UDP_PORT                  319
+#define NX_PTP_GENERAL_UDP_PORT                320
 
 /* Define the TTL of PTP packets */
-#define NX_PTP_TIME_TO_LIVE                1
+#define NX_PTP_TIME_TO_LIVE                    1
 
 /* Define the IPv4 multicast address "224.0.1.129" */
-#define NX_PTP_IPV4_MULTICAST_ADDR         IP_ADDRESS(224, 0, 1, 129)
+#define NX_PTP_IPV4_MULTICAST_ADDR             IP_ADDRESS(224, 0, 1, 129)
+
+/* Define the IPv4 P2P multicast address "224.0.0.107" */
+#define NX_PTP_IPV4_P2P_MULTICAST_ADDR         IP_ADDRESS(224, 0, 0, 107)
 
 /* Define the IPv6 multicast address "ff0e::181" */
-#define NX_PTP_IPV6_MULTICAST_ADDR_SET(x)  {        \
+#define NX_PTP_IPV6_MULTICAST_ADDR_SET(x)      {    \
         (x) -> nxd_ip_version = NX_IP_VERSION_V6;   \
         (x) -> nxd_ip_address.v6[0] = 0xff0e0000UL; \
         (x) -> nxd_ip_address.v6[1] = 0;            \
         (x) -> nxd_ip_address.v6[2] = 0;            \
         (x) -> nxd_ip_address.v6[3] = 0x181; }
 
+/* Define the IPv6 multicast address "ff02::6b" */
+#define NX_PTP_IPV6_P2P_MULTICAST_ADDR_SET(x)  {    \
+        (x) -> nxd_ip_version = NX_IP_VERSION_V6;   \
+        (x) -> nxd_ip_address.v6[0] = 0xff020000UL; \
+        (x) -> nxd_ip_address.v6[1] = 0;            \
+        (x) -> nxd_ip_address.v6[2] = 0;            \
+        (x) -> nxd_ip_address.v6[3] = 0x6b; }
+
+/* Define Ethernet type for PTPv2 over Ethernet */
+#define NX_PTP_ETHERNET_TYPE                   0x88F7
+
+/* Define Ethernet multicast address for PTPv2 over Ethernet */
+#define NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_MSB 0x0180
+#define NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_LSB 0xC200000E
+
+/* Define Ethernet multicast address for all except peer delay messages */
+#define NX_PTP_ETHERNET_ALL_MULTICAST_ADDR_MSB 0x011b
+#define NX_PTP_ETHERNET_ALL_MULTICAST_ADDR_LSB 0x19000000
+
+
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+#define NX_PTP_PACKET                          NX_UDP_PACKET
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+#define NX_PTP_PACKET                          NX_PHYSICAL_HEADER
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
+
 /* Length of PTP message header */
-#define NX_PTP_MSG_HDR_LEN                 34
+#define NX_PTP_MSG_HDR_LEN                     34
 
 /* Length of PTP messages (without header) */
-#define NX_PTP_MSG_ANNOUNCE_LEN            30
-#define NX_PTP_MSG_SYNC_LEN                10
-#define NX_PTP_MSG_FOLLOW_UP_LEN           10
-#define NX_PTP_MSG_DELAY_RESP_LEN          20
+#define NX_PTP_MSG_ANNOUNCE_LEN                30
+#define NX_PTP_MSG_SYNC_LEN                    10
+#define NX_PTP_MSG_FOLLOW_UP_LEN               10
+#define NX_PTP_MSG_DELAY_RESP_LEN              20
+
+/* Length of PTP messages gPTP (without header) */
+#define NX_PTP_MSG_PDELAY_REQ_LEN              20
+#define NX_PTP_MSG_PDELAY_RESP_LEN             20
+#define NX_PTP_MSG_PDELAY_RESP_FOLLOW_UP_LEN   20
+#define NX_PTP_MSG_PDELAY_RESERVED_LEN         10
 
 /* Length of PTP timestamp */
-#define NX_PTP_MSG_TIMESTAMP_LEN           10
+#define NX_PTP_MSG_TIMESTAMP_LEN               10
+
+/* Length of PTP correctionField */
+#define NX_PTP_MSG_CFIELD_TIMESTAMP_LEN        8
 
 /* Get version number */
-#define NX_PTP_MSG_VERSION(p_)             ((p_)[1] & 0xf)
+#define NX_PTP_MSG_VERSION(p_)                 ((p_)[1] & 0xf)
 
 /* Get domain number */
-#define NX_PTP_MSG_DOMAIN(p_)              ((p_)[4])
+#define NX_PTP_MSG_DOMAIN(p_)                  ((p_)[4])
 
 /* Type of messages */
-#define NX_PTP_MSG_TYPE_SYNC               0
-#define NX_PTP_MSG_TYPE_DELAY_REQ          1
-#define NX_PTP_MSG_TYPE_FOLLOW_UP          8
-#define NX_PTP_MSG_TYPE_DELAY_RESP         9
-#define NX_PTP_MSG_TYPE_ANNOUNCE           11
+#define NX_PTP_MSG_TYPE_SYNC                   0
+#define NX_PTP_MSG_TYPE_DELAY_REQ              1
+#define NX_PTP_MSG_TYPE_PDELAY_REQ             2
+#define NX_PTP_MSG_TYPE_PDELAY_RESP            3
+#define NX_PTP_MSG_TYPE_FOLLOW_UP              8
+#define NX_PTP_MSG_TYPE_DELAY_RESP             9
+#define NX_PTP_MSG_TYPE_PDELAY_RESP_FOLLOW_UP  10
+#define NX_PTP_MSG_TYPE_ANNOUNCE               11
 
 /* Message flags */
-#define NX_PTP_MSG_HDR_FLAG_LEAP61         (1 << 0)
-#define NX_PTP_MSG_HDR_FLAG_LEAP59         (1 << 1)
-#define NX_PTP_MSG_HDR_FLAG_UTC_REASONABLE (1 << 2)
-#define NX_PTP_MSG_HDR_FLAG_TWO_STEP       (1 << 9)
+#define NX_PTP_MSG_HDR_FLAG_LEAP61             (1 << 0)
+#define NX_PTP_MSG_HDR_FLAG_LEAP59             (1 << 1)
+#define NX_PTP_MSG_HDR_FLAG_UTC_REASONABLE     (1 << 2)
+#define NX_PTP_MSG_HDR_FLAG_TWO_STEP           (1 << 9)
 
 /* Common Message Header */
 typedef struct NX_PTP_MSG_HEADER_STRUCT
@@ -148,25 +198,47 @@ typedef struct NX_PTP_MSG_HEADER_STRUCT
 } NX_PTP_MSG_HEADER;
 
 /* Get UTC offset from announce message */
-#define NX_PTP_MSG_UTC_OFFSET(p_)          ((SHORT)((p_[10] << 8) | p_[11]))
+#define NX_PTP_MSG_UTC_OFFSET(p_) ((SHORT)((p_[10] << 8) | p_[11]))
 
 /* Macros for reading PTP packet fields */
-#define NX_PTP_RD16(p_, v_)    { \
-        USHORT t_;               \
-        t_ = *p_++;              \
-        t_ = (USHORT)(t_ << 8);  \
+#define NX_PTP_RD16(p_, v_)       { \
+        USHORT t_;                  \
+        t_ = *p_++;                 \
+        t_ = (USHORT)(t_ << 8);     \
         v_ = (USHORT)(t_ | *p_++); }
 
-#define NX_PTP_RD32(p_, v_)    { \
-        ULONG t_;                \
-        t_ = *p_++;              \
-        t_ <<= 8;                \
-        t_ |= *p_++;             \
-        t_ <<= 8;                \
-        t_ |= *p_++;             \
-        t_ <<= 8;                \
+#define NX_PTP_RD32(p_, v_)       { \
+        ULONG t_;                   \
+        t_ = *p_++;                 \
+        t_ <<= 8;                   \
+        t_ |= *p_++;                \
+        t_ <<= 8;                   \
+        t_ |= *p_++;                \
+        t_ <<= 8;                   \
         v_ = t_ |= *p_++; }
 
+#if defined(NX_ENABLE_GPTP) || defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC)
+static VOID  _nx_ptp_utility_32_unsigned_write(UCHAR *dest_ptr, ULONG value)
+{
+
+    *(dest_ptr)     = (UCHAR)((value >> 24) & 0xFF);
+    *(dest_ptr + 1) = (UCHAR)((value >> 16) & 0xFF);
+    *(dest_ptr + 2) = (UCHAR)((value >> 8) & 0xFF);
+    *(dest_ptr + 3) = (UCHAR)(value & 0xFF);
+}
+#endif
+
+#define NX_PTP_TS_RESET(ts) (ts).second_high = 0; \
+                            (ts).second_low = 0;  \
+                            (ts).nanosecond = 0;  \
+
+#define NX_PTP_TS_COPY(ts1, ts2) (ts1).second_high = (ts2).second_high; \
+                                 (ts1).second_low = (ts2).second_low;   \
+                                 (ts1).nanosecond = (ts2).nanosecond;   \
+
+#define NX_PTP_TS_EQUAL(ts1, ts2) ((ts1).second_high == (ts2).second_high && \
+                                   (ts1).second_low == (ts2).second_low &&   \
+                                   (ts1).nanosecond == (ts2).nanosecond)
 
 /**************************************************************************/
 /*                                                                        */
@@ -223,7 +295,7 @@ ULONG nanoseconds = (ULONG)time_ptr -> nanosecond;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_msg_parse_hdr                               PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -256,16 +328,21 @@ ULONG nanoseconds = (ULONG)time_ptr -> nanosecond;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_ptp_msg_parse_hdr(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PTP_MSG_HEADER *hdr)
 {
-UCHAR b;
+UCHAR  b;
 UCHAR *ptr;
-UINT len;
-UINT status;
+UINT   len;
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+UINT   status;
 NXD_ADDRESS src_addr;
-UINT interface_index;
+UINT   interface_index;
+#endif
 
 #ifndef NX_DISABLE_PACKET_CHAIN
     if (packet_ptr -> nx_packet_next)
@@ -295,6 +372,7 @@ UINT interface_index;
         return(NX_INVALID_PACKET);
     }
 
+#if NX_PTP_CLIENT_TRANSPORT_UDP
     /* get info about sender and check packet validity: */
     /* - network interface */
     /* - IP version */
@@ -319,6 +397,7 @@ UINT interface_index;
     {
         client_ptr -> nx_ptp_client_master_addr = src_addr;
     }
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
 
     b = *ptr++;
     hdr -> transportSpecific = b >> 4;
@@ -387,7 +466,7 @@ UINT interface_index;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    _nx_ptp_client_announce_received      Process Announce message      */
+/*    _nx_ptp_client_init_packet_received   Process Announce message      */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -409,6 +488,102 @@ static VOID _nx_ptp_msg_parse_announce(UCHAR *ptr, NX_PTP_CLIENT_MASTER *master)
     NX_PTP_RD16(ptr, master -> nx_ptp_client_master_steps_removed);
     master -> nx_ptp_client_master_time_source = *ptr;
 }
+
+#ifdef NX_PTP_ENABLE_MASTER
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ptp_client_master_clock_compare                    PORTABLE C   */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function compares two clocks for master1 and master2.          */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    master1                               Pointer to first master clock */
+/*    master2                               Pointer to second master clock*/
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    Compare result.                                                      */
+/*    Return positive if master1 is better than master2.                  */
+/*    Return zero if master1 is identical to master2.                     */
+/*    Return negative if master1 is worse than master2.                   */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    memcmp                                Compare memory                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_ptp_client_init_packet_received   Process PTP announce message  */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*                                                                        */
+/**************************************************************************/
+static INT _nx_ptp_client_master_clock_compare(NX_PTP_CLIENT_MASTER *master1, NX_PTP_CLIENT_MASTER *master2)
+{
+INT result;
+INT gm_compare;
+
+    gm_compare = memcmp(master2 -> nx_ptp_client_master_grandmaster_identity,
+                        master1 -> nx_ptp_client_master_grandmaster_identity,
+                        NX_PTP_CLOCK_IDENTITY_SIZE);
+    if (gm_compare == 0)
+    {
+
+        /* Clock identical.  */
+        return(0);
+    }
+
+    result = (INT)master2 -> nx_ptp_client_master_priority1 -
+             (INT)master1 -> nx_ptp_client_master_priority1;
+    if (result != 0)
+    {
+        return(result);
+    }
+
+    result = (INT)master2 -> nx_ptp_client_master_clock_class -
+             (INT)master1 -> nx_ptp_client_master_clock_class;
+    if (result != 0)
+    {
+        return(result);
+    }
+
+    result = (INT)master2 -> nx_ptp_client_master_clock_accuracy -
+             (INT)master1 -> nx_ptp_client_master_clock_accuracy;
+    if (result != 0)
+    {
+        return(result);
+    }
+
+    result = (INT)master2 -> nx_ptp_client_master_offset_scaled_log_variance -
+             (INT)master1 -> nx_ptp_client_master_offset_scaled_log_variance;
+    if (result != 0)
+    {
+        return(result);
+    }
+
+    result = (INT)master2 -> nx_ptp_client_master_priority2 -
+             (INT)master1 -> nx_ptp_client_master_priority2;
+    if (result != 0)
+    {
+        return(result);
+    }
+
+    return(gm_compare);
+}
+#endif /* NX_PTP_ENABLE_MASTER */
 
 
 /**************************************************************************/
@@ -536,6 +711,7 @@ NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)ptp_instance;
 }
 
 
+#if NX_PTP_CLIENT_TRANSPORT_UDP
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
@@ -580,14 +756,109 @@ NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)(socket_ptr -> nx_udp_socket_reserv
     /* set timer event */
     tx_event_flags_set(&(client_ptr -> nx_ptp_client_events), NX_PTP_CLIENT_RX_EVENT, TX_OR);
 }
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
 
 
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ptp_client_ethernet_receive_notify              PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function is invoked when a packet is received.                 */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*                                                                        */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    tx_event_flags_set                    Set receive event             */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX link layer                                                     */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_ptp_client_ethernet_receive_notify(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
+                                                   ULONG physical_address_msw, ULONG physical_address_lsw,
+                                                   UINT packet_type, UINT header_size, VOID *context,
+                                                   struct NX_LINK_TIME_STRUCT *time_ptr)
+{
+TX_INTERRUPT_SAVE_AREA
+NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)context;
+
+    NX_PARAMETER_NOT_USED(ip_ptr);
+    NX_PARAMETER_NOT_USED(interface_index);
+    NX_PARAMETER_NOT_USED(physical_address_msw);
+    NX_PARAMETER_NOT_USED(physical_address_lsw);
+    NX_PARAMETER_NOT_USED(packet_type);
+    NX_PARAMETER_NOT_USED(time_ptr);
+
+    /* Clean off the Ethernet header.  */
+    packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + header_size;
+
+    /* Adjust the packet length.  */
+    packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length - header_size;
+
+    /* Disable interrupts.  */
+    TX_DISABLE
+
+    /* Check to see if the receive queue is empty.  */
+    if (client_ptr -> nx_ptp_client_received_packet_head)
+    {
+
+        /* Not empty, just place the packet at the end of the queue.  */
+        (client_ptr -> nx_ptp_client_received_packet_tail) -> nx_packet_queue_next =  packet_ptr;
+        packet_ptr -> nx_packet_queue_next =  NX_NULL;
+        client_ptr -> nx_ptp_client_received_packet_tail =  packet_ptr;
+
+        /* Restore interrupts.  */
+        TX_RESTORE
+    }
+    else
+    {
+
+        /* Empty receive processing queue.  */
+        client_ptr -> nx_ptp_client_received_packet_head =  packet_ptr;
+        client_ptr -> nx_ptp_client_received_packet_tail =  packet_ptr;
+        packet_ptr -> nx_packet_queue_next =             NX_NULL;
+
+        /* Restore interrupts.  */
+        TX_RESTORE
+
+        /* set timer event */
+        tx_event_flags_set(&(client_ptr -> nx_ptp_client_events), NX_PTP_CLIENT_RX_EVENT, TX_OR);
+    }
+    return(NX_SUCCESS);
+}
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+
+#ifndef NX_PTP_DISABLE_SLAVE
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_clock_adjust                         PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -622,6 +893,9 @@ NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)(socket_ptr -> nx_udp_socket_reserv
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported master clock,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_clock_adjust(NX_PTP_CLIENT *client_ptr, NX_PTP_TIME *offset_ptr)
@@ -671,15 +945,25 @@ NX_PTP_TIME current;
                             (UINT)current.second_low,
                             (INT)current.nanosecond));
     }
+
+#if defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC)
+    if (client_ptr -> nx_ptp_client_sync_timer == 0)
+    {
+
+        /* Set timer values */
+        client_ptr -> nx_ptp_client_sync_timer = NX_PTP_CLIENT_SYNC_INTERVAL;
+    }
+#endif /* defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC) */
 }
+#endif
 
-
+#if NX_PTP_CLIENT_TRANSPORT_UDP
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_send_delay_req                       PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -711,6 +995,10 @@ NX_PTP_TIME current;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            supported master clock,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_delay_req(NX_PTP_CLIENT *client_ptr)
@@ -718,6 +1006,7 @@ static VOID _nx_ptp_client_send_delay_req(NX_PTP_CLIENT *client_ptr)
 NX_PACKET        *packet_ptr;
 UINT              status = NX_NOT_SUCCESSFUL;
 UCHAR            *ptr;
+#if NX_PTP_CLIENT_TRANSPORT_UDP
 NXD_ADDRESS       addr;
 UINT              addr_index = 0;
 #if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
@@ -725,11 +1014,10 @@ NXD_IPV6_ADDRESS *ipv6_addr;
 NX_IP            *ip_ptr;
 NX_INTERFACE     *if_ptr;
 #endif
-
-    NX_PTP_DEBUG_PRINTF(("PTP: send DELAY_REQ\r\n"));
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
 
     /* allocate a packet from the pool */
-    status = nx_packet_allocate(client_ptr -> nx_ptp_client_packet_pool_ptr, &packet_ptr, NX_UDP_PACKET, NX_NO_WAIT);
+    status = nx_packet_allocate(client_ptr -> nx_ptp_client_packet_pool_ptr, &packet_ptr, NX_PTP_PACKET, NX_NO_WAIT);
     if (status != NX_SUCCESS)
     {
         /* Failed to allocate the packet */
@@ -740,7 +1028,7 @@ NX_INTERFACE     *if_ptr;
     ptr = packet_ptr -> nx_packet_prepend_ptr;
 
 #define PTP_MSG_DELAY_REQ_TOTAL_LEN (NX_PTP_MSG_HDR_LEN + NX_PTP_MSG_TIMESTAMP_LEN)
-#define PTP_MSG_DELAY_REQ_ZERO1_LEN (1 + 2 + 8 + 4)
+#define PTP_MSG_DELAY_REQ_ZERO1_LEN (1 + 2 + 8 + 4) /* reserved(1) | flagField(2) | correctionField(8) | reserved(4) */
 
     /* write header */
     *ptr++ = NX_PTP_MSG_TYPE_DELAY_REQ;
@@ -767,6 +1055,7 @@ NX_INTERFACE     *if_ptr;
     packet_ptr -> nx_packet_length = (ULONG)(ptr - packet_ptr -> nx_packet_prepend_ptr);
     packet_ptr -> nx_packet_append_ptr = ptr;
 
+#if NX_PTP_CLIENT_TRANSPORT_UDP
     /* set source and destination addresses */
 #if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
     if (client_ptr -> nx_ptp_client_master_addr.nxd_ip_version == NX_IP_VERSION_V6)
@@ -801,6 +1090,7 @@ NX_INTERFACE     *if_ptr;
         addr_index = client_ptr -> nx_ptp_client_interface_index;
 #endif
     }
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
 
     /* Prepare timestamp for current packet  */
     client_ptr -> nx_ptp_client_delay_state = NX_PTP_CLIENT_DELAY_WAIT_REQ_TS;
@@ -810,8 +1100,17 @@ NX_INTERFACE     *if_ptr;
                                                client_ptr -> nx_ptp_client_clock_callback_data);
 
     /* Send delay request  */
+#if NX_PTP_CLIENT_TRANSPORT_UDP
     status = nxd_udp_socket_source_send((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_event_socket,
                                         packet_ptr, &addr, NX_PTP_EVENT_UDP_PORT, addr_index);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+    nx_link_ethernet_packet_send(client_ptr -> nx_ptp_client_ip_ptr,
+                                 client_ptr -> nx_ptp_client_interface_index, packet_ptr,
+                                 NX_PTP_ETHERNET_ALL_MULTICAST_ADDR_MSB,
+                                 NX_PTP_ETHERNET_ALL_MULTICAST_ADDR_LSB,
+                                 NX_PTP_ETHERNET_TYPE);
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
     if (status)
     {
 
@@ -829,14 +1128,14 @@ NX_INTERFACE     *if_ptr;
     client_ptr -> nx_ptp_client_delay_req_timer = NX_PTP_CLIENT_DELAY_REQ_INTERVAL;
     client_ptr -> nx_ptp_client_delay_req_flag = 0;
 }
-
+#endif
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_sync_received                        PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -850,6 +1149,7 @@ NX_INTERFACE     *if_ptr;
 /*    client_ptr                            Pointer to PTP client         */
 /*    ts_ptr                                Pointer to the timestamp      */
 /*                                           delivered by the Sync message*/
+/*    hdr                                   Pointer to PTP header         */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
@@ -870,15 +1170,125 @@ NX_INTERFACE     *if_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            supported master clock,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-static VOID _nx_ptp_client_sync_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr)
+static VOID _nx_ptp_client_sync_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr, NX_PTP_MSG_HEADER *hdr)
 {
-    NX_PTP_DEBUG_PRINTF(("PTP: rcv SYNC\r\n"));
+#if defined NX_ENABLE_GPTP
+NX_PTP_TIME offset;
+#ifndef NX_PTP_DISABLE_SLAVE
+NX_PTP_CLIENT_SYNC sync;
+#endif /* NX_PTP_DISABLE_SLAVE */
+#if defined(NX_PTP_DEBUG) || defined(NX_PTP_DEBUG_OFFSET)
+double      rate_ratio;
+NX_PTP_TIME delta_t1, delta_t2;
+#endif 
+#endif /* NX_ENABLE_GPTP */
+NX_PTP_TIME correction;
+ULONG64     correctionNS = (hdr -> cFieldHigh << 16) | (hdr -> cFieldLow >> 16);
 
     /* store Sync master timestamp */
     _nx_ptp_msg_parse_timestamp(ts_ptr, &client_ptr -> nx_ptp_client_sync);
 
+    if (correctionNS != 0)
+    {
+
+        /* add correction field to offset.  */
+        correction.second_high = 0;
+        correction.second_low = (ULONG)(correctionNS / 1000000000);
+        correction.nanosecond = (LONG)(correctionNS % 1000000000);
+        _nx_ptp_client_utility_time_sum(&client_ptr -> nx_ptp_client_sync, &correction,
+                                        &client_ptr -> nx_ptp_client_sync);
+    }
+
+#if defined NX_ENABLE_GPTP
+
+    if ((client_ptr -> nx_ptp_client_delay.nanosecond > NX_PTP_CLIENT_DELAY_THRESH) ||
+        (client_ptr -> nx_ptp_client_delay.second_low != 0) ||
+        (client_ptr -> nx_ptp_client_delay.second_high != 0))
+    {
+
+        /* Not as capable. IEEE802.1AS-202, 11.2.2. */
+        return;
+    }
+
+#if defined(NX_PTP_DEBUG) || defined(NX_PTP_DEBUG_OFFSET)
+    /* Compute neighbor rate ratio.  
+       neighborRateRatio = (t1 - prev_t1) / (t2 - prev_t2) */
+    _nx_ptp_client_utility_time_diff(&client_ptr -> nx_ptp_client_sync,
+                                     &client_ptr -> nx_ptp_client_prev_sync, &delta_t1);
+    _nx_ptp_client_utility_time_diff(&client_ptr -> nx_ptp_client_sync_ts,
+                                     &client_ptr -> nx_ptp_client_prev_sync_ts, &delta_t2);
+    if ((delta_t1.second_low == 0) && (delta_t1.second_high == 0) &&
+        (delta_t2.second_low == 0) && (delta_t2.second_high == 0))
+    {
+        rate_ratio = (double)delta_t1.nanosecond / (double)delta_t2.nanosecond;
+    }
+    else
+    {
+        rate_ratio = 1.0;
+    }
+    NX_PTP_DEBUG_PRINTF(("PTP: neighborRateRatio = %lu/%lu = %f\n",
+                         delta_t1.nanosecond, delta_t2.nanosecond, rate_ratio));
+#endif
+
+    /* compute offset = sync_ts - sync_received_ts + delay */
+    _nx_ptp_client_utility_time_diff(&client_ptr -> nx_ptp_client_sync, &client_ptr -> nx_ptp_client_sync_ts, &offset);
+    _nx_ptp_client_utility_time_sum(&offset, &client_ptr -> nx_ptp_client_delay, &offset);
+
+#if defined(NX_PTP_DEBUG) || defined(NX_PTP_DEBUG_OFFSET)
+    if ((offset.second_low == 0) && (offset.second_high == 0))
+    {
+        if ((offset.nanosecond > -1000) && (offset.nanosecond < 1000))
+        {
+            NX_PTP_DEBUG_PRINTF(("PTP: offset = %ld ns\n", offset.nanosecond));
+        }
+        else if ((offset.nanosecond > -1000000) && (offset.nanosecond < 1000000))
+        {
+            NX_PTP_DEBUG_PRINTF(("PTP: offset = %ld us\n", offset.nanosecond / 1000));
+        }
+        else
+        {
+            NX_PTP_DEBUG_PRINTF(("PTP: offset = %ld ms\n", offset.nanosecond / 1000000));
+        }
+    }
+    else
+    {
+        NX_PTP_DEBUG_PRINTF(("PTP: offset > 1s\n"));
+    }
+#endif
+
+#ifndef NX_PTP_DISABLE_SLAVE
+    if (client_ptr -> nx_ptp_client_state == NX_PTP_CLIENT_STATE_SLAVE)
+    {
+        
+        /* add the time offset the client clock */
+        _nx_ptp_client_clock_adjust(client_ptr, &offset);
+
+        /* set calibrated flag */
+        if (!(client_ptr -> nx_ptp_client_sync_flags & NX_PTP_CLIENT_SYNC_CALIBRATED))
+        {
+            client_ptr -> nx_ptp_client_sync_flags |= NX_PTP_CLIENT_SYNC_CALIBRATED;
+
+            /* application callback */
+            if (client_ptr -> nx_ptp_client_event_callback)
+            {
+                sync.nx_ptp_client_sync_flags = client_ptr -> nx_ptp_client_sync_flags;
+                sync.nx_ptp_client_sync_utc_offset = client_ptr -> nx_ptp_client_utc_offset;
+                client_ptr -> nx_ptp_client_event_callback(client_ptr, NX_PTP_CLIENT_EVENT_SYNC, &sync,
+                                                        client_ptr -> nx_ptp_client_event_callback_data);
+            }
+        }
+    }
+#endif /* NX_PTP_DISABLE_SLAVE */
+
+    /* update pdelay responder state */
+    client_ptr -> nx_ptp_client_pdelay_responder_state = NX_PTP_CLIENT_PDELAY_WAIT_REQ;
+#else
     /* delay and offset determination */
     if (client_ptr -> nx_ptp_client_delay_req_flag)
     {
@@ -887,18 +1297,16 @@ static VOID _nx_ptp_client_sync_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr
         /* (delay_req_flag is cleared by this function) */
         _nx_ptp_client_send_delay_req(client_ptr);
     }
-
-    /* update Sync state */
-    client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_WAIT_SYNC;
+#endif
 }
 
-
+#if NX_PTP_CLIENT_TRANSPORT_UDP
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_delay_resp_received                  PORTABLE C      */
-/*                                                           6.1.5        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -937,14 +1345,15 @@ static VOID _nx_ptp_client_sync_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr
 /*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed compiler warnings,    */
 /*                                            resulting in version 6.1.5  */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            simplified debug output,    */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_delay_resp_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr)
 {
-NX_PTP_TIME t4, a, b;
+NX_PTP_TIME        t4, a, b;
 NX_PTP_CLIENT_SYNC sync;
-
-    NX_PTP_DEBUG_PRINTF(("PTP: rcv DELAY_RESP\r\n"));
 
     /*
      * The following timestamps are used for delay/offset determination:
@@ -986,20 +1395,20 @@ NX_PTP_CLIENT_SYNC sync;
     {
         if ((a.nanosecond > -1000) && (a.nanosecond < 1000))
         {
-            printf("PTP: offset = %ld ns\n", a.nanosecond);
+            NX_PTP_DEBUG_PRINTF(("PTP: offset = %ld ns\n", a.nanosecond));
         }
         else if ((a.nanosecond > -1000000) && (a.nanosecond < 1000000))
         {
-            printf("PTP: offset = %ld us\n", a.nanosecond / 1000);
+            NX_PTP_DEBUG_PRINTF(("PTP: offset = %ld us\n", a.nanosecond / 1000));
         }
         else
         {
-            printf("PTP: offset = %ld ms\n", a.nanosecond / 1000000);
+            NX_PTP_DEBUG_PRINTF(("PTP: offset = %ld ms\n", a.nanosecond / 1000000));
         }
     }
     else
     {
-        printf("PTP: offset > 1s\n");
+        NX_PTP_DEBUG_PRINTF(("PTP: offset > 1s\n"));
     }
 #endif
 
@@ -1025,14 +1434,14 @@ NX_PTP_CLIENT_SYNC sync;
     /* update delay req state */
     client_ptr -> nx_ptp_client_delay_state = NX_PTP_CLIENT_DELAY_IDLE;
 }
-
+#endif
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_ptp_client_announce_received                    PORTABLE C      */
-/*                                                           6.1.3        */
+/*    _nx_ptp_client_init_packet_received                 PORTABLE C      */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1059,20 +1468,35 @@ NX_PTP_CLIENT_SYNC sync;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ptp_client_process_general_packet Process PTP general packet    */
+/*    _nx_ptp_client_master_clock_compare   Compare two master clocks     */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            supported master clock,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-static VOID _nx_ptp_client_announce_received(NX_PTP_CLIENT *client_ptr,
+static VOID _nx_ptp_client_init_packet_received(NX_PTP_CLIENT *client_ptr,
                                              NX_PTP_MSG_HEADER *hdr,
                                              UCHAR *ptr)
 {
-NX_PTP_CLIENT_SYNC sync;
+NX_PTP_CLIENT_SYNC   sync;
 NX_PTP_CLIENT_MASTER master;
+#ifdef NX_PTP_ENABLE_MASTER
+INT compare_result;
+
+    if (client_ptr -> nx_ptp_client_role == NX_PTP_CLIENT_ROLE_MASTER_ONLY)
+    {
+
+        /* ignore announce packet for master only mode */
+        return;
+    }
+#endif /* NX_PTP_ENABLE_MASTER */
 
     /* parse Sync information */
     sync.nx_ptp_client_sync_flags = 0;
@@ -1090,6 +1514,57 @@ NX_PTP_CLIENT_MASTER master;
     }
     sync.nx_ptp_client_sync_utc_offset = NX_PTP_MSG_UTC_OFFSET(ptr);
 
+    /* parse announce message */
+    _nx_ptp_msg_parse_announce(ptr, &master);
+
+#ifdef NX_PTP_ENABLE_MASTER
+    if (client_ptr -> nx_ptp_client_role == NX_PTP_CLIENT_ROLE_SLAVE_AND_MASTER)
+    {
+
+        /* compare local clock with incoming master */
+        compare_result = _nx_ptp_client_master_clock_compare(&client_ptr -> ptp_master, &master);
+        if (compare_result == 0)
+        {
+
+            /* error, ignore current announce message */
+            return;
+        }
+        else if (compare_result > 0)
+        {
+
+            /* recommend local clock to be master */
+            if (client_ptr -> nx_ptp_client_state != NX_PTP_CLIENT_STATE_MASTER)
+            {
+
+                /* set timeout for announce and sync */
+                client_ptr -> ptp_master.nx_ptp_client_master_announce_timer = NX_PTP_CLIENT_ANNOUNCE_INTERVAL;
+                client_ptr -> nx_ptp_client_sync_timer = NX_PTP_CLIENT_SYNC_INTERVAL;
+                client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_MASTER;
+                NX_PTP_DEBUG_PRINTF(("PTP: recommend local clock to be master\r\n"));
+                    
+                client_ptr -> nx_ptp_client_event_callback(client_ptr, NX_PTP_CLIENT_EVENT_MASTER,
+                                                           &client_ptr -> ptp_master,
+                                                           client_ptr -> nx_ptp_client_event_callback_data);
+            }
+            return;
+        }
+        else
+        {
+            /* recommend local clock to be slave */
+            if (client_ptr -> nx_ptp_client_state == NX_PTP_CLIENT_STATE_MASTER)
+            {
+
+                /* disable timers for announce and sync */
+                client_ptr -> ptp_master.nx_ptp_client_master_announce_timer = -1;
+                client_ptr -> nx_ptp_client_sync_timer = -1;
+
+                /* change the state to listening and then slave */
+                client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_LISTENING;
+            }
+        }
+    }
+#endif /* NX_PTP_ENABLE_MASTER */
+
     /* check for new master */
     if (client_ptr -> nx_ptp_client_state == NX_PTP_CLIENT_STATE_LISTENING)
     {
@@ -1101,23 +1576,32 @@ NX_PTP_CLIENT_MASTER master;
                NX_PTP_CLOCK_PORT_IDENTITY_SIZE); /* use case of memcpy is verified. */
 
         /* wait for Sync message */
-        client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_WAIT_SYNC;
+        client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_SLAVE;
         client_ptr -> nx_ptp_client_delay_state = NX_PTP_CLIENT_DELAY_IDLE;
+#ifdef NX_ENABLE_GPTP
+        client_ptr -> nx_ptp_client_pdelay_initiator_state = NX_PTP_CLIENT_PDELAY_IDLE;
+        client_ptr -> nx_ptp_client_pdelay_responder_state = NX_PTP_CLIENT_PDELAY_WAIT_SYNC;
+#endif
         client_ptr -> nx_ptp_client_delay_req_timer = -1;
         client_ptr -> nx_ptp_client_delay_req_flag = 1;
 
-
-        /* call application callback */
-        if (client_ptr -> nx_ptp_client_event_callback)
+        if (hdr -> messageType == NX_PTP_MSG_TYPE_ANNOUNCE)
         {
-
-            /* parse annouce message */
-            _nx_ptp_msg_parse_announce(ptr, &master);
-            master.nx_ptp_client_master_address = &(client_ptr -> nx_ptp_client_master_addr);
-            master.nx_ptp_client_master_port_identity = hdr -> sourcePortIdentity;
-            client_ptr -> nx_ptp_client_event_callback(client_ptr, NX_PTP_CLIENT_EVENT_MASTER, &master,
-                                                       client_ptr -> nx_ptp_client_event_callback_data);
+            /* call application callback */
+            if (client_ptr -> nx_ptp_client_event_callback)
+            {
+                master.nx_ptp_client_master_address = &(client_ptr -> nx_ptp_client_master_addr);
+                master.nx_ptp_client_master_port_identity = hdr -> sourcePortIdentity;
+                client_ptr -> nx_ptp_client_event_callback(client_ptr, NX_PTP_CLIENT_EVENT_MASTER, &master,
+                                                        client_ptr -> nx_ptp_client_event_callback_data);
+            }
         }
+
+        /* Reset previous sync timestamp.  */
+        NX_PTP_TS_RESET(client_ptr -> nx_ptp_client_prev_sync);
+        NX_PTP_TS_RESET(client_ptr -> nx_ptp_client_prev_sync_ts);
+        NX_PTP_TS_RESET(client_ptr -> nx_ptp_client_sync);
+        NX_PTP_TS_RESET(client_ptr -> nx_ptp_client_sync_ts);
     }
     else
     {
@@ -1142,8 +1626,195 @@ NX_PTP_CLIENT_MASTER master;
         }
     }
 
-    /* reset annouce timer */
+    /* reset announce timer */
     client_ptr -> nx_ptp_client_announce_timeout = NX_PTP_CLIENT_ANNOUNCE_EXPIRATION;
+}
+
+#ifdef NX_ENABLE_GPTP
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ptp_client_send_pdelay_req                      PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sends a PTP Pdelay Request message.                   */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    client_ptr                            Pointer to PTP client         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_packet_allocate                    Allocate a packet             */
+/*    nxd_udp_socket_source_send            Send a UDP packet             */
+/*    nx_packet_release                     Release a packet              */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_ptp_client_thread_entry           PTP thread entry              */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+static VOID _nx_ptp_client_send_pdelay_req(NX_PTP_CLIENT *client_ptr)
+{
+NX_PACKET *packet_ptr;
+UINT       status = NX_NOT_SUCCESSFUL;
+UCHAR     *ptr;
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+NXD_ADDRESS       addr;
+UINT              addr_index = 0;
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+NXD_IPV6_ADDRESS *ipv6_addr;
+NX_IP            *ip_ptr;
+NX_INTERFACE     *if_ptr;
+#endif
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+    /* Allocate a packet from the pool */
+    status = nx_packet_allocate(client_ptr -> nx_ptp_client_packet_pool_ptr, &packet_ptr, NX_PTP_PACKET, NX_NO_WAIT);
+    if (status != NX_SUCCESS)
+    {
+        /* Failed to allocate the packet */
+        return;
+    }
+
+    /* Start of message */
+    ptr = packet_ptr -> nx_packet_prepend_ptr;
+
+#define PTP_MSG_PDELAY_REQ_TOTAL_LEN (NX_PTP_MSG_HDR_LEN + NX_PTP_MSG_TIMESTAMP_LEN + NX_PTP_MSG_PDELAY_RESERVED_LEN)
+
+    /* Write header IEEE Std 1588-2008 Section 13.3.1*/
+    /* messageType */
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_transport_specific << 4) | NX_PTP_MSG_TYPE_PDELAY_REQ;
+    /* versionPTP */
+    *ptr++ = NX_PTP_VERSION;
+    /* messageLength */
+    *ptr++ = PTP_MSG_PDELAY_REQ_TOTAL_LEN >> 8;
+    *ptr++ = (UCHAR)PTP_MSG_PDELAY_REQ_TOTAL_LEN;
+    /* domainNumber */
+    *ptr++ = client_ptr -> nx_ptp_client_domain;
+
+    /* reserved 1 octets */
+    *ptr++ = 0;
+
+    /* flags 2 octets */
+    *ptr++ = 0;
+    *ptr++ = 0;
+
+    /* correction + reserved 8 + 4 */
+    memset(ptr, 0, 12); 
+    ptr += 12;
+
+    /* sourcePortIdentity */
+    memcpy(ptr, client_ptr -> nx_ptp_client_port_identity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE); /* use case of memcpy is verified. */
+    ptr += NX_PTP_CLOCK_PORT_IDENTITY_SIZE;
+    /* sequenceID */
+    client_ptr -> nx_ptp_client_pdelay_req_id++;
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_req_id >> 8);
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_req_id);
+    /* control */
+    *ptr++ = 5; /* other message */
+    /* XXX */
+    *ptr++ = 0; 
+
+    /* write timestamp */
+    memset(ptr, 0, NX_PTP_MSG_TIMESTAMP_LEN);
+    ptr += NX_PTP_MSG_TIMESTAMP_LEN;
+
+    /* write space for reserved space to align size with pdelay_resp */
+    memset(ptr, 0, NX_PTP_MSG_PDELAY_RESERVED_LEN);
+    ptr += NX_PTP_MSG_PDELAY_RESERVED_LEN;
+
+    /* set final message length */
+    packet_ptr -> nx_packet_length = (ULONG)(ptr - (packet_ptr -> nx_packet_prepend_ptr));
+    packet_ptr -> nx_packet_append_ptr = ptr;
+
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+    /* set source and destination addresses */
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+    if (client_ptr -> nx_ptp_client_master_addr.nxd_ip_version == NX_IP_VERSION_V6)
+    {
+        NX_PTP_IPV6_P2P_MULTICAST_ADDR_SET(&addr);
+
+        /* Use first IPv6 address as source address. */
+        ip_ptr = client_ptr -> nx_ptp_client_ip_ptr;
+        if_ptr = &ip_ptr -> nx_ip_interface[client_ptr -> nx_ptp_client_interface_index];
+        ipv6_addr = if_ptr -> nxd_interface_ipv6_address_list_head;
+        if (ipv6_addr == NX_NULL)
+        {
+
+            /* No available IPv6 address.  */
+            /* Release packet.  */
+            nx_packet_release(packet_ptr);
+
+            /* Reset state.  */
+            client_ptr -> nx_ptp_client_pdelay_initiator_state = NX_PTP_CLIENT_PDELAY_IDLE;
+            client_ptr -> nx_ptp_client_pdelay_req_packet_ptr = NX_NULL;
+
+            return;
+        }
+        addr_index = ipv6_addr -> nxd_ipv6_address_index;
+    }
+    else
+#endif
+    {
+#ifndef NX_DISABLE_IPV4
+        addr.nxd_ip_version = NX_IP_VERSION_V4;
+        addr.nxd_ip_address.v4 = NX_PTP_IPV4_P2P_MULTICAST_ADDR;
+        addr_index = client_ptr -> nx_ptp_client_interface_index;
+#endif
+    }
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+    /* Prepare timestamp for current packet */
+    client_ptr -> nx_ptp_client_pdelay_initiator_state = NX_PTP_CLIENT_PDELAY_WAIT_REQ_TS;
+    client_ptr -> nx_ptp_client_pdelay_req_packet_ptr = packet_ptr;
+    client_ptr -> nx_ptp_client_clock_callback(client_ptr, NX_PTP_CLIENT_CLOCK_PACKET_TS_PREPARE,
+                                               &client_ptr -> nx_ptp_client_pdelay_req_ts, packet_ptr,
+                                               client_ptr -> nx_ptp_client_clock_callback_data);
+
+    /* Send Pdelay_Req */
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+    status = nxd_udp_socket_source_send((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_event_socket,
+                                        packet_ptr, &addr, NX_PTP_EVENT_UDP_PORT, addr_index);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+    nx_link_ethernet_packet_send(client_ptr -> nx_ptp_client_ip_ptr,
+                                 client_ptr -> nx_ptp_client_interface_index, packet_ptr,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_MSB,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_LSB,
+                                 NX_PTP_ETHERNET_TYPE);
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
+    if (status)
+    {
+
+        /* release packet in case of error */
+        nx_packet_release(packet_ptr);
+
+        /* reset state */
+        client_ptr -> nx_ptp_client_pdelay_initiator_state = NX_PTP_CLIENT_PDELAY_IDLE;
+        client_ptr -> nx_ptp_client_pdelay_req_packet_ptr = NX_NULL;
+
+        return;
+    }
+
+    /* rearm delay req timer (use the client timer) */ 
+    client_ptr -> nx_ptp_client_pdelay_req_timer = NX_PTP_CLIENT_PDELAY_REQ_INTERVAL;
 }
 
 
@@ -1151,8 +1822,1075 @@ NX_PTP_CLIENT_MASTER master;
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
+/*    _nx_ptp_client_pdelay_resp_received                 PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function processes a received PTP Pdelay Response message.     */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    client_ptr                            Pointer to PTP client         */
+/*    ts_ptr                                Pointer to the timestamp      */
+/*                                           delivered by the Pdelay Resp */
+/*                                           message                      */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_ptp_client_clock_adjust           Adjust PTP clock              */
+/*    _nx_ptp_msg_parse_timestamp           Parse timestamp field         */
+/*    _nx_ptp_client_utility_time_diff      Diff two PTP times            */
+/*    _nx_ptp_client_utility_time_div_by_2  Divide a PTP time by 2        */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_ptp_client_process_general_packet Process PTP general packet    */
+/*    _nx_ptp_client_process_event_packet   Process PTP event packet      */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+static VOID _nx_ptp_client_pdelay_resp_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr)
+{
+NX_PTP_TIME a, b, c, d, t3;
+
+    /*
+    * The following timestamps are used to calculate the mean link delay using P2P
+    * t1 = nx_ptp_client_pdelay_req_ts
+    * t2 = nx_ptp_client_pdelay_req_receipt_ts (within pdelay_resp)
+    * t3 = nx_ptp_client_pdelay_resp_origin_ts (within pdelay_resp_follow_up or ts_ptr)
+    * t4 = (onestep: nx_ptp_client_pdelay_req_receipt_ts)/(twostep:nx_ptp_client_pdelay_resp_ts)
+    * 
+    * C = t2 - t1
+    * D = t4 - t3
+    *  
+    * <meanLinkDelay> = [(t2 – t1) + (t4 – t3)]/2
+    * 
+    * A = t1 - t2
+    * B = t3 - t4
+    * 
+    * offset = [(t1 - t2) - (t3 - t4)]/2 
+    *        = [B - A]/2
+    * 
+    * 
+    * onestep: <meanLinkDelay> = [(t4 − t1) − <correctedPdelayRespCorrectionField>]/2
+    * correctedPDelayRespCorrectionField = t3-t2 (turnaround time)
+    * 
+    * onestep offset = (t4 + t1 - (nx_ptp_client_pdelay_req_receipt_ts * 2))/2
+    * - the multiply by 2 is here because we are not yet parsing the correction field
+    * 
+    * twostep offset = (t4 + t1 - (nx_ptp_client_pdelay_req_receipt_ts + ts_ptr))/2
+    * 
+    * We will set <delayAsymmetry> to 0 unless a value is provided by the user
+    *
+    * delay_asymmetry = 0;
+    * corrected_pdelay_resp = ingress <delayAsymmetry> + pdelay_resp_correction_field
+    * corrected_pdelay_resp = delay_asymmetry + pdelay_resp_correction_field
+    */
+
+    /* get message timestamp */
+    _nx_ptp_msg_parse_timestamp(ts_ptr, &t3);
+
+    /* compute A = t1 - t2 */
+    _nx_ptp_client_utility_time_diff(&client_ptr -> nx_ptp_client_pdelay_req_ts, &client_ptr -> nx_ptp_client_pdelay_req_receipt_ts, &a);
+
+    /* compute B = t3 - t4 */
+    _nx_ptp_client_utility_time_diff(&t3, &client_ptr -> nx_ptp_client_pdelay_resp_ts, &b);
+
+    /* compute C = t2 - t1 */
+    _nx_ptp_client_utility_time_diff(&client_ptr -> nx_ptp_client_pdelay_req_receipt_ts, &client_ptr -> nx_ptp_client_pdelay_req_ts, &c);
+
+    /* compute D = t4 - t3 */
+    _nx_ptp_client_utility_time_diff(&client_ptr -> nx_ptp_client_pdelay_resp_ts, &t3, &d);
+
+    /* compute delay = (D + C) / 2 */
+    _nx_ptp_client_utility_time_sum(&d, &c, &client_ptr -> nx_ptp_client_delay);
+    _nx_ptp_client_utility_time_div_by_2(&client_ptr -> nx_ptp_client_delay);
+
+#if defined(NX_PTP_DEBUG) || defined(NX_PTP_DEBUG_DELAY)
+    if ((client_ptr -> nx_ptp_client_delay.second_low == 0) && (client_ptr -> nx_ptp_client_delay.second_high == 0))
+    {
+        if ((client_ptr -> nx_ptp_client_delay.nanosecond > -1000) &&
+            (client_ptr -> nx_ptp_client_delay.nanosecond < 1000))
+        {
+            NX_PTP_DEBUG_PRINTF(("PTP: delay = %ld ns", client_ptr -> nx_ptp_client_delay.nanosecond));
+        }
+        else if ((client_ptr -> nx_ptp_client_delay.nanosecond > -1000000) &&
+                 (client_ptr -> nx_ptp_client_delay.nanosecond < 1000000))
+        {
+            NX_PTP_DEBUG_PRINTF(("PTP: delay = %ld us", client_ptr -> nx_ptp_client_delay.nanosecond / 1000));
+        }
+        else
+        {
+            NX_PTP_DEBUG_PRINTF(("PTP: delay = %ld ms", client_ptr -> nx_ptp_client_delay.nanosecond / 1000000));
+        }
+    }
+    else
+    {
+        NX_PTP_DEBUG_PRINTF(("PTP: delay > 1s"));
+    }
+
+    if (client_ptr -> nx_ptp_client_delay.nanosecond > NX_PTP_CLIENT_DELAY_THRESH)
+    {
+        NX_PTP_DEBUG_PRINTF((", asCapable is FALSE\n"));
+    }
+    else
+    {
+        NX_PTP_DEBUG_PRINTF((", asCapable is TRUE\n"));
+    }
+#endif
+
+    /* update pdelay req state */
+    client_ptr -> nx_ptp_client_pdelay_initiator_state = NX_PTP_CLIENT_PDELAY_IDLE;
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ptp_client_send_pdelay_resp_follow_up           PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sends a PTP Pdelay response follow up message.        */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    client_ptr                            Pointer to PTP client         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_packet_allocate                    Allocate a packet             */
+/*    nxd_udp_socket_source_send            Send a UDP packet             */
+/*    nx_packet_release                     Release a packet              */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_ptp_client_thread_entry           PTP thread entry              */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+static VOID _nx_ptp_client_send_pdelay_resp_follow_up(NX_PTP_CLIENT *client_ptr)
+{
+NX_PACKET *packet_ptr;
+UINT       status = NX_NOT_SUCCESSFUL;
+UCHAR     *ptr;
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+NXD_ADDRESS       addr;
+UINT              addr_index = 0;
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+NXD_IPV6_ADDRESS *ipv6_addr;
+NX_IP            *ip_ptr;
+NX_INTERFACE     *if_ptr;
+#endif
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+    /* Verify state */
+    if (client_ptr -> nx_ptp_client_pdelay_responder_state != NX_PTP_CLIENT_PDELAY_SEND_FOLLOW_UP)
+    {
+        return;
+    }
+
+    /* Allocate a packet from the pool */
+    status = nx_packet_allocate(client_ptr -> nx_ptp_client_packet_pool_ptr, &packet_ptr, NX_PTP_PACKET, NX_NO_WAIT);
+    if (status != NX_SUCCESS)
+    {
+        /* Failed to allocate the packet */
+        return;
+    }
+
+    /* Start of message */
+    ptr = packet_ptr -> nx_packet_prepend_ptr;
+
+#define PTP_MSG_PDELAY_RESP_TOTAL_LEN (NX_PTP_MSG_HDR_LEN + NX_PTP_MSG_TIMESTAMP_LEN + NX_PTP_MSG_PDELAY_RESERVED_LEN)
+
+    /* Write header IEEE Std 1588-2008 Section 13.3.1*/
+    /* messageType */
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_transport_specific << 4) | NX_PTP_MSG_TYPE_PDELAY_RESP_FOLLOW_UP;
+    /* versionPTP */
+    *ptr++ = NX_PTP_VERSION;
+    /* messageLength */
+    *ptr++ = PTP_MSG_PDELAY_RESP_TOTAL_LEN >> 8;
+    *ptr++ = (UCHAR)PTP_MSG_PDELAY_RESP_TOTAL_LEN;
+    /* domainNumber */
+    *ptr++ = client_ptr -> nx_ptp_client_domain;
+    /* reserved 1 octets */
+    *ptr++ = 0;
+    /* flags 2 octets */
+    *ptr++ = 0;
+    *ptr++ = 0;
+    /* correction + reserved 8 + 4 (correction field to be updated with t3-t2 later) */
+    memset(ptr, 0, 12); 
+    ptr += 12;
+    /* sourcePortIdentity */
+    memcpy(ptr, client_ptr -> nx_ptp_client_port_identity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE); /* use case of memcpy is verified. */
+    ptr += NX_PTP_CLOCK_PORT_IDENTITY_SIZE;
+    /* sequenceID */
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_responder_id >> 8);
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_responder_id);
+    /* control */
+    *ptr++ = 5; /* other message */
+    /* XXX */
+    *ptr++ = 0;
+
+    /* write timestamp t3 */
+    *ptr++ = (UCHAR)((client_ptr -> nx_ptp_client_pdelay_resp_origin).second_high >> 8);
+    *ptr++ = (UCHAR)((client_ptr -> nx_ptp_client_pdelay_resp_origin).second_high);
+    _nx_ptp_utility_32_unsigned_write(ptr, (client_ptr -> nx_ptp_client_pdelay_resp_origin).second_low);
+    ptr += 4;
+    _nx_ptp_utility_32_unsigned_write(ptr, (ULONG)(client_ptr -> nx_ptp_client_pdelay_resp_origin.nanosecond));
+    ptr += 4;
+
+    /* write requestingPortIdentity */ 
+    memcpy(ptr, client_ptr -> nx_ptp_client_request_port_identity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE); /* use case of memcpy is verified. */
+    ptr += NX_PTP_CLOCK_PORT_IDENTITY_SIZE;
+
+    /* set final message length */
+    packet_ptr -> nx_packet_length = (ULONG)(ptr - (packet_ptr -> nx_packet_prepend_ptr));
+    packet_ptr -> nx_packet_append_ptr = ptr;
+
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+    /* set source and destination addresses */
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+    if (client_ptr -> nx_ptp_client_master_addr.nxd_ip_version == NX_IP_VERSION_V6)
+    {
+        NX_PTP_IPV6_P2P_MULTICAST_ADDR_SET(&addr);
+
+        /* Use first IPv6 address as source address. */
+        ip_ptr = client_ptr -> nx_ptp_client_ip_ptr;
+        if_ptr = &ip_ptr -> nx_ip_interface[client_ptr -> nx_ptp_client_interface_index];
+        ipv6_addr = if_ptr -> nxd_interface_ipv6_address_list_head;
+        if (ipv6_addr == NX_NULL)
+        {
+
+            /* No available IPv6 address.  */
+            /* Release packet.  */
+            nx_packet_release(packet_ptr);
+
+            /* Reset state.  */
+            client_ptr -> nx_ptp_client_pdelay_responder_state = NX_PTP_CLIENT_PDELAY_WAIT_REQ;
+            client_ptr -> nx_ptp_client_pdelay_req_packet_ptr = NX_NULL;
+
+            return;
+        }
+        addr_index = ipv6_addr -> nxd_ipv6_address_index;
+    }
+    else
+#endif
+    {
+#ifndef NX_DISABLE_IPV4
+        addr.nxd_ip_version = NX_IP_VERSION_V4;
+        addr.nxd_ip_address.v4 = NX_PTP_IPV4_P2P_MULTICAST_ADDR;
+        addr_index = client_ptr -> nx_ptp_client_interface_index;
+#endif
+    }
+
+    /* Send Pdelay_Resp */
+    status = nxd_udp_socket_source_send((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_general_socket,
+                                        packet_ptr, &addr, NX_PTP_GENERAL_UDP_PORT, addr_index);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+    nx_link_ethernet_packet_send(client_ptr -> nx_ptp_client_ip_ptr,
+                                 client_ptr -> nx_ptp_client_interface_index, packet_ptr,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_MSB,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_LSB,
+                                 NX_PTP_ETHERNET_TYPE);
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
+    if (status)
+    {
+        /* release packet in case of error */
+        nx_packet_release(packet_ptr);
+
+        /* reset state */
+        client_ptr -> nx_ptp_client_pdelay_responder_state = NX_PTP_CLIENT_PDELAY_WAIT_REQ;
+        client_ptr -> nx_ptp_client_pdelay_req_packet_ptr = NX_NULL;
+
+        return;
+    }
+
+    client_ptr -> nx_ptp_client_pdelay_responder_state = NX_PTP_CLIENT_PDELAY_WAIT_REQ;
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ptp_client_send_pdelay_resp                     PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sends a PTP Pdelay response message.                  */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    client_ptr                            Pointer to PTP client         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_packet_allocate                    Allocate a packet             */
+/*    nxd_udp_socket_source_send            Send a UDP packet             */
+/*    nx_packet_release                     Release a packet              */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_ptp_client_thread_entry           PTP thread entry              */
+/*    _nx_ptp_client_process_event_packet   Process PTP event packet      */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+static VOID _nx_ptp_client_send_pdelay_resp(NX_PTP_CLIENT *client_ptr)
+{ 
+NX_PACKET *packet_ptr;
+UINT       status = NX_NOT_SUCCESSFUL;
+UCHAR     *ptr;
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+NXD_ADDRESS       addr;
+UINT              addr_index = 0;
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+NXD_IPV6_ADDRESS *ipv6_addr;
+NX_IP            *ip_ptr;
+NX_INTERFACE     *if_ptr;
+#endif
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+    /* Verify state */
+    if (client_ptr -> nx_ptp_client_pdelay_responder_state != NX_PTP_CLIENT_PDELAY_SEND_RESP_TWOSTEP)
+    {
+        return;
+    }
+
+    /* Allocate a packet from the pool */
+    status = nx_packet_allocate(client_ptr -> nx_ptp_client_packet_pool_ptr, &packet_ptr, NX_PTP_PACKET, NX_NO_WAIT);
+    if (status != NX_SUCCESS)
+    {
+        /* Failed to allocate the packet */
+        return;
+    }
+
+    /* Start of message */
+    ptr = packet_ptr -> nx_packet_prepend_ptr;
+
+#define PTP_MSG_PDELAY_RESP_TOTAL_LEN (NX_PTP_MSG_HDR_LEN + NX_PTP_MSG_TIMESTAMP_LEN + NX_PTP_MSG_PDELAY_RESERVED_LEN)
+
+    /* Write header IEEE Std 1588-2008 Section 13.3.1*/
+    /* messageType */
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_transport_specific << 4) | NX_PTP_MSG_TYPE_PDELAY_RESP;
+    /* versionPTP */
+    *ptr++ = NX_PTP_VERSION;
+    /* messageLength */
+    *ptr++ = PTP_MSG_PDELAY_REQ_TOTAL_LEN >> 8;
+    *ptr++ = (UCHAR)PTP_MSG_PDELAY_REQ_TOTAL_LEN;
+    /* domainNumber */
+    *ptr++ = client_ptr -> nx_ptp_client_domain;
+    /* reserved 1 octets */
+    *ptr++ = 0;
+    /* flags 2 octets */
+    *ptr++ = 0x02;
+    *ptr++ = 0x8;
+    /* correction + reserved 8 + 4 */
+    memset(ptr, 0, 12); 
+    ptr += 12;
+    /* sourcePortIdentity */
+    memcpy(ptr, client_ptr -> nx_ptp_client_port_identity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE); /* use case of memcpy is verified. */
+    ptr += NX_PTP_CLOCK_PORT_IDENTITY_SIZE;
+    /* sequenceID */
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_responder_id >> 8);
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_responder_id);
+    /* control */
+    *ptr++ = 5; /* other message */
+    /* XXX */
+    *ptr++ = 0;
+
+    /* write timestamp t2 */
+    *ptr++ = (UCHAR)((client_ptr -> nx_ptp_client_pdelay_req_receipt).second_high >> 8);
+    *ptr++ = (UCHAR)((client_ptr -> nx_ptp_client_pdelay_req_receipt).second_high);
+    /* 4 octets for second low */
+    _nx_ptp_utility_32_unsigned_write(ptr, (client_ptr -> nx_ptp_client_pdelay_req_receipt).second_low);
+    ptr += 4;
+    /* 4 for nanosecond */
+    _nx_ptp_utility_32_unsigned_write(ptr, (ULONG)(client_ptr -> nx_ptp_client_pdelay_req_receipt.nanosecond));
+    ptr += 4;
+
+    /* write requestingPortIdentity */ 
+    memcpy(ptr, client_ptr -> nx_ptp_client_request_port_identity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE); /* use case of memcpy is verified. */
+    ptr += NX_PTP_CLOCK_PORT_IDENTITY_SIZE;
+
+    /* set final message length */
+    packet_ptr -> nx_packet_length = (ULONG)(ptr - (packet_ptr -> nx_packet_prepend_ptr));
+    packet_ptr -> nx_packet_append_ptr = ptr;
+
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+    /* set source and destination addresses */
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+    if (client_ptr -> nx_ptp_client_master_addr.nxd_ip_version == NX_IP_VERSION_V6)
+    {
+        NX_PTP_IPV6_P2P_MULTICAST_ADDR_SET(&addr);
+
+        /* Use first IPv6 address as source address. */
+        ip_ptr = client_ptr -> nx_ptp_client_ip_ptr;
+        if_ptr = &ip_ptr -> nx_ip_interface[client_ptr -> nx_ptp_client_interface_index];
+        ipv6_addr = if_ptr -> nxd_interface_ipv6_address_list_head;
+        if (ipv6_addr == NX_NULL)
+        {
+
+            /* No available IPv6 address.  */
+            /* Release packet.  */
+            nx_packet_release(packet_ptr);
+
+            /* Reset state.  */
+            client_ptr -> nx_ptp_client_pdelay_responder_state = NX_PTP_CLIENT_PDELAY_WAIT_REQ;
+            client_ptr -> nx_ptp_client_pdelay_req_packet_ptr = NX_NULL;
+
+            return;
+        }
+        addr_index = ipv6_addr -> nxd_ipv6_address_index;
+    }
+    else
+#endif
+    {
+#ifndef NX_DISABLE_IPV4
+        addr.nxd_ip_version = NX_IP_VERSION_V4;
+        addr.nxd_ip_address.v4 = NX_PTP_IPV4_P2P_MULTICAST_ADDR;
+        addr_index = client_ptr -> nx_ptp_client_interface_index;
+#endif
+    }
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+    client_ptr -> nx_ptp_client_pdelay_resp_packet_ptr = packet_ptr;
+
+     /* Prepare timestamp for current packet (generate t3) */
+    client_ptr -> nx_ptp_client_clock_callback(client_ptr, NX_PTP_CLIENT_CLOCK_PACKET_TS_PREPARE,
+                                               &client_ptr -> nx_ptp_client_pdelay_resp_origin, packet_ptr,
+                                               client_ptr -> nx_ptp_client_clock_callback_data);
+    
+
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+    /* Send Pdelay_Resp */
+    status = nxd_udp_socket_source_send((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_general_socket,
+                                        packet_ptr, &addr, NX_PTP_GENERAL_UDP_PORT, addr_index);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+    nx_link_ethernet_packet_send(client_ptr -> nx_ptp_client_ip_ptr,
+                                 client_ptr -> nx_ptp_client_interface_index, packet_ptr,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_MSB,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_LSB,
+                                 NX_PTP_ETHERNET_TYPE);
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
+    if (status)
+    {
+        /* release packet in case of error */
+        nx_packet_release(packet_ptr);
+
+        /* reset state */
+        client_ptr -> nx_ptp_client_pdelay_responder_state = NX_PTP_CLIENT_PDELAY_WAIT_REQ;
+        client_ptr -> nx_ptp_client_pdelay_req_packet_ptr = NX_NULL;
+
+        return;
+    }
+}
+#endif /* NX_ENABLE_GPTP*/
+
+
+#if defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC)
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ptp_client_send_follow_up                       PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sends a PTP follow up message.                        */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    client_ptr                            Pointer to PTP client         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_packet_allocate                    Allocate a packet             */
+/*    nxd_udp_socket_source_send            Send a UDP packet             */
+/*    nx_packet_release                     Release a packet              */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_ptp_client_thread_entry           PTP thread entry              */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+static VOID _nx_ptp_client_send_follow_up(NX_PTP_CLIENT *client_ptr)
+{
+NX_PACKET *packet_ptr;
+UINT       status = NX_NOT_SUCCESSFUL;
+UCHAR     *ptr;
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+NXD_ADDRESS       addr;
+UINT              addr_index = 0;
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+NXD_IPV6_ADDRESS *ipv6_addr;
+NX_IP            *ip_ptr;
+NX_INTERFACE     *if_ptr;
+#endif
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+    /* allocate a packet from the pool */
+    status = nx_packet_allocate(client_ptr -> nx_ptp_client_packet_pool_ptr, &packet_ptr, NX_PTP_PACKET, NX_NO_WAIT);
+    if (status != NX_SUCCESS)
+    {
+        /* Failed to allocate the packet */
+        return;
+    }
+
+    /* start of message */
+    ptr = packet_ptr -> nx_packet_prepend_ptr;
+    
+#define PTP_FOLLOW_UP_TLV_LENGTH    32
+#define PTP_MSG_FOLLOW_UP_TOTAL_LEN (NX_PTP_MSG_HDR_LEN + NX_PTP_MSG_TIMESTAMP_LEN + PTP_FOLLOW_UP_TLV_LENGTH)
+
+    /* write header */
+    /* messageType */
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_transport_specific << 4) | NX_PTP_MSG_TYPE_FOLLOW_UP;
+    /* versionPTP */
+    *ptr++ = NX_PTP_VERSION;
+    /* messageLength */
+    *ptr++ = PTP_MSG_FOLLOW_UP_TOTAL_LEN >> 8;
+    *ptr++ = (UCHAR)PTP_MSG_FOLLOW_UP_TOTAL_LEN;
+    /* domainNumber */
+    *ptr++ = client_ptr -> nx_ptp_client_domain;
+    /* reserved 1 octets */
+    *ptr++ = 0;
+    /* flags 2 octets */
+    *ptr++ = 0;
+    *ptr++ = 0x08;
+    /* correction + reserved 8 + 4 */
+    memset(ptr, 0, 12); 
+    ptr += 12;
+    /* sourcePortIdentity */
+    memcpy(ptr, client_ptr -> nx_ptp_client_port_identity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE); /* use case of memcpy is verified. */
+    ptr += NX_PTP_CLOCK_PORT_IDENTITY_SIZE;
+    /* sequenceID */
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_sync_sequenceId >> 8);
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_sync_sequenceId);
+    /* control */
+    *ptr++ = 2; /* follow up message */
+    /* XXX */ 
+    *ptr++ = 0;
+
+    /* write preciseOriginTimestamp */
+    *ptr++ = (UCHAR)((client_ptr -> nx_ptp_client_sync_ts_local).second_high >> 8);
+    *ptr++ = (UCHAR)((client_ptr -> nx_ptp_client_sync_ts_local).second_high);
+    /* 4 octets for second low */
+    _nx_ptp_utility_32_unsigned_write(ptr, (client_ptr -> nx_ptp_client_sync_ts_local).second_low);
+    ptr += 4;
+    /* 4 for nanosecond */
+    _nx_ptp_utility_32_unsigned_write(ptr, (ULONG)(client_ptr -> nx_ptp_client_sync_ts_local.nanosecond));
+    ptr += 4;
+
+    /* Follow_Up information TLV definition 801AS-2020 11.4.4.3. Required by 801AS-2020 Section 7.5 g) */
+    /* tlvType */
+    *ptr++ = 0;
+    *ptr++ = 0x3;
+    /* lengthField */
+    *ptr++ = 0;
+    *ptr++ = 28;
+    /* organizationId(3): 00-80-C2 from 801AS-2020 11.4.4.3.4 */
+    *ptr++ = 0x0;
+    *ptr++ = 0x80;
+    *ptr++ = 0xC2;
+    /* organizationSubType(3): 1 */
+    *ptr++ = 0x0;
+    *ptr++ = 0x0;
+    *ptr++ = 0x1;
+    /* cumulativeScaledRateOffset(4) */
+    /* gmTimeBaseIndicator(2) */
+    /* lastGmPhaseChange(12) */
+    /* scaledLastGmFreqChange(4) */
+#define PTP_FOLLOW_UP_TLV_ZEROES 4 + 2 + 12 + 4
+    memset(ptr, 0, PTP_FOLLOW_UP_TLV_ZEROES);
+    ptr += PTP_FOLLOW_UP_TLV_ZEROES;
+
+    /* set final length of message */
+    packet_ptr -> nx_packet_length = (ULONG)(ptr - packet_ptr -> nx_packet_prepend_ptr);
+    packet_ptr -> nx_packet_append_ptr = ptr;
+
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+    /* set source and destination addresses */
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+    if (client_ptr -> nx_ptp_client_master_addr.nxd_ip_version == NX_IP_VERSION_V6)
+    {
+        NX_PTP_IPV6_MULTICAST_ADDR_SET(&addr);
+
+        /* Use first IPv6 address as source address. */
+        ip_ptr = client_ptr -> nx_ptp_client_ip_ptr;
+        if_ptr = &ip_ptr -> nx_ip_interface[client_ptr -> nx_ptp_client_interface_index];
+        ipv6_addr = if_ptr -> nxd_interface_ipv6_address_list_head;
+        if (ipv6_addr == NX_NULL)
+        {
+
+            /* No available IPv6 address.  */
+            /* Release packet.  */
+            nx_packet_release(packet_ptr);
+
+            /* Reset state.  */
+            client_ptr -> nx_ptp_client_sync_timer = NX_PTP_CLIENT_SYNC_INTERVAL;
+
+            return;
+        }
+        addr_index = ipv6_addr -> nxd_ipv6_address_index;
+    }
+    else
+#endif
+    {
+#ifndef NX_DISABLE_IPV4
+        addr.nxd_ip_version = NX_IP_VERSION_V4;
+        addr.nxd_ip_address.v4 = NX_PTP_IPV4_MULTICAST_ADDR;
+        addr_index = client_ptr -> nx_ptp_client_interface_index;
+#endif
+    }
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+    /* Send Pdelay_Resp */
+    status = nxd_udp_socket_source_send((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_general_socket,
+                                        packet_ptr, &addr, NX_PTP_GENERAL_UDP_PORT, addr_index);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+    nx_link_ethernet_packet_send(client_ptr -> nx_ptp_client_ip_ptr,
+                                 client_ptr -> nx_ptp_client_interface_index, packet_ptr,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_MSB,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_LSB,
+                                 NX_PTP_ETHERNET_TYPE);
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
+
+    if (status)
+    {
+
+        /* release packet in case of error */
+        nx_packet_release(packet_ptr);
+    }
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ptp_client_send_sync                            PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sends a PTP sync message.                             */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    client_ptr                            Pointer to PTP client         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_packet_allocate                    Allocate a packet             */
+/*    nxd_udp_socket_source_send            Send a UDP packet             */
+/*    nx_packet_release                     Release a packet              */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_ptp_client_thread_entry           PTP thread entry              */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+static VOID _nx_ptp_client_send_sync(NX_PTP_CLIENT *client_ptr)
+{
+NX_PACKET *packet_ptr;
+UINT       status = NX_NOT_SUCCESSFUL;
+UCHAR     *ptr;
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+NXD_ADDRESS       addr;
+UINT              addr_index = 0;
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+NXD_IPV6_ADDRESS *ipv6_addr;
+NX_IP            *ip_ptr;
+NX_INTERFACE     *if_ptr;
+#endif
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+    /* allocate a packet from the pool */
+    status = nx_packet_allocate(client_ptr -> nx_ptp_client_packet_pool_ptr, &packet_ptr, NX_PTP_PACKET, NX_NO_WAIT);
+    if (status != NX_SUCCESS)
+    {
+        /* Failed to allocate the packet */
+        return;
+    }
+
+    /* start of message */
+    ptr = packet_ptr -> nx_packet_prepend_ptr;
+
+#define PTP_MSG_SYNC_TOTAL_LEN (NX_PTP_MSG_HDR_LEN + NX_PTP_MSG_TIMESTAMP_LEN)
+
+    /* write header */
+    /* messageType */
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_transport_specific << 4) | NX_PTP_MSG_TYPE_SYNC;
+    /* versionPTP */
+    *ptr++ = NX_PTP_VERSION;
+    /* messageLength */
+    *ptr++ = PTP_MSG_SYNC_TOTAL_LEN >> 8;
+    *ptr++ = (UCHAR)PTP_MSG_SYNC_TOTAL_LEN;
+    /* domainNumber */
+    *ptr++ = client_ptr -> nx_ptp_client_domain;
+    /* reserved 1 octets */
+    *ptr++ = 0;
+    /* flags 2 octets */
+    *ptr++ = 0x02;
+    *ptr++ = 0x08;
+    /* correction + reserved 8 + 4 */
+    memset(ptr, 0, 12); 
+    ptr += 12;
+    /* sourcePortIdentity */
+    memcpy(ptr, client_ptr -> nx_ptp_client_port_identity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE); /* use case of memcpy is verified. */
+    ptr += NX_PTP_CLOCK_PORT_IDENTITY_SIZE;
+    /* sequenceID */
+    client_ptr -> nx_ptp_client_sync_sequenceId++;
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_sync_sequenceId >> 8);
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_sync_sequenceId);
+    /* control */
+    *ptr++ = 0; /* sync message */
+    /* XXX */ 
+    *ptr++ = (UCHAR)(NX_PTP_CLIENT_LOG_SYNC_INTERVAL);
+
+    /* write timestamp (0) */
+    memset(ptr, 0, NX_PTP_MSG_TIMESTAMP_LEN);
+    ptr += NX_PTP_MSG_TIMESTAMP_LEN;
+
+    /* set final length of message */
+    packet_ptr -> nx_packet_length = (ULONG)(ptr - packet_ptr -> nx_packet_prepend_ptr);
+    packet_ptr -> nx_packet_append_ptr = ptr;
+
+    #if NX_PTP_CLIENT_TRANSPORT_UDP
+    /* set source and destination addresses */
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+    if (client_ptr -> nx_ptp_client_master_addr.nxd_ip_version == NX_IP_VERSION_V6)
+    {
+        NX_PTP_IPV6_MULTICAST_ADDR_SET(&addr);
+
+        /* Use first IPv6 address as source address. */
+        ip_ptr = client_ptr -> nx_ptp_client_ip_ptr;
+        if_ptr = &ip_ptr -> nx_ip_interface[client_ptr -> nx_ptp_client_interface_index];
+        ipv6_addr = if_ptr -> nxd_interface_ipv6_address_list_head;
+        if (ipv6_addr == NX_NULL)
+        {
+
+            /* No available IPv6 address.  */
+            /* Release packet.  */
+            nx_packet_release(packet_ptr);
+
+            return;
+        }
+        addr_index = ipv6_addr -> nxd_ipv6_address_index;
+    }
+    else
+#endif
+    {
+#ifndef NX_DISABLE_IPV4
+        addr.nxd_ip_version = NX_IP_VERSION_V4;
+        addr.nxd_ip_address.v4 = NX_PTP_IPV4_MULTICAST_ADDR;
+        addr_index = client_ptr -> nx_ptp_client_interface_index;
+#endif
+    }
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+    /* Prepare timestamp for current packet  */
+    client_ptr -> nx_ptp_client_sync_packet_ptr = packet_ptr;
+    client_ptr -> nx_ptp_client_clock_callback(client_ptr, NX_PTP_CLIENT_CLOCK_PACKET_TS_PREPARE,
+                                               &client_ptr -> nx_ptp_client_sync_ts_local, packet_ptr,
+                                               client_ptr -> nx_ptp_client_clock_callback_data);
+
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+    status = nxd_udp_socket_source_send((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_event_socket,
+                                        packet_ptr, &addr, NX_PTP_EVENT_UDP_PORT, addr_index);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+    nx_link_ethernet_packet_send(client_ptr -> nx_ptp_client_ip_ptr,
+                                 client_ptr -> nx_ptp_client_interface_index, packet_ptr,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_MSB,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_LSB,
+                                 NX_PTP_ETHERNET_TYPE);
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
+
+    if (status)
+    {
+
+        /* release packet in case of error */
+        nx_packet_release(packet_ptr);
+    }
+}
+#endif /* defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC) */
+
+
+#ifdef NX_PTP_ENABLE_MASTER
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ptp_client_send_announce                        PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sends a PTP announce message.                         */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    client_ptr                            Pointer to PTP client         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_packet_allocate                    Allocate a packet             */
+/*    nxd_udp_socket_source_send            Send a UDP packet             */
+/*    nx_packet_release                     Release a packet              */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_ptp_client_thread_entry           PTP thread entry              */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+static VOID _nx_ptp_client_send_announce(NX_PTP_CLIENT *client_ptr)
+{
+NX_PACKET *packet_ptr;
+UINT       status = NX_NOT_SUCCESSFUL;
+UCHAR     *ptr;
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+NXD_ADDRESS       addr;
+UINT              addr_index = 0;
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+NXD_IPV6_ADDRESS *ipv6_addr;
+NX_IP            *ip_ptr;
+NX_INTERFACE     *if_ptr;
+#endif
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+    /* Verify state */
+    
+    /* Allocate a packet from the pool */
+    status = nx_packet_allocate(client_ptr -> nx_ptp_client_packet_pool_ptr, &packet_ptr, NX_PTP_PACKET, NX_NO_WAIT);
+    if (status != NX_SUCCESS)
+    {
+        /* Failed to allocate the packet */
+        return;
+    }
+
+    /* Start of message */
+    ptr = packet_ptr -> nx_packet_prepend_ptr;
+
+#define PTP_MSG_ANNOUNCE_PATH_TLV_LEN (2 + 2 + NX_PTP_CLOCK_IDENTITY_SIZE)
+#define PTP_MSG_ANNOUNCE_TOTAL_LEN    (NX_PTP_MSG_HDR_LEN + NX_PTP_MSG_ANNOUNCE_LEN + PTP_MSG_ANNOUNCE_PATH_TLV_LEN)
+
+    /* Write header IEEE Std 1588-2008 Section 13.3.1*/
+    /* messageType */
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_transport_specific << 4) | NX_PTP_MSG_TYPE_ANNOUNCE;
+    /* versionPTP */
+    *ptr++ = NX_PTP_VERSION;
+    /* messageLength */
+    *ptr++ = PTP_MSG_ANNOUNCE_TOTAL_LEN >> 8;
+    *ptr++ = (UCHAR)PTP_MSG_ANNOUNCE_TOTAL_LEN;
+    /* domainNumber */
+    *ptr++ = client_ptr -> nx_ptp_client_domain;
+    /* reserved 1 octets */
+    *ptr++ = 0;
+    /* flags 2 octets */
+    *ptr++ = 0;
+    *ptr++ = 0x08;
+    /* correction + reserved 8 + 4 */
+    memset(ptr, 0, 12); 
+    ptr += 12;
+    /* sourcePortIdentity */
+    memcpy(ptr, client_ptr -> nx_ptp_client_port_identity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE); /* use case of memcpy is verified. */
+    ptr += NX_PTP_CLOCK_PORT_IDENTITY_SIZE;
+    /* sequenceID */
+    client_ptr -> nx_ptp_client_sync_sequenceId++;
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_sync_sequenceId >> 8);
+    *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_sync_sequenceId);
+    /* control */
+    *ptr++ = 5; /* other message */
+    /* XXX */ /* 13.3.2.14 logMessageInterval */
+    *ptr++ = 0x0;
+
+    /* Write announce message field IEEE Std 1588-2019 Section 13.5.2 */
+    /* write originTimestamp */
+    memset(ptr, 0, NX_PTP_MSG_TIMESTAMP_LEN);
+    ptr += NX_PTP_MSG_TIMESTAMP_LEN;
+    /* currentUtcOffset */
+    *ptr++ = 0;
+    *ptr++ = 0;
+    /* reserved */
+    *ptr++ = 0;
+    /* grandmasterPriority1 */
+    *ptr++ = (client_ptr -> ptp_master).nx_ptp_client_master_priority1;
+    /* grandmasterClockQuality(4) = grandmasterClockClass(1) + grandmasterClockAccuracy(1) + grandmasterClockVariance(2) */
+    *ptr++ = (client_ptr -> ptp_master).nx_ptp_client_master_clock_class;
+    *ptr++ = (client_ptr -> ptp_master).nx_ptp_client_master_clock_accuracy;
+    *ptr++ = (UCHAR)((client_ptr -> ptp_master).nx_ptp_client_master_offset_scaled_log_variance >> 8);
+    *ptr++ = (UCHAR)((client_ptr -> ptp_master).nx_ptp_client_master_offset_scaled_log_variance);
+    /* grandmasterPriority2 */
+    *ptr++ = (client_ptr -> ptp_master).nx_ptp_client_master_priority2;
+    /* grandmasterIdentity. Setting to client_port_identity because grandmaster */
+    memcpy(ptr, client_ptr -> nx_ptp_client_port_identity, NX_PTP_CLOCK_IDENTITY_SIZE); /* use case of memcpy is verified. */
+    ptr += NX_PTP_CLOCK_IDENTITY_SIZE;
+    /* stepsRemoved */
+    *ptr++ = 0;
+    *ptr++ = 0;
+    /* timeSource */
+    *ptr++ = (client_ptr -> ptp_master).nx_ptp_client_master_time_source;
+
+    /* Path trace TLV */
+    /* tlvType */
+    *ptr++ = 0;
+    *ptr++ = 0x8;
+    /* lengthField */
+    *ptr++ = 0;
+    *ptr++ = 0x8;
+    /* pathSequence */
+    memcpy(ptr, client_ptr -> nx_ptp_client_port_identity, NX_PTP_CLOCK_IDENTITY_SIZE); /* use case of memcpy is verified. */
+    ptr += NX_PTP_CLOCK_IDENTITY_SIZE;
+
+    /* set final message length */
+    packet_ptr -> nx_packet_length = (ULONG)(ptr - (packet_ptr -> nx_packet_prepend_ptr));
+    packet_ptr -> nx_packet_append_ptr = ptr;
+
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+    /* set source and destination addresses */
+#if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
+    if (client_ptr -> nx_ptp_client_master_addr.nxd_ip_version == NX_IP_VERSION_V6)
+    {
+        NX_PTP_IPV6_MULTICAST_ADDR_SET(&addr);
+
+        /* Use first IPv6 address as source address. */
+        ip_ptr = client_ptr -> nx_ptp_client_ip_ptr;
+        if_ptr = &ip_ptr -> nx_ip_interface[client_ptr -> nx_ptp_client_interface_index];
+        ipv6_addr = if_ptr -> nxd_interface_ipv6_address_list_head;
+        if (ipv6_addr == NX_NULL)
+        {
+
+            /* No available IPv6 address.  */
+            /* Release packet.  */
+            nx_packet_release(packet_ptr);
+
+            return;
+        }
+        addr_index = ipv6_addr -> nxd_ipv6_address_index;
+    }
+    else
+#endif
+    {
+#ifndef NX_DISABLE_IPV4
+        addr.nxd_ip_version = NX_IP_VERSION_V4;
+        addr.nxd_ip_address.v4 = NX_PTP_IPV4_MULTICAST_ADDR;
+        addr_index = client_ptr -> nx_ptp_client_interface_index;
+#endif
+    }
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+    status = nxd_udp_socket_source_send((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_event_socket,
+                                        packet_ptr, &addr, NX_PTP_GENERAL_UDP_PORT, addr_index);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+    nx_link_ethernet_packet_send(client_ptr -> nx_ptp_client_ip_ptr,
+                                 client_ptr -> nx_ptp_client_interface_index, packet_ptr,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_MSB,
+                                 NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_LSB,
+                                 NX_PTP_ETHERNET_TYPE);
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
+    if (status)
+    {
+        /* release packet in case of error */
+        nx_packet_release(packet_ptr);
+    }
+}
+#endif /* NX_PTP_ENABLE_MASTER */
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
 /*    _nx_ptp_client_process_event_packet                 PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1165,6 +2903,7 @@ NX_PTP_CLIENT_MASTER master;
 /*                                                                        */
 /*    client_ptr                            Pointer to PTP client         */
 /*    packet_ptr                            Pointer to PTP packet         */
+/*    hdr                                   Pointer to PTP header         */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
@@ -1179,65 +2918,112 @@ NX_PTP_CLIENT_MASTER master;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ptp_client_thread_entry           PTP thread entry              */
+/*    _nx_ptp_client_send_pdelay_resp       Send pdelay response          */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            supported master clock,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-static VOID _nx_ptp_client_process_event_packet(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr)
+static VOID _nx_ptp_client_process_event_packet(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr,
+                                                NX_PTP_MSG_HEADER *hdr)
 {
-NX_PTP_MSG_HEADER hdr;
 
-    /* parse PTP message header */
-    if (_nx_ptp_msg_parse_hdr(client_ptr, packet_ptr, &hdr))
+#if defined(NX_ENABLE_GPTP)
+    if (hdr -> messageType == NX_PTP_MSG_TYPE_PDELAY_REQ)
     {
-        return;
+
+        if (packet_ptr -> nx_packet_length < NX_PTP_MSG_PDELAY_REQ_LEN)
+        {
+            /* not waiting for Pdelay_Req or invalid message */
+            return;
+        }     
+        
+        /* record timestamp of received message (t2) */
+        client_ptr -> nx_ptp_client_clock_callback(client_ptr, NX_PTP_CLIENT_CLOCK_TS_EXTRACT_ETHERNET,
+                                                &client_ptr -> nx_ptp_client_pdelay_req_receipt, packet_ptr,
+                                                client_ptr -> nx_ptp_client_clock_callback_data);
+
+        /* update request_id */
+        client_ptr -> nx_ptp_client_pdelay_responder_id = hdr -> sequenceId;
+
+        /* update nx_ptp_client_request_port_identity */
+        memcpy(client_ptr -> nx_ptp_client_request_port_identity, hdr -> sourcePortIdentity,
+               NX_PTP_CLOCK_PORT_IDENTITY_SIZE); /* use case of memcpy is verified. */
+
+        client_ptr -> nx_ptp_client_pdelay_responder_state = NX_PTP_CLIENT_PDELAY_SEND_RESP_TWOSTEP;
+        _nx_ptp_client_send_pdelay_resp(client_ptr);
     }
-
-    /* check origin of message */
-    if (memcmp(&client_ptr -> nx_ptp_client_master_port_identity,
-               hdr.sourcePortIdentity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE) != 0)
+    else if (hdr -> messageType == NX_PTP_MSG_TYPE_PDELAY_RESP)
     {
+        if ((client_ptr -> nx_ptp_client_pdelay_initiator_state != NX_PTP_CLIENT_PDELAY_WAIT_RESP) ||
+            (client_ptr -> nx_ptp_client_pdelay_req_id != hdr -> sequenceId) ||
+            (packet_ptr -> nx_packet_length < NX_PTP_MSG_PDELAY_RESP_LEN))
+        {
 
-        /* not from our master clock */
-        return;
+            /* not waiting for Pdelay_resp or invalid message */
+            return;
+        }
+
+        /* retrieve timestamp of event message */
+        client_ptr -> nx_ptp_client_clock_callback(client_ptr, NX_PTP_CLIENT_CLOCK_TS_EXTRACT_ETHERNET,
+                                                &client_ptr -> nx_ptp_client_pdelay_resp_ts, packet_ptr,
+                                                client_ptr -> nx_ptp_client_clock_callback_data);
+        
+        /* get t2 timestamp */
+        _nx_ptp_msg_parse_timestamp(packet_ptr -> nx_packet_prepend_ptr, &client_ptr -> nx_ptp_client_pdelay_req_receipt_ts);
+
+        /* two-step message? */
+        if (hdr -> flagField & NX_PTP_MSG_HDR_FLAG_TWO_STEP)
+        {
+            client_ptr -> nx_ptp_client_pdelay_initiator_state = NX_PTP_CLIENT_PDELAY_WAIT_RESP_FOLLOW_UP;
+        }
+        else
+        {
+            /* process Pdelay_Resp event */
+            _nx_ptp_client_pdelay_resp_received(client_ptr, packet_ptr -> nx_packet_prepend_ptr);
+        }
     }
-
-    if (hdr.messageType != NX_PTP_MSG_TYPE_SYNC)
+#endif
+    
+    if (hdr -> messageType == NX_PTP_MSG_TYPE_SYNC)
     {
-        return;
-    }
+        if ((client_ptr -> nx_ptp_client_state != NX_PTP_CLIENT_STATE_SLAVE) ||
+            (packet_ptr -> nx_packet_length < NX_PTP_MSG_SYNC_LEN))
+        {
 
-    if (((client_ptr -> nx_ptp_client_state != NX_PTP_CLIENT_STATE_WAIT_SYNC) &&
-         (client_ptr -> nx_ptp_client_state != NX_PTP_CLIENT_STATE_WAIT_FOLLOW_UP)) ||
-        (packet_ptr -> nx_packet_length < NX_PTP_MSG_SYNC_LEN))
-    {
+            /* not waiting for Sync or invalid message */
+            return;
+        }
 
-        /* not waiting for Sync or invalid message */
-        return;
-    }
+        /* Store previous sync timestamp.  */
+        NX_PTP_TS_COPY(client_ptr -> nx_ptp_client_prev_sync, client_ptr -> nx_ptp_client_sync);
+        NX_PTP_TS_COPY(client_ptr -> nx_ptp_client_prev_sync_ts, client_ptr -> nx_ptp_client_sync_ts);
 
-    /* retrieve timestamp of event message */
-    client_ptr -> nx_ptp_client_clock_callback(client_ptr, NX_PTP_CLIENT_CLOCK_PACKET_TS_EXTRACT,
-                                               &client_ptr -> nx_ptp_client_sync_ts, packet_ptr,
-                                               client_ptr -> nx_ptp_client_clock_callback_data);
+        /* retrieve timestamp of event message */
+        client_ptr -> nx_ptp_client_clock_callback(client_ptr, NX_PTP_CLIENT_CLOCK_PACKET_TS_EXTRACT,
+                                                &client_ptr -> nx_ptp_client_sync_ts, packet_ptr,
+                                                client_ptr -> nx_ptp_client_clock_callback_data);
 
-    /* two-step message? */
-    if (hdr.flagField & NX_PTP_MSG_HDR_FLAG_TWO_STEP)
-    {
+        /* two-step message? */
+        if (hdr -> flagField & NX_PTP_MSG_HDR_FLAG_TWO_STEP)
+        {
 
-        /* wait for follow up message */
-        client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_WAIT_FOLLOW_UP;
-        client_ptr -> nx_ptp_client_sync_id = hdr.sequenceId;
-    }
-    else
-    {
+            /* wait for follow up message */
+            client_ptr -> nx_ptp_client_sync_id = hdr -> sequenceId;
+        }
+        else
+        {
 
-        /* process Sync event */
-        _nx_ptp_client_sync_received(client_ptr, packet_ptr -> nx_packet_prepend_ptr);
+            /* process Sync event */
+            _nx_ptp_client_sync_received(client_ptr, packet_ptr -> nx_packet_prepend_ptr, hdr);
+        }
     }
 }
 
@@ -1247,7 +3033,7 @@ NX_PTP_MSG_HEADER hdr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_process_general_packet               PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1260,6 +3046,7 @@ NX_PTP_MSG_HEADER hdr;
 /*                                                                        */
 /*    client_ptr                            Pointer to PTP client         */
 /*    packet_ptr                            Pointer to PTP packet         */
+/*    hdr                                   Pointer to PTP header         */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
@@ -1270,7 +3057,7 @@ NX_PTP_MSG_HEADER hdr;
 /*    _nx_ptp_client_sync_received          Process Sync message          */
 /*    _nx_ptp_msg_parse_hdr                 Parse PTP header              */
 /*    _nx_ptp_client_delay_resp_received    Process delay response        */
-/*    _nx_ptp_client_announce_received      Process Announce message      */
+/*    _nx_ptp_client_init_packet_received   Process Announce message      */
 /*    memcmp                                Compare memory                */
 /*                                                                        */
 /*  CALLED BY                                                             */
@@ -1282,30 +3069,18 @@ NX_PTP_MSG_HEADER hdr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            supported master clock,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
-static VOID _nx_ptp_client_process_general_packet(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr)
+static VOID _nx_ptp_client_process_general_packet(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr,
+                                                  NX_PTP_MSG_HEADER *hdr)
 {
-NX_PTP_MSG_HEADER hdr;
-
-    /* parse PTP message header */
-    if (_nx_ptp_msg_parse_hdr(client_ptr, packet_ptr, &hdr))
-    {
-        return;
-    }
-
-    /* check origin of message */
-    if ((client_ptr -> nx_ptp_client_state != NX_PTP_CLIENT_STATE_LISTENING) &&
-        (memcmp(&client_ptr -> nx_ptp_client_master_port_identity,
-                hdr.sourcePortIdentity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE) != 0))
-    {
-
-        /* not from our master clock */
-        return;
-    }
 
     /* process ANNOUNCE message */
-    if (hdr.messageType == NX_PTP_MSG_TYPE_ANNOUNCE)
+    if (hdr -> messageType == NX_PTP_MSG_TYPE_ANNOUNCE)
     {
         if (packet_ptr -> nx_packet_length < NX_PTP_MSG_ANNOUNCE_LEN)
         {
@@ -1315,12 +3090,13 @@ NX_PTP_MSG_HEADER hdr;
         }
 
         /* process announce message */
-        _nx_ptp_client_announce_received(client_ptr, &hdr, packet_ptr -> nx_packet_prepend_ptr);
+        _nx_ptp_client_init_packet_received(client_ptr, hdr, packet_ptr -> nx_packet_prepend_ptr);
     }
-    else if (hdr.messageType == NX_PTP_MSG_TYPE_FOLLOW_UP)
+    /* process FOLLOW_UP message */
+    else if (hdr -> messageType == NX_PTP_MSG_TYPE_FOLLOW_UP)
     {
-        if ((client_ptr -> nx_ptp_client_state != NX_PTP_CLIENT_STATE_WAIT_FOLLOW_UP) ||
-            (client_ptr -> nx_ptp_client_sync_id != hdr.sequenceId) ||
+        if ((client_ptr -> nx_ptp_client_state != NX_PTP_CLIENT_STATE_SLAVE) ||
+            (client_ptr -> nx_ptp_client_sync_id != hdr -> sequenceId) ||
             (packet_ptr -> nx_packet_length < NX_PTP_MSG_FOLLOW_UP_LEN))
         {
 
@@ -1329,12 +3105,28 @@ NX_PTP_MSG_HEADER hdr;
         }
 
         /* process Sync message */
-        _nx_ptp_client_sync_received(client_ptr, packet_ptr -> nx_packet_prepend_ptr);
+        _nx_ptp_client_sync_received(client_ptr, packet_ptr -> nx_packet_prepend_ptr, hdr);
     }
-    else if (hdr.messageType == NX_PTP_MSG_TYPE_DELAY_RESP)
+#if defined(NX_ENABLE_GPTP)
+    if (hdr -> messageType == NX_PTP_MSG_TYPE_PDELAY_RESP_FOLLOW_UP)
+    {
+        if ((client_ptr -> nx_ptp_client_pdelay_initiator_state != NX_PTP_CLIENT_PDELAY_WAIT_RESP_FOLLOW_UP) ||
+            (client_ptr -> nx_ptp_client_pdelay_req_id != hdr -> sequenceId) ||
+            (packet_ptr -> nx_packet_length < NX_PTP_MSG_PDELAY_RESP_FOLLOW_UP_LEN))
+        {
+
+            /* not a follow up for a previous Pdelay_resp or invalid message */
+            return;
+        }
+
+        /* process Pdelay_Resp event */
+        _nx_ptp_client_pdelay_resp_received(client_ptr, packet_ptr -> nx_packet_prepend_ptr);
+    }
+#else
+    else if (hdr -> messageType == NX_PTP_MSG_TYPE_DELAY_RESP)
     {
         if ((client_ptr -> nx_ptp_client_delay_state != NX_PTP_CLIENT_DELAY_WAIT_RESP) ||
-            (client_ptr -> nx_ptp_client_delay_req_id != hdr.sequenceId) ||
+            (client_ptr -> nx_ptp_client_delay_req_id != hdr -> sequenceId) ||
             (packet_ptr -> nx_packet_length < NX_PTP_MSG_DELAY_RESP_LEN) ||
             (memcmp(client_ptr -> nx_ptp_client_port_identity,
                     packet_ptr -> nx_packet_prepend_ptr + NX_PTP_MSG_TIMESTAMP_LEN,
@@ -1348,6 +3140,7 @@ NX_PTP_MSG_HEADER hdr;
         /* process delay response message */
         _nx_ptp_client_delay_resp_received(client_ptr, packet_ptr -> nx_packet_prepend_ptr);
     }
+#endif
 }
 
 
@@ -1356,7 +3149,7 @@ NX_PTP_MSG_HEADER hdr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_thread_entry                         PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1377,6 +3170,11 @@ NX_PTP_MSG_HEADER hdr;
 /*                                                                        */
 /*    _nx_ptp_client_process_general_packet Process PTP general packet    */
 /*    _nx_ptp_client_process_event_packet   Process PTP event packet      */
+/*    _nx_ptp_client_send_pdelay_resp_follow_up                           */
+/*                                          Send pdelay response message  */
+/*    _nx_ptp_client_send_follow_up         Send follow up message        */
+/*    _nx_ptp_client_send_sync              Send sync message             */
+/*    _nx_ptp_client_send_announce          Send announce message         */
 /*    tx_event_flags_get                    Get PTP events                */
 /*    nx_udp_socket_receive                 Receive a UDP packet          */
 /*    nx_packet_release                     Release a packet              */
@@ -1390,21 +3188,54 @@ NX_PTP_MSG_HEADER hdr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            supported master clock,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_thread_entry(ULONG ptp_instance)
 {
 TX_INTERRUPT_SAVE_AREA
-NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)ptp_instance;
-ULONG          ptp_events;
-UINT           status;
-NX_PACKET     *packet_ptr = NX_NULL;
-UCHAR          packet_received;
+NX_PTP_CLIENT    *client_ptr = (NX_PTP_CLIENT *)ptp_instance;
+ULONG             ptp_events;
+UINT              status;
+NX_PACKET        *packet_ptr = NX_NULL;
+NX_PTP_MSG_HEADER hdr;
 
-    /* start in listening state */
-    client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_LISTENING;
-    client_ptr -> nx_ptp_client_delay_req_timer = -1;
-    client_ptr -> nx_ptp_client_announce_timeout = -1;
+#ifdef NX_PTP_ENABLE_MASTER
+    if (client_ptr -> nx_ptp_client_role == NX_PTP_CLIENT_ROLE_MASTER_ONLY)
+    {
+
+        /* Set timer values */
+        client_ptr -> ptp_master.nx_ptp_client_master_announce_timer = NX_PTP_CLIENT_ANNOUNCE_INTERVAL;
+        client_ptr -> nx_ptp_client_sync_timer = NX_PTP_CLIENT_SYNC_INTERVAL;
+        client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_MASTER;
+                    
+        client_ptr -> nx_ptp_client_event_callback(client_ptr, NX_PTP_CLIENT_EVENT_MASTER,
+                                                   &client_ptr -> ptp_master,
+                                                   client_ptr -> nx_ptp_client_event_callback_data);
+    }
+    else
+    {
+
+        /* Set timer values */
+        client_ptr -> ptp_master.nx_ptp_client_master_announce_timer = -1;
+        client_ptr -> nx_ptp_client_sync_timer = -1;
+#endif /* NX_PTP_ENABLE_MASTER */
+        client_ptr -> nx_ptp_client_delay_req_timer = -1;
+        client_ptr -> nx_ptp_client_announce_timeout = NX_PTP_CLIENT_ANNOUNCE_EXPIRATION;
+        
+        /* start in listening state */
+        client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_LISTENING;
+#ifdef NX_PTP_ENABLE_MASTER
+    }
+#endif /* NX_PTP_ENABLE_MASTER */
+
+#ifdef NX_ENABLE_GPTP
+    client_ptr -> nx_ptp_client_pdelay_initiator_state = NX_PTP_CLIENT_PDELAY_IDLE;
+    client_ptr -> nx_ptp_client_pdelay_req_timer = NX_PTP_CLIENT_PDELAY_REQ_INTERVAL;
+#endif
 
     /* main loop */
     for (;;)
@@ -1428,6 +3259,27 @@ UCHAR          packet_received;
             break;
         }
 
+#ifdef NX_ENABLE_GPTP
+        if (ptp_events & NX_PTP_CLIENT_PDELAY_FOLLOW_EVENT)
+        {
+
+            /* update state to send_pdelay_resp_follow_up */
+            client_ptr -> nx_ptp_client_pdelay_responder_state = NX_PTP_CLIENT_PDELAY_SEND_FOLLOW_UP;
+
+            /* call send follow up */
+            _nx_ptp_client_send_pdelay_resp_follow_up(client_ptr);
+        }
+#endif
+
+#if defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC)
+        if (ptp_events & NX_PTP_CLIENT_SYNC_FOLLOW_EVENT)
+        {
+
+            /* call send follow up */
+            _nx_ptp_client_send_follow_up(client_ptr);
+        }
+#endif /* defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC) */
+
         /*
          * PTP Message Received
          */
@@ -1437,31 +3289,80 @@ UCHAR          packet_received;
             /* Loop to receive all packets. */
             for (;;)
             {
-                packet_received = NX_FALSE;
-                if (nx_udp_socket_receive(&(client_ptr -> nx_ptp_client_general_socket),
-                                            &packet_ptr, NX_NO_WAIT) == NX_SUCCESS)
+#if NX_PTP_CLIENT_TRANSPORT_UDP
+                if ((nx_udp_socket_receive(&(client_ptr -> nx_ptp_client_event_socket),
+                                           &packet_ptr, NX_NO_WAIT) == NX_SUCCESS) ||
+                    (nx_udp_socket_receive(&(client_ptr -> nx_ptp_client_general_socket),
+                                           &packet_ptr, NX_NO_WAIT) == NX_SUCCESS))
                 {
-                    _nx_ptp_client_process_general_packet(client_ptr, packet_ptr);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+                if (client_ptr -> nx_ptp_client_received_packet_head)
+                {
+
+                    /* Remove the first packet and process it!  */
+
+                    /* Disable interrupts.  */
+                    TX_DISABLE
+
+                    /* Pickup the first packet.  */
+                    packet_ptr =  client_ptr -> nx_ptp_client_received_packet_head;
+
+                    /* Move the head pointer to the next packet.  */
+                    client_ptr -> nx_ptp_client_received_packet_head =  packet_ptr -> nx_packet_queue_next;
+
+                    /* Check for end of deferred processing queue.  */
+                    if (client_ptr -> nx_ptp_client_received_packet_head == NX_NULL)
+                    {
+
+                        /* Yes, the queue is empty.  Set the tail pointer to NULL.  */
+                       client_ptr -> nx_ptp_client_received_packet_tail =  NX_NULL;
+                    }
+
+                    /* Restore interrupts.  */
+                    TX_RESTORE
+
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
+                    
+                    /* Parse header first.  */
+                    if (_nx_ptp_msg_parse_hdr(client_ptr, packet_ptr, &hdr))
+                    {
+
+                        /* Release packet. */
+                        nx_packet_release(packet_ptr);
+                        continue;
+                    }
+
+                    /* check origin of message */
+                    if ((client_ptr -> nx_ptp_client_state == NX_PTP_CLIENT_STATE_SLAVE) &&
+                        (memcmp(&client_ptr -> nx_ptp_client_master_port_identity,
+                                hdr.sourcePortIdentity, NX_PTP_CLOCK_PORT_IDENTITY_SIZE) != 0))
+                    {
+
+                        /* not from our master clock */
+                        nx_packet_release(packet_ptr);
+                        continue;
+                    }
+
+                    if ((hdr.messageType == NX_PTP_MSG_TYPE_SYNC)
+#ifdef NX_ENABLE_GPTP
+                        || (hdr.messageType == NX_PTP_MSG_TYPE_PDELAY_REQ) 
+                        || (hdr.messageType == NX_PTP_MSG_TYPE_PDELAY_RESP)
+#endif /* NX_ENABLE_GPTP */
+                       )
+                    {
+                        _nx_ptp_client_process_event_packet(client_ptr, packet_ptr, &hdr);
+                    }
+                    else
+                    {
+                        _nx_ptp_client_process_general_packet(client_ptr, packet_ptr, &hdr);
+                    }
 
                     /* Release packet. */
                     nx_packet_release(packet_ptr);
-                    packet_received = NX_TRUE;
                 }
-
-                if (nx_udp_socket_receive(&(client_ptr -> nx_ptp_client_event_socket),
-                                                &packet_ptr, NX_NO_WAIT) == NX_SUCCESS)
+                else
                 {
-                    _nx_ptp_client_process_event_packet(client_ptr, packet_ptr);
-
-                    /* Release packet. */
-                    nx_packet_release(packet_ptr);
-                    packet_received = NX_TRUE;
-                }
-
-                if (packet_received == NX_FALSE)
-                {
-
-                    /* No more packets available. */
                     break;
                 }
             }
@@ -1472,23 +3373,77 @@ UCHAR          packet_received;
          */
         if (ptp_events & NX_PTP_CLIENT_TIMER_EVENT)
         {
+#ifdef NX_ENABLE_GPTP
+            /* pdelay_req interval timer */
+            if ((client_ptr -> nx_ptp_client_pdelay_req_timer > 0) &&
+                (--client_ptr -> nx_ptp_client_pdelay_req_timer == 0))
+            {
+                _nx_ptp_client_send_pdelay_req(client_ptr);
+            }
+#endif
+#if defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC)
+#ifdef NX_PTP_ENABLE_MASTER
+            /* announce messages timeout */
+            if (((client_ptr -> ptp_master).nx_ptp_client_master_announce_timer > 0) &&
+                (--(client_ptr -> ptp_master).nx_ptp_client_master_announce_timer == 0))
+            {
+                _nx_ptp_client_send_announce(client_ptr);
 
+                /* Reset timer.  */
+                (client_ptr -> ptp_master).nx_ptp_client_master_announce_timer = NX_PTP_CLIENT_ANNOUNCE_INTERVAL;
+            }
+#endif /* NX_PTP_ENABLE_MASTER */
+            /* Sync messages timeout */
+            if ((client_ptr -> nx_ptp_client_sync_timer > 0) &&
+                (--client_ptr -> nx_ptp_client_sync_timer == 0))
+            {
+                _nx_ptp_client_send_sync(client_ptr);
+
+                /* Reset timer.  */
+                client_ptr -> nx_ptp_client_sync_timer = NX_PTP_CLIENT_SYNC_INTERVAL;
+            }
+#endif /* defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC) */
+
+#ifndef NX_PTP_DISABLE_SLAVE
             /* announce messages timeout */
             if ((client_ptr -> nx_ptp_client_announce_timeout > 0) &&
                 (--client_ptr -> nx_ptp_client_announce_timeout == 0))
             {
 
-                /* no Annouce message received from master clock, back to listening state */
-                client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_LISTENING;
-                client_ptr -> nx_ptp_client_delay_req_timer = -1;
-                client_ptr -> nx_ptp_client_announce_timeout = -1;
-
-                /* call handler */
-                if (client_ptr -> nx_ptp_client_event_callback)
+#ifdef NX_PTP_ENABLE_MASTER
+                if (client_ptr -> nx_ptp_client_role == NX_PTP_CLIENT_ROLE_SLAVE_ONLY)
+#endif /* NX_PTP_ENABLE_MASTER */
                 {
-                    client_ptr -> nx_ptp_client_event_callback(client_ptr, NX_PTP_CLIENT_EVENT_TIMEOUT, NX_NULL,
+
+                    /* no Announce message received from master clock, back to listening state */
+                    client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_LISTENING;
+                    client_ptr -> nx_ptp_client_delay_req_timer = -1;
+                    client_ptr -> nx_ptp_client_announce_timeout = -1;
+
+                    /* call handler */
+                    if (client_ptr -> nx_ptp_client_event_callback)
+                    {
+                        client_ptr -> nx_ptp_client_event_callback(client_ptr, NX_PTP_CLIENT_EVENT_TIMEOUT, NX_NULL,
+                                                                client_ptr -> nx_ptp_client_event_callback_data);
+                    }
+                }
+#ifdef NX_PTP_ENABLE_MASTER
+                else
+                {
+
+                    /* no Announce message received from master clock, change to master clock. */
+                    client_ptr -> nx_ptp_client_state = NX_PTP_CLIENT_STATE_MASTER;
+
+                    /* set timeout for announce and sync */
+                    client_ptr -> ptp_master.nx_ptp_client_master_announce_timer = NX_PTP_CLIENT_ANNOUNCE_INTERVAL;
+                    client_ptr -> nx_ptp_client_sync_timer = NX_PTP_CLIENT_SYNC_INTERVAL;
+                    NX_PTP_DEBUG_PRINTF(("PTP: recommend local clock to be master\r\n"));
+                    
+                    client_ptr -> nx_ptp_client_event_callback(client_ptr, NX_PTP_CLIENT_EVENT_MASTER,
+                                                               &client_ptr -> ptp_master,
                                                                client_ptr -> nx_ptp_client_event_callback_data);
                 }
+#endif /* NX_PTP_ENABLE_MASTER */
             }
 
             /* delay req interval timer */
@@ -1499,6 +3454,7 @@ UCHAR          packet_received;
                 /* set flag */
                 client_ptr -> nx_ptp_client_delay_req_flag = 1;
             }
+#endif
         }
     }
 
@@ -1588,7 +3544,7 @@ UINT _nxe_ptp_client_create(NX_PTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT inter
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_create                               PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1634,6 +3590,9 @@ UINT _nxe_ptp_client_create(NX_PTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT inter
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_create(NX_PTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT interface_index,
@@ -1656,7 +3615,7 @@ UINT status;
 
     /* Set the packet pool, check for minimal packet size requirement. */
     if (packet_pool_ptr -> nx_packet_pool_payload_size <
-        (NX_UDP_PACKET + NX_PTP_CLIENT_PACKET_DATA_SIZE))
+        (NX_PTP_PACKET + NX_PTP_CLIENT_PACKET_DATA_SIZE))
     {
         return(NX_PTP_CLIENT_INSUFFICIENT_PACKET_PAYLOAD);
     }
@@ -1675,6 +3634,9 @@ UINT status;
     client_ptr -> nx_ptp_client_clock_callback = clock_callback;
     client_ptr -> nx_ptp_client_clock_callback_data = clock_callback_data;
 
+    /* By default, the PTP client will run in slave only mode.  */
+    client_ptr -> nx_ptp_client_role = NX_PTP_CLIENT_ROLE_SLAVE_ONLY;
+
     /* create the internal PTP event flag object.  */
     status = tx_event_flags_create(&(client_ptr -> nx_ptp_client_events), "NetX PTP event flag");
     if (status != TX_SUCCESS)
@@ -1682,6 +3644,7 @@ UINT status;
         return(status);
     }
 
+#if NX_PTP_CLIENT_TRANSPORT_UDP
     /* create the general socket */
     status = nx_udp_socket_create(ip_ptr, &client_ptr -> nx_ptp_client_general_socket,
                                  "NetX PTP Client general socket", NX_IP_NORMAL,
@@ -1708,6 +3671,7 @@ UINT status;
     }
     client_ptr -> nx_ptp_client_event_socket.nx_udp_socket_reserved_ptr = client_ptr;
     nx_udp_socket_receive_notify(&client_ptr -> nx_ptp_client_event_socket, _nx_ptp_client_socket_receive_notify);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
 
     /* create the timer */
     status = tx_timer_create(&client_ptr -> nx_ptp_client_timer,
@@ -1719,8 +3683,10 @@ UINT status;
                                 TX_NO_ACTIVATE);
     if (status != TX_SUCCESS)
     {
+#if NX_PTP_CLIENT_TRANSPORT_UDP
         nx_udp_socket_delete(&client_ptr -> nx_ptp_client_general_socket);
         nx_udp_socket_delete(&client_ptr -> nx_ptp_client_event_socket);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
         tx_event_flags_delete(&client_ptr -> nx_ptp_client_events);
         return(status);
     }
@@ -1733,8 +3699,10 @@ UINT status;
                               NX_PTP_CLIENT_THREAD_TIME_SLICE, TX_DONT_START);
     if (status != TX_SUCCESS)
     {
+#if NX_PTP_CLIENT_TRANSPORT_UDP
         nx_udp_socket_delete(&client_ptr -> nx_ptp_client_general_socket);
         nx_udp_socket_delete(&client_ptr -> nx_ptp_client_event_socket);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
         tx_timer_delete(&client_ptr -> nx_ptp_client_timer);
         tx_event_flags_delete(&client_ptr -> nx_ptp_client_events);
         return(status);
@@ -1805,7 +3773,7 @@ UINT _nxe_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_delete                               PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1841,6 +3809,9 @@ UINT _nxe_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
@@ -1861,11 +3832,13 @@ UINT _nx_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
     /* Delete the timer */
     tx_timer_delete(&client_ptr -> nx_ptp_client_timer);
 
+#if NX_PTP_CLIENT_TRANSPORT_UDP
     /* Delete the general socket */
     nx_udp_socket_delete((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_general_socket);
 
     /* Delete the event socket */
     nx_udp_socket_delete((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_event_socket);
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
 
     /* Delete the event flag */
     tx_event_flags_delete(&client_ptr -> nx_ptp_client_events);
@@ -1949,7 +3922,7 @@ UINT _nxe_ptp_client_start(NX_PTP_CLIENT *client_ptr, UCHAR *client_port_identit
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_start                                PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1997,6 +3970,10 @@ UINT _nxe_ptp_client_start(NX_PTP_CLIENT *client_ptr, UCHAR *client_port_identit
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            supported master clock,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_start(NX_PTP_CLIENT *client_ptr, UCHAR *client_port_identity_ptr, UINT client_port_identity_length,
@@ -2004,8 +3981,8 @@ UINT _nx_ptp_client_start(NX_PTP_CLIENT *client_ptr, UCHAR *client_port_identity
                           VOID *event_callback_data)
 {
 TX_INTERRUPT_SAVE_AREA
-UINT state;
-UINT status;
+UINT  state;
+UINT  status;
 ULONG msw, lsw;
 #if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
 NXD_ADDRESS maddr;
@@ -2037,6 +4014,7 @@ NXD_ADDRESS maddr;
     client_ptr -> nx_ptp_client_transport_specific = (UCHAR)transport_specific;
     client_ptr -> nx_ptp_client_event_callback = event_callback;
     client_ptr -> nx_ptp_client_event_callback_data = event_callback_data;
+    client_ptr -> nx_ptp_client_delay.nanosecond = NX_PTP_CLIENT_DELAY_THRESH;
 
     /* reset and resume the thread */
     status = tx_thread_reset(&client_ptr -> nx_ptp_client_thread);
@@ -2083,6 +4061,7 @@ NXD_ADDRESS maddr;
         }
     }
 
+#if NX_PTP_CLIENT_TRANSPORT_UDP
     /* bind the general socket */
     if (status == TX_SUCCESS)
     {
@@ -2105,7 +4084,13 @@ NXD_ADDRESS maddr;
                                                   client_ptr -> nx_ptp_client_interface_index);
         if (status == TX_SUCCESS)
         {
-            client_ptr -> nx_ptp_client_ipv4_group_joined = NX_TRUE;
+            status = nx_ipv4_multicast_interface_join(client_ptr -> nx_ptp_client_ip_ptr,
+                                                  NX_PTP_IPV4_P2P_MULTICAST_ADDR,
+                                                  client_ptr -> nx_ptp_client_interface_index);
+            if (status == TX_SUCCESS)
+            {
+                client_ptr -> nx_ptp_client_ipv4_group_joined = NX_TRUE;
+            }
         }
     }
 #if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
@@ -2116,7 +4101,20 @@ NXD_ADDRESS maddr;
                                                    &maddr, client_ptr -> nx_ptp_client_interface_index);
         if (status == TX_SUCCESS)
         {
-            client_ptr -> nx_ptp_client_ipv6_group_joined = NX_TRUE;
+            NX_PTP_IPV6_P2P_MULTICAST_ADDR_SET(&maddr);
+            status = nxd_ipv6_multicast_interface_join(client_ptr -> nx_ptp_client_ip_ptr,
+                                                   &maddr, client_ptr -> nx_ptp_client_interface_index);
+            if (status == TX_SUCCESS)
+            {
+                NX_PTP_IPV6_MULTICAST_ADDR_SET(&maddr);
+                status = nxd_ipv6_multicast_interface_join(client_ptr -> nx_ptp_client_ip_ptr,
+                                                   &maddr, client_ptr -> nx_ptp_client_interface_index);
+
+                if (status == TX_SUCCESS)
+                {
+                    client_ptr -> nx_ptp_client_ipv6_group_joined = NX_TRUE;
+                }
+            }
         }
         else if ((status == NX_NOT_SUPPORTED) && (client_ptr -> nx_ptp_client_ipv4_group_joined))
         {
@@ -2126,6 +4124,38 @@ NXD_ADDRESS maddr;
         }
     }
 #endif
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+    /* set link layer receive notification */
+    status = nx_link_packet_receive_callback_add(client_ptr -> nx_ptp_client_ip_ptr,
+                                                 client_ptr -> nx_ptp_client_interface_index,
+                                                 &(client_ptr -> nx_ptp_client_link_queue),
+                                                 NX_PTP_ETHERNET_TYPE,
+                                                 _nx_ptp_client_ethernet_receive_notify, client_ptr);
+    if (status != NX_SUCCESS)
+    {
+        return(status);
+    }
+
+    status = nx_link_multicast_join(client_ptr -> nx_ptp_client_ip_ptr,
+                                    client_ptr -> nx_ptp_client_interface_index,
+                                    NX_PTP_ETHERNET_ALL_MULTICAST_ADDR_MSB,
+                                    NX_PTP_ETHERNET_ALL_MULTICAST_ADDR_LSB);
+    if (status != NX_SUCCESS)
+    {
+        return(status);
+    }
+
+    status = nx_link_multicast_join(client_ptr -> nx_ptp_client_ip_ptr,
+                                    client_ptr -> nx_ptp_client_interface_index,
+                                    NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_MSB,
+                                    NX_PTP_ETHERNET_P2P_MULTICAST_ADDR_LSB);
+    if (status != NX_SUCCESS)
+    {
+        return(status);
+    }
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
 
     /* activate the Client timer */
     if (status == TX_SUCCESS)
@@ -2210,7 +4240,7 @@ UINT _nxe_ptp_client_stop(NX_PTP_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_stop                                 PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2245,6 +4275,9 @@ UINT _nxe_ptp_client_stop(NX_PTP_CLIENT *client_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_stop(NX_PTP_CLIENT *client_ptr)
@@ -2274,6 +4307,7 @@ NXD_ADDRESS maddr;
     /* deactivate the timer */
     tx_timer_deactivate(&client_ptr -> nx_ptp_client_timer);
 
+#if NX_PTP_CLIENT_TRANSPORT_UDP
     /* unbind the sockets */
     nx_udp_socket_unbind((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_general_socket);
     nx_udp_socket_unbind((NX_UDP_SOCKET *)&client_ptr -> nx_ptp_client_event_socket);
@@ -2284,6 +4318,9 @@ NXD_ADDRESS maddr;
         nx_ipv4_multicast_interface_leave(client_ptr -> nx_ptp_client_ip_ptr,
                                           NX_PTP_IPV4_MULTICAST_ADDR,
                                           client_ptr -> nx_ptp_client_interface_index);
+        nx_ipv4_multicast_interface_leave(client_ptr -> nx_ptp_client_ip_ptr,
+                                          NX_PTP_IPV4_P2P_MULTICAST_ADDR,
+                                          client_ptr -> nx_ptp_client_interface_index);
         client_ptr -> nx_ptp_client_ipv4_group_joined = NX_FALSE;
     }
 #if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
@@ -2292,9 +4329,19 @@ NXD_ADDRESS maddr;
         NX_PTP_IPV6_MULTICAST_ADDR_SET(&maddr);
         nxd_ipv6_multicast_interface_leave(client_ptr -> nx_ptp_client_ip_ptr,
                                            &maddr, client_ptr -> nx_ptp_client_interface_index);
+        NX_PTP_IPV6_P2P_MULTICAST_ADDR_SET(&maddr);
+        nxd_ipv6_multicast_interface_leave(client_ptr -> nx_ptp_client_ip_ptr,
+                                           &maddr, client_ptr -> nx_ptp_client_interface_index);
         client_ptr -> nx_ptp_client_ipv6_group_joined = NX_FALSE;
     }
 #endif
+#endif /* NX_PTP_CLIENT_TRANSPORT_UDP */
+
+#if NX_PTP_CLIENT_TRANSPORT_ETHERNET
+    nx_link_packet_receive_callback_remove(client_ptr -> nx_ptp_client_ip_ptr,
+                                           client_ptr -> nx_ptp_client_interface_index,
+                                           &(client_ptr -> nx_ptp_client_link_queue));
+#endif /* NX_PTP_CLIENT_TRANSPORT_ETHERNET */
 
     /* send STOP message */
     tx_event_flags_set(&(client_ptr -> nx_ptp_client_events), NX_PTP_CLIENT_STOP_EVENT, TX_OR);
@@ -2317,6 +4364,169 @@ NXD_ADDRESS maddr;
     return(NX_SUCCESS);
 }
 
+#ifdef NX_PTP_ENABLE_MASTER
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nxe_ptp_client_master_enable                       PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function performs error checking for enabling master feature   */
+/*    for local PTP clock.                                                */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    client_ptr                            Pointer to PTP client         */
+/*    role                                  Role of PTP clock             */
+/*                                            SLAVE_ONLY, MASTER_ONLY or  */
+/*                                            SLAVE_AND_MASTER            */
+/*    priority1                             Priority1 of master clock     */
+/*    priority2                             Priority2 of master clock     */
+/*    clock_class                           Class of master clock         */
+/*    clock_accuracy                        Accuracy of master clock      */
+/*    clock_variance                        Variance of master clock      */
+/*    steps_removed                         Steps removed of master clock */
+/*    time_source                           Time source of master clock   */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    Completion status                                                   */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_ptp_client_master_enable          Actual master enable service  */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application                                                         */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+UINT _nxe_ptp_client_master_enable(NX_PTP_CLIENT *client_ptr, UCHAR role, UCHAR priority1, UCHAR priority2,
+                                   UCHAR clock_class, UCHAR clock_accuracy, USHORT clock_variance,
+                                   USHORT steps_removed, UCHAR time_source)
+{
+    /* Check input parameters.  */
+    if (client_ptr == NX_NULL)
+    {
+
+        /* Return error status.  */
+        return(NX_PTR_ERROR);
+    }
+
+    if ((role != NX_PTP_CLIENT_ROLE_MASTER_ONLY) &&
+        (role != NX_PTP_CLIENT_ROLE_SLAVE_AND_MASTER))
+    {
+
+        /* Return error status.  */
+        return(NX_INVALID_PARAMETERS);
+    }
+
+    /* Check for appropriate caller.  */
+    NX_THREADS_ONLY_CALLER_CHECKING
+
+    /* Call the actual function.  */
+    return(_nx_ptp_client_master_enable(client_ptr, role, priority1, priority2, clock_class,
+                                        clock_accuracy, clock_variance, steps_removed, time_source));
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ptp_client_master_enable                        PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function enables master feature for local PTP clock.           */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    client_ptr                            Pointer to PTP client         */
+/*    role                                  Role of PTP clock             */
+/*                                            SLAVE_ONLY, MASTER_ONLY or  */
+/*                                            SLAVE_AND_MASTER            */
+/*    priority1                             Priority1 of master clock     */
+/*    priority2                             Priority2 of master clock     */
+/*    clock_class                           Class of master clock         */
+/*    clock_accuracy                        Accuracy of master clock      */
+/*    clock_variance                        Variance of master clock      */
+/*    steps_removed                         Steps removed of master clock */
+/*    time_source                           Time source of master clock   */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    Completion status                                                   */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application                                                         */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_ptp_client_master_enable(NX_PTP_CLIENT *client_ptr, UCHAR role, UCHAR priority1, UCHAR priority2,
+                                  UCHAR clock_class, UCHAR clock_accuracy, USHORT clock_variance,
+                                  USHORT steps_removed, UCHAR time_source)
+{
+
+    /* 
+     * nx_ptp_master_priority1:                     0 is reserved. Set at 1 for highest priority
+     * nx_ptp_master_priority2:                     AS2020: 8.6.2.5 The default value for a PTP Relay Instance should be 247. 
+     *                                              The default value for a PTP End Instance should be 248.
+     * nx_ptp_master_clock_class:                   AS2020: 8.6.2.2 If the value that reflects the LocalClock and ClockSource entities is 
+     *                                              not specified or not known, clockClass is set to 248 
+     * nx_ptp_master_clock_accuracy:                User input. 
+     *                                              AS2020:8.6.2.3 If the value that reflects the LocalClock and ClockSource entities is 
+     *                                              not specified or unknown, clockAccuracy is set to 254 (FE16).
+     *                                              1588-2019: 7.6.2.6 clockAccuracy reference Table 5 enumerations 
+     * nx_ptp_master_offset_scaled_log_variance:    AS2020:8.6.2.4 If the value that reflects these entities is not specified or not known,
+     *                                              offsetScaledLogVariance is set to 17258 (436A16)
+     * nx_ptp_master_sequenceId                     Sequence ID for master starts at 0
+     */
+
+    client_ptr -> ptp_master.nx_ptp_client_master_address = NX_NULL; /* use client ptr */
+    client_ptr -> ptp_master.nx_ptp_client_master_port_identity = client_ptr -> nx_ptp_client_port_identity; /* use client port */
+    client_ptr -> ptp_master.nx_ptp_client_master_grandmaster_identity = client_ptr -> nx_ptp_client_port_identity; /* use client identity */
+
+    client_ptr -> ptp_master.nx_ptp_client_master_priority1 = priority1;
+    client_ptr -> ptp_master.nx_ptp_client_master_priority2 = priority2;
+    client_ptr -> ptp_master.nx_ptp_client_master_clock_class = clock_class;
+    client_ptr -> ptp_master.nx_ptp_client_master_clock_accuracy = clock_accuracy;
+    client_ptr -> ptp_master.nx_ptp_client_master_offset_scaled_log_variance = clock_variance;
+    client_ptr -> ptp_master.nx_ptp_client_master_steps_removed = steps_removed;
+    client_ptr -> ptp_master.nx_ptp_client_master_time_source = time_source;
+    client_ptr -> ptp_master.nx_ptp_client_master_sequenceId = 0xFFFF;
+    client_ptr -> ptp_master.nx_ptp_client_master_sync_sequenceId = 0xFFFF;
+    client_ptr -> nx_ptp_client_role = role;
+
+    /* return Success */
+    return(NX_SUCCESS);
+}
+#endif /* NX_PTP_ENABLE_MASTER */
 
 /**************************************************************************/
 /*                                                                        */
@@ -2851,7 +5061,7 @@ UINT _nx_ptp_client_sync_info_get(NX_PTP_CLIENT_SYNC *sync_ptr, USHORT *flags, S
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_packet_timestamp_notify              PORTABLE C      */
-/*                                                           6.1.3        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2883,10 +5093,45 @@ UINT _nx_ptp_client_sync_info_get(NX_PTP_CLIENT_SYNC *sync_ptr, USHORT *flags, S
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
+/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*                                            supported gPTP profile,     */
+/*                                            supported master clock,     */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_ptp_client_packet_timestamp_notify(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PTP_TIME *timestamp_ptr)
 {
+#ifdef NX_ENABLE_GPTP
+    /* process t1 send time */
+    if (client_ptr &&
+        (client_ptr -> nx_ptp_client_pdelay_initiator_state == NX_PTP_CLIENT_PDELAY_WAIT_REQ_TS) &&
+        (client_ptr -> nx_ptp_client_pdelay_req_packet_ptr == packet_ptr))
+    {
+
+        /* store timestamp */
+        client_ptr -> nx_ptp_client_pdelay_req_ts = *timestamp_ptr;
+
+        /* update state */
+        client_ptr -> nx_ptp_client_pdelay_initiator_state = NX_PTP_CLIENT_PDELAY_WAIT_RESP;
+    }
+    
+    /* process t3 response time */
+    if (client_ptr &&
+        (client_ptr -> nx_ptp_client_pdelay_resp_packet_ptr == packet_ptr))
+    {
+
+        /* store timestamp */
+        client_ptr -> nx_ptp_client_pdelay_resp_origin = *timestamp_ptr;
+        
+         /* set timer event */
+        tx_event_flags_set(&(client_ptr -> nx_ptp_client_events), NX_PTP_CLIENT_PDELAY_FOLLOW_EVENT, TX_OR);
+        
+        client_ptr -> nx_ptp_client_pdelay_resp_packet_ptr = NX_NULL;
+    }
+
+    
+    
+#endif /* NX_ENABLE_GPTP */
 
     /* get timestamp of previous delay_req message */
     if (client_ptr &&
@@ -2900,6 +5145,21 @@ VOID _nx_ptp_client_packet_timestamp_notify(NX_PTP_CLIENT *client_ptr, NX_PACKET
         /* update state */
         client_ptr -> nx_ptp_client_delay_state = NX_PTP_CLIENT_DELAY_WAIT_RESP;
     }
+
+#if defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC)
+    /* get timestamp of previous sync message */
+    if (client_ptr && (client_ptr -> nx_ptp_client_sync_packet_ptr == packet_ptr))
+    {
+
+        client_ptr -> nx_ptp_client_sync_packet_ptr = NX_NULL;
+
+        /* store timestamp */
+        client_ptr -> nx_ptp_client_sync_ts_local = *timestamp_ptr;
+
+         /* set follow up event */
+        tx_event_flags_set(&(client_ptr -> nx_ptp_client_events), NX_PTP_CLIENT_SYNC_FOLLOW_EVENT, TX_OR);
+    }
+#endif /* defined(NX_PTP_ENABLE_MASTER) || defined(NX_PTP_ENABLE_REVERSE_SYNC) */
 }
 
 
@@ -3072,6 +5332,63 @@ UINT _nxe_ptp_client_utility_time_diff(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time
     return(_nx_ptp_client_utility_time_diff(time1_ptr, time2_ptr, result_ptr));
 }
 
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nxe_ptp_client_utility_time_sum                    PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function checks for errors on the PTP time sum service.        */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    time1_ptr                             Pointer to first PTP time     */
+/*    time2_ptr                             Pointer to second PTP time    */
+/*    result_ptr                            Pointer to result time1+time2 */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_ptp_client_utility_time_sum       Actual time sum service       */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application                                                         */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+UINT _nxe_ptp_client_utility_time_sum(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time2_ptr, NX_PTP_TIME *result_ptr)
+{
+
+    /* Check input parameters.  */
+    if ((time1_ptr == NX_NULL) || (time2_ptr == NX_NULL) || (result_ptr == NX_NULL))
+    {
+
+        /* Return error status.  */
+        return(NX_PTR_ERROR);
+    }
+    
+    /* Check for appropriate caller.  */
+    NX_THREADS_ONLY_CALLER_CHECKING
+
+    /* Call the actual function.  */
+    return(_nx_ptp_client_utility_time_sum(time1_ptr, time2_ptr, result_ptr));
+}
+
 
 /**************************************************************************/
 /*                                                                        */
@@ -3171,6 +5488,104 @@ LONG  ns;
     return(NX_SUCCESS);
 }
 
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ptp_client_utility_time_sum                    PORTABLE C       */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Tiejun Zhou, Microsoft Corporation                                  */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function computes the sum of two PTP times.                    */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    time1_ptr                             Pointer to first PTP time     */
+/*    time2_ptr                             Pointer to second PTP time    */
+/*    result_ptr                            Pointer to result time1+time2 */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_ptp_client_utility_add64          Adds two 64-bit numbers       */
+/*    _nx_ptp_client_utility_dec64          Decrement a 64-bit number     */
+/*    _nx_ptp_client_utility_inc64          Increment a 64-bit number     */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application                                                         */
+/*    _nx_ptp_client_pdelay_resp_received   Process pdelay response       */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_ptp_client_utility_time_sum(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time2_ptr, NX_PTP_TIME *result_ptr)
+{
+LONG  sec_hi;
+ULONG sec_lo;
+LONG  ns;
+
+    /* compute sum of seconds */
+    sec_hi = time1_ptr -> second_high;
+    sec_lo = time1_ptr -> second_low;
+    _nx_ptp_client_utility_add64(&sec_hi, &sec_lo, time2_ptr -> second_high,
+                                 time2_ptr -> second_low);
+
+    /* compute sum of nanoseconds */
+    /* note: this cannot overflow as nanosecond field is in range +/-0-999999999 */
+    ns = time1_ptr -> nanosecond + time2_ptr -> nanosecond;
+
+    /* keep nanoseconds in range +/-0-999999999 */
+    if (ns <= -NX_PTP_NANOSECONDS_PER_SEC)
+    {
+        ns += NX_PTP_NANOSECONDS_PER_SEC;
+        _nx_ptp_client_utility_dec64(&sec_hi, &sec_lo);
+    }
+    else if (ns >= NX_PTP_NANOSECONDS_PER_SEC)
+    {
+        ns -= NX_PTP_NANOSECONDS_PER_SEC;
+        _nx_ptp_client_utility_inc64(&sec_hi, &sec_lo);
+    }
+
+    /* ensure the nanoseconds field has same sign as seconds field */
+    if ((sec_hi >= 0) && ((sec_hi != 0) || (sec_lo != 0)))
+    {
+        /* positive number of seconds */
+        if (ns < 0)
+        {
+            ns += NX_PTP_NANOSECONDS_PER_SEC;
+            _nx_ptp_client_utility_dec64(&sec_hi, &sec_lo);
+        }
+    }
+    else if (sec_hi < 0)
+    {
+        /* negative number of seconds */
+        if (ns > 0)
+        {
+            ns -= NX_PTP_NANOSECONDS_PER_SEC;
+            _nx_ptp_client_utility_inc64(&sec_hi, &sec_lo);
+        }
+    }
+
+    /* return result time */
+    result_ptr -> second_high = sec_hi;
+    result_ptr -> second_low  = sec_lo;
+    result_ptr -> nanosecond  = ns;
+
+    return(NX_SUCCESS);
+}
 
 /**************************************************************************/
 /*                                                                        */
@@ -3423,7 +5838,7 @@ ULONG r_lo;
 
     r_hi = *a_hi + b_hi;
     r_lo = *a_lo + b_lo;
-    if (r_lo < *a_lo)
+    if ((r_lo < *a_lo) || (r_lo < b_lo))
     {
         r_hi++;     /* add carry */
     }
@@ -3481,7 +5896,7 @@ ULONG r_lo;
     r_lo = *a_lo - b_lo;
     if (*a_lo < b_lo)
     {
-        r_hi--;     /* substract carry */
+        r_hi--;     /* subtract carry */
     }
     *a_hi = r_hi;
     *a_lo = r_lo;
@@ -3589,7 +6004,7 @@ ULONG r_lo;
     r_lo = *a_lo;
     if (r_lo == 0)
     {
-        *a_hi = *a_hi - 1;      /* substract carry */
+        *a_hi = *a_hi - 1;      /* subtract carry */
     }
     *a_lo = r_lo - 1;
 }
@@ -3640,7 +6055,7 @@ LONG r_hi;
     r_hi = -*a_hi;
     if (*a_lo != 0)
     {
-        r_hi--;     /* substract carry */
+        r_hi--;     /* subtract carry */
     }
     *a_hi = r_hi;
     *a_lo = -*a_lo;

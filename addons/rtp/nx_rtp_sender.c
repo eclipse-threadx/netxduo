@@ -134,7 +134,7 @@ UINT status;
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_rtp_sender_create                              PORTABLE C      */
+/*    _nx_rtp_sender_create                               PORTABLE C      */
 /*                                                           6.3.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -642,7 +642,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_create                      PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -686,6 +686,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
+/*  xx-xx-xxxx     Haiqing Zhao            Modified comments(s),          */
+/*                                           supported VLAN,              */
+/*                                           resulting in version 6.x     */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_create(NX_RTP_SENDER *rtp_sender, NX_RTP_SESSION *session, ULONG payload_type,
@@ -758,6 +761,11 @@ UINT _nx_rtp_sender_session_create(NX_RTP_SENDER *rtp_sender, NX_RTP_SESSION *se
 
     /* Release the mutex and return success status. */
     tx_mutex_put(&(rtp_sender -> nx_rtp_sender_protection));
+
+#ifdef NX_ENABLE_VLAN
+    /* Initialize session vlan priority. */
+    session -> nx_rtp_session_vlan_priority = NX_VLAN_PRIORITY_INVALID;
+#endif /* NX_ENABLE_VLAN */
 
     /* Set session magic number to indicate the session is created successfully. */
     session -> nx_rtp_session_id = NX_RTP_SESSION_ID;
@@ -1286,8 +1294,8 @@ UINT status;
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_rtp_sender_session_packet_send                PORTABLE C       */
-/*                                                           6.3.0        */
+/*    _nx_rtp_sender_session_packet_send                 PORTABLE C       */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1328,6 +1336,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
+/*  xx-xx-xxxx     Haiqing Zhao            Modified comments(s),          */
+/*                                           supported VLAN,              */
+/*                                           resulting in version 6.x     */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_packet_send(NX_RTP_SESSION *session, NX_PACKET *packet_ptr, ULONG timestamp, ULONG ntp_msw, ULONG ntp_lsw, UINT marker)
@@ -1481,6 +1492,18 @@ UINT           fragmentation = NX_FALSE;
         session -> nx_rtp_session_ntp_timestamp_lsw = ntp_lsw;
 
         _nx_rtcp_packet_send(session);
+
+#ifdef NX_ENABLE_VLAN
+        /* If user has configured vlan priority with valid value, set vlan priority for the rtp data packet to sent.  */
+        if (session -> nx_rtp_session_vlan_priority != NX_VLAN_PRIORITY_INVALID)
+        {
+            status = nx_packet_vlan_priority_set(send_packet, session -> nx_rtp_session_vlan_priority);
+            if (status)
+            {
+                return(status);
+            }
+        }
+#endif /* NX_ENABLE_VLAN */
 
         /* Send out rtp packet */
         status = nxd_udp_socket_source_send(&(session -> nx_rtp_sender -> nx_rtp_sender_rtp_socket), send_packet,
@@ -1857,6 +1880,130 @@ UINT _nx_rtp_sender_session_ssrc_get(NX_RTP_SESSION *session, ULONG *ssrc)
     *ssrc = session -> nx_rtp_session_ssrc;
 
     return(NX_SUCCESS);
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nxe_rtp_sender_session_vlan_priority_set          PORTABLE C       */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Haiqing Zhao, Microsoft Corporation                                 */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function checks errors in the RTP sender session vlan priority */
+/*    set function call.                                                  */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    session                              Pointer to RTP session         */
+/*    vlan_priority                        The vlan priority              */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                               Completion status              */
+/*    NX_PTR_ERROR                         Invalid pointer input          */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_rtp_sender_session_vlan_priority_set                            */
+/*                                         Set the vlan priority value    */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Haiqing Zhao            Initial Version 6.x            */
+/*                                                                        */
+/**************************************************************************/
+UINT _nxe_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan_priority)
+{
+
+#ifdef NX_ENABLE_VLAN
+UINT status;
+
+
+    /* Check for invalid input pointers. */
+    if ((session == NX_NULL) || (session -> nx_rtp_session_id != NX_RTP_SESSION_ID))
+    {
+        return(NX_PTR_ERROR);
+    }
+
+    /* Call actual RTP sender session vlan priority set service. */
+    status = _nx_rtp_sender_session_vlan_priority_set(session, vlan_priority);
+
+    /* Return status. */
+    return(status);
+#else
+    NX_PARAMETER_NOT_USED(session);
+    NX_PARAMETER_NOT_USED(vlan_priority);
+
+    return(NX_NOT_SUPPORTED);
+#endif /* NX_ENABLE_VLAN */
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nxe_rtp_sender_session_vlan_priority_set          PORTABLE C       */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Haiqing Zhao, Microsoft Corporation                                 */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sets the vlan priority value for the RTP data packets */
+/*    transferred in the specific session.                                */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    session                              Pointer to RTP session         */
+/*    vlan_priority                        The vlan priority              */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                               Completion status              */
+/*    NX_PTR_ERROR                         Invalid pointer input          */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_rtp_sender_session_vlan_priority_set                            */
+/*                                         Set the vlan priority value    */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  xx-xx-xxxx     Haiqing Zhao            Initial Version 6.x            */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan_priority)
+{
+#ifdef NX_ENABLE_VLAN
+
+    /* Store the vlan priority value into the session. */
+    session -> nx_rtp_session_vlan_priority = vlan_priority;
+
+    return(NX_SUCCESS);
+#else
+    NX_PARAMETER_NOT_USED(session);
+    NX_PARAMETER_NOT_USED(vlan_priority);
+
+    return(NX_NOT_SUPPORTED);
+#endif /* NX_ENABLE_VLAN */
 }
 
 /**************************************************************************/

@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_tcp.h                                            PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -50,6 +50,9 @@
 /*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
 /*                                            necessary header file,      */
 /*                                            resulting in version 6.1.9  */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN,             */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -344,6 +347,7 @@ VOID _nx_tcp_socket_thread_suspend(TX_THREAD **suspension_list_head, VOID (*susp
 VOID _nx_tcp_socket_transmit_queue_flush(NX_TCP_SOCKET *socket_ptr);
 VOID _nx_tcp_socket_block_cleanup(NX_TCP_SOCKET *socket_ptr);
 VOID _nx_tcp_transmit_cleanup(TX_THREAD *thread_ptr NX_CLEANUP_PARAMETER);
+UINT _nx_tcp_socket_vlan_priority_set(NX_TCP_SOCKET *socket_ptr, UINT vlan_priority);
 
 
 /* Define error checking shells for TCP API services.  These are only referenced by the
@@ -401,7 +405,7 @@ UINT _nxe_tcp_socket_establish_notify(NX_TCP_SOCKET *socket_ptr, VOID (*tcp_esta
 UINT _nxe_tcp_socket_disconnect_complete_notify(NX_TCP_SOCKET *socket_ptr, VOID (*tcp_disconnect_complete_notify)(NX_TCP_SOCKET *socket_ptr));
 UINT _nxe_tcp_socket_queue_depth_notify_set(NX_TCP_SOCKET *socket_ptr,  VOID (*tcp_socket_queue_depth_notify)(NX_TCP_SOCKET *socket_ptr));
 UINT _nxe_tcp_socket_timed_wait_callback(NX_TCP_SOCKET *socket_ptr, VOID (*tcp_timed_wait_callback)(NX_TCP_SOCKET *socket_ptr));
-
+UINT _nxe_tcp_socket_vlan_priority_set(NX_TCP_SOCKET *socket_ptr, UINT vlan_priority);
 
 /* TCP component data declarations follow.  */
 

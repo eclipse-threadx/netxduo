@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_packet_allocate                                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -71,6 +71,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN and generic  */
+/*                                            link layer,                 */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_packet_allocate(NX_PACKET_POOL *pool_ptr,  NX_PACKET **packet_ptr,
@@ -152,6 +156,11 @@ ULONG                  trace_timestamp;
 
         /* Initialize the IP identification flag.  */
         work_ptr -> nx_packet_identical_copy = NX_FALSE;
+
+#ifdef NX_ENABLE_VLAN
+        /* Initialize the packet vlan priority */
+        work_ptr -> nx_packet_vlan_priority = NX_VLAN_PRIORITY_INVALID;
+#endif /* NX_ENABLE_VLAN */
 
         /* Initialize the IP header length. */
         work_ptr -> nx_packet_ip_header_length = 0;
