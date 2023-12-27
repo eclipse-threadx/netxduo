@@ -396,6 +396,7 @@ ULONG        *ethernet_frame_ptr;
 
             /* Release the packet.  */
             nx_packet_transmit_release(packet_ptr);
+            break;
         }
 #else
 

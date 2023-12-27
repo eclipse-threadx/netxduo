@@ -1082,7 +1082,7 @@ ULONG header_length;
 /*    ip_ptr                                IP instance pointer           */
 /*    interface_index                       Index to the interface        */
 /*    packet_ptr                            Pointer to packet             */
-/*    time_ptr                              Timestamp of packet recceived */
+/*    time_ptr                              Timestamp of packet received  */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
@@ -1090,8 +1090,6 @@ ULONG header_length;
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    tx_mutex_get                          Get protection mutex          */
-/*    tx_mutex_put                          Put protection mutex          */
 /*    _nx_packet_release                    Release packet                */
 /*    nx_link_ethernet_header_parse         Parse Ethernet header         */
 /*    _nx_ip_packet_deferred_receive        IP packet receive             */
@@ -1125,16 +1123,17 @@ NX_LINK_RECEIVE_QUEUE *queue_ptr;
     /* Check for invalid input pointers.  */
     if ((ip_ptr == NX_NULL) || (ip_ptr -> nx_ip_id != NX_IP_ID) || (packet_ptr == NX_NULL))
     {
+        _nx_packet_release(packet_ptr);
         return;
     }
 
     /* Check for interface being valid. */
     if (!ip_ptr -> nx_ip_interface[interface_index].nx_interface_valid)
     {
+        _nx_packet_release(packet_ptr);
         return;
     }
 
-    tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
     interface_ptr = &(ip_ptr -> nx_ip_interface[interface_index]);
     queue_ptr = interface_ptr -> nx_interface_link_receive_queue_head;
 
@@ -1165,7 +1164,6 @@ NX_LINK_RECEIVE_QUEUE *queue_ptr;
 
                 /* Drop the packet.  */
                 _nx_packet_release(packet_ptr);
-                tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
                 return;
             }
@@ -1183,7 +1181,6 @@ NX_LINK_RECEIVE_QUEUE *queue_ptr;
 
                 /* Drop the packet.  */
                 _nx_packet_release(packet_ptr);
-                tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
                 return;
             }
@@ -1217,7 +1214,6 @@ NX_LINK_RECEIVE_QUEUE *queue_ptr;
 
                 /* Drop the packet.  */
                 _nx_packet_release(packet_ptr);
-                tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
                 return;
             }
@@ -1308,7 +1304,6 @@ NX_LINK_RECEIVE_QUEUE *queue_ptr;
                 {
 
                     /* Packet was consumed.  */
-                    tx_mutex_put(&(ip_ptr -> nx_ip_protection));
                     return;
                 }
             }
@@ -1326,7 +1321,6 @@ NX_LINK_RECEIVE_QUEUE *queue_ptr;
         /* Invalid ethernet header... release the packet.  */
         _nx_packet_release(packet_ptr);
     }
-    tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 }
 
 
@@ -1572,7 +1566,7 @@ UINT nx_link_driver_request_preprocess(NX_IP_DRIVER *driver_request, NX_INTERFAC
 
     case NX_LINK_ENABLE: /* fallthrough */
     case NX_LINK_DISABLE: /* fallthrough */
-    /* The link status of virtual interface should be same with its parent phisical interface */
+    /* The link status of virtual interface should be same with its parent physical interface */
     case NX_LINK_SET_PHYSICAL_ADDRESS: /* fallthrough */
     /* Set mac address is not supported for virtual interface */
     case NX_LINK_RX_ENABLE: /* fallthrough */

@@ -791,6 +791,7 @@ USHORT          ether_type;
 
                 /* Release the packet.  */
                 nx_packet_transmit_release(packet_ptr);
+                break;
             }
 #else
             /* Adjust the prepend pointer.  */
@@ -1322,6 +1323,7 @@ USHORT         ether_type;
 
                 /* Release the packet.  */
                 nx_packet_transmit_release(packet_ptr);
+                break;
             }
 #else
             /* Adjust the prepend pointer.  */

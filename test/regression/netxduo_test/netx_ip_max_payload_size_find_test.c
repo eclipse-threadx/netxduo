@@ -181,7 +181,7 @@ ULONG start_offset, payload_length;
     status = nx_ip_max_payload_size_find(&ip_0, &dest_address, 0, 80, 80, NX_PROTOCOL_TCP,
                                          &start_offset, &payload_length);
 
-    if((status != NX_SUCCESS) || (start_offset != 56) || (payload_length != 1460))
+    if((status != NX_SUCCESS) || (start_offset != (40 + NX_PHYSICAL_HEADER)) || (payload_length != 1460))
     {
         printf("ERROR!\n");
         test_control_return(1);
@@ -193,7 +193,7 @@ ULONG start_offset, payload_length;
     status = nx_ip_max_payload_size_find(&ip_0, &dest_address, 1, 80, 80, NX_PROTOCOL_TCP,
                                          &start_offset, &payload_length);
        
-    if((status != NX_SUCCESS) ||(start_offset != 56) || (payload_length != 472))  
+    if((status != NX_SUCCESS) ||(start_offset != (40 + NX_PHYSICAL_HEADER)) || (payload_length != 472))  
     {
         printf("ERROR!\n");
         test_control_return(1);
@@ -218,7 +218,7 @@ ULONG start_offset, payload_length;
     status = nx_ip_max_payload_size_find(&ip_1, &dest_address, 0, 80, 80, NX_PROTOCOL_TCP,
                                          &start_offset, &payload_length);
 
-    if((status != NX_SUCCESS) || (start_offset != 56) || (payload_length != 984))
+    if((status != NX_SUCCESS) || (start_offset != (40 + NX_PHYSICAL_HEADER)) || (payload_length != 984))
     {
         printf("ERROR!\n");
         test_control_return(1);
@@ -232,7 +232,7 @@ ULONG start_offset, payload_length;
                                          &start_offset, &payload_length);
 
     /* 56 = 16 + 20 + 20.  216 = 256 + 16 - 56 */
-    if((status != NX_SUCCESS) ||(start_offset != 56) || (payload_length != 216))
+    if((status != NX_SUCCESS) ||(start_offset != (40 + NX_PHYSICAL_HEADER)) || (payload_length != 216))
     {
         printf("ERROR!\n");
         test_control_return(1);
@@ -251,7 +251,7 @@ ULONG start_offset, payload_length;
     /* Find the max payload with valid address index.  */
     status = nx_ip_max_payload_size_find(&ip_0, &ipv6_address_1, 0, 80, 80, NX_PROTOCOL_UDP, &start_offset, &payload_length);
     /* 64 = 16 + 40 + 8    208 = 1500 + 16 - 64 */
-    if((status != NX_SUCCESS) || (start_offset != 64) || (payload_length != 1452))
+    if((status != NX_SUCCESS) || (start_offset != (48 + NX_PHYSICAL_HEADER)) || (payload_length != 1452))
     {
         printf("ERROR!\n");
         test_control_return(1);
