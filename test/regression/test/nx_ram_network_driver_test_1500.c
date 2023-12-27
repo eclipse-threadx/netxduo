@@ -38,6 +38,9 @@
 #include "nxd_bsd.h"
 #endif /* NX_BSD_RAW_PPPOE_SUPPORT */
 
+#if defined(__PRODUCT_NETXDUO__) && defined(NX_ENABLE_VLAN)
+#include "nx_link.h"
+#endif
 
 #ifdef NX_PCAP_ENABLE
 #ifdef linux
@@ -90,6 +93,8 @@ ULONG      driver_data_length;
 #define NX_ETHERNET_PPPOE_SESSION      0x8864
 #endif
 #define NX_ETHERNET_SIZE    14
+
+#define NX_LINK_MTU      1514
 
 /* For the simulated ethernet driver, physical addresses are allocated starting
    at the preset value and then incremented before the next allocation.  */
@@ -440,7 +445,9 @@ VOID  _nx_ram_network_driver_internal(NX_IP_DRIVER *driver_req_ptr, UINT mtu_siz
 TX_INTERRUPT_SAVE_AREA
 NX_IP           *ip_ptr;
 NX_PACKET       *packet_ptr;
+#ifndef NX_ENABLE_VLAN
 ULONG           *ethernet_frame_ptr;
+#endif
 NX_INTERFACE    *interface_ptr;
 #ifdef __PRODUCT_NETXDUO__
 UINT            interface_index;
@@ -453,6 +460,7 @@ UINT            status;
 ULONG           timer_input;
 NX_PACKET_POOL *pool_ptr;
 UINT            old_threshold = 0;
+USHORT          ether_type;
 
     /* Setup the IP pointer from the driver request. */
     ip_ptr =  driver_req_ptr -> nx_ip_driver_ptr;
@@ -466,8 +474,16 @@ UINT            old_threshold = 0;
     /* Default to successful return.  */
     driver_req_ptr -> nx_ip_driver_status =  NX_SUCCESS;
 
+#ifdef NX_ENABLE_VLAN
+    /* Let link layer to preprocess the driver request and return actual interface.  */
+    if (nx_link_driver_request_preprocess(driver_req_ptr, &interface_ptr) != NX_SUCCESS)
+    {
+        return;
+    }
+#else
     /* Setup interface pointer. */
     interface_ptr = driver_req_ptr -> nx_ip_driver_interface;
+#endif
 
 #ifdef __PRODUCT_NETXDUO__
     /* Obtain the index number of the network interface. */
@@ -631,8 +647,19 @@ UINT            old_threshold = 0;
         }
 
         case NX_LINK_PACKET_SEND:
+        case NX_LINK_PACKET_BROADCAST:
+        case NX_LINK_ARP_SEND:
+        case NX_LINK_ARP_RESPONSE_SEND:
+        case NX_LINK_RARP_SEND:
         {
-            /* Process driver send packet.  */
+
+            /* The IP stack sends down a data packet for transmission.
+               The device driver needs to prepend a MAC header, and fill in the
+               Ethernet frame type (assuming Ethernet protocol for network transmission)
+               based on the type of packet being transmitted.
+
+               The following sequence illustrates this process. */
+
 
             /* Place the ethernet frame at the front of the packet.  */
             packet_ptr =  driver_req_ptr -> nx_ip_driver_packet;
@@ -646,14 +673,16 @@ UINT            old_threshold = 0;
             }
 
 #ifdef NX_ENABLE_INTERFACE_CAPABILITY
+            if(((driver_req_ptr -> nx_ip_driver_command) == NX_LINK_PACKET_BROADCAST) ||
+                ((driver_req_ptr -> nx_ip_driver_command) == NX_LINK_PACKET_SEND))
             _nx_ram_network_driver_calculate_checksum(nx_ram_driver[i].nx_ram_driver_interface_ptr, packet_ptr, NX_FALSE);
 #endif 
-
 
             /* Advanced function entry for calling. */
             if(advanced_packet_process_callback != NX_NULL)
             {
                 status = advanced_packet_process_callback(ip_ptr, packet_ptr, &op, &delay);
+
                 if(!status)
                     return;
 
@@ -717,6 +746,7 @@ UINT            old_threshold = 0;
                     break;
                 }
             }
+
              /*A function entry for calling*/
             if(packet_process_callback != NX_NULL)
             {
@@ -726,6 +756,43 @@ UINT            old_threshold = 0;
                     return;
             }
 
+            /* Get Ethernet type.  */
+            if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_SEND)
+            {
+                ether_type = NX_ETHERNET_ARP;
+            }
+            else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_RESPONSE_SEND)
+            {
+                ether_type = NX_ETHERNET_ARP;
+            }
+            else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_RARP_SEND)
+            {
+                ether_type = NX_ETHERNET_RARP;
+            }
+#ifdef __PRODUCT_NETXDUO__
+            else if (packet_ptr -> nx_packet_ip_version == 6)
+            {
+                ether_type = NX_ETHERNET_IPV6;
+            }
+#endif
+            else
+            {
+                ether_type = NX_ETHERNET_IP;
+            }
+
+#ifdef NX_ENABLE_VLAN
+            /* Add Ethernet header.  */
+            if (nx_link_ethernet_header_add(ip_ptr,
+                                            driver_req_ptr -> nx_ip_driver_interface -> nx_interface_index, packet_ptr,
+                                            driver_req_ptr -> nx_ip_driver_physical_address_msw,
+                                            driver_req_ptr -> nx_ip_driver_physical_address_lsw,
+                                            (UINT)ether_type))
+            {
+
+                /* Release the packet.  */
+                nx_packet_transmit_release(packet_ptr);
+            }
+#else
             /* Adjust the prepend pointer.  */
             packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr - NX_ETHERNET_SIZE;
 
@@ -759,156 +826,6 @@ UINT            old_threshold = 0;
                                        (interface_ptr -> nx_interface_physical_address_lsw >> 16);
             *(ethernet_frame_ptr+3) =  (interface_ptr -> nx_interface_physical_address_lsw << 16);
 
-#ifdef FEATURE_NX_IPV6
-            if(packet_ptr -> nx_packet_ip_version == 6)
-                *(ethernet_frame_ptr+3) |= NX_ETHERNET_IPV6;
-            else
-#endif
-                *(ethernet_frame_ptr+3) |= NX_ETHERNET_IP;
-
-            /* Endian swapping if NX_LITTLE_ENDIAN is defined.  */
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr));
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+1));
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+2));
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+3));
-
-            /* At this point, the packet is a complete Ethernet frame, ready to be transmitted.
-               The driver shall call the actual Ethernet transmit routine and put the packet
-               on the wire.   
-
-               In this example, the simulated RAM network transmit routine is called. */ 
-
-            /* Check whether we need to duplicate the packet. */
-            if(dup_packet_ptr != NX_NULL)
-                nx_packet_copy(packet_ptr, &dup_packet_ptr, pool_ptr, NX_NO_WAIT); 
-            if(op != NX_RAMDRIVER_OP_DELAY)
-                _nx_ram_network_driver_output(ip_ptr, packet_ptr, i);
-            else
-                tx_timer_activate(&nx_driver_timers[timer_index]);
-
-            /* Send the duplicate packet. */
-            if(dup_packet_ptr != NX_NULL)
-                _nx_ram_network_driver_output(ip_ptr, dup_packet_ptr, i);
-
-            break;
-        }
-
-        case NX_LINK_PACKET_BROADCAST:
-        case NX_LINK_ARP_SEND:
-        case NX_LINK_ARP_RESPONSE_SEND:
-        case NX_LINK_RARP_SEND:
-        {
-
-            /* The IP stack sends down a data packet for transmission. 
-               The device driver needs to prepend a MAC header, and fill in the 
-               Ethernet frame type (assuming Ethernet protocol for network transmission)
-               based on the type of packet being transmitted.
-               
-               The following sequence illustrates this process. */
-
-
-            /* Place the ethernet frame at the front of the packet.  */
-            packet_ptr =  driver_req_ptr -> nx_ip_driver_packet;
-
-            if (interface_ptr -> nx_interface_link_up == NX_FALSE)
-            {
-
-                /* Link is down. Drop the packet. */
-                nx_packet_transmit_release(packet_ptr);
-                return;
-            }
-
-#ifdef NX_ENABLE_INTERFACE_CAPABILITY
-            if((driver_req_ptr -> nx_ip_driver_command) == NX_LINK_PACKET_BROADCAST)
-                _nx_ram_network_driver_calculate_checksum(nx_ram_driver[i].nx_ram_driver_interface_ptr, packet_ptr, NX_FALSE);
-#endif 
-                         
-            /* Advanced function entry for calling. */
-            if(advanced_packet_process_callback != NX_NULL)
-            {
-                status = advanced_packet_process_callback(ip_ptr, packet_ptr, &op, &delay);
-
-                if(!status)
-                    return; 
-
-                /* Advanced process. */
-                switch(op)
-                {
-                    case NX_RAMDRIVER_OP_DROP:
-                    {
-
-                        /* Drop the packet. */
-                        nx_packet_transmit_release(packet_ptr);
-                        return;
-                    }break;
-
-                    case NX_RAMDRIVER_OP_DELAY:
-                    {
-                        TX_DISABLE
-
-                        /* Find an unused timer. */
-                        for(timer_index = 0; timer_index < NX_MAX_TIMER; timer_index++)
-                        {
-                            if(nx_driver_timer_used[timer_index] != NX_RAMDRIVER_TIMER_USED)
-                            {
-                                if(nx_driver_timer_used[timer_index] == NX_RAMDRIVER_TIMER_DIRTY)
-                                    tx_timer_delete(&nx_driver_timers[timer_index]);
-
-                                nx_driver_timer_used[timer_index] = NX_RAMDRIVER_TIMER_USED;
-                                break;
-                            }
-                        }
-                        TX_RESTORE
-
-                        if(timer_index < NX_MAX_TIMER)
-                        {
-                            memcpy(&nx_driver_requests[timer_index], driver_req_ptr, sizeof(NX_IP_DRIVER));
-
-                            timer_input = (timer_index << 16) | i;
-
-                            tx_timer_create(&nx_driver_timers[timer_index], "Driver timer",
-                                            _nx_ram_network_driver_delay_entry, 
-                                            (ULONG)timer_input,
-                                            delay, delay, TX_NO_ACTIVATE);
-                        }
-                        else
-                        {
-
-                            /* No available timer, just send bypass. */
-                            op = NX_RAMDRIVER_OP_BYPASS;
-                        }
-                    }break;
-
-                    case NX_RAMDRIVER_OP_DUPLICATE:
-                    {
-
-                        /* Set the dup_packet_ptr. */
-                        dup_packet_ptr = packet_ptr;
-                    }break;
-
-                    case NX_RAMDRIVER_OP_BYPASS:
-                    default:
-                    break;
-                }
-            }
-
-            /* Adjust the prepend pointer.  */
-            packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr - NX_ETHERNET_SIZE;
-
-            /* Adjust the packet length.  */
-            packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length + NX_ETHERNET_SIZE;
-
-            /* Setup the ethernet frame pointer to build the ethernet frame.  Backup another 2
-               bytes to get 32-bit word alignment.  */
-            ethernet_frame_ptr =  (ULONG *) (packet_ptr -> nx_packet_prepend_ptr - 2);
-
-            /* Build the ethernet frame.  */
-            *ethernet_frame_ptr     =  driver_req_ptr -> nx_ip_driver_physical_address_msw;
-            *(ethernet_frame_ptr+1) =  driver_req_ptr -> nx_ip_driver_physical_address_lsw;
-            *(ethernet_frame_ptr+2) =  (interface_ptr -> nx_interface_physical_address_msw << 16) |
-                                       (interface_ptr -> nx_interface_physical_address_lsw >> 16);
-            *(ethernet_frame_ptr+3) =  (interface_ptr -> nx_interface_physical_address_lsw << 16);
-
             if(driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_SEND)
                 *(ethernet_frame_ptr+3) |= NX_ETHERNET_ARP;
             else if(driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_RESPONSE_SEND)
@@ -928,6 +845,7 @@ UINT            old_threshold = 0;
             NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+1));
             NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+2));
             NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+3));
+#endif /* NX_ENABLE_VLAN */
                                 
             /* At this point, the packet is a complete Ethernet frame, ready to be transmitted.
                The driver shall call the actual Ethernet transmit routine and put the packet
@@ -949,7 +867,15 @@ UINT            old_threshold = 0;
 
             break;
         }
+#ifdef NX_ENABLE_VLAN
+    case NX_LINK_RAW_PACKET_SEND:
+    {
 
+        /* Send raw packet out directly.  */
+        _nx_ram_network_driver_output(ip_ptr, driver_req_ptr -> nx_ip_driver_packet, i);
+        break;
+    }
+#endif /* NX_ENABLE_VLAN */
         case NX_LINK_MULTICAST_JOIN:
         {
             UINT          mcast_index;
@@ -1148,7 +1074,9 @@ VOID  _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr)
 
 NX_IP           *ip_ptr;
 NX_PACKET       *packet_ptr;
+#ifndef NX_ENABLE_VLAN
 ULONG           *ethernet_frame_ptr;
+#endif /* NX_ENABLE_VLAN */
 NX_INTERFACE    *interface_ptr;
 #ifdef __PRODUCT_NETXDUO__
 UINT            interface_index;
@@ -1156,6 +1084,7 @@ UINT            interface_index;
 UINT            i;
 UINT            mtu_size = 128;
 UINT            old_threshold = 0;
+USHORT         ether_type;
 
     /* Setup the IP pointer from the driver request. */
     ip_ptr =  driver_req_ptr -> nx_ip_driver_ptr;
@@ -1163,8 +1092,16 @@ UINT            old_threshold = 0;
     /* Default to successful return.  */
     driver_req_ptr -> nx_ip_driver_status =  NX_SUCCESS;
 
+#ifdef NX_ENABLE_VLAN
+    /* Let link layer to preprocess the driver request and return actual interface.  */
+    if (nx_link_driver_request_preprocess(driver_req_ptr, &interface_ptr) != NX_SUCCESS)
+    {
+        return;
+    }
+#else
     /* Setup interface pointer. */
     interface_ptr = driver_req_ptr -> nx_ip_driver_interface;
+#endif
 
 #ifdef __PRODUCT_NETXDUO__
     /* Obtain the index number of the network interface. */
@@ -1322,8 +1259,15 @@ UINT            old_threshold = 0;
         }
 
         case NX_LINK_PACKET_SEND:
+        case NX_LINK_PACKET_BROADCAST:
+        case NX_LINK_ARP_SEND:
+        case NX_LINK_ARP_RESPONSE_SEND:
+        case NX_LINK_RARP_SEND:
+#ifdef NX_PPP_PPPOE_ENABLE
+        case NX_LINK_PPPOE_DISCOVERY_SEND:
+        case NX_LINK_PPPOE_SESSION_SEND:
+#endif
         {
-
             /* Process driver send packet.  */
 
             /* Place the ethernet frame at the front of the packet.  */
@@ -1338,11 +1282,48 @@ UINT            old_threshold = 0;
             }
 
 #ifdef NX_ENABLE_INTERFACE_CAPABILITY
+            if(((driver_req_ptr -> nx_ip_driver_command) == NX_LINK_PACKET_BROADCAST) ||
+                ((driver_req_ptr -> nx_ip_driver_command) == NX_LINK_PACKET_SEND))
             _nx_ram_network_driver_calculate_checksum(nx_ram_driver[i].nx_ram_driver_interface_ptr, packet_ptr, NX_FALSE);
 #endif
-            /* Place the ethernet frame at the front of the packet.  */
-            packet_ptr =  driver_req_ptr -> nx_ip_driver_packet;
 
+            /* Get Ethernet type.  */
+            if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_SEND)
+            {
+                ether_type = NX_ETHERNET_ARP;
+            }
+            else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_RESPONSE_SEND)
+            {
+                ether_type = NX_ETHERNET_ARP;
+            }
+            else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_RARP_SEND)
+            {
+                ether_type = NX_ETHERNET_RARP;
+            }
+#if defined(__PRODUCT_NETXDUO__)
+            else if (packet_ptr -> nx_packet_ip_version == 6)
+            {
+                ether_type = NX_ETHERNET_IPV6;
+            }
+#endif
+            else
+            {
+                ether_type = NX_ETHERNET_IP;
+            }
+
+#ifdef NX_ENABLE_VLAN
+            /* Add Ethernet header.  */
+            if (nx_link_ethernet_header_add(ip_ptr,
+                                            driver_req_ptr -> nx_ip_driver_interface -> nx_interface_index, packet_ptr,
+                                            driver_req_ptr -> nx_ip_driver_physical_address_msw,
+                                            driver_req_ptr -> nx_ip_driver_physical_address_lsw,
+                                            (UINT)ether_type))
+            {
+
+                /* Release the packet.  */
+                nx_packet_transmit_release(packet_ptr);
+            }
+#else
             /* Adjust the prepend pointer.  */
             packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr - NX_ETHERNET_SIZE;
 
@@ -1367,28 +1348,22 @@ UINT            old_threshold = 0;
 
             /* Setup the ethernet frame pointer to build the ethernet frame.  Backup another 2
                bytes to get 32-bit word alignment.  */
-            ethernet_frame_ptr =  (ULONG *) (packet_ptr -> nx_packet_prepend_ptr - 2);
+            /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
+            ethernet_frame_ptr =  (ULONG *)(packet_ptr -> nx_packet_prepend_ptr - 2);
 
             /* Build the ethernet frame.  */
             *ethernet_frame_ptr     =  driver_req_ptr -> nx_ip_driver_physical_address_msw;
-            *(ethernet_frame_ptr+1) =  driver_req_ptr -> nx_ip_driver_physical_address_lsw;
-            *(ethernet_frame_ptr+2) =  (interface_ptr -> nx_interface_physical_address_msw << 16) |
+            *(ethernet_frame_ptr + 1) =  driver_req_ptr -> nx_ip_driver_physical_address_lsw;
+            *(ethernet_frame_ptr + 2) =  (interface_ptr -> nx_interface_physical_address_msw << 16) |
             (interface_ptr -> nx_interface_physical_address_lsw >> 16);
-            *(ethernet_frame_ptr+3) =  (interface_ptr -> nx_interface_physical_address_lsw << 16);
-
-#ifdef FEATURE_NX_IPV6
-            if(packet_ptr -> nx_packet_ip_version == 6)
-                *(ethernet_frame_ptr+3) |= NX_ETHERNET_IPV6;
-            else
-#endif
-                *(ethernet_frame_ptr+3) |= NX_ETHERNET_IP;
-
+            *(ethernet_frame_ptr + 3) =  (interface_ptr -> nx_interface_physical_address_lsw << 16) | ether_type;
 
             /* Endian swapping if NX_LITTLE_ENDIAN is defined.  */
             NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr));
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+1));
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+2));
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+3));
+            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr + 1));
+            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr + 2));
+            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr + 3));
+#endif /* NX_ENABLE_VLAN */
 
             /* At this point, the packet is a complete Ethernet frame, ready to be transmitted.
                The driver shall call the actual Ethernet transmit routine and put the packet
@@ -1401,86 +1376,16 @@ UINT            old_threshold = 0;
             break;
         }
 
-        case NX_LINK_PACKET_BROADCAST:
-        case NX_LINK_ARP_SEND:
-        case NX_LINK_ARP_RESPONSE_SEND:
-        case NX_LINK_RARP_SEND:
-#ifdef NX_PPP_PPPOE_ENABLE
-        case NX_LINK_PPPOE_DISCOVERY_SEND:
-        case NX_LINK_PPPOE_SESSION_SEND:
-#endif
+
+#ifdef NX_ENABLE_VLAN
+        case NX_LINK_RAW_PACKET_SEND:
         {
-            /* Process driver send packet.  */
 
-            /* Place the ethernet frame at the front of the packet.  */
-            packet_ptr =  driver_req_ptr -> nx_ip_driver_packet;
-
-            if (interface_ptr -> nx_interface_link_up == NX_FALSE)
-            {
-
-                /* Link is down. Drop the packet. */
-                nx_packet_transmit_release(packet_ptr);
-                return;
-            }
-
-#ifdef NX_ENABLE_INTERFACE_CAPABILITY
-            if((driver_req_ptr -> nx_ip_driver_command) == NX_LINK_PACKET_BROADCAST)
-                _nx_ram_network_driver_calculate_checksum(nx_ram_driver[i].nx_ram_driver_interface_ptr, packet_ptr, NX_FALSE);
-#endif 
-
-            /* Adjust the prepend pointer.  */
-            packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr - NX_ETHERNET_SIZE;
-
-            /* Adjust the packet length.  */
-            packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length + NX_ETHERNET_SIZE;
-
-            /* Setup the ethernet frame pointer to build the ethernet frame.  Backup another 2
-               bytes to get 32-bit word alignment.  */
-            ethernet_frame_ptr =  (ULONG *) (packet_ptr -> nx_packet_prepend_ptr - 2);
-
-            /* Build the ethernet frame.  */
-            *ethernet_frame_ptr     =  driver_req_ptr -> nx_ip_driver_physical_address_msw;
-            *(ethernet_frame_ptr+1) =  driver_req_ptr -> nx_ip_driver_physical_address_lsw;
-            *(ethernet_frame_ptr+2) =  (interface_ptr -> nx_interface_physical_address_msw << 16) |
-            (interface_ptr -> nx_interface_physical_address_lsw >> 16);
-            *(ethernet_frame_ptr+3) =  (interface_ptr -> nx_interface_physical_address_lsw << 16);
-
-            if(driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_SEND)
-                *(ethernet_frame_ptr+3) |= NX_ETHERNET_ARP;
-            else if(driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_RESPONSE_SEND)
-                *(ethernet_frame_ptr+3) |= NX_ETHERNET_ARP;
-            else if(driver_req_ptr -> nx_ip_driver_command == NX_LINK_RARP_SEND)
-                *(ethernet_frame_ptr+3) |= NX_ETHERNET_RARP;
-#ifdef NX_PPP_PPPOE_ENABLE
-            else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_PPPOE_DISCOVERY_SEND)
-                *(ethernet_frame_ptr + 3) |= NX_ETHERNET_PPPOE_DISCOVERY;
-            else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_PPPOE_SESSION_SEND)
-                *(ethernet_frame_ptr + 3) |= NX_ETHERNET_PPPOE_SESSION;
-#endif
-#ifdef FEATURE_NX_IPV6
-            else if(packet_ptr -> nx_packet_ip_version == 6)
-                *(ethernet_frame_ptr+3) |= NX_ETHERNET_IPV6;
-#endif
-            else
-                *(ethernet_frame_ptr+3) |= NX_ETHERNET_IP;
-
-
-            /* Endian swapping if NX_LITTLE_ENDIAN is defined.  */
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr));
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+1));
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+2));
-            NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr+3));
-
-            /* At this point, the packet is a complete Ethernet frame, ready to be transmitted.
-               The driver shall call the actual Ethernet transmit routine and put the packet
-               on the wire.
-                 
-               In this example, the simulated RAM network transmit routine is called. */
-
-            _nx_ram_network_driver_output(ip_ptr, packet_ptr, i );
-
+            /* Send raw packet out directly.  */
+            _nx_ram_network_driver_output(ip_ptr, driver_req_ptr -> nx_ip_driver_packet, i);
             break;
         }
+#endif /* NX_ENABLE_VLAN */
 
         case NX_LINK_MULTICAST_JOIN:
         {
@@ -1624,17 +1529,6 @@ UINT            old_threshold = 0;
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 /**************************************************************************/ 
 /*                                                                        */ 
@@ -1791,7 +1685,12 @@ UINT        j;
             /* Make a copy of packet for the forwarding.  */
             if (nx_packet_data_append(packet_copy, driver_data_buffer, driver_data_length, pool_ptr, NX_NO_WAIT))
             {
-
+#ifdef NX_ENABLE_VLAN
+                /* Error, no point in continuing, just release the packet.  */
+                nx_link_packet_transmitted(nx_ram_driver[interface_instance_id].nx_ram_driver_ip_ptr,
+                                           nx_ram_driver[interface_instance_id].nx_ram_driver_interface_ptr -> nx_interface_index,
+                                           packet_ptr, NX_NULL);
+#else
                 /* Remove the Ethernet header.  */
                 packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + NX_ETHERNET_SIZE;
 
@@ -1806,7 +1705,7 @@ UINT        j;
 
                 /* Restore preemption.  */
                 tx_thread_preemption_change(tx_thread_identify(), old_threshold, &old_threshold);
-
+#endif /* NX_ENABLE_VLAN */
                 return;
             }        
 
@@ -1882,6 +1781,12 @@ UINT        j;
         }
     }
 
+#ifdef NX_ENABLE_VLAN
+    /* Release the packet.  */
+    nx_link_packet_transmitted(nx_ram_driver[interface_instance_id].nx_ram_driver_ip_ptr,
+                                nx_ram_driver[interface_instance_id].nx_ram_driver_interface_ptr -> nx_interface_index,
+                                packet_ptr, NX_NULL);
+#else
     /* Remove the Ethernet header.  In real hardware environments, this is typically 
        done after a transmit complete interrupt.  */
     packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + NX_ETHERNET_SIZE;
@@ -1891,7 +1796,7 @@ UINT        j;
 
     /* Now that the Ethernet frame has been removed, release the packet.  */
     nx_packet_transmit_release(packet_ptr);
-
+#endif
     /* Restore preemption.  */
     tx_thread_preemption_change(tx_thread_identify(), old_threshold, &old_threshold);
 }
@@ -1946,7 +1851,11 @@ UINT        j;
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)
 {
-
+#ifdef NX_ENABLE_VLAN
+    nx_link_ethernet_packet_received(ip_ptr,
+                                     nx_ram_driver[interface_instance_id].nx_ram_driver_interface_ptr -> nx_interface_index,
+                                     packet_ptr, NX_NULL);
+#else
 UINT    packet_type;
 
     /* Pickup the packet header to determine where the packet needs to be
@@ -2056,6 +1965,7 @@ UINT    packet_type;
         /* Invalid ethernet header... release the packet.  */
         nx_packet_release(packet_ptr);
     }
+#endif /* NX_ENABLE_VLAN */
 }
 
 

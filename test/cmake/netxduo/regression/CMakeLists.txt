@@ -576,6 +576,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_16_21_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_socket_delete_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_link_status_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ip_link_status_test2.c
     ${SOURCE_DIR}/netxduo_test/netx_icmp_tunnel_ipv6_ipv6_ping_test.c
     ${SOURCE_DIR}/netxduo_test/netx_9_19_01_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_hop_by_hop_option_error_test.c
@@ -934,6 +935,11 @@ set(sntp_test_cases
     ${SOURCE_DIR}/sntp_test/netx_sntp_client_seconds_to_date_test.c
     ${SOURCE_DIR}/sntp_test/netx_sntp_client_kod_test.c
     ${SOURCE_DIR}/sntp_test/netx_sntp_client_packet_chain_test.c)
+
+set(tsn_test_cases
+    ${SOURCE_DIR}/tsn_test/netx_mrp_state_machine_test.c
+    ${SOURCE_DIR}/tsn_test/netx_shaper_cbs_test.c
+    ${SOURCE_DIR}/tsn_test/netx_shaper_tas_test.c)
 
 if(PRODUCT STREQUAL netxduo)
   if("-DNX_TAHI_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
@@ -1301,6 +1307,8 @@ elseif($ENV{DHCP_ONLY})
   set(test_cases ${dhcp_test_cases})
 elseif($ENV{DNS_ONLY})
   set(test_cases ${dns_test_cases})
+elseif($ENV{PTP_ONLY})
+  set(test_cases ${ptp_test_cases})
 else()
   set(test_cases
       ${auto_ip_test_cases}
@@ -1327,7 +1335,8 @@ else()
       ${tahi_test_cases}
       ${tahi_dhcpv6_test_cases}
       ${telnet_test_cases}
-      ${tftp_test_cases})
+      ${tftp_test_cases}
+      ${tsn_test_cases})
 endif()
 
 foreach(test_case ${test_cases})

@@ -204,6 +204,9 @@ void    netx_dest_table_add_fail_test_application_define(void *);
 
 void    netx_ip_basic_test_application_define(void *);
 void    netx_ip_link_status_test_application_define(void *);
+void    netx_ip_link_status_test2_application_define(void *);
+void    netx_shaper_cbs_test_application_define(void *);
+void    netx_mrp_state_machine_test_application_define(void *);
 void    netx_ip_create_test_application_define(void *);
 void    netx_ip_delete_test_application_define(void *);
 void    netx_ip_status_check_test_application_define(void*);
@@ -1459,6 +1462,9 @@ TEST_ENTRY  test_control_tests[] =
     /* IPv4 test */
     {netx_ip_basic_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ip_link_status_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_ip_link_status_test2_application_define, TEST_TIMEOUT_LOW},
+    {netx_shaper_cbs_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_mrp_state_machine_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ip_create_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ip_delete_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ip_fragmentation_order_test_application_define, TEST_TIMEOUT_LOW},

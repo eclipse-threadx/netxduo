@@ -52,6 +52,10 @@ UINT       status;
     /* Print out test information banner.  */
     printf("NetX Test:   PTP IPv6 Test ............................................");
 
+#if defined(NX_ENABLE_GPTP) || (NX_PTP_CLIENT_TRANSPORT_UDP==0)
+    printf("N/A\n");
+    test_control_return(3);
+#else 
     /* Setup the working pointer.  */
     pointer = (CHAR *) first_unused_memory;
 
@@ -111,6 +115,7 @@ UINT       status;
 
     /* Check UDP enable status.  */
     ASSERT_SUCCESS(status);
+#endif
 #endif
 }
 
