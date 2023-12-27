@@ -3,7 +3,7 @@
 
 extern void    test_control_return(UINT status);
 
-#if defined __PRODUCT_NETXDUO__ && (NX_MAX_PHYSICAL_INTERFACES > 1) && !defined NX_DISABLE_IPV4
+#if defined __PRODUCT_NETXDUO__ && (NX_MAX_PHYSICAL_INTERFACES > 1) && !defined NX_DISABLE_IPV4 && !defined NX_MDNS_DISABLE_CLIENT
 #include   "nxd_mdns.h"
 
 #define     DEMO_STACK_SIZE    2048

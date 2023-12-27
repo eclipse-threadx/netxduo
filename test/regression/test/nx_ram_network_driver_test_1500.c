@@ -1301,6 +1301,16 @@ USHORT         ether_type;
             {
                 ether_type = NX_ETHERNET_RARP;
             }
+#ifdef NX_PPP_PPPOE_ENABLE
+            else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_PPPOE_DISCOVERY_SEND)
+            {
+                ether_type = NX_ETHERNET_PPPOE_DISCOVERY;
+            }
+            else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_PPPOE_SESSION_SEND)
+            {
+                ether_type = NX_ETHERNET_PPPOE_SESSION;
+            }
+#endif
 #if defined(__PRODUCT_NETXDUO__)
             else if (packet_ptr -> nx_packet_ip_version == 6)
             {
