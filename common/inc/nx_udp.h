@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_udp.h                                            PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -50,6 +50,9 @@
 /*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
 /*                                            necessary header file,      */
 /*                                            resulting in version 6.1.9  */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN,             */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -122,6 +125,7 @@ UINT _nx_udp_socket_send(NX_UDP_SOCKET *socket_ptr, NX_PACKET *packet_ptr,
                          ULONG ip_address, UINT port);
 UINT _nx_udp_socket_unbind(NX_UDP_SOCKET *socket_ptr);
 UINT _nx_udp_source_extract(NX_PACKET *packet_ptr, ULONG *ip_address, UINT *port);
+UINT _nx_udp_socket_vlan_priority_set(NX_UDP_SOCKET *socket_ptr, UINT vlan_priority);
 UINT _nx_udp_packet_info_extract(NX_PACKET *packet_ptr, ULONG *ip_address, UINT *protocol, UINT *port, UINT *interface_index);
 UINT _nxd_udp_source_extract(NX_PACKET *packet_ptr, NXD_ADDRESS *ip_address, UINT *port);
 #ifdef NX_ENABLE_TCPIP_OFFLOAD
@@ -148,6 +152,7 @@ UINT _nxe_udp_socket_create(NX_IP *ip_ptr, NX_UDP_SOCKET *socket_ptr, CHAR *name
 UINT _nxe_udp_socket_delete(NX_UDP_SOCKET *socket_ptr);
 
 UINT _nxe_udp_source_extract(NX_PACKET *packet_ptr, ULONG *ip_address, UINT *port);
+UINT _nxe_udp_socket_vlan_priority_set(NX_UDP_SOCKET *socket_ptr, UINT vlan_priority);
 UINT _nxde_udp_source_extract(NX_PACKET *packet_ptr, NXD_ADDRESS *ip_address, UINT *port);
 UINT _nxe_udp_socket_info_get(NX_UDP_SOCKET *socket_ptr, ULONG *udp_packets_sent, ULONG *udp_bytes_sent,
                               ULONG *udp_packets_received, ULONG *udp_bytes_received, ULONG *udp_packets_queued,

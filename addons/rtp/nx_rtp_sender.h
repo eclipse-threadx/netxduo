@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_rtp_sender.h                                     PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -41,6 +41,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2023     Haiqing Zhao             Initial Version 6.3.0         */
+/*  xx-xx-xxxx     Haiqing Zhao             Modified comments(s),         */
+/*                                            supported VLAN,             */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -292,6 +295,10 @@ struct NX_RTP_SESSION_STRUCT
     /* Store the ip interface index when session created. */
     UINT                          nx_rtp_session_interface_index;
 
+
+    /* Store the vlan priority for the rtp packets transferred in the session */
+    UINT                          nx_rtp_session_vlan_priority;
+
     /* Receiver's IP address and port number */
     NXD_ADDRESS                   nx_rtp_session_peer_ip_address;
     USHORT                        nx_rtp_session_peer_rtp_port;
@@ -367,6 +374,8 @@ typedef struct NX_RTP_HEADER_STRUCT
 #define nx_rtp_sender_session_aac_send                  _nx_rtp_sender_session_aac_send
 #define nx_rtp_sender_session_sequence_number_get       _nx_rtp_sender_session_sequence_number_get
 #define nx_rtp_sender_session_ssrc_get                  _nx_rtp_sender_session_ssrc_get
+#define nx_rtp_sender_session_vlan_priority_set         _nx_rtp_sender_session_vlan_priority_set
+
 #define nx_rtp_sender_rtcp_receiver_report_callback_set _nx_rtp_sender_rtcp_receiver_report_callback_set
 #define nx_rtp_sender_rtcp_sdes_callback_set            _nx_rtp_sender_rtcp_sdes_callback_set
 
@@ -386,6 +395,8 @@ typedef struct NX_RTP_HEADER_STRUCT
 #define nx_rtp_sender_session_aac_send                  _nxe_rtp_sender_session_aac_send
 #define nx_rtp_sender_session_sequence_number_get       _nxe_rtp_sender_session_sequence_number_get
 #define nx_rtp_sender_session_ssrc_get                  _nxe_rtp_sender_session_ssrc_get
+#define nx_rtp_sender_session_vlan_priority_set         _nxe_rtp_sender_session_vlan_priority_set
+
 #define nx_rtp_sender_rtcp_receiver_report_callback_set _nxe_rtp_sender_rtcp_receiver_report_callback_set
 #define nx_rtp_sender_rtcp_sdes_callback_set            _nxe_rtp_sender_rtcp_sdes_callback_set
 
@@ -434,9 +445,15 @@ UINT nx_rtp_sender_session_sequence_number_get(NX_RTP_SESSION *session, UINT *se
 /* Obtain the current ssrc inside the specific session. */
 UINT nx_rtp_sender_session_ssrc_get(NX_RTP_SESSION *session, ULONG *ssrc);
 
+/* Set the vlan priority inside the specific session. */
+UINT nx_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan_priority);
+
 /* Set a callback function to handle incoming RTCP message. */
 UINT nx_rtp_sender_rtcp_receiver_report_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtcp_rr_cb)(NX_RTP_SESSION *, NX_RTCP_RECEIVER_REPORT *));
 UINT nx_rtp_sender_rtcp_sdes_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtcp_sdes_cb)(NX_RTCP_SDES_INFO *));
+
+/* Set VLAN priority of RTP session. */
+UINT nx_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan_priority);
 
 #else
 
@@ -478,6 +495,9 @@ UINT _nx_rtp_sender_session_aac_send(NX_RTP_SESSION *session, UCHAR *frame_data,
                                      ULONG timestamp, ULONG ntp_msw, ULONG ntp_lsw, UINT marker);
 UINT _nxe_rtp_sender_session_ssrc_get(NX_RTP_SESSION *session, ULONG *ssrc);
 UINT _nx_rtp_sender_session_ssrc_get(NX_RTP_SESSION *session, ULONG *ssrc);
+UINT _nxe_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan_priority);
+UINT _nx_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan_priority);
+
 UINT _nxe_rtp_sender_rtcp_receiver_report_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtcp_rr_cb)(NX_RTP_SESSION *, NX_RTCP_RECEIVER_REPORT *));
 UINT _nx_rtp_sender_rtcp_receiver_report_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtcp_rr_cb)(NX_RTP_SESSION *, NX_RTCP_RECEIVER_REPORT *));
 UINT _nxe_rtp_sender_rtcp_sdes_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtcp_sdes_cb)(NX_RTCP_SDES_INFO *));

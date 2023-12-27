@@ -81,6 +81,9 @@ EXECUTION_TIME     idle_time = 0;
 extern TX_THREAD  *_tx_thread_created_ptr;
 #endif
 
+UCHAR              udp_client_socket_vlan_priority = NX_VLAN_PRIORITY_INVALID;
+UCHAR              tcp_client_socket_vlan_priority = NX_VLAN_PRIORITY_INVALID;
+
 /* Define the constants. */
 const unsigned char mslogo_jpg[] = {
     0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
@@ -2088,6 +2091,9 @@ void        nx_iperf_thread_tcp_tx_entry(ULONG thread_input);
 void        nx_iperf_thread_udp_tx_entry(ULONG thread_input);
 void        nx_iperf_thread_udp_rx_entry(ULONG thread_input);
 
+void        nx_iperf_udp_client_socket_vlan_priority_set(UCHAR vlan_priority);
+void        nx_iperf_tcp_client_socket_vlan_priority_set(UCHAR vlan_priority);
+
 void    nx_iperf_entry(NX_PACKET_POOL *pool_ptr, NX_IP *ip_ptr, UCHAR *http_stack, ULONG http_stack_size, UCHAR *iperf_stack, ULONG iperf_stack_size)
 {
 UINT status;
@@ -2124,6 +2130,11 @@ UINT status;
         return;
     }
 
+    if (tcp_client_socket_vlan_priority != NX_VLAN_PRIORITY_INVALID)
+    {
+        nx_tcp_socket_vlan_priority_set(&tcp_client_socket, (UINT)tcp_client_socket_vlan_priority);
+    }
+
     /* Create a UDP server socket.  */
     status = nx_udp_socket_create(nx_iperf_test_ip, &udp_server_socket, "UDP Server Socket", NX_IP_NORMAL, NX_FRAGMENT_OKAY, 0x80, 5);
 
@@ -2142,6 +2153,11 @@ UINT status;
     {
         nx_iperf_test_error_counter++;
         return;
+    }
+
+    if (udp_client_socket_vlan_priority != NX_VLAN_PRIORITY_INVALID)
+    {
+        nx_udp_socket_vlan_priority_set(&udp_client_socket, (UINT)udp_client_socket_vlan_priority);
     }
 
     /* Create the HTTP Server.  */
@@ -4429,3 +4445,18 @@ UINT status;
     return;
 }
 
+void   nx_iperf_udp_client_socket_vlan_priority_set(UCHAR vlan_priority)
+{
+    if (vlan_priority <= NX_VLAN_PRIORITY_MAX)
+    {
+        udp_client_socket_vlan_priority = vlan_priority;
+    }
+}
+
+void   nx_iperf_tcp_client_socket_vlan_priority_set(UCHAR vlan_priority)
+{
+    if (vlan_priority <= NX_VLAN_PRIORITY_MAX)
+    {
+        tcp_client_socket_vlan_priority = vlan_priority;
+    }
+}

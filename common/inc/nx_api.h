@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_api.h                                            PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -103,6 +103,10 @@
 /*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
 /*                                            supported random IP id,     */
 /*                                            resulting in version 6.3.0  */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN and generic  */
+/*                                            link layer,                 */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -1362,6 +1366,7 @@ typedef struct NX_IPV6_DEFAULT_ROUTER_ENTRY_STRUCT
 #define NX_LINK_RX_DISABLE                         26
 #define NX_LINK_6LOWPAN_COMMAND                    27 /* 6LowPAN driver command, the sub command see nx_6lowpan.h.  */
 #define NX_LINK_GET_INTERFACE_TYPE                 28
+#define NX_LINK_RAW_PACKET_SEND                    29
 
 #define NX_LINK_USER_COMMAND                       50 /* Values after this value are reserved for application.  */
 
@@ -1439,6 +1444,9 @@ typedef struct NX_IPV6_DEFAULT_ROUTER_ENTRY_STRUCT
 /* Define the packet type for Thread MLE.  */
 #define NX_PACKET_TYPE_THREAD_MLE                  0x01
 #endif /* NX_ENABLE_THREAD  */
+
+#define NX_VLAN_PRIORITY_INVALID                   0xFF
+#define NX_VLAN_PRIORITY_MAX                       0x07
 
 /* Define IPv4/v6 Address structure */
 typedef struct NXD_ADDRESS_STRUCT
@@ -1591,8 +1599,13 @@ typedef  struct NX_PACKET_STRUCT
     /* Length of IP header including options. It is set for outgoing packet only. */
     UCHAR       nx_packet_ip_header_length;
 
+#ifdef NX_ENABLE_VLAN
+    /* vlan priority */
+    UCHAR       nx_packet_vlan_priority;
+#else
     /*lint -esym(768,NX_PACKET_STRUCT::nx_packet_reserved) suppress member not referenced. It is reserved for future use. */
     UCHAR       nx_packet_reserved;
+#endif /* NX_ENABLE_VLAN */
 
     /* Union that holds either IPv4 interface or IPv6 address. */
     union
@@ -1811,7 +1824,18 @@ typedef struct NX_UDP_SOCKET_STRUCT
     ULONG       nx_udp_socket_fragment_enable;
 
     /* Define the UDP checksum disable flag for this UDP socket.  */
-    UINT        nx_udp_socket_disable_checksum;
+    UCHAR       nx_udp_socket_disable_checksum;
+
+#ifdef NX_ENABLE_VLAN
+    /* Defined the vlan priority for this UDP socket. */
+    UCHAR       nx_udp_socket_vlan_priority;
+
+    /* It is reserved for future use. */
+    UCHAR       nx_udp_socket_reserved[2];
+#else
+    /* It is reserved for future use. */
+    UCHAR       nx_udp_socket_reserved[3];
+#endif /* NX_ENABLE_VLAN */
 
     /* Define the UDP receive packet queue pointers, queue counter, and
        the maximum queue depth.  */
@@ -2025,7 +2049,19 @@ typedef struct NX_TCP_SOCKET_STRUCT
     ULONG       nx_tcp_socket_timeout_rate;
     ULONG       nx_tcp_socket_timeout_retries;
     ULONG       nx_tcp_socket_timeout_max_retries;
-    ULONG       nx_tcp_socket_timeout_shift;
+    UCHAR       nx_tcp_socket_timeout_shift;
+
+#ifdef NX_ENABLE_VLAN
+    /* Defined the vlan priority for this TCP socket. */
+    UCHAR       nx_tcp_socket_vlan_priority;
+
+    /*It is reserved for future use. */
+    UCHAR       nx_tcp_socket_reserved2[2];
+#else
+
+    /*It is reserved for future use. */
+    UCHAR       nx_tcp_socket_reserved2[3];
+#endif /* NX_ENABLE_VLAN */
 
 #ifdef NX_ENABLE_TCP_WINDOW_SCALING
     /* Local receive window size, when user creates the TCP socket. */
@@ -2235,6 +2271,9 @@ typedef struct NX_TCP_LISTEN_STRUCT
 #endif /* NX_DISABLE_PACKET_CHAIN */
 
 struct NX_IP_DRIVER_STRUCT;
+struct NX_LINK_TIME_STRUCT;
+struct NX_LINK_RECEIVE_QUEUE_STRUCT;
+struct NX_SHAPER_STRUCT;
 
 typedef struct NXD_IPV6_ADDRESS_STRUCT
 {
@@ -2290,8 +2329,14 @@ typedef struct NX_INTERFACE_STRUCT
     /* Define a flag to check if link status change. */
     UCHAR nx_interface_link_status_change;
 
+#ifdef NX_ENABLE_VLAN
+    /* Define the VLAN tag control information.  */
+    UCHAR nx_interface_vlan_valid;
+    USHORT nx_interface_vlan_tag;
+#else
     /*lint -esym(768,NX_INTERFACE_STRUCT::nx_interface_reserved) suppress member not referenced. It is reserved for future use. */
     UCHAR nx_interface_reserved[3];
+#endif /* NX_ENABLE_VLAN */
 
     /* Define the physical address of this IP instance.  These field are
        setup by the link driver during initialization.  */
@@ -2337,12 +2382,21 @@ typedef struct NX_INTERFACE_STRUCT
 #ifdef NX_IPV6_STATELESS_AUTOCONFIG_CONTROL
     ULONG nx_ipv6_stateless_address_autoconfig_status;
 #endif /* NX_IPV6_STATELESS_AUTOCONFIG_CONTROL    */
-    /* Define a pointer for use by the applicaiton.  Typically this is going to be
-       used by the link drvier. */
+    /* Define a pointer for use by the application.  Typically this is going to be
+       used by the link driver. */
     VOID *nx_interface_additional_link_info;
 
     /* Define the Link Driver entry point.  */
     VOID        (*nx_interface_link_driver_entry)(struct NX_IP_DRIVER_STRUCT *);
+
+#ifdef NX_ENABLE_VLAN
+
+    /* Define the receive callback function queue.  */
+    struct NX_LINK_RECEIVE_QUEUE_STRUCT *nx_interface_link_receive_queue_head;
+
+    /* Define the parent interface.  */
+    struct NX_INTERFACE_STRUCT *nx_interface_parent_ptr;
+#endif /* NX_ENABLE_VLAN */
 
 #ifdef NX_ENABLE_INTERFACE_CAPABILITY
     /* Define the capability flag of hardware for the interface. */
@@ -2370,6 +2424,11 @@ typedef struct NX_INTERFACE_STRUCT
                                                       NXD_ADDRESS *local_ip, NXD_ADDRESS *remote_ip,
                                                       UINT local_port, UINT *remote_port, UINT wait_option);
 #endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
+#ifdef NX_ENABLE_VLAN
+    /* Define the shaper */
+    struct NX_SHAPER_CONTAINER_STRUCT *shaper_container;
+#endif /* NX_ENABLE_VLAN */
 } NX_INTERFACE;
 
 /* Define the static IPv4 routing table entry structure. */
@@ -3252,6 +3311,7 @@ typedef struct NX_IP_DRIVER_STRUCT
 #define nx_packet_pool_low_watermark_set                _nx_packet_pool_low_watermark_set
 #define nx_packet_release                               _nx_packet_release
 #define nx_packet_transmit_release                      _nx_packet_transmit_release
+#define nx_packet_vlan_priority_set                     _nx_packet_vlan_priority_set
 
 /* APIs for RARP. */
 #define nx_rarp_disable                                 _nx_rarp_disable
@@ -3291,6 +3351,7 @@ typedef struct NX_IP_DRIVER_STRUCT
 #define nx_tcp_socket_timed_wait_callback               _nx_tcp_socket_timed_wait_callback
 #define nx_tcp_socket_transmit_configure                _nx_tcp_socket_transmit_configure
 #define nx_tcp_socket_window_update_notify_set          _nx_tcp_socket_window_update_notify_set
+#define nx_tcp_socket_vlan_priority_set                 _nx_tcp_socket_vlan_priority_set
 #define nxd_tcp_client_socket_connect                   _nxd_tcp_client_socket_connect
 #define nxd_tcp_socket_peer_info_get                    _nxd_tcp_socket_peer_info_get
 
@@ -3314,6 +3375,7 @@ typedef struct NX_IP_DRIVER_STRUCT
 #define nx_udp_socket_source_send                       _nx_udp_socket_source_send
 #define nx_udp_socket_unbind                            _nx_udp_socket_unbind
 #define nx_udp_source_extract                           _nx_udp_source_extract
+#define nx_udp_socket_vlan_priority_set                 _nx_udp_socket_vlan_priority_set
 #define nxd_udp_packet_info_extract                     _nxd_udp_packet_info_extract
 #define nxd_udp_socket_send                             _nxd_udp_socket_send
 #define nxd_udp_socket_source_send                      _nxd_udp_socket_source_send
@@ -3441,6 +3503,7 @@ typedef struct NX_IP_DRIVER_STRUCT
 #define nx_packet_pool_low_watermark_set                _nxe_packet_pool_low_watermark_set
 #define nx_packet_release(p)                            _nxe_packet_release(&p)
 #define nx_packet_transmit_release(p)                   _nxe_packet_transmit_release(&p)
+#define nx_packet_vlan_priority_set                     _nxe_packet_vlan_priority_set
 
 /* APIs for RARP. */
 #define nx_rarp_disable                                 _nxe_rarp_disable
@@ -3480,6 +3543,7 @@ typedef struct NX_IP_DRIVER_STRUCT
 #define nx_tcp_socket_timed_wait_callback               _nxe_tcp_socket_timed_wait_callback
 #define nx_tcp_socket_transmit_configure                _nxe_tcp_socket_transmit_configure
 #define nx_tcp_socket_window_update_notify_set          _nxe_tcp_socket_window_update_notify_set
+#define nx_tcp_socket_vlan_priority_set                 _nxe_tcp_socket_vlan_priority_set
 #define nxd_tcp_client_socket_connect                   _nxde_tcp_client_socket_connect
 #define nxd_tcp_socket_peer_info_get                    _nxde_tcp_socket_peer_info_get
 
@@ -3502,6 +3566,7 @@ typedef struct NX_IP_DRIVER_STRUCT
 #define nx_udp_socket_source_send(s, p, i, t, a)        _nxe_udp_socket_source_send(s, &p, i, t, a)
 #define nx_udp_socket_unbind                            _nxe_udp_socket_unbind
 #define nx_udp_source_extract                           _nxe_udp_source_extract
+#define nx_udp_socket_vlan_priority_set                 _nxe_udp_socket_vlan_priority_set
 #define nxd_udp_packet_info_extract                     _nxde_udp_packet_info_extract
 #define nxd_udp_socket_send(s, p, i, t)                 _nxde_udp_socket_send(s, &p, i, t)
 #define nxd_udp_socket_source_send                      _nxde_udp_socket_source_send
@@ -3707,6 +3772,7 @@ UINT _nxe_packet_transmit_release(NX_PACKET **packet_ptr_ptr);
 UINT _nx_packet_release(NX_PACKET *packet_ptr);
 UINT _nx_packet_transmit_release(NX_PACKET *packet_ptr);
 #endif
+UINT nx_packet_vlan_priority_set(NX_PACKET *packet_ptr, UINT vlan_priority);
 
 /* APIs for RARP. */
 UINT nx_rarp_disable(NX_IP *ip_ptr);
@@ -3781,6 +3847,7 @@ UINT nx_tcp_socket_transmit_configure(NX_TCP_SOCKET *socket_ptr, ULONG max_queue
                                       ULONG max_retries, ULONG timeout_shift);
 UINT nx_tcp_socket_window_update_notify_set(NX_TCP_SOCKET *socket_ptr,
                                             VOID (*tcp_window_update_notify)(NX_TCP_SOCKET *));
+UINT nx_tcp_socket_vlan_priority_set(NX_TCP_SOCKET *socket_ptr, UINT vlan_priority);
 UINT nxd_tcp_client_socket_connect(NX_TCP_SOCKET *socket_ptr, NXD_ADDRESS *server_ip,
                                    UINT server_port, ULONG wait_option);
 UINT nxd_tcp_socket_peer_info_get(NX_TCP_SOCKET *socket_ptr, NXD_ADDRESS *peer_ip_address, ULONG *peer_port);
@@ -3829,6 +3896,7 @@ UINT _nxd_udp_socket_source_send(NX_UDP_SOCKET *socket_ptr, NX_PACKET *packet_pt
 #endif /* NX_DISABLE_ERROR_CHECKING */
 UINT nx_udp_socket_unbind(NX_UDP_SOCKET *socket_ptr);
 UINT nx_udp_source_extract(NX_PACKET *packet_ptr, ULONG *ip_address, UINT *port);
+UINT nx_udp_socket_vlan_priority_set(NX_UDP_SOCKET *socket_ptr, UINT vlan_priority);
 UINT nxd_udp_source_extract(NX_PACKET *packet_ptr, NXD_ADDRESS *ip_address, UINT *port);
 #ifndef NX_DISABLE_ERROR_CHECKING
 UINT _nxe_udp_socket_send(NX_UDP_SOCKET *socket_ptr, NX_PACKET **packet_ptr_ptr,

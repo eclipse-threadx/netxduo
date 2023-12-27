@@ -25,7 +25,7 @@
 /*  BSD DEFINITIONS                                        RELEASE        */
 /*                                                                        */
 /*    nxd_bsd.h                                           PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -54,6 +54,10 @@
 /*                                            added option to enable      */
 /*                                            native APIs with prefix,    */
 /*                                            resulting in version 6.3.0  */
+/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), and      */
+/*                                            added support of recvmsg,   */
+/*                                            added nx_link to raw socket,*/
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -171,6 +175,10 @@ extern   "C" {
                                                                        packet.                                                              */
 #endif
 
+#ifndef NX_BSD_IFNAMSIZE
+#define NX_BSD_IFNAMSIZE                     32
+#endif
+
 /* Define configurable options for BSD extended options. */
 
 
@@ -254,6 +262,7 @@ extern   "C" {
 #define nx_bsd_listen           listen
 #define nx_bsd_recvfrom         recvfrom
 #define nx_bsd_recv             recv
+#define nx_bsd_recvmsg          recvmsg
 #define nx_bsd_sendto           sendto
 #define nx_bsd_send             send
 #define nx_bsd_select           select
@@ -382,6 +391,8 @@ extern   "C" {
 #define FIONBIO                             0x5421                  /* Enables socket non blocking option for the ioctl() command            */
 #endif
 
+#define SIOCGIFINDEX                        0x8933                  /* Get if_index from name  */
+#define SIOCGIFHWADDR                       0x8927                  /* Get hardware address    */
 
 /* Define the minimal TCP socket listen backlog value. */
 #ifndef NX_BSD_TCP_LISTEN_MIN_BACKLOG
@@ -550,6 +561,7 @@ extern   "C" {
 
 #define SOL_SOCKET      1   /* Define the socket option category. */
 #define IPPROTO_IP      2   /* Define the IP option category.     */
+#define SOL_PACKET      3   /* Define the packet option category.     */
 #define SO_MIN          1   /* Minimum Socket option ID */
 #define SO_DEBUG        1   /* Debugging information is being recorded.*/
 #define SO_REUSEADDR    2   /* Enable reuse of local addresses in the time wait state */
@@ -594,7 +606,11 @@ extern   "C" {
 #define IP_RAW_IPV6_HDRINCL 36 /* Transmitted buffer over IPv6 socket contains IPv6 header. */
 #define IP_OPTION_MAX       IP_RAW_IPV6_HDRINCL
 
+#define PACKET_ADD_MEMBERSHIP  41
+#define PACKET_DROP_MEMBERSHIP 42
+#define PACKET_OPTION_MAX      PACKET_DROP_MEMBERSHIP
 
+#define PACKET_MR_MULTICAST 1
 
 /*
  * User-settable options (used with setsockopt).
@@ -707,6 +723,56 @@ struct nx_bsd_ip_mreq
                         imr_interface;     /* The interface to use for this group. */
 };
 
+#ifdef NX_BSD_RAW_SUPPORT
+
+struct nx_bsd_packet_mreq
+{
+    INT    mr_ifindex;
+    USHORT mr_type;
+    USHORT mr_alen;
+    UCHAR  mr_address[8];
+};
+
+#define ETH_ALEN 6
+#define ETHERTYPE_VLAN 0x8100
+
+struct nx_bsd_ether_header
+{
+    UCHAR ether_dhost[ETH_ALEN];
+    UCHAR ether_shost[ETH_ALEN];
+    USHORT ether_type;
+};
+
+struct nx_bsd_ifreq {
+    CHAR ifr_name[NX_BSD_IFNAMSIZE];
+    union {
+        struct nx_bsd_sockaddr ifru_addr;
+        struct nx_bsd_sockaddr ifru_hwaddr;
+        SHORT                  ifru_flags;
+        INT                    ifru_ivalue;
+    } ifr_ifru;
+};
+
+#define ifr_hwaddr  ifr_ifru.ifru_hwaddr
+#define ifr_ifindex ifr_ifru.ifru_ivalue
+#endif
+
+
+
+struct nx_bsd_iovec {
+    void  *iov_base;
+    size_t iov_len;
+};
+
+struct nx_bsd_msghdr {
+    void                *msg_name;
+    nx_bsd_socklen_t     msg_namelen;
+    struct nx_bsd_iovec *msg_iov;
+    size_t               msg_iovlen;
+    void                *msg_control;
+    size_t               msg_controllen;
+    int                  msg_flags;
+};
 
 /* Define additional BSD data structures for supporting socket options.  */
 
@@ -964,6 +1030,7 @@ VOID nx_bsd_raw_receive_notify(NX_IP *ip_ptr, UINT bsd_socket_index);
 UINT nx_bsd_socket_set_inherited_settings(UINT master_sock_id, UINT secondary_sock_id);
 INT  nx_bsd_recvfrom(INT sockID, CHAR *buffer, INT buffersize, INT flags,struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen);
 INT  nx_bsd_recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags);
+INT  nx_bsd_recvmsg(INT sockID, struct nx_bsd_msghdr *msg, INT flags);
 INT  nx_bsd_sendto(INT sockID, CHAR *msg, INT msgLength, INT flags, struct nx_bsd_sockaddr *destAddr, INT destAddrLen);
 INT  nx_bsd_send(INT sockID, const CHAR *msg, INT msgLength, INT flags);
 INT  nx_bsd_select(INT nfds, nx_bsd_fd_set *readfds, nx_bsd_fd_set *writefds, nx_bsd_fd_set *exceptfds, struct nx_bsd_timeval *timeout);

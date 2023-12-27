@@ -24,6 +24,7 @@
 /* Include necessary system files.  */
 
 #include "nx_api.h"
+#include "nx_link.h"
 
 
 /* Define the Link MTU. Note this is not the same as the IP MTU.  The Link MTU
@@ -110,7 +111,7 @@ static _nx_ram_network_driver_instance_type nx_ram_driver[NX_MAX_RAM_INTERFACES]
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver                              PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -150,6 +151,10 @@ static _nx_ram_network_driver_instance_type nx_ram_driver[NX_MAX_RAM_INTERFACES]
 /*                                            added sample of returning   */
 /*                                            link's interface type,      */
 /*                                            resulting in version 6.1.9  */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN and generic  */
+/*                                            link layer,                 */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr)
@@ -157,9 +162,12 @@ VOID  _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr)
 UINT          i = 0;
 NX_IP        *ip_ptr;
 NX_PACKET    *packet_ptr;
-ULONG        *ethernet_frame_ptr;
 NX_INTERFACE *interface_ptr;
 UINT          interface_index;
+USHORT        ether_type;
+#ifndef NX_ENABLE_VLAN
+ULONG        *ethernet_frame_ptr;
+#endif /* NX_ENABLE_VLAN */
 
     /* Setup the IP pointer from the driver request.  */
     ip_ptr =  driver_req_ptr -> nx_ip_driver_ptr;
@@ -167,8 +175,16 @@ UINT          interface_index;
     /* Default to successful return.  */
     driver_req_ptr -> nx_ip_driver_status =  NX_SUCCESS;
 
+#ifdef NX_ENABLE_VLAN
+    /* Let link layer to preprocess the driver request and return actual interface.  */
+    if (nx_link_driver_request_preprocess(driver_req_ptr, &interface_ptr) != NX_SUCCESS)
+    {
+        return;
+    }
+#else
     /* Setup interface pointer.  */
     interface_ptr = driver_req_ptr -> nx_ip_driver_interface;
+#endif /* NX_ENABLE_VLAN */
 
     /* Obtain the index number of the network interface. */
     interface_index = interface_ptr -> nx_interface_index;
@@ -347,6 +363,42 @@ UINT          interface_index;
         /* Place the ethernet frame at the front of the packet.  */
         packet_ptr =  driver_req_ptr -> nx_ip_driver_packet;
 
+        /* Get Ethernet type.  */
+        if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_SEND)
+        {
+            ether_type = NX_ETHERNET_ARP;
+        }
+        else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_RESPONSE_SEND)
+        {
+            ether_type = NX_ETHERNET_ARP;
+        }
+        else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_RARP_SEND)
+        {
+            ether_type = NX_ETHERNET_RARP;
+        }
+        else if (packet_ptr -> nx_packet_ip_version == 4)
+        {
+            ether_type = NX_ETHERNET_IP;
+        }
+        else
+        {
+            ether_type = NX_ETHERNET_IPV6;
+        }
+
+#ifdef NX_ENABLE_VLAN
+        /* Add Ethernet header.  */
+        if (nx_link_ethernet_header_add(ip_ptr,
+                                        driver_req_ptr -> nx_ip_driver_interface -> nx_interface_index, packet_ptr,
+                                        driver_req_ptr -> nx_ip_driver_physical_address_msw,
+                                        driver_req_ptr -> nx_ip_driver_physical_address_lsw,
+                                        (UINT)ether_type))
+        {
+
+            /* Release the packet.  */
+            nx_packet_transmit_release(packet_ptr);
+        }
+#else
+
         /* Adjust the prepend pointer.  */
         packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr - NX_ETHERNET_SIZE;
 
@@ -363,35 +415,15 @@ UINT          interface_index;
         *(ethernet_frame_ptr + 1) =  driver_req_ptr -> nx_ip_driver_physical_address_lsw;
         *(ethernet_frame_ptr + 2) =  (interface_ptr -> nx_interface_physical_address_msw << 16) |
             (interface_ptr -> nx_interface_physical_address_lsw >> 16);
-        *(ethernet_frame_ptr + 3) =  (interface_ptr -> nx_interface_physical_address_lsw << 16);
-
-        if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_SEND)
-        {
-            *(ethernet_frame_ptr + 3) |= NX_ETHERNET_ARP;
-        }
-        else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_ARP_RESPONSE_SEND)
-        {
-            *(ethernet_frame_ptr + 3) |= NX_ETHERNET_ARP;
-        }
-        else if (driver_req_ptr -> nx_ip_driver_command == NX_LINK_RARP_SEND)
-        {
-            *(ethernet_frame_ptr + 3) |= NX_ETHERNET_RARP;
-        }
-        else if (packet_ptr -> nx_packet_ip_version == 4)
-        {
-            *(ethernet_frame_ptr + 3) |= NX_ETHERNET_IP;
-        }
-        else
-        {
-            *(ethernet_frame_ptr + 3) |= NX_ETHERNET_IPV6;
-        }
-
+        *(ethernet_frame_ptr + 3) =  (interface_ptr -> nx_interface_physical_address_lsw << 16) | ether_type;
 
         /* Endian swapping if NX_LITTLE_ENDIAN is defined.  */
         NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr));
         NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr + 1));
         NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr + 2));
         NX_CHANGE_ULONG_ENDIAN(*(ethernet_frame_ptr + 3));
+#endif /* NX_ENABLE_VLAN */
+
 #ifdef NX_DEBUG_PACKET
         printf("NetX RAM Driver Packet Send - %s\n", ip_ptr -> nx_ip_name);
 #endif
@@ -405,6 +437,15 @@ UINT          interface_index;
         break;
     }
 
+#ifdef NX_ENABLE_VLAN
+    case NX_LINK_RAW_PACKET_SEND:
+    {
+
+        /* Send raw packet out directly.  */
+        _nx_ram_network_driver_output(driver_req_ptr -> nx_ip_driver_packet, i);
+        break;
+    }
+#endif /* NX_ENABLE_VLAN */
 
     case NX_LINK_MULTICAST_JOIN:
     {
@@ -625,7 +666,7 @@ UINT          interface_index;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver_output                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -663,6 +704,10 @@ UINT          interface_index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN and generic  */
+/*                                            link layer,                 */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ram_network_driver_output(NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -752,6 +797,12 @@ UINT   j;
             /* Make a copy of packet for the forwarding.  */
             if (nx_packet_copy(packet_ptr, &packet_copy, next_ip -> nx_ip_default_packet_pool, NX_NO_WAIT))
             {
+#ifdef NX_ENABLE_VLAN
+                /* Error, no point in continuing, just release the packet.  */
+                nx_link_packet_transmitted(nx_ram_driver[interface_instance_id].nx_ram_driver_ip_ptr,
+                                           nx_ram_driver[interface_instance_id].nx_ram_driver_interface_ptr -> nx_interface_index,
+                                           packet_ptr, NX_NULL);
+#else
 
                 /* Remove the Ethernet header.  */
                 packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + NX_ETHERNET_SIZE;
@@ -761,6 +812,7 @@ UINT   j;
 
                 /* Error, no point in continuing, just release the packet.  */
                 nx_packet_transmit_release(packet_ptr);
+#endif /* NX_ENABLE_VLAN */
                 return;
             }
 
@@ -797,6 +849,12 @@ UINT   j;
         }
     }
 
+#ifdef NX_ENABLE_VLAN
+    /* Release the packet.  */    
+    nx_link_packet_transmitted(nx_ram_driver[interface_instance_id].nx_ram_driver_ip_ptr,
+                                nx_ram_driver[interface_instance_id].nx_ram_driver_interface_ptr -> nx_interface_index,
+                                packet_ptr, NX_NULL);
+#else
     /* Remove the Ethernet header.  In real hardware environments, this is typically
        done after a transmit complete interrupt.  */
     packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + NX_ETHERNET_SIZE;
@@ -806,6 +864,7 @@ UINT   j;
 
     /* Now that the Ethernet frame has been removed, release the packet.  */
     nx_packet_transmit_release(packet_ptr);
+#endif /* NX_ENABLE_VLAN */
 
     /* Restore preemption.  */
     /*lint -e{644} suppress variable might not be initialized, since "old_threshold" was initialized in previous tx_thread_preemption_change. */
@@ -818,7 +877,7 @@ UINT   j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver_receive                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -861,11 +920,19 @@ UINT   j;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN and generic  */
+/*                                            link layer,                 */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ram_network_driver_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)
 {
-
+#ifdef NX_ENABLE_VLAN
+    nx_link_ethernet_packet_received(ip_ptr,
+                                     nx_ram_driver[interface_instance_id].nx_ram_driver_interface_ptr -> nx_interface_index,
+                                     packet_ptr, NX_NULL);
+#else
 UINT packet_type;
 
     /* Pickup the packet header to determine where the packet needs to be
@@ -943,5 +1010,6 @@ UINT packet_type;
         /* Invalid ethernet header... release the packet.  */
         nx_packet_release(packet_ptr);
     }
+#endif /* NX_ENABLE_VLAN */
 }
 

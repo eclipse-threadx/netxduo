@@ -41,7 +41,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_retransmit                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -79,6 +79,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN,             */
+/*                                            resulting in version 6.x    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_socket_retransmit(NX_IP *ip_ptr, NX_TCP_SOCKET *socket_ptr, UINT need_fast_retransmit)
@@ -368,6 +371,13 @@ ULONG      window_size;
         socket_ptr -> nx_tcp_socket_retransmit_packets++;
 #endif
 
+#ifdef NX_ENABLE_VLAN
+        if (socket_ptr -> nx_tcp_socket_vlan_priority != NX_VLAN_PRIORITY_INVALID)
+        {
+            packet_ptr -> nx_packet_vlan_priority = socket_ptr -> nx_tcp_socket_vlan_priority;
+        }
+#endif /* NX_ENABLE_VLAN */
+            
         /* If trace is enabled, insert this event into the trace buffer.  */
         NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_TCP_RETRY, ip_ptr, socket_ptr, packet_ptr, socket_ptr -> nx_tcp_socket_timeout_retries, NX_TRACE_INTERNAL_EVENTS, 0, 0);
 

@@ -15,7 +15,7 @@
 /**                                                                       */
 /** NetX Component                                                        */
 /**                                                                       */
-/**   Transmission Control Protocol (TCP)                                 */
+/**   Packet Pool Management (Packet)                                     */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
@@ -26,46 +26,35 @@
 /* Include necessary system files.  */
 
 #include "nx_api.h"
-#include "nx_tcp.h"
-
+#include "nx_packet.h"
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_tcp_socket_transmit_configure                   PORTABLE C      */
+/*    _nxe_packet_vlan_priority_set                       PORTABLE C      */
 /*                                                           6.x          */
 /*  AUTHOR                                                                */
 /*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*    Yajun Xia, Microsoft Corporation                                    */
 /*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
-/*    This function sets up various parameters associated with the        */
-/*    socket's transmit operation.                                        */
+/*    This function checks for errors in packet vlan priority set call.   */
 /*                                                                        */
 /*  INPUT                                                                 */
 /*                                                                        */
-/*    socket_ptr                            Pointer to TCP socket         */
-/*    max_queue_depth                       Maximum number of transmit    */
-/*                                            packets that can be queued  */
-/*                                            for the socket              */
-/*    timeout                               Number of timer ticks for the */
-/*                                            initial transmit timeout    */
-/*    max_retries                           Maximum number of retries     */
-/*    timeout_shift                         Factor to be applied to       */
-/*                                            subsequent timeouts, a      */
-/*                                            value of 0 causes identical */
-/*                                            subsequent timeouts         */
+/*    packet_ptr                            Pointer of packet             */
+/*    vlan_priority                         Vlan priority                 */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
-/*    status                                Completion status             */
+/*    status                                Actual completion status      */
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    tx_mutex_get                          Obtain a protection mutex     */
-/*    tx_mutex_put                          Release a protection mutex    */
+/*    _nx_packet_vlan_priority_set          Actual packet vlan priority   */
+/*                                            set function                */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -75,41 +64,36 @@
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
-/*                                            fixed compiler warning,     */
-/*                                            resulting in version 6.x    */
+/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
 /*                                                                        */
 /**************************************************************************/
-UINT  _nx_tcp_socket_transmit_configure(NX_TCP_SOCKET *socket_ptr, ULONG max_queue_depth,
-                                        ULONG timeout, ULONG max_retries, ULONG timeout_shift)
+UINT _nxe_packet_vlan_priority_set(NX_PACKET *packet_ptr, UINT vlan_priority)
 {
+#ifdef NX_ENABLE_VLAN
+UINT status;
 
-NX_IP *ip_ptr;
+    /* Simple integrity check on the packet.  */
+    if ((packet_ptr == NX_NULL) || (packet_ptr -> nx_packet_pool_owner == NX_NULL) ||
+        ((packet_ptr -> nx_packet_pool_owner) -> nx_packet_pool_id != NX_PACKET_POOL_ID))
+    {
+        return(NX_PTR_ERROR);
+    }
 
+    if (vlan_priority > NX_VLAN_PRIORITY_MAX)
+    {
 
-    /* Pickup the associated IP structure.  */
-    ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
+        return(NX_INVALID_PARAMETERS);
+    }
 
-    /* If trace is enabled, insert this event into the trace buffer.  */
-    NX_TRACE_IN_LINE_INSERT(NX_TRACE_TCP_SOCKET_TRANSMIT_CONFIGURE, ip_ptr, socket_ptr, max_queue_depth, timeout, NX_TRACE_TCP_EVENTS, 0, 0);
+    /* Call actual packet vlan priority set function.  */
+    status =  _nx_packet_vlan_priority_set(packet_ptr, vlan_priority);
 
-    /* Obtain the IP mutex so we can initiate accept processing for this socket.  */
-    tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
+    return(status);
+#else
+    NX_PARAMETER_NOT_USED(packet_ptr);
+    NX_PARAMETER_NOT_USED(vlan_priority);
 
-    /* Setup the socket with the new transmit parameters.  */
-    socket_ptr -> nx_tcp_socket_timeout_rate =                    timeout;
-    socket_ptr -> nx_tcp_socket_timeout_max_retries =             max_retries;
-    socket_ptr -> nx_tcp_socket_timeout_shift =                   (UCHAR)timeout_shift;
-    socket_ptr -> nx_tcp_socket_transmit_queue_maximum_default =  max_queue_depth;
-    socket_ptr -> nx_tcp_socket_transmit_queue_maximum =          max_queue_depth;
-
-    /* Release the IP protection.  */
-    tx_mutex_put(&(ip_ptr -> nx_ip_protection));
-
-    /* Return completion status.  */
-    return(NX_SUCCESS);
+    return(NX_NOT_SUPPORTED);
+#endif /* NX_ENABLE_VLAN */
 }
 
