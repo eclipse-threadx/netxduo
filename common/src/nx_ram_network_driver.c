@@ -204,7 +204,7 @@ ULONG        *ethernet_frame_ptr;
                 continue;
             }
 
-            if (nx_ram_driver[i].nx_ram_driver_interface_ptr == driver_req_ptr -> nx_ip_driver_interface)
+            if (nx_ram_driver[i].nx_ram_driver_interface_ptr == interface_ptr)
             {
                 break;
             }
@@ -243,7 +243,7 @@ ULONG        *ethernet_frame_ptr;
             nx_ram_driver[i].nx_ram_network_driver_id = i;
 
             /* Record the interface attached to the IP instance. */
-            nx_ram_driver[i].nx_ram_driver_interface_ptr = driver_req_ptr -> nx_ip_driver_interface;
+            nx_ram_driver[i].nx_ram_driver_interface_ptr = interface_ptr;
 
             /* Record the IP instance. */
             nx_ram_driver[i].nx_ram_driver_ip_ptr = ip_ptr;
@@ -607,7 +607,7 @@ ULONG        *ethernet_frame_ptr;
         /* Find an driver instance to attach the interface. */
         for (i = 0; i < NX_MAX_RAM_INTERFACES; i++)
         {
-            if (nx_ram_driver[i].nx_ram_driver_interface_ptr == driver_req_ptr -> nx_ip_driver_interface)
+            if (nx_ram_driver[i].nx_ram_driver_interface_ptr == interface_ptr)
             {
                 break;
             }

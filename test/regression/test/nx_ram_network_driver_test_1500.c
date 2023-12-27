@@ -501,7 +501,7 @@ USHORT          ether_type;
             if(nx_ram_driver[i].nx_ram_driver_ip_ptr != ip_ptr)
                 continue;
 
-            if(nx_ram_driver[i].nx_ram_driver_interface_ptr != driver_req_ptr -> nx_ip_driver_interface)
+            if(nx_ram_driver[i].nx_ram_driver_interface_ptr != interface_ptr)
                 continue;
             
             break;
@@ -539,7 +539,7 @@ USHORT          ether_type;
                 nx_ram_driver[i].nx_ram_network_driver_id = i;
 
                 /* Record the interface attached to the IP instance. */
-                nx_ram_driver[i].nx_ram_driver_interface_ptr = driver_req_ptr -> nx_ip_driver_interface;
+                nx_ram_driver[i].nx_ram_driver_interface_ptr = interface_ptr;
 
                 /* Record the IP instance. */
                 nx_ram_driver[i].nx_ram_driver_ip_ptr = ip_ptr;
@@ -553,7 +553,7 @@ USHORT          ether_type;
             }
 
 #ifdef NX_ENABLE_INTERFACE_CAPABILITY
-            driver_req_ptr -> nx_ip_driver_interface -> nx_interface_capability_flag = NX_INTERFACE_CAPABILITY;
+            interface_ptr -> nx_interface_capability_flag = NX_INTERFACE_CAPABILITY;
 #endif 
 
             /* Restore preemption.  */
@@ -976,7 +976,7 @@ USHORT          ether_type;
             /* Find an driver instance to attach the interface. */
             for(i = 0; i < NX_MAX_RAM_INTERFACES;i++)
             {
-                if(nx_ram_driver[i].nx_ram_driver_interface_ptr == driver_req_ptr -> nx_ip_driver_interface)
+                if(nx_ram_driver[i].nx_ram_driver_interface_ptr == interface_ptr)
                     break;
             }
             
@@ -1000,7 +1000,7 @@ USHORT          ether_type;
 #ifdef NX_ENABLE_INTERFACE_CAPABILITY
         case NX_INTERFACE_CAPABILITY_GET:   
         {
-            driver_req_ptr -> nx_ip_driver_interface -> nx_interface_capability_flag = NX_INTERFACE_CAPABILITY;
+            interface_ptr -> nx_interface_capability_flag = NX_INTERFACE_CAPABILITY;
             break;
         }
 
@@ -1119,7 +1119,7 @@ USHORT         ether_type;
             if(nx_ram_driver[i].nx_ram_driver_ip_ptr != ip_ptr)
                 continue;
 
-            if(nx_ram_driver[i].nx_ram_driver_interface_ptr != driver_req_ptr -> nx_ip_driver_interface)
+            if(nx_ram_driver[i].nx_ram_driver_interface_ptr != interface_ptr)
                 continue;
 
             break;
@@ -1156,7 +1156,7 @@ USHORT         ether_type;
                 nx_ram_driver[i].nx_ram_network_driver_id = i;
 
                 /* Record the interface attached to the IP instance. */
-                nx_ram_driver[i].nx_ram_driver_interface_ptr = driver_req_ptr -> nx_ip_driver_interface;
+                nx_ram_driver[i].nx_ram_driver_interface_ptr = interface_ptr;
 
                 /* Record the IP instance. */
                 nx_ram_driver[i].nx_ram_driver_ip_ptr = ip_ptr;
@@ -1169,7 +1169,7 @@ USHORT         ether_type;
             }
 
 #ifdef NX_ENABLE_INTERFACE_CAPABILITY
-            driver_req_ptr -> nx_ip_driver_interface -> nx_interface_capability_flag = NX_INTERFACE_CAPABILITY;
+            interface_ptr -> nx_interface_capability_flag = NX_INTERFACE_CAPABILITY;
 #endif
 
             /* Restore preemption.  */
@@ -1485,7 +1485,7 @@ USHORT         ether_type;
             /* Find an driver instance to attach the interface. */
             for(i = 0; i < NX_MAX_RAM_INTERFACES;i++)
             {
-                if(nx_ram_driver[i].nx_ram_driver_interface_ptr == driver_req_ptr -> nx_ip_driver_interface)
+                if(nx_ram_driver[i].nx_ram_driver_interface_ptr == interface_ptr)
                     break;
             }
             
@@ -1509,7 +1509,7 @@ USHORT         ether_type;
 #ifdef NX_ENABLE_INTERFACE_CAPABILITY
         case NX_INTERFACE_CAPABILITY_GET:
         {
-            driver_req_ptr -> nx_ip_driver_interface -> nx_interface_capability_flag = NX_INTERFACE_CAPABILITY;
+            interface_ptr -> nx_interface_capability_flag = NX_INTERFACE_CAPABILITY;
             break;
         }
 
