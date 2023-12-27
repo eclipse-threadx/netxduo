@@ -47,14 +47,6 @@ extern void    test_control_return(UINT status);
 /***** Substitute your ethernet driver entry function here *********/
 void _nx_ram_network_driver(struct NX_IP_DRIVER_STRUCT *driver_req);
 
-/* Define main entry point.  */
-int main()
-{
-
-    /* Enter the ThreadX kernel.  */
-    tx_kernel_enter();
-}
-
 /* Define what the initial system looks like.  */
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
@@ -155,7 +147,7 @@ UINT    status;
         error_counter++;
 #endif
 
-    status = nx_link_vlan_id_set(&ip_0, 1, VLAN_ID);
+    status = nx_link_vlan_set(&ip_0, 1, VLAN_ID);
     if (status)
         error_counter++;
 

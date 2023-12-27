@@ -55,20 +55,11 @@ void thread_0_entry(ULONG thread_input);
 void thread_1_and_2_entry(ULONG thread_input);
 UINT receive_callback(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
                       ULONG physical_address_msw, ULONG physical_address_lsw,
-                      USHORT packet_type, UINT header_size, VOID *context,
+                      UINT packet_type, UINT header_size, VOID *context,
                       struct NX_LINK_TIME_STRUCT *time_ptr);
 
 void _nx_ram_network_driver(struct NX_IP_DRIVER_STRUCT *driver_req);
 extern void    test_control_return(UINT status);
-
-/* Define main entry point.  */
-
-int main()
-{
-
-    /* Enter the ThreadX kernel.  */
-    tx_kernel_enter();
-}
 
 static VOID    set_link_status(NX_IP *ip_ptr, UINT link_status)
 {
@@ -166,7 +157,7 @@ UINT  status;
 /* Define receive callback function.  */
 UINT receive_callback(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
                       ULONG physical_address_msw, ULONG physical_address_lsw,
-                      USHORT packet_type, UINT header_size, VOID *context,
+                      UINT packet_type, UINT header_size, VOID *context,
                       struct NX_LINK_TIME_STRUCT *time_ptr)
 {
     (VOID)(physical_address_msw);
@@ -194,9 +185,8 @@ UINT receive_callback(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr
 
 void conf_link_layer()
 {
-    UINT  status;
-
-    UCHAR interface_0, interface_1;
+UINT  status;
+UINT interface_0, interface_1;
 
     status = nx_link_vlan_interface_create(&ip_0, "NetX IP Interface 0:2", IP_ADDRESS(0, 0, 0, 0), 0xFFFFFFFFUL, VLAN_TAG, 0, &interface_0);
     if (status)
