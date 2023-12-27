@@ -3711,7 +3711,7 @@ NX_BSD_SOCKET *bsd_socket_ptr;
             }
 
             sockaddr_dest.sll_family = AF_PACKET;
-            sockaddr_dest.sll_ifindex = bsd_socket_ptr -> nx_bsd_socket_local_bind_interface_index;
+            sockaddr_dest.sll_ifindex = (INT)bsd_socket_ptr -> nx_bsd_socket_local_bind_interface_index;
             return(_nx_bsd_hardware_internal_sendto(bsd_socket_ptr, (CHAR *)msg, msgLength, flags, (struct nx_bsd_sockaddr*)&sockaddr_dest, sizeof(struct nx_bsd_sockaddr_ll)));
         }
 
@@ -5688,7 +5688,7 @@ NX_INTERFACE        *nx_interface;
                 return NX_SOC_ERROR;
             }
 
-            ifreq -> ifr_ifindex = i;
+            ifreq -> ifr_ifindex = (INT)i;
 
             break;
         }
@@ -5705,7 +5705,7 @@ NX_INTERFACE        *nx_interface;
                 return NX_SOC_ERROR;
             }
 
-            nx_interface = &nx_bsd_default_ip -> nx_ip_interface[i];
+            nx_interface = &nx_bsd_default_ip -> nx_ip_interface[ifreq -> ifr_ifindex];
             if (!(nx_interface -> nx_interface_valid))
             {
                 tx_mutex_put(nx_bsd_protection_ptr);
@@ -6659,7 +6659,7 @@ struct nx_bsd_ip_mreq
 UINT            mcast_interface;
 UINT            status;
 #endif /* NX_DISABLE_IPV4 */
-#ifdef NX_BSD_RAW_SUPPORT
+#if defined(NX_BSD_RAW_SUPPORT) && defined(NX_ENABLE_VLAN)
 struct nx_bsd_packet_mreq
                *pkt_mreq;
 ULONG           physical_addr_msw;
