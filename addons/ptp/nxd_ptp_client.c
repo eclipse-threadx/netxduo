@@ -1709,14 +1709,14 @@ NX_INTERFACE     *if_ptr;
     /* domainNumber */
     *ptr++ = client_ptr -> nx_ptp_client_domain;
 
-    // reserved 1 octets
+    /* reserved 1 octets */
     *ptr++ = 0;
 
-    // flags 2 octets
+    /* flags 2 octets */
     *ptr++ = 0;
     *ptr++ = 0;
 
-    // correction + reserved 8 + 4
+    /* correction + reserved 8 + 4 */
     memset(ptr, 0, 12); 
     ptr += 12;
 
@@ -1728,7 +1728,7 @@ NX_INTERFACE     *if_ptr;
     *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_req_id >> 8);
     *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_req_id);
     /* control */
-    *ptr++ = 5; // other message
+    *ptr++ = 5; /* other message */
     /* XXX */
     *ptr++ = 0; 
 
@@ -2040,12 +2040,12 @@ NX_INTERFACE     *if_ptr;
     *ptr++ = (UCHAR)PTP_MSG_PDELAY_RESP_TOTAL_LEN;
     /* domainNumber */
     *ptr++ = client_ptr -> nx_ptp_client_domain;
-    // reserved 1 octets
+    /* reserved 1 octets */
     *ptr++ = 0;
-    // flags 2 octets
+    /* flags 2 octets */
     *ptr++ = 0;
     *ptr++ = 0;
-    // correction + reserved 8 + 4 (correction field to be updated with t3-t2 later)
+    /* correction + reserved 8 + 4 (correction field to be updated with t3-t2 later) */
     memset(ptr, 0, 12); 
     ptr += 12;
     /* sourcePortIdentity */
@@ -2055,7 +2055,7 @@ NX_INTERFACE     *if_ptr;
     *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_responder_id >> 8);
     *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_responder_id);
     /* control */
-    *ptr++ = 5; // other message
+    *ptr++ = 5; /* other message */
     /* XXX */
     *ptr++ = 0;
 
@@ -2237,7 +2237,7 @@ NX_INTERFACE     *if_ptr;
     *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_responder_id >> 8);
     *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_pdelay_responder_id);
     /* control */
-    *ptr++ = 5; // other message
+    *ptr++ = 5; /* other message */
     /* XXX */
     *ptr++ = 0;
 
@@ -2617,7 +2617,7 @@ NX_INTERFACE     *if_ptr;
     *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_sync_sequenceId >> 8);
     *ptr++ = (UCHAR)(client_ptr -> nx_ptp_client_sync_sequenceId);
     /* control */
-    *ptr++ = 0; // sync message
+    *ptr++ = 0; /* sync message */
     /* XXX */ 
     *ptr++ = (UCHAR)(NX_PTP_CLIENT_LOG_SYNC_INTERVAL);
 
