@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -104,6 +104,9 @@
 /*  10-31-2022     Bo Chen                  Modified comment(s), and      */
 /*                                            updated product constants,  */
 /*                                            resulting in version 6.3.0  */
+/*  12-31-2022     Bo Chen                  Modified comment(s), and      */
+/*                                            updated product constants,  */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 
