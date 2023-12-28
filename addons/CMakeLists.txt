@@ -61,13 +61,7 @@ if(NXD_ENABLE_AZURE_IOT)
          ${CMAKE_CURRENT_LIST_DIR}/azure_iot/nx_azure_iot_adu_root_key.c
     )
     set(ENV{AZ_SDK_C_NO_SAMPLES} TRUE)
-    set(NX_AZURE_DISABLE_IOT_SECURITY_MODULE OFF CACHE BOOL "Disable Azure IoT Security Module (default is OFF)")
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/azure_iot/azure-sdk-for-c)
-    if(NX_AZURE_DISABLE_IOT_SECURITY_MODULE)
-        target_compile_definitions(${PROJECT_NAME} PUBLIC -DNX_AZURE_DISABLE_IOT_SECURITY_MODULE)
-    else()
-        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/azure_iot/azure_iot_security_module)
-    endif()
 endif()
 
 # Remove the file server files if the user doesn't want them
