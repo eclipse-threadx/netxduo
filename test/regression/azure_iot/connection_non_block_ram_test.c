@@ -385,14 +385,6 @@ ULONG pool_ptr_available_packet;
     /* Check connection status. */
     assert_int_equal(connection_status, NX_AZURE_IOT_SUCCESS);
 
-#if (NX_AZURE_IOT_MQTT_KEEP_ALIVE > 0 && defined(NX_AZURE_DISABLE_IOT_SECURITY_MODULE))
-    /* Let keep alive timeout. */
-    tx_thread_sleep(NX_AZURE_IOT_MQTT_KEEP_ALIVE * NX_IP_PERIODIC_RATE + NXD_MQTT_PING_TIMEOUT_DELAY + NX_IP_PERIODIC_RATE);
-
-    /* Check connection status. */
-    assert_int_equal(connection_status, NX_AZURE_IOT_DISCONNECTED);
-#endif
-
     /* Cleanup MQTT server. */
     mqtt_server_deinit(ip_ptr);
 

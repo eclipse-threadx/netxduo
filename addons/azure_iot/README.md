@@ -55,44 +55,6 @@ Azure IoT Middleware for Azure RTOS stays as an addon module for the Azure RTOS 
 
 See the [samples](https://github.com/azure-rtos/samples) of semiconductor's hero development boards with detailed guides to learn configure, build and deploy the over-the-air (OTA) updates to the devices.
 
-### Microsoft Defender for IoT
-
-[Microsoft Defender for IoT](https://learn.microsoft.com/azure/defender-for-iot/device-builders/overview) provides a comprehensive security solution for Azure RTOS devices. The built-in [IoT Security Module](https://learn.microsoft.com/azure/defender-for-iot/device-builders/iot-security-azure-rtos) in IoT Middleware is enabled by default to detect common threats and potential malicious activities.
-
-#### Opt-out
-
-To disable (opt-out) the module for your application, you can choose one of these two options:
-* Define `NX_AZURE_DISABLE_IOT_SECURITY_MODULE` in NetX Duo header file such as `nx_user.h` when building the project.
-* Call [`UINT nx_azure_iot_security_module_disable(NX_AZURE_IOT *nx_azure_iot_ptr)`](https://docs.microsoft.com/azure/defender-for-iot/azure-rtos-security-module-api#disable-azure-iot-security-module) in your application code.
-
-#### Data collection
-
-By enabling the module, it analyzes inbound and outbound network activity on IPv4 and IPv6 with supported protocols of **TCP**, **UDP** and **ICMP**. And with below data collected:
-
-* Local and remote address / port
-* Bytes in / out
-
-#### Footprint
-
-IoT Security Module leverages existing Azure RTOS resources, and sends security messages in the background, without interfering with the user application, using the same connection to the IoT Hub.
-
-The extra resource it will take on device and connection:
-
-**Memory Footprint** (using default config - 4 unique monitored connection in IPv4 in an hour):
-Toolchain | RAM | ROM |
-| --- | --- | --- |
-| IAR Embedded Workbench (iccarm) | 4Kb | 10Kb
-| GNU ARM Embedded Toolchain (arm-gcc) | 4Kb | 13Kb
-
-**Additional Connection**:
-Connection Type | RAM | Network |
-| --- | --- | --- |
-| IPv4 | 52bytes | 36bytes
-| IPv6 | 200bytes | 60bytes
-
-So the total additional connection traffic will be:
-*Total (in bytes) = Metadata (e.g. 300 bytes) + IPv4 Connections * 36 + IPv6 Connections * 60*
-
 ## APIs
 
 * [nx_azure_iot](./docs/azure_rtos_iot.md)    
@@ -101,7 +63,6 @@ So the total additional connection traffic will be:
 * [nx_azure_iot_provisioning_client](./docs/azure_rtos_iot_provisioning_client.md)
 * [nx_azure_iot_json](./docs/azure_rtos_iot_json.md)
 * [nx_azure_iot_adu_agent](./docs/azure_rtos_iot_adu_agent.md)
-* [nx_azure_iot_security_module](../azure_iot_security_module/docs/nx_azure_iot_security_module.md)
 
 ## Need Help?
 

@@ -15,10 +15,6 @@
 #include "nx_azure_iot.h"
 #include "azure/core/internal/az_log_internal.h"
 
-#ifndef NX_AZURE_DISABLE_IOT_SECURITY_MODULE
-#include "nx_azure_iot_security_module.h"
-#endif /* NX_AZURE_DISABLE_IOT_SECURITY_MODULE */
-
 #ifndef NX_AZURE_IOT_WAIT_OPTION
 #define NX_AZURE_IOT_WAIT_OPTION NX_WAIT_FOREVER
 #endif /* NX_AZURE_IOT_WAIT_OPTION */
@@ -274,17 +270,6 @@ UINT status;
     /* Set created IoT pointer.  */
     _nx_azure_iot_created_ptr = nx_azure_iot_ptr;
 
-#ifndef NX_AZURE_DISABLE_IOT_SECURITY_MODULE
-    /* Enable Azure IoT Security Module.  */
-    status = nx_azure_iot_security_module_enable(nx_azure_iot_ptr);
-    if (status)
-    {
-        LogError(LogLiteralArgs("IoT failed to enable IoT Security Module, status: %d"), status);
-        nx_azure_iot_delete(nx_azure_iot_ptr);
-        return(status);
-    }
-#endif /* NX_AZURE_DISABLE_IOT_SECURITY_MODULE */
-
     return(NX_AZURE_IOT_SUCCESS);
 }
 
@@ -303,16 +288,6 @@ UINT status;
         LogError(LogLiteralArgs("IoT delete fail: Resource NOT DELETED"));
         return(NX_AZURE_IOT_DELETE_ERROR);
     }
-
-#ifndef NX_AZURE_DISABLE_IOT_SECURITY_MODULE
-    /* Disable IoT Security Module.  */
-    status = nx_azure_iot_security_module_disable(nx_azure_iot_ptr);
-    if (status != NX_AZURE_IOT_SUCCESS)
-    {
-        LogError(LogLiteralArgs("IoT failed to disable IoT Security Module, status: %d"), status);
-        return(status);
-    }
-#endif /* NX_AZURE_DISABLE_IOT_SECURITY_MODULE */
 
     /* Deregister SDK module on cloud helper.  */
     nx_cloud_module_deregister(&(nx_azure_iot_ptr -> nx_azure_iot_cloud), &(nx_azure_iot_ptr -> nx_azure_iot_cloud_module));

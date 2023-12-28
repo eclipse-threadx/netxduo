@@ -40,7 +40,6 @@ message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.")
 
 set(default_build_coverage)
 set(disable_precondition_build -DAZ_NO_PRECONDITION_CHECKING -DAZ_NO_LOGGING -DNX_DISABLE_IPV6)
-set(disable_security_module_build -DNX_AZURE_DISABLE_IOT_SECURITY_MODULE)
 
 # Set property for folder
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -48,15 +47,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(DISABLE_TEST
     OFF
     CACHE BOOL "Disable test projects (default is OFF)")
-set(NX_AZURE_DISABLE_IOT_SECURITY_MODULE
-    OFF
-    CACHE BOOL "Disable Azure IoT Security Module (default is OFF)")
-
-if(NOT WIN32)
-if("-DNX_AZURE_DISABLE_IOT_SECURITY_MODULE" IN_LIST ${CMAKE_BUILD_TYPE})
-  set(NX_AZURE_DISABLE_IOT_SECURITY_MODULE ON)
-endif()
-endif()
 
 # CFLAGS
 if(WIN32)
@@ -93,12 +83,6 @@ add_definitions(
 
 # Include azure rtos cmake
 include(configs/azure_rtos_src.cmake)
-
-if(NX_AZURE_DISABLE_IOT_SECURITY_MODULE)
-  add_definitions(
-      -DNX_AZURE_DISABLE_IOT_SECURITY_MODULE
-  )
-endif()
 
 # Link libraries
 if(THREADX_ARCH STREQUAL "linux")

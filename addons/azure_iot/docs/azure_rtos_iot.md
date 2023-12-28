@@ -13,17 +13,7 @@ UINT nx_azure_iot_create(NX_AZURE_IOT *nx_azure_iot_ptr, const UCHAR *name_ptr,
 ```
 **Description**
 
-<p>This routine creates the Azure IoT subsystem.  An internal thread is created to manage activities related to Azure IoT services. Only one `NX_AZURE_IOT` instance is needed to manage instances for Azure IoT hub, IoT Central, Device Provisioning Services (DPS), and Azure Security Center (ASC). </p>
-
-<p>This routine enables ASC by default. ASC provides a comprehensive security solution for
-Azure RTOS devices in which it collects network information and send it to the IoTHub.
-More details can be found https://docs.microsoft.com/en-us/azure/defender-for-iot/iot-security-azure-rtos.
-To disable ASC from your application, we provide both compile time and runtime option:
-    - compile-time : NX_AZURE_DISABLE_IOT_SECURITY_MODULE in NetXDuo header file such as nx_port.h
-                     when building the middleware.
-    - runtime : Call UINT nx_azure_iot_security_module_disable(NX_AZURE_IOT *nx_azure_iot_ptr)
-                in your application code.
-</p>
+<p>This routine creates the Azure IoT subsystem.  An internal thread is created to manage activities related to Azure IoT services. Only one `NX_AZURE_IOT` instance is needed to manage instances for Azure IoT hub, IoT Central, and Device Provisioning Services (DPS). </p>
 
 **Parameters**
 | Name | Description |

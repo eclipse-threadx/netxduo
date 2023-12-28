@@ -1,5 +1,0 @@
-if(CMAKE_C_COMPILER_ID MATCHES "GNU")
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        include(asc_security_coreCodeCoverage)
-    endif()
-endif()
