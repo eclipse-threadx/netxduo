@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_udp.h                                            PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -50,9 +50,9 @@
 /*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
 /*                                            necessary header file,      */
 /*                                            resulting in version 6.1.9  */
-/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*  12-31-2023     Yajun Xia                Modified comment(s),          */
 /*                                            supported VLAN,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 

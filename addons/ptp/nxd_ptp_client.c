@@ -24,7 +24,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_ptp_client.c                                    PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -39,10 +39,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -295,7 +295,7 @@ ULONG nanoseconds = (ULONG)time_ptr -> nanosecond;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_msg_parse_hdr                               PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -328,9 +328,9 @@ ULONG nanoseconds = (ULONG)time_ptr -> nanosecond;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_ptp_msg_parse_hdr(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PTP_MSG_HEADER *hdr)
@@ -495,7 +495,7 @@ static VOID _nx_ptp_msg_parse_announce(UCHAR *ptr, NX_PTP_CLIENT_MASTER *master)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_master_clock_compare                    PORTABLE C   */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -765,7 +765,7 @@ NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)(socket_ptr -> nx_udp_socket_reserv
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_ethernet_receive_notify              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -794,7 +794,7 @@ NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)(socket_ptr -> nx_udp_socket_reserv
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_ptp_client_ethernet_receive_notify(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
@@ -858,7 +858,7 @@ NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)context;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_clock_adjust                         PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -893,9 +893,9 @@ NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)context;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_clock_adjust(NX_PTP_CLIENT *client_ptr, NX_PTP_TIME *offset_ptr)
@@ -963,7 +963,7 @@ NX_PTP_TIME current;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_send_delay_req                       PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -995,10 +995,10 @@ NX_PTP_TIME current;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_delay_req(NX_PTP_CLIENT *client_ptr)
@@ -1135,7 +1135,7 @@ NX_INTERFACE     *if_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_sync_received                        PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1170,10 +1170,10 @@ NX_INTERFACE     *if_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_sync_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr, NX_PTP_MSG_HEADER *hdr)
@@ -1306,7 +1306,7 @@ ULONG64     correctionNS = (hdr -> cFieldHigh << 16) | (hdr -> cFieldLow >> 16);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_delay_resp_received                  PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1345,9 +1345,9 @@ ULONG64     correctionNS = (hdr -> cFieldHigh << 16) | (hdr -> cFieldLow >> 16);
 /*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed compiler warnings,    */
 /*                                            resulting in version 6.1.5  */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            simplified debug output,    */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_delay_resp_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr)
@@ -1441,7 +1441,7 @@ NX_PTP_CLIENT_SYNC sync;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_init_packet_received                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1475,10 +1475,10 @@ NX_PTP_CLIENT_SYNC sync;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_init_packet_received(NX_PTP_CLIENT *client_ptr,
@@ -1636,7 +1636,7 @@ INT compare_result;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_send_pdelay_req                      PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -1667,7 +1667,7 @@ INT compare_result;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_pdelay_req(NX_PTP_CLIENT *client_ptr)
@@ -1823,7 +1823,7 @@ NX_INTERFACE     *if_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_pdelay_resp_received                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -1859,7 +1859,7 @@ NX_INTERFACE     *if_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_pdelay_resp_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr)
@@ -1962,7 +1962,7 @@ NX_PTP_TIME a, b, c, d, t3;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_send_pdelay_resp_follow_up           PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -1993,7 +1993,7 @@ NX_PTP_TIME a, b, c, d, t3;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_pdelay_resp_follow_up(NX_PTP_CLIENT *client_ptr)
@@ -2143,7 +2143,7 @@ NX_INTERFACE     *if_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_send_pdelay_resp                     PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -2175,7 +2175,7 @@ NX_INTERFACE     *if_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_pdelay_resp(NX_PTP_CLIENT *client_ptr)
@@ -2337,7 +2337,7 @@ NX_INTERFACE     *if_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_send_follow_up                       PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -2368,7 +2368,7 @@ NX_INTERFACE     *if_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_follow_up(NX_PTP_CLIENT *client_ptr)
@@ -2529,7 +2529,7 @@ NX_INTERFACE     *if_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_send_sync                            PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -2560,7 +2560,7 @@ NX_INTERFACE     *if_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_sync(NX_PTP_CLIENT *client_ptr)
@@ -2696,7 +2696,7 @@ NX_INTERFACE     *if_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_send_announce                        PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -2727,7 +2727,7 @@ NX_INTERFACE     *if_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_announce(NX_PTP_CLIENT *client_ptr)
@@ -2890,7 +2890,7 @@ NX_INTERFACE     *if_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_process_event_packet                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2925,10 +2925,10 @@ NX_INTERFACE     *if_ptr;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_process_event_packet(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr,
@@ -3033,7 +3033,7 @@ static VOID _nx_ptp_client_process_event_packet(NX_PTP_CLIENT *client_ptr, NX_PA
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_process_general_packet               PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3069,10 +3069,10 @@ static VOID _nx_ptp_client_process_event_packet(NX_PTP_CLIENT *client_ptr, NX_PA
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_process_general_packet(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr,
@@ -3149,7 +3149,7 @@ static VOID _nx_ptp_client_process_general_packet(NX_PTP_CLIENT *client_ptr, NX_
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_thread_entry                         PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3188,10 +3188,10 @@ static VOID _nx_ptp_client_process_general_packet(NX_PTP_CLIENT *client_ptr, NX_
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_thread_entry(ULONG ptp_instance)
@@ -3544,7 +3544,7 @@ UINT _nxe_ptp_client_create(NX_PTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT inter
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_create                               PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3590,9 +3590,9 @@ UINT _nxe_ptp_client_create(NX_PTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT inter
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_create(NX_PTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT interface_index,
@@ -3773,7 +3773,7 @@ UINT _nxe_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_delete                               PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3809,9 +3809,9 @@ UINT _nxe_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
@@ -3922,7 +3922,7 @@ UINT _nxe_ptp_client_start(NX_PTP_CLIENT *client_ptr, UCHAR *client_port_identit
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_start                                PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3970,10 +3970,10 @@ UINT _nxe_ptp_client_start(NX_PTP_CLIENT *client_ptr, UCHAR *client_port_identit
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_start(NX_PTP_CLIENT *client_ptr, UCHAR *client_port_identity_ptr, UINT client_port_identity_length,
@@ -4240,7 +4240,7 @@ UINT _nxe_ptp_client_stop(NX_PTP_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_stop                                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4275,9 +4275,9 @@ UINT _nxe_ptp_client_stop(NX_PTP_CLIENT *client_ptr)
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_stop(NX_PTP_CLIENT *client_ptr)
@@ -4370,7 +4370,7 @@ NXD_ADDRESS maddr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_ptp_client_master_enable                       PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -4410,7 +4410,7 @@ NXD_ADDRESS maddr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_master_enable(NX_PTP_CLIENT *client_ptr, UCHAR role, UCHAR priority1, UCHAR priority2,
@@ -4446,7 +4446,7 @@ UINT _nxe_ptp_client_master_enable(NX_PTP_CLIENT *client_ptr, UCHAR role, UCHAR 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_master_enable                        PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -4485,7 +4485,7 @@ UINT _nxe_ptp_client_master_enable(NX_PTP_CLIENT *client_ptr, UCHAR role, UCHAR 
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_master_enable(NX_PTP_CLIENT *client_ptr, UCHAR role, UCHAR priority1, UCHAR priority2,
@@ -5061,7 +5061,7 @@ UINT _nx_ptp_client_sync_info_get(NX_PTP_CLIENT_SYNC *sync_ptr, USHORT *flags, S
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_packet_timestamp_notify              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5093,10 +5093,10 @@ UINT _nx_ptp_client_sync_info_get(NX_PTP_CLIENT_SYNC *sync_ptr, USHORT *flags, S
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_ptp_client_packet_timestamp_notify(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PTP_TIME *timestamp_ptr)
@@ -5337,7 +5337,7 @@ UINT _nxe_ptp_client_utility_time_diff(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_ptp_client_utility_time_sum                    PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -5368,7 +5368,7 @@ UINT _nxe_ptp_client_utility_time_diff(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_utility_time_sum(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time2_ptr, NX_PTP_TIME *result_ptr)
@@ -5494,7 +5494,7 @@ LONG  ns;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ptp_client_utility_time_sum                    PORTABLE C       */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -5528,7 +5528,7 @@ LONG  ns;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_utility_time_sum(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time2_ptr, NX_PTP_TIME *result_ptr)

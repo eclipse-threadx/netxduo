@@ -190,7 +190,7 @@ UINT write_pcap_file(NX_PACKET *packet_ptr);
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_set_pool                     PORTABLE C      */ 
-/*                                                           6.x          */ 
+/*                                                           6.4.0        */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
 /*    Wenhui Xie, Microsoft Corporation                                   */
@@ -219,7 +219,7 @@ UINT write_pcap_file(NX_PACKET *packet_ptr);
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */
+/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */
 /*                                                                        */ 
 /**************************************************************************/ 
 UINT _nx_ram_network_driver_set_pool(NX_PACKET_POOL *pool_ptr)
@@ -234,7 +234,7 @@ UINT _nx_ram_network_driver_set_pool(NX_PACKET_POOL *pool_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_reset                        PORTABLE C      */ 
-/*                                                           6.x          */ 
+/*                                                           6.4.0        */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
 /*    Wenhui Xie, Microsoft Corporation                                   */ 
@@ -263,7 +263,7 @@ UINT _nx_ram_network_driver_set_pool(NX_PACKET_POOL *pool_ptr)
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */
+/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */
 /*                                                                        */ 
 /**************************************************************************/ 
 void _nx_ram_network_driver_reset(void)
@@ -292,7 +292,7 @@ void _nx_ram_network_driver_reset(void)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_delay_entry                  PORTABLE C      */ 
-/*                                                           6.x          */ 
+/*                                                           6.4.0        */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
 /*    Wenhui Xie, Microsoft Corporation                                   */ 
@@ -320,7 +320,7 @@ void _nx_ram_network_driver_reset(void)
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */ 
+/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_delay_entry(ULONG timer_input)
@@ -354,7 +354,7 @@ NX_IP_DRIVER *driver_req;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_timer_clean                  PORTABLE C      */ 
-/*                                                           6.x          */ 
+/*                                                           6.4.0        */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
 /*    Wenhui Xie, Microsoft Corporation                                   */ 
@@ -380,7 +380,7 @@ NX_IP_DRIVER *driver_req;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */ 
+/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_timer_clean(VOID)
@@ -404,7 +404,7 @@ VOID _nx_ram_network_driver_timer_clean(VOID)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_internal                     PORTABLE C      */ 
-/*                                                           6.x          */ 
+/*                                                           6.4.0        */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
 /*    Wenhui Xie, Microsoft Corporation                                   */ 
@@ -436,7 +436,7 @@ VOID _nx_ram_network_driver_timer_clean(VOID)
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx       Wenhui Xie             Initial Version 6.x           */
+/*  12-31-2023       Wenhui Xie             Initial Version 6.4.0         */
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID  _nx_ram_network_driver_internal(NX_IP_DRIVER *driver_req_ptr, UINT mtu_size)
@@ -1038,7 +1038,7 @@ USHORT          ether_type;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver                              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wenhui Xie, Microsoft Corporation                                   */
@@ -1067,7 +1067,7 @@ USHORT          ether_type;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Wenhui Xie             Initial Version 6.x           */
+/*  12-31-2023       Wenhui Xie             Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr)
@@ -1547,7 +1547,7 @@ USHORT         ether_type;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_output                       PORTABLE C      */ 
-/*                                                           6.x          */ 
+/*                                                           6.4.0        */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
 /*    Wenhui Xie, Microsoft Corporation                                   */ 
@@ -1582,7 +1582,7 @@ USHORT         ether_type;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx       Wenhui Xie             Initial Version 6.x           */ 
+/*  12-31-2023       Wenhui Xie             Initial Version 6.4.0         */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID  _nx_ram_network_driver_output(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -1818,7 +1818,7 @@ UINT        j;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_receive                      PORTABLE C      */ 
-/*                                                           6.x          */ 
+/*                                                           6.4.0        */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
 /*    Wenhui Xie, Microsoft Corporation                                   */ 
@@ -1858,7 +1858,7 @@ UINT        j;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */ 
+/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -1987,7 +1987,7 @@ UINT    packet_type;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ram_network_driver_calculate_checksum           PORTABLE C      */ 
-/*                                                           6.x          */ 
+/*                                                           6.4.0        */ 
 /*  AUTHOR                                                                */ 
 /*                                                                        */ 
 /*    Wenhui Xie, Microsoft Corporation                                   */ 
@@ -2019,7 +2019,7 @@ UINT    packet_type;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     Wenhui Xie               Initial Version 6.x           */ 
+/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 UINT  _nx_ram_network_driver_calculate_checksum(NX_INTERFACE *interface_ptr, NX_PACKET *packet_ptr, UCHAR is_check)
@@ -2526,7 +2526,7 @@ NX_IPV6_HEADER         *ipv6_header_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    get_time_of_day                                    PORTABLE C       */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wenhui Xie, Microsoft Corporation                                   */
@@ -2554,7 +2554,7 @@ NX_IPV6_HEADER         *ipv6_header_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Wenhui Xie             Initial Version 6.x           */
+/*  12-31-2023       Wenhui Xie             Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 VOID get_time_of_day(NX_TIME_VALUE *time_value) 
@@ -2589,7 +2589,7 @@ ULONG64     time;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    create_pcap_file                                     PORTABLE C     */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wenhui Xie, Microsoft Corporation                                   */
@@ -2619,7 +2619,7 @@ ULONG64     time;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Wenhui Xie               Initial Version 6.x         */
+/*  12-31-2023       Wenhui Xie               Initial Version 6.4.0       */
 /*                                                                        */
 /**************************************************************************/
 UINT create_pcap_file(CHAR *file_name) 
@@ -2654,7 +2654,7 @@ NX_PCAP_FILE_HEADER     pcap_file_header;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    write_pcap_file                                     PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wenhui Xie, Microsoft Corporation                                   */
@@ -2684,7 +2684,7 @@ NX_PCAP_FILE_HEADER     pcap_file_header;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Wenhui Xie            Initial Version 6.x            */
+/*  12-31-2023       Wenhui Xie            Initial Version 6.4.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT write_pcap_file(NX_PACKET *packet_ptr)
@@ -2728,7 +2728,7 @@ ULONG                   data_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    close_pcap_file                                     PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wenhui Xie, Microsoft Corporation                                   */
@@ -2755,7 +2755,7 @@ ULONG                   data_length;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Wenhui Xie            Initial Version 6.x            */
+/*  12-31-2023       Wenhui Xie            Initial Version 6.4.0          */
 /*                                                                        */
 /**************************************************************************/
 VOID close_pcap_file()

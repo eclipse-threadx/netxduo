@@ -25,7 +25,7 @@
 /*  BSD DEFINITIONS                                        RELEASE        */
 /*                                                                        */
 /*    nxd_bsd.h                                           PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -54,10 +54,10 @@
 /*                                            added option to enable      */
 /*                                            native APIs with prefix,    */
 /*                                            resulting in version 6.3.0  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), and      */
+/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
 /*                                            added support of recvmsg,   */
 /*                                            added nx_link to raw socket,*/
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 

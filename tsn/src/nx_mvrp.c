@@ -30,7 +30,7 @@ NX_MVRP_ATTRIBUTE mvrp_attribute_array[NX_MVRP_ATTRIBUTE_ARRAY_MAX_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mvrp_indication_process                          PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -62,7 +62,7 @@ NX_MVRP_ATTRIBUTE mvrp_attribute_array[NX_MVRP_ATTRIBUTE_ARRAY_MAX_SIZE];
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_indication_process(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR indication_type)
@@ -92,7 +92,7 @@ NX_MVRP *mvrp = (NX_MVRP *)participant;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mvrp_mrpdu_unpack                                PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -124,7 +124,7 @@ NX_MVRP *mvrp = (NX_MVRP *)participant;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_mrpdu_unpack(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_PACKET *packet_ptr)
@@ -286,7 +286,7 @@ UCHAR             three_packed_event, first_event, second_event, third_event;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mvrp_mrpdu_pack                                  PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -317,7 +317,7 @@ UCHAR             three_packed_event, first_event, second_event, third_event;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_mrpdu_pack(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_PACKET *packet_ptr)
@@ -462,7 +462,7 @@ USHORT            i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mvrp_attribute_find                              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -494,7 +494,7 @@ USHORT            i;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_attribute_find(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE **attribute_ptr, USHORT vlan_id)
@@ -530,7 +530,7 @@ NX_MVRP_ATTRIBUTE *mvrp_attribute;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mvrp_attribute_insert                            PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -561,7 +561,7 @@ NX_MVRP_ATTRIBUTE *mvrp_attribute;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mvrp_attribute_insert(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute)
@@ -624,7 +624,7 @@ USHORT            vlan_id = ((NX_MVRP_ATTRIBUTE *)attribute) -> vlan_id;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mvrp_attribute_get                               PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -659,7 +659,7 @@ USHORT            vlan_id = ((NX_MVRP_ATTRIBUTE *)attribute) -> vlan_id;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_attribute_get(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE **attribute_ptr, USHORT vlan_id)
@@ -704,7 +704,7 @@ UINT              status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mvrp_action_request                              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -737,7 +737,7 @@ UINT              status;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_action_request(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, USHORT vlan_id, UCHAR action_type)
@@ -789,7 +789,7 @@ UCHAR             mrp_event;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mvrp_init                                        PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -818,7 +818,7 @@ UCHAR             mrp_event;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_init(NX_MVRP *mvrp_ptr)

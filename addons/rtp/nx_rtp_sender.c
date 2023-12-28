@@ -642,7 +642,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_create                      PORTABLE C       */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -686,9 +686,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*  xx-xx-xxxx     Haiqing Zhao            Modified comments(s),          */
+/*  12-31-2023     Haiqing Zhao            Modified comments(s),          */
 /*                                           supported VLAN,              */
-/*                                           resulting in version 6.x     */
+/*                                           resulting in version 6.4.0   */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_create(NX_RTP_SENDER *rtp_sender, NX_RTP_SESSION *session, ULONG payload_type,
@@ -1295,7 +1295,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_packet_send                 PORTABLE C       */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1336,9 +1336,9 @@ UINT status;
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*  xx-xx-xxxx     Haiqing Zhao            Modified comments(s),          */
+/*  12-31-2023     Haiqing Zhao            Modified comments(s),          */
 /*                                           supported VLAN,              */
-/*                                           resulting in version 6.x     */
+/*                                           resulting in version 6.4.0   */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_packet_send(NX_RTP_SESSION *session, NX_PACKET *packet_ptr, ULONG timestamp, ULONG ntp_msw, ULONG ntp_lsw, UINT marker)
@@ -1887,7 +1887,7 @@ UINT _nx_rtp_sender_session_ssrc_get(NX_RTP_SESSION *session, ULONG *ssrc)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_vlan_priority_set          PORTABLE C       */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1920,7 +1920,7 @@ UINT _nx_rtp_sender_session_ssrc_get(NX_RTP_SESSION *session, ULONG *ssrc)
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Haiqing Zhao            Initial Version 6.x            */
+/*  12-31-2023     Haiqing Zhao            Initial Version 6.4.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan_priority)
@@ -1954,7 +1954,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_vlan_priority_set          PORTABLE C       */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1987,7 +1987,7 @@ UINT status;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Haiqing Zhao            Initial Version 6.x            */
+/*  12-31-2023     Haiqing Zhao            Initial Version 6.4.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan_priority)

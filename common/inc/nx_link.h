@@ -24,7 +24,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_link.h                                           PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -41,7 +41,7 @@
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou               Initial Version 6.x          */
+/*  12-31-2023     Tiejun Zhou               Initial Version 6.4.0        */
 /*                                                                        */
 /**************************************************************************/
 

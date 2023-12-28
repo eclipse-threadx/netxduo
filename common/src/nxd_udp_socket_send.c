@@ -44,7 +44,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_udp_socket_driver_send                          PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -82,9 +82,9 @@
 /*  01-31-2022     Yuxin Zhou               Modified comment(s), corrected*/
 /*                                            the logic for queued packet,*/
 /*                                            resulting in version 6.1.10 */
-/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*  12-31-2023     Yajun Xia                Modified comment(s),          */
 /*                                            supported VLAN,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_udp_socket_driver_send(NX_UDP_SOCKET *socket_ptr,
