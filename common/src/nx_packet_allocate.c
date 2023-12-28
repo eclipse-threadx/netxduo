@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_packet_allocate                                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -71,10 +71,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*  12-31-2023     Yajun Xia                Modified comment(s),          */
 /*                                            supported VLAN and generic  */
 /*                                            link layer,                 */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_packet_allocate(NX_PACKET_POOL *pool_ptr,  NX_PACKET **packet_ptr,

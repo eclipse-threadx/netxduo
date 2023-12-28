@@ -166,7 +166,7 @@ extern   "C" {
 
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
-#define NETX_SECURE_MINOR_VERSION                       3
+#define NETX_SECURE_MINOR_VERSION                       4
 #define NETX_SECURE_PATCH_VERSION                       0
 
 /* The following symbols are defined for backward compatibility reasons. */

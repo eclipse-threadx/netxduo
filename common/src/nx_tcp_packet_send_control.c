@@ -42,7 +42,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_packet_send_control                         PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -85,9 +85,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yajun Xia                Modified comment(s),          */
+/*  12-31-2023     Yajun Xia                Modified comment(s),          */
 /*                                            supported VLAN,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_packet_send_control(NX_TCP_SOCKET *socket_ptr, ULONG control_bits, ULONG tx_sequence,

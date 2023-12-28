@@ -270,9 +270,9 @@ static struct NX_BSD_SERVICE_LIST  *_nx_bsd_serv_list_ptr;
 /*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
 /*                                            used new API/structs naming,*/
 /*                                            resulting in version 6.3.0  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), and      */
+/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
 /*                                            added nx_link layer,        */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_initialize(NX_IP *default_ip, NX_PACKET_POOL *default_pool, CHAR *bsd_thread_stack_area,
@@ -4067,7 +4067,7 @@ struct nx_bsd_iovec iov;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    recvfrom                                            PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4115,9 +4115,9 @@ struct nx_bsd_iovec iov;
 /*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
 /*                                            used new API/structs naming,*/
 /*                                            resulting in version 6.3.0  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), and      */
+/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
 /*                                            added nx_bsd_recv_internal, */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_recvfrom(INT sockID, CHAR *rcvBuffer, INT bufferLength, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen)
@@ -4136,7 +4136,7 @@ struct nx_bsd_iovec iov;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    recvmsg                                             PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yanwu Cai, Microsoft Corporation                                    */
@@ -4171,7 +4171,7 @@ struct nx_bsd_iovec iov;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yanwu Cai                Initial Version 6.x           */
+/*  12-31-2023     Yanwu Cai                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 INT nx_bsd_recvmsg(INT sockID, struct nx_bsd_msghdr *msg, INT flags)
@@ -4191,7 +4191,7 @@ INT fromAddrLen = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    recv_internal                                       PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yanwu Cai, Microsoft Corporation                                    */
@@ -4253,7 +4253,7 @@ INT fromAddrLen = 0;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yanwu Cai                Initial Version 6.x           */
+/*  12-31-2023     Yanwu Cai                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static INT nx_bsd_recv_internal(INT sockID, struct nx_bsd_iovec *iov, size_t iovlen, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen)
@@ -5477,7 +5477,7 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    ioctl                                               PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5525,10 +5525,10 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
 /*                                            used new API/structs naming,*/
 /*                                            resulting in version 6.3.0  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), and      */
+/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
 /*                                            added SIOCGIFINDEX and      */
 /*                                            SIOCGIFHWADDR commands,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_ioctl(INT sockID,  INT command, INT *result)
@@ -6595,7 +6595,7 @@ ULONG                                   ticks;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    setsockopt                                          PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6637,10 +6637,10 @@ ULONG                                   ticks;
 /*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
 /*                                            used new API/structs naming,*/
 /*                                            resulting in version 6.3.0  */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s), and      */
+/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
 /*                                            added PACKET_ADD_MEMBERSHIP */
 /*                                            and PACKET_DROP_MEMBERSHIP, */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_setsockopt(INT sockID, INT option_level, INT option_name, const VOID *option_value, INT option_length)
@@ -13147,7 +13147,7 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_bsd_hardware_internal_sendto                    PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13189,9 +13189,9 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
-/*  xx-xx-xxxx     Yanwu Cai                Modified comment(s),          */
+/*  12-31-2023     Yanwu Cai                Modified comment(s),          */
 /*                                            added nx_link layer,        */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static INT _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
@@ -13446,7 +13446,7 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_bsd_ethernet_receive_notify                     PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yanwu Cai, Microsoft Corporation                                    */
@@ -13486,7 +13486,7 @@ NX_BSD_SOCKET *bsd_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yanwu Cai                Initial Version 6.x           */
+/*  12-31-2023     Yanwu Cai                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_bsd_ethernet_receive_notify(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,

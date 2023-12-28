@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_vlan_priority_set                    PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -61,7 +61,7 @@
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_tcp_socket_vlan_priority_set(NX_TCP_SOCKET *socket_ptr, UINT vlan_priority)

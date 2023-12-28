@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_rtp_sender.h                                     PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -41,9 +41,9 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  10-31-2023     Haiqing Zhao             Initial Version 6.3.0         */
-/*  xx-xx-xxxx     Haiqing Zhao             Modified comments(s),         */
+/*  12-31-2023     Haiqing Zhao             Modified comments(s),         */
 /*                                            supported VLAN,             */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 

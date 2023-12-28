@@ -31,7 +31,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_vlan_set                                    PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -69,7 +69,7 @@
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_vlan_set(NX_IP *ip_ptr, UINT interface_index, UINT vlan_tag)
@@ -102,7 +102,7 @@ UINT nx_link_vlan_set(NX_IP *ip_ptr, UINT interface_index, UINT vlan_tag)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_vlan_get                                    PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -138,7 +138,7 @@ UINT nx_link_vlan_set(NX_IP *ip_ptr, UINT interface_index, UINT vlan_tag)
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_vlan_get(NX_IP *ip_ptr, UINT interface_index, USHORT *vlan_tag)
@@ -176,7 +176,7 @@ UINT nx_link_vlan_get(NX_IP *ip_ptr, UINT interface_index, USHORT *vlan_tag)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_vlan_clear                                  PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -207,7 +207,7 @@ UINT nx_link_vlan_get(NX_IP *ip_ptr, UINT interface_index, USHORT *vlan_tag)
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_vlan_clear(NX_IP *ip_ptr, UINT interface_index)
@@ -241,7 +241,7 @@ UINT nx_link_vlan_clear(NX_IP *ip_ptr, UINT interface_index)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_multicast_join                              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -275,7 +275,7 @@ UINT nx_link_vlan_clear(NX_IP *ip_ptr, UINT interface_index)
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_multicast_join(NX_IP *ip_ptr, UINT interface_index,
@@ -318,7 +318,7 @@ NX_IP_DRIVER driver_request;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_multicast_leave                             PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -353,7 +353,7 @@ NX_IP_DRIVER driver_request;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_multicast_leave(NX_IP *ip_ptr, UINT interface_index,
@@ -396,7 +396,7 @@ NX_IP_DRIVER driver_request;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_ethernet_packet_send                        PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -436,7 +436,7 @@ NX_IP_DRIVER driver_request;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_ethernet_packet_send(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
@@ -484,7 +484,7 @@ UINT          status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_raw_packet_send                             PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -517,7 +517,7 @@ UINT          status;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_raw_packet_send(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr)
@@ -558,7 +558,7 @@ NX_IP_DRIVER driver_request;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_packet_receive_callback_add                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -601,7 +601,7 @@ NX_IP_DRIVER driver_request;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_packet_receive_callback_add(NX_IP *ip_ptr, UINT interface_index, NX_LINK_RECEIVE_QUEUE *queue_ptr,
@@ -657,7 +657,7 @@ NX_INTERFACE *interface_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_packet_receive_callback_remove              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -690,7 +690,7 @@ NX_INTERFACE *interface_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_packet_receive_callback_remove(NX_IP *ip_ptr, UINT interface_index, NX_LINK_RECEIVE_QUEUE *queue_ptr)
@@ -743,7 +743,7 @@ NX_INTERFACE *interface_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_ethernet_header_parse                       PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -781,7 +781,7 @@ NX_INTERFACE *interface_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_ethernet_header_parse(NX_PACKET *packet_ptr, ULONG *destination_msb, ULONG *destination_lsb,
@@ -866,7 +866,7 @@ UCHAR *data_ptr = packet_ptr -> nx_packet_prepend_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_ethernet_header_add                         PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -901,7 +901,7 @@ UCHAR *data_ptr = packet_ptr -> nx_packet_prepend_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_ethernet_header_add(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
@@ -979,7 +979,7 @@ USHORT        vlan_tag;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_packet_transmitted                          PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -1015,7 +1015,7 @@ USHORT        vlan_tag;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 VOID nx_link_packet_transmitted(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr, NX_LINK_TIME *time_ptr)
@@ -1065,7 +1065,7 @@ ULONG header_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_ethernet_packet_received                    PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -1104,7 +1104,7 @@ ULONG header_length;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 VOID nx_link_ethernet_packet_received(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
@@ -1329,7 +1329,7 @@ NX_LINK_RECEIVE_QUEUE *queue_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_vlan_interface_create                       PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -1374,7 +1374,7 @@ NX_LINK_RECEIVE_QUEUE *queue_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_vlan_interface_create(NX_IP *ip_ptr, CHAR *interface_name, ULONG ip_address, ULONG network_mask,
@@ -1471,7 +1471,7 @@ NX_INTERFACE *interface_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_driver_request_preprocess                   PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -1503,7 +1503,7 @@ NX_INTERFACE *interface_ptr = NX_NULL;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_driver_request_preprocess(NX_IP_DRIVER *driver_request, NX_INTERFACE **actual_interface)
@@ -1591,7 +1591,7 @@ UINT nx_link_driver_request_preprocess(NX_IP_DRIVER *driver_request, NX_INTERFAC
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_link_vlan_interface_status_change                PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Tiejun Zhou, Microsoft Corporation                                  */
@@ -1624,7 +1624,7 @@ UINT nx_link_driver_request_preprocess(NX_IP_DRIVER *driver_request, NX_INTERFAC
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Tiejun Zhou              Initial Version 6.x           */
+/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_link_vlan_interface_status_change(NX_IP *ip_ptr, UINT interface_index)

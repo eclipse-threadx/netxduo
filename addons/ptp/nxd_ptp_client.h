@@ -24,7 +24,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_ptp_client.h                                    PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -39,10 +39,10 @@
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  xx-xx-xxxx     Tiejun Zhou              Modified comment(s), and      */
+/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
 /*                                            supported gPTP profile,     */
 /*                                            supported master clock,     */
-/*                                            resulting in version 6.x    */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 

@@ -214,7 +214,7 @@ UINT write_pcap_file(NX_PACKET *packet_ptr);
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx        Yuxin Zhou            Initial Version 5.8           */
+/*  12-31-2023        Yuxin Zhou            Initial Version 5.8           */
 /*                                                                        */ 
 /**************************************************************************/ 
 UINT _nx_ram_network_driver_set_pool(NX_PACKET_POOL *pool_ptr)
@@ -258,7 +258,7 @@ UINT _nx_ram_network_driver_set_pool(NX_PACKET_POOL *pool_ptr)
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx        Yuxin Zhou            Initial Version 5.8           */
+/*  12-31-2023        Yuxin Zhou            Initial Version 5.8           */
 /*                                                                        */ 
 /**************************************************************************/ 
 void _nx_ram_network_driver_reset(void)
@@ -315,7 +315,7 @@ void _nx_ram_network_driver_reset(void)
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     William E. Lamie         Initial Version 2.0           */ 
+/*  12-31-2023     William E. Lamie         Initial Version 2.0           */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_delay_entry(ULONG timer_input)
@@ -375,7 +375,7 @@ NX_IP_DRIVER *driver_req;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     William E. Lamie         Initial Version 2.0           */ 
+/*  12-31-2023     William E. Lamie         Initial Version 2.0           */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_timer_clean(VOID)
@@ -431,7 +431,7 @@ VOID _nx_ram_network_driver_timer_clean(VOID)
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx       Yuxin Zhou             Initial Version 5.8           */
+/*  12-31-2023       Yuxin Zhou             Initial Version 5.8           */
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID  _nx_ram_network_driver_internal(NX_IP_DRIVER *driver_req_ptr, UINT mtu_size)
@@ -1140,7 +1140,7 @@ UINT            old_threshold;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Yuxin Zhou             Initial Version 5.8           */
+/*  12-31-2023       Yuxin Zhou             Initial Version 5.8           */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr)
@@ -1666,7 +1666,7 @@ UINT            old_threshold;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx       Yuxin Zhou             Initial Version 5.8           */ 
+/*  12-31-2023       Yuxin Zhou             Initial Version 5.8           */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID  _nx_ram_network_driver_output(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -1931,7 +1931,7 @@ UINT        j;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     Yuxin Zhou               Initial Version 5.8           */ 
+/*  12-31-2023     Yuxin Zhou               Initial Version 5.8           */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -2062,7 +2062,7 @@ UINT    packet_type;
 /*                                                                        */ 
 /*    DATE              NAME                      DESCRIPTION             */ 
 /*                                                                        */ 
-/*  xx-xx-xxxx     William E. Lamie         Initial Version 2.1b          */ 
+/*  12-31-2023     William E. Lamie         Initial Version 2.1b          */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 UINT  _nx_ram_network_driver_calculate_checksum(NX_INTERFACE *interface_ptr, NX_PACKET *packet_ptr, UCHAR is_check)
@@ -2585,7 +2585,7 @@ NX_IPV6_HEADER         *ipv6_header_ptr;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Yuxin Zhou             Initial Version 5.10          */
+/*  12-31-2023       Yuxin Zhou             Initial Version 5.10          */
 /*                                                                        */
 /**************************************************************************/
 VOID get_time_of_day(NX_TIME_VALUE *time_value) 
@@ -2650,7 +2650,7 @@ ULONG64     time;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Yuxin Zhou               Initial Version 5.10        */
+/*  12-31-2023       Yuxin Zhou               Initial Version 5.10        */
 /*                                                                        */
 /**************************************************************************/
 UINT create_pcap_file(CHAR *file_name) 
@@ -2715,7 +2715,7 @@ NX_PCAP_FILE_HEADER     pcap_file_header;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Yuxin Zhou            Initial Version 5.10           */
+/*  12-31-2023       Yuxin Zhou            Initial Version 5.10           */
 /*                                                                        */
 /**************************************************************************/
 UINT write_pcap_file(NX_PACKET *packet_ptr)
@@ -2786,7 +2786,7 @@ ULONG                   data_length;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx       Yuxin Zhou            Initial Version 5.10           */
+/*  12-31-2023       Yuxin Zhou            Initial Version 5.10           */
 /*                                                                        */
 /**************************************************************************/
 VOID close_pcap_file()
