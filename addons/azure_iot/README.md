@@ -31,7 +31,6 @@ The Azure IoT Middleware for Azure RTOS is built as part of the NetX Duo. Make s
 Module | Macros |
 | --- | --- |
 | Azure IoT Middleware for Azure RTOS | `NX_ENABLE_EXTENDED_NOTIFY_SUPPORT`<br> `NX_SECURE_ENABLE`<br> `NXD_MQTT_CLOUD_ENABLE`
-| Azure Defender for IoT security module | `NX_ENABLE_IP_PACKET_FILTER`
 
 Follow [`nx_user_sample.h`](https://github.com/azure-rtos/netxduo/blob/master/common/inc/nx_user_sample.h) to see how to define these macros in the NetX user header file.
 

@@ -100,7 +100,6 @@ We provide sample codes about how to use various addons in the [`samples`](./sam
 The IoT Middleware also includes built-in support for:
 
 - **[Device Update for IoT Hub](https://learn.microsoft.com/azure/iot-hub-device-update/device-update-azure-real-time-operating-system)**: an Azure service for IoT devices to enable the over-the-air (OTA) updates easily.
-- **[Microsoft Defender for IoT](https://learn.microsoft.com/azure/defender-for-iot/device-builders/iot-security-azure-rtos)**: an Azure service makes IoT devices visibility into security posture management and threat detection, and integrates with other Microsoft tools for unified security management.
 
 ## Component dependencies
 
