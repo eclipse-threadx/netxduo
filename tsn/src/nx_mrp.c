@@ -55,7 +55,7 @@ UCHAR *action_str[] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_applicant_event_process                      PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -90,7 +90,7 @@ UCHAR *action_str[] =
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_applicant_event_process(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR mrp_event)
@@ -456,7 +456,7 @@ UCHAR origin_state = attribute -> applicant.state;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_registrar_event_process                      PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -491,7 +491,7 @@ UCHAR origin_state = attribute -> applicant.state;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_registrar_event_process(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR mrp_event)
@@ -596,7 +596,7 @@ UCHAR origin_state = attribute -> registrar.state;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_leaveall_event_process                       PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -628,7 +628,7 @@ UCHAR origin_state = attribute -> registrar.state;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_leaveall_event_process(NX_MRP_PARTICIPANT *participant, UCHAR mrp_event)
@@ -689,7 +689,7 @@ UCHAR origin_state = participant -> leaveall.state;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_participant_add                              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -719,7 +719,7 @@ UCHAR origin_state = participant -> leaveall.state;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_participant_add(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant)
@@ -764,7 +764,7 @@ NX_MRP_PARTICIPANT *tmp_participant = mrp -> list_head;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_attribute_new                                PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -798,7 +798,7 @@ NX_MRP_PARTICIPANT *tmp_participant = mrp -> list_head;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 NX_MRP_ATTRIBUTE *nx_mrp_attribute_new(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant,
@@ -847,7 +847,7 @@ UINT              i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_attribute_evict                              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -878,7 +878,7 @@ UINT              i;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_attribute_evict(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *target)
@@ -918,7 +918,7 @@ NX_MRP_ATTRIBUTE *attribute = target;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_timer_handle                                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -947,7 +947,7 @@ NX_MRP_ATTRIBUTE *attribute = target;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_timer_handle(ULONG mrp_instance)
@@ -962,7 +962,7 @@ NX_MRP *mrp = (NX_MRP *)mrp_instance;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_timer_handle                                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1000,7 +1000,7 @@ NX_MRP *mrp = (NX_MRP *)mrp_instance;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_ethernet_receive_notify(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
@@ -1062,7 +1062,7 @@ NX_MRP *mrp = (NX_MRP *)context;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_init                                         PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1101,7 +1101,7 @@ NX_MRP *mrp = (NX_MRP *)context;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_init(NX_MRP *mrp, NX_IP *ip_ptr, UINT interface_index, NX_PACKET_POOL *pkt_pool_ptr,
@@ -1189,7 +1189,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_participant_search                           PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1219,7 +1219,7 @@ UINT status;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 NX_MRP_PARTICIPANT *nx_mrp_participant_search(NX_MRP *mrp, UINT participant_type)
@@ -1246,7 +1246,7 @@ NX_MRP_PARTICIPANT *participant = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_rcv_pkt_process                              PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1277,7 +1277,7 @@ NX_MRP_PARTICIPANT *participant = NX_NULL;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_rcv_pkt_process(NX_MRP *mrp)
@@ -1346,7 +1346,7 @@ NX_MRP_PARTICIPANT *participant;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_event_process                                PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1378,7 +1378,7 @@ NX_MRP_PARTICIPANT *participant;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_event_process(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR mrp_event)
@@ -1425,7 +1425,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_attribute_event_get                          PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1455,7 +1455,7 @@ UINT status;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_attribute_event_get(NX_MRP_ATTRIBUTE *attribute, UCHAR *event_ptr)
@@ -1517,7 +1517,7 @@ UINT nx_mrp_attribute_event_get(NX_MRP_ATTRIBUTE *attribute, UCHAR *event_ptr)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_periodic_timeout_process                     PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1546,7 +1546,7 @@ UINT nx_mrp_attribute_event_get(NX_MRP_ATTRIBUTE *attribute, UCHAR *event_ptr)
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_periodic_timeout_process(NX_MRP *mrp)
@@ -1583,7 +1583,7 @@ NX_MRP_ATTRIBUTE   *attribute;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_join_timeout_process                         PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1617,7 +1617,7 @@ NX_MRP_ATTRIBUTE   *attribute;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_join_timeout_process(NX_MRP *mrp)
@@ -1740,7 +1740,7 @@ UINT                eth_type;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_join_timeout_process                         PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1769,7 +1769,7 @@ UINT                eth_type;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_leaveall_timeout_process(NX_MRP *mrp)
@@ -1799,7 +1799,7 @@ NX_MRP_PARTICIPANT *participant;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_join_timeout_process                         PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1829,7 +1829,7 @@ NX_MRP_PARTICIPANT *participant;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_leave_timeout_process(NX_MRP *mrp)
@@ -1864,7 +1864,7 @@ NX_MRP_ATTRIBUTE   *attribute;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_join_timeout_process                         PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1896,7 +1896,7 @@ NX_MRP_ATTRIBUTE   *attribute;
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_timeout_process(NX_MRP *mrp)
@@ -1919,7 +1919,7 @@ void nx_mrp_timeout_process(NX_MRP *mrp)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_mrp_thread_entry                                 PORTABLE C      */
-/*                                                           6.x          */
+/*                                                           6.4.0        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1949,7 +1949,7 @@ void nx_mrp_timeout_process(NX_MRP *mrp)
 /*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
-/*  xx-xx-xxxx     Yajun Xia                Initial Version 6.x           */
+/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_thread_entry(ULONG mrp_instance)
