@@ -10,11 +10,11 @@ Here are the key features and modules of NetX Duo:
 
 Azure RTOS NetX Duo as part of Azure RTOS has been integrated to the semiconductor's SDKs and development environment. You can develop using the tools of choice from [STMicro](https://www.st.com/content/st_com/en/campaigns/x-cube-azrtos-azure-rtos-stm32.html), [NXP](https://www.nxp.com/design/software/embedded-software/azure-rtos-for-nxp-microcontrollers:AZURE-RTOS), [Renesas](https://github.com/renesas/azure-rtos) and [Microchip](https://mu.microchip.com/get-started-simplifying-your-iot-design-with-azure-rtos).
 
-We also provide [getting started guide](https://github.com/azure-rtos/getting-started) and [samples](https://github.com/azure-rtos/samples) using hero development boards from semiconductors you can build and test with.
+We also provide [getting started guide](https://github.com/eclipse-threadx/getting-started) and [samples](https://github.com/eclipse-threadx/samples) using hero development boards from semiconductors you can build and test with.
 
 See [Overview of Azure RTOS NetX Duo](https://learn.microsoft.com/azure/rtos/netx-duo/overview-netx-duo) for the high-level overview, and all documentation and APIs can be found in: [Azure RTOS NetX Duo documentation](https://learn.microsoft.com/azure/rtos/netx-duo/).
 
-Also there is dedicated [learning path of Azure RTOS NetX Duo](https://learn.microsoft.com/training/paths/azure-rtos-netx-duo/) for learning systematically.
+Also there is dedicated [learning path of ThreadX RTOS NetX Duo](https://learn.microsoft.com/training/paths/azure-rtos-netx-duo/) for learning systematically.
 
 ## Repository Structure and Usage
 
@@ -87,7 +87,7 @@ The master branch has the most recent code with all new features and bug fixes. 
 
 ## Protocols and connectivity
 
-Protocols and connectivity support are provided as addon modules within NetX Duo in `addons` folder. Some key modules are: [**azure_iot**](https://github.com/azure-rtos/netxduo/tree/master/addons/azure_iot), [**dhcp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-dhcp-client/chapter1), [**dns**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-dns/chapter1), [**ftp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-dns/chapter1), [**http**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-http/chapter1), [**mqtt**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-mqtt/chapter1), [**pop3**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-pop3-client/chapter1), [**ppp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-ppp/chapter1), [**rtp**](https://learn.microsoft.com/en-us/azure/rtos/netx-duo/netx-duo-rtp/chapter1), [**rtsp**](https://learn.microsoft.com/en-us/azure/rtos/netx-duo/netx-duo-rtsp/chapter1), [**sntp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-sntp-client/chapter1), and [**web**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-web-http/chapter1). For a full list of NetX Duo addons, you can find in the same [Azure RTOS NetX Duo documentation](https://learn.microsoft.com/azure/rtos/netx-duo/).
+Protocols and connectivity support are provided as addon modules within NetX Duo in `addons` folder. Some key modules are: [**azure_iot**](https://github.com/eclipse-threadx/netxduo/tree/master/addons/azure_iot), [**dhcp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-dhcp-client/chapter1), [**dns**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-dns/chapter1), [**ftp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-dns/chapter1), [**http**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-http/chapter1), [**mqtt**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-mqtt/chapter1), [**pop3**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-pop3-client/chapter1), [**ppp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-ppp/chapter1), [**rtp**](https://learn.microsoft.com/en-us/azure/rtos/netx-duo/netx-duo-rtp/chapter1), [**rtsp**](https://learn.microsoft.com/en-us/azure/rtos/netx-duo/netx-duo-rtsp/chapter1), [**sntp**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-sntp-client/chapter1), and [**web**](https://learn.microsoft.com/azure/rtos/netx-duo/netx-duo-web-http/chapter1). For a full list of NetX Duo addons, you can find in the same [Azure RTOS NetX Duo documentation](https://learn.microsoft.com/azure/rtos/netx-duo/).
 
 ### Samples
 
@@ -95,7 +95,7 @@ We provide sample codes about how to use various addons in the [`samples`](./sam
 
 ### Azure IoT Middleware for Azure RTOS
 
-[Azure IoT Middleware for Azure RTOS](https://github.com/azure-rtos/netxduo/tree/master/addons/azure_iot) (a.k.a IoT Middleware) is a platform specific library that acts as a binding layer between the Azure RTOS and the [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c). It simplifies building device application that connects to Azure IoT services.
+[Azure IoT Middleware for Azure RTOS](https://github.com/eclipse-threadx/netxduo/tree/master/addons/azure_iot) (a.k.a IoT Middleware) is a platform specific library that acts as a binding layer between the Azure RTOS and the [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c). It simplifies building device application that connects to Azure IoT services.
 
 The IoT Middleware also includes built-in support for:
 
@@ -119,15 +119,15 @@ Instruction for building the NetX Duo as static library using Arm GNU Toolchain 
     * [Arm GNU Toolchain for arm-none-eabi](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads)
     * [Ninja](https://ninja-build.org/)
 
-1. Build the [ThreadX library](https://github.com/azure-rtos/threadx#building-and-using-the-library) as the dependency.
+1. Build the [ThreadX library](https://github.com/eclipse-threadx/threadx#building-and-using-the-library) as the dependency.
 
 1. Cloning the repo. NetX Duo has a couple of dependencies that are included as submodules.
 
     ```bash
-    $ git clone --recursive https://github.com/azure-rtos/netxduo.git
+    $ git clone --recursive https://github.com/eclipse-threadx/netxduo.git
     ```
 
-1. Define the features and addons you need in `nx_user.h` and build together with the component source code. You can refer to [`nx_user_sample.h`](https://github.com/azure-rtos/netxduo/blob/master/common/inc/nx_user_sample.h) as an example.
+1. Define the features and addons you need in `nx_user.h` and build together with the component source code. You can refer to [`nx_user_sample.h`](https://github.com/eclipse-threadx/netxduo/blob/master/common/inc/nx_user_sample.h) as an example.
 
 1. Building as a static library
 
@@ -157,13 +157,13 @@ The following are references to additional Azure RTOS resources:
 
 - **Product introduction and white papers**: https://azure.com/rtos
 - **General technical questions**: https://aka.ms/QnA/azure-rtos
-- **Product issues and bugs, or feature requests**: https://github.com/azure-rtos/netxduo/issues
+- **Product issues and bugs, or feature requests**: https://github.com/eclipse-threadx/netxduo/issues
 - **Licensing and sales questions**: https://aka.ms/azrtos-license
 - **Product roadmap and support policy**: https://aka.ms/azrtos/lts
 - **Blogs and videos**: http://msiotblog.com and https://aka.ms/iotshow
 - **Azure RTOS TraceX Installer**: https://aka.ms/azrtos-tracex-installer
 
-You can also check [previous questions](https://stackoverflow.com/questions/tagged/azure-rtos+netxduo) or ask new ones on StackOverflow using the `azure-rtos` and `netxduo` tags.
+You can also check [previous questions](https://stackoverflow.com/questions/tagged/threadx-rtos+netxduo) or ask new ones on StackOverflow using the `threadx-rtos` and `netxduo` tags.
 
 ## Security
 
