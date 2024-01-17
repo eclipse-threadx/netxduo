@@ -49,7 +49,7 @@ function test() {
 cd $(dirname $0)
 
 # if threadx repo does not exist, clone it
-[ -d ../threadx ] || git clone https://github.com/azure-rtos/threadx.git ../threadx --depth 1
+[ -d ../threadx ] || git clone https://github.com/eclipse-threadx/threadx.git ../threadx --depth 1
 
 result=$(sed -n "/(BUILD_CONFIGURATIONS/,/)/p" CMakeLists.txt|sed ':label;N;s/\n/ /;b label'|grep -Pzo "[a-zA-Z0-9_]*build[a-zA-Z0-9_]*\s*"| tr -d '\0')
 IFS=' '
