@@ -14,8 +14,6 @@ We also provide [getting started guide](https://github.com/eclipse-threadx/getti
 
 See [Overview of Azure RTOS NetX Duo](https://learn.microsoft.com/azure/rtos/netx-duo/overview-netx-duo) for the high-level overview, and all documentation and APIs can be found in: [Azure RTOS NetX Duo documentation](https://learn.microsoft.com/azure/rtos/netx-duo/).
 
-Also there is dedicated [learning path of ThreadX RTOS NetX Duo](https://learn.microsoft.com/training/paths/azure-rtos-netx-duo/) for learning systematically.
-
 ## Repository Structure and Usage
 
 ### Directory layout
