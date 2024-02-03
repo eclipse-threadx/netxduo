@@ -2074,8 +2074,8 @@ UCHAR *data_ptr;
         case NX_WEBSOCKET_OPCODE_BINARY_FRAME:
         {
 
-            /* Assign the return opcode by the pre-stored opcode */
-            *code = client_ptr -> nx_websocket_client_frame_opcode;
+            /* Assign the return opcode */
+            *code = opcode | fin_bit;
 
             /* Update the offset by payload length */
             offset = payload_length;
