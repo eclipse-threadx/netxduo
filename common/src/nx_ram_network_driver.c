@@ -274,7 +274,7 @@ ULONG        *ethernet_frame_ptr;
 
 #ifdef NX_DEBUG
         printf("NetX RAM Driver Initialization - %s\n", ip_ptr -> nx_ip_name);
-        printf("  IP Address =%08X\n", ip_ptr -> nx_ip_address);
+        printf("  IP Address =%08lX\n", ip_ptr -> nx_ip_address);
 #endif
 
         /* Once the Ethernet controller is initialized, the driver needs to
