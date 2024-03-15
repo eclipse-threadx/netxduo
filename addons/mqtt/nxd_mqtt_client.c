@@ -5443,6 +5443,8 @@ ULONG               message_length;
             if ((topic_buffer_size < topic_length) ||
                 (message_buffer_size < message_length))
             {
+                *actual_topic_length = topic_length;
+                *actual_message_length = message_length;
                 tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
                 return(NXD_MQTT_INSUFFICIENT_BUFFER_SPACE);
             }
