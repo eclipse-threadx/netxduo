@@ -103,7 +103,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hkdf_init(struct  NX_CRYPTO_METHOD_STRUCT
 
     /* Initialize IKM with key data. */
     hkdf->nx_crypto_hkdf_ikm = key;
-    hkdf->nx_crypto_hkdf_ikm_length = (key_size_in_bits << 3);
+    hkdf->nx_crypto_hkdf_ikm_length = (key_size_in_bits >> 3);
 
     /* Initialize HMAC and HASH methods. */
     hkdf->nx_crypto_hmac_method = NX_CRYPTO_NULL;
