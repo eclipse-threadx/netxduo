@@ -83,7 +83,7 @@ UINT  status;
 
     /* First, convert the X.509 ASN.1 time format into 32-bit UINX-epoch format of the "not before" field. */
     status = _nx_secure_x509_asn1_time_to_unix_convert(certificate -> nx_secure_x509_not_before, certificate -> nx_secure_x509_not_before_length,
-                                                       certificate -> nx_secure_x509_validity_format, &not_before);
+                                                       certificate -> nx_secure_x509_not_before_validity_format, &not_before);
     if (status != NX_SECURE_X509_SUCCESS)
     {
         return(status);
@@ -91,7 +91,7 @@ UINT  status;
 
     /* Convert the "not after" time field. */
     status = _nx_secure_x509_asn1_time_to_unix_convert(certificate -> nx_secure_x509_not_after, certificate -> nx_secure_x509_not_after_length,
-                                                       certificate -> nx_secure_x509_validity_format, &not_after);
+                                                       certificate -> nx_secure_x509_not_after_validity_format, &not_after);
     if (status != NX_SECURE_X509_SUCCESS)
     {
         return(status);
