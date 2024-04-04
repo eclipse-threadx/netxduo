@@ -708,7 +708,8 @@ typedef struct NX_SECURE_X509_CERT_STRUCT
 
     /* Validity time format - either ASN.1 generalized time or ASN.1 UTC time.
        Uses the ASN.1 tag value. */
-    USHORT nx_secure_x509_validity_format;
+    USHORT nx_secure_x509_not_before_validity_format;
+    USHORT nx_secure_x509_not_after_validity_format;
 
     /* Validity period. Stored as ASN.1 generalized time or UTC time. */
     const UCHAR *nx_secure_x509_not_before;
