@@ -34,7 +34,7 @@ static ULONG _nx_secure_count_leap_years(ULONG start_year, ULONG end_year);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_expiration_check                    PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.1.7        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,6 +73,10 @@ static ULONG _nx_secure_count_leap_years(ULONG start_year, ULONG end_year);
 /*  04-02-2021     Timothy Stapko           Modified comment(s),          */
 /*                                            removed dependency on TLS,  */
 /*                                            resulting in version 6.1.6  */
+/*  04-04-2024     Simon Scurrell           Modified comment(s),          */
+/*                                            changed name of validity    */
+/*                                            format fields,              */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_expiration_check(NX_SECURE_X509_CERT *certificate, ULONG current_time)
