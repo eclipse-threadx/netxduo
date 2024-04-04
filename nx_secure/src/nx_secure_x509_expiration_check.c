@@ -139,7 +139,7 @@ static const ULONG unix_epoch = 1970;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_asn1_time_to_unix_convert           PORTABLE C      */
-/*                                                           6.1.11       */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -162,7 +162,7 @@ static const ULONG unix_epoch = 1970;
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    None                                                                */
+/*    _nx_secure_count_leap_years                                         */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -180,6 +180,10 @@ static const ULONG unix_epoch = 1970;
 /*                                            extend the time range,      */
 /*                                            removed unused code,        */
 /*                                            resulting in version 6.1.11 */
+/*  04-04-2024     Simon Scurrell           Modified comment(s), and      */
+/*                                            Added support for parsing   */
+/*                                            of ASN.1 GeneralisedTime    */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, USHORT asn1_length,
