@@ -373,12 +373,20 @@ USHORT backup;
     EXPECT_EQ(NX_SECURE_X509_INVALID_DATE_FORMAT, status);
 
 
-    /* Invalid time format. */
-    backup = localtime_certificate.nx_secure_x509_validity_format;
-    localtime_certificate.nx_secure_x509_validity_format = 0xff;
+    /* Invalid 'not before' time format. */
+    backup = localtime_certificate.nx_secure_x509_not_before_validity_format;
+    localtime_certificate.nx_secure_x509_not_before_validity_format = 0xff;
     status = _nx_secure_x509_expiration_check(&localtime_certificate, 944878140);
-    localtime_certificate.nx_secure_x509_validity_format = backup;
+    localtime_certificate.nx_secure_x509_not_before_validity_format = backup;
     EXPECT_EQ(NX_SECURE_X509_INVALID_DATE_FORMAT, status);
+
+    /* Invalid 'not after' time format. */
+    backup = localtime_certificate.nx_secure_x509_not_after_validity_format;
+    localtime_certificate.nx_secure_x509_not_after_validity_format = 0xff;
+    status = _nx_secure_x509_expiration_check(&localtime_certificate, 944878140);
+    localtime_certificate.nx_secure_x509_not_after_validity_format = backup;
+    EXPECT_EQ(NX_SECURE_X509_INVALID_DATE_FORMAT, status);
+
 
     printf("SUCCESS!\n");
     test_control_return(0);
