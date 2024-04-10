@@ -5438,15 +5438,6 @@ ULONG               message_length;
     {
         packet_ptr = client_ptr -> message_receive_queue_head;
         status = _nxd_mqtt_process_publish_packet(packet_ptr, &topic_offset, &topic_length, &message_offset, &message_length);
-        if (status == NXD_MQTT_SUCCESS)
-        {
-            if ((topic_buffer_size < topic_length) ||
-                (message_buffer_size < message_length))
-            {
-                tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
-                return(NXD_MQTT_INSUFFICIENT_BUFFER_SPACE);
-            }
-        }
 
         client_ptr -> message_receive_queue_head = packet_ptr -> nx_packet_queue_next;
         if (client_ptr -> message_receive_queue_tail == packet_ptr)
@@ -5457,18 +5448,26 @@ ULONG               message_length;
 
         if (status == NXD_MQTT_SUCCESS)
         {
+            if ((topic_buffer_size < topic_length) ||
+                (message_buffer_size < message_length))
+            {
+                nx_packet_release(packet_ptr);
+                
+                tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+                return(NXD_MQTT_INSUFFICIENT_BUFFER_SPACE);
+            }else{
+                /* Set topic and message lengths to avoid uninitialized value. */
+                *actual_topic_length = 0;
+                *actual_message_length = 0;
+                nx_packet_data_extract_offset(packet_ptr, topic_offset, topic_buffer,
+                                              topic_length, (ULONG *)actual_topic_length);
+                nx_packet_data_extract_offset(packet_ptr, message_offset, message_buffer,
+                                              message_length, (ULONG *)actual_message_length);
+                nx_packet_release(packet_ptr);
 
-            /* Set topic and message lengths to avoid uninitialized value. */
-            *actual_topic_length = 0;
-            *actual_message_length = 0;
-            nx_packet_data_extract_offset(packet_ptr, topic_offset, topic_buffer,
-                                          topic_length, (ULONG *)actual_topic_length);
-            nx_packet_data_extract_offset(packet_ptr, message_offset, message_buffer,
-                                          message_length, (ULONG *)actual_message_length);
-            nx_packet_release(packet_ptr);
-
-            tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
-            return(NXD_MQTT_SUCCESS);
+                tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+                return(NXD_MQTT_SUCCESS);
+            }
         }
         nx_packet_release(packet_ptr);
     }
