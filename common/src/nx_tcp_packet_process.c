@@ -108,6 +108,9 @@ NX_TCP_SOCKET               *socket_ptr;
 NX_TCP_HEADER               *tcp_header_ptr;
 struct NX_TCP_LISTEN_STRUCT *listen_ptr;
 VOID                         (*listen_callback)(NX_TCP_SOCKET *socket_ptr, UINT port);
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+VOID                         (*queue_callback)(struct NX_TCP_LISTEN_STRUCT *listen_ptr);
+#endif
 ULONG                        option_words;
 ULONG                        mss = 0;
 ULONG                        checksum;
@@ -1011,6 +1014,17 @@ ULONG                        rwin_scale = 0xFF;
                         /* Release the packet.  */
                         _nx_packet_release(packet_ptr);
                     }
+
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+                    /* If extended notify is enabled, call the listen_queue_notify function.
+                       This user-supplied function notifies the host application of
+                       a new connect request in the listen queue. */
+                    queue_callback = listen_ptr -> nx_tcp_listen_queue_notify;
+                    if (queue_callback)
+                    {
+                        (queue_callback)(listen_ptr);
+                    }
+#endif
                 }
 
                 /* Finished processing, just return.  */
