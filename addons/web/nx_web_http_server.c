@@ -4447,8 +4447,7 @@ UINT        temp_realm_length = 0;
             nx_packet_release(packet_ptr);
         }
 
-        /* Error, return to caller.  */
-        return;
+        goto put_process_end;
     }
 
     /* Open the specified file for writing.  */
@@ -4470,8 +4469,7 @@ UINT        temp_realm_length = 0;
             nx_packet_release(packet_ptr);
         }
 
-        /* Error, return to caller.  */
-        return;
+        goto put_process_end;
     }
 
     /* Determine if there is any content in the first packet.  */
@@ -4498,8 +4496,7 @@ UINT        temp_realm_length = 0;
                 nx_packet_release(packet_ptr);
             }
 
-            /* Error, return to caller.  */
-            return;
+            goto put_process_end;
         }
 
         /* Update the length.  */
@@ -4536,8 +4533,7 @@ UINT        temp_realm_length = 0;
                 nx_packet_release(packet_ptr);
             }
 
-            /* Error, return to caller.  */
-            return;
+            goto put_process_end;
         }
 
         /* Update the length.  */
@@ -4580,8 +4576,8 @@ UINT        temp_realm_length = 0;
                                               "NetX HTTP Receive Timeout",
                                               sizeof("NetX HTTP Receive Timeout") - 1, NX_NULL, 0);
 
-            /* Error, return to caller.  */
-            return;
+
+            goto put_process_end;
         }
 
         if (server_ptr -> nx_web_http_server_request_chunked)
@@ -4611,8 +4607,7 @@ UINT        temp_realm_length = 0;
                 /* Release the previous data packet.  */
                 nx_packet_release(data_packet_ptr);
 
-                /* Error, return to caller.  */
-                return;
+                goto put_process_end;
             }
 
             /* Update the length.  */
@@ -4635,29 +4630,33 @@ UINT        temp_realm_length = 0;
         nx_packet_release(data_packet_ptr);
     }
 
-    /* Success, at this point close the file and prepare a successful response for the client.  */
-    fx_file_close(&(server_ptr -> nx_web_http_server_file));
+    put_process_end:
+        /* Always attempt cleanup by closing the file.  */
+        fx_file_close(&(server_ptr -> nx_web_http_server_file));
 
-
-    /* Now build a response header.  */
-    status = _nx_web_http_server_generate_response_header(server_ptr, &data_packet_ptr, NX_WEB_HTTP_STATUS_OK,
-                                                          sizeof(NX_WEB_HTTP_STATUS_OK) - 1, 0,
-                                                          NX_NULL, 0, NX_NULL, 0);
-    if (status == NX_SUCCESS)
-    {
-
-        /* Send the response back to the client.  */
-        status = _nx_web_http_server_send(server_ptr, data_packet_ptr, NX_WEB_HTTP_SERVER_TIMEOUT_SEND);
-
-        /* Check for an error.  */
-        if (status != NX_SUCCESS)
+        /* Now build a response header if everything has gone well. If not, file has
+        already been closed, there is nothing else to do but return.  */
+        if (status == NX_SUCCESS)
+        {
+            status = _nx_web_http_server_generate_response_header(server_ptr, &data_packet_ptr, NX_WEB_HTTP_STATUS_OK,
+                                                                sizeof(NX_WEB_HTTP_STATUS_OK) - 1, 0,
+                                                                NX_NULL, 0, NX_NULL, 0);
+        }
+        if (status == NX_SUCCESS)
         {
 
-            /* Just release the packet.  */
-            nx_packet_release(data_packet_ptr);
-        }
-    }
+            /* Send the response back to the client.  */
+            status = _nx_web_http_server_send(server_ptr, data_packet_ptr, NX_WEB_HTTP_SERVER_TIMEOUT_SEND);
 
+            /* Check for an error.  */
+            if (status != NX_SUCCESS)
+            {
+
+                /* Just release the packet.  */
+                nx_packet_release(data_packet_ptr);
+            }
+        }
+    return;
 }
 
 
