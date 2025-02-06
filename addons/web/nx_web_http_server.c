@@ -4696,33 +4696,29 @@ UINT        temp_realm_length = 0;
         nx_packet_release(data_packet_ptr);
     }
 
+    /* Build a response header. No need to check for success up to this point, as
+    program will have jumped to put_process_end label if an error has occurred.  */
+    status = _nx_web_http_server_generate_response_header(server_ptr, &data_packet_ptr, NX_WEB_HTTP_STATUS_OK,
+                                                          sizeof(NX_WEB_HTTP_STATUS_OK) - 1, 0,
+                                                          NX_NULL, 0, NX_NULL, 0);
+    if (status == NX_SUCCESS)
+    {
+
+        /* Send the response back to the client.  */
+        status = _nx_web_http_server_send(server_ptr, data_packet_ptr, NX_WEB_HTTP_SERVER_TIMEOUT_SEND);
+
+        /* Check for an error.  */
+        if (status != NX_SUCCESS)
+        {
+
+            /* Just release the packet.  */
+            nx_packet_release(data_packet_ptr);
+        }
+    }
     put_process_end:
         /* Always attempt cleanup by closing the file.  */
         // TODO: Write tests against this
         fx_file_close(&(server_ptr -> nx_web_http_server_file));
-
-        /* Now build a response header if everything has gone well. If not, file has
-        already been closed, there is nothing else to do but return.  */
-        if (status == NX_SUCCESS)
-        {
-            status = _nx_web_http_server_generate_response_header(server_ptr, &data_packet_ptr, NX_WEB_HTTP_STATUS_OK,
-                                                                sizeof(NX_WEB_HTTP_STATUS_OK) - 1, 0,
-                                                                NX_NULL, 0, NX_NULL, 0);
-        }
-        if (status == NX_SUCCESS)
-        {
-
-            /* Send the response back to the client.  */
-            status = _nx_web_http_server_send(server_ptr, data_packet_ptr, NX_WEB_HTTP_SERVER_TIMEOUT_SEND);
-
-            /* Check for an error.  */
-            if (status != NX_SUCCESS)
-            {
-
-                /* Just release the packet.  */
-                nx_packet_release(data_packet_ptr);
-            }
-        }
     return;
 }
 
