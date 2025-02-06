@@ -4215,6 +4215,7 @@ VOID  _nx_web_http_server_put_process(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET 
 
 UINT        status;
 ULONG       length = 0;
+ULONG       consumed_length = 0;
 UINT        offset;
 CHAR        *name_ptr;
 CHAR        *password_ptr;
@@ -4500,7 +4501,29 @@ UINT        temp_realm_length = 0;
         }
 
         /* Update the length.  */
-        length =  length - ((ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) - offset);
+        consumed_length = ((ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) - offset);
+        if ((length - consumed_length) > length)
+        {
+            /* Underflow error has occurred.*/
+            /* TODO: Should an HTTP Internal Error response be sent? Here? Would have to
+            duplicate it at the other length calculations. Or, do so in put_process_end label?
+            */
+            // TODO write tests against this
+
+            /* Send response back to HTTP Client.  */
+            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR,
+                                                sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1,
+                                                "NetX HTTP Length Underflow",
+                                                sizeof("NetX HTTP Length Underflow") - 1, NX_NULL, 0);
+
+            /* Release the previous data packet.  */
+            nx_packet_release(data_packet_ptr);
+
+            status = NX_UNDERFLOW;
+            goto put_process_end;
+        }
+        //length =  length - ((ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) - offset);
+        length -= consumed_length;
 
         /* Increment the bytes received count.  */
         server_ptr -> nx_web_http_server_total_bytes_received =  server_ptr -> nx_web_http_server_total_bytes_received +
@@ -4537,7 +4560,28 @@ UINT        temp_realm_length = 0;
         }
 
         /* Update the length.  */
-        length =  length - (ULONG)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr);
+        consumed_length = (ULONG)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr);
+        if ((length - consumed_length) > length)
+        {
+            /* Underflow error has occurred.*/
+            /* TODO: Should an HTTP Internal Error response be sent? Here? Would have to
+            duplicate it at the other length calculations. Do in put_process_end label?
+            */
+
+            /* Send response back to HTTP Client.  */
+            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR,
+                                                sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1,
+                                                "NetX HTTP Length Underflow",
+                                                sizeof("NetX HTTP Length Underflow") - 1, NX_NULL, 0);
+
+            /* Release the previous data packet.  */
+            nx_packet_release(data_packet_ptr);
+
+            status = NX_UNDERFLOW;
+            goto put_process_end;
+        }
+        //length =  length - (ULONG)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr);
+        length -= consumed_length;
 
         /* Increment the bytes received count.  */
         server_ptr -> nx_web_http_server_total_bytes_received =  server_ptr -> nx_web_http_server_total_bytes_received +
@@ -4611,7 +4655,29 @@ UINT        temp_realm_length = 0;
             }
 
             /* Update the length.  */
-            length =  length - (UINT)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr);
+            consumed_length = (ULONG)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr);
+            if ((length - consumed_length) > length)
+            {
+                /* Underflow error has occurred.*/
+                /* TODO: Should an HTTP Internal Error response be sent? Here? Would have to
+                duplicate it at the other length calculations. Do in put_process_end label?
+                */
+
+                /* Send response back to HTTP Client.  */
+                _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR,
+                                                  sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1,
+                                                  "NetX HTTP Length Underflow",
+                                                  sizeof("NetX HTTP Length Underflow") - 1, NX_NULL, 0);
+
+                /* Release the previous data packet.  */
+                nx_packet_release(data_packet_ptr);
+
+                status = NX_UNDERFLOW;
+                goto put_process_end;
+            }
+            // TODO: is UINT correct? Should be ULONG?
+            //length =  length - (UINT)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr);
+            length -= consumed_length;
 
             /* Increment the bytes received count.  */
             server_ptr -> nx_web_http_server_total_bytes_received =  server_ptr -> nx_web_http_server_total_bytes_received +
@@ -4632,6 +4698,7 @@ UINT        temp_realm_length = 0;
 
     put_process_end:
         /* Always attempt cleanup by closing the file.  */
+        // TODO: Write tests against this
         fx_file_close(&(server_ptr -> nx_web_http_server_file));
 
         /* Now build a response header if everything has gone well. If not, file has
