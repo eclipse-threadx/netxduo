@@ -5813,8 +5813,6 @@ UINT         header_size;
     /* Call actual PUT data routine.  */
     status =  _nx_web_http_client_put_packet(client_ptr, packet_ptr, wait_option);
 
-    printf("nxe_web_http_client_put_packet status to return: 0x%x\r\n", status);
-
     /* Return completion status.  */
     return(status);
 }
@@ -5954,8 +5952,6 @@ UINT        status;
         /* Return to the READY state.  */
         client_ptr -> nx_web_http_client_state =  NX_WEB_HTTP_CLIENT_STATE_READY;
 
-        printf("_nx_web_http_client_put_packet error return 0x%x\r\n", status);
-
         /* Return an error.  */
         return(status);
     }
@@ -5963,7 +5959,6 @@ UINT        status;
     /* Otherwise, update the actual bytes transferred.  */
     client_ptr ->  nx_web_http_client_actual_bytes_transferred =  client_ptr ->  nx_web_http_client_actual_bytes_transferred + length;
 
-    printf("_nx_web_http_client_put_packet success\r\n");
     /* Return status to caller.  */
     return(NX_SUCCESS);
 }

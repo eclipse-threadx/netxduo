@@ -273,18 +273,13 @@ NX_PACKET       *recv_packet;
             error_counter++;
 
         /* Send the an empty packet.  */
-        printf("status before send: 0x%x\r\n", status);
-        tx_thread_sleep(10);
         status = nx_web_http_client_put_packet(&my_client, send_packet, 1 * NX_IP_PERIODIC_RATE);
-        printf("status after send: 0x%x\r\n", status);
-        tx_thread_sleep(100);
         if (status)
         {
             nx_packet_release(send_packet);
         }
         else
         {
-            printf("invalid release test put packet error loop %d status %d\r\n", i, status);
             error_counter++;
         }
 
