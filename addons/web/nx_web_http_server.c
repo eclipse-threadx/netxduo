@@ -4620,8 +4620,30 @@ UINT        temp_realm_length = 0;
                                               "NetX HTTP Receive Timeout",
                                               sizeof("NetX HTTP Receive Timeout") - 1, NX_NULL, 0);
 
-
+            printf("7\r\n");
+            printf("code 0x%x\r\n", status);
             goto put_process_end;
+            // fx_file_close(&(server_ptr -> nx_web_http_server_file));
+            // If file is not closed and we just return, tests pass.
+            /* Furthermore, netx_web_invalid_release_test is doing both loops.
+            If assigned 1 right before the loop, tests pass. Where is it getting
+            a value of 2 from?
+            Because CMake in /test/cmake/web/CMakeLists.txt is passing in the 
+            definition of NX_WEB_HTTPS_ENABLE which means it is testing HTTPS as well
+            so what is the failure code on the second run, the run of HTTPS? Why is it
+            failing if the file is closed?
+            In tcp send, invalid packet is returned (0x12) if packet is empty. Adding
+            a printf inside _nx_tcp_socket_send_internal "empty packet not allowed" is
+            printing for the HTTP loop but not for the HTTPS loop, which succeeds.
+            netx_web_invalid_release_test
+            thread_client_entry() is receiving NX_SUCCESS (0) from nx_web_http_client_put_packet.
+            Because when using TCP, the TLS data is included in the packet, so it
+            is no longer empty, so invalid release is expecting a failure but gets a
+            real success? (When using HTTP the packet is empty.)
+            But then why does it work when the file is not closed between the HTTP request
+            and the HTTPS request?
+            */
+            // return;
         }
 
         if (server_ptr -> nx_web_http_server_request_chunked)

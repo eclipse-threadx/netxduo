@@ -90,6 +90,11 @@ UINT status;
         return(NX_PTR_ERROR);
     }
 
+    if (packet_ptr -> nx_packet_length == 0)
+    {
+        // return(NX_INVALID_PACKET);
+    }
+
     if (tls_session -> nx_secure_tls_tcp_socket == NX_NULL)
     {
         return(NX_SECURE_TLS_SESSION_UNINITIALIZED);

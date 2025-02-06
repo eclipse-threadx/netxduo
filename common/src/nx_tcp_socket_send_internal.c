@@ -311,6 +311,7 @@ UINT            compute_checksum = 1;
     {
 
         /* Empty packet is not allowed. */
+        printf("empty packet not allowed\r\n");
         return(NX_INVALID_PACKET);
     }
 
