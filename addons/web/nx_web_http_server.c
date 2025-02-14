@@ -3968,8 +3968,8 @@ UINT        temp_realm_length = 0;
                 }
 
                 /* Send response back to HTTP Client.  */
-                _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR,
-                                                  sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1,
+                _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_BAD_REQUEST,
+                                                  sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
                                                   "NetX HTTP Receive Timeout",
                                                   sizeof("NetX HTTP Receive Timeout") - 1, NX_NULL, 0);
 
@@ -4507,10 +4507,10 @@ UINT        temp_realm_length = 0;
             /* Underflow error has occurred.*/
 
             /* Send response back to HTTP Client.  */
-            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR,
-                                                sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1,
-                                                "NetX HTTP Length Underflow",
-                                                sizeof("NetX HTTP Length Underflow") - 1, NX_NULL, 0);
+            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_BAD_REQUEST,
+                                                sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
+                                                "NetX HTTP Content Length",
+                                                sizeof("NetX HTTP Content Length") - 1, NX_NULL, 0);
 
             /* Release the previous data packet.  */
             nx_packet_release(data_packet_ptr);
@@ -4561,10 +4561,10 @@ UINT        temp_realm_length = 0;
             /* Underflow error has occurred.*/
 
             /* Send response back to HTTP Client.  */
-            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR,
-                                                sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1,
-                                                "NetX HTTP Length Underflow",
-                                                sizeof("NetX HTTP Length Underflow") - 1, NX_NULL, 0);
+            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_BAD_REQUEST,
+                                                sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
+                                                "NetX HTTP Content Length",
+                                                sizeof("NetX HTTP Content Length") - 1, NX_NULL, 0);
 
             /* Release the previous data packet.  */
             nx_packet_release(data_packet_ptr);
@@ -4606,8 +4606,8 @@ UINT        temp_realm_length = 0;
             }
 
             /* Send response back to HTTP Client.  */
-            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR,
-                                              sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1,
+            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_BAD_REQUEST,
+                                              sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
                                               "NetX HTTP Receive Timeout",
                                               sizeof("NetX HTTP Receive Timeout") - 1, NX_NULL, 0);
 
@@ -4651,10 +4651,10 @@ UINT        temp_realm_length = 0;
                 /* Underflow error has occurred.*/
 
                 /* Send response back to HTTP Client.  */
-                _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR,
-                                                  sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1,
-                                                  "NetX HTTP Length Underflow",
-                                                  sizeof("NetX HTTP Length Underflow") - 1, NX_NULL, 0);
+                _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_BAD_REQUEST,
+                                                  sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
+                                                  "NetX HTTP Content Length",
+                                                  sizeof("NetX HTTP Content Length") - 1, NX_NULL, 0);
 
                 /* Release the previous data packet.  */
                 nx_packet_release(data_packet_ptr);
