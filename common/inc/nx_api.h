@@ -1,5 +1,6 @@
 /***************************************************************************
  * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
  * 
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
@@ -109,6 +110,9 @@
 /*  03-01-2024      Tiejun Zhou             Modified comment(s),          */
 /*                                            update version number,      */
 /*                                            resulting in version 6.4.1  */
+/*  02-19-2025      Frédéric Desbiens       Modified comment(s),          */
+/*                                            update version number,      */
+/*                                            resulting in version 6.4.2  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -525,7 +529,7 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 #define AZURE_RTOS_NETXDUO
 #define NETXDUO_MAJOR_VERSION                    6
 #define NETXDUO_MINOR_VERSION                    4
-#define NETXDUO_PATCH_VERSION                    1
+#define NETXDUO_PATCH_VERSION                    2
 
 /* Define the following symbols for backward compatibility */
 #define EL_PRODUCT_NETXDUO
