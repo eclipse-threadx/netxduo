@@ -90,6 +90,16 @@ UINT status;
         return(NX_PTR_ERROR);
     }
 
+    if (packet_ptr -> nx_packet_length == 0)
+    {
+        /* Must check for empty packets here, as TLS data will make a packet's contents
+        non-empty. _nx_tcp_socket_send_internal has a check for an empty packet
+        that correctly works in an HTTP session but will result in a false negative if
+        the session is HTTPS. Thus, this check is performed before the TLS session
+        operations that modify the packet.  */
+        return(NX_INVALID_PACKET);
+    }
+
     if (tls_session -> nx_secure_tls_tcp_socket == NX_NULL)
     {
         return(NX_SECURE_TLS_SESSION_UNINITIALIZED);

@@ -1,5 +1,6 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
  * 
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
@@ -109,6 +110,12 @@
 /*  03-01-2024      Tiejun Zhou             Modified comment(s),          */
 /*                                            update version number,      */
 /*                                            resulting in version 6.4.1  */
+/*  03-01-2024      Tiejun Zhou             Modified comment(s),          */
+/*                                            update version number,      */
+/*                                            resulting in version 6.4.1  */
+/*  02-19-2025      Frédéric Desbiens       Modified comment(s),          */
+/*                                            update version number,      */
+/*                                            resulting in version 6.4.2  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -172,7 +179,7 @@ extern   "C" {
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
 #define NETX_SECURE_MINOR_VERSION                       4
-#define NETX_SECURE_PATCH_VERSION                       1
+#define NETX_SECURE_PATCH_VERSION                       2
 
 /* The following symbols are defined for backward compatibility reasons. */
 #define EL_PRODUCT_NETX_SECURE
