@@ -142,6 +142,19 @@ UINT            op_timestamp_counter = 0;
                 return(NX_FALSE);
             }
 
+            /* GHSA-vwh7-h99r-fvwq:
+               Validate that there are at least 3 bytes in the packet, which allows the option_process logic to read type/length/offset. */
+            if((ip_option_length - index) < 3)
+            {
+#ifndef NX_DISABLE_ICMPV4_ERROR_MESSAGE
+                /* Option length error, send a Parameter Problem Message .  */
+                /*lint -e{835} -e{845} suppress operating on zero. */
+                NX_ICMPV4_SEND_PARAMETER_PROBLEM(ip_ptr, packet_ptr, NX_ICMP_ZERO_CODE, (ip_normal_length + index));
+#endif
+                /* Return NX_FALSE.  */
+                return(NX_FALSE);
+            }
+
             /* Get the option length.  */
             op_length = *(option_ptr + 1);
 

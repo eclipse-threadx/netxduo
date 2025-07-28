@@ -100,6 +100,19 @@ UCHAR version_byte;
         packet_ptr -> nx_packet_address.nx_packet_interface_ptr = &(ip_ptr -> nx_ip_interface[0]);
     }
 
+    /* GHSA-pf5q-r6q5-6j2f:  
+       This is an IPv4 packet. Therefore the header length must be at least 20 bytes.
+       Validate the payload size before accessing the IP header. */
+    if(packet_ptr -> nx_packet_length < sizeof(NX_IPV4_HEADER))
+    {
+        /* Invalid payload length */
+
+        /* Drop the packet. */
+        _nx_packet_release(packet_ptr);
+
+        return;        
+    }
+
     /* It's assumed that the IP link driver has positioned the top pointer in the
        packet to the start of the IP address... so that's where we will start.  */
     version_byte =  *(packet_ptr -> nx_packet_prepend_ptr);

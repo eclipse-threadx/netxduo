@@ -80,7 +80,10 @@ UINT _nx_icmpv6_validate_options(NX_ICMPV6_OPTION *option, INT length, INT addit
 UINT option_len;
 
     /* Parse all option headers from the ICMPv6 header. */
-    while (length > 0)
+    /* GHSA-rf32-h832-hg8r:
+       Verify that the length is at least 2 to cover nx_icmpv6_option_length and 
+       nx_icmpv6_option_type. */
+    while (length > 2)
     {
         /* Verify that the option length is not zero. */
         if (option -> nx_icmpv6_option_length == 0)

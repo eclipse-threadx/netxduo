@@ -115,6 +115,19 @@ UINT            packet_consumed;
     compute_checksum = 0;
 #endif /* NX_DISABLE_IP_RX_CHECKSUM */
 
+    /* GHSA-cf2g-j6vv-m8c5 
+       Validate that the payload length is at least the size of the IPv4 header. */
+    if(packet_ptr -> nx_packet_length < sizeof(NX_IPV4_HEADER))
+    {
+        /* Invalid payload length */
+
+        /* Drop the packet. */
+        _nx_packet_release(packet_ptr);
+
+        return;        
+    }
+    
+
     /* It's assumed that the IP link driver has positioned the top pointer in the
        packet to the start of the IP address... so that's where we will start.  */
     /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
@@ -684,6 +697,17 @@ UINT            packet_consumed;
 
             /* Adjust the length.  */
             packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length - (ULONG)sizeof(NX_IPV4_HEADER);
+
+            /* GHSA-c9pq-93jp-w649:
+               Validate that the packet contains at least the UDP header. */
+            if(packet_ptr -> nx_packet_length < sizeof(NX_UDP_HEADER))
+            {
+                /* Invalid UDP packet. Release it and return. */
+                _nx_packet_release(packet_ptr);
+                
+                /* Return to caller.  */
+                return;
+            }
 
 #ifndef NX_DISABLE_IP_INFO
 
