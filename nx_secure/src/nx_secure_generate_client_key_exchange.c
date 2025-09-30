@@ -133,42 +133,9 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
     if (ciphersuite -> nx_secure_tls_public_cipher -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_ECDH ||
         ciphersuite -> nx_secure_tls_public_cipher -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_ECDHE)
     {
-    	data_size = 0;
+        data_size = (UINT)(1 + tls_key_material -> nx_secure_tls_new_key_material_data[0]);
 
-    	if (ciphersuite -> nx_secure_tls_public_auth -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_PSK)
-    	{
-    		if ((tls_credentials -> nx_secure_tls_client_psk.nx_secure_tls_psk_id_hint_size >
-    		sizeof(tls_credentials -> nx_secure_tls_client_psk.nx_secure_tls_psk_id_hint)) ||
-    				(tls_credentials -> nx_secure_tls_client_psk.nx_secure_tls_psk_id_hint_size >
-    		(buffer_length - 2)))
-    		{
-
-    			/* Packet buffer too small. */
-    			return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
-    		}
-
-    		/* Pointer to the output encrypted pre-master secret. */
-    		encrypted_data_ptr = &data_buffer[2];
-
-    		/* Send the PSK Identity string to the remote server along with its length. */
-    		NX_SECURE_MEMCPY(encrypted_data_ptr, tls_credentials -> nx_secure_tls_client_psk.nx_secure_tls_psk_id,
-    				tls_credentials -> nx_secure_tls_client_psk.nx_secure_tls_psk_id_size); /* Use case of memcpy is verified. */
-
-    		/* Make sure our size is correct. */
-    		data_size = tls_credentials -> nx_secure_tls_client_psk.nx_secure_tls_psk_id_size;
-
-    		/* Put the length into our outgoing packet buffer. */
-    		data_buffer[0] = (UCHAR)((data_size & 0xFF00) >> 8);
-    		data_buffer[1] = (UCHAR)(data_size & 0x00FF);
-
-    		data_size += 2;
-    		data_buffer += data_size;
-    	}
-
-        key_size = (UINT)(1 + tls_key_material -> nx_secure_tls_new_key_material_data[0]);
-        data_size += key_size;
-
-        if ((key_size > sizeof(tls_key_material -> nx_secure_tls_new_key_material_data)) ||
+        if ((data_size > sizeof(tls_key_material -> nx_secure_tls_new_key_material_data)) ||
             (data_size > buffer_length))
         {
 
@@ -176,7 +143,7 @@ NX_CRYPTO_EXTENDED_OUTPUT             extended_output;
             return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
         }
 
-        NX_SECURE_MEMCPY(data_buffer, tls_key_material -> nx_secure_tls_new_key_material_data, key_size); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(data_buffer, tls_key_material -> nx_secure_tls_new_key_material_data, data_size); /* Use case of memcpy is verified. */
     }
     else
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
