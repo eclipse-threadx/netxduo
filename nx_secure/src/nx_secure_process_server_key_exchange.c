@@ -139,7 +139,6 @@ UCHAR                                *current_buffer;
 UCHAR                                 hash_algorithm;
 UCHAR                                 signature_algorithm;
 USHORT                                signature_algorithm_id;
-ULONG 								  size_param;
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
 UINT                                  i;
 #endif /* NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED */
@@ -317,16 +316,11 @@ UINT                                  i;
         else
 #endif /* NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED */
         {
-        	if(auth_method ->nx_crypto_algorithm != NX_CRYPTO_KEY_EXCHANGE_PSK)
-        	{
-        		size_param = 8;
-        	}
-        	else
-        	{
-        		size_param = 6 + tls_credentials -> nx_secure_tls_remote_psk_id_size;
-        	}
-
-            if ((UINT)key_length + size_param > message_length)
+ 		#ifdef NX_SECURE_ENABLE_PSK_CIPHERSUITES
+			if ((UINT)6 + tls_credentials -> nx_secure_tls_remote_psk_id_size > message_length)
+		#else
+			if ((UINT)key_length + 8 > message_length)
+		#endif
             {
                 return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
             }
