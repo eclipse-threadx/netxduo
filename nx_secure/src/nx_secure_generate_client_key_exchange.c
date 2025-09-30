@@ -98,7 +98,6 @@ const NX_CRYPTO_METHOD               *public_cipher_method;
 VOID                                 *handler = NX_NULL;
 #endif
 UINT                                  data_size;
-UINT                                  key_size;
 UCHAR                                *encrypted_data_ptr;
 #ifndef NX_SECURE_DISABLE_X509
 UCHAR                                 rand_byte;
