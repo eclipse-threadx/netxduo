@@ -265,12 +265,14 @@ UINT  nx_websocket_client_packet_allocate(NX_WEBSOCKET_CLIENT *client_ptr, NX_PA
 UINT  nx_websocket_client_connect(NX_WEBSOCKET_CLIENT *client_ptr, NX_TCP_SOCKET *socket_ptr,
                                   UCHAR *host, UINT host_length,
                                   UCHAR *uri_path, UINT uri_path_length,
-                                  UCHAR *protocol, UINT protocol_length,UINT wait_option);
+                                  UCHAR *protocol, UINT protocol_length,
+                                  UCHAR *bearer, UINT bearer_length, UINT wait_option);
 #ifdef NX_SECURE_ENABLE
 UINT  nx_websocket_client_secure_connect(NX_WEBSOCKET_CLIENT *client_ptr, NX_SECURE_TLS_SESSION *tls_session,
                                          UCHAR *host, UINT host_length,
                                          UCHAR *uri_path, UINT uri_path_length,
-                                         UCHAR *protocol, UINT protocol_length,UINT wait_option);
+                                         UCHAR *protocol, UINT protocol_length,
+                                         UCHAR *bearer, UINT bearer_length, UINT wait_option);
 #endif /* NX_SECURE_ENABLE */
 UINT  nx_websocket_client_disconnect(NX_WEBSOCKET_CLIENT *client_ptr, UINT wait_option);
 UINT  nx_websocket_client_send(NX_WEBSOCKET_CLIENT *client_ptr, NX_PACKET *packet_ptr, UINT code, UINT is_final, UINT wait_option);
