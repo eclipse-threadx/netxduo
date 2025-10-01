@@ -15,6 +15,7 @@ extern void test_control_return(UINT);
 #define TEST_HOST_NAME       "1.2.3.4"
 #define TEST_URI_PATH        "/test"
 #define TEST_PROTOCOL        "test"
+#define TEST_BEARER          ""
 
 /* Define device drivers.  */
 extern void _nx_ram_network_driver_1024(NX_IP_DRIVER *driver_req_ptr);
