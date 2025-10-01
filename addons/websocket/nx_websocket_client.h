@@ -302,11 +302,13 @@ UINT  _nx_websocket_client_connect(NX_WEBSOCKET_CLIENT *client_ptr, NX_TCP_SOCKE
 UINT  _nxe_websocket_client_secure_connect(NX_WEBSOCKET_CLIENT *client_ptr, NX_SECURE_TLS_SESSION *tls_session,
                                            UCHAR *host, UINT host_length,
                                            UCHAR *uri_path, UINT uri_path_length,
-                                           UCHAR *protocol, UINT protocol_length,UINT wait_option);
+                                           UCHAR *protocol, UINT protocol_length,
+                                           UCHAR *bearer, UINT bearer_length, UINT wait_option);
 UINT  _nx_websocket_client_secure_connect(NX_WEBSOCKET_CLIENT *client_ptr, NX_SECURE_TLS_SESSION *tls_session,
                                           UCHAR *host, UINT host_length,
                                           UCHAR *uri_path, UINT uri_path_length,
-                                          UCHAR *protocol, UINT protocol_length,UINT wait_option);
+                                          UCHAR *protocol, UINT protocol_length,
+                                          UCHAR *bearer, UINT bearer_length, UINT wait_option);
 #endif /* NX_SECURE_ENABLE */
 UINT  _nxe_websocket_client_disconnect(NX_WEBSOCKET_CLIENT *client_ptr, UINT wait_option);
 UINT  _nx_websocket_client_disconnect(NX_WEBSOCKET_CLIENT *client_ptr, UINT wait_option);
