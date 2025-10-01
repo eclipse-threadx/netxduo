@@ -47,6 +47,7 @@ static void thread_server_entry(ULONG thread_input);
 #define TEST_SERVER_ADDRESS  IP_ADDRESS(1,2,3,4)
 #define TEST_CLIENT_ADDRESS  IP_ADDRESS(1,2,3,5)
 #define TEST_SERVER_PORT     80
+#define TEST_BEARER          ""
 
 static UCHAR server_switch_101[] =
 {
