@@ -99,7 +99,9 @@ NX_SECURE_EC_PUBLIC_KEY   *ec_pubkey;
 VOID                      *handler = NX_NULL;
 NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 UCHAR					   pre_master_secret_cpy[NX_SECURE_TLS_PREMASTER_SIZE];
+#ifdef NX_SECURE_ENABLE_PSK_CIPHERSUITES
 UINT					   pre_master_secret_size;
+#endif
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 #if !defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) || defined(NX_SECURE_DISABLE_X509)
