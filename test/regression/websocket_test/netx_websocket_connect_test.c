@@ -351,6 +351,7 @@ UINT            code;
                                                 TEST_HOST_NAME, sizeof(TEST_HOST_NAME) - 1,
                                                 (UCHAR *)TEST_URI_PATH, sizeof(TEST_URI_PATH) - 1,
                                                 (UCHAR *)TEST_PROTOCOL, sizeof(TEST_PROTOCOL) - 1,
+                                                (UCHAR *)TEST_BEARER, sizeof(TEST_BEARER) -1,
                                                 NX_WAIT_FOREVER);
     if (status || client_websocket.nx_websocket_client_mutex.tx_mutex_ownership_count != 0)
         SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
