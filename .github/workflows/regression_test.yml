@@ -1,0 +1,220 @@
+# This is a basic workflow that is manually triggered
+
+name: regression_test
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  NetXDuo:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_nxd.sh
+      test_script: ./scripts/test_nxd.sh
+      cmake_path: ./test/cmake/netxduo
+      result_affix: NetXDuo
+      skip_deploy: true
+  Web:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_web.sh
+      test_script: ./scripts/test_web.sh
+      cmake_path: ./test/cmake/web
+      result_affix: Web
+      skip_deploy: true
+  PTP:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_ptp.sh
+      test_script: ./scripts/test_ptp.sh
+      cmake_path: ./test/cmake/ptp
+      result_affix: PTP
+      skip_deploy: true
+  MQTT:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_mqtt.sh
+      test_script: ./scripts/test_mqtt.sh
+      cmake_path: ./test/cmake/mqtt
+      result_affix: MQTT
+      skip_deploy: true
+  NetXDuo64:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_nxd64.sh
+      test_script: ./scripts/test_nxd64.sh
+      cmake_path: ./test/cmake/netxduo64
+      result_affix: NetXDuo64
+      skip_deploy: true
+  NetXDuo_Fast:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_nxd_fast.sh
+      test_script: ./scripts/test_nxd_fast.sh
+      cmake_path: ./test/cmake/netxduo_fast
+      result_affix: NetXDuo_Fast
+      skip_deploy: true
+      skip_coverage: true
+  Azure_IoT:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_azure_iot.sh
+      test_script: ./scripts/test_azure_iot.sh
+      cmake_path: ./test/cmake/azure_iot
+      result_affix: Azure_IoT
+      skip_deploy: true
+  Azure_IoT_Windows:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+    runs-on: windows-2019
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Checkout submodules
+      run: |
+        if (!(Test-Path ./test/cmake/threadx)) {git clone https://github.com/eclipse-threadx/threadx.git ./test/cmake/threadx --depth 1}
+    - name: CMake
+      run: |
+        mkdir build
+        cd build
+        cmake ../test/cmake/azure_iot -A Win32
+    - name: Build
+      run: |
+        cd build
+        cmake --build .
+  Secure:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_secure.sh
+      test_script: ./scripts/test_secure.sh
+      cmake_path: ./test/cmake/nx_secure
+      result_affix: Secure
+      skip_deploy: true
+  Crypto:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      build_script: ./scripts/build_crypto.sh
+      test_script: ./scripts/test_crypto.sh
+      cmake_path: ./test/cmake/crypto
+      result_affix: Crypto
+      skip_deploy: true
+  Secure_Interoperability:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      install_script: ./scripts/install_secure.sh
+      build_script: ./scripts/build_secure_interoperability.sh
+      test_script: ./scripts/test_secure_interoperability.sh
+      cmake_path: ./test/cmake/nx_secure_interoperability
+      result_affix: Secure_Interoperability
+      skip_deploy: true
+  MQTT_Interoperability:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      install_script: ./scripts/install_mqtt.sh
+      build_script: ./scripts/build_mqtt_interoperability.sh
+      test_script: ./scripts/test_mqtt_interoperability.sh
+      cmake_path: ./test/cmake/mqtt_interoperability
+      result_affix: MQTT_Interoperability
+      skip_deploy: true
+  Deploy:
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      pages: write
+      id-token: write
+    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Azure_IoT, Secure, Crypto, Secure_Interoperability, MQTT_Interoperability]
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    with:
+      skip_test: true
+      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Azure_IoT Secure Crypto Secure_Interoperability MQTT_Interoperability"

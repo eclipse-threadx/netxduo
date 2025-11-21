@@ -1,0 +1,71 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 5 (0x5)
+    Signature Algorithm: ecdsa-with-SHA256
+        Issuer: C=CN, ST=SH, L=SH, O=EL, OU=EL, CN=ECCA4
+        Validity
+            Not Before: May 24 01:30:14 2018 GMT
+            Not After : May 24 01:30:14 2019 GMT
+        Subject: C=CN, ST=SH, O=EL, OU=EL, CN=ECTestServer6
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:bb:bc:6a:bc:7c:20:77:47:9a:34:9b:0c:06:c5:
+                    c4:40:d8:4b:21:89:63:11:a5:69:e6:43:85:e9:fd:
+                    57:4a:20:fc:45:51:2a:72:f0:03:6e:09:23:23:ae:
+                    70:3e:df:f0:83:45:47:e6:47:5f:15:6a:c4:a2:30:
+                    aa:1c:be:f8:6e:24:a9:39:03:40:5d:32:6a:a3:8f:
+                    09:31:73:9f:11:b1:94:2d:8f:ee:21:6e:5b:ee:03:
+                    a8:a6:31:09:5e:9b:45:1b:6b:19:7e:7c:ef:8a:9e:
+                    04:a1:cb:01:28:12:47:84:3e:8a:4c:eb:62:cc:cc:
+                    2a:f0:2c:1c:03:82:17:91:39:fa:a9:c9:28:4d:78:
+                    c3:48:94:6d:fb:25:4b:72:d8:21:37:64:26:31:01:
+                    fc:4c:fe:00:83:ee:8b:57:90:53:0d:0c:6f:82:30:
+                    f1:0b:ea:4e:5f:9a:47:70:02:37:a2:ef:c4:f9:4c:
+                    00:aa:80:6f:42:c8:45:2a:38:cb:90:43:d1:79:5e:
+                    34:e6:9a:dc:75:3c:68:9e:39:37:56:f1:67:ea:41:
+                    17:4c:fa:2a:dc:ef:ff:3a:a1:c7:f2:46:a6:e3:d4:
+                    24:81:5f:5a:56:13:cf:a0:f8:3b:ee:30:13:4b:17:
+                    47:9a:aa:31:4f:1a:74:e5:bf:d0:7f:d1:d0:10:a2:
+                    4d:81
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Authority Key Identifier: 
+                DirName:/C=CN/ST=SH/L=SH/O=EL/OU=EL/CN=ECCA4
+                serial:BC:64:D9:FE:6A:91:0E:C2
+
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: 
+                Digital Signature, Non Repudiation, Key Encipherment, Data Encipherment, Key Agreement
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication, TLS Web Client Authentication, Code Signing, E-mail Protection, Time Stamping
+    Signature Algorithm: ecdsa-with-SHA256
+         30:65:02:31:00:9a:02:c1:30:87:e9:86:c7:24:7f:d9:e4:5b:
+         04:e7:a3:bf:dc:0d:a8:83:03:9d:df:11:ce:29:eb:ed:e0:80:
+         67:e7:72:5c:f5:af:aa:74:68:11:65:ea:e3:cc:eb:11:bd:02:
+         30:32:c6:2d:07:22:55:b6:e2:4c:48:7f:8e:88:d6:9a:e9:e6:
+         5a:71:ed:dd:dd:9d:4b:f1:8a:51:19:a0:9d:af:61:c6:13:0e:
+         d0:c6:7d:62:a9:c8:d0:2b:37:8d:d4:95:d0
+-----BEGIN CERTIFICATE-----
+MIIDPTCCAsOgAwIBAgIBBTAKBggqhkjOPQQDAjBRMQswCQYDVQQGEwJDTjELMAkG
+A1UECAwCU0gxCzAJBgNVBAcMAlNIMQswCQYDVQQKDAJFTDELMAkGA1UECwwCRUwx
+DjAMBgNVBAMMBUVDQ0E0MB4XDTE4MDUyNDAxMzAxNFoXDTE5MDUyNDAxMzAxNFow
+TDELMAkGA1UEBhMCQ04xCzAJBgNVBAgMAlNIMQswCQYDVQQKDAJFTDELMAkGA1UE
+CwwCRUwxFjAUBgNVBAMMDUVDVGVzdFNlcnZlcjYwggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQC7vGq8fCB3R5o0mwwGxcRA2EshiWMRpWnmQ4Xp/VdKIPxF
+USpy8ANuCSMjrnA+3/CDRUfmR18VasSiMKocvvhuJKk5A0BdMmqjjwkxc58RsZQt
+j+4hblvuA6imMQlem0Ubaxl+fO+KngShywEoEkeEPopM62LMzCrwLBwDgheROfqp
+yShNeMNIlG37JUty2CE3ZCYxAfxM/gCD7otXkFMNDG+CMPEL6k5fmkdwAjei78T5
+TACqgG9CyEUqOMuQQ9F5XjTmmtx1PGieOTdW8WfqQRdM+irc7/86ocfyRqbj1CSB
+X1pWE8+g+DvuMBNLF0eaqjFPGnTlv9B/0dAQok2BAgMBAAGjgcUwgcIwawYDVR0j
+BGQwYqFVpFMwUTELMAkGA1UEBhMCQ04xCzAJBgNVBAgMAlNIMQswCQYDVQQHDAJT
+SDELMAkGA1UECgwCRUwxCzAJBgNVBAsMAkVMMQ4wDAYDVQQDDAVFQ0NBNIIJALxk
+2f5qkQ7CMAkGA1UdEwQCMAAwCwYDVR0PBAQDAgP4MDsGA1UdJQQ0MDIGCCsGAQUF
+BwMBBggrBgEFBQcDAgYIKwYBBQUHAwMGCCsGAQUFBwMEBggrBgEFBQcDCDAKBggq
+hkjOPQQDAgNoADBlAjEAmgLBMIfphsckf9nkWwTno7/cDaiDA53fEc4p6+3ggGfn
+clz1r6p0aBFl6uPM6xG9AjAyxi0HIlW24kxIf46I1prp5lpx7d3dnUvxilEZoJ2v
+YcYTDtDGfWKpyNArN43UldA=
+-----END CERTIFICATE-----

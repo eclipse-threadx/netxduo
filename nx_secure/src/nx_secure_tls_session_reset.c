@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_reset                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,6 +71,21 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            cleanup for session cipher, */
+/*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            option to disable client    */
+/*                                            initiated renegotiation,    */
+/*                                            resulting in version 6.1.9  */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), and      */
+/*                                            fixed renegotiation when    */
+/*                                            receiving in non-block mode,*/
+/*                                            resulting in version 6.2.0  */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_reset(NX_SECURE_TLS_SESSION *session_ptr)
@@ -125,6 +140,8 @@ UINT temp_status;
     /* Sessions are not active when we start the socket. */
     session_ptr -> nx_secure_tls_remote_session_active = 0;
     session_ptr -> nx_secure_tls_local_session_active = 0;
+    session_ptr -> nx_secure_tls_session_cipher_client_initialized = 0;
+    session_ptr -> nx_secure_tls_session_cipher_server_initialized = 0;
 
     /* Set the current ciphersuite to TLS_NULL_WITH_NULL_NULL which is the
     * specified ciphersuite for the handshake (pre-change cipher spec). */
@@ -143,12 +160,16 @@ UINT temp_status;
     NX_SECURE_MEMSET(session_ptr -> nx_secure_tls_local_sequence_number, 0, sizeof(session_ptr -> nx_secure_tls_local_sequence_number));
     NX_SECURE_MEMSET(session_ptr -> nx_secure_tls_remote_sequence_number, 0, sizeof(session_ptr -> nx_secure_tls_remote_sequence_number));
 
+#ifndef NX_SECURE_DISABLE_X509
+
     /* Clear out all remote certificates. */
     status = _nx_secure_tls_remote_certificate_free_all(session_ptr);
 
     /* Clear out the active certificate so if the session is reused it will return to the default (local cert). */
     session_ptr -> nx_secure_tls_credentials.nx_secure_tls_active_certificate = NX_NULL;
-
+#else
+    status = NX_SECURE_TLS_SUCCESS;
+#endif
 
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
     session_ptr -> nx_secure_tls_secure_renegotiation = NX_FALSE;
@@ -159,6 +180,8 @@ UINT temp_status;
     /* Flag to indicate when a session renegotiation is taking place. */
     session_ptr -> nx_secure_tls_renegotiation_handshake = NX_FALSE;
     session_ptr -> nx_secure_tls_secure_renegotiation_verified = NX_FALSE;
+    session_ptr -> nx_secure_tls_server_renegotiation_requested = NX_FALSE;
+    session_ptr -> nx_secure_tls_local_initiated_renegotiation = NX_FALSE;
 #endif
 
     /* Flag to indicate when credentials have been received from the remote host. */

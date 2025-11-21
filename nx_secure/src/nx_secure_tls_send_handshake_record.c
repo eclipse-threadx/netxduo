@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_handshake_record                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -138,7 +138,7 @@ UINT       buffer_offset;
             if (handshake_type == NX_SECURE_TLS_CLIENT_HELLO)
 #endif /* (NX_SECURE_TLS_TLS_1_3_ENABLED) */
             {
-                NX_SECURE_MEMCPY(&tls_session->nx_secure_tls_key_material.nx_secure_tls_handshake_cache[buffer_offset],
+                NX_SECURE_MEMCPY(&tls_session->nx_secure_tls_key_material.nx_secure_tls_handshake_cache[buffer_offset], /* lgtm[cpp/banned-api-usage-required-any] */
                                  current_packet -> nx_packet_prepend_ptr, (UINT)length); /* Use case of memcpy is verified. */
 
                 /* Advance the length. */

@@ -2,3 +2,9 @@
 	path = addons/azure_iot/azure-sdk-for-c
 	url = https://github.com/Azure/azure-sdk-for-c.git
 	branch = 1.0.0
+[submodule "test/cmake/filex"]
+	path = test/cmake/filex
+	url = https://github.com/eclipse-threadx/filex.git
+[submodule "test/cmake/threadx"]
+	path = test/cmake/threadx
+	url = https://github.com/eclipse-threadx/threadx.git

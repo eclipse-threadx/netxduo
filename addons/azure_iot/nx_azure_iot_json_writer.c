@@ -1,15 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
-
-/* Version: 6.1 */
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 #include "nx_azure_iot_json_writer.h"
 
@@ -72,6 +70,8 @@ NX_PACKET *tail_packet_ptr;
 static VOID nx_azure_iot_json_writer_packet_update(NX_AZURE_IOT_JSON_WRITER *json_writer_ptr)
 {
 NX_PACKET *tail_packet_ptr;
+UINT last_chunk_size =
+    (UINT)az_span_size(az_json_writer_get_bytes_used_in_destination(&(json_writer_ptr -> json_writer)));
 
     if (json_writer_ptr -> packet_ptr == NX_NULL)
     {
@@ -88,14 +88,12 @@ NX_PACKET *tail_packet_ptr;
     }
 
     NX_ASSERT((tail_packet_ptr -> nx_packet_data_start + json_writer_ptr -> nx_tail_packet_offset +
-               (UINT)json_writer_ptr -> json_writer._internal.bytes_written) <=
-              tail_packet_ptr -> nx_packet_data_end);
+               last_chunk_size) <= tail_packet_ptr -> nx_packet_data_end);
 
     tail_packet_ptr -> nx_packet_append_ptr =
-        tail_packet_ptr -> nx_packet_data_start + json_writer_ptr -> nx_tail_packet_offset +
-        (UINT)json_writer_ptr -> json_writer._internal.bytes_written;
+        tail_packet_ptr -> nx_packet_data_start + json_writer_ptr -> nx_tail_packet_offset + last_chunk_size;
     json_writer_ptr -> packet_ptr -> nx_packet_length =
-        json_writer_ptr -> nx_packet_init_length + (UINT)json_writer_ptr -> json_writer._internal.total_bytes_written;
+        json_writer_ptr -> nx_packet_init_length + (UINT)json_writer_ptr -> json_writer.total_bytes_written;
 }
 
 UINT nx_azure_iot_json_writer_init(NX_AZURE_IOT_JSON_WRITER *json_writer_ptr,
@@ -177,7 +175,6 @@ UINT nx_azure_iot_json_writer_deinit(NX_AZURE_IOT_JSON_WRITER *json_writer_ptr)
 
     if (json_writer_ptr -> packet_ptr)
     {
-        nx_packet_release(json_writer_ptr -> packet_ptr);
         json_writer_ptr -> packet_ptr = NX_NULL;
     }
 
@@ -192,7 +189,7 @@ UINT nx_azure_iot_json_writer_get_bytes_used(NX_AZURE_IOT_JSON_WRITER *json_writ
         return(NX_AZURE_IOT_INVALID_PARAMETER);
     }
 
-    return((UINT)json_writer_ptr -> json_writer._internal.total_bytes_written);
+    return((UINT)json_writer_ptr -> json_writer.total_bytes_written);
 }
 
 UINT nx_azure_iot_json_writer_append_string(NX_AZURE_IOT_JSON_WRITER *json_writer_ptr,
@@ -344,8 +341,6 @@ UINT nx_azure_iot_json_writer_append_begin_object(NX_AZURE_IOT_JSON_WRITER *json
         return(NX_AZURE_IOT_SDK_CORE_ERROR);
     }
 
-    json_writer_ptr -> object_depth++;
-
     nx_azure_iot_json_writer_packet_update(json_writer_ptr);
 
     return(NX_AZURE_IOT_SUCCESS);
@@ -381,8 +376,6 @@ UINT nx_azure_iot_json_writer_append_end_object(NX_AZURE_IOT_JSON_WRITER *json_w
     {
         return(NX_AZURE_IOT_SDK_CORE_ERROR);
     }
-
-    json_writer_ptr -> object_depth--;
 
     nx_azure_iot_json_writer_packet_update(json_writer_ptr);
 

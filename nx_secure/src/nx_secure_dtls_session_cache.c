@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_secure_dtls_session_cache_delete                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -66,6 +66,10 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            IPv4 is disabled,           */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 VOID nx_secure_dtls_session_cache_delete(NX_SECURE_DTLS_SERVER *dtls_server, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port)
@@ -95,6 +99,7 @@ UINT i;
         {
             continue;
         }
+#ifndef NX_DISABLE_IPV4
         if (ip_address -> nxd_ip_version == NX_IP_VERSION_V4)
         {
             if (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v4 !=
@@ -103,13 +108,18 @@ UINT i;
                 continue;
             }
         }
+#endif /* !NX_DISABLE_IPV4  */
+
 #ifdef FEATURE_NX_IPV6
-        else if ((session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[0] != ip_address -> nxd_ip_address.v6[0]) ||
-                 (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[1] != ip_address -> nxd_ip_address.v6[1]) ||
-                 (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[2] != ip_address -> nxd_ip_address.v6[2]) ||
-                 (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[3] != ip_address -> nxd_ip_address.v6[3]))
+        if (ip_address -> nxd_ip_version == NX_IP_VERSION_V6)
         {
-            continue;
+            if ((session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[0] != ip_address -> nxd_ip_address.v6[0]) ||
+                (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[1] != ip_address -> nxd_ip_address.v6[1]) ||
+                (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[2] != ip_address -> nxd_ip_address.v6[2]) ||
+                (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[3] != ip_address -> nxd_ip_address.v6[3]))
+            {
+                continue;
+            }
         }
 #endif /* FEATURE_NX_IPV6 */
 
@@ -131,7 +141,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_secure_dtls_session_cache_get_new                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -225,7 +235,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_secure_dtls_session_cache_find                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -263,6 +273,10 @@ UINT i;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            IPv4 is disabled,           */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT  nx_secure_dtls_session_cache_find(NX_SECURE_DTLS_SERVER *dtls_server, NX_SECURE_DTLS_SESSION **dtls_session, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port)
@@ -301,6 +315,7 @@ UINT i;
         }
 
         /* Check actual remote IP address value. */
+#ifndef NX_DISABLE_IPV4
         if (ip_address -> nxd_ip_version == NX_IP_VERSION_V4)
         {
             if (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v4 ==
@@ -315,19 +330,24 @@ UINT i;
                 return(NX_SUCCESS);
             }
         }
-#ifdef FEATURE_NX_IPV6
-        else if ((session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[0] == ip_address -> nxd_ip_address.v6[0]) &&
-                 (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[1] == ip_address -> nxd_ip_address.v6[1]) &&
-                 (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[2] == ip_address -> nxd_ip_address.v6[2]) &&
-                 (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[3] == ip_address -> nxd_ip_address.v6[3]))
-        {
-        
-            /* Release the protection. */
-            tx_mutex_put(&_nx_secure_tls_protection);
+#endif /* !NX_DISABLE_IPV4  */
 
-            /* Return the session. */
-            *dtls_session = &session_array[i];
-            return(NX_SUCCESS);
+#ifdef FEATURE_NX_IPV6
+        if (ip_address -> nxd_ip_version == NX_IP_VERSION_V6)
+        {
+            if ((session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[0] == ip_address -> nxd_ip_address.v6[0]) &&
+                (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[1] == ip_address -> nxd_ip_address.v6[1]) &&
+                (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[2] == ip_address -> nxd_ip_address.v6[2]) &&
+                (session_array[i].nx_secure_dtls_remote_ip_address.nxd_ip_address.v6[3] == ip_address -> nxd_ip_address.v6[3]))
+            {
+        
+                /* Release the protection. */
+                tx_mutex_put(&_nx_secure_tls_protection);
+
+                /* Return the session. */
+                *dtls_session = &session_array[i];
+                return(NX_SUCCESS);
+            }
         }
 #endif /* FEATURE_NX_IPV6 */
     }

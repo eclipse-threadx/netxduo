@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /* Local helper function. */
@@ -34,7 +33,7 @@ static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, US
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_expiration_check                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -70,6 +69,9 @@ static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, US
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_expiration_check(NX_SECURE_X509_CERT *certificate, ULONG current_time)
@@ -81,7 +83,7 @@ UINT  status;
     /* First, convert the X.509 ASN.1 time format into 32-bit UINX-epoch format of the "not before" field. */
     status = _nx_secure_x509_asn1_time_to_unix_convert(certificate -> nx_secure_x509_not_before, certificate -> nx_secure_x509_not_before_length,
                                                        certificate -> nx_secure_x509_validity_format, &not_before);
-    if (status != NX_SUCCESS)
+    if (status != NX_SECURE_X509_SUCCESS)
     {
         return(status);
     }
@@ -89,7 +91,7 @@ UINT  status;
     /* Convert the "not after" time field. */
     status = _nx_secure_x509_asn1_time_to_unix_convert(certificate -> nx_secure_x509_not_after, certificate -> nx_secure_x509_not_after_length,
                                                        certificate -> nx_secure_x509_validity_format, &not_after);
-    if (status != NX_SUCCESS)
+    if (status != NX_SECURE_X509_SUCCESS)
     {
         return(status);
     }
@@ -108,14 +110,14 @@ UINT  status;
         return(NX_SECURE_X509_CERTIFICATE_NOT_YET_VALID);
     }
 
-    return(NX_SUCCESS);
+    return(NX_SECURE_X509_SUCCESS);
 }
 
 
 
 /* Helper function to convert the ASN.1 time formats into UNIX epoch time for comparison. */
 
-#define date_2_chars_to_int(buffer, index) (LONG)(((buffer[index] - '0') * 10) + (buffer[index + 1] - '0'))
+#define date_2_chars_to_int(buffer, index) (ULONG)(((buffer[index] - '0') * 10) + (buffer[index + 1] - '0'))
 
 /* Array indexed on month - 1 gives the total number of days in all previous months (through last day of previous
    month). Leap years are handled in the logic below and are not reflected in this array. */
@@ -127,7 +129,7 @@ static const UINT days_before_month[12] = {0, 31, 59, 90, 120, 151, 181, 212, 24
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_asn1_time_to_unix_convert           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -163,15 +165,20 @@ static const UINT days_before_month[12] = {0, 31, 59, 90, 120, 151, 181, 212, 24
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            changed LONG to ULONG to    */
+/*                                            extend the time range,      */
+/*                                            removed unused code,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, USHORT asn1_length,
                                                       USHORT format, ULONG *unix_time)
 {
-LONG year, month, day, hour, minute, second;
+ULONG year, month, day, hour, minute, second;
 UINT index;
 
-    NX_PARAMETER_NOT_USED(asn1_length);
+    NX_CRYPTO_PARAMETER_NOT_USED(asn1_length);
     index = 0;
 
     /* See what format we are using. */
@@ -206,7 +213,6 @@ UINT index;
                 hour -= date_2_chars_to_int(asn1_time, index);
                 index += 2;
                 minute -= date_2_chars_to_int(asn1_time, index);
-                index += 2;
             }
             else if (asn1_time[index] == '-')
             {
@@ -214,7 +220,6 @@ UINT index;
                 hour += date_2_chars_to_int(asn1_time, index);
                 index += 2;
                 minute += date_2_chars_to_int(asn1_time, index);
-                index += 2;
             }
             else
             {
@@ -250,13 +255,13 @@ UINT index;
 
         /* Finally, calculate the number of seconds from the extracted values. */
         day += year * 365;
-        day += (LONG)days_before_month[month - 1];
+        day += days_before_month[month - 1];
         hour += day * 24;
         minute += hour * 60;
         second += minute * 60;
 
         /* Finally, return the converted time. */
-        *unix_time = (ULONG)second;
+        *unix_time = second;
     }
     else if (format == NX_SECURE_ASN_TAG_GENERALIZED_TIME)
     {
@@ -272,6 +277,6 @@ UINT index;
         return(NX_SECURE_X509_INVALID_DATE_FORMAT);
     }
 
-    return(NX_SUCCESS);
+    return(NX_SECURE_X509_SUCCESS);
 }
 

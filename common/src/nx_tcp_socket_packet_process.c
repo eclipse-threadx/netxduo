@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -28,6 +28,9 @@
 #include "nx_api.h"
 #include "nx_tcp.h"
 #include "nx_packet.h"
+#ifdef NX_ENABLE_HTTP_PROXY
+#include "nx_http_proxy_client.h"
+#endif /* NX_ENABLE_HTTP_PROXY */
 
 
 /**************************************************************************/
@@ -35,7 +38,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_packet_process                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -71,6 +74,9 @@
 /*    _nx_tcp_socket_state_transmit_check   Check for transmit ability    */
 /*    (nx_tcp_urgent_data_callback)         Application urgent callback   */
 /*                                            function                    */
+/*    _nx_http_proxy_client_connect_response_process                      */
+/*                                          Process HTTP Proxy CONNECT    */
+/*                                            response                    */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -83,6 +89,16 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed unsigned integers     */
+/*                                            comparison,                 */
+/*                                            resulting in version 6.1.10 */
+/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported HTTP Proxy,       */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_socket_packet_process(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr)
@@ -98,6 +114,12 @@ ULONG         rx_sequence;
 ULONG         rx_window;
 UINT          outside_of_window;
 ULONG         mss = 0;
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+ULONG         tcpip_offload; 
+
+    tcpip_offload = socket_ptr -> nx_tcp_socket_connect_interface -> nx_interface_capability_flag &
+                    NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD;
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
     /* Add debug information. */
     NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
@@ -112,7 +134,11 @@ ULONG         mss = 0;
     header_length =  (tcp_header_copy.nx_tcp_header_word_3 >> NX_TCP_HEADER_SHIFT) * (ULONG)sizeof(ULONG);
 
     /* Process the segment if socket state is equal or greater than NX_TCP_SYN_RECEIVED. According to RFC 793, Section 3.9, Page 69.  */
-    if (socket_ptr -> nx_tcp_socket_state >= NX_TCP_SYN_RECEIVED)
+    if ((socket_ptr -> nx_tcp_socket_state >= NX_TCP_SYN_RECEIVED)
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+        && (!tcpip_offload)
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+       )
     {
 
         /* Step1: Check sequence number. According to RFC 793, Section 3.9, Page 69.  */
@@ -165,8 +191,8 @@ ULONG         mss = 0;
                     outside_of_window = NX_FALSE;
                 }
             }
-            else if (((INT)packet_sequence - (INT)rx_sequence >= 0) &&
-                     ((INT)rx_sequence + (INT)rx_window - (INT)packet_sequence > 0))
+            else if (((INT)(packet_sequence - rx_sequence) >= 0) &&
+                     ((INT)(rx_sequence + rx_window - packet_sequence) > 0))
             {
                 outside_of_window = NX_FALSE;
             }
@@ -174,10 +200,10 @@ ULONG         mss = 0;
         else
         {
             if ((rx_window > 0) &&
-                ((((INT)packet_sequence - (INT)rx_sequence >= 0) &&
-                  ((INT)rx_sequence + (INT)rx_window - (INT)packet_sequence > 0)) ||
-                 (((INT)packet_sequence + ((INT)packet_data_length - 1) - (INT)rx_sequence >= 0) &&
-                  ((INT)rx_sequence + 1 + ((INT)rx_window - (INT)packet_sequence) - (INT)packet_data_length > 0))))
+                ((((INT)(packet_sequence - rx_sequence) >= 0) &&
+                  ((INT)(rx_sequence + rx_window - packet_sequence) > 0)) ||
+                 (((INT)(packet_sequence + (packet_data_length - 1) - rx_sequence) >= 0) &&
+                  ((INT)(rx_sequence + 1 + (rx_window - packet_sequence) - packet_data_length) > 0))))
             {
                 outside_of_window = NX_FALSE;
             }
@@ -366,12 +392,18 @@ ULONG         mss = 0;
         /* Check for data in the current packet.  */
         packet_queued =  _nx_tcp_socket_state_data_check(socket_ptr, packet_ptr);
 
-        /* Call the ESTABLISHED state handling function to process any state
-           changes caused by this new packet.  */
-        _nx_tcp_socket_state_established(socket_ptr);
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+        if (!tcpip_offload)
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+        {
 
-        /* Determine if any transmit suspension can be lifted.  */
-        _nx_tcp_socket_state_transmit_check(socket_ptr);
+            /* Call the ESTABLISHED state handling function to process any state
+            changes caused by this new packet.  */
+            _nx_tcp_socket_state_established(socket_ptr);
+
+            /* Determine if any transmit suspension can be lifted.  */
+            _nx_tcp_socket_state_transmit_check(socket_ptr);
+        }
 
         /* State processing is complete.  */
         break;
@@ -434,6 +466,19 @@ ULONG         mss = 0;
     default:
         break;
     }
+
+#ifdef NX_ENABLE_HTTP_PROXY
+
+    /* Check if HTTP Proxy is started and waiting for the response form the HTTP Proxy server.  */
+    if ((socket_ptr -> nx_tcp_socket_state == NX_TCP_ESTABLISHED) &&
+        (socket_ptr -> nx_tcp_socket_ip_ptr -> nx_ip_http_proxy_enable) &&
+        (socket_ptr -> nx_tcp_socket_http_proxy_state == NX_HTTP_PROXY_STATE_CONNECTING))
+    {
+
+        /* Receive and process the response.  */
+        _nx_http_proxy_client_connect_response_process(socket_ptr);
+    }
+#endif /* NX_ENABLE_HTTP_PROXY */
 
     /* Check for an URG (urgent) bit set.  */
     /*lint -e{644} suppress variable might not be initialized, since "tcp_header_copy" was initialized. */

@@ -199,6 +199,40 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
+**nx_azure_iot_json_reader_token_uint32_get**
+***
+<div style="text-align: right">Gets the JSON token's number as a 32-bit unsigned integer</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_json_reader_token_uint32_get(NX_AZURE_IOT_JSON_READER *reader_ptr,
+                                               uint32_t *value_ptr);
+
+```
+**Description**
+
+<p>Gets the JSON token's number as a 32-bit unsigned integer.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| reader_ptr [in]    | A pointer to an #NX_AZURE_IOT_JSON_READER instance containing the JSON to read. |
+| value_ptr [out]    | A pointer to a variable to receive the value. |
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS The number is returned.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
 **nx_azure_iot_json_reader_token_int32_get**
 ***
 <div style="text-align: right">Gets the JSON token's number as a 32-bit signed integer</div>

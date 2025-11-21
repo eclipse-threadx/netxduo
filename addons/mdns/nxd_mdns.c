@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -81,11 +81,11 @@ static UINT         _nx_mdns_packet_address_check(NX_PACKET *packet_ptr);
 static UINT         _nx_mdns_service_name_assemble(UCHAR *name, UCHAR *type, UCHAR *sub_type, UCHAR *domain, UCHAR *record_buffer, UINT buffer_size, UINT *type_index);
 static UINT         _nx_mdns_service_name_resolve(UCHAR *srv_name, UCHAR **name, UCHAR **type, UCHAR **domain);
 static UINT         _nx_mdns_rr_delete(NX_MDNS *mdns_ptr, NX_MDNS_RR *record_rr); 
-static UINT         _nx_mdns_rr_size_get(UCHAR *resource);
+static UINT         _nx_mdns_rr_size_get(UCHAR *resource, NX_PACKET *packet_ptr);
 static UINT         _nx_mdns_name_match(UCHAR *src, UCHAR *dst, UINT length);  
-static UINT         _nx_mdns_name_size_calculate(UCHAR *name);
+static UINT         _nx_mdns_name_size_calculate(UCHAR *name, NX_PACKET *packet_ptr);
 static UINT         _nx_mdns_name_string_encode(UCHAR *ptr, UCHAR *name);
-static UINT         _nx_mdns_name_string_decode(UCHAR *data, UINT start, UCHAR *buffer, UINT size); 
+static UINT         _nx_mdns_name_string_decode(UCHAR *data, UINT start, UINT data_length, UCHAR *buffer, UINT size); 
 static UINT         _nx_mdns_txt_string_encode(UCHAR *ptr, UCHAR *name);
 static UINT         _nx_mdns_txt_string_decode(UCHAR *data, UINT data_length, UCHAR *buffer, UINT size);
 static VOID         _nx_mdns_short_to_network_convert(UCHAR *ptr, USHORT value);
@@ -113,7 +113,9 @@ static VOID         _nx_mdns_additional_a_aaaa_find(NX_MDNS *mdns_ptr, UCHAR *na
 static VOID         _nx_mdns_probing_send(NX_MDNS *mdns_ptr, UINT interface_index);
 static VOID         _nx_mdns_announcing_send(NX_MDNS *mdns_ptr, UINT interface_index);
 static VOID         _nx_mdns_response_send(NX_MDNS *mdns_ptr, UINT interface_index);
+#ifndef NX_DISABLE_IPV4
 static VOID         _nx_mdns_ip_address_change_notify(NX_IP *ip_ptr, VOID *additional_info);
+#endif /* NX_DISABLE_IPV4 */
 #ifdef NX_MDNS_ENABLE_IPV6
 static VOID         _nx_mdns_ipv6_address_change_notify(NX_IP *ip_ptr, UINT method, UINT interface_index, UINT index, ULONG *ipv6_address);
 #endif /* NX_MDNS_ENABLE_IPV6  */
@@ -159,7 +161,7 @@ static NXD_ADDRESS  NX_MDNS_IPV6_MULTICAST_ADDRESS;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_create                                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -299,7 +301,7 @@ UCHAR   *ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_create                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -359,6 +361,11 @@ UCHAR   *ptr;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            used internal ip address    */
+/*                                            change notification,        */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_mdns_create(NX_MDNS *mdns_ptr, NX_IP *ip_ptr, NX_PACKET_POOL *packet_pool,
@@ -435,24 +442,16 @@ UINT    host_name_size;
     _nx_mdns_created_ptr = mdns_ptr;
 
 #ifndef NX_MDNS_DISABLE_SERVER
-    /* Register IP address change callback. */
-    status = nx_ip_address_change_notify(mdns_ptr -> nx_mdns_ip_ptr, _nx_mdns_ip_address_change_notify, NX_NULL);
 
-    /* Check for error */
-    if (status)
-    {
-        return(status);
-    }
+#ifndef NX_DISABLE_IPV4
+    /* Setup the IP address change callback function. */
+    ip_ptr -> nx_ip_address_change_notify_internal = _nx_mdns_ip_address_change_notify;
+#endif /* NX_DISABLE_IPV4 */
 
 #ifdef NX_MDNS_ENABLE_IPV6
-    /* Register IPv6 address change callback. */
-    status = nxd_ipv6_address_change_notify(mdns_ptr -> nx_mdns_ip_ptr, _nx_mdns_ipv6_address_change_notify);
 
-    /* Check for error */
-    if (status)
-    {
-        return(status);
-    }
+    /* Setup the IPv6 address change callback function. */
+    ip_ptr -> nx_ipv6_address_change_notify_internal =  _nx_mdns_ipv6_address_change_notify;
 #endif /* NX_MDNS_ENABLE_IPV6  */
 #endif /* NX_MDNS_DISABLE_SERVER */
 
@@ -608,7 +607,7 @@ UINT    host_name_size;
     mdns_ptr -> nx_mdns_id = NX_MDNS_ID;
 
     /* The random delay of first probing for RR. */
-    mdns_ptr -> nx_mdns_first_probing_delay = (ULONG)(1 + (NX_RAND() % NX_MDNS_PROBING_TIMER_COUNT));
+    mdns_ptr -> nx_mdns_first_probing_delay = (ULONG)(1 + (((ULONG)NX_RAND()) % NX_MDNS_PROBING_TIMER_COUNT));
 
     /* Return a successful status.  */
     return(NX_SUCCESS);
@@ -620,7 +619,7 @@ UINT    host_name_size;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_delete                                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -685,7 +684,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_delete                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -773,7 +772,7 @@ UINT  _nx_mdns_delete(NX_MDNS *mdns_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_cache_notify_set                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -841,7 +840,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_cache_notify_set                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -898,7 +897,7 @@ UINT _nx_mdns_cache_notify_set(NX_MDNS *mdns_ptr, VOID (*cache_full_notify_cb)(N
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_cache_notify_clear                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -966,7 +965,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_cache_notify_clear                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1024,7 +1023,7 @@ UINT _nx_mdns_cache_notify_clear(NX_MDNS *mdns_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_service_ignore_set                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1091,7 +1090,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_ignore_set                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1149,7 +1148,7 @@ UINT _nx_mdns_service_ignore_set(NX_MDNS *mdns_ptr, ULONG service_mask)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_service_notify_set                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1219,7 +1218,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_notify_set                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1282,7 +1281,7 @@ UINT _nx_mdns_service_notify_set(NX_MDNS *mdns_ptr, ULONG service_mask,
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_service_notify_clear                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1351,7 +1350,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_notify_clear                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1413,7 +1412,7 @@ UINT _nx_mdns_service_notify_clear(NX_MDNS *mdns_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_service_announcement_timing_set           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1488,7 +1487,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_announcement_timing_set            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1568,7 +1567,7 @@ UINT _nx_mdns_service_announcement_timing_set(NX_MDNS *mdns_ptr, UINT t, UINT p,
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_enable                                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1634,7 +1633,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_enable                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1868,7 +1867,7 @@ NXD_IPV6_ADDRESS    *ipv6_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_disable                                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1934,7 +1933,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_disable                                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2110,7 +2109,7 @@ NX_MDNS_RR  *p;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_local_domain_set                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2177,7 +2176,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_domain_name_set                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2256,7 +2255,7 @@ UINT        domain_name_size;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_service_add                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2376,7 +2375,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_add                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2659,7 +2658,7 @@ UINT         string_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_service_delete                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2733,7 +2732,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_delete                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2804,7 +2803,7 @@ UINT    service_delete_success = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_interface_delete                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3001,7 +3000,7 @@ UINT        rr_ptr_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_service_one_shot_query                      PORTABLE C    */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3100,7 +3099,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_one_shot_query                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3144,6 +3143,9 @@ UINT    status;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_one_shot_query(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, NX_MDNS_SERVICE *service, UINT timeout)
@@ -3231,7 +3233,7 @@ UINT        name_length;
 
                     /* Release the mDNS mutex.  */
                     tx_mutex_put(&(mdns_ptr -> nx_mdns_mutex));
-                    return (status);
+                    return (NX_MDNS_DATA_SIZE_ERROR);
                 }
                 memcpy((char *)(service -> buffer), (char*)(answer_rr -> nx_mdns_rr_name), name_length); /* Use case of memcpy is verified. */
             }
@@ -3244,7 +3246,7 @@ UINT        name_length;
 
                     /* Release the mDNS mutex.  */
                     tx_mutex_put(&(mdns_ptr -> nx_mdns_mutex));
-                    return (status);
+                    return (NX_MDNS_DATA_SIZE_ERROR);
                 }
                 memcpy((CHAR *)(service -> buffer), (CHAR *)(answer_rr -> nx_mdns_rr_rdata.nx_mdns_rr_rdata_ptr.nx_mdns_rr_ptr_name), name_length); /* Use case of memcpy is verified. */
             }
@@ -3280,7 +3282,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_one_shot_query                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3327,6 +3329,10 @@ UINT        name_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_one_shot_query(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, NX_MDNS_RR **out_rr, ULONG wait_option, UINT interface_index)
@@ -3394,7 +3400,7 @@ UINT        name_length;
         temp_resource_record.nx_mdns_rr_word = (temp_resource_record.nx_mdns_rr_word | NX_MDNS_RR_FLAG_PEER);
 
         /* Set the interface index.  */
-        temp_resource_record.nx_mdns_rr_interface_index = interface_index;
+        temp_resource_record.nx_mdns_rr_interface_index = (UCHAR)interface_index;
 
         /* Add the resource record.  */
         status = _nx_mdns_cache_add_resource_record(mdns_ptr, NX_MDNS_CACHE_TYPE_PEER, &temp_resource_record, &insert_rr, NX_NULL);
@@ -3410,7 +3416,7 @@ UINT        name_length;
 
         /* A multicast DNS querier should also delay the first query of the series by 
            a randomly chosen amount in the range 20-120ms.  */
-        insert_rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (NX_RAND() % NX_MDNS_QUERY_DELAY_RANGE));
+        insert_rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_QUERY_DELAY_RANGE));
         insert_rr -> nx_mdns_rr_retransmit_lifetime = NX_MDNS_TIMER_COUNT_RANGE;
 
         /* Set the mDNS timer.  */
@@ -3450,7 +3456,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_service_continuous_query                    PORTABLE C    */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3576,7 +3582,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_continuous_query                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3716,7 +3722,7 @@ UINT        i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_continuous_query                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3759,6 +3765,10 @@ UINT        i;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_continuous_query(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, UINT interface_index)
@@ -3815,7 +3825,7 @@ UINT        name_length;
     }
 
     /* Set the interface index.  */
-    temp_resource_record.nx_mdns_rr_interface_index = interface_index;
+    temp_resource_record.nx_mdns_rr_interface_index = (UCHAR)interface_index;
 
     /* Add the resource record.  */
     status = _nx_mdns_cache_add_resource_record(mdns_ptr, NX_MDNS_CACHE_TYPE_PEER, &temp_resource_record, &insert_rr, NX_NULL);
@@ -3831,7 +3841,7 @@ UINT        name_length;
 
     /* A multicast DNS querier should also delay the first query of the series by 
         a randomly chosen amount in the range 20-120ms.  */
-    insert_rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (NX_RAND() % NX_MDNS_QUERY_DELAY_RANGE));
+    insert_rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_QUERY_DELAY_RANGE));
     insert_rr -> nx_mdns_rr_retransmit_lifetime = NX_MDNS_TIMER_COUNT_RANGE;
 
     /* Set the mDNS timer.  */
@@ -3847,7 +3857,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_service_query_stop                          PORTABLE C    */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3926,7 +3936,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_query_stop                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4109,7 +4119,7 @@ UINT         rr_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_service_lookup                              PORTABLE C    */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4190,7 +4200,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_lookup                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4235,6 +4245,9 @@ UINT    status;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_lookup(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, UINT service_index, NX_MDNS_SERVICE *service)
@@ -4304,7 +4317,7 @@ UINT        target_string_length;
 
             /* Release the mDNS mutex.  */
             tx_mutex_put(&(mdns_ptr -> nx_mdns_mutex));
-            return (status);
+            return (NX_MDNS_DATA_SIZE_ERROR);
         }
     }
 
@@ -4314,7 +4327,7 @@ UINT        target_string_length;
 
         /* Release the mDNS mutex.  */
         tx_mutex_put(&(mdns_ptr -> nx_mdns_mutex));
-        return (status);
+        return (NX_MDNS_DATA_SIZE_ERROR);
     }
 
     /* Loop to search local and peer cache.  */
@@ -4542,7 +4555,7 @@ UINT        target_string_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_peer_cache_clear                            PORTABLE C    */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4609,7 +4622,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_peer_cache_clear                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4669,7 +4682,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_mdns_host_address_get                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4742,7 +4755,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_host_address_get                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4949,7 +4962,7 @@ UINT                domain_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_rr_a_aaaa_add                                PORTABLE C    */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5057,7 +5070,7 @@ NX_MDNS_RR  temp_resource_record;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_rr_ptr_add                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5189,7 +5202,7 @@ UINT        ptr_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_rr_srv_add                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5326,7 +5339,7 @@ UINT        target_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_rr_txt_add                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5479,7 +5492,7 @@ UINT        txt_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_rr_nsec_add                                  PORTABLE C    */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5655,7 +5668,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_rr_parameter_set                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5695,6 +5708,9 @@ UINT        name_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_rr_parameter_set(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, ULONG ttl, UINT rdata_length,
@@ -5723,7 +5739,7 @@ UINT        name_length;
         return(status);
 
     /* Set the parameters.  */
-    rr_record -> nx_mdns_rr_interface_index = interface_index;
+    rr_record -> nx_mdns_rr_interface_index = (UCHAR)interface_index;
     rr_record -> nx_mdns_rr_type = type;
     rr_record -> nx_mdns_rr_class = NX_MDNS_RR_CLASS_IN;
     rr_record -> nx_mdns_rr_ttl = ttl;
@@ -5794,7 +5810,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_rr_delete                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5982,7 +5998,7 @@ NX_MDNS_RR  *p;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_local_cache_clear                            PORTABLE C    */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6048,7 +6064,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_local_cache_clear                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6123,7 +6139,7 @@ NX_MDNS_RR      *p;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_name_resolve                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6273,7 +6289,7 @@ UINT     protocol_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_name_assemble                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6443,7 +6459,7 @@ UINT        length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    nx_mdns_host_name_register                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6602,7 +6618,7 @@ NXD_IPV6_ADDRESS *ipv6_address_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_timer_entry                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6658,7 +6674,7 @@ NX_MDNS     *mdns_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_timer_set                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6766,7 +6782,7 @@ UINT        active;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_timer_event_process                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6808,6 +6824,10 @@ UINT        active;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_mdns_timer_event_process(NX_MDNS *mdns_ptr)
@@ -6881,9 +6901,9 @@ UINT        rr_name_length;
             }
 
             /* Calculate the time interval for two responses.*/
-            if (p -> nx_mdns_rr_response_interval > (UCHAR)mdns_ptr -> nx_mdns_timer_min_count)
+            if (p -> nx_mdns_rr_response_interval > mdns_ptr -> nx_mdns_timer_min_count)
             {
-                p -> nx_mdns_rr_response_interval = (UCHAR)(p -> nx_mdns_rr_response_interval - mdns_ptr -> nx_mdns_timer_min_count);
+                p -> nx_mdns_rr_response_interval = (ULONG)(p -> nx_mdns_rr_response_interval - mdns_ptr -> nx_mdns_timer_min_count);
 
                 /* Compare the timer count.and set the minimum timer count. */
                 if ((p -> nx_mdns_rr_response_interval != 0) &&
@@ -7201,7 +7221,7 @@ UINT        rr_name_length;
                             p -> nx_mdns_rr_retransmit_count = NX_MDNS_RR_UPDATE_COUNT;
 
                             /* 50% of the record lifetime has elapsed,the querier should plan to issure a query at 80%-82% of the record lifetime */
-                            p -> nx_mdns_rr_timer_count = p -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(30 + (NX_RAND() % 3)) / 100;
+                            p -> nx_mdns_rr_timer_count = p -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(30 + (((ULONG)NX_RAND()) % 3)) / 100;
                         }
                         else
                         {
@@ -7236,7 +7256,7 @@ UINT        rr_name_length;
 
                             /* mDNS Responder MUST NOT multicast a record until at least one second has elapsed since the last time that record was multicast. RFC6762, Section6, Page16.  */
                             /* Set the next response time interval.  */
-                            p -> nx_mdns_rr_response_interval = (UCHAR)(NX_MDNS_RESPONSE_INTERVAL + NX_MDNS_TIMER_COUNT_RANGE);
+                            p -> nx_mdns_rr_response_interval = (ULONG)(NX_MDNS_RESPONSE_INTERVAL + NX_MDNS_TIMER_COUNT_RANGE);
 
                             /* Compare the timer count.and set the minimum timer count. */
                             if (p -> nx_mdns_rr_response_interval < timer_min_count)
@@ -7344,7 +7364,7 @@ UINT        rr_name_length;
                             while(remaining_ticks > p -> nx_mdns_rr_timer_count)
                                 remaining_ticks -= p -> nx_mdns_rr_timer_count;
 
-                            p -> nx_mdns_rr_timer_count = remaining_ticks + (p -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(NX_RAND() % 3) / 100);
+                            p -> nx_mdns_rr_timer_count = remaining_ticks + (p -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(((ULONG)NX_RAND()) % 3) / 100);
                         }
 
                         /* Compare the timer count.and set the minimum timer count. */
@@ -7411,7 +7431,7 @@ UINT        rr_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_udp_receive_notify                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7463,12 +7483,13 @@ static VOID _nx_mdns_udp_receive_notify(NX_UDP_SOCKET *socket_ptr)
 }
 
 #ifndef NX_MDNS_DISABLE_SERVER
+#ifndef NX_DISABLE_IPV4
 /**************************************************************************/ 
 /*                                                                        */ 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_ip_address_change_notify                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7519,6 +7540,7 @@ static VOID _nx_mdns_ip_address_change_notify(NX_IP *ip_ptr, VOID *additional_in
 
     return;
 }
+#endif /* NX_DISABLE_IPV4 */
 
 
 /**************************************************************************/ 
@@ -7526,7 +7548,7 @@ static VOID _nx_mdns_ip_address_change_notify(NX_IP *ip_ptr, VOID *additional_in
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_ipv6_address_change_notify                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7588,7 +7610,7 @@ static VOID _nx_mdns_ipv6_address_change_notify(NX_IP *ip_ptr, UINT method, UINT
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_thread_entry                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7791,7 +7813,7 @@ UINT             interface_index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_process                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7837,6 +7859,13 @@ UINT             interface_index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_process(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UINT interface_index)
@@ -7912,7 +7941,7 @@ NX_MDNS_RR         *nsec_rr;
 
             /* Multicast DNS responses MUST NOT contain any question in the Question Section, 
                Any questions in the Question Section of a received Multicast DNS response MUST be silently ignored. RFC6762, Section6, Page14.  */
-            data_ptr += (_nx_mdns_name_size_calculate(data_ptr) + 4);
+            data_ptr += (_nx_mdns_name_size_calculate(data_ptr, packet_ptr) + 4);
         }
         else
         {
@@ -8051,7 +8080,7 @@ NX_MDNS_RR         *nsec_rr;
                            Responders SHOULD delay their responses by a random amount of time selected with uniform random distribution in the range 400-500ms. RFC6762, Section6, Page 15.  */
                         if (mdns_flags & NX_MDNS_TC_FLAG)
                         {            
-                            p -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_TC_DELAY_MIN + (NX_RAND() % NX_MDNS_RESPONSE_TC_DELAY_RANGE));
+                            p -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_TC_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_RESPONSE_TC_DELAY_RANGE));
                         }
                         else
                         {
@@ -8061,7 +8090,7 @@ NX_MDNS_RR         *nsec_rr;
                             if (authority_count)
                             {
                                 if (p -> nx_mdns_rr_response_interval > (NX_MDNS_RESPONSE_INTERVAL - NX_MDNS_RESPONSE_PROBING_TIMER_COUNT))
-                                    p -> nx_mdns_rr_response_interval = (UCHAR)(p -> nx_mdns_rr_response_interval - (NX_MDNS_RESPONSE_INTERVAL - NX_MDNS_RESPONSE_PROBING_TIMER_COUNT));
+                                    p -> nx_mdns_rr_response_interval = (ULONG)(p -> nx_mdns_rr_response_interval - (NX_MDNS_RESPONSE_INTERVAL - NX_MDNS_RESPONSE_PROBING_TIMER_COUNT));
                                 else
                                     p -> nx_mdns_rr_response_interval = 0;
                             }                                 
@@ -8078,7 +8107,7 @@ NX_MDNS_RR         *nsec_rr;
                                 else
                                 {
                                     /* Set the timer count, delay 20-120ms.  */
-                                    p -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_SHARED_DELAY_MIN + (NX_RAND() % NX_MDNS_RESPONSE_SHARED_DELAY_RANGE));
+                                    p -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_SHARED_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_RESPONSE_SHARED_DELAY_RANGE));
                                 }
                             }
                             else
@@ -8105,7 +8134,7 @@ NX_MDNS_RR         *nsec_rr;
 #endif /* NX_MDNS_DISABLE_SERVER */
 
             /* Update the data_ptr.  */
-            data_ptr += (_nx_mdns_name_size_calculate(data_ptr) + 4);
+            data_ptr += (_nx_mdns_name_size_calculate(data_ptr, packet_ptr) + 4);
         }
     }
     
@@ -8137,7 +8166,7 @@ NX_MDNS_RR         *nsec_rr;
                         _nx_mdns_conflict_process(mdns_ptr, rr_search);
 
                         /* Update the data_ptr.  */
-                        data_ptr += _nx_mdns_rr_size_get(data_ptr);
+                        data_ptr += _nx_mdns_rr_size_get(data_ptr, packet_ptr);
 
                         continue;
                     }
@@ -8155,7 +8184,7 @@ NX_MDNS_RR         *nsec_rr;
                         rr_search -> nx_mdns_rr_send_flag = NX_MDNS_RR_SEND_MULTICAST;
 
                         /* Set the timer count, delay 20-120ms.  */
-                        rr_search -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_SHARED_DELAY_MIN + (NX_RAND() % NX_MDNS_RESPONSE_SHARED_DELAY_RANGE));
+                        rr_search -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_RESPONSE_SHARED_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_RESPONSE_SHARED_DELAY_RANGE));
 
                         /* Set the mDNS timer.  */
                         _nx_mdns_timer_set(mdns_ptr, rr_search, rr_search -> nx_mdns_rr_timer_count);
@@ -8179,7 +8208,7 @@ NX_MDNS_RR         *nsec_rr;
                     {
 
                         /* Update the data_ptr.  */
-                        data_ptr += _nx_mdns_rr_size_get(data_ptr);
+                        data_ptr += _nx_mdns_rr_size_get(data_ptr, packet_ptr);
 
                         continue;
                     }
@@ -8200,7 +8229,7 @@ NX_MDNS_RR         *nsec_rr;
                         _nx_mdns_conflict_process(mdns_ptr, rr_search);
 
                         /* Update the data_ptr.  */
-                        data_ptr += _nx_mdns_rr_size_get(data_ptr);
+                        data_ptr += _nx_mdns_rr_size_get(data_ptr, packet_ptr);
 
                         continue;
                     }
@@ -8279,7 +8308,7 @@ NX_MDNS_RR         *nsec_rr;
         }
 
         /* Update the data_ptr.  */
-        data_ptr += _nx_mdns_rr_size_get(data_ptr);
+        data_ptr += _nx_mdns_rr_size_get(data_ptr, packet_ptr);
     }
 
     return(NX_MDNS_SUCCESS);
@@ -8292,7 +8321,7 @@ NX_MDNS_RR         *nsec_rr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_probing_send                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8529,7 +8558,7 @@ UINT                rr_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_announcing_send                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8682,7 +8711,7 @@ UCHAR               resend_flag = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_response_send                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8852,7 +8881,7 @@ UCHAR               resend_flag = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_query_send                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9046,7 +9075,7 @@ UINT                i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_create                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9156,7 +9185,7 @@ USHORT      flags;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_send                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9273,7 +9302,7 @@ UINT                address_index = mdns_ptr -> nx_mdns_ipv6_address_index[inter
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_rr_add                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9632,7 +9661,7 @@ UINT        rr_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_rr_set                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9671,6 +9700,15 @@ UINT        rr_name_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.1.3  */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), improved */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_rr_set(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, NX_MDNS_RR *rr_ptr, UINT op, UINT interface_index)
@@ -9709,12 +9747,13 @@ UINT            temp_string_length;
     }
 
     /* Set the interface.  */
-    rr_ptr -> nx_mdns_rr_interface_index = interface_index;
+    rr_ptr -> nx_mdns_rr_interface_index = (UCHAR)interface_index;
 
     /* Process the name string.  */
     if (_nx_mdns_name_string_decode(packet_ptr -> nx_packet_prepend_ptr, 
-                                   (UINT)(data_ptr - packet_ptr -> nx_packet_prepend_ptr), 
-                                   temp_string_buffer, NX_MDNS_NAME_MAX))
+                                    (UINT)(data_ptr - packet_ptr -> nx_packet_prepend_ptr),
+                                    packet_ptr -> nx_packet_length,
+                                    temp_string_buffer, NX_MDNS_NAME_MAX))
     {
 
         /* Check string length.  */
@@ -9735,11 +9774,18 @@ UINT            temp_string_length;
         return(NX_MDNS_ERROR);
     }
 
+    /* Plus 4 for 2 bytes type and 2 bytes class. */
+    temp_string_length = _nx_mdns_name_size_calculate(data_ptr, packet_ptr);
+    if ((temp_string_length == 0) || ((data_ptr + temp_string_length + 4) > packet_ptr -> nx_packet_append_ptr))
+    {
+        return(NX_MDNS_ERROR);
+    }
+
     /* Set the resource record type. */
-    rr_ptr -> nx_mdns_rr_type = NX_MDNS_GET_USHORT_DATA(data_ptr + _nx_mdns_name_size_calculate(data_ptr));
+    rr_ptr -> nx_mdns_rr_type = NX_MDNS_GET_USHORT_DATA(data_ptr + temp_string_length);
 
     /* Get the resource record class.*/
-    record_class = NX_MDNS_GET_USHORT_DATA(data_ptr + _nx_mdns_name_size_calculate(data_ptr) + 2);
+    record_class = NX_MDNS_GET_USHORT_DATA(data_ptr + temp_string_length + 2);
 
     /* Remote RR, set the RR owner flag.*/
     if (cache_type == NX_MDNS_CACHE_TYPE_PEER)
@@ -9776,7 +9822,7 @@ UINT            temp_string_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_rr_process                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9818,6 +9864,16 @@ UINT            temp_string_length;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.1.3  */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            fixed the issue of timer,   */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_rr_process(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, UINT interface_index)
@@ -9847,8 +9903,9 @@ UINT            rr_name_length;
 
     /* Process the name string.  */
     if (_nx_mdns_name_string_decode(packet_ptr -> nx_packet_prepend_ptr, 
-                                   (UINT)(data_ptr - packet_ptr -> nx_packet_prepend_ptr), 
-                                   temp_string_buffer, NX_MDNS_NAME_MAX))
+                                    (UINT)(data_ptr - packet_ptr -> nx_packet_prepend_ptr),
+                                    packet_ptr -> nx_packet_length,
+                                    temp_string_buffer, NX_MDNS_NAME_MAX))
     {
 
         /* Check string length.  */
@@ -9869,11 +9926,18 @@ UINT            rr_name_length;
         return(NX_MDNS_ERROR);
     }
 
+    /* Plus 4 for 2 bytes type and 2 bytes class. */
+    temp_string_length = _nx_mdns_name_size_calculate(data_ptr, packet_ptr);
+    if ((temp_string_length == 0) || ((data_ptr + temp_string_length + 4) > packet_ptr -> nx_packet_append_ptr))
+    {
+        return(NX_MDNS_ERROR);
+    }
+
     /* Set the resource record type. */
-    rr_ptr.nx_mdns_rr_type = NX_MDNS_GET_USHORT_DATA(data_ptr + _nx_mdns_name_size_calculate(data_ptr));
+    rr_ptr.nx_mdns_rr_type = NX_MDNS_GET_USHORT_DATA(data_ptr + temp_string_length);
 
     /* Get the resource record class.*/
-    record_class = NX_MDNS_GET_USHORT_DATA(data_ptr + _nx_mdns_name_size_calculate(data_ptr) + 2);
+    record_class = NX_MDNS_GET_USHORT_DATA(data_ptr + temp_string_length + 2);
 
     /* Set the resource record class.  */
     rr_ptr.nx_mdns_rr_class = record_class & NX_MDNS_TOP_BIT_MASK;
@@ -9888,7 +9952,7 @@ UINT            rr_name_length;
     }
 
     /* Set the interface index.  */
-    rr_ptr.nx_mdns_rr_interface_index = interface_index;
+    rr_ptr.nx_mdns_rr_interface_index = (UCHAR)interface_index;
 
     /* Set the rdata information for answer record.  */
     status = _nx_mdns_packet_rr_data_set(mdns_ptr, packet_ptr, data_ptr, &rr_ptr, NX_MDNS_RR_OP_PEER_ADD_ANSWER);
@@ -10036,7 +10100,7 @@ UINT            rr_name_length;
                 {
 
                     /* Set the timer count. */
-                    p -> nx_mdns_rr_timer_count = insert_ptr -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(80 + (NX_RAND() % 3)) / 100;
+                    p -> nx_mdns_rr_timer_count = insert_ptr -> nx_mdns_rr_ttl * NX_IP_PERIODIC_RATE * (ULONG)(80 + (((ULONG)NX_RAND()) % 3)) / 100;
 
                     /* Set the mDNS timer.  */
                     _nx_mdns_timer_set(mdns_ptr, p, p -> nx_mdns_rr_timer_count);
@@ -10079,7 +10143,7 @@ UINT            rr_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_rr_data_set                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10121,6 +10185,12 @@ UINT            rr_name_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.1.3  */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_rr_data_set(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, NX_MDNS_RR *rr_ptr, UINT op)
@@ -10146,20 +10216,33 @@ UINT            temp_string_length;
         find_string = NX_FALSE;
     }
 
+    /* Plus 10 for 2 bytes type, 2 bytes class, 4 bytes ttl and 2 bytes rdata length. */
+    temp_string_length = _nx_mdns_name_size_calculate(data_ptr, packet_ptr);
+    if ((temp_string_length == 0) || ((data_ptr + temp_string_length + 10) > packet_ptr -> nx_packet_append_ptr))
+    {
+        return(NX_MDNS_ERROR);
+    }
+
     /* Set the resource record time to live.*/
-    rr_ptr -> nx_mdns_rr_ttl = NX_MDNS_GET_ULONG_DATA(data_ptr + _nx_mdns_name_size_calculate(data_ptr) + 4);
+    rr_ptr -> nx_mdns_rr_ttl = NX_MDNS_GET_ULONG_DATA(data_ptr + temp_string_length + 4);
 
     /* Set the resource record rdata length.  */
-    rr_ptr -> nx_mdns_rr_rdata_length = NX_MDNS_GET_USHORT_DATA(data_ptr + _nx_mdns_name_size_calculate(data_ptr) + 8);;
+    rr_ptr -> nx_mdns_rr_rdata_length = NX_MDNS_GET_USHORT_DATA(data_ptr + temp_string_length + 8);;
 
     /* Update the pointer to point at the resource data.  */
-    data_ptr = data_ptr + _nx_mdns_name_size_calculate(data_ptr) + 10;
+    data_ptr = data_ptr + temp_string_length + 10;
 
     /* Check the type.  */
     switch (rr_ptr -> nx_mdns_rr_type)
     {
         case NX_MDNS_RR_TYPE_A:
         {
+
+            /* 4 bytes IP address. */
+            if (data_ptr + 4 > packet_ptr -> nx_packet_append_ptr)
+            {
+                return(NX_MDNS_ERROR);
+            }
 
             /* Get the rdata.  */
             rr_ptr -> nx_mdns_rr_rdata.nx_mdns_rr_rdata_a.nx_mdns_rr_a_address = NX_MDNS_GET_ULONG_DATA(data_ptr);
@@ -10171,6 +10254,12 @@ UINT            temp_string_length;
         }
         case NX_MDNS_RR_TYPE_AAAA:
         {
+
+            /* 16 bytes IPv6 address. */
+            if (data_ptr + 16 > packet_ptr -> nx_packet_append_ptr)
+            {
+                return(NX_MDNS_ERROR);
+            }
 
             /* Get the rdata.  */
             rr_ptr -> nx_mdns_rr_rdata.nx_mdns_rr_rdata_aaaa.nx_mdns_rr_aaaa_address[0] = NX_MDNS_GET_ULONG_DATA(data_ptr);
@@ -10195,6 +10284,11 @@ UINT            temp_string_length;
             }
             else if (rr_ptr -> nx_mdns_rr_rdata_length > 1)
             {
+
+                if (data_ptr + rr_ptr -> nx_mdns_rr_rdata_length > packet_ptr -> nx_packet_append_ptr)
+                {
+                    return(NX_MDNS_ERROR);
+                }
 
                 /* Add the txt string.  */
                 if (_nx_mdns_txt_string_decode(data_ptr, rr_ptr -> nx_mdns_rr_rdata_length, temp_string_buffer, NX_MDNS_NAME_MAX) == NX_MDNS_SUCCESS)
@@ -10227,6 +10321,12 @@ UINT            temp_string_length;
         }
         case NX_MDNS_RR_TYPE_SRV:
         {
+
+            /* Plus 6 bytes for 2 bytes priority, 2 bytes weights and 2 bytes port. */
+            if (data_ptr + 6 > packet_ptr -> nx_packet_append_ptr)
+            {
+                return(NX_MDNS_ERROR);
+            }
 
             /* Get the priority.  */
             rr_ptr -> nx_mdns_rr_rdata.nx_mdns_rr_rdata_srv.nx_mdns_rr_srv_priority = NX_MDNS_GET_USHORT_DATA(data_ptr);
@@ -10265,6 +10365,12 @@ UINT            temp_string_length;
         case NX_MDNS_RR_TYPE_MX:
         {
 
+            /* Plus 2 bytes for preference. */
+            if (data_ptr + 2 > packet_ptr -> nx_packet_append_ptr)
+            {
+                return(NX_MDNS_ERROR);
+            }
+
             /* Set the preference.  */
             rr_ptr -> nx_mdns_rr_rdata.nx_mdns_rr_rdata_mx.nx_mdns_rr_mx_preference = NX_MDNS_GET_USHORT_DATA(data_ptr);
             data_ptr += 2;
@@ -10285,7 +10391,8 @@ UINT            temp_string_length;
 
         /* Process the target/domain name string.  */
         if (_nx_mdns_name_string_decode(packet_ptr -> nx_packet_prepend_ptr, 
-                                       (UINT)(data_ptr - packet_ptr -> nx_packet_prepend_ptr), 
+                                       (UINT)(data_ptr - packet_ptr -> nx_packet_prepend_ptr),
+                                        packet_ptr -> nx_packet_length,
                                        temp_string_buffer, NX_MDNS_NAME_MAX))
         {
 
@@ -10323,7 +10430,7 @@ UINT            temp_string_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_packet_address_check                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10355,6 +10462,9 @@ UINT            temp_string_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_address_check(NX_PACKET *packet_ptr)
@@ -10377,6 +10487,12 @@ NX_IPV4_HEADER     *ipv4_header;
 NX_IPV6_HEADER     *ipv6_header;
 #endif /* NX_MDNS_ENABLE_IPV6  */
 
+
+    /* 2 bytes ID and 2 bytes flags. */
+    if (packet_ptr -> nx_packet_length < 4)
+    {
+        return(NX_MDNS_ERROR);
+    }
 
     /* Extract the message type which should be the first byte.  */
     mdns_flags = NX_MDNS_GET_USHORT_DATA(packet_ptr -> nx_packet_prepend_ptr + NX_MDNS_FLAGS_OFFSET);
@@ -10537,7 +10653,7 @@ NX_IPV6_HEADER     *ipv6_header;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_address_change_process                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10650,7 +10766,7 @@ UINT        i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_conflict_process                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10890,7 +11006,7 @@ UINT        rr_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_change_notify_process              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11052,7 +11168,7 @@ UINT            rr_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_addition_info_get                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11262,7 +11378,7 @@ UINT        temp_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_cache_initialize                         PORTABLE C       */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11380,7 +11496,7 @@ ULONG *tail;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_cache_add_resource_record                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11628,7 +11744,7 @@ ULONG       min_elapsed_time;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_cache_delete_resource_record               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11731,7 +11847,7 @@ ULONG       *head;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_cache_find_resource_record                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11947,7 +12063,7 @@ UINT        same_rdata;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_cache_add_string                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12186,7 +12302,7 @@ UCHAR   *p, *available, *start;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_cache_delete_string                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12381,7 +12497,7 @@ USHORT  cnt;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_cache_delete_rr_string                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12458,7 +12574,7 @@ VOID _nx_mdns_cache_delete_rr_string(NX_MDNS *mdns_ptr, UINT cache_type, NX_MDNS
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_additional_resource_record_find            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12610,7 +12726,7 @@ NX_MDNS_RR      *p;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_additional_a_aaaa_find                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12689,7 +12805,7 @@ NX_MDNS_RR      *p;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_known_answer_find                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12804,7 +12920,7 @@ UINT            cache_count = 1;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_query_check                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12841,6 +12957,9 @@ UINT            cache_count = 1;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the random value, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_query_check(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, UINT one_shot, NX_MDNS_RR **search_rr, UINT interface_index)
@@ -12924,7 +13043,7 @@ UINT        name_length;
 
         /* A multicast DNS querier should also delay the first query of the series by 
            a randomly chosen amount in the range 20-120ms.  */
-        rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (NX_RAND() % NX_MDNS_QUERY_DELAY_RANGE));
+        rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_QUERY_DELAY_RANGE));
         rr -> nx_mdns_rr_retransmit_lifetime = NX_MDNS_TIMER_COUNT_RANGE;
 
         /* Set the mDNS timer.  */
@@ -12943,7 +13062,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_query_cleanup                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13071,7 +13190,7 @@ NX_MDNS     *mdns_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_mdns_query_thread_suspend                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13183,7 +13302,7 @@ TX_THREAD *thread_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_query_thread_resume                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13300,7 +13419,7 @@ TX_THREAD *thread_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_service_mask_match                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13395,7 +13514,7 @@ UINT        type_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_name_match                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13474,7 +13593,7 @@ UINT    index = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_txt_string_encode                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13567,7 +13686,7 @@ UINT    count =  1;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_txt_string_decode                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13605,6 +13724,9 @@ UINT    count =  1;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_txt_string_decode(UCHAR *data, UINT data_length, UCHAR *buffer, UINT size)
@@ -13628,7 +13750,7 @@ static UINT _nx_mdns_txt_string_decode(UCHAR *data, UINT data_length, UCHAR *buf
         {
 
             /* Simple count, check for space and copy the label.  */
-            while (labelSize > 0)
+            while ((labelSize > 0) && (data_length > 1))
             {
 
                 *buffer++ =  *data++;
@@ -13666,7 +13788,7 @@ static UINT _nx_mdns_txt_string_decode(UCHAR *data, UINT data_length, UCHAR *buf
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_name_size_calculate                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13678,6 +13800,7 @@ static UINT _nx_mdns_txt_string_decode(UCHAR *data, UINT data_length, UCHAR *buf
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    name                                  Pointer to the name           */ 
+/*    packet_ptr                            Pointer to received packet    */ 
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -13697,9 +13820,12 @@ static UINT _nx_mdns_txt_string_decode(UCHAR *data, UINT data_length, UCHAR *buf
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
-static UINT  _nx_mdns_name_size_calculate(UCHAR *name)
+static UINT  _nx_mdns_name_size_calculate(UCHAR *name, NX_PACKET *packet_ptr)
 {
 
 UINT size =  0;
@@ -13714,6 +13840,13 @@ UINT size =  0;
         /* Is this a compression pointer or a count.  */
         if (labelSize <= NX_MDNS_LABEL_MAX)
         {
+
+            if (name + labelSize >= packet_ptr -> nx_packet_append_ptr)
+            {
+
+                /* If name buffer is OOB, just fail. */
+                return(0);
+            }
 
             /* Simple count, adjust size and skip the label.  */
             size +=  labelSize + 1;
@@ -13743,7 +13876,7 @@ UINT size =  0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_name_string_encode                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13842,7 +13975,7 @@ UINT    count =  1;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_name_string_decode                       PORTABLE C        */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13857,6 +13990,7 @@ UINT    count =  1;
 /*                                                                        */ 
 /*    data                                  Pointer to buffer to decode   */ 
 /*    start                                 Location of start of data     */
+/*    data_length                           Length of data buffer         */
 /*    buffer                                Pointer to decoded data       */ 
 /*    size                                  Size of data buffer to decode */ 
 /*                                                                        */ 
@@ -13878,21 +14012,42 @@ UINT    count =  1;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            buffer length verification, */
+/*                                            prevented infinite loop in  */
+/*                                            name compression,           */
+/*                                            resulting in version 6.1.3  */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
-static UINT _nx_mdns_name_string_decode(UCHAR *data, UINT start, UCHAR *buffer, UINT size)
+static UINT _nx_mdns_name_string_decode(UCHAR *data, UINT start, UINT data_length, UCHAR *buffer, UINT size)
 {
 
 UCHAR   *character =  data + start;
 UINT    length = 0;
+UINT    offset;
+UINT    pointer_count = 0;
+UINT    labelSize;
 
   
     /* As long as there is space in the buffer and we haven't 
        found a zero terminating label */
-    while ((size > length) && (*character != '\0'))
+    while (1)
     {
 
-    UINT  labelSize =  *character++;
+        if (character >= data + data_length)
+        {
+            return(0);
+        }
+
+        if ((size <= length) || (*character == '\0'))
+        {
+            break;
+        }
+
+        labelSize =  *character++;
 
         /* Is this a compression pointer or a count.  */
         if (labelSize <= NX_MDNS_LABEL_MAX)
@@ -13901,6 +14056,10 @@ UINT    length = 0;
             /* Simple count, check for space and copy the label.  */
             while ((size > length) && (labelSize > 0))
             {
+                if (character >= data + data_length)
+                {
+                    return(0);
+                }
 
                 *buffer++ =  *character++;
                 length++;
@@ -13914,8 +14073,34 @@ UINT    length = 0;
         else if ((labelSize & NX_MDNS_COMPRESS_MASK) == NX_MDNS_COMPRESS_VALUE)
         {
 
+            if (character >= data + data_length)
+            {
+                return(0);
+            }
+
             /* This is a pointer, just adjust the source.  */
-            character =  data + ((labelSize & NX_MDNS_LABEL_MAX) << 8) + *character;
+            offset = ((labelSize & NX_MDNS_LABEL_MAX) << 8) + *character;
+
+            /* Make sure offset is in the buffer.  */
+            if (offset >= data_length)
+            {
+                return(0);
+            }
+
+            /* Pointer must not point back to itself. */
+            if ((data + offset == character) || (data + offset == character - 1))
+            {
+                return(0);
+            }
+
+            /* Prevent infinite loop with compression pointers. */
+            pointer_count++;
+            if (pointer_count > NX_MDNS_MAX_COMPRESSION_POINTERS)
+            {
+                return(0);
+            }
+
+            character =  data + offset;
         }
         else
         {
@@ -13926,7 +14111,7 @@ UINT    length = 0;
     }
 
     /* Done copying the data, set the last . to a trailing null */
-    if (*(buffer - 1) == '.')
+    if ((length > 0) && (*(buffer - 1) == '.'))
     {
 
         buffer--;
@@ -13946,7 +14131,7 @@ UINT    length = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_rr_size_get                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13958,6 +14143,7 @@ UINT    length = 0;
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
 /*    resource                              Pointer to the resource       */ 
+/*    packet_ptr                            Pointer to received packet    */ 
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -13976,9 +14162,12 @@ UINT    length = 0;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.1.4  */
 /*                                                                        */
 /**************************************************************************/
-static UINT  _nx_mdns_rr_size_get(UCHAR *resource)
+static UINT  _nx_mdns_rr_size_get(UCHAR *resource, NX_PACKET *packet_ptr)
 {
 
 UINT    name_size;
@@ -13988,7 +14177,12 @@ UINT    data_size;
         name size + data size + 2 bytes for type, 2 for class, 4 for time to live and 2 for data length
         i.e. name size + data size + 10 bytes overhead.
     */
-    name_size = _nx_mdns_name_size_calculate(resource);
+    name_size = _nx_mdns_name_size_calculate(resource, packet_ptr);
+
+    if (resource + name_size + 8 + 2 > packet_ptr -> nx_packet_append_ptr)
+    {
+        return(0);
+    }
     data_size = NX_MDNS_GET_USHORT_DATA(resource + name_size + 8);
 
     /* Return resource size.  */
@@ -14001,7 +14195,7 @@ UINT    data_size;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_short_to_network_convert                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14050,7 +14244,7 @@ static void  _nx_mdns_short_to_network_convert(UCHAR *ptr, USHORT value)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_mdns_long_to_network_convert                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */

@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls_api.h                                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -44,6 +44,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), and added*/
+/*                                            API to set packet pool,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -94,6 +97,7 @@ extern   "C" {
 #define nx_secure_tls_session_delete                       _nx_secure_tls_session_delete
 #define nx_secure_tls_session_end                          _nx_secure_tls_session_end
 #define nx_secure_tls_session_packet_buffer_set            _nx_secure_tls_session_packet_buffer_set
+#define nx_secure_tls_session_packet_pool_set              _nx_secure_tls_session_packet_pool_set
 #define nx_secure_tls_session_protocol_version_override    _nx_secure_tls_session_protocol_version_override
 #define nx_secure_tls_session_receive                      _nx_secure_tls_session_receive
 #define nx_secure_tls_session_renegotiate                  _nx_secure_tls_session_renegotiate
@@ -136,6 +140,7 @@ extern   "C" {
 #define nx_secure_tls_session_delete                       _nxe_secure_tls_session_delete
 #define nx_secure_tls_session_end                          _nxe_secure_tls_session_end
 #define nx_secure_tls_session_packet_buffer_set            _nxe_secure_tls_session_packet_buffer_set
+#define nx_secure_tls_session_packet_pool_set              _nxe_secure_tls_session_packet_pool_set
 #define nx_secure_tls_session_protocol_version_override    _nxe_secure_tls_session_protocol_version_override
 #define nx_secure_tls_session_receive                      _nxe_secure_tls_session_receive
 #define nx_secure_tls_session_renegotiate                  _nxe_secure_tls_session_renegotiate
@@ -218,6 +223,8 @@ UINT nx_secure_tls_session_delete(NX_SECURE_TLS_SESSION *tls_session);
 UINT nx_secure_tls_session_end(NX_SECURE_TLS_SESSION *tls_session, UINT wait_option);
 UINT nx_secure_tls_session_packet_buffer_set(NX_SECURE_TLS_SESSION *session_ptr,
                                              UCHAR *buffer_ptr, ULONG buffer_size);
+UINT nx_secure_tls_session_packet_pool_set(NX_SECURE_TLS_SESSION *tls_session,
+                                           NX_PACKET_POOL *packet_pool);
 UINT nx_secure_tls_session_protocol_version_override(NX_SECURE_TLS_SESSION *tls_session,
                                                      USHORT protocol_version);
 UINT nx_secure_tls_session_receive(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET **packet_ptr_ptr,

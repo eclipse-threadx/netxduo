@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_dtls.h                                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -43,6 +43,14 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed out-of-order handling,*/
+/*                                            updated cookie handling,    */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -104,6 +112,8 @@ extern   "C" {
 #define NX_SECURE_DTLS_COOKIE_LENGTH              32
 #endif /* NX_SECURE_DTLS_COOKIE_LENGTH  */
 
+/* The cookie size limit for DTLS 1.2 clinet. */
+#define NX_SECURE_DTLS_MAX_COOKIE_LENGTH          255
 
 /* Event flag masks for DTLS retransmit thread. */
 #define NX_SECURE_DTLS_ALL_EVENTS                 ((ULONG)0xFFFFFFFF)   /* All event flags              */
@@ -135,6 +145,8 @@ typedef struct NX_SECURE_DTLS_SESSION_STRUCT
     /* The DTLS handshake starts with a cookie exchange, save it here. */
     USHORT nx_secure_dtls_cookie_length;
     UCHAR  nx_secure_dtls_cookie[NX_SECURE_DTLS_COOKIE_LENGTH];
+
+    UCHAR *nx_secure_dtls_client_cookie_ptr;
 
     /* The DTLS handshake messages have a sequence number that is incremented
        with each message sent. */
@@ -172,6 +184,9 @@ typedef struct NX_SECURE_DTLS_SESSION_STRUCT
 
     /* Pointer to our UDP packet receive queue. */
     NX_PACKET *nx_secure_dtls_receive_queue_head;
+
+    /* Bitfield used for sliding window checks. */
+    ULONG nx_secure_dtls_sliding_window;
 
     /* Pointer to the thread waiting for packet. */
     TX_THREAD *nx_secure_dtls_thread_suspended;
@@ -437,7 +452,7 @@ UINT _nx_secure_dtls_client_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHA
 
 
 UINT _nx_secure_dtls_process_handshake_header(UCHAR *packet_buffer, USHORT *message_type,
-                                              USHORT *header_size, UINT *message_length,
+                                              UINT *header_size, UINT *message_length,
                                               UINT *message_seq, UINT *fragment_offset,
                                               UINT *fragment_length);
 
@@ -446,6 +461,8 @@ UINT _nx_secure_dtls_process_header(NX_SECURE_DTLS_SESSION *dtls_session, NX_PAC
                                     ULONG record_offset, USHORT *message_type, UINT *length,
                                     UCHAR *header_data, USHORT *header_length);
 
+UINT _nx_secure_dtls_session_sliding_window_check(NX_SECURE_DTLS_SESSION *dtls_session, ULONG *sequence_number);
+UINT _nx_secure_dtls_session_sliding_window_update(NX_SECURE_DTLS_SESSION *dtls_session, ULONG *sequence_number);
 
 UINT _nx_secure_dtls_process_record(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *packet_ptr,
                                     ULONG record_offset, ULONG *bytes_processed, ULONG wait_option);
@@ -463,7 +480,7 @@ UINT _nx_secure_dtls_send_record(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET
                                  UCHAR record_type, ULONG wait_option);
 
 UINT _nx_secure_dtls_server_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
-                                      ULONG wait_option);
+                                      UINT data_length, ULONG wait_option);
 
 
 UINT _nx_secure_dtls_send_clienthello(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *send_packet);

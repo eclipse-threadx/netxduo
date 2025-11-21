@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -43,7 +43,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_process_na                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -88,15 +88,16 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_icmpv6_process_na(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
 {
 
 ND_CACHE_ENTRY   *nd_entry = NX_NULL;
-
-/*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
-NX_ICMPV6_ND     *nd_ptr = (NX_ICMPV6_ND *)(packet_ptr -> nx_packet_prepend_ptr);
+NX_ICMPV6_ND     *nd_ptr;
 NX_ICMPV6_OPTION *option_ptr = NX_NULL;
 INT               error = 0;
 INT               lla_same = 0;
@@ -108,6 +109,29 @@ UINT              i;
 
     /* Add debug information. */
     NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
+
+#ifndef NX_DISABLE_RX_SIZE_CHECKING
+    /* Check packet length is at least sizeof(NX_ICMPV6_ND). */
+    if ((packet_ptr -> nx_packet_length < sizeof(NX_ICMPV6_ND))
+#ifndef NX_DISABLE_PACKET_CHAIN
+        || (packet_ptr -> nx_packet_next) /* Ignore chained packet.  */
+#endif /* NX_DISABLE_PACKET_CHAIN */
+        )
+    {
+#ifndef NX_DISABLE_ICMP_INFO
+
+        /* Increment the ICMP invalid packet error. */
+        ip_ptr -> nx_ip_icmp_invalid_packets++;
+#endif /* NX_DISABLE_ICMP_INFO */
+
+        /* Release the packet and we are done. */
+        _nx_packet_release(packet_ptr);
+        return;
+    }
+#endif /* NX_DISABLE_RX_SIZE_CHECKING */
+
+    /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
+    nd_ptr = (NX_ICMPV6_ND *)(packet_ptr -> nx_packet_prepend_ptr);
 
     /* Take care of endian-ness. */
     NX_IPV6_ADDRESS_CHANGE_ENDIAN(nd_ptr -> nx_icmpv6_nd_targetAddress);
@@ -238,7 +262,7 @@ UINT              i;
         /*lint -e{927} suppress cast of pointer to pointer, since it is necessary  */
         /*lint -e{644} suppress variable might not be initialized, since "nd_entry" was initialized in _nx_nd_cache_find_entry. */
         lla = (USHORT *)nd_entry -> nx_nd_cache_mac_addr;
-        if ((new_lla[0] == lla[0]) && (new_lla[1] == lla[1]) && (new_lla[2] == lla[2]))
+        if ((new_lla[0] == lla[0]) && (new_lla[1] == lla[1]) && (new_lla[2] == lla[2])) /* lgtm[cpp/overflow-buffer] */
         {
 
             /* No change in LLA. */
@@ -391,8 +415,8 @@ UINT              i;
             /*lint -e{927} suppress cast of pointer to pointer, since it is necessary  */
             lla = (USHORT *)nd_entry -> nx_nd_cache_mac_addr;
             lla[0] = new_lla[0];
-            lla[1] = new_lla[1];
-            lla[2] = new_lla[2];
+            lla[1] = new_lla[1]; /* lgtm[cpp/overflow-buffer] */
+            lla[2] = new_lla[2]; /* lgtm[cpp/overflow-buffer] */
         }
         if (nd_ptr -> nx_icmpv6_nd_flag & 0x40000000) /* S bit is set, force cache entry to REACHABLE */
         {

@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_interface_status_check                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -79,6 +79,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-08-2023     Yajun Xia                Modified comment(s),          */
+/*                                            added driver entry check,   */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ip_interface_status_check(NX_IP *ip_ptr, UINT interface_index, ULONG needed_status,
@@ -185,6 +188,14 @@ ULONG                  trace_timestamp;
             NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_IO_DRIVER_GET_STATUS, ip_ptr, 0, 0, 0, NX_TRACE_INTERNAL_EVENTS, 0, 0);
 
             /* Call link level driver.  */
+            if(ip_ptr -> nx_ip_interface[interface_index].nx_interface_link_driver_entry == NX_NULL)
+            {
+
+                /* Release mutex protection.  */
+                tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+                return(NX_NOT_SUCCESSFUL);
+            }
             (ip_ptr -> nx_ip_interface[interface_index].nx_interface_link_driver_entry)(&driver_request);
 
             /* If the driver does not recognize this keyword, we fall back to reading the IP link status.*/
@@ -254,6 +265,14 @@ ULONG                  trace_timestamp;
             NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_IO_DRIVER_GET_STATUS, ip_ptr, 0, 0, 0, NX_TRACE_INTERNAL_EVENTS, 0, 0);
 
             /* Call link level driver.  */
+            if(ip_ptr -> nx_ip_interface[interface_index].nx_interface_link_driver_entry == NX_NULL)
+            {
+
+                /* Release mutex protection.  */
+                tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+                return(NX_NOT_SUCCESSFUL);
+            }
             (ip_ptr -> nx_ip_interface[interface_index].nx_interface_link_driver_entry)(&driver_request);
 
             /* If the driver does not recognize this keyword, we fall back to reading the IP link status.*/

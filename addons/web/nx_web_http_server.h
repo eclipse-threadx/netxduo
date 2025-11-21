@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -27,7 +27,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_web_http_server.h                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -46,6 +46,23 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            parsing base64,             */
+/*                                            resulting in version 6.1.6  */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            converting number to string,*/
+/*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            deprecated unused macros,   */
+/*                                            resulting in version 6.1.9  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported ECC configuration,*/
+/*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -134,10 +151,10 @@ extern   "C" {
 #define NX_WEB_HTTP_SERVER_MAX_PENDING          (NX_WEB_HTTP_SERVER_SESSION_MAX << 1)
 #endif
 
+/* Deprecated. This symbol is defined for compatibility. */
 #ifndef NX_WEB_HTTP_SERVER_THREAD_TIME_SLICE
 #define NX_WEB_HTTP_SERVER_THREAD_TIME_SLICE    2
 #endif
-
 
 #ifndef NX_WEB_HTTP_SERVER_MIN_PACKET_SIZE
 #define NX_WEB_HTTP_SERVER_MIN_PACKET_SIZE      600
@@ -160,6 +177,24 @@ extern   "C" {
 #ifndef NX_WEB_HTTP_SERVER_RETRY_SHIFT
 #define NX_WEB_HTTP_SERVER_RETRY_SHIFT          1           /* Every retry is twice as long                        */
 #endif
+
+#ifndef NX_WEB_HTTP_SERVER_NONCE_MAX
+#define NX_WEB_HTTP_SERVER_NONCE_MAX            (NX_WEB_HTTP_SERVER_SESSION_MAX << 1)
+#endif
+
+#ifndef NX_WEB_HTTP_SERVER_NONCE_SIZE
+#define NX_WEB_HTTP_SERVER_NONCE_SIZE           32
+#endif
+
+#ifndef NX_WEB_HTTP_SERVER_NONCE_TIMEOUT
+#define NX_WEB_HTTP_SERVER_NONCE_TIMEOUT        (10 * NX_IP_PERIODIC_RATE)
+#endif
+
+/* Define the state of the nonce.  */
+
+#define NX_WEB_HTTP_SERVER_NONCE_INVALID        0
+#define NX_WEB_HTTP_SERVER_NONCE_VALID          1
+#define NX_WEB_HTTP_SERVER_NONCE_ACCEPTED       2
 
 /* Define HTTP Server request types.  */
 
@@ -210,6 +245,16 @@ typedef struct NX_WEB_HTTP_SERVER_DATE_STRUCT
     UCHAR           nx_web_http_server_second;                          /* Second               */
     UCHAR           nx_web_http_server_weekday;                         /* Weekday              */
 } NX_WEB_HTTP_SERVER_DATE;
+
+/* Define the nonce structure.  */
+
+typedef struct NX_WEB_HTTP_SERVER_NONCE_STRUCT
+{
+    UINT            nonce_state;                                        /* The state of the nonce               */
+    ULONG           nonce_timestamp;                                    /* The time when the nonce is created   */
+    NX_TCP_SESSION  *nonce_session_ptr;                                 /* The session accepted with this nonce */
+    UCHAR           nonce_buffer[NX_WEB_HTTP_SERVER_NONCE_SIZE];        /* Nonce for digest authetication       */
+} NX_WEB_HTTP_SERVER_NONCE;
 
 /* Define the multipart context data structure.  */
 
@@ -276,6 +321,9 @@ typedef struct NX_WEB_HTTP_SERVER_STRUCT
 
 #ifdef  NX_WEB_HTTP_DIGEST_ENABLE
     NX_MD5          nx_web_http_server_md5data;                         /* HTTP server MD5 work area            */
+    NX_WEB_HTTP_SERVER_NONCE
+                    nx_web_http_server_nonces[NX_WEB_HTTP_SERVER_NONCE_MAX];
+                                                                        /* Nonce for digest authetication       */
 #endif /* NX_WEB_HTTP_DIGEST_ENABLE */
 
 #ifdef  NX_WEB_HTTP_MULTIPART_ENABLE
@@ -348,6 +396,7 @@ typedef struct NX_WEB_HTTP_SERVER_STRUCT
 #define nx_web_http_server_query_get                         _nx_web_http_server_query_get
 #define nx_web_http_server_start                             _nx_web_http_server_start
 #define nx_web_http_server_secure_configure                  _nx_web_http_server_secure_configure
+#define nx_web_http_server_secure_ecc_configure              _nx_web_http_server_secure_ecc_configure
 #define nx_web_http_server_stop                              _nx_web_http_server_stop
 #define nx_web_http_server_content_get_extended              _nx_web_http_server_content_get_extended
 #define nx_web_http_server_content_length_get                _nx_web_http_server_content_length_get
@@ -384,6 +433,7 @@ typedef struct NX_WEB_HTTP_SERVER_STRUCT
 #define nx_web_http_server_query_get                         _nxe_web_http_server_query_get
 #define nx_web_http_server_start                             _nxe_web_http_server_start
 #define nx_web_http_server_secure_configure                  _nxe_web_http_server_secure_configure
+#define nx_web_http_server_secure_ecc_configure              _nxe_web_http_server_secure_ecc_configure
 #define nx_web_http_server_stop                              _nxe_web_http_server_stop
 #define nx_web_http_server_content_get_extended              _nxe_web_http_server_content_get_extended
 #define nx_web_http_server_get_entity_header                 _nxe_web_http_server_get_entity_header
@@ -444,6 +494,11 @@ UINT        nx_web_http_server_secure_configure(NX_WEB_HTTP_SERVER *http_server_
                                             UINT remote_certs_num,
                                             UCHAR *remote_certificate_buffer,
                                             UINT remote_cert_buffer_size);
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+UINT        nx_web_http_server_secure_ecc_configure(NX_WEB_HTTP_SERVER *http_server_ptr,
+                                                    const USHORT *supported_groups, USHORT supported_group_count,
+                                                    const NX_CRYPTO_METHOD **curves);
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 #endif /* NX_WEB_HTTPS_ENABLE */
 UINT        nx_web_http_server_stop(NX_WEB_HTTP_SERVER *http_server_ptr);
 UINT        nx_web_http_server_content_get_extended(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, ULONG byte_offset, CHAR *destination_ptr, UINT destination_size, UINT *actual_size);
@@ -508,6 +563,11 @@ UINT        _nx_web_http_server_secure_configure(NX_WEB_HTTP_SERVER *http_server
                                             UINT remote_certs_num,
                                             UCHAR *remote_certificate_buffer,
                                             UINT remote_cert_buffer_size);
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+UINT        _nx_web_http_server_secure_ecc_configure(NX_WEB_HTTP_SERVER *http_server_ptr,
+                                                     const USHORT *supported_groups, USHORT supported_group_count,
+                                                     const NX_CRYPTO_METHOD **curves);
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 #endif /* NX_WEB_HTTPS_ENABLE */
 UINT        _nx_web_http_server_stop(NX_WEB_HTTP_SERVER *http_server_ptr);
 UINT        _nx_web_http_server_content_get_extended(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, ULONG byte_offset, CHAR *destination_ptr, UINT destination_size, UINT *actual_size);
@@ -540,7 +600,6 @@ UINT        _nx_web_http_server_authentication_check_set(NX_WEB_HTTP_SERVER *htt
 
 /* Define internal HTTP Server functions.  */
 
-VOID        _nx_web_http_server_connection_present(NX_TCP_SOCKET *socket_ptr, UINT port);
 UINT        _nx_web_http_server_get_client_request(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET **packet_ptr);
 VOID        _nx_web_http_server_get_process(NX_WEB_HTTP_SERVER *server_ptr, UINT request_type, NX_PACKET *packet_ptr);
 VOID        _nx_web_http_server_put_process(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr);
@@ -553,12 +612,9 @@ UINT        _nx_web_http_server_basic_authenticate(NX_WEB_HTTP_SERVER *server_pt
 UINT        _nx_web_http_server_retrieve_basic_authorization(NX_PACKET *packet_ptr, CHAR *authorization_request_ptr);
 UINT        _nx_web_http_server_retrieve_resource(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *destination, UINT max_size);
 UINT        _nx_web_http_server_calculate_content_offset(NX_PACKET *packet_ptr);
-UINT        _nx_web_http_server_number_convert(UINT number, CHAR *string);
 UINT        _nx_web_http_server_type_get(NX_WEB_HTTP_SERVER *server_ptr, CHAR *name, CHAR *http_type_string, UINT *string_size);
 UINT        _nx_web_http_server_type_get_extended(NX_WEB_HTTP_SERVER *server_ptr, CHAR *name, UINT name_length,
                                                   CHAR *http_type_string, UINT http_type_string_max_size, UINT *string_size);
-VOID        _nx_web_http_base64_encode(CHAR *name, UINT length, CHAR *base64name);
-VOID        _nx_web_http_base64_decode(CHAR *base64name, UINT length, CHAR *name);
 
 UINT        _nx_web_http_server_receive(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET **packet_ptr, ULONG wait_option);
 UINT        _nx_web_http_server_send(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, ULONG wait_option);
@@ -568,8 +624,9 @@ VOID        _nx_web_http_server_connection_disconnect(NX_WEB_HTTP_SERVER *server
 #ifdef  NX_WEB_HTTP_DIGEST_ENABLE
 UINT        _nx_web_http_server_digest_authenticate(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *name_ptr, CHAR *password_ptr, CHAR *realm_ptr, UINT *auth_request_present);
 VOID        _nx_web_http_server_digest_response_calculate(NX_WEB_HTTP_SERVER *server_ptr, CHAR *username, CHAR *realm, CHAR *password, CHAR *nonce, CHAR *method, CHAR *uri, CHAR *nc, CHAR *cnonce, CHAR *result);
-UINT        _nx_web_http_server_retrieve_digest_authorization(NX_PACKET *packet_ptr, CHAR *response, CHAR *uri, CHAR *nc, CHAR *cnonce);
+UINT        _nx_web_http_server_retrieve_digest_authorization(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *response, CHAR *uri, CHAR *nc, CHAR *cnonce, NX_WEB_HTTP_SERVER_NONCE **nonce_ptr);
 VOID        _nx_web_http_server_hex_ascii_convert(CHAR *source, UINT source_length, CHAR *destination);
+UINT        _nx_web_http_server_nonce_allocate(NX_WEB_HTTP_SERVER *server_ptr, NX_WEB_HTTP_SERVER_NONCE **nonce_ptr);
 #endif
 
 #ifdef  NX_WEB_HTTP_MULTIPART_ENABLE
@@ -636,6 +693,11 @@ UINT        _nxe_web_http_server_secure_configure(NX_WEB_HTTP_SERVER *http_serve
                                             UINT remote_certs_num,
                                             UCHAR *remote_certificate_buffer,
                                             UINT remote_cert_buffer_size);
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+UINT        _nxe_web_http_server_secure_ecc_configure(NX_WEB_HTTP_SERVER *http_server_ptr,
+                                                      const USHORT *supported_groups, USHORT supported_group_count,
+                                                      const NX_CRYPTO_METHOD **curves);
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 #endif /* NX_WEB_HTTPS_ENABLE */
 UINT        _nxe_web_http_server_stop(NX_WEB_HTTP_SERVER *http_server_ptr);
 UINT        _nxe_web_http_server_invalid_userpassword_notify_set(NX_WEB_HTTP_SERVER *http_server_ptr,

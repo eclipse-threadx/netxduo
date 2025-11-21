@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -15,7 +15,7 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_x509.h                                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -44,6 +44,24 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            fixed key usage bit order,  */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
+/*  06-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            supported hardware EC       */
+/*                                            private key,                */
+/*                                            resulting in version 6.1.7  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            ignored public key in EC    */
+/*                                            private key,                */
+/*                                            resulting in version 6.1.10 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            checked expiration for all  */
+/*                                            the certs in the chain,     */
+/*                                            resulting in version 6.1.12 */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            included TLS port header,   */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -60,6 +78,50 @@ extern   "C" {
 #endif
 
 #include "nx_crypto.h"
+
+#ifndef NX_CRYPTO_STANDALONE_ENABLE
+#include "nx_secure_port.h"
+#endif
+
+/* Enable ECC by default. */
+#ifndef NX_SECURE_DISABLE_ECC_CIPHERSUITE
+#ifndef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#define NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#endif
+#else
+#undef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#endif
+
+#ifndef NX_SECURE_CALLER_CHECKING_EXTERNS
+#ifdef NX_CRYPTO_STANDALONE_ENABLE
+#define NX_SECURE_CALLER_CHECKING_EXTERNS
+#else
+#define NX_SECURE_CALLER_CHECKING_EXTERNS               NX_CALLER_CHECKING_EXTERNS
+#endif
+#endif
+
+#ifndef NX_THREADS_ONLY_CALLER_CHECKING
+#ifdef NX_CRYPTO_STANDALONE_ENABLE
+#define NX_THREADS_ONLY_CALLER_CHECKING
+#endif
+#endif
+
+/* Define memcpy, memset and memcmp functions used internal. */
+#ifndef NX_SECURE_MEMCPY
+#define NX_SECURE_MEMCPY                                memcpy
+#endif /* NX_SECURE_MEMCPY */
+
+#ifndef NX_SECURE_MEMCMP
+#define NX_SECURE_MEMCMP                                memcmp
+#endif /* NX_SECURE_MEMCMP */
+
+#ifndef NX_SECURE_MEMSET
+#define NX_SECURE_MEMSET                                memset
+#endif /* NX_SECURE_MEMSET */
+
+#ifndef NX_SECURE_MEMMOVE
+#define NX_SECURE_MEMMOVE                               memmove
+#endif /* NX_SECURE_MEMMOVE */
 
 /* Define extensions used for user defined actions during X509 parse. */
 #ifndef NX_SECURE_X509_PARSE_CERTIFICATE_EXTENSION
@@ -117,6 +179,18 @@ extern   "C" {
 #define NX_SECURE_X509_EXT_KEY_USAGE_NOT_FOUND                    0x19F /* In parsing an ExtendedKeyUsage extension, the specified usage was not found. */
 #define NX_SECURE_X509_KEY_USAGE_ERROR                            0x1A0 /* For use with key usage extensions - return this to indicate an error at the application level with key usage. */
 
+/* Return values from TLS. */
+#define NX_SECURE_X509_UNSUPPORTED_PUBLIC_CIPHER                  0x1A1 /* A certificate provided by a server specified a public-key operation we do not support. */
+#define NX_SECURE_X509_INVALID_CERTIFICATE                        0x1A2 /* An X509 certificate did not parse correctly. */
+#define NX_SECURE_X509_UNKNOWN_CERT_SIG_ALGORITHM                 0x1A3 /* A certificate during verification had an unsupported signature algorithm. */
+#define NX_SECURE_X509_CERTIFICATE_SIG_CHECK_FAILED               0x1A4 /* A certificate signature verification check failed - certificate data did not match signature. */
+#define NX_SECURE_X509_INVALID_SELF_SIGNED_CERT                   0x1A5 /* The remote host sent a self-signed certificate and NX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES is not defined. */
+#define NX_SECURE_X509_ISSUER_CERTIFICATE_NOT_FOUND               0x1A6 /* A remote certificate was received with an issuer not in the local trusted store. */
+#define NX_SECURE_X509_NO_CERT_SPACE_ALLOCATED                    0x1A7 /* No certificate space was allocated for incoming remote certificates. */
+#define NX_SECURE_X509_INSUFFICIENT_CERT_SPACE                    0x1A8 /* Not enough certificate buffer space allocated for a certificate. */
+#define NX_SECURE_X509_CERT_ID_DUPLICATE                          0x1A9 /* Tried to add a certificate with a numeric ID that was already used - needs to be unique. */
+#define NX_SECURE_X509_MISSING_CRYPTO_ROUTINE                     0x1AA /* In attempting to perform a cryptographic operation, an entry in the ciphersuite table (or one of its function pointers) was NULL. */
+
 /* Defines for working with private key types. */
 #define NX_SECURE_X509_KEY_TYPE_USER_DEFINED_MASK                 (0xFFFF0000)
 
@@ -124,6 +198,7 @@ extern   "C" {
 #define NX_SECURE_X509_KEY_TYPE_NONE                              0x00000000 /* Default value for no key. */
 #define NX_SECURE_X509_KEY_TYPE_RSA_PKCS1_DER                     0x00000001 /* DER-encoded PKCS-1 RSA private key. */
 #define NX_SECURE_X509_KEY_TYPE_EC_DER                            0x00000002 /* DER-encoded EC private key. */
+#define NX_SECURE_X509_KEY_TYPE_HARDWARE                          0x00000003 /* Hardware private key */
 
 
 /*  ASN.1 Format:
@@ -479,13 +554,6 @@ typedef struct NX_SECURE_EC_PRIVATE_KEY_STRUCT
     /* Size of the EC private key. */
     USHORT nx_secure_ec_private_key_length;
 
-    /* Public key for EC. */
-    /* This field is optional and it can be NX_NULL. */
-    const UCHAR *nx_secure_ec_public_key;
-
-    /* Size of the key used by the algorithm. */
-    USHORT nx_secure_ec_public_key_length;
-
     /* Named curve used. */
     UINT nx_secure_ec_named_curve;
 
@@ -759,6 +827,8 @@ UINT _nx_secure_x509_pkcs1_rsa_private_key_parse(const UCHAR *buffer, UINT lengt
 UINT _nx_secure_x509_ec_private_key_parse(const UCHAR *buffer, UINT length,
                                           UINT *bytes_processed,
                                           NX_SECURE_EC_PRIVATE_KEY *ec_key);
+UINT _nx_secure_x509_find_curve_method(USHORT named_curve, const NX_CRYPTO_METHOD **curve_method);
+
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
 /* CRL parsing. */
@@ -877,7 +947,7 @@ UINT _nx_secure_x509_certificate_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
 
 /* Verify a given certificate chain to see if the end-entity certificate can be traced through the chain to a trust anchor. */
 UINT _nx_secure_x509_certificate_chain_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
-                                              NX_SECURE_X509_CERT *certificate);
+                                              NX_SECURE_X509_CERT *certificate, ULONG current_time);
 
 /* Parse an OID string, returning an internally-used constant (defined above) for use in other parsing. */
 VOID _nx_secure_x509_oid_parse(const UCHAR *oid, ULONG length, UINT *oid_value);

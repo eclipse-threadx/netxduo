@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_receive                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,6 +80,16 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            released packet securely,   */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed out-of-order handling,*/
+/*                                            resulting in version 6.1.10 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            IPv4 is disabled,           */
+/*                                            resulting in version 6.1.12 */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            released packet on failure, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_receive(NX_SECURE_DTLS_SESSION *dtls_session,
@@ -227,6 +237,7 @@ UINT                   source_port;
             }
             else
             {
+#ifndef NX_DISABLE_IPV4
                 if (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_version == NX_IP_VERSION_V4)
                 {
 
@@ -236,8 +247,10 @@ UINT                   source_port;
                         status = NX_CONTINUE;
                     }
                 }
+#endif /* !NX_DISABLE_IPV4  */
+
 #ifdef FEATURE_NX_IPV6
-                else if (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_version == NX_IP_VERSION_V6)
+                if (dtls_session -> nx_secure_dtls_remote_ip_address.nxd_ip_version == NX_IP_VERSION_V6)
                 {
 
                     /* Compare the IPv6 address.  */
@@ -332,9 +345,19 @@ UINT                   source_port;
             /* Clear out the packet, we don't want any of the data in it. */
             nx_secure_tls_packet_release(packet_ptr);
 
-            if (status != NX_CONTINUE)
+            if (status == NX_SECURE_TLS_ALERT_RECEIVED)
             {
-
+                /* See if the alert was a CloseNotify */
+                if(tls_session -> nx_secure_tls_received_alert_level == NX_SECURE_TLS_ALERT_LEVEL_WARNING &&
+                   tls_session -> nx_secure_tls_received_alert_value == NX_SECURE_TLS_ALERT_CLOSE_NOTIFY)
+                {
+                    /* Close the connection */
+                    status = NX_SECURE_TLS_CLOSE_NOTIFY_RECEIVED;
+                }
+                /* Dont send alert to remote host if we recevied an alert */
+            }
+            else if (status != NX_CONTINUE)
+            {
                 /* Error status, send alert back to remote host. */
                 /* Get our alert number and level from our status. */
                 error_number = status;
@@ -358,7 +381,12 @@ UINT                   source_port;
                     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 
                     _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-                    _nx_secure_dtls_send_record(dtls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
+                    if (_nx_secure_dtls_send_record(dtls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option) != NX_SUCCESS)
+                    {
+                        
+                        /* Release packet on send error. */
+                        nx_secure_tls_packet_release(send_packet);
+                    }
 
                     /* Release the protection. */
                     tx_mutex_put(&_nx_secure_tls_protection);

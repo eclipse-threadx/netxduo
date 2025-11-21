@@ -1,3 +1,14 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025 Eclipse ThreadX contributors 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This is a small demo of the NetX Web HTTP Client/Server API running on a 
    high-performance NetX TCP/IP stack.  */
 /* This demo works for IPv4 only */
@@ -352,13 +363,16 @@ static NX_SECURE_X509_CERT remote_certificate, remote_issuer;
 static UCHAR remote_cert_buffer[2000];
 static UCHAR remote_issuer_buffer[2000];
 
+/* For TLS Web servers, define NX_SECURE_ENABLE_AEAD_CIPHER in NetX Crypto to allow web browsers to connect using AES_128_GCM cipher suites. */
 extern const NX_SECURE_TLS_CRYPTO nx_crypto_tls_ciphers;
 
 #endif /*NX_WEB_HTTPS_ENABLE */
 
 /* Define the RAM disk memory for FileX demo.  */
+#define TOTAL_SECTORS 256
+#define SECTOR_SIZE 512
 static UCHAR media_memory[4096];
-static CHAR ram_disk_memory[4096];
+static CHAR ram_disk_memory[TOTAL_SECTORS*SECTOR_SIZE];
 static FX_MEDIA ram_disk;
 
 /* HTTP server stack area. */
@@ -711,12 +725,15 @@ void    https_server_thread_entry(ULONG thread_input)
 UINT            status;
 UINT            server_port;
 
-
-
     NX_PARAMETER_NOT_USED(thread_input);
 
-    
-    fx_media_format(&ram_disk,
+   /* Format the RAM disk - the memory for the RAM disk was setup in
+      tx_application_define above. 
+
+      Important Note: The user must ensure there is enough RAM for the format
+                      specified.  Otherwise, memory corruption can occur. 
+   */
+    status = fx_media_format(&ram_disk,
                     _fx_ram_driver,               // Driver entry
                     ram_disk_memory,              // RAM disk memory pointer
                     media_memory,              // Media buffer pointer
@@ -725,14 +742,31 @@ UINT            server_port;
                     1,                            // Number of FATs
                     32,                           // Directory Entries
                     0,                            // Hidden sectors
-                    256,                          // Total sectors
-                    512,                          // Sector size
+                    TOTAL_SECTORS,                // Total sectors
+                    SECTOR_SIZE,                  // Sector size
                     8,                            // Sectors per cluster
                     1,                            // Heads
                     1);                           // Sectors per track   
     
+    /* Determine if the RAM disk format was successful.  */
+    if (status != FX_SUCCESS)
+    {
+        /* Error formatting the RAM disk.  */
+        printf("HTTPS RAM disk format failed, error: %x\n", status);
+        return; 
+    }
+    
     /* Open the RAM disk.  */
-    fx_media_open(&ram_disk, "RAM DISK", _fx_ram_driver, ram_disk_memory, media_memory, sizeof(media_memory)) ;
+    status = fx_media_open(&ram_disk, "RAM DISK", _fx_ram_driver, 
+                           ram_disk_memory, media_memory, sizeof(media_memory));
+
+    /* Determine if the RAM disk open was successful.  */
+    if (status != FX_SUCCESS)
+    {
+        /* Error formatting the RAM disk.  */
+        printf("HTTPS RAM disk open failed, error: %x\n", status);
+        return; 
+    }
 
     fx_file_create(&ram_disk, "TEST.TXT");
 

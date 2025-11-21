@@ -46,7 +46,7 @@ ULONG   ipDefaultTTL =              NX_IP_TIME_TO_LIVE;             /* ipDefault
    underlying application driver, but for now simple defaults are used.  */     
 ULONG   ifLastChange =              2048;                           /* ifLastChange:TimeTicks               RO */
 ULONG   ifInOctets =                155;                            /* ifInOctets:Counter                   RO */
-ULONG   ifInUcastPkts =             0;                              /* ifInUcastPkts:Counter                RO */
+ULONG64 ifInUcastPkts =             0;                              /* ifInUcastPkts:Counter                RO */
 UCHAR   ifDescr[] =                 "NetX Physical Interface";      /* ifDescr:OctetString                  RO */
 
 /* Define the MIB-2 "address translation" group, assuming one address translation.  */
@@ -62,31 +62,31 @@ MIB_ENTRY   mib2_mib[] = {
 
     /*    OBJECT ID                OBJECT VARIABLE                    GET ROUTINE/ GET_OCTET_ROUTINE            SET ROUTINE      LENGTH */
 
-    {(UCHAR *) "1.3.6.1.2.1.1.1.0",       sysDescr,                   nx_snmp_object_string_get, NX_NULL,      nx_snmp_object_string_set, 0},
-    {(UCHAR *) "1.3.6.1.2.1.1.2.0",       sysObjectID,                nx_snmp_object_id_get, NX_NULL,          NX_NULL, 0},
-    {(UCHAR *) "1.3.6.1.2.1.1.3.0",       &sysUpTime,                 nx_snmp_object_timetics_get, NX_NULL,    NX_NULL, 0},
-    {(UCHAR *) "1.3.6.1.2.1.1.4.0",       sysContact,                 nx_snmp_object_string_get, NX_NULL,      nx_snmp_object_string_set, 0},
-    {(UCHAR *) "1.3.6.1.2.1.1.5.0",       sysName,                    nx_snmp_object_string_get, NX_NULL,      nx_snmp_object_string_set, 0},
-    {(UCHAR *) "1.3.6.1.2.1.1.6.0",       sysLocation,                nx_snmp_object_string_get, NX_NULL,      nx_snmp_object_string_set, 0},
-    {(UCHAR *) "1.3.6.1.2.1.1.7.0",       &sysServices,               nx_snmp_object_integer_get, NX_NULL,     NX_NULL,  0},
+    {(UCHAR *) "1.3.6.1.2.1.1.1.0",       sysDescr,                   nx_snmp_object_string_get, NX_NULL,      nx_snmp_object_string_set, sizeof(sysDescr)},
+    {(UCHAR *) "1.3.6.1.2.1.1.2.0",       sysObjectID,                nx_snmp_object_id_get, NX_NULL,          NX_NULL, sizeof(sysObjectID)},
+    {(UCHAR *) "1.3.6.1.2.1.1.3.0",       &sysUpTime,                 nx_snmp_object_timetics_get, NX_NULL,    NX_NULL, sizeof(sysUpTime)},
+    {(UCHAR *) "1.3.6.1.2.1.1.4.0",       sysContact,                 nx_snmp_object_string_get, NX_NULL,      nx_snmp_object_string_set, sizeof(sysContact)},
+    {(UCHAR *) "1.3.6.1.2.1.1.5.0",       sysName,                    nx_snmp_object_string_get, NX_NULL,      nx_snmp_object_string_set, sizeof(sysName)},
+    {(UCHAR *) "1.3.6.1.2.1.1.6.0",       sysLocation,                nx_snmp_object_string_get, NX_NULL,      nx_snmp_object_string_set, sizeof(sysLocation)},
+    {(UCHAR *) "1.3.6.1.2.1.1.7.0",       &sysServices,               nx_snmp_object_integer_get, NX_NULL,     NX_NULL,  sizeof(sysServices)},
 
-    {(UCHAR *) "1.3.6.1.2.1.3.1.1.3.0",   &atNetworkAddress,          nx_snmp_object_ip_address_get, NX_NULL,  nx_snmp_object_ip_address_set, 0},
+    {(UCHAR *) "1.3.6.1.2.1.3.1.1.3.0",   &atNetworkAddress,          nx_snmp_object_ip_address_get, NX_NULL,  nx_snmp_object_ip_address_set, sizeof(atNetworkAddress)},
 #ifdef FEATURE_NX_IPV6
      /* Either GET method should work. IPv6 addresses are handled as octet strings and accept any IPv6 address format e.g. addresses with '::'s are accepted as is. */
-    {(UCHAR *) "1.3.6.1.2.1.3.1.1.3.1",   &atIPv6NetworkAddress,      nx_snmp_object_ipv6_address_get, NX_NULL, nx_snmp_object_ipv6_address_set, 0},
-    {(UCHAR *) "1.3.6.1.2.1.3.1.1.3.2",   &atIPv6NetworkAddress,      NX_NULL, nx_snmp_object_octet_string_get, nx_snmp_object_octet_string_set, 0},
+    {(UCHAR *) "1.3.6.1.2.1.3.1.1.3.1",   &atIPv6NetworkAddress,      nx_snmp_object_ipv6_address_get, NX_NULL, nx_snmp_object_ipv6_address_set, sizeof(atIPv6NetworkAddress)},
+    {(UCHAR *) "1.3.6.1.2.1.3.1.1.3.2",   &atIPv6NetworkAddress,      NX_NULL, nx_snmp_object_octet_string_get, nx_snmp_object_octet_string_set, sizeof(atIPv6NetworkAddress)},
 #endif
 
-    {(UCHAR *) "1.3.6.1.2.1.2.2.1.2.0",   ifDescr,                    nx_snmp_object_string_get, NX_NULL,      NX_NULL,  0},
-    {(UCHAR *) "1.3.6.1.2.1.3.1.1.2.0",   &atPhysAddress,             NX_NULL, nx_snmp_object_octet_string_get, nx_snmp_object_octet_string_set, 0},
-    {(UCHAR *) "1.3.6.1.2.1.2.2.1.9.0",   &ifLastChange,              nx_snmp_object_timetics_get, NX_NULL,    nx_snmp_object_timetics_set,  0},
-    {(UCHAR *) "1.3.6.1.2.1.2.2.1.10.0",  &ifInOctets,                nx_snmp_object_counter_get, NX_NULL,     nx_snmp_object_counter_set,  0},
-    {(UCHAR *) "1.3.6.1.2.1.2.2.1.11.0",  &ifInUcastPkts,             nx_snmp_object_counter64_get, NX_NULL,   nx_snmp_object_counter64_set,  0},
+    {(UCHAR *) "1.3.6.1.2.1.2.2.1.2.0",   ifDescr,                    nx_snmp_object_string_get, NX_NULL,      NX_NULL,  sizeof(ifDescr)},
+    {(UCHAR *) "1.3.6.1.2.1.3.1.1.2.0",   &atPhysAddress,             NX_NULL, nx_snmp_object_octet_string_get, nx_snmp_object_octet_string_set, sizeof(atPhysAddress)},
+    {(UCHAR *) "1.3.6.1.2.1.2.2.1.9.0",   &ifLastChange,              nx_snmp_object_timetics_get, NX_NULL,    nx_snmp_object_timetics_set,  sizeof(ifLastChange)},
+    {(UCHAR *) "1.3.6.1.2.1.2.2.1.10.0",  &ifInOctets,                nx_snmp_object_counter_get, NX_NULL,     nx_snmp_object_counter_set,  sizeof(ifInOctets)},
+    {(UCHAR *) "1.3.6.1.2.1.2.2.1.11.0",  &ifInUcastPkts,             nx_snmp_object_counter64_get, NX_NULL,   nx_snmp_object_counter64_set,  sizeof(ifInUcastPkts)},
 
-    {(UCHAR *) "1.3.6.1.2.1.4.1.0",       &ipForwarding,              nx_snmp_object_integer_get, NX_NULL,     nx_snmp_object_integer_set,  0},
-    {(UCHAR *) "1.3.6.1.2.1.4.2.0",       &ipDefaultTTL,              nx_snmp_object_integer_get, NX_NULL,     NX_NULL,  0},
+    {(UCHAR *) "1.3.6.1.2.1.4.1.0",       &ipForwarding,              nx_snmp_object_integer_get, NX_NULL,     nx_snmp_object_integer_set,  sizeof(ipForwarding)},
+    {(UCHAR *) "1.3.6.1.2.1.4.2.0",       &ipDefaultTTL,              nx_snmp_object_integer_get, NX_NULL,     NX_NULL,  sizeof(ipDefaultTTL)},
 
-    {(UCHAR *) "1.3.6.1.7",               (UCHAR *) "1.3.6.1.7",      nx_snmp_object_end_of_mib,  NX_NULL,     NX_NULL, 0},
+    {(UCHAR *) "1.3.6.1.7",               (UCHAR *) "1.3.6.1.7",      nx_snmp_object_end_of_mib,  NX_NULL,     NX_NULL, sizeof("1.3.6.1.7") - 1},
     {NX_NULL, NX_NULL, NX_NULL, NX_NULL, NX_NULL, 0}
 
 };

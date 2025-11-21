@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -33,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_server_handshake                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -48,6 +48,7 @@
 /*                                                                        */
 /*    dtls_session                          TLS control block             */
 /*    packet_buffer                         Pointer into record buffer    */
+/*    data_length                           Length of data                */
 /*    wait_option                           Controls timeout actions      */
 /*                                                                        */
 /*  OUTPUT                                                                */
@@ -72,11 +73,9 @@
 /*    _nx_secure_tls_generate_keys          Generate session keys         */
 /*    _nx_secure_tls_handshake_hash_init    Initialize Finished hash      */
 /*    _nx_secure_tls_handshake_hash_update  Update Finished hash          */
-/*    _nx_secure_tls_map_error_to_alert     Map internal error to alert   */
 /*    _nx_secure_tls_process_client_key_exchange                          */
 /*                                          Process key exchange          */
 /*    _nx_secure_tls_process_finished       Process Finished message      */
-/*    _nx_secure_tls_send_alert             Send TLS alert                */
 /*    _nx_secure_tls_send_certificate       Send TLS certificate          */
 /*    _nx_secure_tls_send_changecipherspec  Send ChangeCipherSpec         */
 /*    _nx_secure_tls_send_finished          Send Finished message         */
@@ -110,15 +109,28 @@
 /*                                            fixed certificate buffer    */
 /*                                            allocation,                 */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed out-of-order handling,*/
+/*                                            resulting in version 6.1.10 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed duplicated alert,   */
+/*                                            resulting in version 6.1.12 */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            released packet on failure, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_server_handshake(NX_SECURE_DTLS_SESSION *dtls_session, UCHAR *packet_buffer,
-                                      ULONG wait_option)
+                                      UINT data_length, ULONG wait_option)
 {
 #ifndef NX_SECURE_TLS_SERVER_DISABLED
 UINT                                  status;
 USHORT                                message_type;
-USHORT                                header_bytes;
+UINT                                  header_bytes;
 UINT                                  message_length;
 UINT                                  message_seq;
 UINT                                  fragment_offset;
@@ -127,10 +139,7 @@ NX_PACKET                            *send_packet;
 NX_PACKET_POOL                       *packet_pool;
 UCHAR                                *packet_start;
 NX_SECURE_TLS_SESSION                *tls_session;
-UINT                                  error_number;
-UINT                                  alert_number;
-UINT                                  alert_level;
-UCHAR                                 *fragment_buffer;
+UCHAR                                *fragment_buffer;
 
 
     /* Basic state machine for handshake:
@@ -150,6 +159,8 @@ UCHAR                                 *fragment_buffer;
     /* Use the TLS packet buffer for fragment processing. */
     fragment_buffer = tls_session->nx_secure_tls_packet_buffer;
 
+    header_bytes = data_length;
+
     /* First, process the handshake message to get our state and any data therein. */
     status = _nx_secure_dtls_process_handshake_header(packet_buffer, &message_type, &header_bytes,
                                                       &message_length, &message_seq, &fragment_offset, &fragment_length);
@@ -158,24 +169,22 @@ UCHAR                                 *fragment_buffer;
     {
         /* For now, if we see a repeated message sequence, assume an unnecessary retransmission and ignore. */
         /* Don't ignore sequence 0 - it's a new handshake request! */
-        if (message_seq < dtls_session -> nx_secure_dtls_expected_handshake_sequence)
+        if (message_seq < dtls_session -> nx_secure_dtls_remote_handshake_sequence)
         {
+            /* Re-transmitted message. */
             return(NX_CONTINUE);
         }
 
-        /* If we have a new sequence number, we have a new record (may be fragmented). Unless
-           the sequence number is 0, which means it is the first record. */
-        if (message_seq != dtls_session -> nx_secure_dtls_remote_handshake_sequence || (message_seq == 0 && fragment_offset == 0))
+        /* When we receive a message fragment, subtract it from the current fragment length. */
+        if ((header_bytes + fragment_length) > data_length)
         {
-            /* New record starting, reset the fragment length and handshake sequence number. */
-            dtls_session -> nx_secure_dtls_remote_handshake_sequence = message_seq;
-            dtls_session -> nx_secure_dtls_fragment_length = message_length;
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
         }
 
-        /* When we receive a message fragment, subtract it from the current fragment length. */
-        if (fragment_length > dtls_session -> nx_secure_dtls_fragment_length)
+        /* Check the fragment_length with the lenght of packet buffer. */
+        if ((header_bytes + fragment_length) > data_length)
         {
-            return(1);
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
         }
 
         /* Check available area of buffer. */
@@ -185,6 +194,27 @@ UCHAR                                 *fragment_buffer;
             return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
         }
 
+        /* If this message sequence isn't what we expect, continue reading packets. */ 
+        if(message_seq != dtls_session -> nx_secure_dtls_expected_handshake_sequence)
+        {
+            return(NX_SECURE_TLS_OUT_OF_ORDER_MESSAGE);
+        }
+
+        /* If we have a new sequence number, we have a new record (may be fragmented). Unless
+            the sequence number is 0, which means it is the first record. */
+        if (message_seq > dtls_session -> nx_secure_dtls_remote_handshake_sequence || (message_seq == 0 && fragment_offset == 0))
+        {
+            /* New record starting, reset the fragment length and handshake sequence number. */
+            dtls_session -> nx_secure_dtls_remote_handshake_sequence = message_seq;
+            dtls_session -> nx_secure_dtls_fragment_length = message_length;
+        }
+
+        if (fragment_length > dtls_session -> nx_secure_dtls_fragment_length)
+        {
+            return(NX_SECURE_TLS_INVALID_PACKET);
+        }
+
+        /* When we receive a message fragment, subtract it from the current fragment length. */
         dtls_session -> nx_secure_dtls_fragment_length -= fragment_length;
 
         /* Copy the fragment data (minus the header) into the reassembly buffer. */
@@ -203,9 +233,9 @@ UCHAR                                 *fragment_buffer;
                 dtls_session -> nx_secure_dtls_expected_handshake_sequence = 0;
             }
 
-            /* If the recontructed message has a sequence number less than the expected, it's
-               a retransmission we need to ignore. */
-            if (message_seq < dtls_session -> nx_secure_dtls_expected_handshake_sequence)
+            /* If the recontructed message has a sequence number not equal to the expected, it's
+               a retransmission or out-of-order message we need to ignore. */
+            if (message_seq != dtls_session -> nx_secure_dtls_expected_handshake_sequence)
             {
                 return(NX_CONTINUE);
             }
@@ -332,22 +362,8 @@ UCHAR                                 *fragment_buffer;
     /* Check for errors in processing messages. */
     if (status != NX_SECURE_TLS_SUCCESS)
     {
-        /* Get our alert number and level from our status. */
-        error_number = status;
-        _nx_secure_tls_map_error_to_alert(error_number, &alert_number, &alert_level);
 
-        /* Release the protection before suspending on nx_packet_allocate. */
-        tx_mutex_put(&_nx_secure_tls_protection);
-
-        status = _nx_secure_dtls_packet_allocate(dtls_session, packet_pool, &send_packet, wait_option);
-
-        /* Get the protection after nx_packet_allocate. */
-        tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-        _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-
-        _nx_secure_dtls_send_record(dtls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
-        return(error_number);
+        return(status);
     }
 
     /* Hash this handshake message. We do not hash HelloRequest messages, but since only the server will send them,
@@ -538,6 +554,9 @@ UCHAR                                 *fragment_buffer;
 
         if (status != NX_SUCCESS)
         {
+
+            /* Release packet on send error. */
+            nx_secure_tls_packet_release(send_packet);
             break;
         }
 
@@ -589,32 +608,6 @@ UCHAR                                 *fragment_buffer;
         status = NX_SECURE_TLS_INVALID_STATE;
     }
 
-
-    /* If we have an error at this point, we have experienced a problem in sending
-       handshake messages, which is some type of internal issue. Send an alert
-       back to the remote host indicating the error. */
-    if (status != NX_SUCCESS)
-    {
-        /* Get our alert number and level from our status. */
-        error_number = status;
-        _nx_secure_tls_map_error_to_alert(error_number, &alert_number, &alert_level);
-
-        /* Release the protection before suspending on nx_packet_allocate. */
-        tx_mutex_put(&_nx_secure_tls_protection);
-
-        status = _nx_secure_dtls_packet_allocate(dtls_session, packet_pool, &send_packet, wait_option);
-
-        /* Get the protection after nx_packet_allocate. */
-        tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-        if (status == NX_SUCCESS)
-        {
-            _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-            _nx_secure_dtls_send_record(dtls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
-        }
-
-        return(error_number);
-    }
 
     return(status);
 #else /* TLS Server disabled. */

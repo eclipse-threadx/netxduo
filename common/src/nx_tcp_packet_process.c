@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -44,7 +44,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_packet_process                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -92,6 +92,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            validated TCP header buffer,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_packet_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -106,6 +109,9 @@ NX_TCP_SOCKET               *socket_ptr;
 NX_TCP_HEADER               *tcp_header_ptr;
 struct NX_TCP_LISTEN_STRUCT *listen_ptr;
 VOID                         (*listen_callback)(NX_TCP_SOCKET *socket_ptr, UINT port);
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+VOID                         (*queue_callback)(struct NX_TCP_LISTEN_STRUCT *listen_ptr);
+#endif
 ULONG                        option_words;
 ULONG                        mss = 0;
 ULONG                        checksum;
@@ -215,6 +221,22 @@ ULONG                        rwin_scale = 0xFF;
         }
     }
 
+#ifndef NX_DISABLE_RX_SIZE_CHECKING
+    /* Make sure the TCP header is in the first packet.  */
+    if ((UINT)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) < sizeof(NX_TCP_HEADER))
+    {
+
+#ifndef NX_DISABLE_TCP_INFO
+        /* Increment the TCP invalid packet error.  */
+        ip_ptr -> nx_ip_tcp_invalid_packets++;
+#endif
+
+        /* Not supported.  */
+        _nx_packet_release(packet_ptr);
+        return;
+    }
+#endif /* NX_DISABLE_RX_SIZE_CHECKING */
+
     /* Pickup the pointer to the head of the TCP packet.  */
     /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
     tcp_header_ptr =  (NX_TCP_HEADER *)packet_ptr -> nx_packet_prepend_ptr;
@@ -232,7 +254,9 @@ ULONG                        rwin_scale = 0xFF;
 
 #ifndef NX_DISABLE_RX_SIZE_CHECKING
     /* Check for valid packet length.  */
-    if (((INT)option_words < 0) || (packet_ptr -> nx_packet_length < (sizeof(NX_TCP_HEADER) + (option_words << 2))))
+    if (((INT)option_words < 0) ||
+        ((UINT)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) <
+         (sizeof(NX_TCP_HEADER) + (option_words << 2))))
     {
 
 #ifndef NX_DISABLE_TCP_INFO
@@ -991,6 +1015,17 @@ ULONG                        rwin_scale = 0xFF;
                         /* Release the packet.  */
                         _nx_packet_release(packet_ptr);
                     }
+
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+                    /* If extended notify is enabled, call the listen_queue_notify function.
+                       This user-supplied function notifies the host application of
+                       a new connect request in the listen queue. */
+                    queue_callback = listen_ptr -> nx_tcp_listen_queue_notify;
+                    if (queue_callback)
+                    {
+                        (queue_callback)(listen_ptr);
+                    }
+#endif
                 }
 
                 /* Finished processing, just return.  */

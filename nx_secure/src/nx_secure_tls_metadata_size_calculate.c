@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_metadata_size_calculate              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -65,6 +65,13 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved the code,          */
+/*                                            resulting in version 6.1.11 */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_metadata_size_calculate(const NX_SECURE_TLS_CRYPTO *crypto_table,
@@ -82,8 +89,10 @@ UINT                            max_handshake_hash_scratch_size  = 0;
 NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_table;
 USHORT                          ciphersuite_table_size;
 ULONG                           max_total_metadata_size;
+#ifndef NX_SECURE_DISABLE_X509
 NX_SECURE_X509_CRYPTO          *cert_crypto;
 USHORT                          cert_crypto_size;
+#endif
 
 
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
@@ -94,11 +103,6 @@ const NX_CRYPTO_METHOD *crypto_method_sha1;
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
 const NX_CRYPTO_METHOD *crypto_method_sha256;
 #endif
-
-    if (crypto_table == NX_NULL)
-    {
-        return(NX_PTR_ERROR);
-    }
 
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
     crypto_method_md5 = crypto_table -> nx_secure_tls_handshake_hash_md5_method;
@@ -112,8 +116,10 @@ const NX_CRYPTO_METHOD *crypto_method_sha256;
     /* Get working pointers to our tables. */
     ciphersuite_table = crypto_table -> nx_secure_tls_ciphersuite_lookup_table;
     ciphersuite_table_size = crypto_table -> nx_secure_tls_ciphersuite_lookup_table_size;
+#ifndef NX_SECURE_DISABLE_X509
     cert_crypto = crypto_table -> nx_secure_tls_x509_cipher_table;
     cert_crypto_size = crypto_table -> nx_secure_tls_x509_cipher_table_size;
+#endif
 
 
     /* Loop through the ciphersuite table and find the largest metadata for each type of cipher. */
@@ -145,6 +151,8 @@ const NX_CRYPTO_METHOD *crypto_method_sha256;
         }
     }
 
+#ifndef NX_SECURE_DISABLE_X509
+
     /* Loop through the certificate cipher table as well. */
     for (i = 0; i < cert_crypto_size; ++i)
     {
@@ -164,6 +172,7 @@ const NX_CRYPTO_METHOD *crypto_method_sha256;
             max_handshake_hash_scratch_size = cert_crypto[i].nx_secure_x509_hash_method -> nx_crypto_metadata_area_size;
         }
     }
+#endif
 
     /* We also need metadata space for the TLS handshake hash, so add that into the total.
        We need some scratch space to copy the handshake hash metadata during final hash generation

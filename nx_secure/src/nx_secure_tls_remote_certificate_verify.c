@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_verify            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -53,11 +53,9 @@
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    _nx_secure_x509_certificate_chain_verify                            */
-/*                                          Verify cert against stores    */
-/*    _nx_secure_x509_expiration_check      Verify expiration of cert     */
 /*    _nx_secure_x509_remote_endpoint_certificate_get                     */
 /*                                          Get remote host certificate   */
+/*    [nx_secure_remote_certificate_verify] Verify the remote certificate */
 /*    [nx_secure_tls_session_certificate_callback]                        */
 /*                                          Session certificate callback  */
 /*    [nx_secure_tls_session_time_function] Session time callback         */
@@ -74,10 +72,29 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            updated X.509 return value, */
+/*                                            resulting in version 6.1.6  */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved code coverage      */
+/*                                            results,                    */
+/*                                            resulting in version 6.1.10 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            checked expiration for all  */
+/*                                            the certs in the chain,     */
+/*                                            resulting in version 6.1.12 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
+/*                                            custom secret generation,   */
+/*                                            resulting in version 6.2.0  */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_remote_certificate_verify(NX_SECURE_TLS_SESSION *tls_session)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT                              status;
 NX_SECURE_X509_CERT              *remote_certificate;
 NX_SECURE_X509_CERTIFICATE_STORE *store;
@@ -116,19 +133,11 @@ ULONG                             current_time;
     {
         /* Get the current time from our callback. */
         current_time = tls_session -> nx_secure_tls_session_time_function();
-
-        /* Check the remote certificate against the current time. */
-        status = _nx_secure_x509_expiration_check(remote_certificate, current_time);
-
-        if (status != NX_SUCCESS)
-        {
-            return(status);
-        }
     }
 
     /* Now verify our remote certificate chain. If the certificate can be linked to an issuer in the trusted store
        through an issuer chain, this function will return NX_SUCCESS. */
-    status = _nx_secure_x509_certificate_chain_verify(store, remote_certificate);
+    status = tls_session -> nx_secure_remote_certificate_verify(store, remote_certificate, current_time);
 
     if (status != NX_SUCCESS)
     {
@@ -152,5 +161,10 @@ ULONG                             current_time;
     }
 
     return(status);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }
 

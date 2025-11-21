@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -24,19 +24,19 @@
 
 #include "nx_secure_tls.h"
 
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_info,
                                              NX_SECURE_X509_CERT *cert, UINT selected_curve,
                                              UINT cert_curve_supported);
 
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_clienthello                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -91,6 +91,21 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*                                            fixed renegotiation bug,    */
 /*                                            improved negotiation logic, */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            ability to disable client   */
+/*                                            initiated renegotiation,    */
+/*                                            resulting in version 6.1.9  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),  fixed   */
+/*                                            the bug of processing       */
+/*                                            extensions,                 */
+/*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), fixed    */
+/*                                            TLS 1.3 version negotiation,*/
+/*                                            resulting in version 6.2.0  */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_clienthello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -112,16 +127,17 @@ USHORT                                new_ciphersuite_priority = 0;
 NX_SECURE_TLS_HELLO_EXTENSION         extension_data[NX_SECURE_TLS_HELLO_EXTENSIONS_MAX];
 UINT                                  num_extensions = NX_SECURE_TLS_HELLO_EXTENSIONS_MAX;
 UCHAR                                *ciphersuite_list;
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 NX_SECURE_X509_CERT                  *cert;
 UINT                                  selected_curve;
 UINT                                  cert_curve;
 UINT                                  cert_curve_supported;
 NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
 NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3;
+USHORT                                no_extension = NX_FALSE;
 #endif
 
     /* Structure of ClientHello:
@@ -152,10 +168,20 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
         }
 #endif
 
-#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
-        if (tls_session -> nx_secure_tls_renegotation_enabled && tls_session -> nx_secure_tls_secure_renegotiation)
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 
+        /* If Client initiated renegotiation is enabled, handle the renegotiation 
+           handshake if appropriate. Otherwise return "no renegotiation allowed" error. */
+        if (tls_session -> nx_secure_tls_renegotation_enabled && tls_session -> nx_secure_tls_secure_renegotiation 
+#if defined(NX_SECURE_TLS_DISABLE_CLIENT_INITIATED_RENEGOTIATION)
+            /* If client initiated renegotiation is disabled for TLS servers, only allow 
+               server-initiated renegotiations requested by the server itself. */
+            && tls_session -> nx_secure_tls_server_renegotiation_requested
+#endif
+           )
         {
             tls_session -> nx_secure_tls_renegotiation_handshake = NX_TRUE;
+
+#ifndef NX_SECURE_DISABLE_X509
 
             /* On a session resumption free all certificates for the new session.
              * SESSION RESUMPTION: if session resumption is enabled, don't free!!
@@ -166,6 +192,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
             {
                 return(status);
             }
+#endif
 
             /* Invoke user callback to notify application of renegotiation request. */
             if (tls_session -> nx_secure_tls_session_renegotiation_callback != NX_NULL)
@@ -177,7 +204,11 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
                     return(status);
                 }
             }
-        }
+
+            /* We don't want any more clienthellos to come in after this - only the first one
+               in response to our original request. */
+            tls_session -> nx_secure_tls_server_renegotiation_requested = NX_FALSE; 
+    }
         else
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
         {
@@ -229,7 +260,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
     tls_session -> nx_secure_tls_protocol_version = protocol_version;
 
     /* Save off the random value for key generation later. */
-    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, &packet_buffer[length], NX_SECURE_TLS_RANDOM_SIZE); /* Use case of memcpy is verified. */
+    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_random, &packet_buffer[length], NX_SECURE_TLS_RANDOM_SIZE); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
     length += NX_SECURE_TLS_RANDOM_SIZE;
 
     /* Extract the session ID if there is one. */
@@ -245,10 +276,16 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
     tls_session -> nx_secure_tls_session_id_length = session_id_length;
     if (session_id_length > 0)
     {
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_session_id, &packet_buffer[length], session_id_length); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_session_id, &packet_buffer[length], session_id_length); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
         length += session_id_length;
     }
 
+    /* GHSA-5vrv-8j5h-h6h6 2504xx */
+    if ((length + 1) >= message_length)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
+  
     /* Negotiate the ciphersuite we want to use. */
     ciphersuite_list_length = (USHORT)((packet_buffer[length] << 8) + packet_buffer[length + 1]);
     length += 2;
@@ -263,6 +300,12 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
 
     length += ciphersuite_list_length;
 
+    /* GHSA-5vrv-8j5h-h6h6 2504xx */
+    if (length >= message_length)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
+  
     /* Compression methods length - one byte. For now we only support the NULL method. */
     compression_methods_length = packet_buffer[length];
     length++;
@@ -338,9 +381,46 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
                 }
             }
         }
+        else
+        {
+            num_extensions = 0;
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+            no_extension = NX_TRUE;
+#endif
+        }
+    }
+    else
+    {
+        num_extensions = 0;
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+        no_extension = NX_TRUE;
+#endif
     }
 
-#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    if ((tls_session -> nx_secure_tls_1_3) && (no_extension == NX_TRUE))
+    {
+
+        /* Negotiate a version of TLS prior to TLS 1.3. */
+        if (tls_session -> nx_secure_tls_protocol_version_override == 0)
+        {
+            tls_session -> nx_secure_tls_1_3 = NX_FALSE;
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION)
+            tls_session -> nx_secure_tls_renegotation_enabled = NX_TRUE;
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
+
+            return(NX_SUCCESS);
+        }
+        else
+        {
+
+            /* Protocol version is overridden to TLS 1.3. */
+            return(NX_SECURE_TLS_UNSUPPORTED_TLS_VERSION);
+        }
+    }
+#endif
+
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 
     if ((tls_session -> nx_secure_tls_renegotiation_handshake) && (!tls_session -> nx_secure_tls_secure_renegotiation_verified))
     {
 
@@ -351,7 +431,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
     tls_session -> nx_secure_tls_secure_renegotiation_verified = NX_FALSE;
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 
     /* Get the local certificate. */
     if (tls_session -> nx_secure_tls_credentials.nx_secure_tls_active_certificate != NX_NULL)
@@ -407,7 +487,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
             return(NX_SECURE_TLS_NO_SUPPORTED_CIPHERS);
         }
     }
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
     /* Set our initial priority to the maximum value - the size of our ciphersuite crypto table. */
     ciphersuite_priority = (USHORT)(0xFFFFFFFF);
@@ -432,7 +512,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
         /* Save the first ciphersuite we find - assume cipher table is in priority order. */
         if ((status == NX_SUCCESS) && (new_ciphersuite_priority < ciphersuite_priority))
         {
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
             if (NX_SUCCESS == _nx_secure_tls_check_ciphersuite(ciphersuite_info, cert, selected_curve, cert_curve_supported))
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
             {
@@ -443,7 +523,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
             }
         }
 
-#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 
         if (cipher_entry == TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
         {
             if (tls_session -> nx_secure_tls_renegotiation_handshake)
@@ -515,7 +595,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_check_ciphersuite                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -554,7 +634,7 @@ USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_info,
                                              NX_SECURE_X509_CERT *cert, UINT selected_curve,
                                              UINT cert_curve_supported)
@@ -658,4 +738,4 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 
     return(NX_SUCCESS);
 }
-#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */

@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -24,7 +24,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_tcpserver.h                                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -42,6 +42,12 @@
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed packet leak issue,    */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            deprecated unused macros,   */
+/*                                            resulting in version 6.1.9  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported ECC configuration,*/
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -60,14 +66,17 @@
 #include "nx_secure_tls_api.h"
 #endif /* NX_WEB_HTTPS_ENABLE */
 
+/* Deprecated. This symbol is defined for compatibility. */
 #ifndef NX_TCPSERVER_ACCEPT_WAIT    
 #define NX_TCPSERVER_ACCEPT_WAIT 1
 #endif /* NX_TCPSERVER_ACCEPT_WAIT */
 
+/* Deprecated. This symbol is defined for compatibility. */
 #ifndef NX_TCPSERVER_DISCONNECT_WAIT    
 #define NX_TCPSERVER_DISCONNECT_WAIT 1
 #endif /* NX_TCPSERVER_DISCONNECT_WAIT */
 
+/* Deprecated. This symbol is defined for compatibility. */
 #ifndef NX_TCPSERVER_PRIORITY    
 #define NX_TCPSERVER_PRIORITY 4
 #endif /* NX_TCPSERVER_PRIORITY */
@@ -142,6 +151,9 @@ typedef struct NX_TCPSERVER_STRUCT
 #define nx_tcpserver_delete         _nx_tcpserver_delete
 #ifdef NX_TCPSERVER_ENABLE_TLS
 #define nx_tcpserver_tls_setup      _nx_tcpserver_tls_setup
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+#define nx_tcpserver_tls_ecc_setup  _nx_tcpserver_tls_ecc_setup
+#endif
 #endif
 
 #ifdef NX_TCPSERVER_ENABLE_TLS
@@ -149,6 +161,11 @@ UINT nx_tcpserver_tls_setup(NX_TCPSERVER *server_ptr, const NX_SECURE_TLS_CRYPTO
                             VOID *metadata_buffer, ULONG metadata_size, UCHAR* packet_buffer, UINT packet_buffer_size, NX_SECURE_X509_CERT *identity_certificate,
                             NX_SECURE_X509_CERT *trusted_certificates[], UINT trusted_certs_num, NX_SECURE_X509_CERT *remote_certificates[], UINT remote_certs_num,
                             UCHAR *remote_certificate_buffer, UINT remote_cert_buffer_size);
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+UINT nx_tcpserver_tls_ecc_setup(NX_TCPSERVER *server_ptr,
+                                const USHORT *supported_groups, USHORT supported_group_count,
+                                const NX_CRYPTO_METHOD **curves);
+#endif
 #endif
 
 UINT nx_tcpserver_create(NX_IP *ip_ptr, NX_TCPSERVER *server_ptr, CHAR *name, 
@@ -174,6 +191,11 @@ UINT _nx_tcpserver_tls_setup(NX_TCPSERVER *server_ptr, const NX_SECURE_TLS_CRYPT
                              VOID *metadata_buffer, ULONG metadata_size, UCHAR* packet_buffer, UINT packet_buffer_size, NX_SECURE_X509_CERT *identity_certificate,
                              NX_SECURE_X509_CERT *trusted_certificates[], UINT trusted_certs_num, NX_SECURE_X509_CERT *remote_certificates[], UINT remote_certs_num,
                              UCHAR *remote_certificate_buffer, UINT remote_cert_buffer_size);
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+UINT _nx_tcpserver_tls_ecc_setup(NX_TCPSERVER *server_ptr,
+                                 const USHORT *supported_groups, USHORT supported_group_count,
+                                 const NX_CRYPTO_METHOD **curves);
+#endif
 #endif
 
 UINT _nx_tcpserver_create(NX_IP *ip_ptr, NX_TCPSERVER *server_ptr, CHAR *name, 

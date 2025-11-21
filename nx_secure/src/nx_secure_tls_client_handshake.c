@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_client_handshake                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -60,7 +60,6 @@
 /*    _nx_secure_tls_generate_premaster_secret                            */
 /*                                          Generate premaster secret     */
 /*    _nx_secure_tls_handshake_hash_update  Update Finished hash          */
-/*    _nx_secure_tls_map_error_to_alert     Map internal error to alert   */
 /*    _nx_secure_tls_packet_allocate        Allocate internal TLS packet  */
 /*    _nx_secure_tls_process_certificate_request                          */
 /*                                          Process certificate request   */
@@ -74,7 +73,6 @@
 /*    _nx_secure_tls_process_serverhello    Process ServerHello           */
 /*    _nx_secure_tls_remote_certificate_free_all                          */
 /*                                          Free all remote certificates  */
-/*    _nx_secure_tls_send_alert             Send TLS alert                */
 /*    _nx_secure_tls_send_certificate       Send TLS certificate          */
 /*    _nx_secure_tls_send_certificate_verify                              */
 /*                                          Send certificate verify       */
@@ -107,6 +105,24 @@
 /*                                            fixed certificate buffer    */
 /*                                            allocation,                 */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
+/*  02-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            support for fragmented TLS  */
+/*                                            Handshake messages,         */
+/*                                            resulting in version 6.1.4  */
+/*  03-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.5  */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed duplicated alert,   */
+/*                                            resulting in version 6.1.12 */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_client_handshake(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -116,15 +132,12 @@ UINT _nx_secure_tls_client_handshake(NX_SECURE_TLS_SESSION *tls_session, UCHAR *
 UINT            status;
 UINT            temp_status;
 USHORT          message_type = NX_SECURE_TLS_INVALID_MESSAGE;
-USHORT          header_bytes;
+UINT            header_bytes;
 UINT            message_length;
 UINT            packet_buffer_length = data_length;
 UCHAR          *packet_start;
 NX_PACKET      *send_packet = NX_NULL;
 NX_PACKET_POOL *packet_pool;
-UINT            error_number;
-UINT            alert_number;
-UINT            alert_level;
 const NX_CRYPTO_METHOD
                *method_ptr = NX_NULL;
 
@@ -142,13 +155,24 @@ const NX_CRYPTO_METHOD
          * so we can hash it. */
         packet_start = packet_buffer;
 
-        /* First, process the handshake message to get our state and any data therein. */
-        _nx_secure_tls_process_handshake_header(packet_buffer, &message_type, &header_bytes, &message_length);
+        header_bytes = data_length;
 
-        /* Check for fragmented records. */
+        /* First, process the handshake message to get our state and any data therein. */
+        status = _nx_secure_tls_process_handshake_header(packet_buffer, &message_type, &header_bytes, &message_length);
+
+        if (status != NX_SECURE_TLS_SUCCESS)
+        {
+            return(status);
+        }
+
+        /* Check for fragmented message. */
         if((message_length + header_bytes) > data_length)
         {
-            /* Incomplete record! We need to obtain the next fragment. */
+            /* Incomplete message! A single message is fragmented across several records. We need to obtain the next fragment. */
+            tls_session -> nx_secure_tls_handshake_record_expected_length = message_length + header_bytes;
+
+            tls_session -> nx_secure_tls_handshake_record_fragment_state = NX_SECURE_TLS_HANDSHAKE_RECEIVED_FRAGMENT;
+
             return(NX_SECURE_TLS_HANDSHAKE_FRAGMENT_RECEIVED);
         }
 
@@ -255,6 +279,8 @@ const NX_CRYPTO_METHOD
                 {
                     tls_session -> nx_secure_tls_renegotiation_handshake = NX_TRUE;
 
+#ifndef NX_SECURE_DISABLE_X509
+
                     /* On a session resumption free all certificates for the new session.
                      * SESSION RESUMPTION: if session resumption is enabled, don't free!!
                      */
@@ -264,6 +290,9 @@ const NX_CRYPTO_METHOD
                     {
                         return(status);
                     }
+#else
+                    status = NX_SECURE_TLS_SUCCESS;
+#endif
                 }
                 else
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
@@ -289,29 +318,8 @@ const NX_CRYPTO_METHOD
         /* Check for errors in processing messages. */
         if (status != NX_SECURE_TLS_SUCCESS)
         {
-            /* Get our alert number and level from our status. */
-            error_number = status;
-            _nx_secure_tls_map_error_to_alert(error_number, &alert_number, &alert_level);
 
-            /* Release the protection before suspending on nx_packet_allocate. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-
-            status = _nx_secure_tls_packet_allocate(tls_session, packet_pool, &send_packet, wait_option);
-
-            /* Get the protection after nx_packet_allocate. */
-            tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-            if (status == NX_SUCCESS)
-            {
-                _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-                status = _nx_secure_tls_send_record(tls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
-
-                if (status != NX_SUCCESS)
-                {
-                    nx_secure_tls_packet_release(send_packet);
-                }
-            }
-            return(error_number);
+            return(status);
         }
 
         /* Now take any actions based on state set in the message processing. */
@@ -326,7 +334,6 @@ const NX_CRYPTO_METHOD
             /* This means an error was encountered at some point in processing a valid message. At this point
                the alert was sent, so just return a status indicating as much. */
             return(NX_SECURE_TLS_HANDSHAKE_FAILURE);
-            break;
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
         case NX_SECURE_TLS_CLIENT_STATE_HELLO_REQUEST:
             /* Server sent a hello request, indicating it wants to restart the handshake process with a new ClientHello. */
@@ -573,34 +580,11 @@ const NX_CRYPTO_METHOD
         }
 
         /* If we have an error at this point, we have experienced a problem in sending
-           handshake messages, which is some type of internal issue. Send an alert
-           back to the remote host indicating the error. */
+           handshake messages, which is some type of internal issue. */
         if (status != NX_SUCCESS)
         {
-            /* Get our alert number and level from our status. */
-            error_number = status;
-            _nx_secure_tls_map_error_to_alert(error_number, &alert_number, &alert_level);
 
-            /* Release the protection before suspending on nx_packet_allocate. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-
-            status = _nx_secure_tls_packet_allocate(tls_session, packet_pool, &send_packet, wait_option);
-
-            /* Get the protection after nx_packet_allocate. */
-            tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-            if (status == NX_SUCCESS)
-            {
-                _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-                status = _nx_secure_tls_send_record(tls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
-
-                if (status != NX_SUCCESS)
-                {
-                    nx_secure_tls_packet_release(send_packet);
-                }
-            }
-
-            return(error_number);
+            return(status);
         }
 
         /* Advance the buffer pointer past the message. */

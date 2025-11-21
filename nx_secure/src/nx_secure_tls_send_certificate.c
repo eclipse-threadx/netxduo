@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_certificate                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,11 +73,25 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            updated X.509 return value, */
+/*                                            resulting in version 6.1.6  */
+/*  04-25-2022     Zhen Kong                Modified comment(s), removed  */
+/*                                            unreachable error code,     */
+/*                                            resulting in version 6.1.11 */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.2.1  */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed packet buffer overrun,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_certificate(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
                                      ULONG wait_option)
 {
+#ifndef NX_SECURE_DISABLE_X509
 UINT                 length;
 UINT                 total_length;
 UCHAR                length_buffer[3];
@@ -86,7 +100,7 @@ NX_SECURE_X509_CERT *cert;
 INT                  compare_result = 0;
 UCHAR               *record_start;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-UINT                 extensions_length;
+USHORT               extensions_length;
 #endif
 
 
@@ -118,7 +132,7 @@ UINT                 extensions_length;
     /* See if this is a TLS client sending a certificate in response to a certificate request from
        the remote server. */
     if (tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_CLIENT &&
-        (status == NX_SECURE_TLS_CERTIFICATE_NOT_FOUND))
+        (status == NX_SECURE_X509_CERTIFICATE_NOT_FOUND))
     {
         /* If this is a TLS client, as per the RFC we can have no certificate assigned in which
            case our response to the server that has requested our certificate will contain
@@ -133,8 +147,10 @@ UINT                 extensions_length;
     {
         if (status)
         {
-            /* No certificate found, error! */
-            return(status);
+
+            /* _nx_secure_x509_local_device_certificate_get can only return
+                NX_SECURE_X509_CERTIFICATE_NOT_FOUND in this case. */
+            return(NX_SECURE_TLS_CERTIFICATE_NOT_FOUND);
         }
     }
 
@@ -209,17 +225,21 @@ UINT                 extensions_length;
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
         /* Check for TLS 1.3 extensions following each certificate. */
-        if(tls_session->nx_secure_tls_1_3)
+        if (tls_session -> nx_secure_tls_1_3)
         {
             extensions_length = 0;
+            NX_CHANGE_USHORT_ENDIAN(extensions_length);
 
             /* Add extension length to packet. */
-            send_packet -> nx_packet_append_ptr[0] = (UCHAR)((extensions_length & 0xFF00) >> 8);
-            send_packet -> nx_packet_append_ptr[1] = (UCHAR)(extensions_length & 0x00FF);
+            status = nx_packet_data_append(send_packet, &extensions_length,
+                                           sizeof(extensions_length),
+                                           tls_session -> nx_secure_tls_packet_pool,
+                                           wait_option);
+            if (status != NX_SUCCESS)
+            {
+                return(status);
+            }
 
-            /* Adjust pointer and length in packet according to extensions sent. */
-            send_packet -> nx_packet_append_ptr = send_packet -> nx_packet_append_ptr + 2;
-            send_packet -> nx_packet_length = send_packet -> nx_packet_length + (USHORT)(2);
             total_length += 2;
         }
 #endif
@@ -258,4 +278,11 @@ UINT                 extensions_length;
     record_start[2] = (UCHAR)(total_length & 0xFF);
 
     return(NX_SUCCESS);
+#else
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(send_packet);
+    NX_PARAMETER_NOT_USED(wait_option);
+
+    return(NX_NOT_SUPPORTED);
+#endif
 }

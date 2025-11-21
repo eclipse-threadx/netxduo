@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_renegotiate                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -87,13 +87,31 @@
 /*                                            supported chained packet,   */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed packet leak bug,      */
+/*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            option to disable client    */
+/*                                            initiated renegotiation,    */
+/*                                            resulting in version 6.1.9  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), changed  */
+/*                                            an error to assert,         */
+/*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), and      */
+/*                                            fixed renegotiation when    */
+/*                                            receiving in non-block mode,*/
+/*                                            resulting in version 6.2.0  */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 UINT _nx_secure_tls_session_renegotiate(NX_SECURE_TLS_SESSION *tls_session, UINT wait_option)
 {
 UINT       status = NX_NOT_SUCCESSFUL;
-NX_PACKET *incoming_packet;
+NX_PACKET *incoming_packet = NX_NULL;
 NX_PACKET *send_packet;
 
     /* Get the protection. */
@@ -144,7 +162,9 @@ NX_PACKET *send_packet;
 
         /* This is a renegotiation handshake so indicate that to the stack. */
         tls_session -> nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_RENEGOTIATING;
+        tls_session -> nx_secure_tls_local_initiated_renegotiation = NX_TRUE;
 
+#ifndef NX_SECURE_DISABLE_X509
         /* On a session resumption free all certificates for the new session.
          * SESSION RESUMPTION: if session resumption is enabled, don't free!!
          */
@@ -156,6 +176,7 @@ NX_PACKET *send_packet;
             tx_mutex_put(&_nx_secure_tls_protection);
             return(status);
         }
+#endif
 
         /* Populate our packet with clienthello data. */
         status = _nx_secure_tls_send_clienthello(tls_session, send_packet);
@@ -196,6 +217,17 @@ NX_PACKET *send_packet;
                 break;
             }
         }
+
+        if (incoming_packet != NX_NULL)
+        {
+            nx_secure_tls_packet_release(incoming_packet);
+        }
+
+        if (tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HANDSHAKE_FINISHED)
+        {
+            tls_session -> nx_secure_tls_local_initiated_renegotiation = NX_FALSE;
+            tls_session -> nx_secure_tls_renegotiation_handshake = NX_FALSE;
+        }
     }
 #endif
 
@@ -216,15 +248,19 @@ NX_PACKET *send_packet;
             return(status);
         }
 
+        /* We are requesting a renegotiation from the server side - we need to know if we requested
+           the renegotiation when the ClientHello comes in so we can reject client-initiated renegotiation
+           if the user so chooses. */
+        tls_session -> nx_secure_tls_server_renegotiation_requested = NX_TRUE;
+
         /* Populate our packet with HelloRequest data. */
         status = _nx_secure_tls_send_hellorequest(tls_session, send_packet);
+        NX_ASSERT(status == NX_SUCCESS);
 
-        if (status == NX_SUCCESS)
-        {
+        tls_session -> nx_secure_tls_local_initiated_renegotiation = NX_TRUE;
 
-            /* Send the HelloRequest to kick things off. */
-            status = _nx_secure_tls_send_handshake_record(tls_session, send_packet, NX_SECURE_TLS_HELLO_REQUEST, wait_option);
-        }
+        /* Send the HelloRequest to kick things off. */
+        status = _nx_secure_tls_send_handshake_record(tls_session, send_packet, NX_SECURE_TLS_HELLO_REQUEST, wait_option);
 
         /* If anything after the allocate fails, we need to release our packet. */
         if (status != NX_SUCCESS)
@@ -256,6 +292,17 @@ NX_PACKET *send_packet;
             {
                 break;
             }
+        }
+
+        if (incoming_packet != NX_NULL)
+        {
+            nx_secure_tls_packet_release(incoming_packet);
+        }
+
+        if (tls_session -> nx_secure_tls_server_state == NX_SECURE_TLS_SERVER_STATE_HANDSHAKE_FINISHED)
+        {
+            tls_session -> nx_secure_tls_local_initiated_renegotiation = NX_FALSE;
+            tls_session -> nx_secure_tls_renegotiation_handshake = NX_FALSE;
         }
     }
 #endif

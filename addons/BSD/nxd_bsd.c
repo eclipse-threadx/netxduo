@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 /**************************************************************************/
 /**************************************************************************/
@@ -27,6 +27,7 @@
 #include "nx_ipv6.h"
 #include "nx_ipv4.h"
 #include "nxd_bsd.h"
+#include "nx_link.h"
 
 #ifdef NX_BSD_ENABLE_DNS
 #include "nxd_dns.h"
@@ -36,7 +37,7 @@
 #include "nx_udp.h"
 #include "nx_igmp.h"
 #include "nx_system.h"
-#ifdef FEATURE_NX_IPV6 
+#ifdef FEATURE_NX_IPV6
 #include "nx_icmpv6.h"
 #endif
 #include "tx_timer.h"
@@ -93,19 +94,19 @@ TX_BLOCK_POOL           nx_bsd_socket_block_pool;
 
 /* Define the memory area for the socket block pool... use TCP socket size, since it is the larger.  */
 
-static UCHAR            nx_bsd_socket_pool_memory[NX_BSD_MAX_SOCKETS*(sizeof(NX_TCP_SOCKET)+sizeof(VOID *))];
+static ULONG            nx_bsd_socket_pool_memory[NX_BSD_MAX_SOCKETS * (sizeof(NX_TCP_SOCKET) + sizeof(VOID *)) / sizeof(ULONG)];
 
 /* Define the block pool that will be used to dynamically allocate addrinfo struct. */
 
 TX_BLOCK_POOL           nx_bsd_addrinfo_block_pool;
 
-/* Define the memory area for addrinfo pool. sizeof(addrinfo) is the MAX of: 
- * {sizeof(addrinfo)== 32, sizeof(sockaddr_in) == 16, or sizeof(sockaddr_in6)} = 28. 
- * Every address may be  mapped to 3 socktypes, SOCK_STREAM, SOCK_DGRAM and SOCK_RAW, 
+/* Define the memory area for addrinfo pool. sizeof(addrinfo) is the MAX of:
+ * {sizeof(addrinfo)== 32, sizeof(sockaddr_in) == 16, or sizeof(sockaddr_in6)} = 28.
+ * Every address may be  mapped to 3 socktypes, SOCK_STREAM, SOCK_DGRAM and SOCK_RAW,
  * 3 blocks for addrinfo) + 1 block for IP adddress = 4 blocks */
- 
-static UCHAR            nx_bsd_addrinfo_pool_memory[(NX_BSD_IPV4_ADDR_MAX_NUM + NX_BSD_IPV6_ADDR_MAX_NUM)* 4 
-                                                    *(sizeof(struct addrinfo) + sizeof(VOID *))];
+
+static ULONG            nx_bsd_addrinfo_pool_memory[(NX_BSD_IPV4_ADDR_MAX_NUM + NX_BSD_IPV6_ADDR_MAX_NUM) * 4
+                                                    *(sizeof(struct nx_bsd_addrinfo) + sizeof(VOID *)) / sizeof(ULONG)];
 
 #ifdef NX_BSD_ENABLE_DNS
 
@@ -116,11 +117,15 @@ extern NX_DNS *_nx_dns_instance_ptr;
 /* Define the block pool that will be used to dynamically allocate canonical name buffer. */
 TX_BLOCK_POOL           nx_bsd_cname_block_pool;
 
-/* Here we just support a CNAME per IP address. */                                                   
-static UCHAR            nx_bsd_cname_pool_memory[(NX_BSD_IPV4_ADDR_MAX_NUM + NX_BSD_IPV6_ADDR_MAX_NUM) * 
-                                                          (NX_DNS_NAME_MAX + 1)]; 
+/* Here we just support a CNAME per IP address. */
+static ULONG            nx_bsd_cname_pool_memory[(NX_BSD_IPV4_ADDR_MAX_NUM + NX_BSD_IPV6_ADDR_MAX_NUM) *
+                                                          (NX_DNS_NAME_MAX + 1) / sizeof(ULONG)];
 #endif /* NX_DNS_ENABLE_EXTENDED_RR_TYPES */
 #endif /* NX_BSD_ENABLE_DNS */
+
+#if (defined(NX_BSD_RAW_SUPPORT) || defined(NX_BSD_RAW_PPPOE_SUPPORT)) && defined(NX_ENABLE_VLAN)
+NX_LINK_RECEIVE_QUEUE  nx_bsd_socket_link_receive_queue[NX_MAX_IP_INTERFACES];
+#endif
 
 /* Buffer used to store IP address get from DNS. */
 static ULONG           nx_bsd_ipv4_addr_buffer[NX_BSD_IPV4_ADDR_PER_HOST];
@@ -139,7 +144,7 @@ static VOID  nx_bsd_tcp_socket_disconnect_notify(NX_TCP_SOCKET *socket_ptr);
 static VOID  nx_bsd_udp_receive_notify(NX_UDP_SOCKET *socket_ptr);
 #ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
 static UINT  nx_bsd_raw_packet_filter(NX_IP *ip_ptr, ULONG protocol, NX_PACKET *packet_ptr);
-#ifdef FEATURE_NX_IPV6 
+#ifdef FEATURE_NX_IPV6
 static VOID  _nxd_bsd_swap_ipv6_extension_headers(NX_PACKET *packet_ptr, UCHAR header_type);
 #endif /* FEATURE_NX_IPV6 */
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
@@ -156,10 +161,11 @@ static INT   nx_bsd_find_interface_by_source_addr(UINT addr_family, ULONG* ip_ad
 #ifndef NX_DISABLE_IPV4
 static VOID  _nxd_bsd_ipv4_packet_send(NX_PACKET *packet_ptr);
 #endif /* NX_DISABLE_IPV4 */
-static INT   nx_bsd_send_internal(INT sockID, const CHAR *msg, INT msgLength, INT flags, 
+static INT   nx_bsd_send_internal(INT sockID, const CHAR *msg, INT msgLength, INT flags,
                                   NXD_ADDRESS *dst_address, USHORT dst_port, UINT local_interface_index);
-
-#ifdef FEATURE_NX_IPV6 
+static INT   nx_bsd_recv_internal(INT sockID, struct nx_bsd_iovec *iov, size_t iovlen, INT flags,
+                                  struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen);
+#ifdef FEATURE_NX_IPV6
 static VOID  _nxd_bsd_ipv6_packet_send(NX_PACKET *packet_ptr, ULONG *src_addr, ULONG *dest_addr);
 #endif /* FEATURE_NX_IPV6 */
 
@@ -168,15 +174,21 @@ static INT   bsd_string_to_number(const CHAR *string, UINT *number);
 static ULONG _nx_bsd_string_length(CHAR * string);
 
 #ifdef NX_BSD_RAW_PPPOE_SUPPORT
-static INT   nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, 
-                                          INT flags,  struct sockaddr* destAddr, INT destAddrLen);
+static INT   nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength,
+                                          INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen);
 static UINT  nx_bsd_socket_create_id = 0;
 #endif /* NX_BSD_RAW_PPPOE_SUPPORT */
 
 #ifdef NX_BSD_RAW_SUPPORT
-static INT   _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, 
-                                              INT flags,  struct sockaddr* destAddr, INT destAddrLen);
+static INT   _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength,
+                                              INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen);
 static VOID  _nx_bsd_hardware_packet_received(NX_PACKET *packet_ptr, UCHAR *consumed);
+#ifdef NX_ENABLE_VLAN
+static UINT  _nx_bsd_ethernet_receive_notify(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
+                                             ULONG physical_address_msw, ULONG physical_address_lsw,
+                                             UINT packet_type, UINT header_size, VOID *context,
+                                             struct NX_LINK_TIME_STRUCT *time_ptr);
+#endif /* NX_ENABLE_VLAN */
 #endif /* NX_BSD_RAW_SUPPORT */
 static VOID  _nx_bsd_fast_periodic_timer_entry(ULONG id);
 
@@ -205,7 +217,7 @@ static struct NX_BSD_SERVICE_LIST  *_nx_bsd_serv_list_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    bsd_initialize                                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -255,15 +267,21 @@ static struct NX_BSD_SERVICE_LIST  *_nx_bsd_serv_list_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
+/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
+/*                                            added nx_link layer,        */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  bsd_initialize(NX_IP *default_ip, NX_PACKET_POOL *default_pool, CHAR *bsd_thread_stack_area, 
+INT  nx_bsd_initialize(NX_IP *default_ip, NX_PACKET_POOL *default_pool, CHAR *bsd_thread_stack_area,
                     ULONG bsd_thread_stack_size, UINT bsd_thread_priority)
 {
 
 INT         i;
 UINT        status;
-ULONG       info; 
+ULONG       info;
 
 #ifndef NX_ENABLE_EXTENDED_NOTIFY_SUPPORT
 
@@ -274,20 +292,20 @@ ULONG       info;
 #endif /* NX_ENABLE_EXTENDED_NOTIFY_SUPPORT */
 
     /* Create a block pool for dynamically allocating sockets.  */
-    status =  tx_block_pool_create(&nx_bsd_socket_block_pool, "NetX BSD Socket Block Pool", sizeof(NX_TCP_SOCKET), 
+    status =  tx_block_pool_create(&nx_bsd_socket_block_pool, "NetX BSD Socket Block Pool", sizeof(NX_TCP_SOCKET),
                                    nx_bsd_socket_pool_memory, sizeof(nx_bsd_socket_pool_memory));
 
     /* Determine if the pool was created.  */
     if (status)
     {
-    
+
         /* Error, return the error message.  */
         NX_BSD_ERROR(NX_BSD_BLOCK_POOL_ERROR, __LINE__);
         return(NX_BSD_BLOCK_POOL_ERROR);
     }
 
     /* Create a block pool for dynamically allocating addrinfo. */
-    status = tx_block_pool_create(&nx_bsd_addrinfo_block_pool, "NetX BSD Addrinfo Block Pool", sizeof(struct addrinfo),
+    status = tx_block_pool_create(&nx_bsd_addrinfo_block_pool, "NetX BSD Addrinfo Block Pool", sizeof(struct nx_bsd_addrinfo),
                                   nx_bsd_addrinfo_pool_memory, sizeof(nx_bsd_addrinfo_pool_memory));
 
     /* Determine if the pool was created. */
@@ -300,7 +318,7 @@ ULONG       info;
         /* Delete the block pool.  */
         tx_block_pool_delete(&nx_bsd_socket_block_pool);
         return(NX_BSD_BLOCK_POOL_ERROR);
-        
+
     }
 
 #if defined(NX_BSD_ENABLE_DNS) && defined (NX_DNS_ENABLE_EXTENDED_RR_TYPES)
@@ -319,7 +337,7 @@ ULONG       info;
         tx_block_pool_delete(&nx_bsd_socket_block_pool);
         tx_block_pool_delete(&nx_bsd_addrinfo_block_pool);
         return(NX_BSD_BLOCK_POOL_ERROR);
-        
+
     }
 #endif
 
@@ -327,7 +345,7 @@ ULONG       info;
 
     /* Create the BSD event flag group.   */
     status =  tx_event_flags_create(&nx_bsd_events, "NetX BSD Events");
-    
+
     /* Check the return status.  */
     if (status)
     {
@@ -345,11 +363,11 @@ ULONG       info;
 
     /* Set the array index to 0.  */
     nx_bsd_socket_array_index =  0;
-    
+
     /* Loop through the BSD socket array and clear it out!  */
     for (i = 0; i < NX_BSD_MAX_SOCKETS; i++)
     {
-    
+
         /* Clear the BSD socket structure.  */
         memset((VOID*) &nx_bsd_socket_array[i], 0, sizeof(NX_BSD_SOCKET));
     }
@@ -368,11 +386,11 @@ ULONG       info;
 
 #ifndef NX_BSD_TIMEOUT_PROCESS_IN_TIMER
     /* Create a thread for BSD socket features requiring periodic tasks.  */
-    info = 0 ; 
+    info = 0 ;
     status = tx_thread_create(&nx_bsd_task_thread, "BSD thread task", nx_bsd_thread_entry, info,
-                              bsd_thread_stack_area, bsd_thread_stack_size, bsd_thread_priority, 
+                              bsd_thread_stack_area, bsd_thread_stack_size, bsd_thread_priority,
                               bsd_thread_priority, 1, TX_AUTO_START);
-           
+
      if (status != TX_SUCCESS)
      {
          /* Delete the event flag group.  */
@@ -393,12 +411,12 @@ ULONG       info;
      }
 #else
 
-    info = 0 ; 
+    info = 0 ;
 
-    /* Create a one shot timer. Do not activate it. We will use it if 
+    /* Create a one shot timer. Do not activate it. We will use it if
        a socket being disconnected is NOT enabled for REUSEADDR socket option. */
-    status = tx_timer_create(&nx_bsd_timer, "BSD Timer", 
-                             nx_bsd_timer_entry, info,   
+    status = tx_timer_create(&nx_bsd_timer, "BSD Timer",
+                             nx_bsd_timer_entry, info,
                              NX_BSD_TIMER_RATE, NX_BSD_TIMER_RATE, TX_AUTO_START);
 
     if (status != TX_SUCCESS)
@@ -426,15 +444,34 @@ ULONG       info;
     }
 #endif
 
-#ifdef NX_BSD_RAW_SUPPORT
+#ifdef NX_BSD_RAW_SUPPORT 
+#ifdef NX_ENABLE_VLAN
+
+    /* set link layer receive notification */
+    for(i = 0; i< NX_MAX_IP_INTERFACES; i++)
+    {
+
+        status = nx_link_packet_receive_callback_add(default_ip,
+                                                     i,
+                                                     &nx_bsd_socket_link_receive_queue[i],
+                                                     NX_LINK_PACKET_TYPE_ALL,
+                                                     _nx_bsd_ethernet_receive_notify,
+                                                     NX_NULL);
+        if (status != NX_SUCCESS)
+        {
+            return(status);
+        }
+    }
+#else
     _nx_driver_hardware_packet_received_callback = _nx_bsd_hardware_packet_received;
+#endif /* NX_ENABLE_VLAN */
 #endif /* NX_BSD_RAW_SUPPORT */
 
     /* Calculate BSD system timer rate. */
     nx_bsd_timer_rate = (NX_IP_PERIODIC_RATE + (NX_IP_FAST_TIMER_RATE - 1)) / NX_IP_FAST_TIMER_RATE;
 
-    /* Return success!  */    
-    return(NX_SOC_OK);   
+    /* Return success!  */
+    return(NX_SOC_OK);
 }
 
 
@@ -443,7 +480,7 @@ ULONG       info;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_bsd_timeout_process                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -492,7 +529,7 @@ NX_BSD_SOCKET  *bsd_socket_ptr;
 
    /* Obtain the BSD lock. */
    status = tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);
-   
+
    if(status)
    {
        /* Mutex operation failed.  This should be fatal. */
@@ -516,7 +553,7 @@ NX_BSD_SOCKET  *bsd_socket_ptr;
            continue;
        }
 
-       /* Check for sockets trying to make a TCP connection.  
+       /* Check for sockets trying to make a TCP connection.
           Detect that the socket state is CLOSED, which is an indication
           that the attempted connection failed, and we shall signal any pending
           select on the socket. */
@@ -529,7 +566,7 @@ NX_BSD_SOCKET  *bsd_socket_ptr;
 
                /* Yes. Set up a local pointer to the BSD socket. */
                bsd_socket_ptr = &nx_bsd_socket_array[i];
-               
+
                /* Is this a secondary socket (passive open)? */
                if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_SECONDARY_SOCKET)
                {
@@ -549,10 +586,10 @@ NX_BSD_SOCKET  *bsd_socket_ptr;
                                                      bsd_socket_ptr -> nx_bsd_socket_tcp_socket);
 
                        /* Relisten on this socket. */
-                       status = nx_tcp_server_socket_relisten(nx_bsd_default_ip, 
+                       status = nx_tcp_server_socket_relisten(nx_bsd_default_ip,
                                                               bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_port,
                                                               bsd_socket_ptr -> nx_bsd_socket_tcp_socket);
-                       /* Set the socket to accept the connection. */                       
+                       /* Set the socket to accept the connection. */
                        nx_tcp_server_socket_accept(bsd_socket_ptr -> nx_bsd_socket_tcp_socket, NX_NO_WAIT);
 
                        /* Check the result of the relisten call. */
@@ -564,24 +601,24 @@ NX_BSD_SOCKET  *bsd_socket_ptr;
                        else if(status != NX_SUCCESS)
                        {
 
-                                
-                           /* Failed the relisten on the secondary socket.  Set the error code on the 
+
+                           /* Failed the relisten on the secondary socket.  Set the error code on the
                               master socket, and wake it up. */
-                           
+
                            master_socket_index = (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_master_socket_id;
-                           
+
                            nx_bsd_socket_array[master_socket_index].nx_bsd_socket_status_flags |= NX_BSD_SOCKET_ERROR;
                            nx_bsd_set_error_code(&nx_bsd_socket_array[master_socket_index], status);
-                           
+
                            nx_bsd_select_wakeup((UINT)master_socket_index, (FDSET_READ | FDSET_WRITE | FDSET_EXCEPTION));
                        }
-                   }                       
+                   }
                }
                else
                {
                    /* The underlying socket is closed.  This indicates an error, and since is a non-blocking
                       socket, we need to wake up the corresponding thread. */
-               
+
                    /* Mark this socket as error, and remove the CONNECT and INPROGRESS flags */
                    nx_bsd_socket_array[i].nx_bsd_socket_status_flags |= NX_BSD_SOCKET_ERROR;
                    nx_bsd_socket_array[i].nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_CONNECTION_INPROGRESS);
@@ -605,7 +642,7 @@ NX_BSD_SOCKET  *bsd_socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_bsd_thread_entry                                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -657,14 +694,14 @@ VOID nx_bsd_thread_entry(ULONG info)
         nx_bsd_timeout_process();
     }
 }
-#endif                      
+#endif
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    socket                                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -709,9 +746,12 @@ VOID nx_bsd_thread_entry(ULONG info)
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  socket(INT protocolFamily, INT type, INT protocol)
+INT  nx_bsd_socket(INT protocolFamily, INT type, INT protocol)
 {
 
 INT             i;
@@ -750,10 +790,10 @@ UINT            index;
     {
 
         /* Set the socket error. */
-        set_errno(EAFNOSUPPORT);
+        nx_bsd_set_errno(EAFNOSUPPORT);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Check for a supported socket type.   */
@@ -765,12 +805,12 @@ UINT            index;
     {
 
         /* Set the socket error. */
-        set_errno(EPROTOTYPE);
+        nx_bsd_set_errno(EPROTOTYPE);
 
         /* Invalid type.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
-    }    
+        return(NX_SOC_ERROR);
+    }
 
 #if defined(NX_BSD_RAW_SUPPORT) || defined(NX_BSD_RAW_PPPOE_SUPPORT)
     /* An extra check when BSD RAW Packet type is enabled:
@@ -778,12 +818,12 @@ UINT            index;
     if((protocolFamily == AF_PACKET) && (type != SOCK_RAW))
     {
         /* Set the socket error. */
-        set_errno(EPROTOTYPE);
+        nx_bsd_set_errno(EPROTOTYPE);
 
         /* Invalid type.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
-    }    
+        return(NX_SOC_ERROR);
+    }
 #endif /* defined(NX_BSD_RAW_SUPPORT) || defined(NX_BSD_RAW_PPPOE_SUPPORT) */
 
 
@@ -795,11 +835,11 @@ UINT            index;
     {
 
         /* Set the socket error. */
-        set_errno(EACCES);
+        nx_bsd_set_errno(EACCES);
 
         /* Error getting the protection mutex.  */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Check whether IP fast timer is created or not. */
@@ -817,7 +857,7 @@ UINT            index;
     }
 
     /* Now find a free slot in the BSD socket array.  */
-    for (i = 0; i < NX_BSD_MAX_SOCKETS; i++)  
+    for (i = 0; i < NX_BSD_MAX_SOCKETS; i++)
     {
 
         /* See if this entry is available.  Check the in use flag. */
@@ -832,7 +872,7 @@ UINT            index;
 
             /* Mark this socket as in-use.  */
             nx_bsd_socket_array[nx_bsd_socket_array_index].nx_bsd_socket_status_flags |=  NX_BSD_SOCKET_IN_USE;
-            
+
             /* Get out of the loop.  */
             break;
         }
@@ -845,13 +885,13 @@ UINT            index;
             /* Check if we need to wrap around to the start of the socket table.  */
             if (nx_bsd_socket_array_index >= NX_BSD_MAX_SOCKETS)
             {
-            
+
                 /* Reset the index to 0.  */
                 nx_bsd_socket_array_index =  0;
             }
         }
     }
-    
+
     /* Check if a free socket was found.  */
     if (i >= NX_BSD_MAX_SOCKETS)
     {
@@ -859,13 +899,13 @@ UINT            index;
         /* No, set the error status and return. */
 
         /* Set the socket error. */
-        set_errno(ENFILE);
+        nx_bsd_set_errno(ENFILE);
 
         /* Release the mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-            
+
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Mark the location of the free socket. */
@@ -877,7 +917,7 @@ UINT            index;
     /* Check if we need to wrap around to the start of the table.  */
     if (nx_bsd_socket_array_index >= NX_BSD_MAX_SOCKETS)
     {
-            
+
         /* Reset the index to 0.  */
         nx_bsd_socket_array_index =  0;
     }
@@ -890,26 +930,26 @@ UINT            index;
 
     if ((type == SOCK_STREAM) || (type == SOCK_DGRAM))
     {
-    
+
         /* Allocate a socket from the block pool.  */
         status =  tx_block_allocate(&nx_bsd_socket_block_pool, &socket_memory, NX_BSD_TIMEOUT);
-        
+
         /* Check for error status.  */
         if (status != TX_SUCCESS)
         {
-    
+
             /* Set the socket error. */
-            set_errno(ENOMEM); 
-    
+            nx_bsd_set_errno(ENOMEM);
+
             /* Clear the allocated internal BSD socket.  */
             bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_IN_USE);
-     
+
             /* Release the mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
-                
+
             /* Error getting NetX socket memory.  */
             NX_BSD_ERROR(NX_BSD_BLOCK_POOL_ERROR, __LINE__);
-            return(NX_SOC_ERROR); 
+            return(NX_SOC_ERROR);
         }
 
         /* Clear the socket memory.  */
@@ -920,29 +960,29 @@ UINT            index;
     /* Is this a stream socket e.g. TCP?  */
     if (type == SOCK_STREAM)
     {
-        bsd_socket_ptr -> nx_bsd_socket_protocol = NX_PROTOCOL_TCP;    
-    
+        bsd_socket_ptr -> nx_bsd_socket_protocol = NX_PROTOCOL_TCP;
+
         /* Mark the master/secondary socket id as invalid. */
         (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_master_socket_id = NX_BSD_MAX_SOCKETS;
         (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id = NX_BSD_MAX_SOCKETS;
 
         /* Yes, allocate memory for a TCP socket.  */
         tcp_socket_ptr =  (NX_TCP_SOCKET *) socket_memory;
-    
+
         /* Create a NetX TCP socket. */
-        /* Note that the nx_bsd_tcp_socket_disconnect_notify is invoked when an 
-           established connection is disconnected.  
+        /* Note that the nx_bsd_tcp_socket_disconnect_notify is invoked when an
+           established connection is disconnected.
            The disconnect_complete_notify is called for all types of disconnect,
            including the ones covered by tcp_socket_disconnect_notify. */
-           
-        status =  nx_tcp_socket_create(nx_bsd_default_ip, tcp_socket_ptr, "NetX BSD TCP Socket", 
+
+        status =  nx_tcp_socket_create(nx_bsd_default_ip, tcp_socket_ptr, "NetX BSD TCP Socket",
                                        NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, NX_BSD_TCP_WINDOW, NX_NULL,
                                        nx_bsd_tcp_socket_disconnect_notify);
 
         /* Check for a successful status.  */
         if (status == NX_SUCCESS)
         {
-            
+
             /* Register a receive notify callback.  */
             status =  nx_tcp_socket_receive_notify(tcp_socket_ptr, nx_bsd_tcp_receive_notify);
 
@@ -951,7 +991,7 @@ UINT            index;
             {
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);
 
                 /* Release the allocated socket memory block.  */
                 tx_block_release(socket_memory);
@@ -961,7 +1001,7 @@ UINT            index;
 
                 /* Error getting NetX socket memory.  */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return(NX_SOC_ERROR); 
+                return(NX_SOC_ERROR);
             }
 
 #ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
@@ -975,8 +1015,8 @@ UINT            index;
             tcp_socket_ptr -> nx_tcp_socket_keepalive_enabled = NX_FALSE;
 #endif /* NX_ENABLE_TCP_KEEPALIVE */
 
-            /* Set the socket reuse feature to enabled. This is the default NetX socket behavior. */ 
-            bsd_socket_ptr -> nx_bsd_socket_option_flags |= NX_BSD_SOCKET_ENABLE_OPTION_REUSEADDR; 
+            /* Set the socket reuse feature to enabled. This is the default NetX socket behavior. */
+            bsd_socket_ptr -> nx_bsd_socket_option_flags |= NX_BSD_SOCKET_ENABLE_OPTION_REUSEADDR;
 
 #ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
             /* Register an establish notify callback for the specified server socket with NetX.  */
@@ -1006,13 +1046,13 @@ UINT            index;
         /* Make a double circular list. */
         bsd_socket_ptr -> nx_bsd_socket_next = bsd_socket_ptr;
         bsd_socket_ptr -> nx_bsd_socket_previous = bsd_socket_ptr;
-    
+
         /* Allocate memory for a UDP socket.  */
         udp_socket_ptr =  (NX_UDP_SOCKET *) socket_memory;
 
         /* Create a NetX UDP socket */
-        status =  nx_udp_socket_create(nx_bsd_default_ip, udp_socket_ptr, "NetX BSD UDP Socket", 
-                                       NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, 
+        status =  nx_udp_socket_create(nx_bsd_default_ip, udp_socket_ptr, "NetX BSD UDP Socket",
+                                       NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE,
                                        (nx_bsd_default_packet_pool -> nx_packet_pool_total)/8+1);
 
         /* Check for successful result. */
@@ -1021,11 +1061,11 @@ UINT            index;
 
             /* Register a receive notify callback.  */
             status = nx_udp_socket_receive_notify(udp_socket_ptr, nx_bsd_udp_receive_notify);
-            
+
             /* Check for errors.  */
             if (status != NX_SUCCESS)
             {
-    
+
                 /* Release the allocated socket memory block.  */
                 tx_block_release(socket_memory);
 
@@ -1033,16 +1073,16 @@ UINT            index;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
-    
+                nx_bsd_set_errno(EINVAL);
+
                 /* Error getting NetX socket memory.  */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return(NX_SOC_ERROR); 
+                return(NX_SOC_ERROR);
             }
-    
+
             /* Save the UDP pointer in the BSD socket.  */
             bsd_socket_ptr -> nx_bsd_socket_udp_socket =  udp_socket_ptr;
-    
+
             /* Set the reserved UDP socket pointer back to the BSD socket.  */
             udp_socket_ptr -> nx_udp_socket_reserved_ptr =  (VOID *) (i + 0x00010000);
         }
@@ -1059,17 +1099,17 @@ UINT            index;
         {
             /* No, Enable raw socket handling in NetX Duo. */
             status = nx_ip_raw_packet_enable(nx_bsd_default_ip);
-    
+
             if (status != NX_SUCCESS)
             {
 
                 /* Release the mutex.  */
                 tx_mutex_put(nx_bsd_protection_ptr);
 
-                set_errno(EPROTONOSUPPORT);
+                nx_bsd_set_errno(EPROTONOSUPPORT);
 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return NX_SOC_ERROR; 
+                return NX_SOC_ERROR;
             }
         }
 
@@ -1089,11 +1129,11 @@ UINT            index;
                 /* Release the mutex.  */
                 tx_mutex_put(nx_bsd_protection_ptr);
 
-                set_errno(EPROTONOSUPPORT);
+                nx_bsd_set_errno(EPROTONOSUPPORT);
 
                 /* No, return error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return NX_SOC_ERROR; 
+                return NX_SOC_ERROR;
             }
         }
 
@@ -1101,7 +1141,7 @@ UINT            index;
         if(protocolFamily == AF_INET6)
         {
             bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_RX_NO_HDR;
-        }            
+        }
 
         /* Set the raw socket protocol to the BSD raw socket. */
         bsd_socket_ptr -> nx_bsd_socket_protocol = (USHORT)protocol;
@@ -1109,7 +1149,7 @@ UINT            index;
 
         /* Calculate the hash index in the raw socket protocol table. */
         index = (UINT) ((protocol + (protocol >> 8)) & NX_BSD_SOCKET_RAW_PROTOCOL_TABLE_MASK);
-        
+
         /* Determine if the list is NULL. */
         if(nx_bsd_socket_raw_protocol_table[index])
         {
@@ -1142,14 +1182,14 @@ UINT            index;
     }
 #endif  /* NX_ENABLE_IP_RAW_PACKET_FILTER || NX_BSD_RAW_PPPOE_SUPPORT || NX_BSD_RAW_SUPPORT */
 
-    else  
+    else
     {
         /* Not a supported socket type.   */
-       set_errno(EOPNOTSUPP);
+       nx_bsd_set_errno(EOPNOTSUPP);
 
         /* Invalid type.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Set the protocol family: AF_INET or AF_INET6.   */
@@ -1158,14 +1198,14 @@ UINT            index;
     /* For UDP and RAW sockets, set the maximum receive queue depth. */
     if(bsd_socket_ptr -> nx_bsd_socket_protocol != NX_PROTOCOL_TCP)
     {
-    
+
         bsd_socket_ptr -> nx_bsd_socket_received_packet_count_max = NX_BSD_SOCKET_QUEUE_MAX;
     }
 
     /* Check for error creating the NetX Duo socket.  */
     if (status != NX_SUCCESS)
     {
-    
+
         /* Release the BSD protection.  */
 
         /* Clear the BSD socket in use flag.  */
@@ -1181,11 +1221,11 @@ UINT            index;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         /* Error present, return error code.  */
         NX_BSD_ERROR(status, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Release the mutex.  */
@@ -1193,7 +1233,7 @@ UINT            index;
 
     /* Return success!  */
     return(i + NX_BSD_SOCKFD_START);
-}      
+}
 
 
 /**************************************************************************/
@@ -1201,7 +1241,7 @@ UINT            index;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    connect                                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1210,7 +1250,7 @@ UINT            index;
 /*                                                                        */
 /*    Establishes a connection between a client socket and a remote server*/
 /*    socket associated with the remote address, if any. Upon returning   */
-/*    successfully, the given socket's local and remote IP address and    */    
+/*    successfully, the given socket's local and remote IP address and    */
 /*    port information are filled in. If the socket was not previously    */
 /*    bound to a local port, one is assigned randomly.                    */
 /*                                                                        */
@@ -1259,9 +1299,12 @@ UINT            index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  connect(INT sockID, struct sockaddr *remoteAddress, INT addressLength)
+INT  nx_bsd_connect(INT sockID, struct nx_bsd_sockaddr *remoteAddress, INT addressLength)
 {
 UINT                status;
 NX_TCP_SOCKET       *tcp_socket_ptr;
@@ -1275,7 +1318,7 @@ ULONG               actual_status;
     {
 
         /* Set the socket error. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1291,9 +1334,9 @@ ULONG               actual_status;
     /* Check the status.  */
     if (status != NX_SUCCESS)
     {
-    
+
         /* Set the socket error. */
-        set_errno(EFAULT);
+        nx_bsd_set_errno(EFAULT);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1306,16 +1349,16 @@ ULONG               actual_status;
     /* Make sure the socket is valid. */
     if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
     {
-        
+
         /* Socket is no longer in use.   */
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
-    }    
+    }
 
     /* Obtain the BSD protection.  */
     status =  tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);
@@ -1323,17 +1366,17 @@ ULONG               actual_status;
     /* Check the status.  */
     if (status != NX_SUCCESS)
     {
-        
+
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Check whether supplied address structure and length is valid */
-    if (remoteAddress == NX_NULL ) 
+    if (remoteAddress == NX_NULL )
     {
 
         /* For UDP socket or RAW socket, a NULL remoteAddress dis-associate
@@ -1342,7 +1385,7 @@ ULONG               actual_status;
         {
             memset(&bsd_socket_ptr -> nx_bsd_socket_peer_ip, 0, sizeof(NXD_ADDRESS));
             bsd_socket_ptr -> nx_bsd_socket_peer_port = 0;
-            
+
             /* Clear the connect flag. */
             bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_CONNECTED);
 
@@ -1362,7 +1405,7 @@ ULONG               actual_status;
             /* Release the mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EAFNOSUPPORT);
+            nx_bsd_set_errno(EAFNOSUPPORT);
 
             /* Return an error. */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1373,17 +1416,17 @@ ULONG               actual_status;
 
     /* Check if the remote address family matches the local BSD socket address family. */
     if((remoteAddress -> sa_family != bsd_socket_ptr -> nx_bsd_socket_family) ||
-       ((remoteAddress -> sa_family == AF_INET) && (addressLength != sizeof(struct sockaddr_in))) ||
-       ((remoteAddress -> sa_family == AF_INET6) && (addressLength != sizeof(struct sockaddr_in6))))
+       ((remoteAddress -> sa_family == AF_INET) && (addressLength != sizeof(struct nx_bsd_sockaddr_in))) ||
+       ((remoteAddress -> sa_family == AF_INET6) && (addressLength != sizeof(struct nx_bsd_sockaddr_in6))))
     {
-        
+
         /* Mismatch! */
 
         /* Release the mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EAFNOSUPPORT);  
+        nx_bsd_set_errno(EAFNOSUPPORT);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(ERROR);
@@ -1397,12 +1440,12 @@ ULONG               actual_status;
         /* This is an IPv4 socket type. */
 
         /* Set the UDP remote host IP address and port for the UDP 'connection'; for NetX Duo
-           set the IP version. */ 
-        /* NetX API expects multi byte values to be in host byte order. 
+           set the IP version. */
+        /* NetX API expects multi byte values to be in host byte order.
            Therefore ntohl/s are used to make the conversion. */
         bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_version = NX_IP_VERSION_V4;
-        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v4 =  htonl(((struct sockaddr_in *) remoteAddress ) -> sin_addr.s_addr);  
-        bsd_socket_ptr -> nx_bsd_socket_peer_port =  htons(((struct sockaddr_in *) remoteAddress ) -> sin_port);
+        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v4 =  htonl(((struct nx_bsd_sockaddr_in *) remoteAddress ) -> sin_addr.s_addr);
+        bsd_socket_ptr -> nx_bsd_socket_peer_port =  htons(((struct nx_bsd_sockaddr_in *) remoteAddress ) -> sin_port);
     }
     else
 #endif /* NX_DISABLE_IPV4 */
@@ -1413,28 +1456,28 @@ ULONG               actual_status;
 
         /* This is an IPv6 enabled socket family type). */
         bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_version = NX_IP_VERSION_V6;
-        /* NetX API expects multi byte values to be in host byte order. 
+        /* NetX API expects multi byte values to be in host byte order.
            Therefore ntohl/s are used to make the conversion. */
         /* Get remote address and port. */
-        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[0] = htonl(((struct sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[0]);
-        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[1] = htonl(((struct sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[1]);
-        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[2] = htonl(((struct sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[2]);
-        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[3] = htonl(((struct sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[3]);
+        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[0] = htonl(((struct nx_bsd_sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[0]);
+        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[1] = htonl(((struct nx_bsd_sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[1]);
+        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[2] = htonl(((struct nx_bsd_sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[2]);
+        bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[3] = htonl(((struct nx_bsd_sockaddr_in6*)remoteAddress) -> sin6_addr._S6_un._S6_u32[3]);
 
-        bsd_socket_ptr -> nx_bsd_socket_peer_port =  htons(((struct sockaddr_in6 *) remoteAddress ) -> sin6_port);
+        bsd_socket_ptr -> nx_bsd_socket_peer_port =  htons(((struct nx_bsd_sockaddr_in6 *) remoteAddress ) -> sin6_port);
 
     }
     else
 #endif /* FEATURE_NX_IPV6 */
     {
-        
+
         /* Address family not supported. */
 
         /* Release the mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EAFNOSUPPORT);  
+        nx_bsd_set_errno(EAFNOSUPPORT);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(ERROR);
@@ -1460,10 +1503,10 @@ ULONG               actual_status;
 
                 /* Release the mutex.  */
                 tx_mutex_put(nx_bsd_protection_ptr);
-                
+
                 /* Set the socket error based on NetX error status return. */
                 nx_bsd_set_error_code(bsd_socket_ptr, status);
-                
+
                 /* Return an error.  */
                 NX_BSD_ERROR(ERROR, __LINE__);
                 return(ERROR);
@@ -1478,7 +1521,7 @@ ULONG               actual_status;
 
        /* Mark the socket as connected. */
        bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_CONNECTED;
-       
+
        /* Release the mutex.  */
        tx_mutex_put(nx_bsd_protection_ptr);
 
@@ -1494,11 +1537,11 @@ ULONG               actual_status;
            transmit, and also limit the reception of data from that remote address. */
 
         /* Mark the socket as connected. */
-        bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_CONNECTED;                
+        bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_CONNECTED;
 
         /* Release the mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-        
+
         /* Return successful status.  */
         return(NX_SOC_OK);
     }
@@ -1509,72 +1552,72 @@ ULONG               actual_status;
     if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED)
     {
 
-        /* If INPROGRESS is set, clear the INPROGRESS flag and return OK. 
+        /* If INPROGRESS is set, clear the INPROGRESS flag and return OK.
            The INPROGRESS flag needs to be cleared so the next connect call would return EISCONN */
         if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTION_INPROGRESS)
         {
 
             bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_CONNECTION_INPROGRESS);
-        
+
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
 
-            return(NX_SOC_OK); 
+            return(NX_SOC_OK);
         }
 
         /* Already connected. */
-        set_errno(EISCONN);
-        
+        nx_bsd_set_errno(EISCONN);
+
         tx_mutex_put(nx_bsd_protection_ptr);
-                
+
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
 
     }
 
     /* If the socket is marked as EINPROGRESS, return EALREADY. */
     if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTION_INPROGRESS)
     {
-        
 
-        set_errno(EALREADY);
-        
+
+        nx_bsd_set_errno(EALREADY);
+
         /* Release the protection mutex.  */
-        tx_mutex_put(nx_bsd_protection_ptr);            
+        tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
-            
+        return(NX_SOC_ERROR);
+
     }
     /* If the socket has an error */
-    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) 
-    {                                                                        
-        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;    
+    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
+    {
+        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;
 
         /* Now clear the error code. */
         bsd_socket_ptr -> nx_bsd_socket_error_code = 0;
-        
-        /* Clear the error flag.  The application is expected to close the socket at this point.*/  
-        bsd_socket_ptr -> nx_bsd_socket_status_flags = 
-            bsd_socket_ptr -> nx_bsd_socket_status_flags & ((ULONG)(~NX_BSD_SOCKET_ERROR)); 
-                                                                             
-        set_errno(errcode);                                                  
-                                                                             
-        /* Release the protection mutex.  */                                  
-        tx_mutex_put(nx_bsd_protection_ptr);                                     
-                                                                              
-        /* Return an error.  */                                               
-        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
-                                                                              
-        /* At this point the error flag is cleared.  Application should       
-           detect and handle the error codition. This socket is still bound   
-           to the port (either the application called bind(), or a bind       
-           operation was executed as part of the connect call) is able to     
-           handle another "connect" call, or be closed. */                    
-        return(NX_SOC_ERROR);                                                 
-    }                                                                        
+
+        /* Clear the error flag.  The application is expected to close the socket at this point.*/
+        bsd_socket_ptr -> nx_bsd_socket_status_flags =
+            bsd_socket_ptr -> nx_bsd_socket_status_flags & ((ULONG)(~NX_BSD_SOCKET_ERROR));
+
+        nx_bsd_set_errno(errcode);
+
+        /* Release the protection mutex.  */
+        tx_mutex_put(nx_bsd_protection_ptr);
+
+        /* Return an error.  */
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+
+        /* At this point the error flag is cleared.  Application should
+           detect and handle the error codition. This socket is still bound
+           to the port (either the application called bind(), or a bind
+           operation was executed as part of the connect call) is able to
+           handle another "connect" call, or be closed. */
+        return(NX_SOC_ERROR);
+    }
 
     /* Set a NetX tcp pointer.  */
     tcp_socket_ptr =  bsd_socket_ptr -> nx_bsd_socket_tcp_socket;
@@ -1605,7 +1648,7 @@ ULONG               actual_status;
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
 
             /* Release the protection mutex.  */
-            tx_mutex_put(nx_bsd_protection_ptr);            
+            tx_mutex_put(nx_bsd_protection_ptr);
 
             return(NX_SOC_ERROR);
         }
@@ -1615,7 +1658,7 @@ ULONG               actual_status;
         bsd_socket_ptr -> nx_bsd_socket_local_port = (USHORT)tcp_socket_ptr -> nx_tcp_socket_port;
         bsd_socket_ptr -> nx_bsd_socket_local_bind_interface = NX_BSD_LOCAL_IF_INADDR_ANY;
         bsd_socket_ptr -> nx_bsd_socket_local_bind_interface_index = NX_BSD_LOCAL_IF_INADDR_ANY;
-        
+
     }
 
     /* Mark this BSD socket as busy.  */
@@ -1635,9 +1678,9 @@ ULONG               actual_status;
            so the nx_tcp_client_socket_connect can suspend waiting
            for a connection. */
         timeout = NX_WAIT_FOREVER;
-        tx_mutex_put(nx_bsd_protection_ptr);            
-    }        
-    
+        tx_mutex_put(nx_bsd_protection_ptr);
+    }
+
     /* Make the connection. */
     status =  nxd_tcp_client_socket_connect(tcp_socket_ptr, &(bsd_socket_ptr -> nx_bsd_socket_peer_ip), bsd_socket_ptr -> nx_bsd_socket_peer_port, timeout);
     if(timeout != 0)
@@ -1645,14 +1688,14 @@ ULONG               actual_status;
         /* The mutex was released prior to the call.  Accquire the mutex
            again. */
         tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);
-        
+
         /* Verify that the socket is still valid. */
         if(!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
         {
             /* The socket is no longer in use. */
 
             /* Set the socket error code. */
-            set_errno(EBADF);
+            nx_bsd_set_errno(EBADF);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -1665,11 +1708,11 @@ ULONG               actual_status;
         if (status == NX_NOT_CONNECTED)
         {
 
-            if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) || 
+            if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) ||
                 (tcp_socket_ptr -> nx_tcp_socket_timeout_retries >= tcp_socket_ptr -> nx_tcp_socket_timeout_max_retries))
             {
 
-                /* Connect timeouts since NX_BSD_SOCKET_ERROR is not set or 
+                /* Connect timeouts since NX_BSD_SOCKET_ERROR is not set or
                  * number of timeout retry has been exceeded. */
                 status = NX_WAIT_ABORTED;
             }
@@ -1694,7 +1737,7 @@ ULONG               actual_status;
             /* Clear the busy flag.  */
             bsd_socket_ptr -> nx_bsd_socket_busy =  TX_NULL;
         }
-        
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
@@ -1717,13 +1760,13 @@ ULONG               actual_status;
     /* Make sure thread making the bind call is the current thread.  */
     if (bsd_socket_ptr -> nx_bsd_socket_busy == tx_thread_identify())
     {
-    
+
         /* OK to clear the busy flag.  */
         bsd_socket_ptr -> nx_bsd_socket_busy =  TX_NULL;
 
         /* Check if the connect call was successful.  */
         if (status == NX_SUCCESS)
-        {    
+        {
 
             /* It was. Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -1731,10 +1774,10 @@ ULONG               actual_status;
             /* Successful connection. Return the success status.  */
             return(NX_SOC_OK);
         }
-    }    
-    
+    }
+
     /* Error condition: the thread that was executing connect is not the current thread. */
-    
+
     /* Clear the connected flags and peer infomration .*/
     bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_CONNECTED);
     bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_CONNECTION_REQUEST);
@@ -1745,19 +1788,19 @@ ULONG               actual_status;
     tx_mutex_put(nx_bsd_protection_ptr);
 
     /* Set the socket error. */
-    set_errno(EINTR); 
+    nx_bsd_set_errno(EINTR);
 
-    /* Return an error.  */        
+    /* Return an error.  */
     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
     return(NX_SOC_ERROR);
-} 
+}
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    bind                                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1801,9 +1844,12 @@ ULONG               actual_status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  bind(INT sockID, struct sockaddr *localAddress, INT addressLength)     
+INT  nx_bsd_bind(INT sockID, const struct nx_bsd_sockaddr *localAddress, INT addressLength)
 {
 
 INT                 local_port = 0;
@@ -1820,7 +1866,7 @@ INT                 address_conflict;
     {
 
         /* Set the socket error. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Error, invalid socket ID.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1832,18 +1878,18 @@ INT                 address_conflict;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EFAULT);
+        nx_bsd_set_errno(EFAULT);
 
-        /* Error, invalid local address. */ 
+        /* Error, invalid local address. */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
-    if (((localAddress -> sa_family == AF_INET) && (addressLength != sizeof(struct sockaddr_in))) ||
-        ((localAddress -> sa_family == AF_INET6) && (addressLength != sizeof(struct sockaddr_in6))))
+    if (((localAddress -> sa_family == AF_INET) && (addressLength != sizeof(struct nx_bsd_sockaddr_in))) ||
+        ((localAddress -> sa_family == AF_INET6) && (addressLength != sizeof(struct nx_bsd_sockaddr_in6))))
     {
-        set_errno(EAFNOSUPPORT);
-            
+        nx_bsd_set_errno(EAFNOSUPPORT);
+
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -1851,7 +1897,7 @@ INT                 address_conflict;
 
     /* Normalize the socket ID.  */
     sockID =  sockID - NX_BSD_SOCKFD_START;
-    
+
     /* Get the protection mutex.  */
     status =  tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);
 
@@ -1860,10 +1906,10 @@ INT                 address_conflict;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);
+        nx_bsd_set_errno(EACCES);
 
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Set up a pointer to the BSD socket.  */
@@ -1872,14 +1918,14 @@ INT                 address_conflict;
     /* See if the socket is still in use.  */
     if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
     {
-        
+
         /* Socket is no longer in use.   */
 
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -1887,39 +1933,39 @@ INT                 address_conflict;
     }
 
     /* If the socket has an error */
-    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) 
-    {     
+    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
+    {
 
-        /* Clear the error flag.  The application is expected to close the socket at this point.*/  
-        bsd_socket_ptr -> nx_bsd_socket_status_flags = 
-            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
-                                                                             
-        set_errno(bsd_socket_ptr -> nx_bsd_socket_error_code);
+        /* Clear the error flag.  The application is expected to close the socket at this point.*/
+        bsd_socket_ptr -> nx_bsd_socket_status_flags =
+            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR);
+
+        nx_bsd_set_errno(bsd_socket_ptr -> nx_bsd_socket_error_code);
 
         /* Clear the error code. */
         bsd_socket_ptr -> nx_bsd_socket_error_code = 0;
 
-        /* Release the protection mutex.  */                                  
-        tx_mutex_put(nx_bsd_protection_ptr);                                     
-                                                                              
-        /* Return an error.  */                                               
-        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
-                                                                              
-        /* At this point the error flag is cleared.  Application should       
-           detect and handle the error codition. This socket is still bound   
-           to the port (either the application called bind(), or a bind       
-           operation was executed as part of the connect call) is able to     
-           handle another "connect" call, or be closed. */                    
-        return(NX_SOC_ERROR);                                                 
-    }                                                                        
+        /* Release the protection mutex.  */
+        tx_mutex_put(nx_bsd_protection_ptr);
+
+        /* Return an error.  */
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+
+        /* At this point the error flag is cleared.  Application should
+           detect and handle the error codition. This socket is still bound
+           to the port (either the application called bind(), or a bind
+           operation was executed as part of the connect call) is able to
+           handle another "connect" call, or be closed. */
+        return(NX_SOC_ERROR);
+    }
 
     /* Check the address family. */
     if (bsd_socket_ptr -> nx_bsd_socket_family != localAddress -> sa_family)
     {
-        set_errno(EAFNOSUPPORT);
+        nx_bsd_set_errno(EAFNOSUPPORT);
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-            
+
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -1932,11 +1978,11 @@ INT                 address_conflict;
         /* It is. */
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);
+        nx_bsd_set_errno(EINVAL);
 
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-            
+
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -1953,11 +1999,11 @@ INT                 address_conflict;
     INT if_index;
 
         /* Pickup the local port.  */
-        local_port = ntohs(((struct sockaddr_in *) localAddress) -> sin_port);
-    
+        local_port = ntohs(((struct nx_bsd_sockaddr_in *) localAddress) -> sin_port);
+
         /* Pick up the local IP address */
-        local_addr = ntohl(((struct sockaddr_in*)localAddress) -> sin_addr.s_addr);
-        
+        local_addr = ntohl(((struct nx_bsd_sockaddr_in*)localAddress) -> sin_addr.s_addr);
+
         if(local_addr == INADDR_ANY)
         {
 
@@ -1990,13 +2036,13 @@ INT                 address_conflict;
     INT if_index;
 
         /* Pickup the local port.  */
-        local_port = ntohs(((struct sockaddr_in6 *) localAddress) -> sin6_port);
+        local_port = ntohs(((struct nx_bsd_sockaddr_in6 *) localAddress) -> sin6_port);
 
-        ipv6_addr[0] = ntohl((((struct sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[0]);
-        ipv6_addr[1] = ntohl((((struct sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[1]);
-        ipv6_addr[2] = ntohl((((struct sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[2]);
-        ipv6_addr[3] = ntohl((((struct sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[3]);
-        
+        ipv6_addr[0] = ntohl((((struct nx_bsd_sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[0]);
+        ipv6_addr[1] = ntohl((((struct nx_bsd_sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[1]);
+        ipv6_addr[2] = ntohl((((struct nx_bsd_sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[2]);
+        ipv6_addr[3] = ntohl((((struct nx_bsd_sockaddr_in6*)localAddress)) -> sin6_addr._S6_un._S6_u32[3]);
+
         if((ipv6_addr[0] | ipv6_addr[1] | ipv6_addr[2] | ipv6_addr[3]) == 0)
         {
 
@@ -2013,7 +2059,7 @@ INT                 address_conflict;
                    (nx_bsd_default_ip -> nx_ipv6_address[if_index].nxd_ipv6_address[1] == ipv6_addr[1]) &&
                    (nx_bsd_default_ip -> nx_ipv6_address[if_index].nxd_ipv6_address[2] == ipv6_addr[2]) &&
                    (nx_bsd_default_ip -> nx_ipv6_address[if_index].nxd_ipv6_address[3] == ipv6_addr[3]))
-                { 
+                {
 
                     bsd_socket_ptr -> nx_bsd_socket_local_bind_interface = (ULONG)(&nx_bsd_default_ip -> nx_ipv6_address[if_index]);
 
@@ -2025,11 +2071,11 @@ INT                 address_conflict;
     }
 #endif
 #ifdef NX_BSD_RAW_SUPPORT
-    if ((localAddress -> sa_family == AF_PACKET) && (addressLength == sizeof(struct sockaddr_ll)))
+    if ((localAddress -> sa_family == AF_PACKET) && (addressLength == sizeof(struct nx_bsd_sockaddr_ll)))
     {
     UINT if_index;
 
-        if_index = (UINT)(((struct sockaddr_ll *)localAddress) -> sll_ifindex);
+        if_index = (UINT)(((struct nx_bsd_sockaddr_ll *)localAddress) -> sll_ifindex);
         bsd_socket_ptr -> nx_bsd_socket_local_bind_interface = (ULONG)(&nx_bsd_default_ip -> nx_ip_interface[if_index]);
         bsd_socket_ptr -> nx_bsd_socket_local_bind_interface_index = if_index;
     }
@@ -2038,18 +2084,18 @@ INT                 address_conflict;
     /* Check if the bind information is correctly set. */
     if(bsd_socket_ptr -> nx_bsd_socket_local_bind_interface == 0)
     {
-        
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EADDRNOTAVAIL);
-        
+        nx_bsd_set_errno(EADDRNOTAVAIL);
+
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
         return(NX_SOC_ERROR);
     }
 
-    /* At this point the local bind interface and port are known. 
+    /* At this point the local bind interface and port are known.
        If port number is specified, we need to go through the existing sockets
        and make sure there is no conflict. */
     address_conflict = 0;
@@ -2069,7 +2115,7 @@ INT                 address_conflict;
                /* Skip the unbound entries */
                (!(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_BOUND)))
             {
-            
+
                 continue;
             }
 
@@ -2078,14 +2124,14 @@ INT                 address_conflict;
             {
 
                 address_conflict = 1;
-            
+
                 if((nx_bsd_socket_array[i].nx_bsd_socket_local_bind_interface == bsd_socket_ptr -> nx_bsd_socket_local_bind_interface) &&
                    (nx_bsd_socket_array[i].nx_bsd_socket_family == bsd_socket_ptr -> nx_bsd_socket_family))
                 {
-                    
+
                     /* This is completely duplicate binding.  */
 
-                    /* If it is a TCP non-listen socket (in other words a TCP server socket that is 
+                    /* If it is a TCP non-listen socket (in other words a TCP server socket that is
                        already in connection, and the REUSEADDR is set, it is OK. */
                     if((nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED) &&
                        (!(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CLIENT)) &&
@@ -2105,7 +2151,7 @@ INT                 address_conflict;
                         address_conflict = 0;
 
                         if(bsd_socket_ptr -> nx_bsd_socket_protocol == NX_PROTOCOL_UDP)
-                        {              
+                        {
 
                             UINT counter;
 
@@ -2116,9 +2162,9 @@ INT                 address_conflict;
                             memset((VOID*)bsd_socket_ptr -> nx_bsd_socket_udp_socket, 0, sizeof(NX_UDP_SOCKET));
 
                             tx_block_release((VOID*)bsd_socket_ptr -> nx_bsd_socket_udp_socket);
-                            
+
                             /* Add this bsd udp socket to the list that map to the same NetX udp socket. */
-                            
+
                             /* See if this is the only bsd udp socket on the list. */
                             if ((&nx_bsd_socket_array[i]) == nx_bsd_socket_array[i].nx_bsd_socket_next)
                             {
@@ -2129,7 +2175,7 @@ INT                 address_conflict;
                                 bsd_socket_ptr -> nx_bsd_socket_previous = &nx_bsd_socket_array[i];
                                 nx_bsd_socket_array[i].nx_bsd_socket_next = bsd_socket_ptr;
                                 nx_bsd_socket_array[i].nx_bsd_socket_previous = bsd_socket_ptr;
-                                
+
                             }
                             else
                             {
@@ -2144,7 +2190,7 @@ INT                 address_conflict;
 
 
                             bsd_socket_ptr -> nx_bsd_socket_udp_socket = nx_bsd_socket_array[i].nx_bsd_socket_udp_socket;
-                            
+
                             /* Increase the counter. */
                             counter = (UINT)bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_reserved_ptr;
                             counter = ((counter & 0xFFFF0000) + 0x00010000 + (counter & 0x0000FFFF)) & 0xFFFFFFFF;
@@ -2156,7 +2202,7 @@ INT                 address_conflict;
 
                             /* Release the protection mutex.  */
                             tx_mutex_put(nx_bsd_protection_ptr);
-                            
+
                             return(NX_SOC_OK);
                         }
                         else if(bsd_socket_ptr -> nx_bsd_socket_protocol == NX_PROTOCOL_TCP)
@@ -2166,7 +2212,7 @@ INT                 address_conflict;
                             (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id = nx_bsd_socket_array[i].nx_bsd_socket_union_id.nx_bsd_socket_secondary_socket_id;
 
                             bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_BOUND;
-                            
+
                             bsd_socket_ptr -> nx_bsd_socket_local_port = (USHORT)local_port;
 #if defined(__PRODUCT_NETXDUO__) && !defined(NX_DISABLE_IPV4)
                             /* Handle client sockets differently. Share the port here for sockets with different IP/IPv6 addresses. */
@@ -2184,7 +2230,7 @@ INT                 address_conflict;
 
 
                                     /* Calculate the hash index in the TCP port array of the associated IP instance.  */
-                                    UINT index =  (UINT) ((local_port + (local_port >> 8)) & NX_TCP_PORT_TABLE_MASK); 
+                                    UINT index =  (UINT) ((local_port + (local_port >> 8)) & NX_TCP_PORT_TABLE_MASK);
 
                                     /* This non server socket needs to share a port with the other client socket. */
                                     socket_ptr -> nx_tcp_socket_port = (UINT)local_port;
@@ -2206,7 +2252,7 @@ INT                 address_conflict;
 
                             /* Release the protection mutex.  */
                             tx_mutex_put(nx_bsd_protection_ptr);
-                            
+
                             return(NX_SOC_OK);
                         }
                     }
@@ -2214,7 +2260,7 @@ INT                 address_conflict;
 
                 if(address_conflict)
                 {
-                
+
                     break; /* Break out of the for loop */
                 }
             }
@@ -2238,7 +2284,7 @@ INT                 address_conflict;
                /* Skip the unbound entries */
                (!(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_BOUND)))
             {
-            
+
                 continue;
             }
 
@@ -2263,17 +2309,17 @@ INT                 address_conflict;
 
     if(address_conflict)
     {
-        
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-        
+
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EADDRINUSE);
-        
+        nx_bsd_set_errno(EADDRINUSE);
+
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
         return(NX_SOC_ERROR);
     }
- 
+
     /* Mark this BSD socket as busy.  */
     bsd_socket_ptr -> nx_bsd_socket_busy = tx_thread_identify();
 
@@ -2283,7 +2329,7 @@ INT                 address_conflict;
 
         /* Setup TCP socket pointer.  */
         tcp_socket_ptr =  bsd_socket_ptr -> nx_bsd_socket_tcp_socket;
-        
+
         /* Call NetX to bind the client socket.  */
         status =  nx_tcp_client_socket_bind(tcp_socket_ptr, (UINT)local_port, NX_NO_WAIT);
 
@@ -2294,11 +2340,11 @@ INT                 address_conflict;
     }
     else if (bsd_socket_ptr -> nx_bsd_socket_udp_socket)
     {
-    
+
         /* Set up a pointer to the UDP socket.  */
         udp_socket_ptr =  bsd_socket_ptr -> nx_bsd_socket_udp_socket;
 
-        /* Bind the UDP socket to the specified port in NetX.  */        
+        /* Bind the UDP socket to the specified port in NetX.  */
         status =  nx_udp_socket_bind(udp_socket_ptr, (UINT)local_port, NX_BSD_TIMEOUT);
 
         /* Update the port. */
@@ -2311,7 +2357,7 @@ INT                 address_conflict;
         /* Raw socket.  All done.  Just need to set status = NX_SUCCESS and continue. */
         status = NX_SUCCESS;
     }
-        
+
 
     /* Check if we were able to bind the port. */
     if (status == NX_SUCCESS)
@@ -2324,29 +2370,29 @@ INT                 address_conflict;
         /* Make sure this thread is still the owner.  */
         if (bsd_socket_ptr -> nx_bsd_socket_busy == tx_thread_identify())
         {
-    
+
             /* Clear the busy flag.  */
             bsd_socket_ptr -> nx_bsd_socket_busy =  TX_NULL;
         }
 
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-        
+
         /* Return successful status.  */
         return(NX_SOC_OK);
 
-    }    
-    
+    }
+
     /* Release the protection mutex.  */
     tx_mutex_put(nx_bsd_protection_ptr);
 
     /* Set the socket error, if extended socket options enabled,  depending on the status returned by NetX. */
     nx_bsd_set_error_code(bsd_socket_ptr, status);
 
-    /* Return an error, unsuccessful socket bind call.  */        
+    /* Return an error, unsuccessful socket bind call.  */
     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
     return(NX_SOC_ERROR);
-    
+
 }
 
 
@@ -2355,7 +2401,7 @@ INT                 address_conflict;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    listen                                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2400,9 +2446,12 @@ INT                 address_conflict;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  listen(INT sockID, INT backlog)
+INT  nx_bsd_listen(INT sockID, INT backlog)
 {
 
 UINT                status;
@@ -2417,7 +2466,7 @@ INT                 ret;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2426,7 +2475,7 @@ INT                 ret;
 
     /* Normalize the socket ID.  */
     sockID =  sockID - NX_BSD_SOCKFD_START;
-    
+
     /* Get the protection mutex.  */
     status =  tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);
 
@@ -2435,11 +2484,11 @@ INT                 ret;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);
+        nx_bsd_set_errno(EACCES);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Set up a pointer to the BSD socket.  */
@@ -2448,72 +2497,72 @@ INT                 ret;
     /* Determine if the socket is a UDP socket or raw  */
     if (bsd_socket_ptr -> nx_bsd_socket_protocol != NX_PROTOCOL_TCP)
     {
-    
+
         /* The underlying protocol is not TCP, therefore it does not support the listen operation. */
-        set_errno(EOPNOTSUPP);
-        
+        nx_bsd_set_errno(EOPNOTSUPP);
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-        
+
         /* Return an error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
-    }    
+    }
 
     /* Is the socket still in use?  */
     if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);  
-        
+        nx_bsd_set_errno(EBADF);
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-        
+
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
-    }        
+    }
 
     /* Check if the socket has an error */
-    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) 
-    {                                                                        
-        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;    
+    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
+    {
+        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;
 
         /* Now clear the error code. */
         bsd_socket_ptr -> nx_bsd_socket_error_code = 0;
-        
-        /* Clear the error flag.  The application is expected to close the socket at this point.*/  
-        bsd_socket_ptr -> nx_bsd_socket_status_flags = 
-            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
-                                                                             
-        set_errno(errcode);                                                  
-                                                                             
-        /* Release the protection mutex.  */                                  
-        tx_mutex_put(nx_bsd_protection_ptr);                                     
-                                                                              
-        /* Return an error.  */                                               
-        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
-                                                                              
-        /* At this point the error flag is cleared.  Application should       
-           detect and handle the error codition. This socket is still bound   
-           to the port (either the application called bind(), or a bind       
-           operation was executed as part of the connect call) is able to     
-           handle another "connect" call, or be closed. */                    
-        return(NX_SOC_ERROR);                                                 
-    }                                                                            
-        
+
+        /* Clear the error flag.  The application is expected to close the socket at this point.*/
+        bsd_socket_ptr -> nx_bsd_socket_status_flags =
+            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR);
+
+        nx_bsd_set_errno(errcode);
+
+        /* Release the protection mutex.  */
+        tx_mutex_put(nx_bsd_protection_ptr);
+
+        /* Return an error.  */
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+
+        /* At this point the error flag is cleared.  Application should
+           detect and handle the error codition. This socket is still bound
+           to the port (either the application called bind(), or a bind
+           operation was executed as part of the connect call) is able to
+           handle another "connect" call, or be closed. */
+        return(NX_SOC_ERROR);
+    }
+
     /* Have we already started listening?  */
     if (bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ENABLE_LISTEN)
     {
 
         /* Error, socket is already listening.  */
-        
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2523,14 +2572,14 @@ INT                 ret;
     /* Check if this is a secondary server socket.  */
     if (bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_SECONDARY_SOCKET)
     {
- 
+
         /* Error, socket is a secondary server socket.  */
-          
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EOPNOTSUPP);  
+        nx_bsd_set_errno(EOPNOTSUPP);
 
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2545,7 +2594,7 @@ INT                 ret;
        tx_mutex_put(nx_bsd_protection_ptr);
 
        /* Set the socket error code. */
-       set_errno(EDESTADDRREQ);  
+       nx_bsd_set_errno(EDESTADDRREQ);
 
        /* Return error code.  */
        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2558,7 +2607,7 @@ INT                 ret;
     {
 
         /* It is set. */
-        
+
         secondary_sockID = (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id;
 
         bsd_secondary_socket = &nx_bsd_socket_array[secondary_sockID];
@@ -2572,7 +2621,7 @@ INT                 ret;
             bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_ENABLE_LISTEN;
             bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_SERVER_SECONDARY_SOCKET);
             bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_client_type =  NX_FALSE;
-            bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_SERVER_MASTER_SOCKET;            
+            bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_SERVER_MASTER_SOCKET;
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -2602,7 +2651,7 @@ INT                 ret;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    accept                                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2654,9 +2703,12 @@ INT                 ret;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  accept(INT sockID, struct sockaddr *ClientAddress, INT *addressLength)
+INT  nx_bsd_accept(INT sockID, struct nx_bsd_sockaddr *ClientAddress, INT *addressLength)
 {
 /* Define the accept function if NetX BSD accept() is not set to asynchronous (on automatic callback). */
 
@@ -2669,10 +2721,12 @@ INT                 connected = 0;
 ULONG               requested_events;
 INT                 secondary_socket_id = 0;
 #ifndef NX_DISABLE_IPV4
-struct sockaddr_in  peer4_address;
+struct nx_bsd_sockaddr_in
+                    peer4_address;
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
-struct sockaddr_in6 peer6_address;
+struct nx_bsd_sockaddr_in6
+                    peer6_address;
 #endif
 
 
@@ -2681,7 +2735,7 @@ struct sockaddr_in6 peer6_address;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);  
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error.*/
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2702,74 +2756,74 @@ struct sockaddr_in6 peer6_address;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         /* Return an error.*/
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Is the socket still in use?  */
     if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
     {
-       
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);  
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
-    }        
+    }
 
     /* If the socket has an error */
-    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) 
-    {            
+    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
+    {
 
-        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;    
+        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;
 
         /* Now clear the error code. */
         bsd_socket_ptr -> nx_bsd_socket_error_code = 0;
-        
-        /* Clear the error flag.  The application is expected to close the socket at this point.*/  
-        bsd_socket_ptr -> nx_bsd_socket_status_flags = 
-            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
-                                                                             
-        set_errno(errcode);                                                  
-                                                                             
-        /* Release the protection mutex.  */                                  
-        tx_mutex_put(nx_bsd_protection_ptr);                                     
-                                                                              
-        /* Return an error.  */                                               
-        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
-                                                                              
-        /* At this point the error flag is cleared.  Application should       
-           detect and handle the error codition. This socket is still bound   
-           to the port (either the application called bind(), or a bind       
-           operation was executed as part of the connect call) is able to     
 
-           handle another "connect" call, or be closed. */                    
-        return(NX_SOC_ERROR);                                                 
-    }                                                                            
+        /* Clear the error flag.  The application is expected to close the socket at this point.*/
+        bsd_socket_ptr -> nx_bsd_socket_status_flags =
+            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR);
+
+        nx_bsd_set_errno(errcode);
+
+        /* Release the protection mutex.  */
+        tx_mutex_put(nx_bsd_protection_ptr);
+
+        /* Return an error.  */
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+
+        /* At this point the error flag is cleared.  Application should
+           detect and handle the error codition. This socket is still bound
+           to the port (either the application called bind(), or a bind
+           operation was executed as part of the connect call) is able to
+
+           handle another "connect" call, or be closed. */
+        return(NX_SOC_ERROR);
+    }
 
     /* Determine if the socket is a UDP socket.  */
     if (bsd_socket_ptr -> nx_bsd_socket_protocol != NX_PROTOCOL_TCP)
     {
-    
+
         /* Error, UDP or raw sockets do not perform listen.  */
 
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EOPNOTSUPP);  
+        nx_bsd_set_errno(EOPNOTSUPP);
 
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
-    }    
+    }
 
     /* Has listening been enabled on this socket?  */
     if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ENABLE_LISTEN))
@@ -2781,7 +2835,7 @@ struct sockaddr_in6 peer6_address;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2791,15 +2845,15 @@ struct sockaddr_in6 peer6_address;
     /* Make sure the accept call operates on the master socket. */
     if((bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET) == 0)
     {
-        /* This is not a master socket. 
-           BSD accept is only allowed on the master socket. 
+        /* This is not a master socket.
+           BSD accept is only allowed on the master socket.
            Return. */
-        
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EBADF);  
+        nx_bsd_set_errno(EBADF);
 
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -2820,7 +2874,7 @@ struct sockaddr_in6 peer6_address;
             /* Failed to allocate a secondary socket, release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
 
-            /* Errno is already set inside nx_bsd_tcp_create_listen_socket.  Therefore 
+            /* Errno is already set inside nx_bsd_tcp_create_listen_socket.  Therefore
                there is no need to set errno here. */
 
             /* Return an error. */
@@ -2838,7 +2892,7 @@ struct sockaddr_in6 peer6_address;
     /* Mark this BSD socket as busy.  */
     bsd_socket_ptr -> nx_bsd_socket_busy = tx_thread_identify();
 
-    /* If the master socket is marked as non-blocking, we just need to check if the 
+    /* If the master socket is marked as non-blocking, we just need to check if the
        secondary socket has a connection already. */
     while(!connected)
     {
@@ -2865,19 +2919,19 @@ struct sockaddr_in6 peer6_address;
                 /* No connection yet. Return EWOULDBLOCK */
 
                 tx_mutex_put(nx_bsd_protection_ptr);
-                
+
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EWOULDBLOCK);  
-                
+                nx_bsd_set_errno(EWOULDBLOCK);
+
                 /* Return an error. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-            
+
                 if (bsd_socket_ptr -> nx_bsd_socket_busy == tx_thread_identify())
                 {
                     bsd_socket_ptr -> nx_bsd_socket_busy = NX_NULL;
                 }
                 return(NX_SOC_ERROR);
-            }   
+            }
 
             tx_mutex_put(nx_bsd_protection_ptr);
             tx_event_flags_get(&nx_bsd_events, NX_BSD_RECEIVE_EVENT, TX_OR_CLEAR, &requested_events, TX_WAIT_FOREVER);
@@ -2889,8 +2943,8 @@ struct sockaddr_in6 peer6_address;
                 /* The socket is no longer in use. */
 
                 /* Set the socket error code. */
-                set_errno(EBADF);
-                
+                nx_bsd_set_errno(EBADF);
+
                 /* Release the protection mutex.  */
                 tx_mutex_put(nx_bsd_protection_ptr);
 
@@ -2900,38 +2954,38 @@ struct sockaddr_in6 peer6_address;
             }
         }
     }
-            
+
     /* If we get here, we should have a valid connection, or an error occured. */
     if(bsd_secondary_socket -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
     {
         INT errcode = bsd_secondary_socket -> nx_bsd_socket_error_code;
-        
+
         /* Now clear the error code. */
         bsd_secondary_socket -> nx_bsd_socket_error_code = 0;
-        
-        /* Clear the error flag.  The application is expected to close the socket at this point.*/  
-        bsd_secondary_socket -> nx_bsd_socket_status_flags = 
-            bsd_secondary_socket -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
-                                                                             
-        set_errno(errcode);                                                  
-                                                                             
-        /* Return an error.  */                                               
-        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
+
+        /* Clear the error flag.  The application is expected to close the socket at this point.*/
+        bsd_secondary_socket -> nx_bsd_socket_status_flags =
+            bsd_secondary_socket -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR);
+
+        nx_bsd_set_errno(errcode);
+
+        /* Return an error.  */
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
 
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-                                                                              
-        /* At this point the error flag is cleared.  Application should       
-           detect and handle the error codition. This socket is still bound   
-           to the port (either the application called bind(), or a bind       
-           operation was executed as part of the connect call) is able to     
-           handle another "connect" call, or be closed. */                    
-        return(NX_SOC_ERROR);                                                 
-    }                                                                                    
+
+        /* At this point the error flag is cleared.  Application should
+           detect and handle the error codition. This socket is still bound
+           to the port (either the application called bind(), or a bind
+           operation was executed as part of the connect call) is able to
+           handle another "connect" call, or be closed. */
+        return(NX_SOC_ERROR);
+    }
 
     /* Update the BSD socket source port and sender IP address. */
-    status = nxd_tcp_socket_peer_info_get(bsd_secondary_socket -> nx_bsd_socket_tcp_socket, 
-                                          &bsd_secondary_socket -> nx_bsd_socket_source_ip_address, 
+    status = nxd_tcp_socket_peer_info_get(bsd_secondary_socket -> nx_bsd_socket_tcp_socket,
+                                          &bsd_secondary_socket -> nx_bsd_socket_source_ip_address,
                                           (ULONG *)(&bsd_secondary_socket -> nx_bsd_socket_source_port));
 
     memcpy(&bsd_secondary_socket -> nx_bsd_socket_peer_ip, &bsd_secondary_socket -> nx_bsd_socket_source_ip_address,  sizeof(NXD_ADDRESS)); /* Use case of memcpy is verified. */
@@ -2943,7 +2997,7 @@ struct sockaddr_in6 peer6_address;
     if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET)
     {
 
-        bsd_secondary_socket -> nx_bsd_socket_source_ip_address.nxd_ip_address.v4 = 
+        bsd_secondary_socket -> nx_bsd_socket_source_ip_address.nxd_ip_address.v4 =
                 bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_connect_ip.nxd_ip_address.v4;
     }
 #endif /* NX_DISABLE_IPV4 */
@@ -2956,7 +3010,7 @@ struct sockaddr_in6 peer6_address;
         bsd_secondary_socket -> nx_bsd_socket_source_ip_address.nxd_ip_address.v6[2] = bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_connect_ip.nxd_ip_address.v6[2];
         bsd_secondary_socket -> nx_bsd_socket_source_ip_address.nxd_ip_address.v6[3] = bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_connect_ip.nxd_ip_address.v6[3];
     }
-#endif 
+#endif
 
     /* Attempt to obtain peer address if ClientAddress is not NULL. */
     if(ClientAddress && addressLength != 0)
@@ -2971,14 +3025,14 @@ struct sockaddr_in6 peer6_address;
             peer4_address.sin_family =      AF_INET;
             peer4_address.sin_addr.s_addr = ntohl(bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_connect_ip.nxd_ip_address.v4);
             peer4_address.sin_port =        ntohs((USHORT)bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_connect_port);
-         
+
             /* Copy the peer address/port info to the ClientAddress.  Truncate if
                addressLength is smaller than the size of struct sockaddr_in */
-            if(*addressLength > (INT)sizeof(struct sockaddr_in))
+            if(*addressLength > (INT)sizeof(struct nx_bsd_sockaddr_in))
             {
 
-                memcpy(ClientAddress, &peer4_address, sizeof(struct sockaddr_in)); /* Use case of memcpy is verified. */
-                *addressLength = sizeof(struct sockaddr_in);
+                memcpy(ClientAddress, &peer4_address, sizeof(struct nx_bsd_sockaddr_in)); /* Use case of memcpy is verified. */
+                *addressLength = sizeof(struct nx_bsd_sockaddr_in);
             }
             else
             {
@@ -2988,27 +3042,27 @@ struct sockaddr_in6 peer6_address;
         else
 #endif /* NX_DISABLE_IPV4 */
 
-#ifdef FEATURE_NX_IPV6 
-        if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET6) 
+#ifdef FEATURE_NX_IPV6
+        if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET6)
         {
 
             /* Update the Client address with socket family, remote host IPv6 address and port.  */
             peer6_address.sin6_family = AF_INET6;
-            
+
             peer6_address.sin6_addr._S6_un._S6_u32[0] = ntohl(bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_connect_ip.nxd_ip_address.v6[0]);
             peer6_address.sin6_addr._S6_un._S6_u32[1] = ntohl(bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_connect_ip.nxd_ip_address.v6[1]);
             peer6_address.sin6_addr._S6_un._S6_u32[2] = ntohl(bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_connect_ip.nxd_ip_address.v6[2]);
             peer6_address.sin6_addr._S6_un._S6_u32[3] = ntohl(bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_connect_ip.nxd_ip_address.v6[3]);
-            
+
             peer6_address.sin6_port = ntohs((USHORT)bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_connect_port);
-            
+
             if((*addressLength) > (INT)sizeof(peer6_address))
             {
 
                 memcpy(ClientAddress, &peer6_address, sizeof(peer6_address)); /* Use case of memcpy is verified. */
                 *addressLength = sizeof(peer6_address);
             }
-            else 
+            else
             {
                 memcpy(ClientAddress, &peer6_address, (UINT)(*addressLength)); /* Use case of memcpy is verified. */
             }
@@ -3016,17 +3070,17 @@ struct sockaddr_in6 peer6_address;
         else
 #endif /* !FEATURE_NX_IPV6 */
         {
-            
+
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
-            
+
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);  
+            nx_bsd_set_errno(EINVAL);
 
             /* Make sure this thread is still the owner.  */
             if (bsd_socket_ptr -> nx_bsd_socket_busy == tx_thread_identify())
             {
-                
+
                 /* Clear the busy flag.  */
                 bsd_socket_ptr -> nx_bsd_socket_busy =  TX_NULL;
             }
@@ -3055,7 +3109,7 @@ struct sockaddr_in6 peer6_address;
     /* Make sure this thread is still the owner.  */
     if (bsd_socket_ptr -> nx_bsd_socket_busy == tx_thread_identify())
     {
-        
+
         /* Clear the busy flag.  */
         bsd_socket_ptr -> nx_bsd_socket_busy =  TX_NULL;
     }
@@ -3072,7 +3126,7 @@ struct sockaddr_in6 peer6_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_bsd_send_internal                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3103,7 +3157,7 @@ struct sockaddr_in6 peer6_address;
 /*    set_errno                             Sets the BSD errno            */
 /*    nx_packet_allocate                    Allocate a packet             */
 /*    nx_packet_data_append                 Append data to the packet     */
-/*    tx_mutex_get                          Get Mutex protction           */
+/*    tx_mutex_get                          Get Mutex protection          */
 /*    tx_mutex_put                          Release Mutex protection      */
 /*    nx_packet_release                     Release the packet on error   */
 /*    nx_udp_socket_send                    UDP packet send               */
@@ -3128,6 +3182,9 @@ struct sockaddr_in6 peer6_address;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            supported random IP id,     */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static INT nx_bsd_send_internal(INT sockID, const CHAR *msg, INT msgLength, INT flags,
@@ -3143,7 +3200,7 @@ UINT                wait_option;
 ULONG               data_sent = (ULONG)msgLength;
 
     bsd_socket_ptr = &nx_bsd_socket_array[sockID];
-        
+
 #ifndef NX_DISABLE_IPV4
     /* Determine the socket family for allocating a packet. */
     if (bsd_socket_ptr -> nx_bsd_socket_family == AF_INET)
@@ -3205,7 +3262,7 @@ ULONG               data_sent = (ULONG)msgLength;
     if(packet_type == 0)
     {
         /* Set the socket error.  */
-        set_errno(EINVAL);
+        nx_bsd_set_errno(EINVAL);
 
         /* Return an error status.*/
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -3218,26 +3275,26 @@ ULONG               data_sent = (ULONG)msgLength;
     {
 
         /* Yes, set to wait to zero on the NetX call. */
-        wait_option = 0 ; 
+        wait_option = 0 ;
     }
     /* Does this socket have a send timeout option set? */
     else if (bsd_socket_ptr -> nx_bsd_option_send_timeout)
     {
-         
+
         /* Yes, this is our wait option. */
-        wait_option = bsd_socket_ptr -> nx_bsd_option_send_timeout; 
+        wait_option = bsd_socket_ptr -> nx_bsd_option_send_timeout;
     }
     else
         wait_option = TX_WAIT_FOREVER;
-    
+
     status =  nx_packet_allocate(nx_bsd_default_packet_pool, &packet_ptr, packet_type, wait_option);
-    
+
     /* Check for errors.   */
     if (status != NX_SUCCESS)
     {
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
@@ -3254,13 +3311,13 @@ ULONG               data_sent = (ULONG)msgLength;
         nx_packet_release(packet_ptr);
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
         return(NX_SOC_ERROR);
     }
-    
+
 
     /* Get the protection mutex.  */
     status =  tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);
@@ -3273,11 +3330,11 @@ ULONG               data_sent = (ULONG)msgLength;
         nx_packet_release(packet_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         /* Return an error status.*/
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
 
@@ -3288,21 +3345,21 @@ ULONG               data_sent = (ULONG)msgLength;
         nx_packet_release(packet_ptr);
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
-        
+        nx_bsd_set_errno(EBADF);
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-        
+
         /* Return an error status.*/
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
-    }        
+    }
 
 
     /* Determine if the socket is a UDP socket.  */
     if (bsd_socket_ptr -> nx_bsd_socket_protocol == NX_PROTOCOL_UDP)
     {
-    
+
          /* Pickup the NetX UDP socket.  */
          udp_socket_ptr =  bsd_socket_ptr -> nx_bsd_socket_udp_socket;
 
@@ -3311,15 +3368,15 @@ ULONG               data_sent = (ULONG)msgLength;
              status =  nxd_udp_socket_send(udp_socket_ptr, packet_ptr, dst_address, dst_port);
          else
              status =  nxd_udp_socket_interface_send(udp_socket_ptr, packet_ptr, dst_address, dst_port, local_interface_index);
-    }   
-    else if(bsd_socket_ptr -> nx_bsd_socket_protocol == NX_PROTOCOL_TCP)  
+    }
+    else if(bsd_socket_ptr -> nx_bsd_socket_protocol == NX_PROTOCOL_TCP)
     {
 
         /* We have a TCP socket and a packet ready to send.  */
-    
+
         /* Set a pointer to the TCP BSD socket.  */
         tcp_socket_ptr =  bsd_socket_ptr -> nx_bsd_socket_tcp_socket;
-    
+
         if(wait_option != TX_NO_WAIT)
         {
             /* Release the protection mutex.  */
@@ -3380,18 +3437,24 @@ ULONG               data_sent = (ULONG)msgLength;
                    value is modified */
                 if((*(packet_ptr -> nx_packet_prepend_ptr + 4) == 0) &&
                    (*(packet_ptr -> nx_packet_prepend_ptr + 5) == 0))
-                {                    
+                {
 
+#ifdef NX_ENABLE_IP_ID_RANDOMIZATION
+                    ULONG rand_id = (ULONG)NX_RAND();
+                    *(packet_ptr -> nx_packet_prepend_ptr + 4) = (UCHAR)((rand_id & 0xFFFF) >> 8);
+                    *(packet_ptr -> nx_packet_prepend_ptr + 5) = (UCHAR)(rand_id & 0xFF);
+#else
                     *(packet_ptr -> nx_packet_prepend_ptr + 4) = (UCHAR)(((nx_bsd_default_ip -> nx_ip_packet_id) & 0xFFFF) >> 8);
                     *(packet_ptr -> nx_packet_prepend_ptr + 5) = (UCHAR)((nx_bsd_default_ip -> nx_ip_packet_id) & 0xFF);
+#endif /* NX_ENABLE_IP_ID_RANDOMIZATION */
                 }
-                
+
                 /* Clear the checksum field. */
                 *(packet_ptr -> nx_packet_prepend_ptr + 10) = 0;
                 *(packet_ptr -> nx_packet_prepend_ptr + 11) = 0;
-                
+
                 _nxd_bsd_ipv4_packet_send(packet_ptr);
-                
+
                 status = NX_SUCCESS;
             }
 #endif /* NX_DISABLE_IPV4 */
@@ -3407,16 +3470,16 @@ ULONG               data_sent = (ULONG)msgLength;
                     status = NX_NOT_SUCCESSFUL;
                 }
 
-                else 
+                else
                 {
 
                     NX_IPV6_HEADER *ipv6_header;
                     ULONG src_addr[4], dest_addr[4];
 
                     packet_ptr -> nx_packet_ip_header = packet_ptr -> nx_packet_prepend_ptr;
-                    
+
                     packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr = &nx_bsd_default_ip -> nx_ipv6_address[src_interface];
-                    
+
                     ipv6_header = (NX_IPV6_HEADER*)packet_ptr -> nx_packet_ip_header;
 
                     /* Set up source / Destination IP */
@@ -3424,10 +3487,10 @@ ULONG               data_sent = (ULONG)msgLength;
                     COPY_IPV6_ADDRESS(ipv6_header -> nx_ip_header_source_ip, src_addr);
                     NX_IPV6_ADDRESS_CHANGE_ENDIAN(dest_addr);
                     NX_IPV6_ADDRESS_CHANGE_ENDIAN(src_addr);
-                    
+
 
                     _nxd_bsd_ipv6_packet_send(packet_ptr, src_addr, dest_addr);
-                    
+
                     status = NX_SUCCESS;
                 }
             }
@@ -3439,16 +3502,16 @@ ULONG               data_sent = (ULONG)msgLength;
             /* Raw socket without any IP header appended yet. We can send this directly to the NetX Duo IP packet handler.  */
             if(local_interface_index == NX_BSD_LOCAL_IF_INADDR_ANY)
                 local_interface_index = 0;
-            
+
             status = nxd_ip_raw_packet_interface_send(nx_bsd_default_ip, packet_ptr, dst_address,
-                                                      local_interface_index, bsd_socket_ptr -> nx_bsd_socket_protocol, 
+                                                      local_interface_index, bsd_socket_ptr -> nx_bsd_socket_protocol,
                                                       NX_IP_TIME_TO_LIVE, NX_IP_NORMAL);
         }
     }
 
     /* Was the packet send successful?  */
     if (status != NX_SUCCESS)
-    { 
+    {
 
         /* No, release the packet.  */
         nx_packet_release(packet_ptr);
@@ -3460,20 +3523,20 @@ ULONG               data_sent = (ULONG)msgLength;
         {
 
             case NX_IP_ADDRESS_ERROR:
-                set_errno(EDESTADDRREQ);
+                nx_bsd_set_errno(EDESTADDRREQ);
                 break;
 
             case NX_NOT_ENABLED:
-                set_errno(EPROTONOSUPPORT);
+                nx_bsd_set_errno(EPROTONOSUPPORT);
                 break;
 
             case NX_NOT_CONNECTED:
-                set_errno(ENOTCONN);
+                nx_bsd_set_errno(ENOTCONN);
                 break;
 
             case NX_NO_PACKET:
             case NX_UNDERFLOW:
-                set_errno(ENOBUFS);
+                nx_bsd_set_errno(ENOBUFS);
                 break;
 
             case NX_WINDOW_OVERFLOW:
@@ -3481,16 +3544,16 @@ ULONG               data_sent = (ULONG)msgLength;
             case NX_TX_QUEUE_DEPTH:
                 if ((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING) ||
                     (flags & MSG_DONTWAIT))
-                    set_errno( EWOULDBLOCK);
+                    nx_bsd_set_errno( EWOULDBLOCK);
                 else
-                    set_errno(ETIMEDOUT);
+                    nx_bsd_set_errno(ETIMEDOUT);
                 break;
 
             default:
                 /* NX_NOT_BOUND */
                 /* NX_PTR_ERROR */
                 /* NX_INVALID_PACKET */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);
                 break;
         }
 
@@ -3501,7 +3564,7 @@ ULONG               data_sent = (ULONG)msgLength;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         return(NX_SOC_ERROR);
-    }    
+    }
 
     /* Release the protection mutex.  */
     tx_mutex_put(nx_bsd_protection_ptr);
@@ -3514,7 +3577,7 @@ ULONG               data_sent = (ULONG)msgLength;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    send                                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3572,9 +3635,12 @@ ULONG               data_sent = (ULONG)msgLength;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  send(INT sockID, const CHAR *msg, INT msgLength, INT flags)
+INT  nx_bsd_send(INT sockID, const CHAR *msg, INT msgLength, INT flags)
 {
 
 NX_BSD_SOCKET *bsd_socket_ptr;
@@ -3585,7 +3651,7 @@ NX_BSD_SOCKET *bsd_socket_ptr;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error status.*/
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -3599,44 +3665,54 @@ NX_BSD_SOCKET *bsd_socket_ptr;
     bsd_socket_ptr =  &nx_bsd_socket_array[sockID];
 
     /* If the socket has an error */
-    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) 
-    {                                                                        
-        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;    
+    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
+    {
+        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;
 
         /* Now clear the error code. */
         bsd_socket_ptr -> nx_bsd_socket_error_code = 0;
-        
-        /* Clear the error flag.  The application is expected to close the socket at this point.*/  
-        bsd_socket_ptr -> nx_bsd_socket_status_flags = 
-            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
-                                                                             
-        set_errno(errcode);                                                  
-                                                                             
-        /* Return an error.  */                                               
-        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
-                                                                              
-        /* At this point the error flag is cleared.  Application should       
-           detect and handle the error codition. This socket is still bound   
-           to the port (either the application called bind(), or a bind       
-           operation was executed as part of the connect call) is able to     
-           handle another "connect" call, or be closed. */                    
-        return(NX_SOC_ERROR);                                                 
-    }                                                                            
+
+        /* Clear the error flag.  The application is expected to close the socket at this point.*/
+        bsd_socket_ptr -> nx_bsd_socket_status_flags =
+            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR);
+
+        nx_bsd_set_errno(errcode);
+
+        /* Return an error.  */
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+
+        /* At this point the error flag is cleared.  Application should
+           detect and handle the error codition. This socket is still bound
+           to the port (either the application called bind(), or a bind
+           operation was executed as part of the connect call) is able to
+           handle another "connect" call, or be closed. */
+        return(NX_SOC_ERROR);
+    }
 
     /* Send() requires the socket be connected. A connected socket implies the socket is bound.*/
     if((bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED) == 0)
     {
 
-        /* For AF_PACKET family, user shall use the sendto call. */
+        /* For AF_PACKET family, the socket should be bound. */
 #if defined(NX_BSD_RAW_SUPPORT) || defined(NX_BSD_RAW_PPPOE_SUPPORT)
         if(bsd_socket_ptr -> nx_bsd_socket_family == AF_PACKET)
         {
-            /* Set the socket error */
-            set_errno(ENOTCONN);
+            struct nx_bsd_sockaddr_ll sockaddr_dest;
 
-            /* Return an error status.*/
-            NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-            return(NX_SOC_ERROR);
+            if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_BOUND))
+            {
+
+                /* Set the socket error code. */
+                nx_bsd_set_errno(EDESTADDRREQ);
+
+                /* Return error code.  */
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return(NX_SOC_ERROR);
+            }
+
+            sockaddr_dest.sll_family = AF_PACKET;
+            sockaddr_dest.sll_ifindex = (INT)bsd_socket_ptr -> nx_bsd_socket_local_bind_interface_index;
+            return(_nx_bsd_hardware_internal_sendto(bsd_socket_ptr, (CHAR *)msg, msgLength, flags, (struct nx_bsd_sockaddr*)&sockaddr_dest, sizeof(struct nx_bsd_sockaddr_ll)));
         }
 
 #endif /* defined(NX_BSD_RAW_SUPPORT) || defined(NX_BSD_RAW_PPPOE_SUPPORT) */
@@ -3645,8 +3721,8 @@ NX_BSD_SOCKET *bsd_socket_ptr;
         if(!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_TX_HDR_INCLUDE))
         {
             /* Set the socket error */
-            set_errno(ENOTCONN);
-            
+            nx_bsd_set_errno(ENOTCONN);
+
             /* Return an error status.*/
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return(NX_SOC_ERROR);
@@ -3654,10 +3730,10 @@ NX_BSD_SOCKET *bsd_socket_ptr;
     }
 
     return nx_bsd_send_internal(sockID, msg, msgLength, flags,
-                                &bsd_socket_ptr -> nx_bsd_socket_peer_ip, 
+                                &bsd_socket_ptr -> nx_bsd_socket_peer_ip,
                                 bsd_socket_ptr -> nx_bsd_socket_peer_port,
                                 bsd_socket_ptr -> nx_bsd_socket_local_bind_interface_index);
-    
+
 }
 
 
@@ -3666,7 +3742,7 @@ NX_BSD_SOCKET *bsd_socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    sendto                                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3720,9 +3796,12 @@ NX_BSD_SOCKET *bsd_socket_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  sendto(INT sockID, CHAR *msg, INT msgLength, INT flags,  struct sockaddr *destAddr, INT destAddrLen)
+INT  nx_bsd_sendto(INT sockID, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr *destAddr, INT destAddrLen)
 {
 UINT                 status;
 NX_BSD_SOCKET       *bsd_socket_ptr;
@@ -3734,7 +3813,7 @@ USHORT               peer_port = 0;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error status. */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -3745,45 +3824,45 @@ USHORT               peer_port = 0;
     bsd_socket_ptr =  &nx_bsd_socket_array[sockID - NX_BSD_SOCKFD_START];
 
     /* If the socket has an error */
-    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) 
-    {                                                                        
-        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;    
+    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
+    {
+        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;
 
         /* Now clear the error code. */
         bsd_socket_ptr -> nx_bsd_socket_error_code = 0;
-        
-        /* Clear the error flag.  The application is expected to close the socket at this point.*/  
-        bsd_socket_ptr -> nx_bsd_socket_status_flags = 
-            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
-                                                                             
-        set_errno(errcode);                                                  
-                                                                             
-        /* Return an error.  */                                               
-        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
-                                                                              
-        /* At this point the error flag is cleared.  Application should       
-           detect and handle the error codition. This socket is still bound   
-           to the port (either the application called bind(), or a bind       
-           operation was executed as part of the connect call) is able to     
-           handle another "connect" call, or be closed. */                    
-        return(NX_SOC_ERROR);                                                 
-    } 
+
+        /* Clear the error flag.  The application is expected to close the socket at this point.*/
+        bsd_socket_ptr -> nx_bsd_socket_status_flags =
+            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR);
+
+        nx_bsd_set_errno(errcode);
+
+        /* Return an error.  */
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+
+        /* At this point the error flag is cleared.  Application should
+           detect and handle the error codition. This socket is still bound
+           to the port (either the application called bind(), or a bind
+           operation was executed as part of the connect call) is able to
+           handle another "connect" call, or be closed. */
+        return(NX_SOC_ERROR);
+    }
     /* For TCP, make sure the socket is already connected. */
     if(bsd_socket_ptr -> nx_bsd_socket_protocol == NX_PROTOCOL_TCP)
     {
         if((bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED) == 0)
         {
-            set_errno(ENOTCONN);
-            
-            /* Return an error.  */                                               
-            NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
-            
+            nx_bsd_set_errno(ENOTCONN);
+
+            /* Return an error.  */
+            NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+
             return(NX_SOC_ERROR);
         }
-        return nx_bsd_send_internal((sockID - NX_BSD_SOCKFD_START), msg, msgLength, flags, NX_NULL, 0, 
+        return nx_bsd_send_internal((sockID - NX_BSD_SOCKFD_START), msg, msgLength, flags, NX_NULL, 0,
                                     bsd_socket_ptr -> nx_bsd_socket_local_bind_interface_index);
     }
-    else 
+    else
     {
 
         /* This is a UDP or raw socket.  */
@@ -3806,7 +3885,7 @@ USHORT               peer_port = 0;
 
         }
 
-        /* Perform error checkings on the remote address if the socket is 
+        /* Perform error checkings on the remote address if the socket is
            not raw socket, or HDRINCL is not set for the raw socket. */
         if(!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_TX_HDR_INCLUDE))
         {
@@ -3814,10 +3893,10 @@ USHORT               peer_port = 0;
             /* Check for an invalid destination. */
             if (destAddr == NX_NULL)
             {
-            
+
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
-                
+                nx_bsd_set_errno(EINVAL);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return(NX_SOC_ERROR);
             }
@@ -3825,10 +3904,10 @@ USHORT               peer_port = 0;
             /* Validate the destination address. */
             if(bsd_socket_ptr -> nx_bsd_socket_family != destAddr -> sa_family)
             {
-                set_errno(EAFNOSUPPORT);
-                
+                nx_bsd_set_errno(EAFNOSUPPORT);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                
+
                 return(NX_SOC_ERROR);
             }
         }
@@ -3841,7 +3920,7 @@ USHORT               peer_port = 0;
                 status = nx_udp_socket_bind(bsd_socket_ptr -> nx_bsd_socket_udp_socket, NX_ANY_PORT, NX_NO_WAIT);
                 if((status != NX_SUCCESS) && (status != NX_ALREADY_BOUND))
                 {
-                    set_errno(EINVAL);
+                    nx_bsd_set_errno(EINVAL);
 
                     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
 
@@ -3866,11 +3945,11 @@ USHORT               peer_port = 0;
             {
 
                 /* This is for an IPv4 packet. */
-                peer_ip_address.nxd_ip_version = NX_IP_VERSION_V4; 
-                peer_ip_address.nxd_ip_address.v4 = htonl(((struct sockaddr_in *) destAddr) -> sin_addr.s_addr);
-                peer_port = htons(((struct sockaddr_in *) destAddr) -> sin_port);
+                peer_ip_address.nxd_ip_version = NX_IP_VERSION_V4;
+                peer_ip_address.nxd_ip_address.v4 = htonl(((struct nx_bsd_sockaddr_in *) destAddr) -> sin_addr.s_addr);
+                peer_port = htons(((struct nx_bsd_sockaddr_in *) destAddr) -> sin_port);
 
-                /* Local interface ID is set to invalid value, so the send routine needs to 
+                /* Local interface ID is set to invalid value, so the send routine needs to
                    find the best interface to send the packet based on destination IP address. */
 
             }
@@ -3882,22 +3961,22 @@ USHORT               peer_port = 0;
                 /* This is for an IPv6 packet. Set the NetX Duo IP address version. */
                 peer_ip_address.nxd_ip_version = NX_IP_VERSION_V6;
 
-                peer_ip_address.nxd_ip_address.v6[0] = ntohl(((struct sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[0]);
-                peer_ip_address.nxd_ip_address.v6[1] = ntohl(((struct sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[1]);
-                peer_ip_address.nxd_ip_address.v6[2] = ntohl(((struct sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[2]);
-                peer_ip_address.nxd_ip_address.v6[3] = ntohl(((struct sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[3]);
+                peer_ip_address.nxd_ip_address.v6[0] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[0]);
+                peer_ip_address.nxd_ip_address.v6[1] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[1]);
+                peer_ip_address.nxd_ip_address.v6[2] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[2]);
+                peer_ip_address.nxd_ip_address.v6[3] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[3]);
 
-                peer_port = htons(((struct sockaddr_in6 *) destAddr) -> sin6_port);
-                
+                peer_port = htons(((struct nx_bsd_sockaddr_in6 *) destAddr) -> sin6_port);
+
             }
 #endif
         }
 
         /* Call the internal send routine to finish the send process. */
-        /* Local interface ID is set to a special marker, so the send routine needs to 
+        /* Local interface ID is set to a special marker, so the send routine needs to
            find the best interface to send the packet based on destination IP address. */
         return nx_bsd_send_internal((sockID - NX_BSD_SOCKFD_START), msg, msgLength, flags,
-                                    &peer_ip_address, peer_port, 
+                                    &peer_ip_address, peer_port,
                                     bsd_socket_ptr -> nx_bsd_socket_local_bind_interface_index);
 
     }
@@ -3909,7 +3988,7 @@ USHORT               peer_port = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    recv                                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3922,16 +4001,16 @@ USHORT               peer_port = 0;
 /*    byte is returned or the connection closes.The return value indicates*/
 /*    the number of bytes actually copied into the buffer starting at the */
 /*    specified location.                                                 */
-/*                                                                        */ 
+/*                                                                        */
 /*    For a stream socket, the bytes are delivered in the same order as   */
 /*    they were transmitted, without omissions. For a datagram socket,    */
 /*    each recv() returns the data from at most one send(), and order is  */
 /*    not necessarily preserved.                                          */
-/*                                                                        */ 
+/*                                                                        */
 /*    For non blocking sockets, a receive status of NX_NO_PACKET from NetX*/
 /*    results in an error status returned from BSD, and the socket error  */
 /*    set to EWOULDBLOCK (if BSD extended socket features are enabled.    */
-/*                                                                        */ 
+/*                                                                        */
 /*    Likewise, an event flag status of TX_NO_EVENTS returned from ThreadX*/
 /*    on a non blocking socket sets the socket error to EWOULDBLOCK.      */
 /*                                                                        */
@@ -3951,13 +4030,7 @@ USHORT               peer_port = 0;
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    nx_tcp_socket_receive                 Receive a Packet              */
-/*    nx_packet_allocate                    Allocate packet for receive   */
-/*    nx_packet_release                     Free the nx_packet after use  */
-/*    nx_packet_data_extract_offset         Retrieve packet data          */
-/*    tx_event_flags_get                    Wait for data to arrive       */
-/*    tx_mutex_get                          Get protection                */
-/*    tx_mutex_put                          Release protection            */
+/*    nx_bsd_recv_internal                  Actual receive function       */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -3971,22 +4044,241 @@ USHORT               peer_port = 0;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags)
+INT  nx_bsd_recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags)
 {
 
-UINT                status;
+struct nx_bsd_iovec iov;
+
+    iov.iov_base = rcvBuffer;
+    iov.iov_len = (size_t)bufferLength;
+
+    /* Call the recv_internal() function. */
+    return nx_bsd_recv_internal(sockID, &iov, 1, flags, NX_NULL, NX_NULL);
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    recvfrom                                            PORTABLE C      */
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function copies up to a specified number of bytes, received on */
+/*    the socket into a specified location. To use recvfrom() on a TCP    */
+/*    socket requires the socket to be in the connected state.            */
+/*                                                                        */
+/*    This function is identical to recv() except for returning the sender*/
+/*    address and length if non null arguments are supplied.              */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    sockID                                Socket(must be connected)     */
+/*    buffer                                Pointer to hold data received */
+/*    bufferSize                            Maximum number of bytes       */
+/*    flags                                 Control flags, support        */
+/*                                            MSG_PEEK and MSG_DONTWAIT   */
+/*    fromAddr                              Address data of sender        */
+/*    fromAddrLen                           Length of address structure   */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    number of bytes received              If no error occurs            */
+/*    NX_SOC_ERROR (-1)                     In case of any error          */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_bsd_recv_internal                  Actual receive function       */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
+/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memcpy use cases,  */
+/*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
+/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
+/*                                            added nx_bsd_recv_internal, */
+/*                                            resulting in version 6.4.0  */
+/*                                                                        */
+/**************************************************************************/
+INT  nx_bsd_recvfrom(INT sockID, CHAR *rcvBuffer, INT bufferLength, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen)
+{
+struct nx_bsd_iovec iov;
+
+    iov.iov_base = rcvBuffer;
+    iov.iov_len = (size_t)bufferLength;
+
+    /* Call the recv_internal() function. */
+    return nx_bsd_recv_internal(sockID, &iov, 1, flags, fromAddr, fromAddrLen);
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    recvmsg                                             PORTABLE C      */
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yanwu Cai, Microsoft Corporation                                    */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function copies up to a specified number of bytes, received on */
+/*    the socket into a specified location. To use recvmsg() on a TCP     */
+/*    socket requires the socket to be in the connected state.            */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    sockID                                Socket(must be connected)     */
+/*    msg                                   Pointer to hold msghdr struct */
+/*    flags                                 Control flags, support        */
+/*                                            MSG_PEEK and MSG_DONTWAIT   */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    number of bytes received              If no error occurs            */
+/*    NX_SOC_ERROR (-1)                     In case of any error          */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_bsd_recv_internal                  Actual receive function       */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  12-31-2023     Yanwu Cai                Initial Version 6.4.0         */
+/*                                                                        */
+/**************************************************************************/
+INT nx_bsd_recvmsg(INT sockID, struct nx_bsd_msghdr *msg, INT flags)
+{
+INT fromAddrLen = 0;
+
+    if (msg -> msg_name != NX_NULL)
+    {
+        fromAddrLen = (INT)(msg -> msg_namelen);
+    }
+
+    return(nx_bsd_recv_internal(sockID, msg -> msg_iov, msg -> msg_iovlen, flags, (struct nx_bsd_sockaddr *)(msg -> msg_name), &fromAddrLen));
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    recv_internal                                       PORTABLE C      */
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yanwu Cai, Microsoft Corporation                                    */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function copies up to a specified number of bytes received on  */
+/*    the socket into specified location. The given socket must be in the */
+/*    connected state. Normally, the call blocks until either at least one*/
+/*    byte is returned or the connection closes.The return value indicates*/
+/*    the number of bytes actually copied into the buffer starting at the */
+/*    specified location.                                                 */
+/*                                                                        */
+/*    For a stream socket, the bytes are delivered in the same order as   */
+/*    they were transmitted, without omissions. For a datagram socket,    */
+/*    each recv() returns the data from at most one send(), and order is  */
+/*    not necessarily preserved.                                          */
+/*                                                                        */
+/*    For non blocking sockets, a receive status of NX_NO_PACKET from NetX*/
+/*    results in an error status returned from BSD, and the socket error  */
+/*    set to EWOULDBLOCK (if BSD extended socket features are enabled.    */
+/*                                                                        */
+/*    Likewise, an event flag status of TX_NO_EVENTS returned from ThreadX*/
+/*    on a non blocking socket sets the socket error to EWOULDBLOCK.      */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    sockID                                Socket (must be connected).   */
+/*    iov                                   Pointer to iovec struct.      */
+/*    iovlen                                Number of iov elements        */
+/*    flags                                 Control flags, support        */
+/*                                            MSG_PEEK and MSG_DONTWAIT   */
+/*    fromAddr                              Address data of sender        */
+/*    fromAddrLen                           Length of address structure   */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    Number of bytes received              If success                    */
+/*    NX_SOC_ERROR (-1)                     If failure                    */
+/*    0                                     socket disconnected           */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_tcp_socket_receive                 Receive a Packet              */
+/*    nx_packet_allocate                    Allocate packet for receive   */
+/*    nx_packet_release                     Free the nx_packet after use  */
+/*    nx_packet_data_extract_offset         Retrieve packet data          */
+/*    tx_event_flags_get                    Wait for data to arrive       */
+/*    tx_mutex_get                          Get protection                */
+/*    tx_mutex_put                          Release protection            */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    recv                                                                */
+/*    recvmsg                                                             */
+/*    recvfrom                                                            */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  12-31-2023     Yanwu Cai                Initial Version 6.4.0         */
+/*                                                                        */
+/**************************************************************************/
+static INT nx_bsd_recv_internal(INT sockID, struct nx_bsd_iovec *iov, size_t iovlen, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen)
+{
+UINT                 status;
 NX_PACKET           *packet_ptr;
 NX_BSD_SOCKET       *bsd_socket_ptr;
 NX_TCP_SOCKET       *tcp_socket_ptr;
-ULONG               requested_events;
-ULONG               bytes_received;
-UINT                wait_option;
-UINT                remaining_wait_option;
-ULONG               offset;
-INT                 header_size = 0;
-ULONG               start_time = nx_bsd_system_clock;
+ULONG                requested_events;
+ULONG                bytes_received;
+ULONG                bytes_copied;
+ULONG                buffer_used = 0;
+UINT                 wait_option;
+UINT                 remaining_wait_option;
+ULONG                offset;
+UINT                 header_size = 0;
+ULONG                start_time = nx_bsd_system_clock;
+#ifndef NX_DISABLE_IPV4
+struct nx_bsd_sockaddr_in
+                     peer4_address;
+#endif /* NX_DISABLE_IPV4 */
+#ifdef FEATURE_NX_IPV6
+struct nx_bsd_sockaddr_in6
+                     peer6_address;
+#endif
 
 
     /* Check for a valid socket ID.  */
@@ -3994,7 +4286,7 @@ ULONG               start_time = nx_bsd_system_clock;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -4012,19 +4304,19 @@ ULONG               start_time = nx_bsd_system_clock;
     wait_option = NX_WAIT_FOREVER;
 
     /* Is this a nonblocking socket?:  */
-    if ((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING) || 
+    if ((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING) ||
         (flags & MSG_DONTWAIT))
     {
 
         /* Yes, set to receive wait option to no wait (zero). */
-        wait_option = 0; 
+        wait_option = 0;
     }
     /* Does this socket have a receive timeout option set? */
     else if (bsd_socket_ptr -> nx_bsd_option_receive_timeout)
     {
-         
+
         /* Yes, this is our wait option. */
-        wait_option = bsd_socket_ptr -> nx_bsd_option_receive_timeout; 
+        wait_option = bsd_socket_ptr -> nx_bsd_option_receive_timeout;
     }
 
     /* Get the protection mutex.  */
@@ -4035,41 +4327,41 @@ ULONG               start_time = nx_bsd_system_clock;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* If the socket has an error */
-    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) 
-    {                    
+    if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
+    {
 
-        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;    
+        INT errcode = bsd_socket_ptr -> nx_bsd_socket_error_code;
 
         /* Now clear the error code. */
         bsd_socket_ptr -> nx_bsd_socket_error_code = 0;
-        
-        /* Clear the error flag.  The application is expected to close the socket at this point.*/  
-        bsd_socket_ptr -> nx_bsd_socket_status_flags = 
-            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
-                                                                             
-        set_errno(errcode);                                                  
+
+        /* Clear the error flag.  The application is expected to close the socket at this point.*/
+        bsd_socket_ptr -> nx_bsd_socket_status_flags =
+            bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR);
+
+        nx_bsd_set_errno(errcode);
 
         /* Release the protection mutex.  */
-        tx_mutex_put(nx_bsd_protection_ptr);     
+        tx_mutex_put(nx_bsd_protection_ptr);
 
-        /* Return an error.  */                                               
-        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);                                 
-                                                                              
-        /* At this point the error flag is cleared.  The application should       
-           detect and handle the error codition. This socket is still bound   
-           to the port (either the application called bind(), or a bind       
-           operation was executed as part of the connect call) and is able to     
-           handle another "connect" call, or be closed. */                    
-        return(NX_SOC_ERROR);                                                 
-    }                                                                            
+        /* Return an error.  */
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+
+        /* At this point the error flag is cleared.  The application should
+           detect and handle the error codition. This socket is still bound
+           to the port (either the application called bind(), or a bind
+           operation was executed as part of the connect call) and is able to
+           handle another "connect" call, or be closed. */
+        return(NX_SOC_ERROR);
+    }
 
     /* Set pointers to the BSD NetX Duo sockets.  */
     tcp_socket_ptr =  bsd_socket_ptr -> nx_bsd_socket_tcp_socket;
@@ -4083,15 +4375,15 @@ ULONG               start_time = nx_bsd_system_clock;
         {
 
             /* Set the socket error if extended options enabled. */
-            set_errno(EBADF);
+            nx_bsd_set_errno(EBADF);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
-        
+
             /* Return an error.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return(NX_SOC_ERROR);
-        }        
+        }
 
         /* Check if the BSD socket already has received a packet.  */
         packet_ptr =  bsd_socket_ptr -> nx_bsd_socket_received_packet;
@@ -4106,14 +4398,14 @@ ULONG               start_time = nx_bsd_system_clock;
         /* Check if there is an incoming packet on this socket.  */
         else
         {
-        
+
             /* Determine if this is a TCP BSD socket.  */
             if (tcp_socket_ptr)
             {
-            
+
                 /* It is, check the socket TCP receive queue with a zero wait option (no suspension).  */
                 status =  nx_tcp_socket_receive(tcp_socket_ptr, &packet_ptr, TX_NO_WAIT);
-                
+
                 /* Check for no packet on the queue.  */
                 if (status == NX_NOT_CONNECTED)
                 {
@@ -4131,11 +4423,11 @@ ULONG               start_time = nx_bsd_system_clock;
                     }
 
                     /* Set the socket status (not really an error).  */
-                    set_errno(ENOTCONN); 
-        
+                    nx_bsd_set_errno(ENOTCONN);
+
                     /* Return an error.  */
                     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                    return(NX_SOC_ERROR);        
+                    return(NX_SOC_ERROR);
                 }
 
                 if (status == NX_SUCCESS)
@@ -4154,7 +4446,7 @@ ULONG               start_time = nx_bsd_system_clock;
                 /* Setup the bsd socket with the packet information.  */
                 bsd_socket_ptr -> nx_bsd_socket_received_packet =         packet_ptr;
                 bsd_socket_ptr -> nx_bsd_socket_received_packet_offset =  0;
-                
+
                 /* Get out of the loop.  */
                 break;
             }
@@ -4187,12 +4479,12 @@ ULONG               start_time = nx_bsd_system_clock;
             /* No packets received. */
 
             /* Set the socket error depending if this is a non blocking socket. */
-            if ((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING) || 
+            if ((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING) ||
                 (wait_option == NX_WAIT_FOREVER) ||
                 (flags & MSG_DONTWAIT))
-                set_errno(EWOULDBLOCK);  
+                nx_bsd_set_errno(EWOULDBLOCK);
             else
-                set_errno (EAGAIN);  
+                nx_bsd_set_errno(EAGAIN);
 
             /* Return an error.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -4200,28 +4492,28 @@ ULONG               start_time = nx_bsd_system_clock;
         }
         else if (status != TX_SUCCESS)
         {
-        
+
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);  
+            nx_bsd_set_errno(EINVAL);
 
             /* Return an error.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-            return(NX_SOC_ERROR); 
+            return(NX_SOC_ERROR);
         }
 
         /* Re-obtain the protection mutex.  */
-        status = tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);               
+        status = tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);
 
         /* Check the status.  */
         if (status)
         {
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EACCES);  
+            nx_bsd_set_errno(EACCES);
 
             /* Return an error.  */
             NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-            return(NX_SOC_ERROR); 
+            return(NX_SOC_ERROR);
         }
 
         if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
@@ -4229,7 +4521,7 @@ ULONG               start_time = nx_bsd_system_clock;
             /* The socket is no longer in use. */
 
             /* Set the socket error code. */
-            set_errno(EBADF);
+            nx_bsd_set_errno(EBADF);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -4238,18 +4530,18 @@ ULONG               start_time = nx_bsd_system_clock;
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return(NX_SOC_ERROR);
         }
-       
+
     } while (1);
 
     /* At this point, the socket has received a packet.  */
-    
+
 
     /* Obtain sender information for UDP socket. */
     if(bsd_socket_ptr -> nx_bsd_socket_protocol == NX_PROTOCOL_UDP)
-    {    
+    {
 
-        /* Get the sender and port from the UDP packet.  */ 
-        nxd_udp_source_extract(packet_ptr, &bsd_socket_ptr -> nx_bsd_socket_source_ip_address, (UINT *)&bsd_socket_ptr -> nx_bsd_socket_source_port);        
+        /* Get the sender and port from the UDP packet.  */
+        nxd_udp_source_extract(packet_ptr, &bsd_socket_ptr -> nx_bsd_socket_source_ip_address, (UINT *)&bsd_socket_ptr -> nx_bsd_socket_source_port);
     }
 
 #if defined(NX_BSD_RAW_SUPPORT) || defined(NX_BSD_RAW_PPPOE_SUPPORT)
@@ -4261,7 +4553,7 @@ ULONG               start_time = nx_bsd_system_clock;
         {
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
@@ -4283,13 +4575,13 @@ ULONG               start_time = nx_bsd_system_clock;
         bsd_socket_ptr -> nx_bsd_socket_sll_addr[5] = packet_ptr -> nx_packet_prepend_ptr[11];
 
         /* Pick up the sender's protocol */
-        bsd_socket_ptr -> nx_bsd_socket_sll_protocol = (USHORT)((packet_ptr -> nx_packet_prepend_ptr[12] << 8) | 
+        bsd_socket_ptr -> nx_bsd_socket_sll_protocol = (USHORT)((packet_ptr -> nx_packet_prepend_ptr[12] << 8) |
                                                                 (packet_ptr -> nx_packet_prepend_ptr[13]));
         if (bsd_socket_ptr -> nx_bsd_socket_sll_protocol == 0x8100)
         {
-            
+
             /* Skip VLAN tag. */
-            bsd_socket_ptr -> nx_bsd_socket_sll_protocol = (USHORT)((packet_ptr -> nx_packet_prepend_ptr[16] << 8) | 
+            bsd_socket_ptr -> nx_bsd_socket_sll_protocol = (USHORT)((packet_ptr -> nx_packet_prepend_ptr[16] << 8) |
                                                                     (packet_ptr -> nx_packet_prepend_ptr[17]));
         }
 
@@ -4305,7 +4597,7 @@ ULONG               start_time = nx_bsd_system_clock;
     else if(bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_RAW_SOCKET)
     {
 
-        /* Get the sender IP address from the raw packet.  */ 
+        /* Get the sender IP address from the raw packet.  */
         status = nx_bsd_raw_packet_info_extract(packet_ptr, &(bsd_socket_ptr -> nx_bsd_socket_source_ip_address), NX_NULL);
     }
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
@@ -4315,7 +4607,7 @@ ULONG               start_time = nx_bsd_system_clock;
 
 #ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
     /* Perform extra processing on this packet if it processed as a raw packet. */
-    if((bsd_socket_ptr -> nx_bsd_socket_family != AF_PACKET) && 
+    if((bsd_socket_ptr -> nx_bsd_socket_family != AF_PACKET) &&
        (bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_RAW_SOCKET))
     {
 
@@ -4323,15 +4615,15 @@ ULONG               start_time = nx_bsd_system_clock;
         {
             header_size = 0;
         }
-        else 
+        else
         {
 #ifndef NX_DISABLE_IPV4
             if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET)
             {
 
 
-                header_size = packet_ptr -> nx_packet_prepend_ptr - packet_ptr -> nx_packet_ip_header;
-                
+                header_size = (UINT)(packet_ptr -> nx_packet_prepend_ptr - packet_ptr -> nx_packet_ip_header);
+
                 /* Byte-Swap the basic IPv4 header.  The NetX Duo IP receive process does not
                    examine the extension header.  Therefore it does not perform byte swap
                    on extension headers. */
@@ -4340,11 +4632,7 @@ ULONG               start_time = nx_bsd_system_clock;
                 NX_CHANGE_ULONG_ENDIAN((((NX_IPV4_HEADER*)(packet_ptr -> nx_packet_ip_header)) -> nx_ip_header_word_2));
                 NX_CHANGE_ULONG_ENDIAN((((NX_IPV4_HEADER*)(packet_ptr -> nx_packet_ip_header)) -> nx_ip_header_source_ip));
                 NX_CHANGE_ULONG_ENDIAN((((NX_IPV4_HEADER*)(packet_ptr -> nx_packet_ip_header)) -> nx_ip_header_destination_ip));
-                    
-                if(bufferLength < header_size)
-                {
-                    header_size = bufferLength; 
-                }
+
             }
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
@@ -4354,13 +4642,7 @@ ULONG               start_time = nx_bsd_system_clock;
                 NX_IPV6_HEADER *ipv6_header_ptr;
                 UCHAR           next_header_type;
 
-                header_size = (INT)(packet_ptr -> nx_packet_prepend_ptr - packet_ptr -> nx_packet_ip_header);
-
-                if(bufferLength < header_size)
-                {
-
-                    header_size = bufferLength; 
-                }
+                header_size = (UINT)(packet_ptr -> nx_packet_prepend_ptr - packet_ptr -> nx_packet_ip_header);
 
                 ipv6_header_ptr = (NX_IPV6_HEADER*)packet_ptr -> nx_packet_ip_header;
 
@@ -4374,51 +4656,84 @@ ULONG               start_time = nx_bsd_system_clock;
 
                 /* Go through the rest of the IPv6 extension headers. */
                 _nxd_bsd_swap_ipv6_extension_headers(packet_ptr, next_header_type);
-            }    
+            }
 #endif
+            bytes_copied = 0;
+            while(iovlen)
+            {
+                if(iov -> iov_len > (header_size - bytes_copied))
+                {
+                    memcpy(iov -> iov_base, (VOID*)((UINT)(packet_ptr -> nx_packet_ip_header) + bytes_copied), (UINT)(header_size - bytes_copied)); /* Use case of memcpy is verified. */
+                    buffer_used = (header_size - bytes_copied);
+                    bytes_copied += (header_size - bytes_copied);
 
-            memcpy(rcvBuffer, packet_ptr -> nx_packet_ip_header, (UINT)header_size); /* Use case of memcpy is verified. */
+                    break;
+                }
+                else
+                {
+                    memcpy(iov -> iov_base, (VOID*)((UINT)(packet_ptr -> nx_packet_ip_header) + bytes_copied), iov -> iov_len); /* Use case of memcpy is verified. */
+                    bytes_copied += iov -> iov_len;
+                    iovlen--;
+                    iov++;
+                    buffer_used = 0;
+                }
+            }
+            header_size = bytes_copied;
+
         }
     }
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
 
-
-    /* Copy the packet data into the supplied buffer.  */
-    status =  nx_packet_data_extract_offset(packet_ptr, offset, (VOID*)((INT)rcvBuffer + header_size), (ULONG) (bufferLength - header_size), &bytes_received);
-    
-    /* Check for an error.  */
-    if (status)
+    bytes_copied = 0;
+    while(iovlen)
     {
+        /* Copy the packet data into the supplied buffer.  */
+        status =  nx_packet_data_extract_offset(packet_ptr, offset + bytes_copied, (VOID*)((UINT)(iov -> iov_base) + buffer_used), (ULONG) (iov -> iov_len - buffer_used), &bytes_received);
 
-        /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL); 
-        
-        /* Release the protection mutex.  */
-        tx_mutex_put(nx_bsd_protection_ptr);
-        
-        /* Release the packet.  */
-        nx_packet_release(packet_ptr);
-        
-        /* Return an error.  */
-        NX_BSD_ERROR( status, __LINE__);
-        return(NX_SOC_ERROR);
+        /* Check for an error.  */
+        if (status)
+        {
+
+            /* Set the socket error if extended socket options enabled. */
+            nx_bsd_set_errno(EINVAL);
+
+            /* Release the protection mutex.  */
+            tx_mutex_put(nx_bsd_protection_ptr);
+
+            /* Release the packet.  */
+            nx_packet_release(packet_ptr);
+
+            /* Return an error.  */
+            NX_BSD_ERROR( status, __LINE__);
+            return(NX_SOC_ERROR);
+        }
+
+        bytes_copied += bytes_received;
+        if (bytes_received < iov -> iov_len - buffer_used)
+        {
+            break;
+        }
+
+        buffer_used = 0;
+        iovlen--;
+        iov++;
     }
-    
+
     if((flags & MSG_PEEK) == 0)
     {
 
         /* Calculate the new offset.  */
-        offset =  offset + bytes_received;
+        offset =  offset + bytes_copied;
 
         /* Determine if all the packet data was consumed.  */
         if(packet_ptr -> nx_packet_length <= offset)
         {
-        
+
             bsd_socket_ptr -> nx_bsd_socket_received_packet =  packet_ptr -> nx_packet_queue_next;
 
             /* Release the packet.  */
             nx_packet_release(packet_ptr);
-            
+
             /* Clear the offset.  */
             bsd_socket_ptr -> nx_bsd_socket_received_packet_offset =  0;
         }
@@ -4429,11 +4744,11 @@ ULONG               start_time = nx_bsd_system_clock;
                )
         {
 
-            /* For UDP or raw socket, We extracted as much as can fit in the caller's buffer. 
+            /* For UDP or raw socket, We extracted as much as can fit in the caller's buffer.
                We will discard the remaining bytes. */
             bsd_socket_ptr -> nx_bsd_socket_received_packet =  packet_ptr -> nx_packet_queue_next;
 
-            bytes_received = packet_ptr -> nx_packet_length;
+            bytes_copied = packet_ptr -> nx_packet_length;
 
             /* No need to retain the packet.  */
             nx_packet_release(packet_ptr);
@@ -4443,124 +4758,17 @@ ULONG               start_time = nx_bsd_system_clock;
         }
         else
         {
-        
-            /* For TCP, the remaining data is saved for the next recv call. 
+
+            /* For TCP, the remaining data is saved for the next recv call.
                Just update the offset.  */
             bsd_socket_ptr -> nx_bsd_socket_received_packet_offset =  offset;
         }
-        bsd_socket_ptr -> nx_bsd_socket_received_byte_count -= bytes_received;
+        bsd_socket_ptr -> nx_bsd_socket_received_byte_count -= bytes_copied;
         bsd_socket_ptr -> nx_bsd_socket_received_packet_count--;
     }
 
     /* Release the protection mutex.  */
     tx_mutex_put(nx_bsd_protection_ptr);
-
-    /* Successful received a packet. Return the number of bytes copied to buffer.  */
-    return((INT)bytes_received + (INT)header_size);
-}
-
-
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    recvfrom                                            PORTABLE C      */ 
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */
-/*    This function copies up to a specified number of bytes, received on */
-/*    the socket into a specified location. To use recvfrom() on a TCP    */
-/*    socket requires the socket to be in the connected state.            */
-/*                                                                        */
-/*    This function is identical to recv() except for returning the sender*/
-/*    address and length if non null arguments are supplied.              */  
-/*                                                                        */
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    sockID                                Socket(must be connected)     */
-/*    buffer                                Pointer to hold data received */
-/*    bufferSize                            Maximum number of bytes       */ 
-/*    flags                                 Control flags, support        */
-/*                                            MSG_PEEK and MSG_DONTWAIT   */
-/*    fromAddr                              Address data of sender        */
-/*    fromAddrLen                           Length of address structure   */
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    number of bytes received              If no error occurs            */
-/*    NX_SOC_ERROR (-1)                     In case of any error          */
-/*                                                                        */
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
-/*    memset                                Clear memory                  */
-/*    nx_packet_allocate                    Allocate a packet             */
-/*    nx_packet_data_extract_offset         Extract packet data           */
-/*    nx_packet_release                     Free the packet used          */
-/*    tx_mutex_get                          Get protection                */
-/*    tx_mutex_put                          Release protection            */
-/*    tx_event_flags_get                    Wait for data to arrive       */
-/*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    Application Code                                                    */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-INT  recvfrom(INT sockID, CHAR *rcvBuffer, INT bufferLength, INT flags, struct sockaddr *fromAddr, INT *fromAddrLen)
-{
-
-INT                  bytes_received;
-NX_BSD_SOCKET       *bsd_socket_ptr;
-#ifndef NX_DISABLE_IPV4
-struct sockaddr_in  peer4_address;
-#endif /* NX_DISABLE_IPV4 */
-#ifdef FEATURE_NX_IPV6
-struct sockaddr_in6 peer6_address;
-#endif
-
-    /* Check for a valid socket ID. */
-    if ((sockID < NX_BSD_SOCKFD_START) || (sockID >= (NX_BSD_SOCKFD_START + NX_BSD_MAX_SOCKETS)))
-    {
-
-        /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
-        /* Return an error.  */
-        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);
-    }
-
-    /* Set up a pointer to the socket.  */
-    bsd_socket_ptr =  &nx_bsd_socket_array[sockID - NX_BSD_SOCKFD_START];
-
-    /* Socket error checking is done inside recv() call. */
-
-    /* Call the equivalent recv() function. */
-    bytes_received = recv(sockID, rcvBuffer, bufferLength, flags);
-
-    /* Check for error. */
-    if (bytes_received < 0)
-    {
-
-        /* Return an error status. */
-        return NX_SOC_ERROR;
-    }
-    /* If no bytes are received do not handle as an error. */
-    else if (bytes_received == 0)
-    {
-        return NX_SOC_OK;
-    }
 
     /* At this point we did receive a packet. */
     /* Supply the sender address if valid pointer is supplied. */
@@ -4589,21 +4797,21 @@ struct sockaddr_in6 peer6_address;
             }
             /* Copy the peer address/port info to the ClientAddress.  Truncate if
                addressLength is smaller than the size of struct sockaddr_in */
-            if(*fromAddrLen > (INT)sizeof(struct sockaddr_in))
+            if(*fromAddrLen > (INT)sizeof(struct nx_bsd_sockaddr_in))
             {
-                *fromAddrLen = sizeof(struct sockaddr_in);
+                *fromAddrLen = sizeof(struct nx_bsd_sockaddr_in);
             }
             memcpy(fromAddr, &peer4_address, (UINT)(*fromAddrLen)); /* Use case of memcpy is verified. */
         }
         else
 #endif /* NX_DISABLE_IPV4 */
 
-#ifdef FEATURE_NX_IPV6 
-        if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET6) 
+#ifdef FEATURE_NX_IPV6
+        if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET6)
         {
             /* Update the Client address with socket family, remote host IPv6 address and port.  */
             peer6_address.sin6_family = AF_INET6;
-            
+
             if(bsd_socket_ptr -> nx_bsd_socket_tcp_socket)
             {
                 peer6_address.sin6_addr._S6_un._S6_u32[0] = ntohl(bsd_socket_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v6[0]);
@@ -4618,29 +4826,29 @@ struct sockaddr_in6 peer6_address;
                 peer6_address.sin6_addr._S6_un._S6_u32[1] = ntohl(bsd_socket_ptr -> nx_bsd_socket_source_ip_address.nxd_ip_address.v6[1]);
                 peer6_address.sin6_addr._S6_un._S6_u32[2] = ntohl(bsd_socket_ptr -> nx_bsd_socket_source_ip_address.nxd_ip_address.v6[2]);
                 peer6_address.sin6_addr._S6_un._S6_u32[3] = ntohl(bsd_socket_ptr -> nx_bsd_socket_source_ip_address.nxd_ip_address.v6[3]);
-            
+
             /* Skip the port data for raw sockets. They do not use them. */
 #ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
                 if(!(bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_RAW_SOCKET))
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
                     peer6_address.sin6_port = ntohs((USHORT)bsd_socket_ptr -> nx_bsd_socket_source_port);
             }
-            
+
             if((*fromAddrLen) > (INT)sizeof(peer6_address))
             {
                 *fromAddrLen = sizeof(peer6_address);
             }
             memcpy(fromAddr, &peer6_address, (UINT)(*fromAddrLen)); /* Use case of memcpy is verified. */
-            
+
         }
         else
 #endif /* !FEATURE_NX_IPV6 */
 #if defined(NX_BSD_RAW_PPPOE_SUPPORT) || defined(NX_BSD_RAW_SUPPORT)
         if(bsd_socket_ptr -> nx_bsd_socket_family == AF_PACKET)
         {
-            if(*fromAddrLen >= (INT)sizeof(struct sockaddr_ll))
+            if(*fromAddrLen >= (INT)sizeof(struct nx_bsd_sockaddr_ll))
             {
-                struct sockaddr_ll *sockaddr = (struct sockaddr_ll*)fromAddr;
+                struct nx_bsd_sockaddr_ll *sockaddr = (struct nx_bsd_sockaddr_ll*)fromAddr;
                 INT i;
                 sockaddr -> sll_family = AF_PACKET;
                 sockaddr -> sll_protocol = bsd_socket_ptr -> nx_bsd_socket_sll_protocol;
@@ -4650,28 +4858,25 @@ struct sockaddr_in6 peer6_address;
                 sockaddr -> sll_halen = 6;
                 for(i = 0; i < 6; i++)
                     sockaddr -> sll_addr[i] = bsd_socket_ptr -> nx_bsd_socket_sll_addr[i];
-                *fromAddrLen = sizeof(struct sockaddr_ll);
+                *fromAddrLen = sizeof(struct nx_bsd_sockaddr_ll);
             }
 
         }
         else
 #endif
         {
-            
-            /* Release the protection mutex.  */
-            tx_mutex_put(nx_bsd_protection_ptr);
-            
+
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);  
-            
+            nx_bsd_set_errno(EINVAL);
+
             /* Error, IPv6 support is not enabled.  */
             NX_BSD_ERROR(ERROR, __LINE__);
             return(ERROR);
         }
     }
 
-    /* Successfully received a packet. Return bytes received. */
-    return (INT)(bytes_received);
+    /* Successful received a packet. Return the number of bytes copied to buffer.  */
+    return((INT)bytes_copied + (INT)header_size);
 }
 
 
@@ -4680,7 +4885,7 @@ struct sockaddr_in6 peer6_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    soc_close                                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4737,9 +4942,12 @@ struct sockaddr_in6 peer6_address;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  soc_close(INT sockID)
+INT  nx_bsd_soc_close(INT sockID)
 {
 
 NX_BSD_SOCKET       *bsd_socket_ptr;
@@ -4761,7 +4969,7 @@ UINT                 index;
     {
 
         /* Set the socket error. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Error, invalid socket ID.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -4797,12 +5005,12 @@ UINT                 index;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         /* Return error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
-    }        
+    }
 
     /* Set NetX socket pointers.  */
     tcp_socket_ptr =  bsd_socket_ptr -> nx_bsd_socket_tcp_socket;
@@ -4816,7 +5024,7 @@ UINT                 index;
         next_packet_ptr = packet_ptr -> nx_packet_queue_next;
 
         /* Mark it as allocated so it will be released.  */
-        packet_ptr -> nx_packet_queue_next =  (NX_PACKET *) NX_PACKET_ALLOCATED;            
+        packet_ptr -> nx_packet_queue_next =  (NX_PACKET *) NX_PACKET_ALLOCATED;
 
         nx_packet_release(packet_ptr);
 
@@ -4837,14 +5045,14 @@ UINT                 index;
     {
 
         /* If the socket has not been closed, disconnect it. This would be the case
-           if NetX already closed the socket e.g. a RST packet received before the 
+           if NetX already closed the socket e.g. a RST packet received before the
            host application called this function. */
         if (tcp_socket_ptr -> nx_tcp_socket_state != NX_TCP_CLOSED)
         {
 
             /* Disconnect the socket. */
 
-            /* If the disconnect takes more than the timeout option, NetX marks the socket as "closed" 
+            /* If the disconnect takes more than the timeout option, NetX marks the socket as "closed"
                or puts it back to "listen" state. The default value is 1 to emulate an immediate
                socket closure without sending a RST packet.  */
             timeout = NX_BSD_TCP_SOCKET_DISCONNECT_TIMEOUT;
@@ -4860,13 +5068,13 @@ UINT                 index;
             if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
             {
                 /* The socket is no longer in use. */
-                
+
                 /* Set the socket error code. */
-                set_errno(EBADF);
-                
+                nx_bsd_set_errno(EBADF);
+
                 /* Release the protection mutex.  */
                 tx_mutex_put(nx_bsd_protection_ptr);
-                
+
                 /* Return error code.  */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return(NX_SOC_ERROR);
@@ -4892,21 +5100,21 @@ UINT                 index;
 
         /* Clear the TCP socket structure.  */
         memset((VOID *) tcp_socket_ptr, 0, sizeof(NX_TCP_SOCKET));
-        
+
         /* Release the NetX TCP socket.  */
         tx_block_release((VOID *) tcp_socket_ptr);
-        
-        /* If this is the master server socket, we need to unaccept the 
+
+        /* If this is the master server socket, we need to unaccept the
            associated secondary socket. */
         if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET)
         {
 
             INT sec_soc_id = (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id;
-            
+
             if(sec_soc_id < NX_BSD_MAX_SOCKETS)
             {
 
-                /* Find whether or not this is the only master socket that is connected to this 
+                /* Find whether or not this is the only master socket that is connected to this
                    secondary socket. */
                 for(i = 0; i < NX_BSD_MAX_SOCKETS; i++)
                 {
@@ -4931,7 +5139,7 @@ UINT                 index;
 
                     /* Release the secondary socket if there are no more master sockets associated
                        with this secondary socket. */
-                      
+
                     tcp_socket_ptr = nx_bsd_socket_array[sec_soc_id].nx_bsd_socket_tcp_socket;
 
                     /* If the secondary socket has not been closed, disconnect it. This would be the case
@@ -4941,7 +5149,7 @@ UINT                 index;
 
                         /* Disconnect the socket. */
 
-                        /* If the disconnect takes more than the timeout option, NetX marks the socket as "closed" 
+                        /* If the disconnect takes more than the timeout option, NetX marks the socket as "closed"
                            or puts it back to "listen" state. The default value is 1 to emulate an immediate
                            socket closure without sending a RST packet.  */
                         timeout = NX_BSD_TCP_SOCKET_DISCONNECT_TIMEOUT;
@@ -4959,7 +5167,7 @@ UINT                 index;
                             /* The socket is no longer in use. */
 
                             /* Set the socket error code. */
-                            set_errno(EBADF);
+                            nx_bsd_set_errno(EBADF);
 
                             /* Release the protection mutex.  */
                             tx_mutex_put(nx_bsd_protection_ptr);
@@ -4974,7 +5182,7 @@ UINT                 index;
                     nx_tcp_server_socket_unaccept(tcp_socket_ptr);
                     nx_tcp_server_socket_unlisten(nx_bsd_default_ip, tcp_socket_ptr -> nx_tcp_socket_port);
                     nx_tcp_socket_delete(tcp_socket_ptr);
-                    
+
                     memset((VOID*)tcp_socket_ptr, 0, sizeof(NX_TCP_SOCKET));
                     tx_block_release((VOID*)tcp_socket_ptr);
                     memset((VOID*)&(nx_bsd_socket_array[sec_soc_id]), 0, sizeof(NX_BSD_SOCKET));
@@ -4984,16 +5192,16 @@ UINT                 index;
 
         /* Finally Clear the BSD socket structure.  */
         memset((VOID *) bsd_socket_ptr, 0, sizeof(NX_BSD_SOCKET));
-        
+
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Return */
         return(NX_SOC_OK);
-        
+
     }
     else if (udp_socket_ptr)
-    {   
-    
+    {
+
         /* A UDP socket needs to be closed.  */
 
         /* Check whether this is the last BSD socket attached to the NX_UDP_SOCKET */
@@ -5014,7 +5222,7 @@ UINT                 index;
                 /* Do not delete this socket. */
                 delete_socket = NX_FALSE;
 
-                /* If the underlying NX_UDP_SOCKET points to this UDP socket, we need to 
+                /* If the underlying NX_UDP_SOCKET points to this UDP socket, we need to
                    reassign a BSD socket to the NX UDP socket. */
                 for(i = 0; i < NX_BSD_MAX_SOCKETS; i++)
                 {
@@ -5042,14 +5250,14 @@ UINT                 index;
             if(udp_socket_ptr -> nx_udp_socket_bound_next)
             {
                 nx_udp_socket_unbind(udp_socket_ptr);
-            }            
-            
+            }
+
             /* Socket successfully unbound. Now delete the UDP socket.  */
             nx_udp_socket_delete(udp_socket_ptr);
-            
+
             /* Clear the UDP socket block.  */
             memset((VOID *) udp_socket_ptr, 0, sizeof(NX_UDP_SOCKET));
-            
+
             /* Release the NetX UDP socket memory.  */
             tx_block_release((VOID *) udp_socket_ptr);
         }
@@ -5064,7 +5272,7 @@ UINT                 index;
         memset((VOID *) bsd_socket_ptr, 0, sizeof(NX_BSD_SOCKET));
 
         /* Release the protection mutex.  */
-        tx_mutex_put(nx_bsd_protection_ptr);                
+        tx_mutex_put(nx_bsd_protection_ptr);
 
         return(NX_SOC_OK);
     }
@@ -5078,7 +5286,7 @@ UINT                 index;
 
         /* Remove this socket from the list. */
         protocol = bsd_socket_ptr -> nx_bsd_socket_protocol;
-    
+
         /* Calculate the hash index in the raw socket protocol table. */
         index = (UINT) ((protocol + (protocol >> 8)) & NX_BSD_SOCKET_RAW_PROTOCOL_TABLE_MASK);
 
@@ -5110,9 +5318,9 @@ UINT                 index;
 
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-        
+
         return(NX_SOC_OK);
-    
+
     }
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
 #if defined(NX_BSD_RAW_PPPOE_SUPPORT) || defined(NX_BSD_RAW_SUPPORT)
@@ -5136,13 +5344,13 @@ UINT                 index;
 
 
     /* Unknown socket type or invalid socket. */
-    
+
     /* Release the protection mutex.  */
     tx_mutex_put(nx_bsd_protection_ptr);
-    
+
     /* Set the socket error if extended socket options enabled. */
-    set_errno(EINVAL);  
-    
+    nx_bsd_set_errno(EINVAL);
+
     /* Return error.  */
     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
     return(NX_SOC_ERROR);
@@ -5156,7 +5364,7 @@ UINT                 index;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    fcntl                                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5195,9 +5403,12 @@ UINT                 index;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT fcntl(INT sockID, UINT flag_type, UINT f_options)
+INT nx_bsd_fcntl(INT sockID, UINT flag_type, UINT f_options)
 {
 
 NX_BSD_SOCKET   *bsd_socket_ptr;
@@ -5207,7 +5418,7 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
 
@@ -5216,7 +5427,7 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
     }
 
     /* Normalize the socket ID to our array. */
-    sockID =  sockID - NX_BSD_SOCKFD_START; 
+    sockID =  sockID - NX_BSD_SOCKFD_START;
 
     /* Build pointer to BSD socket structure.  */
     bsd_socket_ptr =  &nx_bsd_socket_array[sockID];
@@ -5249,10 +5460,10 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
     /* Flag_type is not the one we support */
 
     /* Set the socket error if extended socket options enabled. */
-    set_errno(EINVAL);  
-    
+    nx_bsd_set_errno(EINVAL);
+
     NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-    
+
     /* Return error status. */
     return NX_SOC_ERROR;
 
@@ -5266,7 +5477,7 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    ioctl                                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5308,16 +5519,30 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-08-2023     Wenhui Xie               Modified comment(s), corrected*/
+/*                                            the result of FIONREAD,     */
+/*                                            resulting in version 6.2.1  */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
+/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
+/*                                            added SIOCGIFINDEX and      */
+/*                                            SIOCGIFHWADDR commands,     */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  ioctl(INT sockID,  INT command, INT *result)
+INT  nx_bsd_ioctl(INT sockID,  INT command, INT *result)
 {
 
 NX_BSD_SOCKET       *bsd_socket_ptr;
 NX_TCP_SOCKET       *tcp_socket_ptr;
 NX_UDP_SOCKET       *udp_socket_ptr;
-UINT                status;
-
+UINT                 status;
+#ifdef NX_BSD_RAW_SUPPORT
+UINT                 i;
+struct nx_bsd_ifreq *ifreq;
+NX_INTERFACE        *nx_interface;
+#endif
 
     /* Check that the supplied socket ID is valid.  */
     if ((sockID < NX_BSD_SOCKFD_START) || (sockID >= (NX_BSD_SOCKFD_START + NX_BSD_MAX_SOCKETS)))
@@ -5340,7 +5565,7 @@ UINT                status;
 
         /* Error getting the protection mutex.  */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Set a pointer to the BSD socket.  */
@@ -5360,17 +5585,17 @@ UINT                status;
             /* Check NULL pointer. */
             if(result == NX_NULL)
             {
-                tx_mutex_put(nx_bsd_protection_ptr); 
+                tx_mutex_put(nx_bsd_protection_ptr);
 
-                set_errno(EFAULT);
+                nx_bsd_set_errno(EFAULT);
 
-                /* Error, invalid address. */ 
+                /* Error, invalid address. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
 
                 return(NX_SOC_ERROR);
             }
 
-            /* Determine which socket pointer to use.  */        
+            /* Determine which socket pointer to use.  */
             if (tcp_socket_ptr)
             {
 
@@ -5380,12 +5605,16 @@ UINT                status;
                 if (status != NX_SUCCESS)
                 {
 
-                    tx_mutex_put(nx_bsd_protection_ptr); 
+                    tx_mutex_put(nx_bsd_protection_ptr);
 
                     /* Error in the native NetX call.  */
                     NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-                    return(NX_SOC_ERROR); 
+                    return(NX_SOC_ERROR);
                 }
+                else
+                {
+                    *result += (INT)(bsd_socket_ptr -> nx_bsd_socket_received_byte_count);
+            }
             }
             else if (udp_socket_ptr)
             {
@@ -5398,16 +5627,16 @@ UINT                status;
         }
 
         case FIONBIO:
-        {    
+        {
 
             /* Check NULL pointer. */
             if(result == NX_NULL)
             {
-                tx_mutex_put(nx_bsd_protection_ptr); 
+                tx_mutex_put(nx_bsd_protection_ptr);
 
-                set_errno(EFAULT);
+                nx_bsd_set_errno(EFAULT);
 
-                /* Error, invalid address. */ 
+                /* Error, invalid address. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
 
                 return(NX_SOC_ERROR);
@@ -5416,7 +5645,7 @@ UINT                status;
             if(*result == NX_FALSE)
             {
 
-                /* Disable the socket for non blocking. */        
+                /* Disable the socket for non blocking. */
                 bsd_socket_ptr -> nx_bsd_socket_option_flags &= (ULONG)(~NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING);
 
                 /* Update the file descriptor with the non blocking bit. */
@@ -5425,7 +5654,7 @@ UINT                status;
             else
             {
 
-                /* Enable the socket for non blocking. */        
+                /* Enable the socket for non blocking. */
                 bsd_socket_ptr -> nx_bsd_socket_option_flags |= NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING;
 
                 /* Update the file descriptor with the non blocking bit. */
@@ -5435,15 +5664,76 @@ UINT                status;
             break;
         }
 
+#ifdef NX_BSD_RAW_SUPPORT
+        case SIOCGIFINDEX:
+        {
+            ifreq = (struct nx_bsd_ifreq*)result;
+
+            for (i = 0; i < NX_MAX_IP_INTERFACES; i++)
+            {
+                if (strncmp(ifreq->ifr_name, nx_bsd_default_ip->nx_ip_interface[i].nx_interface_name, NX_BSD_IFNAMSIZE) == 0)
+                {
+                    break;
+                }
+            }
+
+            if (i == NX_MAX_IP_INTERFACES)
+            {
+                tx_mutex_put(nx_bsd_protection_ptr);
+
+                /* Did not find a matching interface. */
+                nx_bsd_set_errno(EINVAL);
+
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
+            ifreq -> ifr_ifindex = (INT)i;
+
+            break;
+        }
+
+        case SIOCGIFHWADDR:
+        {
+            ifreq = (struct nx_bsd_ifreq*)result;
+
+            if (ifreq -> ifr_ifindex < 0 || ifreq -> ifr_ifindex >= NX_MAX_IP_INTERFACES)
+            {
+                tx_mutex_put(nx_bsd_protection_ptr);
+                nx_bsd_set_errno(EINVAL);
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
+            nx_interface = &nx_bsd_default_ip -> nx_ip_interface[ifreq -> ifr_ifindex];
+            if (!(nx_interface -> nx_interface_valid))
+            {
+                tx_mutex_put(nx_bsd_protection_ptr);
+                nx_bsd_set_errno(EINVAL);
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
+            ifreq -> ifr_hwaddr.sa_data[0] = (UCHAR)(nx_interface -> nx_interface_physical_address_msw >> 8);
+            ifreq -> ifr_hwaddr.sa_data[1] = (UCHAR)(nx_interface -> nx_interface_physical_address_msw & 0xFF);
+            ifreq -> ifr_hwaddr.sa_data[2] = (UCHAR)(nx_interface -> nx_interface_physical_address_lsw >> 24);
+            ifreq -> ifr_hwaddr.sa_data[3] = (UCHAR)(nx_interface -> nx_interface_physical_address_lsw >> 16);
+            ifreq -> ifr_hwaddr.sa_data[4] = (UCHAR)(nx_interface -> nx_interface_physical_address_lsw >> 8);
+            ifreq -> ifr_hwaddr.sa_data[5] = (UCHAR)(nx_interface -> nx_interface_physical_address_lsw & 0xFF);
+
+            break;
+        }
+#endif
+
         default:
 
             /* Unhandled command; ignore  */
             break;
     }
 
-    tx_mutex_put(nx_bsd_protection_ptr); 
+    tx_mutex_put(nx_bsd_protection_ptr);
 
-    return NX_SOC_OK; 
+    return NX_SOC_OK;
 }
 
 /**************************************************************************/
@@ -5451,7 +5741,7 @@ UINT                status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    inet_ntoa                                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5488,9 +5778,12 @@ UINT                status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-CHAR *inet_ntoa(struct in_addr address_to_convert)
+CHAR *nx_bsd_inet_ntoa(struct nx_bsd_in_addr address_to_convert)
 {
 UINT status;
 
@@ -5508,45 +5801,45 @@ UINT status;
 
     /* Return the start of the string buffer. */
     return nx_bsd_url_buffer;
-                    
+
 }
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    bsd_number_convert                                  PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    bsd_number_convert                                  PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This function converts an integer to a string.                      */
 /*                                                                        */
-/*  INPUT                                                                 */  
-/*                                                                        */  
-/*    number                                Number to convert             */  
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    number                                Number to convert             */
 /*    string                                Pointer to string buffer      */
 /*    buffer_len                            Size of the string buffer     */
 /*    base                                  the base of the number,       */
 /*                                          2,8,10,16                     */
-/*                                                                        */  
-/*  OUTPUT                                                                */  
-/*                                                                        */  
-/*    size                                  Size of string buffer         */ 
-/*                                                                        */  
-/*  CALLS                                                                 */  
-/*                                                                        */  
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    size                                  Size of string buffer         */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    None                                                                */
 /*                                                                        */
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -5613,52 +5906,55 @@ UINT    size;
     return(size);
 }
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    inet_aton                                           PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    inet_aton                                           PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This function converts hexadecimal characters into an ASCII IP      */
 /*    address representation.                                             */
 /*                                                                        */
-/*  INPUT                                                                 */  
-/*                                                                        */  
-/*    address_buffer_ptr                    String holding the IP address */ 
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    address_buffer_ptr                    String holding the IP address */
 /*    addr                                  Struct to store the IP address*/
 /*                                                                        */
-/*  OUTPUT                                                                */  
-/*                                                                        */  
-/*    NX_SUCCESS                            Successful conversion         */ 
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_SUCCESS                            Successful conversion         */
 /*    NX_SOC_ERROR                          Error during conversion       */
-/*                                                                        */  
-/*  CALLS                                                                 */  
-/*                                                                        */  
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    nx_bsd_isdigit                        Indicate char is a number     */
 /*    isspace                               Indicate char is a space      */
 /*    islower                               Indicate char is lowercase    */
 /*    htonl                                 Convert to network byte order */
-/*                                                                        */  
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT inet_aton(const CHAR *address_buffer_ptr, struct in_addr *addr)
+INT nx_bsd_inet_aton(const CHAR *address_buffer_ptr, struct nx_bsd_in_addr *addr)
 {
 ULONG value;
 INT   base = 10, ip_address_index;
@@ -5666,7 +5962,7 @@ UCHAR tempchar;
 const UCHAR *buffer_ptr;
 UINT  ip_address_number[4];  /* Four discreet numbers in IP address representation. */
 UINT *ip_number_ptr;         /* IP address as equivalent ULONG value. */
-UINT  dot_flag;   
+UINT  dot_flag;
 
     /* Set local variables. */
     buffer_ptr = (const UCHAR *) address_buffer_ptr;
@@ -5687,7 +5983,7 @@ UINT  dot_flag;
     {
 
         /* Initialize the (next) extracted IP address number to zero. */
-        value = 0; 
+        value = 0;
 
         if(dot_flag== 1)
         {
@@ -5695,7 +5991,7 @@ UINT  dot_flag;
             base = 10;
 
             /* Determine which number base the input number buffer is. */
-            if (*buffer_ptr == '0') 
+            if (*buffer_ptr == '0')
             {
                 /* Get the next character. */
                 buffer_ptr++;
@@ -5720,15 +6016,15 @@ UINT  dot_flag;
         tempchar = *buffer_ptr;
 
         /* Parse characters making up the next word. */
-        while (*buffer_ptr != '\0') 
+        while (*buffer_ptr != '\0')
         {
             /* Check if the next character is a decimal or octal digit. */
-            if (nx_bsd_isdigit(tempchar)) 
+            if (nx_bsd_isdigit(tempchar))
             {
 
                 dot_flag = 0;
 
-                /* Convert the tempchar character to a number.  Multiply the existing 
+                /* Convert the tempchar character to a number.  Multiply the existing
                    number by the base (8 or 10) and this digit to the sum. */
                 value = (value * (ULONG)base) + (ULONG)(tempchar - '0');
 
@@ -5763,7 +6059,7 @@ UINT  dot_flag;
                 {
                     /* Not a valid hex character. */
                     return (0);
-                }                    
+                }
             }
             else
             {
@@ -5773,7 +6069,7 @@ UINT  dot_flag;
         }
 
         /* At the end of the current word. Is this a separator character? */
-        if (*buffer_ptr == '.') 
+        if (*buffer_ptr == '.')
         {
 
             dot_flag = 1;
@@ -5798,7 +6094,7 @@ UINT  dot_flag;
 
             /* Move to the next character in the IP address string. */
             buffer_ptr++;
-        } 
+        }
         /* Check for non digit or seperator character indicating (maybe) end of the buffer. */
         else
             break;
@@ -5816,10 +6112,10 @@ UINT  dot_flag;
         }
     }
 
-    /* IP addresses are grouped as A, B, C, or D types.  Determine which 
+    /* IP addresses are grouped as A, B, C, or D types.  Determine which
        type address we have by comparing the IP address value against...*/
 
-    /* Determine this by substracting the pointer to beginning of the whole 
+    /* Determine this by substracting the pointer to beginning of the whole
        IP address number ip_number_ptr[4] against the pointer to the last extracted word, ip_address_number. */
     ip_address_index = ip_number_ptr - ip_address_number + 1;
 
@@ -5849,7 +6145,7 @@ UINT  dot_flag;
        }
     }
     /* Most common input... */
-    else if (ip_address_index == 1) 
+    else if (ip_address_index == 1)
     {
 
         /* We are done, this address contained one 32 bit word (no separators).  */
@@ -5881,7 +6177,7 @@ UINT  dot_flag;
             value |= ip_address_number[i] << (24 - (i*8));
         }
      }
-    
+
     /* Check if a return pointer for the address data is supplied. */
     if (addr)
     {
@@ -5894,55 +6190,58 @@ UINT  dot_flag;
 }
 
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    inet_addr                                           PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    inet_addr                                           PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This function converts an IP address string to a number. If it      */
 /*    detects an error in the conversion it returns a zero address.       */
 /*                                                                        */
-/*  INPUT                                                                 */  
-/*                                                                        */  
-/*    buffer                                IP address text buffer        */ 
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    buffer                                IP address text buffer        */
 /*    address                               Converted address number      */
 /*                                                                        */
-/*  OUTPUT                                                                */  
-/*                                                                        */  
-/*    NX_SUCCESS                            Successful conversion         */ 
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_SUCCESS                            Successful conversion         */
 /*    NX_SOC_ERROR                          Error during conversion       */
-/*                                                                        */  
-/*  CALLS                                                                 */  
-/*                                                                        */  
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    inet_aton                             Indicate char is a space      */
 /*                                                                        */
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-in_addr_t inet_addr(const CHAR *buffer) 
+nx_bsd_in_addr_t nx_bsd_inet_addr(const CHAR *buffer)
 {
 
-struct  in_addr ip_address;
+struct  nx_bsd_in_addr ip_address;
 UINT    status;
 
-    status = (UINT)inet_aton(buffer, &ip_address);
+    status = (UINT)nx_bsd_inet_aton(buffer, &ip_address);
 
     if (status == 0)
     {
@@ -5953,66 +6252,69 @@ UINT    status;
 }
 
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    getsockopt                                          PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    getsockopt                                          PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This function returns the status of the specified socket option in  */
 /*    the current BSD socket session.                                     */
 /*                                                                        */
-/*  INPUT                                                                 */  
-/*                                                                        */  
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    sockID                                socket descriptor             */
 /*    option_level                          Category of option (SOCKET)   */
 /*    option_name                           Socket option ID              */
 /*    option_value                          Pointer to option value       */
 /*    option_value                          Pointer to size of value      */
 /*                                                                        */
-/*  OUTPUT                                                                */  
-/*                                                                        */  
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    tx_mutex_get                          Get protection                */
-/*    tx_mutex_put                          Release protection            */ 
-/*                                                                        */  
-/*  CALLS                                                                 */  
-/*                                                                        */  
+/*    tx_mutex_put                          Release protection            */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    NX_SOC_OK                             Request processed successfully*/
 /*    NX_SOC_ERROR                          Errors with request           */
 /*    (option data)                         Pointer to requested data     */
 /*                                                                        */
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  getsockopt(INT sockID, INT option_level, INT option_name, VOID *option_value, INT *option_length)
+INT  nx_bsd_getsockopt(INT sockID, INT option_level, INT option_name, VOID *option_value, INT *option_length)
 {
 
 TX_INTERRUPT_SAVE_AREA
 
-INT             status;
-NX_BSD_SOCKET   *bsd_socket_ptr;
-struct          sock_errno      *so_errno;
-struct          sock_keepalive  *so_keepalive;
-struct          sock_reuseaddr  *so_reuseaddr;
-struct          timeval         *so_rcvtimeval;
-struct          sock_winsize    *soc_window_size;
-ULONG           ticks;
+INT                                     status;
+NX_BSD_SOCKET                           *bsd_socket_ptr;
+struct          nx_bsd_sock_errno       *so_errno;
+struct          nx_bsd_sock_keepalive   *so_keepalive;
+struct          nx_bsd_sock_reuseaddr   *so_reuseaddr;
+struct          nx_bsd_timeval          *so_rcvtimeval;
+struct          nx_bsd_sock_winsize     *soc_window_size;
+ULONG                                   ticks;
 
 
     /* Check for valid socket ID/descriptor. */
@@ -6020,7 +6322,7 @@ ULONG           ticks;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -6031,7 +6333,7 @@ ULONG           ticks;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return NX_SOC_ERROR;
@@ -6046,8 +6348,8 @@ ULONG           ticks;
             /* Error, one or more invalid arguments.  */
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOPROTOOPT);              
-            
+            nx_bsd_set_errno(ENOPROTOOPT);
+
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return NX_SOC_ERROR;
         }
@@ -6059,10 +6361,10 @@ ULONG           ticks;
         {
 
             /* Error, one or more invalid arguments.  */
-            
+
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOPROTOOPT);  
-            
+            nx_bsd_set_errno(ENOPROTOOPT);
+
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return NX_SOC_ERROR;
         }
@@ -6073,7 +6375,7 @@ ULONG           ticks;
         /* Error, one or more invalid arguments.  */
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return NX_SOC_ERROR;
@@ -6083,17 +6385,17 @@ ULONG           ticks;
     sockID =  sockID - NX_BSD_SOCKFD_START;
 
     /* Get the protection mutex.  */
-    status =  (INT)tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);  
+    status =  (INT)tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);
 
     /* Check the status.  */
     if (status)
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Setup pointer to socket.  */
@@ -6113,31 +6415,31 @@ ULONG           ticks;
                tx_mutex_put(nx_bsd_protection_ptr);
 
                /* Set the socket error if extended socket options enabled. */
-               set_errno(EINVAL);  
+               nx_bsd_set_errno(EINVAL);
 
                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-               return(NX_SOC_ERROR); 
+               return(NX_SOC_ERROR);
            }
 
-           so_errno = (struct sock_errno *)option_value;
+           so_errno = (struct nx_bsd_sock_errno *)option_value;
 
            TX_DISABLE
-           if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR) 
+           if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
            {
                so_errno -> error = bsd_socket_ptr -> nx_bsd_socket_error_code;
 
                /* Now clear the error code. */
                bsd_socket_ptr -> nx_bsd_socket_error_code = 0;
 
-               /* Clear the error flag.  The application is expected to close the socket at this point.*/  
-               bsd_socket_ptr -> nx_bsd_socket_status_flags = bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR); 
+               /* Clear the error flag.  The application is expected to close the socket at this point.*/
+               bsd_socket_ptr -> nx_bsd_socket_status_flags = bsd_socket_ptr -> nx_bsd_socket_status_flags & (ULONG)(~NX_BSD_SOCKET_ERROR);
            }
            else
                so_errno -> error = 0;
            TX_RESTORE
 
-           /* Set the actual size of the data returned. */ 
-           *option_length = sizeof(struct sock_errno);
+           /* Set the actual size of the data returned. */
+           *option_length = sizeof(struct nx_bsd_sock_errno);
 
         }
 
@@ -6146,7 +6448,7 @@ ULONG           ticks;
         case SO_KEEPALIVE:
 
             /* Determine if NetX Duo supports keepalive. */
-            
+
             /* Check to make sure the size arguement is sufficient if supplied. */
             if (*option_length < (INT)sizeof(so_keepalive -> keepalive_enabled))
             {
@@ -6154,19 +6456,19 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);
 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return(NX_SOC_ERROR); 
+                return(NX_SOC_ERROR);
             }
-            
-            so_keepalive = (struct sock_keepalive *)option_value;
+
+            so_keepalive = (struct nx_bsd_sock_keepalive *)option_value;
 #ifndef NX_ENABLE_TCP_KEEPALIVE
             so_keepalive -> keepalive_enabled = NX_FALSE;
 #else
             so_keepalive -> keepalive_enabled = (INT)(bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled);
 #endif /* NX_ENABLE_TCP_KEEPALIVE */
-            *option_length = sizeof(struct sock_keepalive);
+            *option_length = sizeof(struct nx_bsd_sock_keepalive);
 
         break;
 
@@ -6178,27 +6480,27 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);
 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return(NX_SOC_ERROR); 
+                return(NX_SOC_ERROR);
 
             }
 
-            so_rcvtimeval = (struct timeval *)option_value;
+            so_rcvtimeval = (struct nx_bsd_timeval *)option_value;
 
             ticks = bsd_socket_ptr -> nx_bsd_option_receive_timeout;
 
 
-            so_rcvtimeval -> tv_usec = (suseconds_t)(ticks * NX_MICROSECOND_PER_CPU_TICK) % 1000000;
-            so_rcvtimeval -> tv_sec = (time_t)((ticks * NX_MICROSECOND_PER_CPU_TICK) / 1000000);
+            so_rcvtimeval -> tv_usec = (nx_bsd_suseconds_t)(ticks * NX_MICROSECOND_PER_CPU_TICK) % 1000000;
+            so_rcvtimeval -> tv_sec = (nx_bsd_time_t)((ticks * NX_MICROSECOND_PER_CPU_TICK) / 1000000);
             *option_length = sizeof(so_rcvtimeval);
 
         break;
 
         case SO_RCVBUF:
 
-            soc_window_size = (struct sock_winsize *)option_value;
+            soc_window_size = (struct nx_bsd_sock_winsize *)option_value;
             soc_window_size -> winsize = (INT)(bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_rx_window_default);
             *option_length = sizeof(soc_window_size);
 
@@ -6213,15 +6515,15 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
+                nx_bsd_set_errno(EINVAL);
 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return(NX_SOC_ERROR); 
+                return(NX_SOC_ERROR);
             }
-            
-            so_reuseaddr= (struct sock_reuseaddr *)option_value;
+
+            so_reuseaddr= (struct nx_bsd_sock_reuseaddr *)option_value;
             so_reuseaddr -> reuseaddr_enabled = bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_REUSEADDR;
-            *option_length = sizeof(struct sock_reuseaddr);
+            *option_length = sizeof(struct nx_bsd_sock_reuseaddr);
 
         break;
 
@@ -6234,8 +6536,8 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
-                
+                nx_bsd_set_errno(EINVAL);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
@@ -6247,8 +6549,8 @@ ULONG           ticks;
                 tx_mutex_put(nx_bsd_protection_ptr);
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EBADF);  
-                
+                nx_bsd_set_errno(EBADF);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
@@ -6258,10 +6560,10 @@ ULONG           ticks;
             {
 
                 tx_mutex_put(nx_bsd_protection_ptr);
-               
+
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
-                
+                nx_bsd_set_errno(ENOPROTOOPT);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
@@ -6270,16 +6572,16 @@ ULONG           ticks;
             *(UCHAR*)option_value = (UCHAR)(bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live);
             break;
 
-        default:   
+        default:
 
             tx_mutex_put(nx_bsd_protection_ptr);
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOPROTOOPT);  
+            nx_bsd_set_errno(ENOPROTOOPT);
 
             /* Unsupported or unknown option. */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-            return(NX_SOC_ERROR); 
+            return(NX_SOC_ERROR);
     }
 
     /* Release the protection mutex.  */
@@ -6288,67 +6590,81 @@ ULONG           ticks;
     return status;
 }
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    setsockopt                                          PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    setsockopt                                          PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This function enables the specified socket option in the current BSD*/
 /*    socket session to the specified setting.                            */
 /*                                                                        */
-/*  INPUT                                                                 */  
-/*                                                                        */  
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    sockID                                socket descriptor             */
 /*    option_level                          Category of option (SOCKET)   */
 /*    option_name                           Socket option ID              */
 /*    option_value                          Pointer to option value       */
 /*    option_length                         Size of option value data     */
 /*                                                                        */
-/*  OUTPUT                                                                */  
-/*                                                                        */  
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    NX_SOC_OK                             Request processed successfully*/
 /*    NX_SOC_ERROR                          Errors with request           */
-/*                                                                        */  
-/*  CALLS                                                                 */  
+/*                                                                        */
+/*  CALLS                                                                 */
 /*                                                                        */
 /*    tx_mutex_get                          Get protection                */
-/*    tx_mutex_put                          Release protection            */ 
-/*                                                                        */  
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*    tx_mutex_put                          Release protection            */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
+/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
+/*                                            added PACKET_ADD_MEMBERSHIP */
+/*                                            and PACKET_DROP_MEMBERSHIP, */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  setsockopt(INT sockID, INT option_level, INT option_name, const VOID *option_value, INT option_length)
+INT  nx_bsd_setsockopt(INT sockID, INT option_level, INT option_name, const VOID *option_value, INT option_length)
 {
-UINT            reuse_enabled;
-NX_BSD_SOCKET   *bsd_socket_ptr;
-ULONG           window_size;
-ULONG           timer_ticks;
-struct timeval *time_val;
+UINT                    reuse_enabled;
+NX_BSD_SOCKET           *bsd_socket_ptr;
+ULONG                   window_size;
+ULONG                   timer_ticks;
+struct nx_bsd_timeval   *time_val;
 #if defined(NX_ENABLE_IP_RAW_PACKET_FILTER) || !defined(NX_DISABLE_IPV4)
 INT             i;
 #endif /* defined(NX_ENABLE_IP_RAW_PACKET_FILTER) || !defined(NX_DISABLE_IPV4) */
 #ifndef NX_DISABLE_IPV4
-struct ip_mreq *mreq;
+struct nx_bsd_ip_mreq
+               *mreq;
 UINT            mcast_interface;
 UINT            status;
 #endif /* NX_DISABLE_IPV4 */
+#if defined(NX_BSD_RAW_SUPPORT) && defined(NX_ENABLE_VLAN)
+struct nx_bsd_packet_mreq
+               *pkt_mreq;
+ULONG           physical_addr_msw;
+ULONG           physical_addr_lsw;
+#endif
 
 
     /* Check for valid socket ID. */
@@ -6358,20 +6674,20 @@ UINT            status;
         /* Error, invalid socket ID.  */
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
     }
 
     /* Check for invalid paremters. */
-    if((option_value == NX_NULL) || (option_length == 0))        
+    if((option_value == NX_NULL) || (option_length == 0))
     {
 
         /* Error, one or more invalid arguments.  */
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return NX_SOC_ERROR;
@@ -6386,8 +6702,8 @@ UINT            status;
             /* Error, one or more invalid arguments.  */
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOPROTOOPT);              
-            
+            nx_bsd_set_errno(ENOPROTOOPT);
+
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return NX_SOC_ERROR;
         }
@@ -6399,10 +6715,39 @@ UINT            status;
            (option_name < SO_MIN))
         {
             /* Error, one or more invalid arguments.  */
-            
+
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOPROTOOPT);  
-            
+            nx_bsd_set_errno(ENOPROTOOPT);
+
+            NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+            return NX_SOC_ERROR;
+        }
+    }
+    else if(option_level == SOL_PACKET)
+    {
+        if ((option_name > PACKET_OPTION_MAX) ||
+            (option_name < PACKET_ADD_MEMBERSHIP))
+        {
+            /* Error, one or more invalid arguments.  */
+
+            /* Set the socket error if extended socket options enabled. */
+            nx_bsd_set_errno(ENOPROTOOPT);
+
+            NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+            return NX_SOC_ERROR;
+        }
+    }
+    else if (option_level == IPPROTO_TCP)
+    {
+
+        if ((option_name > TCP_NOOPT) ||
+            (option_name < TCP_NODELAY))
+        {
+            /* Error, one or more invalid arguments.  */
+
+            /* Set the socket error if extended socket options enabled. */
+            nx_bsd_set_errno(ENOPROTOOPT);
+
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return NX_SOC_ERROR;
         }
@@ -6412,7 +6757,7 @@ UINT            status;
         /* Error, one or more invalid arguments.  */
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return NX_SOC_ERROR;
@@ -6430,7 +6775,7 @@ UINT            status;
         case SO_BROADCAST:
 
             /* This is the default behavior of NetX. All sockets have this capability. */
-        break; 
+        break;
 
         case SO_KEEPALIVE:
 
@@ -6442,7 +6787,7 @@ UINT            status;
 #ifndef NX_ENABLE_TCP_KEEPALIVE
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
+                nx_bsd_set_errno(ENOPROTOOPT);
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6451,8 +6796,8 @@ UINT            status;
                 /* Determine if NetX Duo supports keepalive. */
 
                 /* Update the BSD socket with this attribute. */
-                bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled = 
-                                        (UINT)(((struct sock_keepalive *)option_value) -> keepalive_enabled);
+                bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled =
+                                        (UINT)(((struct nx_bsd_sock_keepalive *)option_value) -> keepalive_enabled);
 
                 if (bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled == NX_TRUE)
                 {
@@ -6473,7 +6818,7 @@ UINT            status;
                 /* Not a TCP socket. */
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
+                nx_bsd_set_errno(ENOPROTOOPT);
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6490,7 +6835,7 @@ UINT            status;
 
         case SO_SNDTIMEO:
 
-            time_val =  (struct timeval *)option_value;
+            time_val =  (struct nx_bsd_timeval *)option_value;
 
             /* Calculate ticks for the ThreadX Timer.  */
             timer_ticks = (ULONG)(time_val -> tv_usec)/NX_MICROSECOND_PER_CPU_TICK  + (ULONG)(time_val -> tv_sec) * NX_IP_PERIODIC_RATE;
@@ -6501,7 +6846,7 @@ UINT            status;
 
         case SO_RCVTIMEO:
 
-            time_val =  (struct timeval *)option_value;
+            time_val =  (struct nx_bsd_timeval *)option_value;
 
             /* Calculate ticks for the ThreadX Timer.  */
             timer_ticks = (ULONG)(time_val -> tv_usec)/NX_MICROSECOND_PER_CPU_TICK  + (ULONG)(time_val -> tv_sec) * NX_IP_PERIODIC_RATE;
@@ -6517,7 +6862,7 @@ UINT            status;
             {
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
+                nx_bsd_set_errno(ENOPROTOOPT);
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6525,7 +6870,7 @@ UINT            status;
             }
 
 
-            window_size = (ULONG)(((struct sock_winsize *)option_value) -> winsize);
+            window_size = (ULONG)(((struct nx_bsd_sock_winsize *)option_value) -> winsize);
 
 #ifdef NX_ENABLE_TCP_WINDOW_SCALING
 
@@ -6547,7 +6892,7 @@ UINT            status;
 
         case SO_REUSEADDR:
 
-            reuse_enabled = (UINT)(((struct sock_reuseaddr *)option_value) -> reuseaddr_enabled);
+            reuse_enabled = (UINT)(((struct nx_bsd_sock_reuseaddr *)option_value) -> reuseaddr_enabled);
 
             if(reuse_enabled)
                 bsd_socket_ptr -> nx_bsd_socket_option_flags |= NX_BSD_SOCKET_ENABLE_OPTION_REUSEADDR;
@@ -6555,34 +6900,34 @@ UINT            status;
                 bsd_socket_ptr -> nx_bsd_socket_option_flags &= (ULONG)(~NX_BSD_SOCKET_ENABLE_OPTION_REUSEADDR);
 
         break;
-                   
+
 
         case TCP_NODELAY:
 
             /* This is the default behavior of NetX. All sockets have this attribute. */
 
-        break; 
+        break;
 
         case IP_MULTICAST_TTL:
 
             /* Validate the option length. */
-            if(option_length != sizeof(UCHAR))
+            if(option_length != sizeof(UCHAR) && option_length != sizeof(INT))
             {
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
-                
+                nx_bsd_set_errno(EINVAL);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
-          
+
             /* Verify that the socket is still valid. */
             if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
             {
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EBADF);  
-                
+                nx_bsd_set_errno(EBADF);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
@@ -6591,16 +6936,99 @@ UINT            status;
             if(bsd_socket_ptr -> nx_bsd_socket_udp_socket == NX_NULL)
             {
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
-                
+                nx_bsd_set_errno(ENOPROTOOPT);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
+
             /* Set the TTL value. */
-            bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live = *(UCHAR*)option_value;
+            if (option_length == sizeof(UCHAR))
+            {
+                bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live = *(UCHAR*)option_value;
+            }
+            else
+            {
+                bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live = (UCHAR)(*(INT*)option_value);
+            }
         break;
 
-            
+        case IP_MULTICAST_LOOP:
+
+            /* This is not supported yet. */
+
+        break;
+
+        case IP_MULTICAST_IF:
+
+            /* This is not supported yet. */
+
+        break;
+#if defined(NX_BSD_RAW_SUPPORT) && defined(NX_ENABLE_VLAN)
+
+        case PACKET_ADD_MEMBERSHIP:
+        case PACKET_DROP_MEMBERSHIP:
+
+            /* Validate the option length */
+            if (option_length != sizeof(struct nx_bsd_packet_mreq))
+            {
+
+                /* Set the socket error if extended socket options enabled. */
+                nx_bsd_set_errno(EINVAL);
+
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
+            pkt_mreq = (struct nx_bsd_packet_mreq*)option_value;
+
+            if (pkt_mreq -> mr_alen != ETH_ALEN || pkt_mreq -> mr_type != PACKET_MR_MULTICAST)
+            {
+
+                /* Set the socket error if extended socket options enabled. */
+                nx_bsd_set_errno(EINVAL);
+
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
+            /* Verify that the socket is still valid. */
+            if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
+            {
+                /* Set the socket error if extended socket options enabled. */
+                nx_bsd_set_errno(EBADF);
+
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
+            physical_addr_msw = (pkt_mreq -> mr_address[0] << 8) | pkt_mreq->mr_address[1];
+            physical_addr_lsw = (pkt_mreq -> mr_address[2] << 24) | (pkt_mreq->mr_address[3] << 16) |
+                                (pkt_mreq -> mr_address[4] << 8) | pkt_mreq -> mr_address[5];
+
+            if (option_name == PACKET_ADD_MEMBERSHIP)
+            {
+                status = nx_link_multicast_join(nx_bsd_default_ip, pkt_mreq -> mr_ifindex,
+                                                physical_addr_msw, physical_addr_lsw);
+            }
+            else
+            {
+                status = nx_link_multicast_leave(nx_bsd_default_ip, pkt_mreq -> mr_ifindex,
+                                                 physical_addr_msw, physical_addr_lsw);
+            }
+
+            if (status != NX_SUCCESS)
+            {
+
+                nx_bsd_set_errno(EINVAL);
+
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
+            break;
+#endif
+
         case IP_RAW_RX_NO_HEADER:
 
 #ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
@@ -6617,7 +7045,7 @@ UINT            status;
                 }
                 else
                 {
-                
+
                     bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_RX_NO_HDR);
                 }
             }
@@ -6625,7 +7053,7 @@ UINT            status;
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
             {
 
-                set_errno(EINVAL);
+                nx_bsd_set_errno(EINVAL);
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6642,7 +7070,7 @@ UINT            status;
             i = *(INT*)option_value;
 
             /* Is this an IPv6 socket? */
-            if((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_RAW_SOCKET) && 
+            if((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_RAW_SOCKET) &&
                (bsd_socket_ptr -> nx_bsd_socket_family == AF_INET6))
             {
 
@@ -6655,16 +7083,16 @@ UINT            status;
                 }
                 else
                 {
-                
+
                     /* No, clear the flag for no header. */
                     bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_TX_HDR_INCLUDE);
                 }
-            } 
+            }
             else
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
             {
 
-                set_errno(EINVAL);
+                nx_bsd_set_errno(EINVAL);
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6681,24 +7109,24 @@ UINT            status;
         case IP_DROP_MEMBERSHIP:
 
             /* Validate the option length */
-            if(option_length != sizeof(struct ip_mreq))
+            if(option_length != sizeof(struct nx_bsd_ip_mreq))
             {
 
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
-                
+                nx_bsd_set_errno(EINVAL);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
-            
-            mreq = (struct ip_mreq*)option_value;
+
+            mreq = (struct nx_bsd_ip_mreq*)option_value;
 
             /* Make sure the multicast group address is valid. */
             if((mreq -> imr_multiaddr.s_addr & ntohl(NX_IP_CLASS_D_TYPE)) != ntohl(NX_IP_CLASS_D_TYPE))
             {
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EINVAL);  
-                
+                nx_bsd_set_errno(EINVAL);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
@@ -6707,8 +7135,8 @@ UINT            status;
             if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
             {
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(EBADF);  
-                
+                nx_bsd_set_errno(EBADF);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
@@ -6717,8 +7145,8 @@ UINT            status;
             if(bsd_socket_ptr -> nx_bsd_socket_udp_socket == NX_NULL)
             {
                 /* Set the socket error if extended socket options enabled. */
-                set_errno(ENOPROTOOPT);  
-                
+                nx_bsd_set_errno(ENOPROTOOPT);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
@@ -6731,8 +7159,8 @@ UINT            status;
             {
                 mcast_interface = 0;
             }
-            else 
-            {   
+            else
+            {
 
                 /* Set the socket error if extended socket options enabled. */
                 UINT addr;
@@ -6757,12 +7185,12 @@ UINT            status;
             {
 
                 /* Did not find a matching interface. */
-                set_errno(EINVAL);  
-                
+                nx_bsd_set_errno(EINVAL);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
             }
-            
+
             if(option_name == IP_ADD_MEMBERSHIP)
             {
 
@@ -6771,7 +7199,7 @@ UINT            status;
                 {
                     nx_igmp_enable(nx_bsd_default_ip);
                 }
-                    
+
                 /* Join the group. */
                 status = nx_igmp_multicast_interface_join(nx_bsd_default_ip, ntohl(mreq -> imr_multiaddr.s_addr), mcast_interface);
             }
@@ -6785,11 +7213,11 @@ UINT            status;
             if(status != NX_SUCCESS)
             {
 
-                set_errno(EINVAL);  
-                
+                nx_bsd_set_errno(EINVAL);
+
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
-            }                                                      
+            }
 
             break;
 #endif /* NX_DISABLE_IPV4 */
@@ -6798,9 +7226,9 @@ UINT            status;
 
 #if defined(NX_ENABLE_IP_RAW_PACKET_FILTER) && !defined(NX_DISABLE_IPV4)
             i = *(INT*)option_value;
-            /* First verify that raw socket processing is enabled on the IP instance and that this is 
+            /* First verify that raw socket processing is enabled on the IP instance and that this is
                an IPv4 thread. */
-            if((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_RAW_SOCKET) && 
+            if((bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_RAW_SOCKET) &&
                (bsd_socket_ptr -> nx_bsd_socket_family == AF_INET))
             {
 
@@ -6813,23 +7241,23 @@ UINT            status;
                 }
                 else
                 {
-                
+
                     /* No, clear the flag bit indicating IP task will append the IP header. */
                     bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_TX_HDR_INCLUDE);
                 }
-            } 
+            }
             else
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
             {
 
-                set_errno(EINVAL);
+                nx_bsd_set_errno(EINVAL);
 
                 /* Return an error status. */
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
 
                 return NX_SOC_ERROR;
             }
-            
+
 #ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
             break;
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
@@ -6837,7 +7265,7 @@ UINT            status;
         default:
 
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);  
+            nx_bsd_set_errno(EINVAL);
 
             /* Return an error status. */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6849,62 +7277,65 @@ UINT            status;
 }
 
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    getsockname                                         PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    getsockname                                         PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This function returns the socket's primary interface address and    */
 /*    port. For NetX Duo environments, it returns the address at address  */
 /*    index 1 into the IP address table; this is where the primary        */
 /*    interface global IP address is normally located.                    */
 /*                                                                        */
-/*  INPUT                                                                 */  
-/*                                                                        */  
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    sockID                                socket descriptor             */
 /*    localAddress                          sockaddr struct to return     */
 /*                                          the local address             */
 /*    addressLength                         Number of bytes in sockAddr   */
 /*                                                                        */
-/*  OUTPUT                                                                */  
-/*                                                                        */  
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    NX_SOC_OK (0)                         On success                    */
 /*    NX_SOC_ERROR (-1)                     On failure                    */
-/*                                                                        */  
-/*  CALLS                                                                 */  
-/*                                                                        */  
-/*    tx_mutex_get                          Get protection                */ 
-/*    tx_mutex_put                          Release protection            */ 
 /*                                                                        */
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    tx_mutex_get                          Get protection                */
+/*    tx_mutex_put                          Release protection            */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  getsockname(INT sockID, struct sockaddr *localAddress, INT *addressLength)
+INT  nx_bsd_getsockname(INT sockID, struct nx_bsd_sockaddr *localAddress, INT *addressLength)
 {
 
 #ifndef NX_DISABLE_IPV4
-struct sockaddr_in  soc_struct;
+struct nx_bsd_sockaddr_in  soc_struct;
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
-struct sockaddr_in6 soc6_struct;
+struct nx_bsd_sockaddr_in6 soc6_struct;
 #endif
 UINT                status;
 NX_BSD_SOCKET       *bsd_socket_ptr;
@@ -6915,7 +7346,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -6923,9 +7354,9 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
 
     if((localAddress == NX_NULL) || (addressLength == NX_NULL) || (*addressLength == 0))
     {
-    
+
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         /* Return error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -6946,10 +7377,10 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Is the socket still in use?  */
@@ -6957,15 +7388,15 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
     {
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-        
+
         /* Return error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
-    }        
-    
+    }
+
     if(!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_BOUND))
     {
         /* This socket is not bound yet.  Just return.
@@ -6973,8 +7404,8 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
            localAddress is unspecified. */
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-        
-        /* Success!  */    
+
+        /* Success!  */
         return(NX_SOC_OK);
     }
 
@@ -6988,11 +7419,11 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
         else if(bsd_socket_ptr -> nx_bsd_socket_local_bind_interface == 0)
         {
 
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
-            
+
             /* Return error.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return(NX_SOC_ERROR);
@@ -7003,12 +7434,12 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
             soc_struct.sin_addr.s_addr = htonl(local_if -> nx_interface_ip_address);
         }
         soc_struct.sin_port = htons((USHORT)bsd_socket_ptr -> nx_bsd_socket_local_port);
-        
+
         soc_struct.sin_family = AF_INET;
 
-        if((*addressLength) > (INT)sizeof(struct sockaddr_in))
+        if((*addressLength) > (INT)sizeof(struct nx_bsd_sockaddr_in))
         {
-            *addressLength = sizeof(struct sockaddr_in);
+            *addressLength = sizeof(struct nx_bsd_sockaddr_in);
         }
         memcpy(localAddress, &soc_struct, (UINT)(*addressLength)); /* Use case of memcpy is verified. */
     }
@@ -7018,7 +7449,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
     if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET6)
     {
 
-        
+
         if(bsd_socket_ptr -> nx_bsd_socket_local_bind_interface == NX_BSD_LOCAL_IF_INADDR_ANY)
         {
             soc6_struct.sin6_addr._S6_un._S6_u32[0] = 0;
@@ -7029,11 +7460,11 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
         else if(bsd_socket_ptr -> nx_bsd_socket_local_bind_interface == 0)
         {
 
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
 
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
-            
+
             /* Return error.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
             return(NX_SOC_ERROR);
@@ -7044,7 +7475,7 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
 
             soc6_struct.sin6_addr._S6_un._S6_u32[0] = htonl(local_v6if -> nxd_ipv6_address[0]);
             soc6_struct.sin6_addr._S6_un._S6_u32[1] = htonl(local_v6if -> nxd_ipv6_address[1]);
-            soc6_struct.sin6_addr._S6_un._S6_u32[2] = htonl(local_v6if -> nxd_ipv6_address[2]); 
+            soc6_struct.sin6_addr._S6_un._S6_u32[2] = htonl(local_v6if -> nxd_ipv6_address[2]);
             soc6_struct.sin6_addr._S6_un._S6_u32[3] = htonl(local_v6if -> nxd_ipv6_address[3]);
         }
 
@@ -7052,9 +7483,9 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
 
         soc6_struct.sin6_family = AF_INET6;
 
-        if((*addressLength) > (INT)sizeof(struct sockaddr_in6))
+        if((*addressLength) > (INT)sizeof(struct nx_bsd_sockaddr_in6))
         {
-            *addressLength = sizeof(struct sockaddr_in6);
+            *addressLength = sizeof(struct nx_bsd_sockaddr_in6);
         }
         memcpy(localAddress, &soc6_struct, (UINT)(*addressLength)); /* Use case of memcpy is verified. */
 
@@ -7062,11 +7493,11 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
     else
 #endif /* FEATURE_NX_IPV6 */
     {
-    
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
-        set_errno(EPROTONOSUPPORT);
+        nx_bsd_set_errno(EPROTONOSUPPORT);
 
         /* Return error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -7077,66 +7508,69 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
 
     /* Release the protection mutex.  */
     tx_mutex_put(nx_bsd_protection_ptr);
-    
-    /* Success!  */    
+
+    /* Success!  */
     return(NX_SOC_OK);
 }
 
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    getpeername                                         PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    getpeername                                         PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This function returns the socket's remote address and port.         */
 /*                                                                        */
-/*  INPUT                                                                 */  
+/*  INPUT                                                                 */
 /*                                                                        */
 /*    sockID                                socket descriptor             */
 /*    localAddress                          sockaddr struct to return     */
 /*                                          the remote address            */
 /*    addressLength                         Number of bytes in sockAddr   */
 /*                                                                        */
-/*  OUTPUT                                                                */  
-/*                                                                        */  
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    NX_SOC_OK (0)                         On success                    */
 /*    NX_SOC_ERROR (-1)                     On failure                    */
-/*                                                                        */  
-/*  CALLS                                                                 */  
-/*                                                                        */  
-/*    tx_mutex_get                          Get protection                */ 
-/*    tx_mutex_put                          Release protection            */ 
 /*                                                                        */
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */   
-/*                                                                        */  
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    tx_mutex_get                          Get protection                */
+/*    tx_mutex_put                          Release protection            */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  getpeername(INT sockID, struct sockaddr *remoteAddress, INT *addressLength)
+INT  nx_bsd_getpeername(INT sockID, struct nx_bsd_sockaddr *remoteAddress, INT *addressLength)
 {
 
 UINT                status;
 NX_BSD_SOCKET       *bsd_socket_ptr;
 #ifndef NX_DISABLE_IPV4
-struct sockaddr_in  *soc_struct_ptr = NX_NULL;
+struct nx_bsd_sockaddr_in  *soc_struct_ptr = NX_NULL;
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
-struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
+struct nx_bsd_sockaddr_in6 *soc6_struct_ptr = NX_NULL;
 #endif
 
 
@@ -7145,7 +7579,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         /* Error, invalid socket ID.  */
         NX_BSD_ERROR(ERROR, __LINE__);
@@ -7160,7 +7594,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         /* Return error.  */
         NX_BSD_ERROR(ERROR, __LINE__);
@@ -7176,11 +7610,11 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         /* Error getting the protection mutex.  */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(ERROR); 
+        return(ERROR);
     }
 
     /* Setup pointer to socket.  */
@@ -7188,12 +7622,12 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
 
 #ifndef NX_DISABLE_IPV4
     if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET)
-    {        
+    {
 
         /* This is an IPv4 only socket. */
 
         /* Now validate the size of remoteAddress structure. */
-        if(*addressLength < (INT)sizeof(struct sockaddr_in))
+        if(*addressLength < (INT)sizeof(struct nx_bsd_sockaddr_in))
         {
 
             /* User supplied buffer is too small .*/
@@ -7202,26 +7636,26 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
             tx_mutex_put(nx_bsd_protection_ptr);
 
             /* Set the socket error, if socket enabled with extended BSD features. */
-            set_errno(ESOCKTNOSUPPORT);
+            nx_bsd_set_errno(ESOCKTNOSUPPORT);
 
             /* Return error.  */
             NX_BSD_ERROR(ERROR, __LINE__);
             return(ERROR);
         }
-        
-        soc_struct_ptr = (struct sockaddr_in*)remoteAddress;
-        *addressLength = sizeof(struct sockaddr_in);
+
+        soc_struct_ptr = (struct nx_bsd_sockaddr_in*)remoteAddress;
+        *addressLength = sizeof(struct nx_bsd_sockaddr_in);
     }
     else
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
     if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET6)
-    {        
+    {
 
         /* IPv6 socket */
 
         /* Now validate the size of remoteAddress structure. */
-        if(*addressLength < (INT)sizeof(struct sockaddr_in6))
+        if(*addressLength < (INT)sizeof(struct nx_bsd_sockaddr_in6))
         {
 
             /* User supplied buffer is too small .*/
@@ -7230,15 +7664,15 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
             tx_mutex_put(nx_bsd_protection_ptr);
 
             /* Set the socket error, if socket enabled with extended BSD features. */
-            set_errno(ESOCKTNOSUPPORT);
+            nx_bsd_set_errno(ESOCKTNOSUPPORT);
 
             /* Return error.  */
             NX_BSD_ERROR(ERROR, __LINE__);
             return(ERROR);
         }
-        
-        soc6_struct_ptr = (struct sockaddr_in6*)remoteAddress;
-        *addressLength = sizeof(struct sockaddr_in6);
+
+        soc6_struct_ptr = (struct nx_bsd_sockaddr_in6*)remoteAddress;
+        *addressLength = sizeof(struct nx_bsd_sockaddr_in6);
     }
     else
 #endif /* FEATURE_NX_IPV6 */
@@ -7249,7 +7683,7 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error, if socket enabled with extended BSD features. */
-        set_errno(ESOCKTNOSUPPORT);
+        nx_bsd_set_errno(ESOCKTNOSUPPORT);
 
         /* Return error.  */
         NX_BSD_ERROR(ERROR, __LINE__);
@@ -7261,22 +7695,22 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
     {
 
         /* Error, socket not in use anymore.  */
-        
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error if extended options enabled. */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return error.  */
         NX_BSD_ERROR(ERROR, __LINE__);
         return(ERROR);
-    }        
+    }
 
     /* Check whether TCP or UDP */
     if (bsd_socket_ptr -> nx_bsd_socket_tcp_socket)
     {
-        
+
 #ifndef NX_DISABLE_IPV4
         /* TCP Socket.  Determine socket family type. */
         if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET)
@@ -7302,33 +7736,33 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
         else
 #endif  /* FEATURE_NX_IPV6 */
         {
-        
+
             /* Release the protection mutex.  */
             tx_mutex_put(nx_bsd_protection_ptr);
 
             /* Set the socket error if extended options enabled. */
-            set_errno(EBADF);
+            nx_bsd_set_errno(EBADF);
 
             /* Return error.  */
             NX_BSD_ERROR(ERROR, __LINE__);
-            return(ERROR);            
+            return(ERROR);
 
         }
     }
     else if (bsd_socket_ptr -> nx_bsd_socket_udp_socket)
     {
-    
+
 #ifndef NX_DISABLE_IPV4
         /* UDP Socket.  Get Peer Name doesn't apply to UDP sockets.  Only fill in AF family information.*/
         if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET)
         {
             soc_struct_ptr -> sin_family      =  AF_INET;
             soc_struct_ptr -> sin_port        =  0;
-            soc_struct_ptr -> sin_addr.s_addr =  0; 
+            soc_struct_ptr -> sin_addr.s_addr =  0;
         }
         else
 #endif /* NX_DISABLE_IPV4 */
-#ifdef FEATURE_NX_IPV6 
+#ifdef FEATURE_NX_IPV6
         if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET6)
         {
             soc6_struct_ptr -> sin6_family    =  AF_INET6;
@@ -7342,22 +7776,22 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
             tx_mutex_put(nx_bsd_protection_ptr);
 
             /* Set the socket error, if socket enabled with extended BSD features. */
-            set_errno(ESOCKTNOSUPPORT);
+            nx_bsd_set_errno(ESOCKTNOSUPPORT);
 
             /* Return error.  */
             NX_BSD_ERROR(ERROR, __LINE__);
-            return(ERROR);            
+            return(ERROR);
 
         }
     }
     else
     {
-    
+
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
 
         /* Set the socket error, if socket enabled with extended BSD features. */
-        set_errno(ESOCKTNOSUPPORT);
+        nx_bsd_set_errno(ESOCKTNOSUPPORT);
 
         /* Return error.  */
         NX_BSD_ERROR(ERROR, __LINE__);
@@ -7367,22 +7801,22 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
 
     /* Release the protection mutex.  */
     tx_mutex_put(nx_bsd_protection_ptr);
-    
-    /* Success!  */    
+
+    /* Success!  */
     return(NX_SOC_OK);
 }
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    select                                              PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    select                                              PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This function allows for sockets to be checked for incoming packets.*/
 /*    nfds should be one greater than value of the largest valued socket  */
@@ -7395,13 +7829,13 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
 /*    returns (otherwise they will be set to false).                      */
 /*    Note that the sets are modified by select():thus they must be reset */
 /*    between each call to the function.                                  */
-/*                                                                        */     
+/*                                                                        */
 /*    fd_sets can be manipulated using the following macros or functions: */
 /*                                                                        */
 /*    FD_SET(fd, fdset)  Sets socket fd in fdset to true.                 */
 /*    FD_CLR(fd, fdset)  Sets socket fd in fdset to false.                */
 /*    FD_ISSET(fd, fdset)Returns true if socket fd is set to true in fdset*/
-/*    FD_ZERO(fdset)  Sets all the sockets in fdset to false.             */ 
+/*    FD_ZERO(fdset)  Sets all the sockets in fdset to false.             */
 /*                                                                        */
 /*    If the input timeout is NULL, select() blocks until one of the      */
 /*    sockets receives a packet. If the timeout is non-NULL, select waits */
@@ -7417,58 +7851,61 @@ struct sockaddr_in6 *soc6_struct_ptr = NX_NULL;
 /*                                                                        */
 /*    NOTE:  ****** When select returns NX_SOC_ERROR it won't update      */
 /*           the readfds descriptor.                                      */
-/*                                                                        */   
-/*  INPUT                                                                 */  
-/*                                                                        */   
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    nfds                                 Maximum socket descriptor #    */
 /*    fd_set *readFDs                      List of read ready sockets     */
 /*    fd_set *writeFDs                     List of write ready sockets    */
 /*    fd_set *exceptFDs                    List of exceptions             */
 /*    struct timeval *timeOut                                             */
-/*                                                                        */  
-/*  OUTPUT                                                                */  
-/*                                                                        */  
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    NX_SUCCESS                            No descriptors read           */
 /*                                             (successful completion)    */
 /*    status                                Number of descriptors read    */
 /*                                             (< 0 if error occurred)    */
-/*                                                                        */ 
-/*  CALLS                                                                 */  
-/*                                                                        */  
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    FD_ZERO                               Clear a socket ready list     */
 /*    FD_ISSET                              Check a socket is ready       */
-/*    FD_SET                                Set a socket to check         */ 
-/*    nx_tcp_socket_receive                 Receive TCP packet            */ 
-/*    nx_udp_source_extract                 Extract source IP and port    */ 
-/*    tx_event_flags_get                    Get events                    */ 
-/*    tx_mutex_get                          Get protection                */ 
-/*    tx_mutex_put                          Release protection            */ 
-/*    tx_thread_identify                    Get current thread pointer    */ 
-/*    tx_thread_preemption_change           Disable/restore preemption    */ 
+/*    FD_SET                                Set a socket to check         */
+/*    nx_tcp_socket_receive                 Receive TCP packet            */
+/*    nx_udp_source_extract                 Extract source IP and port    */
+/*    tx_event_flags_get                    Get events                    */
+/*    tx_mutex_get                          Get protection                */
+/*    tx_mutex_put                          Release protection            */
+/*    tx_thread_identify                    Get current thread pointer    */
+/*    tx_thread_preemption_change           Disable/restore preemption    */
 /*                                                                        */
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  select(INT nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
+INT  nx_bsd_select(INT nfds, nx_bsd_fd_set *readfds, nx_bsd_fd_set *writefds, nx_bsd_fd_set *exceptfds, struct nx_bsd_timeval *timeout)
 {
 
 INT                     i;
 UINT                    status;
 NX_BSD_SOCKET_SUSPEND   suspend_request;
 NX_PACKET               *packet_ptr;
-fd_set                  readfds_found;
-fd_set                  writefds_found;
-fd_set                  exceptfds_found;
+nx_bsd_fd_set           readfds_found;
+nx_bsd_fd_set           writefds_found;
+nx_bsd_fd_set           exceptfds_found;
 INT                     readfds_left;
 INT                     writefds_left;
 INT                     exceptfds_left;
@@ -7481,13 +7918,13 @@ INT                     ret;
     /* Check for valid input parameters.  */
     if ((readfds == NX_NULL) && (writefds == NX_NULL) && (exceptfds == NX_NULL) && (timeout == NX_NULL))
     {
-    
+
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Check the maximum number of file descriptors.  */
@@ -7495,17 +7932,17 @@ INT                     ret;
     {
 
         /* Set the socket error */
-        set_errno(EBADF);
+        nx_bsd_set_errno(EBADF);
 
         /* Return an error.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     /* Clear the read and the write selector set.  */
-    FD_ZERO(&readfds_found);
-    FD_ZERO(&writefds_found);
-    FD_ZERO(&exceptfds_found);
+    NX_BSD_FD_ZERO(&readfds_found);
+    NX_BSD_FD_ZERO(&writefds_found);
+    NX_BSD_FD_ZERO(&exceptfds_found);
 
     if(readfds)
         readfds_left = readfds -> fd_count;
@@ -7514,12 +7951,12 @@ INT                     ret;
 
     if(writefds)
     {
-    
+
         writefds_left = writefds -> fd_count;
     }
     else
     {
-    
+
         writefds_left = 0;
     }
 
@@ -7530,20 +7967,20 @@ INT                     ret;
     }
     else
     {
-    
+
         exceptfds_left = 0;
     }
 
     /* Compute the timeout for the suspension if a timeout value was supplied.  */
-    if (timeout != NX_NULL) 
+    if (timeout != NX_NULL)
     {
-        
+
         /* Calculate ticks for the ThreadX Timer.  */
         ticks = (ULONG)(timeout -> tv_usec)/NX_MICROSECOND_PER_CPU_TICK + (ULONG)(timeout -> tv_sec) * NX_IP_PERIODIC_RATE;
     }
     else
     {
-    
+
         /* If no timeout input, set the wait to 'forever.'  */
         ticks =  TX_WAIT_FOREVER;
     }
@@ -7556,13 +7993,13 @@ INT                     ret;
     {
 
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         /* Set the socket error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
-       
+
     /* Loop through the BSD sockets to see if the read ready request can be satisfied.  */
     for (i = 0; i < (nfds - NX_BSD_SOCKFD_START); i++)
     {
@@ -7571,7 +8008,7 @@ INT                     ret;
             break;
 
         /* Is this socket selected for read?  */
-        if (FD_ISSET((i + NX_BSD_SOCKFD_START), readfds))
+        if (NX_BSD_FD_ISSET((i + NX_BSD_SOCKFD_START), readfds))
         {
 
             /* Yes, decrement the number of read selectors left to search for.  */
@@ -7582,23 +8019,23 @@ INT                     ret;
             {
 
                 /* There is; add this socket to the read ready list.  */
-                FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
             }
 
             /* Check to see if there is a disconnection request pending.  */
             else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_DISCONNECTION_REQUEST)
             {
-            
+
                 /* There is; add this socket to the read ready list.  */
-                FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
             }
 
-            /* Check to see if there is a receive packet pending.  */ 
+            /* Check to see if there is a receive packet pending.  */
             else if (nx_bsd_socket_array[i].nx_bsd_socket_received_packet)
             {
-            
+
                 /* Therer is; add this socket to the read ready list.  */
-                FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
             }
             /* Is this a TCP socket? */
             else if (nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket)
@@ -7618,18 +8055,18 @@ INT                     ret;
                             /* This secondary socket is not avaialble yet.  This could happen if the
                                previous accept call fails to allocate a new secondary socket. */
                             ret = nx_bsd_tcp_create_listen_socket(i, 0);
-                            
+
                             if(ret < 0)
                             {
 
                                 /* Mark the FD set so the application could be notified. */
-                                FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
                             }
                         }
 
                         if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED)
                         {
-                            FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                            NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
                         }
                     }
                 }
@@ -7645,7 +8082,7 @@ INT                     ret;
 
                         /* Save the received packet in the TCP BSD socket packet pointer.  */
                         nx_bsd_socket_array[i].nx_bsd_socket_received_packet =  packet_ptr;
-                    
+
                         /* Reset the packet offset.  */
                         nx_bsd_socket_array[i].nx_bsd_socket_received_packet_offset =  0;
 
@@ -7654,7 +8091,7 @@ INT                     ret;
                         nx_bsd_socket_array[i].nx_bsd_socket_received_packet_count++;
 
                         /* Add this socket to the read ready list.  */
-                        FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                        NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
                     }
                 }
             }
@@ -7670,17 +8107,17 @@ INT                     ret;
                 if ((status == NX_SUCCESS) && (packet_ptr))
                 {
 
-                    /* Get the sender IP address from the raw packet.  */ 
+                    /* Get the sender IP address from the raw packet.  */
                     status = nx_bsd_raw_packet_info_extract(packet_ptr, &(nx_bsd_socket_array[i].nx_bsd_socket_source_ip_address), NX_NULL);
 
                     /* Save the received packet in the BSD socket packet pointer.  */
                     nx_bsd_socket_array[i].nx_bsd_socket_received_packet =  packet_ptr;
-                    
+
                     /* Reset the packet offset.  */
                     nx_bsd_socket_array[i].nx_bsd_socket_received_packet_offset =  0;
 
                     /* Add this socket to the read ready list.  */
-                    FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
+                    NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
                 }
             }
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
@@ -7695,7 +8132,7 @@ INT                     ret;
             break;
 
         /* Is this socket selected for write?  */
-        if (FD_ISSET(i + NX_BSD_SOCKFD_START, writefds))
+        if (NX_BSD_FD_ISSET(i + NX_BSD_SOCKFD_START, writefds))
         {
 
             /* Yes, decrement the number of read selectors left to search for.  */
@@ -7706,22 +8143,22 @@ INT                     ret;
             {
 
                 /* Yes, add this socket to the write ready list.  */
-                FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
 
             /* Check to see if there is a connection request pending.  */
             else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTION_REQUEST)
             {
-            
+
                 /* Yes, add this socket to the write ready list.  */
-                FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
 
             /* Check to see if there is an error.*/
             else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
             {
 
-                FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
         }
     }
@@ -7734,7 +8171,7 @@ INT                     ret;
             break;
 
         /* Is this socket selected for exceptions?  */
-        if (FD_ISSET(i + NX_BSD_SOCKFD_START, exceptfds))
+        if (NX_BSD_FD_ISSET(i + NX_BSD_SOCKFD_START, exceptfds))
         {
 
             /* Yes, decrement the number of read selectors left to search for.  */
@@ -7744,14 +8181,14 @@ INT                     ret;
             if (!(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
             {
 
-                FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
             }
 
             /* Check to see if there is an error.*/
             else if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
             {
 
-                FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
             }
         }
     }
@@ -7774,38 +8211,38 @@ INT                     ret;
 
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
-        
+
         /* Return the number of fds found.  */
         return(readfds_found.fd_count + writefds_found.fd_count + exceptfds_found.fd_count);
     }
 
     /* Otherwise, nothing is ready to be read at this point.  */
-    
+
     /* Pickup the current thread.  */
     current_thread_ptr =  tx_thread_identify();
 
-    /* Save the fd requests in the local suspension structure. This will be used by the receive notify routines to 
+    /* Save the fd requests in the local suspension structure. This will be used by the receive notify routines to
        wakeup threads on the select.  */
     suspend_request.nx_bsd_socket_suspend_actual_flags =  0;
 
     if(readfds)
         suspend_request.nx_bsd_socket_suspend_read_fd_set =  *readfds;
     else
-        FD_ZERO(&suspend_request.nx_bsd_socket_suspend_read_fd_set);
+        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_read_fd_set);
 
     if(writefds)
         suspend_request.nx_bsd_socket_suspend_write_fd_set = *writefds;
     else
-        FD_ZERO(&suspend_request.nx_bsd_socket_suspend_write_fd_set);
+        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_write_fd_set);
 
     if(exceptfds)
         suspend_request.nx_bsd_socket_suspend_exception_fd_set = *exceptfds;
     else
-        FD_ZERO(&suspend_request.nx_bsd_socket_suspend_exception_fd_set);
-    
+        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_exception_fd_set);
+
     /* Temporarily disable preemption.  */
     tx_thread_preemption_change(current_thread_ptr, 0, &original_threshold);
-       
+
     /* Release the protection mutex.  */
     tx_mutex_put(nx_bsd_protection_ptr);
 
@@ -7813,37 +8250,37 @@ INT                     ret;
 
     /* Restore original preemption threshold.  */
     tx_thread_preemption_change(current_thread_ptr, original_threshold, &original_threshold);
-        
+
     /* Check for an error.  */
     if (status != NX_SUCCESS)
     {
 
         /* If we got here, we received no packets. */
 
-        /* TX_NO_EVENT implies an immediate return from the flag get call. 
+        /* TX_NO_EVENT implies an immediate return from the flag get call.
            This happens if the wait option is set to zero. */
         if (status == TX_NO_EVENTS)
         {
 
             /* Determine if the effected sockets are non blocking (zero ticks for the wait option). */
             if (ticks == 0)
-                set_errno(EWOULDBLOCK);  
+                nx_bsd_set_errno(EWOULDBLOCK);
             else
-                set_errno(ETIMEDOUT);
+                nx_bsd_set_errno(ETIMEDOUT);
 
             /* Do not handle as an error; just a timeout so return 0.  */
             return(0);
         }
         else
         {
-        
+
             /* Actual error.  */
             /* Set the socket error if extended socket options enabled. */
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
 
             /* Error getting the protection mutex.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-            return(NX_SOC_ERROR); 
+            return(NX_SOC_ERROR);
         }
     }
     else
@@ -7858,7 +8295,7 @@ INT                     ret;
             *exceptfds = suspend_request.nx_bsd_socket_suspend_exception_fd_set;
 
         /* Return the number of fds.  */
-        return(suspend_request.nx_bsd_socket_suspend_read_fd_set.fd_count + 
+        return(suspend_request.nx_bsd_socket_suspend_read_fd_set.fd_count +
                suspend_request.nx_bsd_socket_suspend_write_fd_set.fd_count +
                suspend_request.nx_bsd_socket_suspend_exception_fd_set.fd_count);
     }
@@ -7868,46 +8305,46 @@ INT                     ret;
 
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_tcp_receive_notify                           PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_tcp_receive_notify                           PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This is the NetX callback function for TCP Socket receive operation */
 /*    This function resumes all the threads suspended on the socket.      */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    *socket_ptr                           Pointer to the socket which   */
-/*                                            received the data packet    */  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                            received the data packet    */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    FD_ZERO                               Clear a socket ready list     */
 /*    FD_ISSET                              Check a socket is ready       */
-/*    FD_SET                                Set a socket to check         */ 
-/*    tx_event_flags_get                    Get events                    */ 
-/*    tx_mutex_get                          Get protection                */ 
-/*    tx_mutex_put                          Release protection            */ 
-/*    tx_thread_identify                    Get current thread pointer    */ 
+/*    FD_SET                                Set a socket to check         */
+/*    tx_event_flags_get                    Get events                    */
+/*    tx_mutex_get                          Get protection                */
+/*    tx_mutex_put                          Release protection            */
+/*    tx_thread_identify                    Get current thread pointer    */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    NetX                                                                */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX                                                                */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -7921,22 +8358,22 @@ UINT                    bsd_socket_index;
 
     /* Figure out what BSD socket this is.  */
     bsd_socket_index =  (UINT) socket_ptr -> nx_tcp_socket_reserved_ptr;
-    
+
     /* Determine if this is a good index into the BSD socket array.  */
     if (bsd_socket_index >= NX_BSD_MAX_SOCKETS)
     {
-    
+
         /* Bad socket index... simply return!  */
         return;
     }
 
     /* Now check if the socket may have been released (e.g. socket closed) while
        waiting for the mutex. */
-    if( socket_ptr -> nx_tcp_socket_id == 0 )    
+    if( socket_ptr -> nx_tcp_socket_id == 0 )
     {
 
-        return;          
-    }     
+        return;
+    }
 
     /* Check the suspended socket list for one ready to receive or send packets. */
     nx_bsd_select_wakeup(bsd_socket_index, FDSET_READ);
@@ -7946,46 +8383,46 @@ UINT                    bsd_socket_index;
 }
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_tcp_establish_notify                         PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_tcp_establish_notify                         PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This is the NetX callback function for TCP Server Socket listen.    */
 /*    This function resumes all the threads suspended on the socket.      */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    *socket_ptr                           Pointer to the socket which   */
-/*                                          Received the data packet      */  
 /*                                                                        */
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    *socket_ptr                           Pointer to the socket which   */
+/*                                          Received the data packet      */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    FD_ZERO                               Clear a socket ready list     */
 /*    FD_ISSET                              Check a socket is ready       */
-/*    FD_SET                                Set a socket to check         */ 
-/*    tx_event_flags_get                    Get events                    */ 
-/*    tx_mutex_get                          Get protection                */ 
-/*    tx_mutex_put                          Release protection            */ 
-/*    tx_thread_identify                    Get current thread pointer    */ 
+/*    FD_SET                                Set a socket to check         */
+/*    tx_event_flags_get                    Get events                    */
+/*    tx_mutex_get                          Get protection                */
+/*    tx_mutex_put                          Release protection            */
+/*    tx_thread_identify                    Get current thread pointer    */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    NetX                                                                */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX                                                                */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -7997,15 +8434,15 @@ UINT                    bsd_socket_index;
 static VOID  nx_bsd_tcp_establish_notify(NX_TCP_SOCKET *socket_ptr)
 {
 UINT                    bsd_socket_index;
-UINT                    master_socket_index; 
+UINT                    master_socket_index;
 
     /* Figure out what BSD socket this is.  */
     bsd_socket_index =  (UINT) socket_ptr -> nx_tcp_socket_reserved_ptr;
-    
+
     /* Determine if this is a good index into the BSD socket array.  */
     if (bsd_socket_index >= NX_BSD_MAX_SOCKETS)
     {
-    
+
         /* Bad socket index... simply return!  */
         return;
     }
@@ -8066,46 +8503,46 @@ UINT                    master_socket_index;
 }
 #endif /* NX_DISABLE_EXTENDED_NOTIFY_SUPPORT */
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_tcp_socket_disconnect_notify                 PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_tcp_socket_disconnect_notify                 PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This is the NetX callback function for TCP Socket disconnect.       */
 /*    This function resumes all the BSD threads suspended on the socket.  */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    *socket_ptr                           Pointer to the socket which   */
-/*                                            received the data packet    */  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
+/*                                            received the data packet    */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    None                                                                */
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    FD_ZERO                               Clear a socket ready list     */
 /*    FD_ISSET                              Check a socket is ready       */
-/*    FD_SET                                Set a socket to check         */ 
-/*    tx_event_flags_get                    Get events                    */ 
-/*    tx_mutex_get                          Get protection                */ 
-/*    tx_mutex_put                          Release protection            */ 
-/*    tx_thread_identify                    Get current thread pointer    */ 
+/*    FD_SET                                Set a socket to check         */
+/*    tx_event_flags_get                    Get events                    */
+/*    tx_mutex_get                          Get protection                */
+/*    tx_mutex_put                          Release protection            */
+/*    tx_thread_identify                    Get current thread pointer    */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    NetX                                                                */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX                                                                */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -8124,7 +8561,7 @@ UINT                    status;
 
     /* Figure out what BSD socket this is.  */
     bsd_socket_index =  (UINT) socket_ptr -> nx_tcp_socket_reserved_ptr;
-    
+
     /* Determine if this is a good index into the BSD socket array.  */
     if (bsd_socket_index >= NX_BSD_MAX_SOCKETS)
     {
@@ -8139,7 +8576,7 @@ UINT                    status;
     {
         return;
     }
-        
+
     /* Mark this socket as having a disconnect request pending.  */
     bsd_socket_ptr -> nx_bsd_socket_status_flags |=  NX_BSD_SOCKET_DISCONNECTION_REQUEST;
 
@@ -8154,24 +8591,24 @@ UINT                    status;
         if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_SECONDARY_SOCKET)
         {
 
-             
+
             /* Instead the socket needs to be cleaned up and to perform a relisten. */
             if(!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED))
             {
 
                 /* Turn off the disconnection_request flag. */
                 bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_DISCONNECTION_REQUEST);
-                
+
                 nx_tcp_server_socket_unaccept(bsd_socket_ptr -> nx_bsd_socket_tcp_socket);
-                
+
                 /* Check if a listen request is queued up for this socket. */
                 nx_bsd_tcp_pending_connection(bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_port,
                                               bsd_socket_ptr -> nx_bsd_socket_tcp_socket);
-            
-                status = nx_tcp_server_socket_relisten(nx_bsd_default_ip, 
+
+                status = nx_tcp_server_socket_relisten(nx_bsd_default_ip,
                                                        bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_port,
                                                        bsd_socket_ptr -> nx_bsd_socket_tcp_socket);
-                
+
                 /* Force the socket into SYN_RECEIVED state */
                 nx_tcp_server_socket_accept(bsd_socket_ptr -> nx_bsd_socket_tcp_socket, NX_NO_WAIT);
 
@@ -8183,14 +8620,14 @@ UINT                    status;
                 else if(status != NX_SUCCESS)
                 {
 
-                    /* Failed the relisten on the secondary socket.  Set the error code on the 
+                    /* Failed the relisten on the secondary socket.  Set the error code on the
                        master socket, and wake it up. */
-                    
+
                     master_socket_index = (UINT)(bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_master_socket_id;
-                    
+
                     nx_bsd_socket_array[master_socket_index].nx_bsd_socket_status_flags |= NX_BSD_SOCKET_ERROR;
                     nx_bsd_set_error_code(&nx_bsd_socket_array[master_socket_index], status);
-                    
+
                     nx_bsd_select_wakeup(master_socket_index, (FDSET_READ | FDSET_WRITE | FDSET_EXCEPTION));
                 }
             }
@@ -8202,7 +8639,7 @@ UINT                    status;
             /* Set error code. */
             bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_ERROR;
             bsd_socket_ptr -> nx_bsd_socket_error_code = ECONNREFUSED;
-            
+
             /* Wake up the select on both read and write FDsets. */
             nx_bsd_select_wakeup(bsd_socket_index, (FDSET_READ | FDSET_WRITE | FDSET_EXCEPTION));
         }
@@ -8225,47 +8662,47 @@ UINT                    status;
 
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_udp_receive_notify                           PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_udp_receive_notify                           PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*    This is the NetX callback function for UDP Socket receive           */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This is the NetX callback function for UDP Socket receive           */
 /*    operation.                                                          */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    *socket_ptr                           Pointer to the socket which   */
-/*                                          Received the data packet      */  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                          Received the data packet      */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    FD_ZERO                               Clear a socket ready list     */
 /*    FD_ISSET                              Check a socket is ready       */
-/*    FD_SET                                Set a socket to check         */ 
-/*    tx_event_flags_get                    Get events                    */ 
-/*    tx_mutex_get                          Get protection                */ 
-/*    tx_mutex_put                          Release protection            */ 
-/*    tx_thread_identify                    Get current thread pointer    */ 
-/*    nx_udp_socket_receive                 Receive UDP packet            */ 
+/*    FD_SET                                Set a socket to check         */
+/*    tx_event_flags_get                    Get events                    */
+/*    tx_mutex_get                          Get protection                */
+/*    tx_mutex_put                          Release protection            */
+/*    tx_thread_identify                    Get current thread pointer    */
+/*    nx_udp_socket_receive                 Receive UDP packet            */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    NetX                                                                */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX                                                                */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -8278,12 +8715,12 @@ static VOID  nx_bsd_udp_receive_notify(NX_UDP_SOCKET *socket_ptr)
 
 UINT                    bsd_socket_index;
 NX_PACKET               *packet_ptr;
-NX_UDP_SOCKET           *udp_socket_ptr;    
+NX_UDP_SOCKET           *udp_socket_ptr;
 
 
     /* Figure out what BSD socket this is.  */
     bsd_socket_index =  ((UINT) socket_ptr -> nx_udp_socket_reserved_ptr) & 0x0000FFFF;
-    
+
     /* Determine if this is a good index into the BSD socket array.  */
     if (bsd_socket_index >= NX_BSD_MAX_SOCKETS)
     {
@@ -8302,47 +8739,50 @@ NX_UDP_SOCKET           *udp_socket_ptr;
 }
 
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    FD_SET                                              PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    FD_SET                                              PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*   This function adds a fd to the set.                                  */
-/*                                                                        */  
-/*  INPUT                                                                 */  
-/*                                                                        */  
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    fd                                    fd to add.                    */
 /*    fd_set *fdset                         fd set.                       */
 /*                                                                        */
-/*  OUTPUT                                                                */  
-/*                                                                        */  
-/*    None                                                                */  
-/*                                                                        */ 
-/*  CALLS                                                                 */  
-/*                                                                        */  
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    None                                                                */
 /*                                                                        */
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-VOID  FD_SET(INT fd, fd_set *fdset)
+VOID  NX_BSD_FD_SET(INT fd, nx_bsd_fd_set *fdset)
 {
 
 UINT    index;
@@ -8351,10 +8791,10 @@ UINT    index;
     /* Check the FD size.  */
     if (fd >= NX_BSD_SOCKFD_START)
     {
-    
+
         /* Normalize the fd.  */
         fd =  fd - NX_BSD_SOCKFD_START;
-        
+
         /* Now make sure it isn't too big.  */
         if (fd < NX_BSD_MAX_SOCKETS)
         {
@@ -8364,14 +8804,14 @@ UINT    index;
 
             /* Now calculate the bit position.  */
             fd =  fd % 32;
-            
+
             /* Is the bit already set?  */
             if ((fdset -> fd_array[index] & (((ULONG) 1) << fd)) == 0)
             {
-    
+
                 /* No, set the bit.  */
                 fdset -> fd_array[index] = fdset -> fd_array[index] | (((ULONG) 1) << fd);
-                
+
                 /* Increment the counter.  */
                 fdset -> fd_count++;
             }
@@ -8379,47 +8819,50 @@ UINT    index;
     }
 }
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    FD_CLR                                              PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    FD_CLR                                              PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*   This function removes a fd from a fd set.                            */
-/*                                                                        */  
-/*  INPUT                                                                 */  
-/*                                                                        */  
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    fd                                    fd to remove.                 */
 /*    fd_set *fdset                         fd set.                       */
 /*                                                                        */
-/*  OUTPUT                                                                */  
-/*                                                                        */  
-/*    None                                                                */
-/*                                                                        */ 
-/*  CALLS                                                                 */
-/*                                                                        */  
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    None                                                                */
 /*                                                                        */
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-VOID  FD_CLR(INT fd, fd_set *fdset)
+VOID  NX_BSD_FD_CLR(INT fd, nx_bsd_fd_set *fdset)
 {
 
 UINT    index;
@@ -8428,10 +8871,10 @@ UINT    index;
     /* Check the FD size.  */
     if (fd >= NX_BSD_SOCKFD_START)
     {
-    
+
         /* Normalize the fd.  */
         fd =  fd - NX_BSD_SOCKFD_START;
-        
+
         /* Now make sure it isn't too big.  */
         if ((fd < NX_BSD_MAX_SOCKETS) && (fdset -> fd_count))
         {
@@ -8441,14 +8884,14 @@ UINT    index;
 
             /* Now calculate the bit position.  */
             fd =  fd % 32;
-            
+
             /* Determine if the bit is set.  */
             if (fdset -> fd_array[index] & (((ULONG) 1) << fd))
             {
-            
+
                 /* Yes, clear the bit.  */
                 fdset -> fd_array[index] = fdset -> fd_array[index] & ~(((ULONG) 1) << fd);
-                
+
                 /* Decrement the counter.  */
                 fdset -> fd_count--;
             }
@@ -8457,40 +8900,40 @@ UINT    index;
 }
 
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    FD_ISSET                                            PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    FD_ISSET                                            PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*   This function tests to see if a fd is in the set.                    */
-/*                                                                        */  
-/*  INPUT                                                                 */  
-/*                                                                        */  
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    fd                                    fd to add.                    */
 /*    fd_set *fdset                         fd set.                       */
 /*                                                                        */
-/*  OUTPUT                                                                */  
-/*                                                                        */  
-/*    NX_TRUE                               If fd is found in the set.    */  
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_TRUE                               If fd is found in the set.    */
 /*    NX_FALSE                              If fd is not there in the set.*/
 /*                                                                        */
-/*  CALLS                                                                 */  
-/*                                                                        */  
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    None                                                                */
 /*                                                                        */
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -8498,7 +8941,7 @@ UINT    index;
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-INT  FD_ISSET(INT fd, fd_set *fdset)
+INT  NX_BSD_FD_ISSET(INT fd, nx_bsd_fd_set *fdset)
 {
 
 UINT    index;
@@ -8507,10 +8950,10 @@ UINT    index;
     /* Check the FD size.  */
     if (fd >= NX_BSD_SOCKFD_START)
     {
-    
+
         /* Normalize the fd.  */
         fd =  fd - NX_BSD_SOCKFD_START;
-        
+
         /* Now make sure it isn't too big.  */
         if (fd < NX_BSD_MAX_SOCKETS)
         {
@@ -8520,11 +8963,11 @@ UINT    index;
 
             /* Now calculate the bit position.  */
             fd =  fd % 32;
-            
+
             /* Finally, see if the bit is set.  */
             if (fdset -> fd_array[index] & (((ULONG) 1) << fd))
             {
-            
+
                 /* Yes, return true!  */
                 return(NX_TRUE);
             }
@@ -8536,46 +8979,49 @@ UINT    index;
 }
 
 
-/**************************************************************************/  
-/*                                                                        */  
-/*  FUNCTION                                               RELEASE        */  
-/*                                                                        */  
-/*    FD_ZERO                                             PORTABLE C      */  
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    FD_ZERO                                             PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */  
+/*  DESCRIPTION                                                           */
 /*                                                                        */
 /*   This function clears a fd set.                                       */
-/*                                                                        */  
-/*  INPUT                                                                 */  
-/*                                                                        */  
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*   fd_set *fdset                          fd set to clear.              */
 /*                                                                        */
-/*  OUTPUT                                                                */  
-/*                                                                        */  
-/*    None                                                                */  
-/*                                                                        */ 
-/*  CALLS                                                                 */  
-/*                                                                        */  
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    None                                                                */
 /*                                                                        */
-/*  CALLED BY                                                             */  
-/*                                                                        */  
-/*    Application Code                                                    */  
-/*                                                                        */  
-/*  RELEASE HISTORY                                                       */  
-/*                                                                        */  
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-VOID  FD_ZERO(fd_set *fdset)
+VOID  NX_BSD_FD_ZERO(nx_bsd_fd_set *fdset)
 {
 
 INT     i;
@@ -8592,53 +9038,57 @@ INT     i;
     }
 }
 
- 
+
 #ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_raw_packet_filter                            PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_raw_packet_filter                            PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function receives raw packets from NetX Duo and determines if  */
 /*    BSD will consume the packet (store on the BSD socket raw receive    */
 /*    queue) or if the packet is available to NetX Duo (not consumed).    */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    ip_ptr                               NetX Duo IP instance           */
 /*    protocol                             Received packet protocol       */
-/*    packet_ptr                           Pointer to the received packet */  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
+/*    packet_ptr                           Pointer to the received packet */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    0                                     Raw filter consumed the packet*/
 /*    1                                     Raw filter did not consume    */
 /*                                            packet.  Allow the caller to*/
 /*                                            process this packet         */
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    nx_bsd_raw_receive_notify             Notify threads waiting to     */
 /*                                               receive a raw packet     */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    NetX Duo                                                            */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX Duo                                                            */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed NULL pointer access   */
+/*                                            for raw socket,             */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  nx_bsd_raw_packet_filter(NX_IP *ip_ptr, ULONG protocol, NX_PACKET *packet_ptr)
@@ -8652,6 +9102,13 @@ NX_BSD_SOCKET * bsd_socket_ptr;
 
     /* Search the bound sockets in this index for particular protocol. */
     bsd_socket_ptr = nx_bsd_socket_raw_protocol_table[index];
+
+    /* Was a BSD socket with this protocol found? */
+    if (bsd_socket_ptr == NX_NULL)
+    {
+        /* No, let NetX Duo continue processing the packet. */
+        return 1;
+    }
 
     do
     {
@@ -8685,7 +9142,7 @@ NX_BSD_SOCKET * bsd_socket_ptr;
 
                 /* Check if the queue is currently full. */
                 if (bsd_socket_ptr -> nx_bsd_socket_received_byte_count_max &&
-                    (bsd_socket_ptr -> nx_bsd_socket_received_byte_count >= 
+                    (bsd_socket_ptr -> nx_bsd_socket_received_byte_count >=
                     bsd_socket_ptr -> nx_bsd_socket_received_byte_count_max))
                 {
 
@@ -8726,10 +9183,10 @@ NX_BSD_SOCKET * bsd_socket_ptr;
     /* Was a BSD socket with this protocol found? */
     if (bsd_socket_ptr == nx_bsd_socket_raw_protocol_table[index])
     {
-        /* No, let NetX Duo know it can discard the packet. */
+        /* No, let NetX Duo continue processing the packet. */
         return 1;
     }
-    
+
     return(NX_SUCCESS);
 }
 
@@ -8737,47 +9194,47 @@ NX_BSD_SOCKET * bsd_socket_ptr;
 
 
 #ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_raw_receive_notify                           PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_raw_receive_notify                           PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*    This is the NetX Duo callback function for raw socket receive       */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This is the NetX Duo callback function for raw socket receive       */
 /*    operation.                                                          */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    ip_ptr                               NetX Duo IP instance           */
 /*    bsd_socket_index                     Index of the raw socket which  */
-/*                                            received the data packet    */  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                            received the data packet    */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    FD_ZERO                               Clear a socket ready list     */
 /*    FD_ISSET                              Check a socket is ready       */
-/*    FD_SET                                Set a socket to check         */ 
-/*    tx_event_flags_get                    Get events                    */ 
-/*    tx_mutex_get                          Get protection                */ 
-/*    tx_mutex_put                          Release protection            */ 
-/*    tx_thread_identify                    Get current thread pointer    */ 
+/*    FD_SET                                Set a socket to check         */
+/*    tx_event_flags_get                    Get events                    */
+/*    tx_mutex_get                          Get protection                */
+/*    tx_mutex_put                          Release protection            */
+/*    tx_thread_identify                    Get current thread pointer    */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    NetX                                                                */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX                                                                */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -8797,49 +9254,52 @@ VOID  nx_bsd_raw_receive_notify(NX_IP *ip_ptr, UINT bsd_socket_index)
 
 #ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_raw_packet_receive                           PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_raw_packet_receive                           PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function retrieves a packet from the BSD raw socket receive    */
 /*    queue.                                                              */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    bsd_socket_ptr                       BSD raw socket                 */
 /*    packet_ptr                           Pointer to retrieved packet    */
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    NX_SUCCESS                           Packet successfully retrieved  */
-/*    NX_NO_PACKET                         No packet on receive queue     */ 
-/*    NX_NOT_ENABLED                       Not enabled for raw packets    */
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
-/*    None                                                                */ 
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_SUCCESS                           Packet successfully retrieved  */
+/*    NX_NO_PACKET                         No packet on receive queue     */
+/*    NX_NOT_ENABLED                       Not enabled for raw packets    */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
 /*    select                              Checks for receive packets      */
 /*    recv                                Checks the specified socket for */
-/*                                           received packets             */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                           received packets             */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_bsd_raw_packet_receive(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET **packet_ptr)
@@ -8850,7 +9310,7 @@ UINT nx_bsd_raw_packet_receive(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET **packet
     if (!(bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_RAW_SOCKET))
     {
         /* Set the socket error. */
-        set_errno(EPROTOTYPE);
+        nx_bsd_set_errno(EPROTOTYPE);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_NOT_ENABLED);
@@ -8885,7 +9345,7 @@ UINT nx_bsd_raw_packet_receive(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET **packet
         }
         else
         {
-            
+
             /* No packets on the queue. Return the NetX Duo status. This is an internal call, so no BSD socket error to report. */
             return NX_NO_PACKET;
         }
@@ -8900,43 +9360,43 @@ UINT nx_bsd_raw_packet_receive(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET **packet
 
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
 
-#ifdef NX_ENABLE_IP_RAW_PACKET_FILTER 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_raw_packet_info_extract                      PORTABLE C      */ 
-/*                                                           6.1          */
+#ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_raw_packet_info_extract                      PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function extracts the source IP address and interface index    */
-/*    from the received packet.                                           */ 
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    packet_ptr                            Pointer to received raw packet*/ 
-/*    address                               Pointer to sender IP address  */ 
+/*    from the received packet.                                           */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    packet_ptr                            Pointer to received raw packet*/
+/*    address                               Pointer to sender IP address  */
 /*    interface_index                       Pointer to network index      */
 /*                                            packet received on          */
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    NX_SUCCESS                           Successful completion status   */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
-/*    COPY_IPV6_ADDRESS                    Copy IPv6 address              */ 
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    Application Code                                                    */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_SUCCESS                           Successful completion status   */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    COPY_IPV6_ADDRESS                    Copy IPv6 address              */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -8970,15 +9430,15 @@ NX_INTERFACE    *if_ptr = NX_NULL;
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
     if (packet_ptr -> nx_packet_ip_version == NX_IP_VERSION_V6)
-    {    
-        
+    {
+
         NX_IPV6_HEADER *ipv6_header_ptr;
 
         ipv6_header_ptr = (NX_IPV6_HEADER  *)(packet_ptr -> nx_packet_prepend_ptr - sizeof(NX_IPV6_HEADER));
 
         /* Fill in the IPv6 address information. */
         address -> nxd_ip_version = NX_IP_VERSION_V6;
-        
+
         /* Copy the IPv6 address. */
         address -> nxd_ip_address.v6[0] = ipv6_header_ptr -> nx_ip_header_source_ip[0];
         address -> nxd_ip_address.v6[1] = ipv6_header_ptr -> nx_ip_header_source_ip[1];
@@ -9013,49 +9473,49 @@ NX_INTERFACE    *if_ptr = NX_NULL;
 
 #endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_set_socket_timed_wait_callback               PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_set_socket_timed_wait_callback               PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function is called when a BSD TCP socket has closed. If the    */
 /*    BSD socket associated with the TCP socket is not enabled for        */
 /*    REUSEADDR, this function will put the BSD socket in the TIMED WAIT  */
 /*    state.                                                              */
-/*                                                                        */ 
+/*                                                                        */
 /*    When this time out expires, the BSD socket is removed from the TIME */
-/*    WAIT State and available to the host application.                   */  
-/*                                                                        */ 
+/*    WAIT State and available to the host application.                   */
+/*                                                                        */
 /*    Note: only sockets not enabled with REUSEADDR are placed in the WAIT*/
-/*    STATE. All other BSD sockets are immediately available upon closing.*/ 
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    tcp_socket_ptr                       TCP socket state being closed  */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
-/*    tx_thread_identify                   Identify socket owning thread  */ 
-/*    tx_mutex_get                         Obtain BSD mutex protection    */ 
+/*    STATE. All other BSD sockets are immediately available upon closing.*/
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    tcp_socket_ptr                       TCP socket state being closed  */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    tx_thread_identify                   Identify socket owning thread  */
+/*    tx_mutex_get                         Obtain BSD mutex protection    */
 /*    tx_mutex_put                         Release BSD mutex protection   */
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    NetX                                                                */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX                                                                */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -9067,7 +9527,7 @@ VOID  nx_bsd_socket_timed_wait_callback(NX_TCP_SOCKET *tcp_socket_ptr)
 {
     NX_PARAMETER_NOT_USED(tcp_socket_ptr);
 
-    /* Logic has been removed elsewhere but for compatibility with 
+    /* Logic has been removed elsewhere but for compatibility with
        NetX we leave this function stub. */
 
     return;
@@ -9075,45 +9535,45 @@ VOID  nx_bsd_socket_timed_wait_callback(NX_TCP_SOCKET *tcp_socket_ptr)
 
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_packet_data_extract_offset                       PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_packet_data_extract_offset                       PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*    This function copies data from a NetX packet (or packet chain) into */ 
-/*    the supplied user buffer.                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function copies data from a NetX packet (or packet chain) into */
+/*    the supplied user buffer.                                           */
+/*                                                                        */
 /*    This basically defines the data extract service in the BSD source   */
 /*    code if it is not provided in the NetX or NetX Duo library already. */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    packet_ptr                        Pointer to the source packet      */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    packet_ptr                        Pointer to the source packet      */
 /*    buffer_start                      Pointer to destination data area  */
 /*    buffer_length                     Size in bytes                     */
-/*    bytes_copied                      Number of bytes copied            */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    status                            Completion status                 */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    Application Code                                                    */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*    bytes_copied                      Number of bytes copied            */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                            Completion status                 */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -9132,7 +9592,7 @@ UCHAR       *destination_ptr;
 ULONG       offset_bytes;
 #ifndef NX_DISABLE_PACKET_CHAIN
 ULONG       packet_fragment_length;
-#endif 
+#endif
 ULONG       bytes_to_copy;
 NX_PACKET   *working_packet_ptr;
 
@@ -9149,7 +9609,7 @@ NX_PACKET   *working_packet_ptr;
         }
 
         /* Otherwise, this is an invalid offset or packet length. */
-        return(NX_PACKET_OFFSET_ERROR);        
+        return(NX_PACKET_OFFSET_ERROR);
     }
 
     /* Initialize the source pointer to NULL.  */
@@ -9159,7 +9619,7 @@ NX_PACKET   *working_packet_ptr;
     offset_bytes =  offset;
 #ifndef NX_DISABLE_PACKET_CHAIN
     while (working_packet_ptr)
-    {     
+    {
         packet_fragment_length =  (working_packet_ptr -> nx_packet_append_ptr - working_packet_ptr -> nx_packet_prepend_ptr) ;
 
         /* Determine if we are at the offset location fragment in the packet chain  */
@@ -9181,7 +9641,7 @@ NX_PACKET   *working_packet_ptr;
 #else /* NX_DISABLE_PACKET_CHAIN */
 
     /* Setup loop to copy from this packet.  */
-    source_ptr =  working_packet_ptr -> nx_packet_prepend_ptr + offset_bytes;    
+    source_ptr =  working_packet_ptr -> nx_packet_prepend_ptr + offset_bytes;
 
 #endif /* NX_DISABLE_PACKET_CHAIN */
 
@@ -9216,7 +9676,7 @@ NX_PACKET   *working_packet_ptr;
         if(remaining_bytes < bytes_to_copy)
             bytes_to_copy = remaining_bytes;
 
-        /* Copy data from this packet.  */        
+        /* Copy data from this packet.  */
         memcpy(destination_ptr, source_ptr, bytes_to_copy); /* Use case of memcpy is verified. */
 
         /* Update the pointers. */
@@ -9243,41 +9703,41 @@ NX_PACKET   *working_packet_ptr;
 }
 #endif /* NX_BSD_INCLUDE_DATA_EXTRACT_OFFSET */
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_timer_entry                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_timer_entry                                  PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function is called when the nx_bsd_socket_wait_timer expires.  */
 /*    It signals the BSD thread task to check and decrement the time      */
 /*    remaining on all sockets suspended in the wait state.               */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    info                                 Timer thread data (not used)   */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    info                                 Timer thread data (not used)   */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    tx_event_flags_set                   Sets the WAIT event in the BSD */
-/*                                              event group               */ 
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    ThreadX                                                             */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                              event group               */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    ThreadX                                                             */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -9293,42 +9753,42 @@ VOID  nx_bsd_timer_entry(ULONG info)
 #endif
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_socket_set_inherited_settings                PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_socket_set_inherited_settings                PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function applies the socket options of the specified parent    */
 /*    (master) socket to the specified child (secondary) socket, if BSD   */
 /*    extended socket options are enabled. If they are not, this function */
 /*    has no effect.                                                      */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    master_sock_id                       Source of socket options       */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    master_sock_id                       Source of socket options       */
 /*    secondary_sock_id                    Socket inheriting options      */
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    NX_SUCCESS                          Successful completion           */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_SUCCESS                          Successful completion           */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    None                                                                */
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    ThreadX                                                             */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    ThreadX                                                             */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -9360,7 +9820,7 @@ UINT nx_bsd_socket_set_inherited_settings(UINT master_sock_id, UINT secondary_so
     /* Is NetX Duo currently enabled for TCP keep alive? */
 #ifdef NX_ENABLE_TCP_KEEPALIVE
 
-    nx_bsd_socket_array[secondary_sock_id].nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled = 
+    nx_bsd_socket_array[secondary_sock_id].nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled =
                         nx_bsd_socket_array[master_sock_id].nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled;
 
 #endif /* NX_ENABLE_TCP_KEEPALIVE */
@@ -9370,40 +9830,40 @@ UINT nx_bsd_socket_set_inherited_settings(UINT master_sock_id, UINT secondary_so
 }
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_isspace                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_isspace                                      PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function determines if the input character is white space      */
 /*    (ascii characters 0x09 - 0x0D or space (0x20).                      */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    c                                    Input character to examine     */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    NX_TRUE                              Input character is white space */ 
-/*    NX_FALSE                             Input character not white space*/ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    c                                    Input character to examine     */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_TRUE                              Input character is white space */
+/*    NX_FALSE                             Input character not white space*/
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    None                                                                */
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    ThreadX                                                             */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    ThreadX                                                             */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -9424,46 +9884,46 @@ static UINT nx_bsd_isspace(UCHAR c)
     {
         return NX_TRUE;
     }
-    else 
+    else
         /* Not a white space character. */
         return NX_FALSE;
 }
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_islower                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_islower                                      PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function determines if the input character is lower case       */
 /*    alphabetic character.                                               */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    c                                    Input character to examine     */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    NX_TRUE                              Input character is lower case  */ 
-/*    NX_FALSE                             Input character not lower case */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    c                                    Input character to examine     */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_TRUE                              Input character is lower case  */
+/*    NX_FALSE                             Input character not lower case */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    None                                                                */
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    ThreadX                                                             */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    ThreadX                                                             */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -9480,45 +9940,45 @@ static UINT nx_bsd_islower(UCHAR c)
 
         return NX_TRUE;
     }
-    else 
+    else
         return NX_FALSE;
 
 }
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_isdigit                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_isdigit                                      PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function determines if the input character is a digit (0-9)    */
 /*    Does not include hex digits, (see nx_bsd_isxdigit).                 */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    c                                    Input character to examine     */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    NX_TRUE                              Input character is a digit     */ 
-/*    NX_FALSE                             Input character not a digit    */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    c                                    Input character to examine     */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_TRUE                              Input character is a digit     */
+/*    NX_FALSE                             Input character not a digit    */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    None                                                                */
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    ThreadX                                                             */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    ThreadX                                                             */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -9534,46 +9994,46 @@ static UINT nx_bsd_isdigit(UCHAR c)
     {
         return NX_TRUE;
     }
-    else 
+    else
         return NX_FALSE;
 }
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_isxdigit                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_isxdigit                                     PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function determines if the input character is a digit (0-9)    */
 /*    or hex digit (A - F, or a-f).  For decimal digits, see              */
 /*    nx_bsd_isdigit.                                                     */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    c                                    Input character to examine     */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    NX_TRUE                              Input character is hex digit   */ 
-/*    NX_FALSE                             Input character not hex digit  */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    c                                    Input character to examine     */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_TRUE                              Input character is hex digit   */
+/*    NX_FALSE                             Input character not hex digit  */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    None                                                                */
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    ThreadX                                                             */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    ThreadX                                                             */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -9601,52 +10061,55 @@ static UINT nx_bsd_isxdigit(UCHAR c)
     {
         return NX_TRUE;
     }
-    else 
+    else
         return NX_FALSE;
 }
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    set_errno                                           PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    set_errno                                           PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function sets the error on the current socket (thread) for     */
 /*    sockets enabled with BSD extended socket options. For sockets not   */
 /*    enabled with extended features, this function has no effect.        */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    tx_errno                                Socket error status code    */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    tx_errno                                Socket error status code    */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    None                                                                */
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    ThreadX                                                             */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    ThreadX                                                             */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-VOID set_errno(INT tx_errno)
+VOID nx_bsd_set_errno(INT tx_errno)
 {
 
 TX_INTERRUPT_SAVE_AREA
@@ -9656,47 +10119,47 @@ TX_THREAD       *current_thread_ptr;
       TX_DISABLE
 
       current_thread_ptr =  tx_thread_identify();
-      current_thread_ptr -> bsd_errno = tx_errno; 
-      
-      TX_RESTORE  
+      current_thread_ptr -> bsd_errno = tx_errno;
+
+      TX_RESTORE
 
       return;
 }
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    get_errno                                           PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    get_errno                                           PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function retrieves the error on the current socket (thread) for*/
 /*    sockets enabled with BSD extended socket options. For sockets not   */
 /*    enabled with extended features, this function has no effect.        */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    Socket error status code                                            */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    None                                                                */
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    ThreadX                                                             */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    Socket error status code                                            */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    ThreadX                                                             */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -9716,79 +10179,82 @@ TX_THREAD       *current_thread_ptr;
 
     current_thread_ptr =  tx_thread_identify();
     val = current_thread_ptr -> bsd_errno;
-    
-    TX_RESTORE  
-    
+
+    TX_RESTORE
+
     return (val);
 }
 
-      
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_select_wakeup                                PORTABLE C      */ 
-/*                                                           6.1          */
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_select_wakeup                                PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*    This function checks the suspend list for a given socket being      */ 
-/*    readable or writeable.                                              */ 
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function checks the suspend list for a given socket being      */
+/*    readable or writeable.                                              */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    sock_id                               BSD socket ID                 */
-/*    fd_sets                               The FD set to check           */  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*    fd_sets                               The FD set to check           */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    FD_ZERO                               Zeros out an FD Set           */
 /*    FD_SET                                Set a socket in the FDSET     */
 /*    TX_DISABLE                            Disable Interrupt             */
 /*    TX_RESTORE                            Enable Interrupt              */
 /*    tx_event_flags_set                    Set an event flag             */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    nx_bsd_timeout_process                                              */ 
-/*    nx_bsd_tcp_receive_notify                                           */ 
-/*    nx_bsd_tcp_establish_notify                                         */ 
-/*    nx_bsd_tcp_socket_disconnect_notify                                 */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    nx_bsd_timeout_process                                              */
+/*    nx_bsd_tcp_receive_notify                                           */
+/*    nx_bsd_tcp_establish_notify                                         */
+/*    nx_bsd_tcp_socket_disconnect_notify                                 */
 /*    nx_bsd_raw_receive_notify                                           */
-/*    nx_bsd_udp_packet_received                                          */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*    nx_bsd_udp_packet_received                                          */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID nx_bsd_select_wakeup(UINT sock_id, UINT fd_sets)
 {
 TX_INTERRUPT_SAVE_AREA
-fd_set                  local_fd;
+nx_bsd_fd_set           local_fd;
 TX_THREAD               *suspended_thread;
 ULONG                   suspended_count;
 ULONG                   original_suspended_count;
 NX_BSD_SOCKET_SUSPEND   *suspend_info;
 
 
-    /* At this point the thread should NOT own the IP mutex, and it must own the 
+    /* At this point the thread should NOT own the IP mutex, and it must own the
        BSD mutex. */
 
- 
-    FD_ZERO(&local_fd);
-    FD_SET((INT)sock_id + NX_BSD_SOCKFD_START, &local_fd);
+
+    NX_BSD_FD_ZERO(&local_fd);
+    NX_BSD_FD_SET((INT)sock_id + NX_BSD_SOCKFD_START, &local_fd);
 
     /* Disable interrupts temporarily.  */
     TX_DISABLE
@@ -9807,102 +10273,102 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
         /* Determine if this thread is suspended on select.  */
         if (suspended_thread -> tx_thread_suspend_info == NX_BSD_SELECT_EVENT)
         {
-        
+
             /* Yes, this thread is suspended on select.  */
 
             /* Pickup a pointer to its select suspend structure.  */
             suspend_info =  (NX_BSD_SOCKET_SUSPEND *) suspended_thread -> tx_thread_additional_suspend_info;
 
             /* Now determine if this thread was waiting for this socket.  */
-            if ((fd_sets & FDSET_READ) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set)))
+            if ((fd_sets & FDSET_READ) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set)))
             {
 
                 /* Copy the local fd over so that the return shows the receive socket.  */
                 suspend_info -> nx_bsd_socket_suspend_read_fd_set = local_fd;
-                
-                /* Adjust the suspension type so that the event flag set below will wakeup the thread 
+
+                /* Adjust the suspension type so that the event flag set below will wakeup the thread
                    selecting.  */
                 suspended_thread -> tx_thread_suspend_info =  NX_BSD_RECEIVE_EVENT;
-            }        
+            }
 
             /* Now determine if this thread was waiting for this socket.  */
-            if ((fd_sets & FDSET_WRITE) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set)))
+            if ((fd_sets & FDSET_WRITE) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set)))
             {
 
                 /* Copy the local fd over so that the return shows the receive socket.  */
                 suspend_info -> nx_bsd_socket_suspend_write_fd_set = local_fd;
-                
-                /* Adjust the suspension type so that the event flag set below will wakeup the thread 
+
+                /* Adjust the suspension type so that the event flag set below will wakeup the thread
                    selecting.  */
                 suspended_thread -> tx_thread_suspend_info =  NX_BSD_RECEIVE_EVENT;
-            }        
+            }
 
             /* Now determine if this thread was waiting for this socket.  */
-            if ((fd_sets & FDSET_EXCEPTION) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set)))
+            if ((fd_sets & FDSET_EXCEPTION) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set)))
             {
 
                 /* Copy the local fd over so that the return shows the receive socket.  */
                 suspend_info -> nx_bsd_socket_suspend_exception_fd_set = local_fd;
-                
-                /* Adjust the suspension type so that the event flag set below will wakeup the thread 
+
+                /* Adjust the suspension type so that the event flag set below will wakeup the thread
                    selecting.  */
                 suspended_thread -> tx_thread_suspend_info =  NX_BSD_RECEIVE_EVENT;
-            }        
+            }
 
             /* Clear FD that is not set. */
             if (suspended_thread -> tx_thread_suspend_info == NX_BSD_RECEIVE_EVENT)
             {
-                if (!(fd_sets & FDSET_READ) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set)))
+                if (!(fd_sets & FDSET_READ) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set)))
                 {
 
                     /* Clear read FD. */
-                    FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set);
+                    NX_BSD_FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set);
                 }
 
-                if (!(fd_sets & FDSET_WRITE) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set)))
+                if (!(fd_sets & FDSET_WRITE) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set)))
                 {
 
                     /* Clear write FD. */
-                    FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set);
+                    NX_BSD_FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set);
                 }
 
-                if (!(fd_sets & FDSET_EXCEPTION) && (FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set)))
+                if (!(fd_sets & FDSET_EXCEPTION) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set)))
                 {
 
                     /* Clear exception FD. */
-                    FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set);
+                    NX_BSD_FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set);
                 }
             }
         }
 
         /* Now move to the next event.  */
         suspended_thread =  suspended_thread -> tx_thread_suspended_next;
-        
+
         /* Restore interrupts.  */
         TX_RESTORE
-            
+
         /* Disable interrupts again.  */
         TX_DISABLE
 
-        /* Determine if something changes on the suspension list... this could have happened if there 
+        /* Determine if something changes on the suspension list... this could have happened if there
            was a timeout or a wait abort on the thread.  */
         if (original_suspended_count != nx_bsd_events.tx_event_flags_group_suspended_count)
         {
-        
+
             /* Something changed, so simply restart the search.  */
-            
+
             /* Setup the head pointer and the count.  */
             suspended_thread =   nx_bsd_events.tx_event_flags_group_suspension_list;
             suspended_count =    nx_bsd_events.tx_event_flags_group_suspended_count;
 
             /* Save the original suspended count.  */
             original_suspended_count =  suspended_count;
-        } 
+        }
     }
 
     /* Restore interrupts.  */
     TX_RESTORE
-    
+
     /* Wakeup all threads that are attempting to perform a receive or that had their select satisfied.  */
     tx_event_flags_set(&nx_bsd_events, NX_BSD_RECEIVE_EVENT, TX_OR);
 
@@ -9910,45 +10376,48 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
 
 }
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_set_error_code                               PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_set_error_code                               PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*    This is sets the BSD error code based on NetX Duo API return code   */ 
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This is sets the BSD error code based on NetX Duo API return code   */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    bsd_socket_ptr                        Pointer to the BSD socket     */
-/*    status_code                           NetX Duo API return code      */  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*    status_code                           NetX Duo API return code      */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    set_errno                             Sets the BSD errno            */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    connect                                                             */ 
-/*    bind                                                                */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    connect                                                             */
+/*    bind                                                                */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID nx_bsd_set_error_code(NX_BSD_SOCKET *bsd_socket_ptr, UINT status_code)
@@ -9957,109 +10426,109 @@ static VOID nx_bsd_set_error_code(NX_BSD_SOCKET *bsd_socket_ptr, UINT status_cod
     {
         case NX_NOT_CLOSED:
             /* TCP connection is not closed state. */
-            set_errno(EISCONN);
+            nx_bsd_set_errno(EISCONN);
             break;
 
         case NX_PTR_ERROR:
         case NX_INVALID_PORT:
             /* Invalid arguement. */
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
             break;
 
         case NX_MAX_LISTEN:
-            set_errno(ENOBUFS);  
+            nx_bsd_set_errno(ENOBUFS);
             break;
 
         case NX_PORT_UNAVAILABLE:
         case NX_NO_FREE_PORTS:
-            set_errno(EADDRNOTAVAIL);
+            nx_bsd_set_errno(EADDRNOTAVAIL);
             break;
 
         case NX_ALREADY_BOUND:
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
             break;
 
         case NX_WAIT_ABORTED:
-            set_errno(ETIMEDOUT);
+            nx_bsd_set_errno(ETIMEDOUT);
             break;
 
         case NX_NOT_CONNECTED:
             /* NX TCP connect service may return NX_NOT_CONNECTED if the timeout is WAIT_FOREVER. */
-            set_errno(ECONNREFUSED);
+            nx_bsd_set_errno(ECONNREFUSED);
             break;
 
         case NX_IN_PROGRESS:
-            /* The NetX "in progress" status is the equivalent of the non blocking BSD socket waiting 
+            /* The NetX "in progress" status is the equivalent of the non blocking BSD socket waiting
                to connect. This can only happen if timeout is NX_NO_WAIT.*/
             if (bsd_socket_ptr -> nx_bsd_socket_option_flags & NX_BSD_SOCKET_ENABLE_OPTION_NON_BLOCKING)
             {
                 bsd_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_CONNECTION_INPROGRESS;
-                set_errno(EINPROGRESS);
+                nx_bsd_set_errno(EINPROGRESS);
             }
             else
-                set_errno(EINTR);
+                nx_bsd_set_errno(EINTR);
             break;
 
         case NX_INVALID_INTERFACE:
         case NX_IP_ADDRESS_ERROR:
-            set_errno(ENETUNREACH);
+            nx_bsd_set_errno(ENETUNREACH);
             break;
 
         case NX_NOT_ENABLED:
-            set_errno(EPROTONOSUPPORT);
+            nx_bsd_set_errno(EPROTONOSUPPORT);
             break;
 
         case NX_NOT_BOUND:
         case NX_DUPLICATE_LISTEN:
         default:
-            set_errno(EINVAL);
+            nx_bsd_set_errno(EINVAL);
             break;
     }
 
     return;
 }
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_udp_packet_received                          PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_udp_packet_received                          PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*    This is executed as part of the UDP packet receive callback         */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This is executed as part of the UDP packet receive callback         */
 /*    function.                                                           */
-/*                                                                        */ 
-/*    This routine puts an incoming UDP packet into the appropriate       */ 
-/*    UDP BSD socket, taking into consideration that multiple BSD sockets */ 
-/*    may be mapped to the same NetX Duo UDP socket.                      */ 
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*    This routine puts an incoming UDP packet into the appropriate       */
+/*    UDP BSD socket, taking into consideration that multiple BSD sockets */
+/*    may be mapped to the same NetX Duo UDP socket.                      */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    sockID                                The BSD socket descriptor     */
-/*    packet_ptr                            The incoming UDP packet       */  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*    packet_ptr                            The incoming UDP packet       */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    nx_packet_release                     Release a packet that is not  */
 /*                                            received by any sockets.    */
-/*    nx_bsd_select_wakeup                  Wake up any asychronous       */ 
-/*                                            receive call                */ 
+/*    nx_bsd_select_wakeup                  Wake up any asychronous       */
+/*                                            receive call                */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    nx_bsd_udp_receive_notify                                           */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    nx_bsd_udp_receive_notify                                           */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -10073,13 +10542,13 @@ static VOID nx_bsd_udp_packet_received(INT sockID, NX_PACKET *packet_ptr)
 NX_BSD_SOCKET *bsd_ptr;
 ULONG          addr_family;
 NX_BSD_SOCKET *exact_match = NX_NULL;
-NX_BSD_SOCKET *receiver_match = NX_NULL;  
-NX_BSD_SOCKET *wildcard_match = NX_NULL; 
+NX_BSD_SOCKET *receiver_match = NX_NULL;
+NX_BSD_SOCKET *wildcard_match = NX_NULL;
 NX_INTERFACE   *interface_ptr;
 
 
     bsd_ptr = &nx_bsd_socket_array[sockID];
-    
+
 #ifndef NX_DISABLE_IPV4
     if(packet_ptr -> nx_packet_ip_version == NX_IP_VERSION_V4)
     {
@@ -10100,7 +10569,7 @@ NX_INTERFACE   *interface_ptr;
 
         /* Invalid version.  Release the packet and return. */
         nx_packet_release(packet_ptr);
-        
+
         return;
     }
 
@@ -10123,7 +10592,7 @@ NX_INTERFACE   *interface_ptr;
 
                 receiver_match = bsd_ptr;
             }
-            else 
+            else
             {
 
                 /* Does not match the local interface. Move to the next entry. */
@@ -10148,7 +10617,7 @@ NX_INTERFACE   *interface_ptr;
                     /* Now we can check for an exact match based on sender IP address and port. */
                     if((bsd_ptr -> nx_bsd_socket_source_ip_address.nxd_ip_address.v4 ==
                         bsd_ptr -> nx_bsd_socket_peer_ip.nxd_ip_address.v4) &&
-                       (bsd_ptr -> nx_bsd_socket_source_port == 
+                       (bsd_ptr -> nx_bsd_socket_source_port ==
                         bsd_ptr -> nx_bsd_socket_peer_port))
                     {
                         exact_match = bsd_ptr;
@@ -10176,23 +10645,23 @@ NX_INTERFACE   *interface_ptr;
                     }
                 }
 #endif
-            
+
                 if(exact_match != NX_NULL)
                     break;
-                
+
                 if(receiver_match != NX_NULL)
                     receiver_match = NX_NULL;
-                
+
                 if(wildcard_match != NX_NULL)
                     wildcard_match = NX_NULL;
             }
-        } 
-        
+        }
+
         /* Move to the next entry. */
         bsd_ptr = bsd_ptr -> nx_bsd_socket_next;
 
     }while(bsd_ptr != &nx_bsd_socket_array[sockID]);
-   
+
     /* Let bsd_ptr point to the matched socket. */
     if(exact_match != NX_NULL)
         bsd_ptr = exact_match;
@@ -10204,19 +10673,19 @@ NX_INTERFACE   *interface_ptr;
     {
         /* This packet is not for any of the BSD sockets. Release the packet and we are done. */
         nx_packet_release(packet_ptr);
-        
+
         return;
     }
-    
+
     /* Move the packet to the socket internal receive queue. */
-    
+
     if(bsd_ptr -> nx_bsd_socket_received_byte_count_max &&
        (bsd_ptr -> nx_bsd_socket_received_byte_count >= bsd_ptr -> nx_bsd_socket_received_byte_count_max))
     {
 
         /* Receive buffer is full.  Release the packet and return. */
         nx_packet_release(packet_ptr);
-        
+
         return;
     }
 
@@ -10227,7 +10696,7 @@ NX_INTERFACE   *interface_ptr;
 
         /* Receive buffer is full.  Release the packet and return. */
         nx_packet_release(packet_ptr);
-        
+
         return;
     }
     if(bsd_ptr -> nx_bsd_socket_received_packet)
@@ -10244,46 +10713,46 @@ NX_INTERFACE   *interface_ptr;
     bsd_ptr -> nx_bsd_socket_received_packet_tail = packet_ptr;
     bsd_ptr -> nx_bsd_socket_received_byte_count += packet_ptr -> nx_packet_length;
     bsd_ptr -> nx_bsd_socket_received_packet_count++;
-        
+
     nx_bsd_select_wakeup((UINT)(bsd_ptr -> nx_bsd_socket_id), FDSET_READ);
 
     return;
 }
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_tcp_syn_received_notify                      PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_tcp_syn_received_notify                      PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function checks if the socket has a connection request.        */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    socket_ptr                           Socket receiving the packet    */
-/*    packet_ptr                           Pointer to the received packet */  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
+/*    packet_ptr                           Pointer to the received packet */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    0                                     Not a valid match             */
 /*    1                                     Valid match found             */
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    None                                                                */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    NetX Duo                                                            */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX Duo                                                            */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -10294,7 +10763,7 @@ NX_INTERFACE   *interface_ptr;
 static UINT  nx_bsd_tcp_syn_received_notify(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr)
 {
 
-UINT            bsd_socket_index;    
+UINT            bsd_socket_index;
 INT             i;
 INT             sockID_find;
 ULONG           addr_family;
@@ -10306,7 +10775,7 @@ NX_INTERFACE   *interface_ptr;
 
 
     bsd_socket_index = (UINT)socket_ptr -> nx_tcp_socket_reserved_ptr;
-    
+
     if(bsd_socket_index >= NX_BSD_MAX_SOCKETS)
     {
 
@@ -10346,13 +10815,13 @@ NX_INTERFACE   *interface_ptr;
     {
 
         bsd_socket_ptr = &nx_bsd_socket_array[search_index];
-        
+
         /* Skip the unrelated sockets. */
         if((bsd_socket_ptr -> nx_bsd_socket_protocol == NX_PROTOCOL_TCP) &&
            (bsd_socket_ptr -> nx_bsd_socket_family == addr_family) &&
            ((bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED) == 0) &&
            (bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET) &&
-           (bsd_socket_ptr -> nx_bsd_socket_local_port == socket_ptr -> nx_tcp_socket_port) &&  
+           (bsd_socket_ptr -> nx_bsd_socket_local_port == socket_ptr -> nx_tcp_socket_port) &&
            (bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
         {
 
@@ -10375,7 +10844,7 @@ NX_INTERFACE   *interface_ptr;
 
         /*  Move to the next entry. */
         search_index++;
-        
+
         if(search_index >= NX_BSD_MAX_SOCKETS)
             search_index = 0;
     }
@@ -10397,49 +10866,52 @@ NX_INTERFACE   *interface_ptr;
     return(NX_TRUE);
 }
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_tcp_create_listen_socket                     PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_tcp_create_listen_socket                     PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This routine sets up the input socket as a listen socket.           */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    master_sockid                        Index to the master socket     */
-/*    backlog                              Size of the socket listen queue*/  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
+/*    backlog                              Size of the socket listen queue*/
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    NX_SOC_OK                             Successfully set up socket    */
 /*    NX_SOC_ERROR                          Error setting up the socket   */
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    socket                                Allocate a BSD socket         */
 /*    nx_bsd_socket_set_inherited_settings  Apply master socket options   */
 /*    nx_tcp_server_socket_listen           Enable the socket to listen   **/
 /*    nx_tcp_server_socket_accept           Wait for connection request   */
 /*    nx_tcp_server_socket_relisten         Reset the socket to listen    */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    NetX Duo                                                            */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX Duo                                                            */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static INT nx_bsd_tcp_create_listen_socket(INT master_sockid, INT backlog)
@@ -10456,7 +10928,7 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
 
 
     /* This is called from BSD internal code so the BSD mutex is obtained. */
- 
+
     /* Search through the sockets to find a master socket that is listening on the same port. */
     for(i = 0; i < NX_BSD_MAX_SOCKETS; i++)
     {
@@ -10479,19 +10951,19 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
 
         /* Check if another master socket is listening on the same port.  */
         if((nx_bsd_socket_array[i].nx_bsd_socket_local_port == master_socket_ptr -> nx_bsd_socket_local_port) &&
-           (nx_bsd_socket_array[i].nx_bsd_socket_union_id.nx_bsd_socket_secondary_socket_id 
+           (nx_bsd_socket_array[i].nx_bsd_socket_union_id.nx_bsd_socket_secondary_socket_id
             != (master_socket_ptr -> nx_bsd_socket_union_id.nx_bsd_socket_secondary_socket_id)) &&
            (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_ENABLE_LISTEN))
         {
 
             /* This one is. Point to the same secondary socket. */
-            (master_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id = 
+            (master_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id =
               nx_bsd_socket_array[i].nx_bsd_socket_union_id.nx_bsd_socket_secondary_socket_id;
             master_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_ENABLE_LISTEN;
             master_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_SERVER_SECONDARY_SOCKET);
             master_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_client_type =  NX_FALSE;
             master_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_SERVER_MASTER_SOCKET;
-            
+
             return(NX_SOC_OK);
         }
     }
@@ -10508,7 +10980,7 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
 
             /* Error, invalid backlog.  */
             /* Set the socket error if extended socket options enabled. */
-            set_errno(ENOBUFS);  
+            nx_bsd_set_errno(ENOBUFS);
 
             /* Return error code.  */
             NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
@@ -10517,15 +10989,15 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
     }
 
     /* Now create a dedicated secondary socket to listen for next client connection.  */
-    secondary_sockID =  socket((INT)(master_socket_ptr -> nx_bsd_socket_family), SOCK_STREAM, IPPROTO_TCP);
+    secondary_sockID =  nx_bsd_socket((INT)(master_socket_ptr -> nx_bsd_socket_family), SOCK_STREAM, IPPROTO_TCP);
 
     /* Determine if there was an error.  */
     if (secondary_sockID == NX_SOC_ERROR)
     {
 
         /* Secondary socket create failed. Note: The socket thread error is set in socket().  */
-        set_errno(ENOMEM);
-        
+        nx_bsd_set_errno(ENOMEM);
+
         /* Return error code.  */
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
         return(NX_SOC_ERROR);
@@ -10534,10 +11006,10 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
     /* Adjust the secondary socket ID.  */
     secondary_sockID =  secondary_sockID - NX_BSD_SOCKFD_START;
 
-    /* The master server socket will never connect to a client! For each successful 
-       client connection there will be a new secondary server socket and 
-       each such socket is associated with this master server socket. This is 
-       the difference between NetX and BSD sockets. The NetX listen() service is used 
+    /* The master server socket will never connect to a client! For each successful
+       client connection there will be a new secondary server socket and
+       each such socket is associated with this master server socket. This is
+       the difference between NetX and BSD sockets. The NetX listen() service is used
        with this secondary server socket.  */
 
     /* Set a pointer to the secondary socket. */
@@ -10559,7 +11031,7 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
 
         /* Since a zero backlog is specified, this secondary socket needs to share with another master socket. */
         bsd_secondary_socket -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_port = local_port;
-        
+
         /* Check if a listen request is queued up for this socket. */
         nx_bsd_tcp_pending_connection(local_port, bsd_secondary_socket -> nx_bsd_socket_tcp_socket);
 
@@ -10586,7 +11058,7 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
     master_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_client_type =  NX_FALSE;
     master_socket_ptr -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_SERVER_MASTER_SOCKET;
 
-    /* This is a master socket.  So we use the nx_bsd_socket_master_socket_id field to 
+    /* This is a master socket.  So we use the nx_bsd_socket_master_socket_id field to
        record the secondary socket that is doing the real listen/accept work. */
     (master_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id = secondary_sockID;
 
@@ -10596,14 +11068,14 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
     bsd_secondary_socket -> nx_bsd_socket_status_flags |= NX_BSD_SOCKET_ENABLE_LISTEN;
     bsd_secondary_socket -> nx_bsd_socket_local_port              =  (USHORT)local_port;
 
-    /* If the master server socket is marked as non-blocking, we need to 
+    /* If the master server socket is marked as non-blocking, we need to
        start the NetX accept process here. */
 
     sec_socket_ptr = bsd_secondary_socket -> nx_bsd_socket_tcp_socket;
 
     /* Allow accept from remote. */
     nx_tcp_server_socket_accept(sec_socket_ptr, 0);
-   
+
     /* Set the master socket of other BSD TCP sockets that bind to the same port to the same secondary socket. */
     for(i = 0; i < NX_BSD_MAX_SOCKETS; i++)
     {
@@ -10617,10 +11089,10 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
            (bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_BOUND) &&
            (bsd_socket_ptr -> nx_bsd_socket_local_port == local_port))
         {
-        
+
             (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id = secondary_sockID;
         }
-    }        
+    }
 
     /* Check the relisten/listen status. */
     if(status == NX_CONNECTION_PENDING)
@@ -10634,42 +11106,42 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
     return(NX_SOC_OK);
 }
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    nx_bsd_tcp_pending_connection                       PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_tcp_pending_connection                       PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This routine checks if the BSD TCP socket has a listen request      */
 /*    queued up on in the specified port.                                 */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*    local_port                           Listening port                 */
-/*    socket_ptr                           Socket to check                */  
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
+/*    socket_ptr                           Socket to check                */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
 /*    None                                                                */
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    nx_bsd_tcp_syn_received_notify        Match connection request      */
 /*                                             (packet) to input socket   */
 /*    nx_packet_receive                     Release packet to packet pool */
 /*                                                                        */
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    NetX Duo                                                            */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX Duo                                                            */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -10691,7 +11163,7 @@ UINT                         ret;
     if(listen_ptr)
     {
 
-        do 
+        do
         {
 
             if((listen_ptr -> nx_tcp_listen_port == local_port) &&
@@ -10702,7 +11174,7 @@ UINT                         ret;
                 {
 
                     packet_ptr = listen_ptr -> nx_tcp_listen_queue_head;
-                    
+
                     tcp_header_ptr = (NX_TCP_HEADER*)packet_ptr -> nx_packet_prepend_ptr;
 
                     if(tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_SYN_BIT)
@@ -10718,7 +11190,7 @@ UINT                         ret;
                         }
 
                         listen_ptr -> nx_tcp_listen_queue_head = packet_ptr -> nx_packet_queue_next;
-                        
+
                         if(packet_ptr == listen_ptr -> nx_tcp_listen_queue_tail)
                         {
                             listen_ptr -> nx_tcp_listen_queue_tail = NX_NULL;
@@ -10727,7 +11199,7 @@ UINT                         ret;
                         listen_ptr -> nx_tcp_listen_queue_current--;
 
                         nx_packet_release(packet_ptr);
-                        
+
                     }
                 } while(listen_ptr -> nx_tcp_listen_queue_head);
             }
@@ -10743,7 +11215,7 @@ UINT                         ret;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_bsd_find_interface_by_source_addr                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10769,7 +11241,7 @@ UINT                         ret;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    nx_bsd_send_internal                                                */ 
+/*    nx_bsd_send_internal                                                */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -10795,7 +11267,7 @@ ULONG ipv6_addr[4];
     {
         ipv4_addr = *ip_addr;
         NX_CHANGE_ULONG_ENDIAN(ipv4_addr);
-        
+
         for(i = 0; i < NX_MAX_IP_INTERFACES; i++)
         {
             if((nx_bsd_default_ip -> nx_ip_interface[i].nx_interface_valid) &&
@@ -10812,12 +11284,12 @@ ULONG ipv6_addr[4];
         ipv6_addr[2] = *(ip_addr + 2);
         ipv6_addr[3] = *(ip_addr + 3);
         NX_IPV6_ADDRESS_CHANGE_ENDIAN(ipv6_addr);
-        
+
         for(i = 0; i < NX_MAX_IPV6_ADDRESSES; i++)
         {
-            
+
             if((nx_bsd_default_ip -> nx_ipv6_address[i].nxd_ipv6_address_valid) &&
-               (nx_bsd_default_ip -> nx_ipv6_address[i].nxd_ipv6_address_attached -> nx_interface_valid) && 
+               (nx_bsd_default_ip -> nx_ipv6_address[i].nxd_ipv6_address_attached -> nx_interface_valid) &&
                (nx_bsd_default_ip -> nx_ipv6_address[i].nxd_ipv6_address[0] == ipv6_addr[0]) &&
                (nx_bsd_default_ip -> nx_ipv6_address[i].nxd_ipv6_address[1] == ipv6_addr[1]) &&
                (nx_bsd_default_ip -> nx_ipv6_address[i].nxd_ipv6_address[2] == ipv6_addr[2]) &&
@@ -10826,7 +11298,7 @@ ULONG ipv6_addr[4];
         }
     }
 #endif
-    
+
     return((INT)(NX_BSD_LOCAL_IF_INADDR_ANY));
 
 }
@@ -10838,7 +11310,7 @@ ULONG ipv6_addr[4];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_bsd_ipv4_packet_send                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10870,7 +11342,7 @@ ULONG ipv6_addr[4];
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    nx_bsd_send_internal                                                */ 
+/*    nx_bsd_send_internal                                                */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -10899,7 +11371,7 @@ UINT                    queued_count;
 NX_PACKET              *packet_copy;
 ULONG                   network_mask;
 ULONG                   network;
-NX_IP *                 ip_ptr; 
+NX_IP *                 ip_ptr;
 ULONG                   destination_ip;
 
     ip_ptr = nx_bsd_default_ip;
@@ -10908,13 +11380,13 @@ ULONG                   destination_ip;
     /* Increment the total send requests counter.  */
     ip_ptr -> nx_ip_total_packet_send_requests++;
 #endif
-    
-    
+
+
     /* Setup the IP header pointer.  */
     ip_header_ptr =  (NX_IPV4_HEADER *) packet_ptr -> nx_packet_prepend_ptr;
 
     destination_ip = ip_header_ptr -> nx_ip_header_destination_ip;
-    
+
     /* Swap the destination address to host byte order.*/
     NX_CHANGE_ULONG_ENDIAN(destination_ip);
 
@@ -10924,13 +11396,13 @@ ULONG                   destination_ip;
                                        (UINT)((*(UCHAR*)ip_header_ptr & 0xf) << 2),
                                        /* IPv4 header checksum does not use src/dest addresses */
                                        NULL, NULL);
-                    
+
     val = (ULONG)(~checksum);
     val = val & NX_LOWER_16_MASK;
-    
+
     /* Convert to network byte order. */
     NX_CHANGE_ULONG_ENDIAN(val);
-    
+
     /* Now store the checksum in the IP header.  */
     ip_header_ptr -> nx_ip_header_word_2 =  ip_header_ptr -> nx_ip_header_word_2 | val;
 
@@ -11722,13 +12194,13 @@ ULONG                   destination_ip;
 }
 #endif /*NX_DISABLE_IPV4 */
 
-#ifdef FEATURE_NX_IPV6 
+#ifdef FEATURE_NX_IPV6
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_bsd_ipv6_packet_send                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11767,7 +12239,7 @@ ULONG                   destination_ip;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    nx_bsd_send_internal                                                */ 
+/*    nx_bsd_send_internal                                                */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -11820,7 +12292,7 @@ NX_IP          *ip_ptr;
 
         /* Release the packet.  */
         _nx_packet_transmit_release(packet_ptr);
-        
+
         /* Return... nothing more can be done!  */
         return;
     }
@@ -11853,19 +12325,19 @@ NX_IP          *ip_ptr;
         if(_nx_packet_copy(packet_ptr, &packet_copy, ip_ptr -> nx_ip_default_packet_pool, NX_NO_WAIT) == NX_SUCCESS)
         {
 #ifndef NX_DISABLE_IP_INFO
-            
+
             /* Increment the IP packet sent count. */
             ip_ptr -> nx_ip_total_packets_sent++;
-            
+
             /* Increment the IP bytes sent count. */
             ip_ptr -> nx_ip_total_bytes_sent += packet_ptr -> nx_packet_length - sizeof(NX_IPV6_HEADER);
-#endif 
-            
+#endif
+
             /* Send the packet to this IP's receive processing like it came in from the driver. */
             _nx_ip_packet_deferred_receive(ip_ptr, packet_copy);
         }
 #ifndef NX_DISABLE_IP_INFO
-        else 
+        else
         {
             /* Increment the IP send packets dropped count. */
             ip_ptr -> nx_ip_send_packets_dropped++;
@@ -11908,7 +12380,7 @@ NX_IP          *ip_ptr;
         /* It is; is path MTU enabled? */
 #ifdef NX_ENABLE_IPV6_PATH_MTU_DISCOVERY
 
-        /* It is. We will check the path MTU for the packet destination to 
+        /* It is. We will check the path MTU for the packet destination to
            determine if we need to fragment the packet. */
 
         /* Get a pointer to the packet IP header. */
@@ -11922,7 +12394,7 @@ NX_IP          *ip_ptr;
         {
 
             /* Yes; Check the destination path MTU if fragmentation is needed.  */
-            if ((dest_entry_ptr -> nx_ipv6_destination_entry_path_mtu > 0) && (packet_ptr -> nx_packet_length > 
+            if ((dest_entry_ptr -> nx_ipv6_destination_entry_path_mtu > 0) && (packet_ptr -> nx_packet_length >
                                                      dest_entry_ptr -> nx_ipv6_destination_entry_path_mtu))
             {
 
@@ -11953,14 +12425,14 @@ NX_IP          *ip_ptr;
 
 #endif  /* NX_DISABLE_FRAGMENTATION */
 
-    
+
         /* Send the IP packet out on the network via the attached driver.  */
         (if_ptr -> nx_interface_link_driver_entry) (&driver_request);
-        
+
         /* Return to caller.  */
         return;
     }
-    
+
     /* Determine if physical mapping is needed by this link driver. */
     if( if_ptr && if_ptr -> nx_interface_address_mapping_needed )
     {
@@ -11986,10 +12458,10 @@ NX_IP          *ip_ptr;
                 COPY_IPV6_ADDRESS(dest_addr, next_hop_address);
 
                 /* Add the next_hop in destination table. */
-                status = _nx_icmpv6_dest_table_add(ip_ptr, dest_addr, &dest_entry_ptr, 
-                                                   next_hop_address, if_ptr -> nx_interface_ip_mtu_size, 
+                status = _nx_icmpv6_dest_table_add(ip_ptr, dest_addr, &dest_entry_ptr,
+                                                   next_hop_address, if_ptr -> nx_interface_ip_mtu_size,
                                                    NX_WAIT_FOREVER, packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr);
-   
+
                 /* Get the NDCacheEntry. */
                 if(status == NX_SUCCESS)
                     NDCacheEntry = dest_entry_ptr -> nx_ipv6_destination_entry_nd_entry;
@@ -11999,8 +12471,8 @@ NX_IP          *ip_ptr;
             else if(_nxd_ipv6_router_lookup(ip_ptr, if_ptr, next_hop_address, (VOID**)&NDCacheEntry) == NX_SUCCESS)
             {
                /* Add the next_hop in destination table. */
-                status = _nx_icmpv6_dest_table_add(ip_ptr, dest_addr, &dest_entry_ptr, 
-                                                   next_hop_address, if_ptr -> nx_interface_ip_mtu_size, 
+                status = _nx_icmpv6_dest_table_add(ip_ptr, dest_addr, &dest_entry_ptr,
+                                                   next_hop_address, if_ptr -> nx_interface_ip_mtu_size,
                                                    NX_WAIT_FOREVER, packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr);
 
                 /* If the default router did not has a reachable ND_CACHE_ENTRY. Get the NDCacheEntry. */
@@ -12050,29 +12522,29 @@ NX_IP          *ip_ptr;
            (NDCacheEntry -> nx_nd_cache_nd_status <= ND_CACHE_STATE_PROBE))
         {
 
-            UCHAR *mac_addr; 
-            
+            UCHAR *mac_addr;
+
             mac_addr = NDCacheEntry -> nx_nd_cache_mac_addr;
-            
+
             /* Assume we find the mac */
             driver_request.nx_ip_driver_ptr                  = ip_ptr;
             driver_request.nx_ip_driver_command              = NX_LINK_PACKET_SEND;
             driver_request.nx_ip_driver_packet               = packet_ptr;
             driver_request.nx_ip_driver_physical_address_msw = (ULONG)((mac_addr[0] << 8) | mac_addr[1]);
-            driver_request.nx_ip_driver_physical_address_lsw = 
+            driver_request.nx_ip_driver_physical_address_lsw =
                 (ULONG)((mac_addr[2] << 24) | (mac_addr[3] << 16) | (mac_addr[4] << 8) | mac_addr[5]);
             driver_request.nx_ip_driver_interface            = if_ptr;
 
 #ifndef NX_DISABLE_FRAGMENTATION
 
-            /* If the packet size is bigger than MTU, NetX Duo is enabled to fragment 
+            /* If the packet size is bigger than MTU, NetX Duo is enabled to fragment
                the packet payload. */
 
             /* Check if path MTU Discovery is enabled first. */
 
 #ifdef NX_ENABLE_IPV6_PATH_MTU_DISCOVERY
 
-            /* It is.  To know if we need to fragment this packet we need the path MTU for the packet 
+            /* It is.  To know if we need to fragment this packet we need the path MTU for the packet
                destination.  */
 
             /* If this destination has a non null next hop, we need to ascertain the next hop MTU.  */
@@ -12098,7 +12570,7 @@ NX_IP          *ip_ptr;
             }
 
             /* Yes; Check the destination path MTU if fragmentation is needed.  */
-            if ((next_hop_path_mtu > 0) && 
+            if ((next_hop_path_mtu > 0) &&
                 (packet_ptr -> nx_packet_length > next_hop_path_mtu))
             {
 
@@ -12132,10 +12604,10 @@ NX_IP          *ip_ptr;
 
 
 #ifndef NX_DISABLE_IP_INFO
-        
+
             /* Increment the IP packet sent count.  */
             ip_ptr -> nx_ip_total_packets_sent++;
-            
+
             /* Increment the IP bytes sent count.  */
             ip_ptr -> nx_ip_total_bytes_sent +=  packet_ptr -> nx_packet_length - sizeof(NX_IPV6_HEADER);
 #endif
@@ -12150,19 +12622,19 @@ NX_IP          *ip_ptr;
 
                 /* Start the Delay first probe timer */
                 NDCacheEntry -> nx_nd_cache_timer_tick = NX_DELAY_FIRST_PROBE_TIME;
-                
+
             }
 
             /* Return to caller.  */
             return;
         }
-        
-        /* No MAC address was found in our cache table.  Start the Neighbor Discovery (ND) 
+
+        /* No MAC address was found in our cache table.  Start the Neighbor Discovery (ND)
            process to get it. */
 
         /* Ensure the current packet's queue next pointer to NULL */
         packet_ptr -> nx_packet_queue_next = NX_NULL;
-        
+
         /* Determine if the queue is empty. */
         if(NDCacheEntry -> nx_nd_cache_packet_waiting_head == NX_NULL)
         {
@@ -12192,20 +12664,20 @@ NX_IP          *ip_ptr;
 
                 NDCacheEntry -> nx_nd_cache_num_solicit = NX_MAX_MULTICAST_SOLICIT - 1;
                 NDCacheEntry -> nx_nd_cache_timer_tick = ip_ptr -> nx_ipv6_retrans_timer_ticks;
-                
+
             }
-            else 
+            else
             {
 
                 _nx_packet_transmit_release(packet_ptr);
 #ifndef NX_DISABLE_IP_INFO
-                
+
                 /* Increment the IP transmit resource error count.  */
                 ip_ptr -> nx_ip_transmit_resource_errors++;
-        
+
                 /* Increment the IP send packets dropped count.  */
                 ip_ptr -> nx_ip_send_packets_dropped++;
-#endif      
+#endif
             }
             return;
         }
@@ -12223,15 +12695,15 @@ NX_IP          *ip_ptr;
             remove_packet = NDCacheEntry -> nx_nd_cache_packet_waiting_head;
 
             NDCacheEntry -> nx_nd_cache_packet_waiting_head = remove_packet -> nx_packet_queue_next;
-            
+
             /* Update the queued packet count for this cache entry. */
-            NDCacheEntry -> nx_nd_cache_packet_waiting_queue_length--; 
+            NDCacheEntry -> nx_nd_cache_packet_waiting_queue_length--;
 
             _nx_packet_transmit_release(remove_packet);
 #ifndef NX_DISABLE_IP_INFO
             /* Increment the IP transmit resource error count.  */
             ip_ptr -> nx_ip_transmit_resource_errors++;
-            
+
             /* Increment the IP send packets dropped count.  */
             ip_ptr -> nx_ip_send_packets_dropped++;
 #endif
@@ -12252,7 +12724,7 @@ NX_IP          *ip_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_bsd_swap_ipv6_extension_headers                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12279,7 +12751,7 @@ NX_IP          *ip_ptr;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    NetX Duo BSD Layer Source Code                                      */ 
+/*    NetX Duo BSD Layer Source Code                                      */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -12299,7 +12771,7 @@ NX_IPV6_HEADER_OPTION           *option;
 
 
     remaining_bytes = (ULONG)packet_ptr -> nx_packet_prepend_ptr - (ULONG)packet_ptr -> nx_packet_ip_header;
-    
+
     scan_ptr = packet_ptr -> nx_packet_ip_header;
 
     remaining_bytes -= header_length;
@@ -12315,7 +12787,7 @@ NX_IPV6_HEADER_OPTION           *option;
             break;
 
         case NX_PROTOCOL_NEXT_HEADER_DESTINATION:
-            
+
             break;
 
         case NX_PROTOCOL_NEXT_HEADER_ROUTING:
@@ -12327,7 +12799,7 @@ NX_IPV6_HEADER_OPTION           *option;
             break;
 
         default:
-            
+
             break;
         }
 
@@ -12338,11 +12810,11 @@ NX_IPV6_HEADER_OPTION           *option;
         else
             header_length = (ULONG)((option -> nx_ipv6_header_option_ext_length + 1) << 3);
 
-            
+
         remaining_bytes -= header_length;
         scan_ptr += header_length;
     }
-}    
+}
 #endif  /* defined(FEATURE_NX_IPV6) && defined(NX_ENABLE_IP_RAW_PACKET_FILTER) */
 #ifdef NX_BSD_RAW_PPPOE_SUPPORT
 
@@ -12352,7 +12824,7 @@ NX_IPV6_HEADER_OPTION           *option;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_bsd_pppoe_internal_sendto                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12394,15 +12866,19 @@ NX_IPV6_HEADER_OPTION           *option;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-static INT nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct sockaddr* destAddr, INT destAddrLen)
+static INT nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
 {
 UINT                if_index;
-struct sockaddr_ll *destAddr_ll;    
+struct nx_bsd_sockaddr_ll
+                    *destAddr_ll;
 #if 0
-ULONG               src_mac_msw;  
-ULONG               src_mac_lsw;  
+ULONG               src_mac_msw;
+ULONG               src_mac_lsw;
 #endif
 NX_IP_DRIVER        driver_request;
 UINT                status;
@@ -12415,39 +12891,39 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(destAddr == NX_NULL)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
     if(destAddr -> sa_family != AF_PACKET)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
-    if(destAddrLen != sizeof(struct sockaddr_ll))
+    if(destAddrLen != sizeof(struct nx_bsd_sockaddr_ll))
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
-    destAddr_ll = (struct sockaddr_ll*)destAddr;
+    destAddr_ll = (struct nx_bsd_sockaddr_ll*)destAddr;
 
     if((destAddr_ll -> sll_protocol != ETHERTYPE_PPPOE_SESS) && (destAddr_ll -> sll_protocol != ETHERTYPE_PPPOE_DISC))
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
     /* Validate the interface ID */
@@ -12455,19 +12931,19 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(if_index >= NX_MAX_IP_INTERFACES)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
     if(nx_bsd_default_ip -> nx_ip_interface[if_index].nx_interface_valid == 0)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
 #if 0
@@ -12480,12 +12956,12 @@ NX_PACKET          *packet_ptr = NX_NULL;
 
     /* Validate the packet length */
     if(msgLength > (INT)(nx_bsd_default_ip -> nx_ip_interface[if_index].nx_interface_ip_mtu_size + 14))
-    {    
+    {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
     /* FIXME:  If the socket is non-blocking, Timeout value should be set to 0 */
@@ -12496,12 +12972,12 @@ NX_PACKET          *packet_ptr = NX_NULL;
     {
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
         return(NX_SOC_ERROR);
-    }    
+    }
 
 
 
@@ -12515,7 +12991,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
         nx_packet_release(packet_ptr);
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
@@ -12539,13 +13015,13 @@ NX_PACKET          *packet_ptr = NX_NULL;
     {
 
         nx_packet_release(packet_ptr);
-        
+
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
     (driver_request.nx_ip_driver_interface -> nx_interface_link_driver_entry)(&driver_request);
@@ -12562,7 +13038,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_bsd_pppoe_packet_received                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12583,8 +13059,8 @@ NX_PACKET          *packet_ptr = NX_NULL;
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    nx_bsd_select_wakeup                  Wake up any asychronous       */ 
-/*                                            receive call                */ 
+/*    nx_bsd_select_wakeup                  Wake up any asychronous       */
+/*                                            receive call                */
 /*    nx_packet_release                     Release the packet on error   */
 /*                                                                        */
 /*  CALLED BY                                                             */
@@ -12603,7 +13079,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
 UINT _nx_bsd_pppoe_packet_received(NX_PACKET *packet_ptr, UINT frame_type, UINT interface_id)
 {
 
-UINT i;        
+UINT i;
 UINT sockid = NX_BSD_MAX_SOCKETS;
 UINT create_id = 0xFFFFFFFF;
 NX_BSD_SOCKET *bsd_ptr;
@@ -12671,7 +13147,7 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_bsd_hardware_internal_sendto                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12713,12 +13189,16 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            added nx_link layer,        */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
-static INT _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct sockaddr* destAddr, INT destAddrLen)
+static INT _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
 {
 UINT                if_index;
-struct sockaddr_ll *destAddr_ll;    
+struct nx_bsd_sockaddr_ll
+                   *destAddr_ll;
 UINT                status;
 NX_PACKET          *packet_ptr = NX_NULL;
 
@@ -12729,60 +13209,60 @@ NX_PACKET          *packet_ptr = NX_NULL;
     if(destAddr == NX_NULL)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
     if(destAddr -> sa_family != AF_PACKET)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
-    if(destAddrLen != sizeof(struct sockaddr_ll))
+    if(destAddrLen != sizeof(struct nx_bsd_sockaddr_ll))
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
-    destAddr_ll = (struct sockaddr_ll*)destAddr;
+    destAddr_ll = (struct nx_bsd_sockaddr_ll*)destAddr;
 
     /* Validate the interface ID */
     if_index = (UINT)(destAddr_ll -> sll_ifindex);
     if(if_index >= NX_MAX_IP_INTERFACES)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
     if(nx_bsd_default_ip -> nx_ip_interface[if_index].nx_interface_valid == 0)
     {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
     /* Validate the packet length */
     if(msgLength > (INT)(nx_bsd_default_ip -> nx_ip_interface[if_index].nx_interface_ip_mtu_size + 18))
-    {    
+    {
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EINVAL);  
+        nx_bsd_set_errno(EINVAL);
 
         NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-        return(NX_SOC_ERROR);        
+        return(NX_SOC_ERROR);
     }
 
     status = nx_packet_allocate(nx_bsd_default_packet_pool, &packet_ptr, NX_PHYSICAL_HEADER, NX_NO_WAIT);
@@ -12792,12 +13272,12 @@ NX_PACKET          *packet_ptr = NX_NULL;
     {
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
         return(NX_SOC_ERROR);
-    }    
+    }
 
     /* Set IP interface. */
     packet_ptr -> nx_packet_ip_interface = &nx_bsd_default_ip -> nx_ip_interface[if_index];
@@ -12812,7 +13292,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
         nx_packet_release(packet_ptr);
 
         /* Set the socket error.  */
-        set_errno(ENOBUFS);
+        nx_bsd_set_errno(ENOBUFS);
 
         /* Return an error status.*/
         NX_BSD_ERROR(status, __LINE__);
@@ -12831,16 +13311,20 @@ NX_PACKET          *packet_ptr = NX_NULL;
     {
 
         nx_packet_release(packet_ptr);
-        
+
         /* Set the socket error if extended socket options enabled. */
-        set_errno(EACCES);  
+        nx_bsd_set_errno(EACCES);
 
         /* Return an error. */
         NX_BSD_ERROR(NX_BSD_MUTEX_ERROR, __LINE__);
-        return(NX_SOC_ERROR); 
+        return(NX_SOC_ERROR);
     }
 
+#ifdef NX_ENABLE_VLAN
+    nx_link_raw_packet_send(nx_bsd_default_ip, if_index, packet_ptr);
+#else
     _nx_driver_hardware_packet_send(packet_ptr);
+#endif /* NX_ENABLE_VLAN */
 
     /* Release the mutex. */
     tx_mutex_put(nx_bsd_protection_ptr);
@@ -12854,7 +13338,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_bsd_hardware_packet_received                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12874,8 +13358,8 @@ NX_PACKET          *packet_ptr = NX_NULL;
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    nx_bsd_select_wakeup                  Wake up any asychronous       */ 
-/*                                            receive call                */ 
+/*    nx_bsd_select_wakeup                  Wake up any asychronous       */
+/*                                            receive call                */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -12893,7 +13377,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
 static VOID  _nx_bsd_hardware_packet_received(NX_PACKET *packet_ptr, UCHAR *consumed)
 {
 
-UINT i;        
+UINT i;
 UINT sockid = NX_BSD_MAX_SOCKETS;
 NX_BSD_SOCKET *bsd_ptr;
 
@@ -12955,6 +13439,132 @@ NX_BSD_SOCKET *bsd_ptr;
 
     return;
 }
+
+#ifdef NX_ENABLE_VLAN
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_bsd_ethernet_receive_notify                     PORTABLE C      */
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yanwu Cai, Microsoft Corporation                                    */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function receives raw packet from NetX Link layer.             */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    ip_ptr                                Pointer to IP struct          */
+/*    interface_index                       Interface index               */
+/*    packet_ptr                            Pointer to received packet    */
+/*    physical_address_msw                  Pyhsical address              */
+/*    physical_address_lsw                  Pyhsical address              */
+/*    packet_type                           Type of received packet       */
+/*    header_size                           Header size                   */
+/*    context                               Pointer to context            */
+/*    time_ptr                              Pointer to NX_LINK_TIME_STRUCT*/
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_SUCCESS                            The packet is consumed        */
+/*    NX_SOC_ERROR                          Error occured and the packet  */
+/*                                            is not consumed             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_bsd_select_wakeup                  Wake up any asychronous       */
+/*                                            receive call                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  12-31-2023     Yanwu Cai                Initial Version 6.4.0         */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_bsd_ethernet_receive_notify(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
+                                            ULONG physical_address_msw, ULONG physical_address_lsw,
+                                            UINT packet_type, UINT header_size, VOID *context,
+                                            struct NX_LINK_TIME_STRUCT *time_ptr)
+{
+UINT i;
+UINT sockid = NX_BSD_MAX_SOCKETS;
+NX_BSD_SOCKET *bsd_ptr;
+
+
+    /* Find the socket with the matching interface.  Put the packet into the socket's recevie queue. */
+    for(i = 0; i < NX_BSD_MAX_SOCKETS; i++)
+    {
+        if((nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE) &&
+                (nx_bsd_socket_array[i].nx_bsd_socket_family == AF_PACKET) &&
+                ((nx_bsd_socket_array[i].nx_bsd_socket_local_bind_interface == NX_BSD_LOCAL_IF_INADDR_ANY) ||
+                 (nx_bsd_socket_array[i].nx_bsd_socket_local_bind_interface == (ULONG)(packet_ptr -> nx_packet_ip_interface))))
+        {
+            sockid = i;
+        }
+    }
+    if(sockid == NX_BSD_MAX_SOCKETS)
+    {
+        /* No BSD sockets are avaialble for this frame type. */
+        return(NX_SOC_ERROR);
+    }
+    /* Now we need to put the packet into the socket. */
+    bsd_ptr = &nx_bsd_socket_array[sockid];
+
+    /* Drop the packet if the receive queue exceeds max depth. */
+    if(bsd_ptr -> nx_bsd_socket_received_packet_count >=
+            bsd_ptr -> nx_bsd_socket_received_packet_count_max)
+    {
+        return(NX_SOC_ERROR);
+    }
+
+#ifndef NX_DISABLE_BSD_RAW_PACKET_DUPLICATE
+    /* Duplicate the packet. */
+    if (nx_packet_copy(packet_ptr, &packet_ptr, nx_bsd_default_packet_pool, NX_NO_WAIT) != NX_SUCCESS)
+    {
+        return(NX_SOC_ERROR);
+    }
+
+#endif /* NX_DISABLE_BSD_RAW_PACKET_DUPLICATE */
+
+#ifdef NX_ENABLE_VLAN
+    if (header_size == NX_LINK_ETHERNET_HEADER_SIZE + NX_LINK_VLAN_HEADER_SIZE)
+    {
+        memmove(packet_ptr -> nx_packet_prepend_ptr + NX_LINK_VLAN_HEADER_SIZE,
+                packet_ptr -> nx_packet_prepend_ptr,
+                NX_LINK_ETHERNET_HEADER_SIZE - 2); /* use case of memmove is verified. */
+        packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length - NX_LINK_VLAN_HEADER_SIZE;
+        packet_ptr -> nx_packet_prepend_ptr += NX_LINK_VLAN_HEADER_SIZE;
+    }
+#endif /* NX_ENABLE_VLAN */
+
+    if(bsd_ptr -> nx_bsd_socket_received_packet)
+    {
+        bsd_ptr -> nx_bsd_socket_received_packet_tail -> nx_packet_queue_next = packet_ptr;
+    }
+    else
+    {
+        bsd_ptr -> nx_bsd_socket_received_packet = packet_ptr;
+        bsd_ptr -> nx_bsd_socket_received_packet_offset = 0;
+    }
+
+    bsd_ptr -> nx_bsd_socket_received_packet_tail = packet_ptr;
+    bsd_ptr -> nx_bsd_socket_received_byte_count += packet_ptr -> nx_packet_length;
+    bsd_ptr -> nx_bsd_socket_received_packet_count ++;
+
+    nx_bsd_select_wakeup(sockid, FDSET_READ);
+
+    return(NX_SUCCESS);
+
+}
+#endif
 #endif /* NX_BSD_RAW_SUPPORT */
 
 
@@ -12964,7 +13574,7 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    inet_pton                                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12979,11 +13589,11 @@ NX_BSD_SOCKET *bsd_ptr;
 /*    src                                   A pointer pointing to the     */
 /*                                            presentation of IP address  */
 /*    dst                                   A pointer pointing to the     */
-/*                                            destination memory          */ 
+/*                                            destination memory          */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
-/*    status                                1 OK                          */  
+/*    status                                1 OK                          */
 /*                                          0 invalid presentation        */
 /*                                          -1 error                      */
 /*                                                                        */
@@ -12994,7 +13604,7 @@ NX_BSD_SOCKET *bsd_ptr;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    Application Code                                                    */  
+/*    Application Code                                                    */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -13003,14 +13613,17 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  inet_pton(INT af, const CHAR *src, VOID *dst)
+INT  nx_bsd_inet_pton(INT af, const CHAR *src, VOID *dst)
 {
 CHAR    ch;
-USHORT  value; 
+USHORT  value;
 /* A number used to convert a character in '0123456789abcdefABCDEF'  to a number. */
-UINT    minuend;    
+UINT    minuend;
 /* A counter used to recoder the number of digits between 2 colons. */
 UINT    digit_counter;
 
@@ -13022,14 +13635,14 @@ UCHAR   *dst_end_ptr;
 ULONG   *dst_long_ptr;
 
 const CHAR    *ipv4_addr_start = src;
-UINT    n, i; 
+UINT    n, i;
 
-struct  in_addr ipv4_addr;
+struct  nx_bsd_in_addr ipv4_addr;
 
     if(af == AF_INET)
     {
         /* Convert IPv4 address from presentation to numeric. */
-        if(inet_aton(src, &ipv4_addr))
+        if(nx_bsd_inet_aton(src, &ipv4_addr))
         {
             /* Copy the IPv4 address to the destination. */
             *((ULONG *)dst) = ipv4_addr.s_addr;
@@ -13059,16 +13672,16 @@ struct  in_addr ipv4_addr;
             /* Get the current character. */
             ch = *src++;
 
-            /* Judge which minuend to use. 
-             * '0' - 48 == 0 
+            /* Judge which minuend to use.
+             * '0' - 48 == 0
              * 'a' - 87 == 10
              * 'A' - 55 == 10
              */
             minuend = 0;
             if(ch >= '0' && ch <= '9')
-                minuend = 48;   
+                minuend = 48;
             else if(ch >= 'a' && ch <= 'f')
-                minuend = 87;       
+                minuend = 87;
             else if(ch >= 'A' && ch <= 'F')
                 minuend = 55;
 
@@ -13099,17 +13712,17 @@ struct  in_addr ipv4_addr;
                      * IF there is a ":::", Invalid Presention Format. */
                     if(colon_location)
                         return 0;
-                    
+
                     /* Record the colon location. */
                     colon_location = dst_cur_ptr;
                     continue;
-                }                   
+                }
                 else if(*src == '\0')
                 {
                     /* The colon is at the end of src, Invalid Presention Format. */
                     return 0;
                 }
-                
+
                 if(dst_cur_ptr + 1 > dst_end_ptr)
                 {
                     /* Invalid Presentation Format. */
@@ -13138,7 +13751,7 @@ struct  in_addr ipv4_addr;
                 }
 
                 /* Convert the ipv4 address from presentation to numeric. */
-                if(inet_aton(ipv4_addr_start, &ipv4_addr))
+                if(nx_bsd_inet_aton(ipv4_addr_start, &ipv4_addr))
                 {
 
                     /* Make sure the result is in network byte order. */
@@ -13187,9 +13800,9 @@ struct  in_addr ipv4_addr;
             if(dst_cur_ptr == dst_end_ptr)
                 return 0;
 
-            /* Move the data to the end of dst memory. 
-             *  -----------         ----------- 
-             * |aabb0000000| ----> |aa0000000bb|   
+            /* Move the data to the end of dst memory.
+             *  -----------         -----------
+             * |aabb0000000| ----> |aa0000000bb|
              *  -----------         -----------
              */
             for(i = 1; i <=n; i++)
@@ -13200,7 +13813,7 @@ struct  in_addr ipv4_addr;
 
             dst_cur_ptr = dst_end_ptr + 1;
         }
-        
+
         if(dst_cur_ptr != (dst_end_ptr + 1))
             return 0;
 
@@ -13231,7 +13844,7 @@ struct  in_addr ipv4_addr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    inet_ntop                                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13261,7 +13874,7 @@ struct  in_addr ipv4_addr;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    Application Code                                                    */  
+/*    Application Code                                                    */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -13270,9 +13883,12 @@ struct  in_addr ipv4_addr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-const CHAR *inet_ntop(INT af, const VOID *src, CHAR *dst, socklen_t size)
+const CHAR *nx_bsd_inet_ntop(INT af, const VOID *src, CHAR *dst, nx_bsd_socklen_t size)
 {
 
 INT    shorthand_index;
@@ -13284,7 +13900,7 @@ INT    i;
 INT    index;
 UINT   rt_size;
 
-    
+
     if(af == AF_INET)
     {
         /* Convert IPv4 address from numeric to presentation. */
@@ -13311,7 +13927,7 @@ UINT   rt_size;
         current_index = -1;
         current_len = 0;
 
-        /* Find the longest 0x00 in src for :: 
+        /* Find the longest 0x00 in src for ::
          * 16 * 8 == 128  */
         for(i = 0; i < 8; i++)
         {
@@ -13335,7 +13951,7 @@ UINT   rt_size;
                 if(current_index != -1)
                 {
                     /* Not equal -1, means there is record of 0x00s . */
-                     
+
                     if(shorthand_index == -1 || current_len > shorthand_len)
                     {
                         /* Record the longest 0x00s. */
@@ -13349,7 +13965,7 @@ UINT   rt_size;
 
             }
         }
-        
+
 
         if(current_len > shorthand_len)
         {
@@ -13369,8 +13985,8 @@ UINT   rt_size;
         for(i = 0; i < 8; i++)
         {
             /* Is i in the range of :: */
-            if((shorthand_index != -1) && 
-               (i >= shorthand_index) && 
+            if((shorthand_index != -1) &&
+               (i >= shorthand_index) &&
                (i < (shorthand_index + shorthand_len)))
             {
                 if(i == shorthand_index)
@@ -13382,7 +13998,7 @@ UINT   rt_size;
                     dst[index++] = ':';
                 }
                 continue;
-            }    
+            }
 
            if(i != 0)
            {
@@ -13400,7 +14016,7 @@ UINT   rt_size;
            {
                /* Convert ipv4 address to string.  12 == 16 - 4*/
                rt_size = (UINT)inet_ntoa_internal((UCHAR*)src + 12, &dst[index], size - (ULONG)index);
-               
+
                /* Check the return size, 0 means error. */
                if(rt_size)
                    index += (INT)rt_size;
@@ -13428,7 +14044,7 @@ UINT   rt_size;
             dst[index++] = ':';
 
         }
-    
+
         /* Check if there is enough memory to store a character. */
         if((size - (ULONG)index) < 1)
             return NX_NULL;
@@ -13437,7 +14053,7 @@ UINT   rt_size;
 
         return dst;
     }
-    else 
+    else
     {
         return NX_NULL;
     }
@@ -13448,7 +14064,7 @@ UINT   rt_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    inet_ntoa_internal                                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13456,7 +14072,7 @@ UINT   rt_size;
 /*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This function converts an IPv4 address to a string and returns the  */
-/*    size of the string.                                                 */ 
+/*    size of the string.                                                 */
 /*                                                                        */
 /*  INPUT                                                                 */
 /*                                                                        */
@@ -13479,7 +14095,7 @@ UINT   rt_size;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    NetX Duo BSD Layer Source Code                                      */ 
+/*    NetX Duo BSD Layer Source Code                                      */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -13505,16 +14121,16 @@ UINT index = 0;
 
     /* Convert the first number to a string. */
     size = bsd_number_convert((temp >> 24), &dst[0], dst_size - index, 10);
-    
+
     if(!size)
         return 0;
 
     /* Move up the index and buffer pointer. */
     index += size;
-        
+
     /* Check the rest of the dst buffer. */
     if((dst_size - index) < 1)
-        return 0; 
+        return 0;
 
     /* Add the decimal. */
     dst[index++] = '.';
@@ -13528,7 +14144,7 @@ UINT index = 0;
     index += size;
 
     if((dst_size - index) < 1)
-        return 0; 
+        return 0;
 
     dst[index++] = '.';
 
@@ -13540,7 +14156,7 @@ UINT index = 0;
     index += size;
 
     if((dst_size - index) < 1)
-        return 0; 
+        return 0;
 
     dst[index++] = '.';
 
@@ -13552,7 +14168,7 @@ UINT index = 0;
     index += size;
 
     if((dst_size - index) < 1)
-        return 0; 
+        return 0;
 
     dst[index++] = '\0';
 
@@ -13561,64 +14177,64 @@ UINT index = 0;
 }
 
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    getaddrinfo                                         PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    getaddrinfo                                         PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function returns one or more addrinfo structures according to  */
 /*    the specified node and service.                                     */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
 /*   node                                   Node is either a hostname or  */
 /*                                           an address string(dotted-    */
 /*                                           decimal for IPv4 or a hex    */
 /*                                           string for IPv6).            */
 /*   service                                Service is either a service   */
-/*                                           name or a decimal port number*/ 
+/*                                           name or a decimal port number*/
 /*                                           string.                      */
-/*   hints                                  Hints is either a null pointer*/ 
-/*                                           or a pointer to an addrinfo  */ 
+/*   hints                                  Hints is either a null pointer*/
+/*                                           or a pointer to an addrinfo  */
 /*                                           structure that the caller    */
-/*                                           fills in with hints about the*/ 
+/*                                           fills in with hints about the*/
 /*                                           types of information the     */
-/*                                           caller wants returned.       */      
+/*                                           caller wants returned.       */
 /*   res                                    Pointer to the returned       */
 /*                                           addrinfo list.               */
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    status                                0 if OK, nonzero on errors    */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                0 if OK, nonzero on errors    */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
 /*    bsd_string_to_number                  Convert a string to a number  */
-/*    htons                                 Host byte order to network    */ 
+/*    htons                                 Host byte order to network    */
 /*                                          byte order                    */
 /*    memcmp                                Memory compare                */
-/*    inet_pton                             Convert IP address from       */ 
+/*    inet_pton                             Convert IP address from       */
 /*                                          presentation to numeric       */
-/*    tx_block_allocate                     Allocate memory for address or*/ 
-/*                                          addrinfo                      */ 
+/*    tx_block_allocate                     Allocate memory for address or*/
+/*                                          addrinfo                      */
 /*    memset                                Set the memory to 0           */
 /*    freeaddrinfo                          Release addrinfo memory       */
 /*    nx_dns_ipv4_address_by_name_get       Get ipv4 addr by name via dns */
 /*    nxd_dns_ipv6_address_by_name_get      Get ipv6 addr by name via dns */
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    Application Code                                                    */  
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
@@ -13627,9 +14243,15 @@ UINT index = 0;
 /*                                            verified memcpy use cases,  */
 /*                                            fixed compiler errors,      */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.12 */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  getaddrinfo(const CHAR *node, const CHAR *service, const struct addrinfo *hints, struct addrinfo **res)
+INT  nx_bsd_getaddrinfo(const CHAR *node, const CHAR *service, const struct nx_bsd_addrinfo *hints, struct nx_bsd_addrinfo **res)
 {
 
 UINT            status;
@@ -13645,14 +14267,18 @@ UINT            ipv6_addr_count = 0;
 UINT            match_service_count;
 UINT            match_service_socktype[3];
 UINT            match_service_protocol[3];
-struct addrinfo *addrinfo_cur_ptr  = NX_NULL;
-struct addrinfo *addrinfo_head_ptr = NX_NULL;
-struct addrinfo *addrinfo_tail_ptr = NX_NULL;
-struct sockaddr *sockaddr_ptr      = NX_NULL;
+struct nx_bsd_addrinfo
+               *addrinfo_cur_ptr  = NX_NULL;
+struct nx_bsd_addrinfo
+               *addrinfo_head_ptr = NX_NULL;
+struct nx_bsd_addrinfo
+               *addrinfo_tail_ptr = NX_NULL;
+struct nx_bsd_sockaddr
+               *sockaddr_ptr      = NX_NULL;
 UCHAR           *cname_buffer      = NX_NULL;
 
 /* When hints is a null pointer, use the default value below. */
-static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL, NX_NULL};
+static struct nx_bsd_addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL, NX_NULL};
 
 
 
@@ -13757,25 +14383,25 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
         /* Service is not null. */
         if(bsd_string_to_number(service, &port) != NX_SOC_ERROR)
         {
-            
+
             /* Service is a decimal port number string, and has been converted to a numeric port successfully. */
 
             /* Convert port from host byte order to network byte order. */
-            port = htons(port);
+            port = htons((USHORT)port);
         }
         else
         {
 
             /* Service is an address name, not a decimal port number string. */
 
-            /* Check if numeric service flag is set. If so this is an invalid string. */            
+            /* Check if numeric service flag is set. If so this is an invalid string. */
             if(hints -> ai_flags & AI_NUMERICSERV)
                 return EAI_NONAME;
 
             match_service_count = 0;
 
-            /* Look for a match of name, protocol and socket type for a match in the service list. */ 
-            for(i = 0; i < _nx_bsd_serv_list_len; i++)            
+            /* Look for a match of name, protocol and socket type for a match in the service list. */
+            for(i = 0; i < _nx_bsd_serv_list_len; i++)
             {
 
                 /* Check if there is a match. */
@@ -13790,7 +14416,7 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
                     port = htons(_nx_bsd_serv_list_ptr[i].service_port);
                 }
             }
-            
+
             /* Service is not available. */
             if(match_service_count == 0)
                 return EAI_SERVICE;
@@ -13828,7 +14454,7 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
         {
 
             /* Convert node from a string presentation to a numeric address. */
-            if(inet_pton(addr_family, node, &(nx_bsd_ipv4_addr_buffer[0])) == 1)
+            if(nx_bsd_inet_pton(addr_family, node, &(nx_bsd_ipv4_addr_buffer[0])) == 1)
             {
                 /* pton has successful completion. */
                 pton_flag = 1;
@@ -13845,7 +14471,7 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
         {
 
             /* Convert node from a string presentation to a numeric address. */
-            if(inet_pton(addr_family, node, &(nx_bsd_ipv6_addr_buffer[0])) == 1)
+            if(nx_bsd_inet_pton(addr_family, node, &(nx_bsd_ipv6_addr_buffer[0])) == 1)
             {
                 /* pton completed successfully. */
                 pton_flag = 1;
@@ -13879,13 +14505,13 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
                 if (status != TX_SUCCESS)
                 {
                     /* Set the error. */
-                    set_errno(ENOMEM); 
+                    nx_bsd_set_errno(ENOMEM);
 
                     /* Error getting NetX socket memory.  */
                     NX_BSD_ERROR(NX_BSD_BLOCK_POOL_ERROR, __LINE__);
 
                     /* Return memory allocation error. */
-                    return(EAI_MEMORY); 
+                    return(EAI_MEMORY);
                 }
 
                 /* Verify buffer size. */
@@ -13912,14 +14538,14 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
             {
 
                 /* Get IPv4 address by hostname. */
-                status = nx_dns_ipv4_address_by_name_get(_nx_dns_instance_ptr, (UCHAR *)node, &nx_bsd_ipv4_addr_buffer[0], 
+                status = nx_dns_ipv4_address_by_name_get(_nx_dns_instance_ptr, (UCHAR *)node, &nx_bsd_ipv4_addr_buffer[0],
                                                          NX_BSD_IPV4_ADDR_PER_HOST * 4, &ipv4_addr_count, NX_BSD_TIMEOUT);
 
                 if(status != NX_SUCCESS)
                 {
 
-                    /* Just return EAI_FAIL, because we can't discriminate between DNS FAIL and the situation where the specified 
-                       network host exists but does not have any network addresses defined. It would be better to return EAI_FAIL 
+                    /* Just return EAI_FAIL, because we can't discriminate between DNS FAIL and the situation where the specified
+                       network host exists but does not have any network addresses defined. It would be better to return EAI_FAIL
                        for DNS FAIL, and EAI_NODATA for the latter situation. */
                     return EAI_FAIL;
                 }
@@ -13928,34 +14554,34 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
             {
 
                 /* Get IPv6 address by hostname. */
-                status = nxd_dns_ipv6_address_by_name_get(_nx_dns_instance_ptr, (UCHAR *)node, &nx_bsd_ipv6_addr_buffer[0], 
+                status = nxd_dns_ipv6_address_by_name_get(_nx_dns_instance_ptr, (UCHAR *)node, &nx_bsd_ipv6_addr_buffer[0],
                                                           NX_BSD_IPV6_ADDR_PER_HOST * 16, &ipv6_addr_count, NX_BSD_TIMEOUT);
 
                 if(status != NX_SUCCESS)
                 {
-                    /* Just return EAI_FAIL, because we can't discriminate between DNS FAIL and the situation where the specified 
-                       network host exists but does not have any network addresses defined. It would be better to return EAI_FAIL 
+                    /* Just return EAI_FAIL, because we can't discriminate between DNS FAIL and the situation where the specified
+                       network host exists but does not have any network addresses defined. It would be better to return EAI_FAIL
                        for DNS FAIL, and EAI_NODATA for the latter situation. */
                     return EAI_FAIL;
                 }
             }
-            else 
+            else
             {
 
                 /* Address family is not specified. Query for both IPv4 and IPv6 address. */
 
                 /* Get IPv4 address by hostname. */
-                status = nx_dns_ipv4_address_by_name_get(_nx_dns_instance_ptr, (UCHAR *)node, &nx_bsd_ipv4_addr_buffer[0], 
+                status = nx_dns_ipv4_address_by_name_get(_nx_dns_instance_ptr, (UCHAR *)node, &nx_bsd_ipv4_addr_buffer[0],
                                                          NX_BSD_IPV4_ADDR_PER_HOST * 4, &ipv4_addr_count, NX_BSD_TIMEOUT);
 
                 /* Get IPv6 address by hostname. */
-                status2 = nxd_dns_ipv6_address_by_name_get(_nx_dns_instance_ptr, (UCHAR *)node, &nx_bsd_ipv6_addr_buffer[0], 
+                status2 = nxd_dns_ipv6_address_by_name_get(_nx_dns_instance_ptr, (UCHAR *)node, &nx_bsd_ipv6_addr_buffer[0],
                                                            NX_BSD_IPV6_ADDR_PER_HOST * 16, &ipv6_addr_count, NX_BSD_TIMEOUT);
 
                 if((status != NX_SUCCESS) && status2 != NX_SUCCESS)
                 {
-                    /* Just return EAI_FAIL, because we can't discriminate between DNS FAIL and the situation that the specified 
-                       network host exists, but does not have any network addresses defined. It would be better to return EAI_FAIL 
+                    /* Just return EAI_FAIL, because we can't discriminate between DNS FAIL and the situation that the specified
+                       network host exists, but does not have any network addresses defined. It would be better to return EAI_FAIL
                        for DNS FAIL, and EAI_NODATA for the latter situation. */
                     return EAI_FAIL;
                 }
@@ -13972,16 +14598,16 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
                 if (status != TX_SUCCESS)
                 {
                     /* Set the error. */
-                    set_errno(ENOMEM); 
+                    set_errno(ENOMEM);
 
                     /* Error getting NetX socket memory.  */
                     NX_BSD_ERROR(NX_BSD_BLOCK_POOL_ERROR, __LINE__);
 
                     /* Return memory allocation error. */
-                    return(EAI_MEMORY); 
+                    return(EAI_MEMORY);
                 }
 
-                status = nx_dns_cname_get(_nx_dns_instance_ptr, (UCHAR *)node, cname_buffer, 
+                status = nx_dns_cname_get(_nx_dns_instance_ptr, (UCHAR *)node, cname_buffer,
                                           nx_bsd_cname_block_pool.tx_block_pool_block_size, NX_BSD_TIMEOUT);
                 if(status != NX_SUCCESS)
                 {
@@ -14049,11 +14675,11 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
         {
 
             /* Set the error. */
-            set_errno(ENOMEM); 
+            nx_bsd_set_errno(ENOMEM);
 
             /* If head is not null, free the memory. */
             if(addrinfo_head_ptr)
-                freeaddrinfo(addrinfo_head_ptr);
+                nx_bsd_freeaddrinfo(addrinfo_head_ptr);
 
 #ifdef NX_DNS_ENABLE_EXTENDED_RR_TYPES
             if(hints -> ai_flags & AI_CANONNAME)
@@ -14062,36 +14688,36 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
 
             /* Error getting NetX socket memory.  */
             NX_BSD_ERROR(NX_BSD_BLOCK_POOL_ERROR, __LINE__);
-            
+
             /* Return memory allocation error. */
-            return(EAI_MEMORY); 
+            return(EAI_MEMORY);
         }
 
         /* Clear the  memory.  */
-        memset((VOID*)sockaddr_ptr, 0, sizeof(struct addrinfo));
+        memset((VOID*)sockaddr_ptr, 0, sizeof(struct nx_bsd_addrinfo));
 
         if(i < ipv4_addr_count)
         {
 
             /* Process IPv4 address. */
-            ((struct sockaddr_in*)sockaddr_ptr) -> sin_family = AF_INET;
-            ((struct sockaddr_in*)sockaddr_ptr) -> sin_port   = (USHORT)port;
-            ((struct sockaddr_in*)sockaddr_ptr) -> sin_addr.s_addr = nx_bsd_ipv4_addr_buffer[i];
-            
-            NX_CHANGE_ULONG_ENDIAN(((struct sockaddr_in*)sockaddr_ptr) -> sin_addr.s_addr);
+            ((struct nx_bsd_sockaddr_in*)sockaddr_ptr) -> sin_family = AF_INET;
+            ((struct nx_bsd_sockaddr_in*)sockaddr_ptr) -> sin_port   = (USHORT)port;
+            ((struct nx_bsd_sockaddr_in*)sockaddr_ptr) -> sin_addr.s_addr = nx_bsd_ipv4_addr_buffer[i];
+
+            NX_CHANGE_ULONG_ENDIAN(((struct nx_bsd_sockaddr_in*)sockaddr_ptr) -> sin_addr.s_addr);
         }
         else
         {
 
             /* Process IPv6 address. */
-            ((struct sockaddr_in6*)sockaddr_ptr) -> sin6_family = AF_INET6;
-            ((struct sockaddr_in6*)sockaddr_ptr) -> sin6_port   = (USHORT)port;
-            memcpy(&(((struct sockaddr_in6*)sockaddr_ptr) -> sin6_addr), &nx_bsd_ipv6_addr_buffer[(i - ipv4_addr_count)*4], 16); /* Use case of memcpy is verified. */
-            
-            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[0]));
-            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[1]));
-            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[2]));
-            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[3]));
+            ((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_family = AF_INET6;
+            ((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_port   = (USHORT)port;
+            memcpy(&(((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_addr), &nx_bsd_ipv6_addr_buffer[(i - ipv4_addr_count)*4], 16); /* Use case of memcpy is verified. */
+
+            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[0]));
+            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[1]));
+            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[2]));
+            NX_CHANGE_ULONG_ENDIAN(*(ULONG*)&(((struct nx_bsd_sockaddr_in6*)sockaddr_ptr) -> sin6_addr.s6_addr32[3]));
 
         }
 
@@ -14106,11 +14732,11 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
             {
 
                 /* Set the error. */
-                set_errno(ENOMEM); 
+                nx_bsd_set_errno(ENOMEM);
 
                 /* If head is not null, free the memory. */
                 if(addrinfo_head_ptr)
-                    freeaddrinfo(addrinfo_head_ptr);
+                    nx_bsd_freeaddrinfo(addrinfo_head_ptr);
 
                 tx_block_release((VOID *)sockaddr_ptr);
 
@@ -14123,27 +14749,27 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
                 NX_BSD_ERROR(NX_BSD_BLOCK_POOL_ERROR, __LINE__);
 
                 /* Return memory allocation error. */
-                return(EAI_MEMORY); 
+                return(EAI_MEMORY);
             }
 
             /* Clear the socket memory.  */
-            memset((VOID*)addrinfo_cur_ptr, 0, sizeof(struct addrinfo));
-            
+            memset((VOID*)addrinfo_cur_ptr, 0, sizeof(struct nx_bsd_addrinfo));
+
             if(i < ipv4_addr_count)
             {
 
                 /* IPv4 */
                 addrinfo_cur_ptr -> ai_family  = AF_INET;
-                addrinfo_cur_ptr -> ai_addrlen = sizeof(struct sockaddr_in);
+                addrinfo_cur_ptr -> ai_addrlen = sizeof(struct nx_bsd_sockaddr_in);
             }
             else
             {
 
                 /* IPv6 */
                 addrinfo_cur_ptr -> ai_family = AF_INET6;
-                addrinfo_cur_ptr -> ai_addrlen = sizeof(struct sockaddr_in6);
+                addrinfo_cur_ptr -> ai_addrlen = sizeof(struct nx_bsd_sockaddr_in6);
             }
-            
+
             addrinfo_cur_ptr -> ai_socktype = (INT)(match_service_socktype[j]);
             addrinfo_cur_ptr -> ai_protocol = (INT)(match_service_protocol[j]);
             addrinfo_cur_ptr -> ai_addr = sockaddr_ptr;
@@ -14165,54 +14791,57 @@ static struct addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, NX_NULL,
     }
 
     *res = addrinfo_head_ptr;
-    
+
     return 0;
 }
 
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    freeaddrinfo                                        PORTABLE C      */ 
-/*                                                           6.1          */
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    freeaddrinfo                                        PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
 /*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
+/*  DESCRIPTION                                                           */
+/*                                                                        */
 /*    This function releases the memory allocated by getaddrinfo.         */
-/*                                                                        */ 
-/*  INPUT                                                                 */ 
-/*                                                                        */ 
-/*    res                                   Pointer to a addrinfo struct  */ 
-/*                                                                        */ 
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
-/*    tx_block_release                      Release socket memory         */ 
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    Application Code                                                    */  
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    res                                   Pointer to a addrinfo struct  */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    tx_block_release                      Release socket memory         */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-VOID freeaddrinfo(struct addrinfo *res)
+VOID nx_bsd_freeaddrinfo(struct nx_bsd_addrinfo *res)
 {
 
-struct addrinfo *next_addrinfo;
-struct sockaddr *ai_addr_ptr = NX_NULL;
+struct nx_bsd_addrinfo *next_addrinfo;
+struct nx_bsd_sockaddr *ai_addr_ptr = NX_NULL;
 #ifdef NX_DNS_ENABLE_EXTENDED_RR_TYPES
 CHAR *ai_canonname_ptr = NX_NULL;
 #endif
@@ -14226,7 +14855,7 @@ CHAR *ai_canonname_ptr = NX_NULL;
 
             /* Release  the CNAME memory. */
             tx_block_release((VOID *)res -> ai_canonname);
-            
+
             ai_canonname_ptr = res -> ai_canonname;
         }
 #endif
@@ -14236,7 +14865,7 @@ CHAR *ai_canonname_ptr = NX_NULL;
 
             /* Release the address memory. */
             tx_block_release((VOID *)res -> ai_addr);
-            
+
             ai_addr_ptr = res -> ai_addr;
         }
 
@@ -14256,7 +14885,7 @@ CHAR *ai_canonname_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    bsd_string_to_number                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14280,7 +14909,7 @@ CHAR *ai_canonname_ptr = NX_NULL;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    Application Code                                                    */  
+/*    Application Code                                                    */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -14305,7 +14934,7 @@ static INT bsd_string_to_number(const CHAR *string, UINT *number)
             return NX_SOC_ERROR;
 
         *number = (*number * 10) + (UINT)(*string - 0x30);
-   
+
         string++;
     }
 
@@ -14317,7 +14946,7 @@ static INT bsd_string_to_number(const CHAR *string, UINT *number)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    getnameinfo                                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14341,7 +14970,7 @@ static INT bsd_string_to_number(const CHAR *string, UINT *number)
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
-/*    status                               0 if OK, nonzero on errors     */ 
+/*    status                               0 if OK, nonzero on errors     */
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
@@ -14350,7 +14979,7 @@ static INT bsd_string_to_number(const CHAR *string, UINT *number)
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    Application Code                                                    */  
+/*    Application Code                                                    */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -14360,16 +14989,19 @@ static INT bsd_string_to_number(const CHAR *string, UINT *number)
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
+/*                                            used new API/structs naming,*/
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-INT  getnameinfo(const struct sockaddr *sa, socklen_t salen, char *host, size_t hostlen, char *serv, size_t servlen, int flags)
+INT  nx_bsd_getnameinfo(const struct nx_bsd_sockaddr *sa, nx_bsd_socklen_t salen, char *host, size_t hostlen, char *serv, size_t servlen, int flags)
 {
 
 UINT        i = 0;
 /* Flag used to identify whether host/service is numeric, 0 no, 1 yes. */
 UINT        numeric_flag;
 USHORT     *temp;
-#ifdef NX_BSD_ENABLE_DNS          
+#ifdef NX_BSD_ENABLE_DNS
 UINT        status;
 #ifdef FEATURE_NX_IPV6
 NXD_ADDRESS nxd_ipv6_addr;
@@ -14383,17 +15015,17 @@ const CHAR  *rt_ptr;
         /* sa is NULL. */
         return EAI_FAMILY;
     }
-    else 
+    else
     {
-        if((sa -> sa_family != AF_INET)  && 
+        if((sa -> sa_family != AF_INET)  &&
            (sa -> sa_family != AF_INET6))
         {
 
             /* sa isn't NULL, but family type is invalid. */
             return EAI_FAMILY;
         }
-        else if((sa -> sa_family == AF_INET && salen != sizeof(struct sockaddr_in)) ||
-                (sa -> sa_family == AF_INET6 && salen != sizeof(struct sockaddr_in6)))
+        else if((sa -> sa_family == AF_INET && salen != sizeof(struct nx_bsd_sockaddr_in)) ||
+                (sa -> sa_family == AF_INET6 && salen != sizeof(struct nx_bsd_sockaddr_in6)))
         {
 
             /* Address length is invalid. */
@@ -14406,7 +15038,7 @@ const CHAR  *rt_ptr;
         return EAI_NONAME;
 
     if(serv && servlen > 0)
-    {      
+    {
         numeric_flag = 1;
 
         /* If NUMERICSERV bit is set, set to 1. */
@@ -14431,7 +15063,7 @@ const CHAR  *rt_ptr;
                 }
             }
         }
-        else 
+        else
         {
 
             /* Socket type is SOCK_STREAM. */
@@ -14479,13 +15111,13 @@ const CHAR  *rt_ptr;
         else
         {
 
-#ifdef NX_BSD_ENABLE_DNS          
+#ifdef NX_BSD_ENABLE_DNS
             if(sa -> sa_family == AF_INET)
             {
 
 #ifndef NX_DISABLE_IPV4
                 /* Get host name by IPv4 address via DNS. */
-                status = nx_dns_host_by_address_get(_nx_dns_instance_ptr, ntohl(((struct sockaddr_in *)sa) -> sin_addr.s_addr), 
+                status = nx_dns_host_by_address_get(_nx_dns_instance_ptr, ntohl(((struct nx_bsd_sockaddr_in *)sa) -> sin_addr.s_addr),
                                                     (UCHAR *)host, hostlen, NX_BSD_TIMEOUT);
 #else
                 status = NX_DNS_NO_SERVER;
@@ -14496,13 +15128,13 @@ const CHAR  *rt_ptr;
 #ifdef FEATURE_NX_IPV6
                 /* copy data from sockaddr structure to NXD_ADDRESS structure. */
                 nxd_ipv6_addr.nxd_ip_version = NX_IP_VERSION_V6;
-                nxd_ipv6_addr.nxd_ip_address.v6[0] = ntohl(((struct sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[0]);
-                nxd_ipv6_addr.nxd_ip_address.v6[1] = ntohl(((struct sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[1]);
-                nxd_ipv6_addr.nxd_ip_address.v6[2] = ntohl(((struct sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[2]);
-                nxd_ipv6_addr.nxd_ip_address.v6[3] = ntohl(((struct sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[3]);
+                nxd_ipv6_addr.nxd_ip_address.v6[0] = ntohl(((struct nx_bsd_sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[0]);
+                nxd_ipv6_addr.nxd_ip_address.v6[1] = ntohl(((struct nx_bsd_sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[1]);
+                nxd_ipv6_addr.nxd_ip_address.v6[2] = ntohl(((struct nx_bsd_sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[2]);
+                nxd_ipv6_addr.nxd_ip_address.v6[3] = ntohl(((struct nx_bsd_sockaddr_in6 *)sa) -> sin6_addr.s6_addr32[3]);
 
                 /* Get host name by IPv6 address via DNS. */
-                status = nxd_dns_host_by_address_get(_nx_dns_instance_ptr, &nxd_ipv6_addr, 
+                status = nxd_dns_host_by_address_get(_nx_dns_instance_ptr, &nxd_ipv6_addr,
                                                      (UCHAR *) host, hostlen, NX_BSD_TIMEOUT);
 #else
                 status = NX_DNS_NO_SERVER;
@@ -14536,10 +15168,10 @@ const CHAR  *rt_ptr;
 
             /* Host must be numeric string. Convert IP address from numeric to presentation. */
             if(sa -> sa_family == AF_INET)
-                rt_ptr = inet_ntop(AF_INET, &((struct sockaddr_in*)sa) -> sin_addr, (CHAR *)host, hostlen);
+                rt_ptr = nx_bsd_inet_ntop(AF_INET, &((struct nx_bsd_sockaddr_in*)sa) -> sin_addr, (CHAR *)host, hostlen);
             else
-                rt_ptr = inet_ntop(AF_INET6, &((struct sockaddr_in6*)sa) -> sin6_addr, (CHAR *)host, hostlen);
-            
+                rt_ptr = nx_bsd_inet_ntop(AF_INET6, &((struct nx_bsd_sockaddr_in6*)sa) -> sin6_addr, (CHAR *)host, hostlen);
+
             if(!rt_ptr)
                 return EAI_OVERFLOW;
         }
@@ -14554,7 +15186,7 @@ const CHAR  *rt_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_bsd_set_service_list                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14570,7 +15202,7 @@ const CHAR  *rt_ptr;
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
-/*    None                                                                */ 
+/*    None                                                                */
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
@@ -14578,7 +15210,7 @@ const CHAR  *rt_ptr;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    Application Code                                                    */  
+/*    Application Code                                                    */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -14601,7 +15233,7 @@ VOID nx_bsd_set_service_list(struct NX_BSD_SERVICE_LIST *serv_list_ptr, ULONG se
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_bsd_string_length                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14616,7 +15248,7 @@ VOID nx_bsd_set_service_list(struct NX_BSD_SERVICE_LIST *serv_list_ptr, ULONG se
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
-/*    ULONG                                String length                  */ 
+/*    ULONG                                String length                  */
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
@@ -14624,7 +15256,7 @@ VOID nx_bsd_set_service_list(struct NX_BSD_SERVICE_LIST *serv_list_ptr, ULONG se
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    NetX Duo BSD Layer Source Code                                      */ 
+/*    NetX Duo BSD Layer Source Code                                      */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -14646,7 +15278,7 @@ int length = 0;
     }
 
     return((ULONG)length);
-    
+
 }
 
 
@@ -14655,7 +15287,7 @@ int length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_bsd_fast_periodic_timer_entry                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14672,7 +15304,7 @@ int length = 0;
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
-/*    None                                                                */ 
+/*    None                                                                */
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
@@ -14680,7 +15312,7 @@ int length = 0;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    None                                                                */ 
+/*    None                                                                */
 /*                                                                        */
 /*  RELEASE HISTORY                                                       */
 /*                                                                        */
@@ -14699,4 +15331,196 @@ static VOID  _nx_bsd_fast_periodic_timer_entry(ULONG id)
 
     /* Call default IP fast periodic timer entry. */
     nx_bsd_ip_fast_periodic_timer_entry(id);
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    poll                                                PORTABLE C      */
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Chaoqiong Xiao, Microsoft Corporation                               */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function allows for list of sockets to be checked for incoming */
+/*    events.                                                             */
+/*                                                                        */
+/*    Before invoked, each item inside fds array should be initialized,   */
+/*    pollfd::fd must be the descriptor ID to check and pollfd::events    */
+/*    must be the events (bits) to check.                                 */
+/*                                                                        */
+/*    Returned, the pollfd::revents of each item is updated, to indicate  */
+/*    if the checked events happen.                                       */
+/*                                                                        */
+/*    The event (bit) currently supported:                                */
+/*    - POLLIN : checking socket read FD                                  */
+/*    - POLLOUT: checking socket write FD                                 */
+/*    - POLLPRI: checking socket exception FD                             */
+/*                                                                        */
+/*    NOTE:  ****** When select returns NX_SOC_ERROR it won't update      */
+/*           the fds descriptor.                                          */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    fds                                  Socket descriptor list to poll */
+/*                                           and report actual status     */
+/*    nfds                                 Number of socket descriptors   */
+/*    timeOut                              Timeout in microseconds, set   */
+/*                                         to below 0 to wait infinitely  */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_SUCCESS                            Descriptors check ends        */
+/*                                           (successful completion)      */
+/*    NX_SOC_ERROR (-1)                     Error occured                 */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    FD_ZERO                               Clear a socket ready list     */
+/*    FD_ISSET                              Check a socket is ready       */
+/*    FD_SET                                Set a socket                  */
+/*    select                                Perform checks, see select()  */
+/*    set_errno                             Set the error code            */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  10-31-2023     Chaoqiong Xiao           Initial Version 6.3.0         */
+/*                                                                        */
+/**************************************************************************/
+INT  nx_bsd_poll(struct nx_bsd_pollfd *fds, ULONG nfds, INT timeout)
+{
+nx_bsd_fd_set           read_fds;
+nx_bsd_fd_set           write_fds;
+nx_bsd_fd_set           except_fds;
+struct nx_bsd_timeval   stime;
+struct nx_bsd_timeval   *ptime;
+INT                     n_ready_fds;
+INT                     max_fd;
+ULONG                   i;
+struct nx_bsd_pollfd    *poll_fd;
+
+    /* Check input parameter.  */
+    if (fds == NX_NULL)
+    {
+        nx_bsd_set_errno(EFAULT);
+        return(NX_SOC_ERROR);
+    }
+    if (nfds == 0)
+    {
+        nx_bsd_set_errno(EFAULT);
+        return(NX_SOC_ERROR);
+    }
+
+    /* Initialize local FDs.  */
+    NX_BSD_FD_ZERO(&read_fds);
+    NX_BSD_FD_ZERO(&write_fds);
+    NX_BSD_FD_ZERO(&except_fds);
+
+    /* Map the poll() FD to select() FDs.  */
+    max_fd = 0;
+    for(i = 0; i < nfds; i ++)
+    {
+        poll_fd = &fds[i];
+
+        /* Skip bad FDs.  */
+        if (poll_fd -> fd < 0)
+            continue;
+
+        /* POLLIN.  */
+        if (poll_fd -> events & POLLIN)
+        {
+            NX_BSD_FD_SET(poll_fd -> fd, &read_fds);
+        }
+
+        /* POLLOUT.  */
+        if (poll_fd -> events & POLLOUT)
+        {
+            NX_BSD_FD_SET(poll_fd -> fd, &write_fds);
+        }
+
+        /* POLLPRI.  */
+        if (poll_fd -> events & POLLPRI)
+        {
+            NX_BSD_FD_SET(poll_fd -> fd, &except_fds);
+        }
+
+        /* Update max FD.  */
+        if (poll_fd -> fd > max_fd)
+            max_fd = poll_fd -> fd;
+    }
+
+    /* Map the select() timeout.  */
+    if (timeout < 0)
+    {
+
+        /* select() wait infinitely.  */
+        ptime = NX_NULL;
+    }
+    else
+    {
+
+        /* select() uses timeval option.  */
+        ptime = &stime;
+
+        if (timeout == 0)
+        {
+
+            /* select() no wait.  */
+            ptime -> tv_sec = 0;
+            ptime -> tv_usec = 0;
+        }
+        else
+        {
+
+            /* select() wait specific time in ms.  */
+            ptime -> tv_sec = (timeout / 1000);
+            ptime -> tv_usec = (timeout % 1000);
+        }
+
+    }
+
+    /* Invoke select().  */
+    n_ready_fds = nx_bsd_select(max_fd + 1, &read_fds, &write_fds, &except_fds, ptime);
+
+    /* Parse result events if FDs updated.  */
+    if (n_ready_fds)
+    {
+
+        for (i = 0; i < nfds; i ++)
+        {
+            poll_fd = &fds[i];
+
+            /* Skip bad FDs.  */
+            if (poll_fd -> fd < 0)
+                continue;
+
+            /* Exceptions.  */
+            if (NX_BSD_FD_ISSET(poll_fd -> fd, &except_fds))
+                poll_fd -> revents |= POLLPRI;
+
+            else
+            {
+
+                /* Inputs.  */
+                if (NX_BSD_FD_ISSET(poll_fd -> fd, &read_fds))
+                    poll_fd -> revents |= POLLIN;
+            }
+
+            /* Outputs.  */
+            if (NX_BSD_FD_ISSET(poll_fd -> fd, &write_fds))
+                poll_fd -> revents |= POLLOUT;
+        }
+    }
+
+    return(n_ready_fds);
 }

@@ -1,15 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
-
-/* Version: 6.1 */
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 /**
  * @file nx_azure_iot_json_reader.h
@@ -54,6 +52,7 @@ typedef struct NX_AZURE_IOT_READER_STRUCT
       NX_PACKET *packet_ptr;
       az_json_reader json_reader;
       az_span span_list[NX_AZURE_IOT_READER_MAX_LIST];
+      ULONG json_length;
 } NX_AZURE_IOT_JSON_READER;
 
 /**
@@ -68,7 +67,6 @@ typedef struct NX_AZURE_IOT_READER_STRUCT
  * @retval #NX_AZURE_IOT_SUCCESS The #NX_AZURE_IOT_JSON_READER is initialized successfully.
  * @retval other Initialization failed.
  *
- * @remarks The provided json buffer must not be empty, as that is invalid JSON.
  */
 UINT nx_azure_iot_json_reader_with_buffer_init(NX_AZURE_IOT_JSON_READER *reader_ptr,
                                                const UCHAR *buffer_ptr, UINT buffer_len);
@@ -82,8 +80,6 @@ UINT nx_azure_iot_json_reader_with_buffer_init(NX_AZURE_IOT_JSON_READER *reader_
  * @return An `UINT` value indicating the result of the operation.
  * @retval #NX_AZURE_IOT_SUCCESS The #NX_AZURE_IOT_JSON_READER is initialized successfully.
  * @retval other Initialization failed.
- *
- * @remarks The provided json buffer must not be empty, as that is invalid JSON.
  *
  * @remarks Ownership of #NX_PACKET is taken by the reader.
  */
@@ -137,6 +133,18 @@ UINT nx_azure_iot_json_reader_skip_children(NX_AZURE_IOT_JSON_READER *reader_ptr
  */
 UINT nx_azure_iot_json_reader_token_bool_get(NX_AZURE_IOT_JSON_READER *reader_ptr,
                                              UINT *value_ptr);
+
+/**
+ * @brief Gets the JSON token's number as a 32-bit unsigned integer.
+ *
+ * @param[in] reader_ptr A pointer to an #NX_AZURE_IOT_JSON_READER instance.
+ * @param[out] value_ptr A pointer to a variable to receive the value.
+ *
+ * @return An `UINT` value indicating the result of the operation.
+ * @retval #NX_AZURE_IOT_SUCCESS The number is returned.
+ */
+UINT nx_azure_iot_json_reader_token_uint32_get(NX_AZURE_IOT_JSON_READER *reader_ptr,
+                                               uint32_t *value_ptr);
 
 /**
  * @brief Gets the JSON token's number as a 32-bit signed integer.

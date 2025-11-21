@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -46,17 +46,10 @@
 #error "Content length needed when keepalive is enabled"
 #endif /* NX_WEB_HTTP_SERVER_OMIT_CONTENT_LENGTH */
 
-/* Define the Base64 array that is used to build username and passwords for Basic authentication. Indexing
-   into this array yields the base64 representation of the 6bit number.  */
-
-CHAR  _nx_web_http_server_base64_array[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-
 #ifdef  NX_WEB_HTTP_DIGEST_ENABLE
-/* Define the default nonce, used only for MD5 authentication.  For security reasons, this ASCII value should
-   change over time.  */
 
-CHAR  _nx_web_http_server_nonce[] =  "a4b8c8d7e0f6a7b2c3d2e4f5a4b7c5d2e7f";
+/* Use for mapping random nonces to printable characters.  */
+static CHAR _nx_web_http_server_base64_array[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 #endif
 
 /* Define date strings. */
@@ -89,7 +82,7 @@ NX_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_content_get                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -156,7 +149,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_content_get                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -216,7 +209,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_packet_content_find            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -277,7 +270,7 @@ UINT  _nxe_web_http_server_packet_content_find(NX_WEB_HTTP_SERVER *server_ptr, N
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_packet_content_find             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -324,6 +317,9 @@ UINT  _nxe_web_http_server_packet_content_find(NX_WEB_HTTP_SERVER *server_ptr, N
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_web_http_server_packet_content_find(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET **packet_ptr, ULONG *content_length)
@@ -396,6 +392,12 @@ ULONG       temp_offset;
         {
             temp_offset -= (ULONG)((*packet_ptr) -> nx_packet_append_ptr - (*packet_ptr) -> nx_packet_prepend_ptr);
             (*packet_ptr) = (*packet_ptr) -> nx_packet_next;
+        }
+
+        /* Chack if packet is valid.  */
+        if ((*packet_ptr) == NX_NULL)
+        {
+            return(NX_WEB_HTTP_BAD_PACKET_LENGTH);
         }
 
         /* If this packet contain no content, set next packet as the first packet of the content.  */
@@ -491,7 +493,7 @@ ULONG       temp_offset;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_packet_get                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -548,7 +550,7 @@ UINT  _nxe_web_http_server_packet_get(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_packet_get                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -637,7 +639,7 @@ UINT       status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_content_get_extended           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -708,7 +710,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_content_get_extended            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -999,7 +1001,7 @@ NX_PACKET   *header_packet_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_content_length_get             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1059,7 +1061,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_content_length_get              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1175,7 +1177,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_create                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1260,7 +1262,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_create                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1384,7 +1386,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_delete                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1445,7 +1447,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_delete                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1525,7 +1527,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_param_get                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1590,7 +1592,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_param_get                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1752,7 +1754,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_query_get                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1818,7 +1820,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_query_get                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1979,7 +1981,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_start                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2037,7 +2039,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_start                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2103,7 +2105,7 @@ UINT    port;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_secure_configure               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2189,8 +2191,8 @@ UINT    status;
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nxe_web_http_server_secure_configure               PORTABLE C      */
-/*                                                           6.1          */
+/*    _nx_web_http_server_secure_configure                PORTABLE C      */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2258,6 +2260,8 @@ UINT    status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_web_http_server_secure_configure(NX_WEB_HTTP_SERVER *http_server_ptr, const NX_SECURE_TLS_CRYPTO *crypto_table,
@@ -2289,6 +2293,120 @@ UINT    status;
     return(status);
 }
 
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nxe_web_http_server_secure_ecc_configure           PORTABLE C      */
+/*                                                           6.1.11       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function checks for errors in the HTTPS ECC configuration call.*/
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    http_server_ptr                       Pointer to HTTP server        */
+/*    supported_groups                      List of supported groups      */
+/*    supported_group_count                 Number of supported groups    */
+/*    curves                                List of curve methods         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_web_http_server_secure_ecc_configure                            */
+/*                                          Actual ECC configuration call */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*                                                                        */
+/**************************************************************************/
+UINT _nxe_web_http_server_secure_ecc_configure(NX_WEB_HTTP_SERVER *http_server_ptr,
+                                               const USHORT *supported_groups, USHORT supported_group_count,
+                                               const NX_CRYPTO_METHOD **curves)
+{
+UINT status;
+
+    /* Check for invalid input pointers. */
+    if ((http_server_ptr == NX_NULL) || (http_server_ptr -> nx_web_http_server_id != NX_WEB_HTTP_SERVER_ID) ||
+        (supported_groups == NX_NULL) || (supported_group_count == 0) || (curves == NX_NULL))
+    {
+        return(NX_PTR_ERROR);
+    }
+
+    /* Call actual ECC configuration function.  */
+    status = _nx_web_http_server_secure_ecc_configure(http_server_ptr, supported_groups, supported_group_count, curves);
+    return(status);
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_web_http_server_secure_ecc_configure            PORTABLE C      */
+/*                                                           6.1.11       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function configures supported curve lists for NetX Web HTTP    */
+/*    server instance using TLS.                                          */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    http_server_ptr                       Pointer to HTTP server        */
+/*    supported_groups                      List of supported groups      */
+/*    supported_group_count                 Number of supported groups    */
+/*    curves                                List of curve methods         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_tcpserver_tls_ecc_setup            Socket server ECC configure   */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_web_http_server_secure_ecc_configure(NX_WEB_HTTP_SERVER *http_server_ptr,
+                                              const USHORT *supported_groups, USHORT supported_group_count,
+                                              const NX_CRYPTO_METHOD **curves)
+{
+UINT status;
+
+    /* Configure TLS ECC for the socket server. */
+    status = nx_tcpserver_tls_ecc_setup(&http_server_ptr -> nx_web_http_server_tcpserver, 
+                                        supported_groups, supported_group_count, curves);
+    return(status);
+}
+#endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+
 #endif /* NX_WEB_HTTPS_ENABLE */
 
 /**************************************************************************/
@@ -2296,7 +2414,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_stop                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2357,7 +2475,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_stop                            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2424,7 +2542,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_callback_data_send             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2485,7 +2603,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_callback_data_send              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2587,7 +2705,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_callback_response_send         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2652,7 +2770,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_callback_response_send          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2726,7 +2844,7 @@ UINT status;
 /*                                                                        */
 /*    _nxe_web_http_server_callback_response_send_extended                */
 /*                                                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2800,7 +2918,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_callback_response_send_extended PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2886,7 +3004,7 @@ UINT temp_additional_info_length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_connection_end                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2942,7 +3060,7 @@ NX_WEB_HTTP_SERVER *server_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_connection_timeout              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2997,8 +3115,8 @@ NX_WEB_HTTP_SERVER *server_ptr;
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_web_http_server_connection_present              PORTABLE C      */
-/*                                                           6.1          */
+/*    _nx_web_http_server_receive_data                    PORTABLE C      */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3278,7 +3396,7 @@ NX_PACKET               *response_pkt;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_get_client_request              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3490,7 +3608,7 @@ NX_PACKET   *tmp_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_get_process                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3851,8 +3969,8 @@ UINT        temp_realm_length = 0;
                 }
 
                 /* Send response back to HTTP Client.  */
-                _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR,
-                                                  sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1,
+                _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_BAD_REQUEST,
+                                                  sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
                                                   "NetX HTTP Receive Timeout",
                                                   sizeof("NetX HTTP Receive Timeout") - 1, NX_NULL, 0);
 
@@ -4039,7 +4157,7 @@ UINT        temp_realm_length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_put_process                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4098,6 +4216,7 @@ VOID  _nx_web_http_server_put_process(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET 
 
 UINT        status;
 ULONG       length = 0;
+ULONG       consumed_length = 0;
 UINT        offset;
 CHAR        *name_ptr;
 CHAR        *password_ptr;
@@ -4330,8 +4449,7 @@ UINT        temp_realm_length = 0;
             nx_packet_release(packet_ptr);
         }
 
-        /* Error, return to caller.  */
-        return;
+        goto put_process_end;
     }
 
     /* Open the specified file for writing.  */
@@ -4353,8 +4471,7 @@ UINT        temp_realm_length = 0;
             nx_packet_release(packet_ptr);
         }
 
-        /* Error, return to caller.  */
-        return;
+        goto put_process_end;
     }
 
     /* Determine if there is any content in the first packet.  */
@@ -4381,12 +4498,28 @@ UINT        temp_realm_length = 0;
                 nx_packet_release(packet_ptr);
             }
 
-            /* Error, return to caller.  */
-            return;
+            goto put_process_end;
         }
 
         /* Update the length.  */
-        length =  length - ((ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) - offset);
+        consumed_length = ((ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) - offset);
+        if ((length - consumed_length) > length)
+        {
+            /* Underflow error has occurred.*/
+
+            /* Send response back to HTTP Client.  */
+            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_BAD_REQUEST,
+                                                sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
+                                                "NetX HTTP Content Length",
+                                                sizeof("NetX HTTP Content Length") - 1, NX_NULL, 0);
+
+            /* Release the previous data packet.  */
+            nx_packet_release(data_packet_ptr);
+
+            status = NX_UNDERFLOW;
+            goto put_process_end;
+        }
+        length -= consumed_length;
 
         /* Increment the bytes received count.  */
         server_ptr -> nx_web_http_server_total_bytes_received =  server_ptr -> nx_web_http_server_total_bytes_received +
@@ -4419,12 +4552,28 @@ UINT        temp_realm_length = 0;
                 nx_packet_release(packet_ptr);
             }
 
-            /* Error, return to caller.  */
-            return;
+            goto put_process_end;
         }
 
         /* Update the length.  */
-        length =  length - (ULONG)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr);
+        consumed_length = (ULONG)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr);
+        if ((length - consumed_length) > length)
+        {
+            /* Underflow error has occurred.*/
+
+            /* Send response back to HTTP Client.  */
+            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_BAD_REQUEST,
+                                                sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
+                                                "NetX HTTP Content Length",
+                                                sizeof("NetX HTTP Content Length") - 1, NX_NULL, 0);
+
+            /* Release the previous data packet.  */
+            nx_packet_release(data_packet_ptr);
+
+            status = NX_UNDERFLOW;
+            goto put_process_end;
+        }
+        length -= consumed_length;
 
         /* Increment the bytes received count.  */
         server_ptr -> nx_web_http_server_total_bytes_received =  server_ptr -> nx_web_http_server_total_bytes_received +
@@ -4458,13 +4607,12 @@ UINT        temp_realm_length = 0;
             }
 
             /* Send response back to HTTP Client.  */
-            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR,
-                                              sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1,
+            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_BAD_REQUEST,
+                                              sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
                                               "NetX HTTP Receive Timeout",
                                               sizeof("NetX HTTP Receive Timeout") - 1, NX_NULL, 0);
 
-            /* Error, return to caller.  */
-            return;
+            goto put_process_end;
         }
 
         if (server_ptr -> nx_web_http_server_request_chunked)
@@ -4494,12 +4642,28 @@ UINT        temp_realm_length = 0;
                 /* Release the previous data packet.  */
                 nx_packet_release(data_packet_ptr);
 
-                /* Error, return to caller.  */
-                return;
+                goto put_process_end;
             }
 
             /* Update the length.  */
-            length =  length - (UINT)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr);
+            consumed_length = (ULONG)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr);
+            if ((length - consumed_length) > length)
+            {
+                /* Underflow error has occurred.*/
+
+                /* Send response back to HTTP Client.  */
+                _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_BAD_REQUEST,
+                                                  sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
+                                                  "NetX HTTP Content Length",
+                                                  sizeof("NetX HTTP Content Length") - 1, NX_NULL, 0);
+
+                /* Release the previous data packet.  */
+                nx_packet_release(data_packet_ptr);
+
+                status = NX_UNDERFLOW;
+                goto put_process_end;
+            }
+            length -= consumed_length;
 
             /* Increment the bytes received count.  */
             server_ptr -> nx_web_http_server_total_bytes_received =  server_ptr -> nx_web_http_server_total_bytes_received +
@@ -4518,11 +4682,8 @@ UINT        temp_realm_length = 0;
         nx_packet_release(data_packet_ptr);
     }
 
-    /* Success, at this point close the file and prepare a successful response for the client.  */
-    fx_file_close(&(server_ptr -> nx_web_http_server_file));
-
-
-    /* Now build a response header.  */
+    /* Build a response header. No need to check for success up to this point, as
+    program will have jumped to put_process_end label if an error has occurred.  */
     status = _nx_web_http_server_generate_response_header(server_ptr, &data_packet_ptr, NX_WEB_HTTP_STATUS_OK,
                                                           sizeof(NX_WEB_HTTP_STATUS_OK) - 1, 0,
                                                           NX_NULL, 0, NX_NULL, 0);
@@ -4540,7 +4701,10 @@ UINT        temp_realm_length = 0;
             nx_packet_release(data_packet_ptr);
         }
     }
-
+    put_process_end:
+        /* Always attempt cleanup by closing the file.  */
+        fx_file_close(&(server_ptr -> nx_web_http_server_file));
+    return;
 }
 
 
@@ -4549,7 +4713,7 @@ UINT        temp_realm_length = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_delete_process                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4786,7 +4950,7 @@ UINT        temp_realm_length = 0;
 /*                                                                        */
 /*    _nxe_web_http_server_invalid_userpassword_notify_set                */
 /*                                                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4843,7 +5007,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_invalid_userpassword_notify_set PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4896,7 +5060,7 @@ UINT _nx_web_http_server_invalid_userpassword_notify_set(NX_WEB_HTTP_SERVER *htt
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_response_send                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5034,7 +5198,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_basic_authenticate              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5085,6 +5249,14 @@ NX_PACKET   *packet_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            parsing base64,             */
+/*                                            resulting in version 6.1.6  */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            the issue of processing     */
+/*                                            empty password,             */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_web_http_server_basic_authenticate(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *name_ptr, CHAR *password_ptr, CHAR *realm_ptr, UINT *auth_request_present)
@@ -5097,6 +5269,7 @@ CHAR        crlf[2] = {13,10};
 UINT        match;
 UINT        realm_length;
 UINT        length;
+UINT        authorization_decoded_size;
 
     /* Default to no authentication request detected. */
     *auth_request_present = NX_FALSE;
@@ -5117,14 +5290,14 @@ UINT        length;
         *auth_request_present = NX_TRUE;
 
         /* Convert the request from Base64 representation to ASCII.  */
-        _nx_web_http_base64_decode(authorization_request, length, authorization_decoded);
+        _nx_utility_base64_decode((UCHAR *)authorization_request, length, (UCHAR *)authorization_decoded, sizeof(authorization_decoded), &authorization_decoded_size);
 
         /* See if it is valid.  */
 
         /* Compare the name.  */
         i =  0;
         match = NX_TRUE;
-        while (name_ptr[i] && (i < sizeof(authorization_decoded)))
+        while (name_ptr[i] && (i < authorization_decoded_size))
         {
 
             /* Is there a mismatch?  */
@@ -5140,7 +5313,7 @@ UINT        length;
         }
 
         /* Determine if everything matches.  */
-        if (match && (i < sizeof(authorization_decoded)) && (authorization_decoded[i] == ':'))
+        if (match && (i < authorization_decoded_size) && (authorization_decoded[i] == ':'))
         {
 
             /* Move the authorization index past the semicolon.  */
@@ -5149,7 +5322,7 @@ UINT        length;
             /* Now compare the passwords.  */
             j =  0;
             match = NX_TRUE;
-            while (password_ptr[j] && (i < sizeof(authorization_decoded)))
+            while (password_ptr[j] && (i < authorization_decoded_size))
             {
 
                 /* Is there a mismatch?  */
@@ -5166,7 +5339,9 @@ UINT        length;
             }
 
             /* Determine if we have a match.  */
-            if (match && (i < sizeof(authorization_decoded)) && (authorization_decoded[i] == (CHAR) NX_NULL))
+            if (match && (i == authorization_decoded_size) && 
+                (authorization_decoded[i] == (CHAR) NX_NULL) && 
+                (password_ptr[j] == (CHAR) NX_NULL))
             {
 
                 /* Yes, we have successful authorization!!  */
@@ -5260,7 +5435,7 @@ UINT        length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_retrieve_basic_authorization    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5297,6 +5472,10 @@ UINT        length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s),  fixed   */
+/*                                            the HTTP Server state issue */
+/*                                            with basic authorization,   */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_web_http_server_retrieve_basic_authorization(NX_PACKET *packet_ptr, CHAR *authorization_request_ptr)
@@ -5361,6 +5540,9 @@ CHAR    *buffer_ptr;
         /* No, authorization is not present.  Return a zero length.  */
         return(length);
     }
+
+    /* Set the found flag back to false.  */
+    found =  NX_FALSE;
 
     /* Now remove any extra blanks.  */
     while ((buffer_ptr < (CHAR *) packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr == ' '))
@@ -5430,7 +5612,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_retrieve_resource               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5656,7 +5838,7 @@ CHAR    *buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_calculate_content_offset        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5761,107 +5943,8 @@ UINT       crlf_found = 0;
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
-/*    _nx_web_http_server_number_convert                  PORTABLE C      */
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */
-/*                                                                        */
-/*    This function converts a number into an ASCII string.               */
-/*                                                                        */
-/*  INPUT                                                                 */
-/*                                                                        */
-/*    number                                Unsigned integer number       */
-/*    string                                Destination string            */
-/*                                                                        */
-/*  OUTPUT                                                                */
-/*                                                                        */
-/*    Size                                  Number of bytes in string     */
-/*                                           (0 implies an error)         */
-/*                                                                        */
-/*  CALLS                                                                 */
-/*                                                                        */
-/*    None                                                                */
-/*                                                                        */
-/*  CALLED BY                                                             */
-/*                                                                        */
-/*    _nx_web_http_server_get_process       Process GET request           */
-/*    _nx_web_http_server_response_send     Send response to client       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-UINT  _nx_web_http_server_number_convert(UINT number, CHAR *string)
-{
-
-UINT    j;
-UINT    digit;
-UINT    size;
-
-
-    /* Initialize counters.  */
-    size =  0;
-
-    /* Loop to convert the number to ASCII.  */
-    while (size < 10)
-    {
-
-        /* Shift the current digits over one.  */
-        for (j = size; j != 0; j--)
-        {
-
-            /* Move each digit over one place.  */
-            string[j] =  string[j-1];
-        }
-
-        /* Compute the next decimal digit.  */
-        digit =  number % 10;
-
-        /* Update the input number.  */
-        number =  number / 10;
-
-        /* Store the new digit in ASCII form.  */
-        string[0] =  (CHAR) (digit + 0x30);
-
-        /* Increment the size.  */
-        size++;
-
-        /* Determine if the number is now zero.  */
-        if (number == 0)
-            break;
-    }
-
-    /* Make the string NULL terminated.  */
-    string[size] =  (CHAR) NX_NULL;
-
-    /* Determine if there is an overflow error.  */
-    if (number)
-    {
-
-        /* Error, return bad values to user.  */
-        size =  0;
-        string[0] = '0';
-    }
-
-    /* Return size to caller.  */
-    return(size);
-}
-
-
-/**************************************************************************/
-/*                                                                        */
-/*  FUNCTION                                               RELEASE        */
-/*                                                                        */
 /*    _nxe_web_http_server_type_get                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5921,7 +6004,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_type_get                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5981,7 +6064,7 @@ UINT    temp_name_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_type_get_extended              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6049,7 +6132,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_type_get_extended               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6223,268 +6306,109 @@ UINT    temp_name_length;
 }
 
 
-/**************************************************************************/
-/*                                                                        */
-/*  FUNCTION                                               RELEASE        */
-/*                                                                        */
-/*    _nx_web_http_base64_encode                          PORTABLE C      */
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */
-/*                                                                        */
-/*    This function encodes the input string into a base64                */
-/*    representation.                                                     */
-/*                                                                        */
-/*  INPUT                                                                 */
-/*                                                                        */
-/*    name                                  Name string                   */
-/*    name                                  Length of name                */
-/*    base64name                            Encoded base64 name string    */
-/*                                                                        */
-/*  OUTPUT                                                                */
-/*                                                                        */
-/*    None                                                                */
-/*                                                                        */
-/*  CALLS                                                                 */
-/*                                                                        */
-/*    _nx_utility_string_length_check       Check string length           */
-/*                                                                        */
-/*  CALLED BY                                                             */
-/*                                                                        */
-/*    None                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-VOID _nx_web_http_base64_encode(CHAR *name, UINT length, CHAR *base64name)
-{
-
-UINT    pad;
-UINT    i, j;
-UINT    step;
-
-
-    /* Adjust the length to represent the base64 name.  */
-    length =  ((length * 8) / 6);
-
-    /* Default padding to none.  */
-    pad =  0;
-
-    /* Determine if an extra conversion is needed.  */
-    if ((length * 6) % 24)
-    {
-
-        /* Some padding is needed.  */
-
-        /* Calculate the number of pad characters.  */
-        pad =  (length * 6) % 24;
-        pad =  (24 - pad) / 6;
-        pad =  pad - 1;
-
-        /* Adjust the length to pickup the character fraction.  */
-        length++;
-    }
-
-    /* Setup index into the base64name.  */
-    j =  0;
-
-    /* Compute the base64name.  */
-    step =  0;
-    i =     0;
-    while (j < length)
-    {
-
-        /* Determine which step we are in.  */
-        if (step == 0)
-        {
-
-            /* Use first 6 bits of name character for index.  */
-            base64name[j++] =  _nx_web_http_server_base64_array[((UINT) name[i]) >> 2];
-            step++;
-        }
-        else if (step == 1)
-        {
-
-            /* Use last 2 bits of name character and first 4 bits of next name character for index.  */
-            base64name[j++] =  _nx_web_http_server_base64_array[((((UINT) name[i]) & 0x3) << 4) | (((UINT) name[i+1]) >> 4)];
-            i++;
-            step++;
-        }
-        else if (step == 2)
-        {
-
-            /* Use last 4 bits of name character and first 2 bits of next name character for index.  */
-            base64name[j++] =  _nx_web_http_server_base64_array[((((UINT) name[i]) & 0xF) << 2) | (((UINT) name[i+1]) >> 6)];
-            i++;
-            step++;
-        }
-        else /* Step 3 */
-        {
-
-            /* Use last 6 bits of name character for index.  */
-            base64name[j++] =  _nx_web_http_server_base64_array[(((UINT) name[i]) & 0x3F)];
-            i++;
-            step = 0;
-        }
-    }
-
-    /* Determine if the index needs to be advanced.  */
-    if (step != 3)
-        i++;
-
-    /* Now add the PAD characters.  */
-    while ((pad--) && (j < NX_WEB_HTTP_MAX_STRING))
-    {
-
-        /* Pad base64name with '=' characters.  */
-        base64name[j++] = '=';
-    }
-
-    /* Put a NULL character in.  */
-    base64name[j] =  NX_NULL;
-}
-
-
-/**************************************************************************/
-/*                                                                        */
-/*  FUNCTION                                               RELEASE        */
-/*                                                                        */
-/*    _nx_web_http_base64_decode                          PORTABLE C      */
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */
-/*                                                                        */
-/*    This function decodes the input base64 ASCII string and converts    */
-/*    it into a standard ASCII representation.                            */
-/*                                                                        */
-/*  INPUT                                                                 */
-/*                                                                        */
-/*    base64name                            Encoded base64 name string    */
-/*    length                                Length of encoded base64 name */
-/*    name                                  Name string                   */
-/*                                                                        */
-/*  OUTPUT                                                                */
-/*                                                                        */
-/*    None                                                                */
-/*                                                                        */
-/*  CALLS                                                                 */
-/*                                                                        */
-/*    None                                                                */
-/*                                                                        */
-/*  CALLED BY                                                             */
-/*                                                                        */
-/*    _nx_web_http_server_basic_authenticate                              */
-/*                                          Basic authentication          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-VOID _nx_web_http_base64_decode(CHAR *base64name, UINT length, CHAR *name)
-{
-
-UINT    i, j;
-UINT    value1, value2;
-UINT    step;
-
-
-    /* Adjust the length to represent the ASCII name.  */
-    length =  ((length * 6) / 8);
-
-    /* Setup index into the ASCII name.  */
-    j =  0;
-
-    /* Compute the ASCII name.  */
-    step =  0;
-    i =     0;
-    while ((j < length) && (base64name[i]) && (base64name[i] != '='))
-    {
-
-        /* Derive values of the Base64 name.  */
-        if ((base64name[i] >= 'A') && (base64name[i] <= 'Z'))
-            value1 =  (UINT) (base64name[i] - 'A');
-        else if ((base64name[i] >= 'a') && (base64name[i] <= 'z'))
-            value1 =  (UINT) (base64name[i] - 'a') + 26;
-        else if ((base64name[i] >= '0') && (base64name[i] <= '9'))
-            value1 =  (UINT) (base64name[i] - '0') + 52;
-        else if (base64name[i] == '+')
-            value1 =  62;
-        else if (base64name[i] == '/')
-            value1 =  63;
-        else
-            value1 =  0;
-
-        /* Derive value for the next character.  */
-        if ((base64name[i+1] >= 'A') && (base64name[i+1] <= 'Z'))
-            value2 =  (UINT) (base64name[i+1] - 'A');
-        else if ((base64name[i+1] >= 'a') && (base64name[i+1] <= 'z'))
-            value2 =  (UINT) (base64name[i+1] - 'a') + 26;
-        else if ((base64name[i+1] >= '0') && (base64name[i+1] <= '9'))
-            value2 =  (UINT) (base64name[i+1] - '0') + 52;
-        else if (base64name[i+1] == '+')
-            value2 =  62;
-        else if (base64name[i+1] == '/')
-            value2 =  63;
-        else
-            value2 =  0;
-
-        /* Determine which step we are in.  */
-        if (step == 0)
-        {
-
-            /* Use first value and first 2 bits of second value.  */
-            name[j++] =    (CHAR) (((value1 & 0x3f) << 2) | ((value2 >> 4) & 3));
-            i++;
-            step++;
-        }
-        else if (step == 1)
-        {
-
-            /* Use last 4 bits of first value and first 4 bits of next value.  */
-            name[j++] =    (CHAR) (((value1 & 0xF) << 4) | (value2 >> 2));
-            i++;
-            step++;
-        }
-        else if (step == 2)
-        {
-
-            /* Use first 2 bits and following 6 bits of next value.  */
-            name[j++] =   (CHAR) (((value1 & 3) << 6) | (value2 & 0x3f));
-            i++;
-            i++;
-            step =  0;
-        }
-    }
-
-    /* Put a NULL character in.  */
-    name[j] =  NX_NULL;
-}
-
-
 #ifdef NX_WEB_HTTP_DIGEST_ENABLE
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_web_http_server_nonce_allocate                  PORTABLE C      */
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function allocate a new nonce for digest authentication.       */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    server_ptr                            HTTP Server pointer           */
+/*    nonce_ptr                             Allocated nonce pointer       */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    tx_time_get                           Get system time               */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_web_http_server_digest_authenticate                             */
+/*                                          Digest authentication         */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  10-31-2022     Yuxin Zhou               Initial Version 6.2.0         */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_web_http_server_nonce_allocate(NX_WEB_HTTP_SERVER *server_ptr, NX_WEB_HTTP_SERVER_NONCE **nonce_ptr)
+{
+UINT i;
+UCHAR random_value;
+NX_WEB_HTTP_SERVER_NONCE *nonces_list = server_ptr -> nx_web_http_server_nonces;
+
+
+    /* Search if there is free entry for new nonce.  */
+    for (i = 0; i < NX_WEB_HTTP_SERVER_NONCE_MAX; i++)
+    {
+        if (nonces_list[i].nonce_state == NX_WEB_HTTP_SERVER_NONCE_INVALID)
+        {
+            *nonce_ptr = &(nonces_list[i]);
+            break;
+        }
+    }
+
+    if (i == NX_WEB_HTTP_SERVER_NONCE_MAX)
+    {
+
+        /* If no free entry, check the timeout of allocated nonces.  */
+        for (i = 0; i < NX_WEB_HTTP_SERVER_NONCE_MAX; i++)
+        {
+            if (nonces_list[i].nonce_state == NX_WEB_HTTP_SERVER_NONCE_VALID)
+            {
+                if (tx_time_get() > nonces_list[i].nonce_timestamp + NX_WEB_HTTP_SERVER_NONCE_TIMEOUT)
+                {
+
+                    /* If this nonce is timed out, free up this entry for new nonce.  */
+                    *nonce_ptr = &(nonces_list[i]);
+                    break;
+                }
+            }
+        }
+
+        /* If no entry can be allocated, return error.  */
+        if (i == NX_WEB_HTTP_SERVER_NONCE_MAX)
+        {
+            return(NX_NOT_FOUND);
+        }
+    }
+
+    /* Generate new nonce for digest authentication. */
+    for (i = 0; i < NX_WEB_HTTP_SERVER_NONCE_SIZE; i++)
+    {
+        random_value = (UCHAR)NX_RAND() % (sizeof(_nx_web_http_server_base64_array) - 1);
+        (*nonce_ptr) -> nonce_buffer[i] = (UCHAR)_nx_web_http_server_base64_array[random_value];
+    }
+
+    /* Reset the timestamp and state for the new nonce.  */
+    (*nonce_ptr) -> nonce_timestamp = tx_time_get();
+    (*nonce_ptr) -> nonce_state = NX_WEB_HTTP_SERVER_NONCE_VALID;
+
+    return(NX_SUCCESS);
+}
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_digest_authenticate             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6536,6 +6460,9 @@ UINT    step;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_web_http_server_digest_authenticate(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *name_ptr, CHAR *password_ptr, CHAR *realm_ptr, UINT *auth_request_present)
@@ -6553,6 +6480,7 @@ CHAR        crlf[2] = {13,10};
 CHAR        authorization_nc[NX_WEB_HTTP_MAX_RESOURCE + 1];
 CHAR        authorization_cnonce[NX_WEB_HTTP_MAX_RESOURCE + 1];
 UINT        realm_length;
+NX_WEB_HTTP_SERVER_NONCE *nonce_ptr = NX_NULL;
 
     /* Default to no authentication request detected. */
     *auth_request_present =  NX_FALSE;
@@ -6561,7 +6489,7 @@ UINT        realm_length;
     status =  NX_WEB_HTTP_DIGEST_AUTHENTICATE;
 
     /* Is the authorization request present?  */
-    if (_nx_web_http_server_retrieve_digest_authorization(packet_ptr, authorization_response, authorization_uri, authorization_nc, authorization_cnonce))
+    if (_nx_web_http_server_retrieve_digest_authorization(server_ptr, packet_ptr, authorization_response, authorization_uri, authorization_nc, authorization_cnonce, &nonce_ptr))
     {
 
         /* Yes, an authorization request is present.  */
@@ -6595,7 +6523,7 @@ UINT        realm_length;
         }
 
         /* Calculate what the MD5 should be.  */
-        _nx_web_http_server_digest_response_calculate(server_ptr, name_ptr, realm_ptr, password_ptr, _nx_web_http_server_nonce, method, authorization_uri, authorization_nc, authorization_cnonce, calculated_response);
+        _nx_web_http_server_digest_response_calculate(server_ptr, name_ptr, realm_ptr, password_ptr, (CHAR *)(nonce_ptr -> nonce_buffer), method, authorization_uri, authorization_nc, authorization_cnonce, calculated_response);
 
         /* Determine if the calculated response is the same as the received response.  */
         i =  0;
@@ -6613,6 +6541,32 @@ UINT        realm_length;
             /* Otherwise, look at next character.  */
             i++;
         }
+
+        /* If the response is authenticated, mark the nonce as accepted.  */
+        if (status == NX_SUCCESS)
+        {
+
+            /* If another session uses the same nonce, don't accept it.  */
+            if (nonce_ptr -> nonce_state == NX_WEB_HTTP_SERVER_NONCE_ACCEPTED)
+            {
+                if (nonce_ptr -> nonce_session_ptr != server_ptr -> nx_web_http_server_current_session_ptr)
+                {
+                    status = NX_WEB_HTTP_DIGEST_AUTHENTICATE;
+                }
+            }
+            else
+            {
+
+                /* Update nonce state and set the session pointer for mapping in disconnection.  */
+                nonce_ptr -> nonce_state = NX_WEB_HTTP_SERVER_NONCE_ACCEPTED;
+                nonce_ptr -> nonce_session_ptr = server_ptr -> nx_web_http_server_current_session_ptr;
+            }
+        }
+        else
+        {
+            nonce_ptr -> nonce_state = NX_WEB_HTTP_SERVER_NONCE_INVALID;
+        }
+
         /* If digest authenticate callback function returns non-success value, the request is 
            considered unauthenticated. */
         if(callback_status != NX_SUCCESS)
@@ -6622,6 +6576,24 @@ UINT        realm_length;
     /* Determine if we need to send back an unauthorized request.  */
     if (status == NX_WEB_HTTP_DIGEST_AUTHENTICATE)
     {
+
+        /* Allocate a new nonce for digest authentication.  */
+        status1 = _nx_web_http_server_nonce_allocate(server_ptr, &nonce_ptr);
+
+        /* Determine if an error occurred in the packet allocation.  */
+        if (status1)
+        {
+
+            /* Send response back to HTTP Client.  */
+            _nx_web_http_server_response_send(server_ptr, NX_WEB_HTTP_STATUS_INTERNAL_ERROR, sizeof(NX_WEB_HTTP_STATUS_INTERNAL_ERROR) - 1, 
+                                              "NetX HTTP Server Internal Error", sizeof("NetX HTTP Server Internal Error") - 1, NX_NULL, 0);
+
+            /* Indicate an allocation error occurred.  */
+            server_ptr -> nx_web_http_server_allocation_errors++;
+
+            /* Return the internal NetX error.  */
+            return(status1);
+        }
 
         /* We need authorization so build the HTTP 401 Unauthorized message to send to the server.  */
 
@@ -6705,7 +6677,7 @@ UINT        realm_length;
                                         server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
 
         /* Place the nonce string into the buffer.  */
-        nx_packet_data_append(packet_ptr, _nx_web_http_server_nonce, sizeof(_nx_web_http_server_nonce) - 1,
+        nx_packet_data_append(packet_ptr, nonce_ptr -> nonce_buffer, NX_WEB_HTTP_SERVER_NONCE_SIZE,
                                         server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
 
         /* Insert the double quote.  */
@@ -6714,6 +6686,14 @@ UINT        realm_length;
 
         /* Place the qop="auth" parameter string into the buffer.  */
         nx_packet_data_append(packet_ptr, ", qop=\"auth\"", 12,
+                                        server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
+
+        /* Place the <cr,lf> into the buffer.  */
+        nx_packet_data_append(packet_ptr, crlf, 2,
+                                        server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
+
+        /* Set Content-Length as 0.  */
+        nx_packet_data_append(packet_ptr, "Content-Length: 0", 17,
                                         server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
 
         /* Place the <cr,lf> into the buffer.  */
@@ -6749,7 +6729,7 @@ UINT        realm_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_digest_response_calculate       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6796,6 +6776,9 @@ UINT        realm_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_web_http_server_digest_response_calculate(NX_WEB_HTTP_SERVER *server_ptr, CHAR *username, CHAR *realm, CHAR *password, CHAR *nonce, CHAR *method, CHAR *uri, CHAR *nc, CHAR *cnonce, CHAR *result)
@@ -6809,7 +6792,6 @@ UINT    password_length;
 UINT    realm_length;
 UINT    method_length;
 UINT    uri_length;
-UINT    nonce_length;
 UINT    nc_length;
 UINT    cnonce_length;
 
@@ -6819,7 +6801,6 @@ UINT    cnonce_length;
         _nx_utility_string_length_check(realm, &realm_length, NX_MAX_STRING_LENGTH) ||
         _nx_utility_string_length_check(method, &method_length, 7) ||
         _nx_utility_string_length_check(uri, &uri_length, NX_WEB_HTTP_MAX_RESOURCE) ||
-        _nx_utility_string_length_check(nonce, &nonce_length, sizeof(_nx_web_http_server_nonce) - 1) ||
         _nx_utility_string_length_check(nc, &nc_length, NX_WEB_HTTP_MAX_RESOURCE) ||
         _nx_utility_string_length_check(cnonce, &cnonce_length, NX_WEB_HTTP_MAX_RESOURCE))
     {
@@ -6853,7 +6834,7 @@ UINT    cnonce_length;
     _nx_md5_initialize(&(server_ptr -> nx_web_http_server_md5data));
     _nx_md5_update(&(server_ptr -> nx_web_http_server_md5data), (unsigned char *) ha1_string, sizeof(ha1_string) - 1);
     _nx_md5_update(&(server_ptr -> nx_web_http_server_md5data), (unsigned char *) ":", 1);
-    _nx_md5_update(&(server_ptr -> nx_web_http_server_md5data), (unsigned char *) nonce, nonce_length);
+    _nx_md5_update(&(server_ptr -> nx_web_http_server_md5data), (unsigned char *) nonce, NX_WEB_HTTP_SERVER_NONCE_SIZE);
 
     /* Start of Internet Explorer bug work-around.  */
     _nx_md5_update(&(server_ptr -> nx_web_http_server_md5data), (unsigned char *) ":", 1);
@@ -6878,7 +6859,7 @@ UINT    cnonce_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_retrieve_digest_authorization   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6890,11 +6871,13 @@ UINT    cnonce_length;
 /*                                                                        */
 /*  INPUT                                                                 */
 /*                                                                        */
+/*    server_ptr                            HTTP Server pointer           */
 /*    packet_ptr                            Request packet pointer        */
 /*    response                              Digest response pointer       */
 /*    uri                                   URI from response pointer     */
 /*    nc                                    Nonce count string            */
 /*    cnonce                                Client nonce string           */
+/*    nonce_ptr                             Server nonce pointer          */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
@@ -6918,15 +6901,20 @@ UINT    cnonce_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
-UINT  _nx_web_http_server_retrieve_digest_authorization(NX_PACKET *packet_ptr, CHAR *response, CHAR *uri, CHAR *nc, CHAR *cnonce)
+UINT  _nx_web_http_server_retrieve_digest_authorization(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET *packet_ptr, CHAR *response, CHAR *uri, CHAR *nc, CHAR *cnonce, NX_WEB_HTTP_SERVER_NONCE **nonce_ptr)
 {
 
 UINT    length;
 UINT    found;
 CHAR    *buffer_ptr;
 CHAR    *saved_buffer_ptr;
+UCHAR   *nonce_buffer;
+UINT    i;
 
 
     /* Set the found flag to false.  */
@@ -7046,6 +7034,86 @@ CHAR    *saved_buffer_ptr;
     /* Save current buffer pointer, so each parameter search always starts from here.  */
     saved_buffer_ptr =  buffer_ptr;
 
+    while (((buffer_ptr + 6) < (CHAR *) packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != (CHAR) 0))
+    {
+
+        /* Check for the uri token.  */
+        if (((*(buffer_ptr) ==  'n') || (*(buffer_ptr) ==  'N')) &&
+            ((*(buffer_ptr+1) ==  'o') || (*(buffer_ptr+1) ==  'O')) &&
+            ((*(buffer_ptr+2) ==  'n') || (*(buffer_ptr+2) ==  'N')) &&
+            ((*(buffer_ptr+3) ==  'c') || (*(buffer_ptr+3) ==  'C')) &&
+            ((*(buffer_ptr+4) ==  'e') || (*(buffer_ptr+4) ==  'E')) &&
+            (*(buffer_ptr+5) == '='))
+        {
+
+            /* Move the pointer up to the actual nonce string.  */
+            buffer_ptr =  buffer_ptr + 6;
+            found = NX_TRUE;
+
+            break;
+        }
+
+        /* Move the pointer up to the next character.  */
+        buffer_ptr++;
+    }
+
+    /* Check if nonce is found.  */
+    if (!found)
+    {
+        return(0);
+    }
+
+    /* Now remove any extra blanks and quotes.  */
+    while ((buffer_ptr < (CHAR *) packet_ptr -> nx_packet_append_ptr) && ((*buffer_ptr == ' ') || (*buffer_ptr == (CHAR) 0x22)))
+    {
+
+        /* Move the pointer up one character.  */
+        buffer_ptr++;
+    }
+
+    /* Now pickup the nonce string.  */
+    length =  0;
+    nonce_buffer = (UCHAR *)buffer_ptr;
+    while ((buffer_ptr < (CHAR *) packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != (CHAR) 0) && (*buffer_ptr != ' ') && (*buffer_ptr != (CHAR) 13))
+    {
+
+        /* Determine if the ending quote is present.  */
+        if (*buffer_ptr == (CHAR) 0x22)
+        {
+            break;
+        }
+
+        /* Increase the length.  */
+        length++;
+        buffer_ptr++;
+    }
+
+    /* Check the nonce size.  */
+    if (length != NX_WEB_HTTP_SERVER_NONCE_SIZE)
+    {
+        return(0);
+    }
+
+    /* Check if the nonce is valid.  */
+    for (i = 0; i < NX_WEB_HTTP_SERVER_NONCE_MAX; i++)
+    {
+        if ((server_ptr -> nx_web_http_server_nonces[i].nonce_state != NX_WEB_HTTP_SERVER_NONCE_INVALID) &&
+            (memcmp(server_ptr -> nx_web_http_server_nonces[i].nonce_buffer, nonce_buffer, NX_WEB_HTTP_SERVER_NONCE_SIZE) == 0)) /* Use case of memcmp is verified. */
+        {
+            *nonce_ptr = &(server_ptr -> nx_web_http_server_nonces[i]);
+            break;
+        }
+    }
+
+    /* If the nonca is invalid, just return.  */
+    if (i == NX_WEB_HTTP_SERVER_NONCE_MAX)
+    {
+        return(0);
+    }
+
+    /* Get saved buffer pointer.  */
+    buffer_ptr =  saved_buffer_ptr;
+
     /* Now look for the nc in the digest response.  */
     while (((buffer_ptr+3) < (CHAR *) packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != (CHAR) 0))
     {
@@ -7105,9 +7173,9 @@ CHAR    *saved_buffer_ptr;
         if (((*buffer_ptr ==      'c') || (*buffer_ptr ==      'C')) &&
             ((*(buffer_ptr+1) ==  'n') || (*(buffer_ptr+1) ==  'N')) &&
             ((*(buffer_ptr+2) ==  'o') || (*(buffer_ptr+2) ==  'O')) &&
-            ((*(buffer_ptr+3) ==  'n') || (*(buffer_ptr+2) ==  'N')) &&
-            ((*(buffer_ptr+4) ==  'c') || (*(buffer_ptr+2) ==  'C')) &&
-            ((*(buffer_ptr+5) ==  'e') || (*(buffer_ptr+2) ==  'E')) &&
+            ((*(buffer_ptr+3) ==  'n') || (*(buffer_ptr+3) ==  'N')) &&
+            ((*(buffer_ptr+4) ==  'c') || (*(buffer_ptr+4) ==  'C')) &&
+            ((*(buffer_ptr+5) ==  'e') || (*(buffer_ptr+5) ==  'E')) &&
             (*(buffer_ptr+6) == '='))
         {
 
@@ -7212,11 +7280,11 @@ CHAR    *saved_buffer_ptr;
         if (((*buffer_ptr ==      'r') || (*buffer_ptr ==      'R')) &&
             ((*(buffer_ptr+1) ==  'e') || (*(buffer_ptr+1) ==  'E')) &&
             ((*(buffer_ptr+2) ==  's') || (*(buffer_ptr+2) ==  'S')) &&
-            ((*(buffer_ptr+3) ==  'p') || (*(buffer_ptr+2) ==  'P')) &&
-            ((*(buffer_ptr+4) ==  'o') || (*(buffer_ptr+2) ==  'O')) &&
-            ((*(buffer_ptr+5) ==  'n') || (*(buffer_ptr+2) ==  'N')) &&
-            ((*(buffer_ptr+6) ==  's') || (*(buffer_ptr+2) ==  'S')) &&
-            ((*(buffer_ptr+7) ==  'e') || (*(buffer_ptr+2) ==  'E')) &&
+            ((*(buffer_ptr+3) ==  'p') || (*(buffer_ptr+3) ==  'P')) &&
+            ((*(buffer_ptr+4) ==  'o') || (*(buffer_ptr+4) ==  'O')) &&
+            ((*(buffer_ptr+5) ==  'n') || (*(buffer_ptr+5) ==  'N')) &&
+            ((*(buffer_ptr+6) ==  's') || (*(buffer_ptr+6) ==  'S')) &&
+            ((*(buffer_ptr+7) ==  'e') || (*(buffer_ptr+7) ==  'E')) &&
             (*(buffer_ptr+8) == '='))
         {
 
@@ -7276,7 +7344,7 @@ CHAR    *saved_buffer_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_hex_ascii_convert               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7357,7 +7425,7 @@ CHAR    digit;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_web_http_server_get_entity_header              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7423,7 +7491,7 @@ UINT  _nxe_web_http_server_get_entity_header(NX_WEB_HTTP_SERVER *server_ptr, NX_
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_get_entity_header               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7465,6 +7533,9 @@ UINT  _nxe_web_http_server_get_entity_header(NX_WEB_HTTP_SERVER *server_ptr, NX_
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            fixed write underflow,      */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            verified memmove use cases, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_web_http_server_get_entity_header(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr, UCHAR *entity_header_buffer, ULONG buffer_size)
@@ -7568,7 +7639,7 @@ UINT                        index;
             /* Leave boundary string only. */
             memmove(&multipart_ptr -> nx_web_http_server_multipart_boundary[4],
                     &multipart_ptr -> nx_web_http_server_multipart_boundary[index],
-                    quotation_index - index + 1);
+                    quotation_index - index + 1); /* Use case of memmove is verified.  */
         }
         else
         {
@@ -7797,7 +7868,7 @@ UINT                        index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_web_http_server_get_entity_content             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7864,7 +7935,7 @@ UINT  _nxe_web_http_server_get_entity_content(NX_WEB_HTTP_SERVER *server_ptr, NX
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_get_entity_content              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7937,7 +8008,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_boundary_find                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8193,7 +8264,7 @@ UINT                        boundary_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_match_string                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8321,7 +8392,7 @@ ULONG   remain_match;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_field_value_get                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8439,7 +8510,7 @@ UINT    index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_memicmp                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8516,7 +8587,7 @@ UCHAR   ch;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_generate_response_header        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8547,7 +8618,7 @@ UCHAR   ch;
 /*                                          Allocate response packet      */
 /*    nx_packet_data_append                 Append packet data            */
 /*    memcmp                                Compare string                */
-/*    _nx_web_http_server_number_convert    Convert number to ASCII       */
+/*    _nx_utility_uint_to_string            Convert number to ASCII       */
 /*    _nx_web_http_server_date_to_string    Convert data to string        */
 /*    nx_packet_release                     Release packet                */
 /*                                                                        */ 
@@ -8566,6 +8637,10 @@ UCHAR   ch;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved the logic of       */
+/*                                            converting number to string,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_web_http_server_generate_response_header(NX_WEB_HTTP_SERVER *server_ptr, NX_PACKET **packet_pptr,
@@ -8665,7 +8740,7 @@ CHAR        status_code_not_modified;
         {
 
             /* Convert the content_length to ASCII representation.  */
-            temp = _nx_web_http_server_number_convert(content_length, temp_string);
+            temp = _nx_utility_uint_to_string(content_length, 10, temp_string, sizeof(temp_string));
 
             /* Place the "Content-Length" field in the header.  */
             status += nx_packet_data_append(packet_ptr, "Content-Length: ", 16,
@@ -8733,7 +8808,7 @@ CHAR        status_code_not_modified;
                                                 server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
 
                 /* Convert the max-age to ASCII representation.  */
-                temp = _nx_web_http_server_number_convert(max_age, temp_string);
+                temp = _nx_utility_uint_to_string(max_age, 10, temp_string, sizeof(temp_string));
                 status += nx_packet_data_append(packet_ptr, temp_string, temp,
                                                 server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
 
@@ -8785,7 +8860,7 @@ CHAR        status_code_not_modified;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_request_read                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8896,7 +8971,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_request_byte_expect             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8966,7 +9041,7 @@ UCHAR tmp;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_chunked_size_get                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9114,7 +9189,7 @@ UINT  chunk_extension = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_request_chunked_get             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9359,7 +9434,7 @@ UCHAR     *current_data_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_response_chunked_set           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9421,7 +9496,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_response_chunked_set            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9524,7 +9599,7 @@ CHAR        crlf[2] = {13,10};
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_chunked_check                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9593,7 +9668,7 @@ UINT temp_string_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_response_packet_allocate       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9655,7 +9730,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_response_packet_allocate        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9726,7 +9801,7 @@ UINT status;
 /*                                                                        */ 
 /*    _nxe_web_http_server_callback_generate_response_header              */
 /*                                                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9785,7 +9860,7 @@ UINT  _nxe_web_http_server_callback_generate_response_header(NX_WEB_HTTP_SERVER 
 /*                                                                        */ 
 /*    _nx_web_http_server_callback_generate_response_header               */
 /*                                                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9857,7 +9932,7 @@ UINT additional_header_length = 0;
 /*                                                                        */ 
 /*    _nxe_web_http_server_callback_generate_response_header_extended     */
 /*                                                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9928,7 +10003,7 @@ UINT  _nxe_web_http_server_callback_generate_response_header_extended(NX_WEB_HTT
 /*                                                                        */ 
 /*    _nx_web_http_server_callback_generate_response_header_extended      */
 /*                                                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10016,7 +10091,7 @@ UINT temp_add_header_length = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_web_http_server_callback_packet_send           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10067,7 +10142,7 @@ UINT  _nxe_web_http_server_callback_packet_send(NX_WEB_HTTP_SERVER *server_ptr, 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_callback_packet_send            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10146,7 +10221,7 @@ UINT length = packet_ptr -> nx_packet_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_web_http_server_gmt_callback_set               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10199,7 +10274,7 @@ UINT  _nxe_web_http_server_gmt_callback_set(NX_WEB_HTTP_SERVER *server_ptr, VOID
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_gmt_callback_set                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10257,7 +10332,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_web_http_server_cache_info_callback_set        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10310,7 +10385,7 @@ UINT  _nxe_web_http_server_cache_info_callback_set(NX_WEB_HTTP_SERVER *server_pt
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_cache_info_callback_set         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10373,7 +10448,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_date_to_string                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10465,7 +10540,7 @@ UINT index = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_date_convert                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10531,7 +10606,7 @@ UINT    digit;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_web_http_server_mime_maps_additional_set       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10584,7 +10659,7 @@ UINT  _nxe_web_http_server_mime_maps_additional_set(NX_WEB_HTTP_SERVER *server_p
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_mime_maps_additional_set        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10643,7 +10718,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_get_client_keepalive            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10757,7 +10832,7 @@ UINT    connection_value_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_send                            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10833,7 +10908,7 @@ NX_SECURE_TLS_SESSION *tls_session;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_receive                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10913,7 +10988,7 @@ NX_SECURE_TLS_SESSION *tls_session;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_connection_reset                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10978,7 +11053,7 @@ NX_TCP_SOCKET *tcp_socket;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_connection_disconnect           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11015,6 +11090,9 @@ NX_TCP_SOCKET *tcp_socket;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported random nonce,     */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_web_http_server_connection_disconnect(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION *session_ptr, UINT wait_option)
@@ -11022,12 +11100,29 @@ VOID _nx_web_http_server_connection_disconnect(NX_WEB_HTTP_SERVER *server_ptr, N
 NX_TCP_SOCKET *tcp_socket;
 #ifdef NX_WEB_HTTPS_ENABLE
 NX_SECURE_TLS_SESSION *tls_session;
-#endif
+#endif /* NX_WEB_HTTPS_ENABLE */
+#ifdef NX_WEB_HTTP_DIGEST_ENABLE
+UINT i;
+#endif /* NX_WEB_HTTP_DIGEST_ENABLE  */
 
 #ifndef NX_WEB_HTTPS_ENABLE
     NX_PARAMETER_NOT_USED(server_ptr);
     NX_PARAMETER_NOT_USED(wait_option);
 #endif /* NX_WEB_HTTPS_ENABLE */
+
+#ifdef NX_WEB_HTTP_DIGEST_ENABLE
+
+    /* Once the nonce has been accepted, set the state as invalid. */
+    for (i = 0; i < NX_WEB_HTTP_SERVER_NONCE_MAX; i++)
+    {
+        if ((server_ptr -> nx_web_http_server_nonces[i].nonce_state == NX_WEB_HTTP_SERVER_NONCE_ACCEPTED) &&
+            (server_ptr -> nx_web_http_server_nonces[i].nonce_session_ptr == session_ptr))
+        {
+            server_ptr -> nx_web_http_server_nonces[i].nonce_state = NX_WEB_HTTP_SERVER_NONCE_INVALID;
+            break;
+        }
+    }
+#endif /* NX_WEB_HTTP_DIGEST_ENABLE  */
 
     tcp_socket = &(session_ptr -> nx_tcp_session_socket);
 
@@ -11056,7 +11151,7 @@ NX_SECURE_TLS_SESSION *tls_session;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_web_http_server_digest_authenticate_notify_set PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11116,7 +11211,7 @@ UINT _nxe_web_http_server_digest_authenticate_notify_set(NX_WEB_HTTP_SERVER *htt
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_web_http_server_digest_authenticate_notify_set  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11184,7 +11279,7 @@ UINT _nx_web_http_server_digest_authenticate_notify_set(NX_WEB_HTTP_SERVER *http
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_web_http_server_authentication_check_set       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11250,7 +11345,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_web_http_server_authentication_check_set        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */

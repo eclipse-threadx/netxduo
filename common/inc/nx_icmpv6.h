@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_icmpv6.h                                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -44,6 +44,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -212,7 +215,7 @@ typedef struct NX_ICMPV6_OPTION_STRUCT
     /* Size of the option. */
     UCHAR   nx_icmpv6_option_length;
 
-    /* Option data. */
+    /* Option data. This field is used to retrieve starting address of option. The size is decided by option length. */
     USHORT  nx_icmpv6_option_data;
 } NX_ICMPV6_OPTION;
 
@@ -255,24 +258,13 @@ typedef struct NX_ICMPV6_OPTION_PREFIX_STRUCT
 typedef struct NX_ICMPV6_OPTION_MTU_STRUCT
 {
 
-    /* prefix type. */
-    /*lint -esym(768,NX_ICMPV6_OPTION_MTU_STRUCT::nx_icmpv6_option_mtu_type) suppress member not referenced. It is used before type casting from NX_ICMPV6_OPTION. */
-    UCHAR nx_icmpv6_option_mtu_type;
-
-    /* option length. */
-    /*lint -esym(768,NX_ICMPV6_OPTION_MTU_STRUCT::nx_icmpv6_option_mtu_length) suppress member not referenced. It is used before type casting from NX_ICMPV6_OPTION. */
-    UCHAR nx_icmpv6_option_mtu_length;
-
-    /* Unused  */
-    /*lint -esym(768,NX_ICMPV6_OPTION_MTU_STRUCT::nx_icmpv6_option_mtu_reserved) suppress member not referenced. It is reserved for future use. */
-    USHORT nx_icmpv6_option_mtu_reserved;
+    /* General ICMPv6 header. */
+    /*lint -esym(768,NX_ICMPV6_OPTION_MTU_STRUCT::nx_icmpv6_option_mtu_icmpv6_header) suppress member not referenced. It is used before type casting from NX_ICMPV6_HEADER. */
+    NX_ICMPV6_HEADER nx_icmpv6_option_mtu_icmpv6_header;
 
     /* MTU length. */
     ULONG nx_icmpv6_option_mtu_path_mtu;
 
-    /* Pointer to the probe message (not the ICMPv6 header)
-       which for path MTU discovery. */
-    UCHAR *nx_icmpv6_option_mtu_message;
 } NX_ICMPV6_OPTION_MTU;
 
 /* Define the Router solicitation message type.  */

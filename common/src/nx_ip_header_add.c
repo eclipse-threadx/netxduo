@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -39,7 +39,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_header_add                                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -52,6 +52,7 @@
 /*                                                                        */
 /*    ip_ptr                                Pointer to IP control block   */
 /*    packet_ptr                            Pointer to packet to send     */
+/*    source_ip                             Source IP address             */
 /*    destination_ip                        Destination IP address        */
 /*    type_of_service                       Type of service for packet    */
 /*    time_to_live                          Time to live value for packet */
@@ -79,9 +80,15 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            supported random IP id,     */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
-UINT  _nx_ip_header_add(NX_IP *ip_ptr, NX_PACKET *packet_ptr, ULONG destination_ip,
+UINT  _nx_ip_header_add(NX_IP *ip_ptr, NX_PACKET *packet_ptr, ULONG source_ip, ULONG destination_ip,
                         ULONG type_of_service, ULONG time_to_live,  ULONG protocol, ULONG fragment)
 {
 ULONG           router_alert = 0;
@@ -91,6 +98,10 @@ ULONG           checksum;
 UINT            compute_checksum = 1;
 #endif /* defined(NX_DISABLE_IP_TX_CHECKSUM) || defined(NX_ENABLE_INTERFACE_CAPABILITY) || defined(NX_IPSEC_ENABLE) */
 ULONG           val;
+
+#ifdef NX_ENABLE_IP_ID_RANDOMIZATION
+    NX_PARAMETER_NOT_USED(ip_ptr);
+#endif /* NX_ENABLE_IP_ID_RANDOMIZATION */
 
 #ifndef NX_DISABLE_IGMPV2
     /* Check IGMPv2 protocol. */
@@ -148,13 +159,17 @@ ULONG           val;
     }
 
     /* Build the second 32-bit word of the IP header.  */
+#ifdef NX_ENABLE_IP_ID_RANDOMIZATION
+    ip_header_ptr -> nx_ip_header_word_1 =  (((ULONG)NX_RAND()) << NX_SHIFT_BY_16) | fragment;
+#else
     ip_header_ptr -> nx_ip_header_word_1 =  (ip_ptr -> nx_ip_packet_id++ << NX_SHIFT_BY_16) | fragment;
+#endif /* NX_ENABLE_IP_ID_RANDOMIZATION */
 
     /* Build the third 32-bit word of the IP header.  */
     ip_header_ptr -> nx_ip_header_word_2 =  ((time_to_live << NX_IP_TIME_TO_LIVE_SHIFT) | protocol);
 
     /* Place the source IP address in the IP header.  */
-    ip_header_ptr -> nx_ip_header_source_ip =  packet_ptr -> nx_packet_ip_interface -> nx_interface_ip_address;
+    ip_header_ptr -> nx_ip_header_source_ip =  source_ip;
 
     /* Place the destination IP address in the IP header.  */
     ip_header_ptr -> nx_ip_header_destination_ip =  destination_ip;

@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -32,7 +32,7 @@ extern const NX_SECURE_VERSIONS_LIST nx_secure_supported_versions_list[];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_newest_supported_version             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -112,7 +112,7 @@ INT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_highest_supported_version_negotiate     PORTABLE C   */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -196,7 +196,7 @@ USHORT highest_version_not_greater_than_client_version = 0;
         }
     }
 
-	/* No versions of TLS have been enabled. Set protocol to 0 to indicate failure. */
+    /* No versions of TLS have been enabled. Set protocol to 0 to indicate failure. */
     if (highest_version == 0)
     {
         (*protocol_version) = 0;
@@ -219,14 +219,14 @@ USHORT highest_version_not_greater_than_client_version = 0;
         if ((*protocol_version) < highest_version && (*protocol_version) > lowest_version)
         {
             (*protocol_version) = highest_version_not_greater_than_client_version;
-	    }
+        }
         else
         {
             (*protocol_version) = 0;
         }
     }
 
-	session_ptr -> nx_secure_tls_negotiated_highest_protocol_version = (*protocol_version);
+    session_ptr -> nx_secure_tls_negotiated_highest_protocol_version = (*protocol_version);
     return;
 }
 

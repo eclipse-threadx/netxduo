@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -24,13 +24,16 @@
 
 
 /* Force error checking to be disabled in this module */
+#include "tx_port.h"
 
 #ifndef NX_DISABLE_ERROR_CHECKING
 #define NX_DISABLE_ERROR_CHECKING
 #endif
 
+#ifndef TX_SAFETY_CRITICAL
 #ifndef TX_DISABLE_ERROR_CHECKING
 #define TX_DISABLE_ERROR_CHECKING
+#endif
 #endif
 
 
@@ -52,7 +55,7 @@ static NX_AUTO_IP    *_nx_auto_ip_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_auto_ip_create                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -119,7 +122,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_auto_ip_create                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -220,7 +223,7 @@ UINT  status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_auto_ip_set_interface                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -281,7 +284,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_auto_ip_set_interface                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -343,7 +346,7 @@ UINT  _nx_auto_ip_set_interface(NX_AUTO_IP *auto_ip_ptr, UINT interface_index)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_auto_ip_get_address                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -401,7 +404,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_auto_ip_get_address                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -476,7 +479,7 @@ NX_IP   *ip_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_auto_ip_start                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -537,7 +540,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_auto_ip_start                                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -604,7 +607,7 @@ UINT  _nx_auto_ip_start(NX_AUTO_IP *auto_ip_ptr, ULONG starting_local_address)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_auto_ip_stop                                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -665,7 +668,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_auto_ip_stop                                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -719,7 +722,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_auto_ip_delete                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -780,7 +783,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_auto_ip_delete                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -858,7 +861,7 @@ NX_IP       *ip_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_auto_ip_thread_entry                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -898,6 +901,9 @@ NX_IP       *ip_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_auto_ip_thread_entry(ULONG auto_ip_ptr_info)  
@@ -1079,7 +1085,7 @@ ULONG           host_ip_address;
         {
 
 #ifdef NX_AUTO_IP_DEBUG
-            printf("AutoIP %s, CONFLICT for: %d,%d,%d,%d\n", auto_ip_ptr -> nx_auto_ip_name, 
+            printf("AutoIP %s, CONFLICT for: %lu,%lu,%lu,%lu\n", auto_ip_ptr -> nx_auto_ip_name, 
                                     (auto_ip_ptr -> nx_auto_ip_current_local_address >> 24),
                                     (auto_ip_ptr -> nx_auto_ip_current_local_address >> 16 & 0xFF),
                                     (auto_ip_ptr -> nx_auto_ip_current_local_address >> 8 & 0xFF),
@@ -1097,7 +1103,7 @@ ULONG           host_ip_address;
            is ours!  */
         
 #ifdef NX_AUTO_IP_DEBUG
-        printf("AutoIP %s, RESOLVED for: %d,%d,%d,%d\n", auto_ip_ptr -> nx_auto_ip_name, 
+        printf("AutoIP %s, RESOLVED for: %lu,%lu,%lu,%lu\n", auto_ip_ptr -> nx_auto_ip_name, 
                                 (auto_ip_ptr -> nx_auto_ip_current_local_address >> 24),
                                 (auto_ip_ptr -> nx_auto_ip_current_local_address >> 16 & 0xFF),
                                 (auto_ip_ptr -> nx_auto_ip_current_local_address >> 8 & 0xFF),
@@ -1145,7 +1151,7 @@ ULONG           host_ip_address;
         {
 
 #ifdef NX_AUTO_IP_DEBUG
-            printf("AutoIP %s, CONFLICT for: %d,%d,%d,%d\n", auto_ip_ptr -> nx_auto_ip_name, 
+            printf("AutoIP %s, CONFLICT for: %lu,%lu,%lu,%lu\n", auto_ip_ptr -> nx_auto_ip_name, 
                                     (auto_ip_ptr -> nx_auto_ip_current_local_address >> 24),
                                     (auto_ip_ptr -> nx_auto_ip_current_local_address >> 16 & 0xFF),
                                     (auto_ip_ptr -> nx_auto_ip_current_local_address >> 8 & 0xFF),
@@ -1174,7 +1180,7 @@ ULONG           host_ip_address;
             auto_ip_ptr -> nx_auto_ip_defend_count++;
 
 #ifdef NX_AUTO_IP_DEBUG
-            printf("AutoIP %s, DEFEND for: %d,%d,%d,%d\n", auto_ip_ptr -> nx_auto_ip_name, 
+            printf("AutoIP %s, DEFEND for: %lu,%lu,%lu,%lu\n", auto_ip_ptr -> nx_auto_ip_name, 
                                     (auto_ip_ptr -> nx_auto_ip_current_local_address >> 24),
                                     (auto_ip_ptr -> nx_auto_ip_current_local_address >> 16 & 0xFF),
                                     (auto_ip_ptr -> nx_auto_ip_current_local_address >> 8 & 0xFF),
@@ -1197,7 +1203,7 @@ ULONG           host_ip_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_auto_ip_conflict                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */

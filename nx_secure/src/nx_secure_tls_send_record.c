@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_record                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -84,6 +84,18 @@
 /*                                            fixed race condition for    */
 /*                                            multithread transmission,   */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1.7  */
+/*  08-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            used wait forever on        */
+/*                                            transmission mutex,         */
+/*                                            resulting in version 6.1.8  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved internal logic,    */
+/*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            checked seq number overflow,*/
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
@@ -116,7 +128,7 @@ NX_PACKET *current_packet;
     tx_mutex_put(&_nx_secure_tls_protection);
 
     /* Get transmit mutex first. */
-    status = tx_mutex_get(&(tls_session -> nx_secure_tls_session_transmit_mutex), wait_option);
+    status = tx_mutex_get(&(tls_session -> nx_secure_tls_session_transmit_mutex), TX_WAIT_FOREVER);
 
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 
@@ -160,10 +172,6 @@ NX_PACKET *current_packet;
         send_packet -> nx_packet_length += iv_size;
     }
 
-    /* Back off the prepend_ptr for TLS Record header. Note the packet_length field is adjusted
-       prior to nx_tcp_socket_send() below. */
-    //send_packet -> nx_packet_prepend_ptr -= NX_SECURE_TLS_RECORD_HEADER_SIZE;
-
     /* Ensure there is enough room for the record header.  */
     if ((ULONG)(send_packet -> nx_packet_prepend_ptr - send_packet -> nx_packet_data_start) < NX_SECURE_TLS_RECORD_HEADER_SIZE)
     {
@@ -196,14 +204,7 @@ NX_PACKET *current_packet;
     if (tls_session -> nx_secure_tls_local_session_active)
     {
         /*************************************************************************************************************/
-
-        if (tls_session -> nx_secure_tls_session_ciphersuite == NX_NULL)
-        {
-
-            /* Likely internal error since at this point ciphersuite negotiation was theoretically completed. */
-            tx_mutex_put(&(tls_session -> nx_secure_tls_session_transmit_mutex));
-            return(NX_SECURE_TLS_UNKNOWN_CIPHERSUITE);
-        }
+        NX_ASSERT(tls_session -> nx_secure_tls_session_ciphersuite != NX_NULL)
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
         /* TLS 1.3 records have the record type appended in a single byte. */
@@ -320,6 +321,14 @@ NX_PACKET *current_packet;
         {
             /* Check for overflow of the 32-bit number. */
             tls_session -> nx_secure_tls_local_sequence_number[1]++;
+
+            if (tls_session -> nx_secure_tls_local_sequence_number[1] == 0)
+            {
+
+                /* Check for overflow of the 64-bit unsigned number. As it should not reach here
+                   in practical, we return a general error to prevent overflow theoretically. */
+                return(NX_NOT_SUCCESSFUL);
+            }
         }
         tls_session -> nx_secure_tls_local_sequence_number[0]++;
     }

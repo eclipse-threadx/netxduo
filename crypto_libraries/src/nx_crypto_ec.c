@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -685,7 +685,7 @@ NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_secp521r1 =
     _nx_crypto_ec_fp_projective_multiple,
     _nx_crypto_ec_secp521r1_reduce
 };
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 static NX_CRYPTO_CONST NX_CRYPTO_EC *_nx_crypto_ec_named_curves[] =
 {
     &_nx_crypto_ec_secp192r1,
@@ -700,7 +700,7 @@ static NX_CRYPTO_CONST NX_CRYPTO_EC *_nx_crypto_ec_named_curves[] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_is_infinite                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -715,8 +715,8 @@ static NX_CRYPTO_CONST NX_CRYPTO_EC *_nx_crypto_ec_named_curves[] =
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
-/*    NX_CRYPTO_TRUE                               Point is infinite             */
-/*    NX_CRYPTO_FALSE                              Point is not infinite         */
+/*    NX_CRYPTO_TRUE                        Point is infinite             */
+/*    NX_CRYPTO_FALSE                       Point is not infinite         */
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
@@ -764,7 +764,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_ec_point_is_infinite(NX_CRYPTO_EC_POINT *point)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_set_infinite                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -823,7 +823,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_set_infinite(NX_CRYPTO_EC_POINT *point)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_setup                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -896,7 +896,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_extract_uncompressed            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -985,7 +985,7 @@ UINT clen;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_fp_affine_to_projective         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1034,7 +1034,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_fp_affine_to_projective(NX_CRYPTO_EC_POI
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_point_fp_projective_to_affine         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1126,7 +1126,7 @@ UINT                   buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp192r1_reduce                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1176,6 +1176,9 @@ UINT                   buffer_size;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp192r1_reduce(NX_CRYPTO_EC *curve,
@@ -1184,7 +1187,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp192r1_reduce(NX_CRYPTO_EC *curve,
 {
 NX_CRYPTO_HUGE_NUMBER temp;
 UINT                 *data;
-UINT                 *buffer;
+HN_UBASE              rev1;
 UINT                  size = 0;
 UINT                  compare_value;
 
@@ -1202,8 +1205,6 @@ UINT                  compare_value;
     NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 36);
 
     data = (UINT *)(((ULONG)scratch + 3) & (ULONG) ~3);
-    scratch += (64 >> HN_SIZE_SHIFT);
-    buffer = (UINT *)scratch;
 
     /* c= (c5,...,c2,c1,c0), ci is a 64-bit word */
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 48, &size);
@@ -1219,19 +1220,19 @@ UINT                  compare_value;
     _nx_crypto_huge_number_setup(value, (UCHAR *)data + 24, 24);
 
     /* s2 = (0,c3,c3) */
-    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, rev1,
                                       0, 0, data[4], data[5],
                                       data[4], data[5]);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s3 = (c4,c4,0) */
-    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, rev1,
                                       data[2], data[3], data[2],
                                       data[3], 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s4 = (c5,c5,c5) */
-    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP192R1_DATA_SETUP(&temp, rev1,
                                       data[0], data[1], data[0], data[1],
                                       data[0], data[1]);
     _nx_crypto_huge_number_add(value, &temp);
@@ -1259,7 +1260,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp224r1_reduce                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1312,6 +1313,9 @@ UINT                  compare_value;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp224r1_reduce(NX_CRYPTO_EC *curve,
@@ -1320,7 +1324,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp224r1_reduce(NX_CRYPTO_EC *curve,
 {
 NX_CRYPTO_HUGE_NUMBER temp;
 UINT                 *data;
-UINT                 *buffer;
+HN_UBASE              rev1;
 UINT                  size = 0;
 UINT                  compare_value;
 
@@ -1338,8 +1342,6 @@ UINT                  compare_value;
     NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 36);
 
     data = (UINT *)(((ULONG)scratch + 3) & (ULONG) ~3);
-    scratch += (64 >> HN_SIZE_SHIFT);
-    buffer = (UINT *)scratch;
 
     /* c= (c13,...,c2,c1,c0), ci is a 32-bit word */
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 56, &size);
@@ -1355,25 +1357,25 @@ UINT                  compare_value;
     _nx_crypto_huge_number_setup(value, (UCHAR *)data + 28, 28);
 
     /* s2 = (c10,c9,c8,c7,0,0,0) */
-    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, rev1,
                                       data[3], data[4], data[5],
                                       data[6], 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s3 = (0,c13,c12,c11,0,0,0) */
-    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, rev1,
                                       0, data[0], data[1],
                                       data[2], 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s4 = (c13,c12,c11,c10,c9,c8,c7) */
-    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, rev1,
                                       data[0], data[1], data[2], data[3],
                                       data[4], data[5], data[6]);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s5 = (0,0,0,0,c13,c12,c11) */
-    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP224R1_DATA_SETUP(&temp, rev1,
                                       0, 0, 0, 0, data[0],
                                       data[1], data[2]);
     _nx_crypto_huge_number_subtract(value, &temp);
@@ -1401,7 +1403,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp256r1_reduce                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1454,6 +1456,9 @@ UINT                  compare_value;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp256r1_reduce(NX_CRYPTO_EC *curve,
@@ -1462,7 +1467,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp256r1_reduce(NX_CRYPTO_EC *curve,
 {
 NX_CRYPTO_HUGE_NUMBER temp;
 UINT                 *data;
-UINT                 *buffer;
+HN_UBASE              rev1;
+HN_UBASE              rev2;
 UINT                  size = 0;
 UINT                  compare_value;
 
@@ -1480,8 +1486,6 @@ UINT                  compare_value;
     NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 36);
 
     data = (UINT *)(((ULONG)scratch + 3) & (ULONG) ~3);
-    scratch += (64 >> HN_SIZE_SHIFT);
-    buffer = (UINT *)scratch;
 
     /* c= (c15,...,c2,c1,c0), ci is a 32-bit word */
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 64, &size);
@@ -1497,51 +1501,49 @@ UINT                  compare_value;
     _nx_crypto_huge_number_setup(value, (UCHAR *)data + 32, 32);
 
     /* s2 = (c15,c14,c13,c12,c11,0,0,0) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
-                                      data[0], data[1], data[2], data[3],
-                                      data[4], 0, 0, 0);
-    _nx_crypto_huge_number_shift_left(&temp, 1);
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP_LS1(&temp, rev1, rev2,
+                                          data[0], data[1], data[2], data[3],
+                                          data[4], 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s3 = (0,c15,c14,c13,c12,0,0,0) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
-                                      0, data[0], data[1], data[2],
-                                      data[3], 0, 0, 0);
-    _nx_crypto_huge_number_shift_left(&temp, 1);
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP_LS1(&temp, rev1, rev2,
+                                          0, data[0], data[1], data[2],
+                                          data[3], 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s4 = (c15,c14,0,0,0,c10,c9,c8) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[0], data[1], 0, 0,
                                       0, data[5], data[6], data[7]);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s5 = (c8,c13,c15,c14,c13,c11,c10,c9) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[7], data[2], data[0], data[1],
                                       data[2], data[4], data[5], data[6]);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s6 = (c10,c8,0,0,0,c13,c12,c11) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[5], data[7], 0, 0,
                                       0, data[2], data[3], data[4]);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s7 = (c11,c9,0,0,c15,c14,c13,c12) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[4], data[6], 0, 0,
                                       data[0], data[1], data[2], data[3]);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s8 = (c12,0,c10,c9,c8,c15,c14,c13) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[3], 0, data[5], data[6],
                                       data[7], data[0], data[1], data[2]);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s9 = (c13,0,c11,c10,c9,0,c15,c14) */
-    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP256R1_DATA_SETUP(&temp, rev1,
                                       data[2], 0, data[4], data[5],
                                       data[6], 0, data[0], data[1]);
     _nx_crypto_huge_number_subtract(value, &temp);
@@ -1569,7 +1571,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp384r1_reduce                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1619,6 +1621,9 @@ UINT                  compare_value;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp384r1_reduce(NX_CRYPTO_EC *curve,
@@ -1627,7 +1632,8 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp384r1_reduce(NX_CRYPTO_EC *curve,
 {
 NX_CRYPTO_HUGE_NUMBER temp;
 UINT                 *data;
-UINT                 *buffer;
+HN_UBASE              rev1;
+HN_UBASE              rev2;
 UINT                  size = 0;
 UINT                  compare_value;
 
@@ -1642,11 +1648,9 @@ UINT                  compare_value;
         return;
     }
 
-    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 48);
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&temp, scratch, 52);
 
     data = (UINT *)(((ULONG)scratch + 3) & (ULONG) ~3);
-    scratch += (96 >> HN_SIZE_SHIFT);
-    buffer = (UINT *)scratch;
 
     /* c= (c23,...,c2,c1,c0), ci is a 32-bit word */
     _nx_crypto_huge_number_extract(value, (UCHAR *)data, 96, &size);
@@ -1662,10 +1666,9 @@ UINT                  compare_value;
     _nx_crypto_huge_number_setup(value, (UCHAR *)data + 48, 48);
 
     /* s2 = (0,0,0,0,0,c23,c22,c21,0,0,0,0) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
-                                      0, 0, 0, 0, 0, data[0],
-                                      data[1], data[2], 0, 0, 0, 0);
-    _nx_crypto_huge_number_shift_left(&temp, 1);
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP_LS1(&temp, rev1, rev2,
+                                          0, 0, 0, 0, 0, data[0],
+                                          data[1], data[2], 0, 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s3 = (c23,c22,c21,c20,c19,c18,c17,c16,c15,c14,c13,c12) */
@@ -1673,48 +1676,48 @@ UINT                  compare_value;
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s4 = (c20,c19,c18,c17,c16,c15,c14,c13,c12,c23,c22,c21) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       data[3], data[4], data[5], data[6],
                                       data[7], data[8], data[9], data[10],
                                       data[11], data[0], data[1], data[2]);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s5 = (c19,c18,c17,c16,c15,c14,c13,c12,c20,0,c23,0) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       data[4], data[5], data[6],
                                       data[7], data[8], data[9], data[10],
                                       data[11], data[3], 0, data[0], 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s6 = (0,0,0,0,c23,c22,c21,c20,0,0,0,0) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       0, 0, 0, 0,
                                       data[0], data[1], data[2], data[3],
                                       0, 0, 0, 0);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s7 = (0,0,0,0,0,0,c23,c22,c21,0,0,c20) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       0, 0, 0, 0, 0, 0,
                                       data[0], data[1], data[2],
                                       0, 0, data[3]);
     _nx_crypto_huge_number_add(value, &temp);
 
     /* s8 = (c22,c21,c20,c19,c18,c17,c16,c15,c14,c13,c12,c23) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       data[1], data[2], data[3], data[4],
                                       data[5], data[6], data[7], data[8],
                                       data[9], data[10], data[11], data[0]);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s9 = (0,0,0,0,0,0,0,c23,c22,c21,c20,0) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       0, 0, 0, 0, 0, 0, 0, data[0],
                                       data[1], data[2], data[3], 0);
     _nx_crypto_huge_number_subtract(value, &temp);
 
     /* s10 = (0,0,0,0,0,0,0,c23,c23,0,0,0) */
-    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, buffer,
+    NX_CRYPTO_EC_SECP384R1_DATA_SETUP(&temp, rev1,
                                       0, 0, 0, 0, 0, 0, 0, data[0],
                                       data[0], 0, 0, 0);
     _nx_crypto_huge_number_subtract(value, &temp);
@@ -1742,7 +1745,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_secp521r1_reduce                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1863,7 +1866,7 @@ UINT                  compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_add_digit_reduce                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1907,9 +1910,13 @@ UINT                  compare_value;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_digit_reduce(NX_CRYPTO_EC *curve,
                                                    NX_CRYPTO_HUGE_NUMBER *value,
                                                    HN_UBASE digit,
@@ -1931,7 +1938,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_digit_reduce(NX_CRYPTO_EC *curve,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_subtract_digit_reduce                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1994,7 +2001,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_digit_reduce(NX_CRYPTO_EC *curve,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_reduce                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2028,9 +2035,13 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_digit_reduce(NX_CRYPTO_EC *curve,
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_reduce(NX_CRYPTO_EC *curve,
                                             NX_CRYPTO_HUGE_NUMBER *value,
                                             HN_UBASE *scratch)
@@ -2045,7 +2056,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_reduce(NX_CRYPTO_EC *curve,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_add_reduce                            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2113,7 +2124,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_reduce(NX_CRYPTO_EC *curve,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_subtract_reduce                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2186,7 +2197,7 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_reduce(NX_CRYPTO_EC *curve,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_projective_add                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2338,7 +2349,7 @@ UINT                  buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_projective_double                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2473,7 +2484,7 @@ UINT                  buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_affine_add                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2606,7 +2617,7 @@ UINT                   buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_affine_subtract                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2671,7 +2682,7 @@ NX_CRYPTO_EC_POINT point;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_naf_compute                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2799,7 +2810,7 @@ UINT      i, j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_projective_multiple                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2935,7 +2946,7 @@ UINT               bit;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fp_fixed_multiple                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3080,7 +3091,7 @@ UINT                       j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_key_pair_generation_extra             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3183,7 +3194,7 @@ NX_CRYPTO_HUGE_NUMBER modulus;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_key_pair_stream_generate              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3288,7 +3299,7 @@ NX_CRYPTO_EC_POINT    public_key;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_precomputation                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3330,9 +3341,13 @@ NX_CRYPTO_EC_POINT    public_key;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_precomputation(NX_CRYPTO_EC *curve,
                                                  UINT window_width,
                                                  UINT bits,
@@ -3474,7 +3489,7 @@ UINT                       i, j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_fixed_output                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3510,9 +3525,13 @@ UINT                       i, j;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fixed_output(NX_CRYPTO_EC *curve,
                                                INT (*output)(const CHAR *format, ...),
                                                const CHAR *tab,
@@ -3721,7 +3740,7 @@ const CHAR                *array_name[] = {"", "_2e"};
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_get_named_curve                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3755,9 +3774,13 @@ const CHAR                *array_name[] = {"", "_2e"};
 /*  09-30-2020     Timothy Stapko           Modified comment(s), updated  */
 /*                                            constants, resulting        */
 /*                                            in version 6.1              */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_FIPS
+#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_get_named_curve(NX_CRYPTO_EC **curve, UINT curve_id)
 {
 UINT i;
@@ -3780,7 +3803,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ec_secp192r1_operation            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3868,7 +3891,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp192r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ec_secp224r1_operation            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -3955,7 +3978,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp224r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ec_secp256r1_operation            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -4042,7 +4065,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp256r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ec_secp384r1_operation            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -4129,7 +4152,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp384r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_ec_secp521r1_operation            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -4217,7 +4240,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_ec_validate_public_key                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -4255,6 +4278,9 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
 /*    DATE              NAME                      DESCRIPTION             */
 /*                                                                        */
 /*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION
@@ -4267,8 +4293,9 @@ NX_CRYPTO_HUGE_NUMBER temp;
 NX_CRYPTO_HUGE_NUMBER right;
 UINT                  compare_value;
 UINT                  buffer_size = chosen_curve -> nx_crypto_ec_n.nx_crypto_huge_buffer_size;
-NX_CRYPTO_EC_POINT    pt;
 HN_UBASE             *scratch2 = scratch;
+
+    NX_CRYPTO_PARAMETER_NOT_USED(partial);
 
     /* 1. Verify Q is not the point at infinity. */ 
     if(_nx_crypto_ec_point_is_infinite(public_key))
@@ -4330,6 +4357,8 @@ HN_UBASE             *scratch2 = scratch;
         verification in step 1, ensures that the public key is in the correct range in the correct EC
         subgroup; that is, it is in the correct EC subgroup and is not the identity element O.)
     */
+    /* Removed this validation as h is 1 for all the software supported curves and nQ = O
+        is implied by the checks in step 2 and 3.
     if (!partial)
     {
         NX_CRYPTO_EC_POINT_INITIALIZE(&pt, NX_CRYPTO_EC_POINT_AFFINE, scratch, buffer_size);
@@ -4339,7 +4368,731 @@ HN_UBASE             *scratch2 = scratch;
             return(NX_CRYPTO_INVALID_KEY);
         }
     }
+    */
 
     return(NX_CRYPTO_SUCCESS);
 }
 #endif /* NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION */
+
+#ifdef NX_CRYPTO_ENABLE_CURVE25519_448
+
+/* x25519 */
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_x25519_p[] =
+{
+
+    /* p = 7fffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffed */
+    HN_ULONG_TO_UBASE(0xFFFFFFED), HN_ULONG_TO_UBASE(0xFFFFFFFF),
+    HN_ULONG_TO_UBASE(0xFFFFFFFF), HN_ULONG_TO_UBASE(0xFFFFFFFF),
+    HN_ULONG_TO_UBASE(0xFFFFFFFF), HN_ULONG_TO_UBASE(0xFFFFFFFF),
+    HN_ULONG_TO_UBASE(0xFFFFFFFF), HN_ULONG_TO_UBASE(0x7FFFFFFF),
+};
+
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_x25519_gx[] =
+{
+
+    /* U(P) = 9 */
+    HN_ULONG_TO_UBASE(0x00000009)
+};
+
+
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_x25519_h[] =
+{
+
+    /* h = 08 */
+    HN_ULONG_TO_UBASE(0x00000008)
+};
+
+/* x448 */
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_x448_p[] =
+{
+
+    /* p = ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff */
+    HN_ULONG_TO_UBASE(0xFFFFFFFF), HN_ULONG_TO_UBASE(0xFFFFFFFF),
+    HN_ULONG_TO_UBASE(0xFFFFFFFF), HN_ULONG_TO_UBASE(0xFFFFFFFF),
+    HN_ULONG_TO_UBASE(0xFFFFFFFF), HN_ULONG_TO_UBASE(0xFFFFFFFF),
+    HN_ULONG_TO_UBASE(0xFFFFFFFF), HN_ULONG_TO_UBASE(0xFFFFFFFE),
+    HN_ULONG_TO_UBASE(0xFFFFFFFF), HN_ULONG_TO_UBASE(0xFFFFFFFF),
+    HN_ULONG_TO_UBASE(0xFFFFFFFF), HN_ULONG_TO_UBASE(0xFFFFFFFF),
+    HN_ULONG_TO_UBASE(0xFFFFFFFF), HN_ULONG_TO_UBASE(0xFFFFFFFF),
+};
+
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_x448_gx[] =
+{
+
+    /* U(P) = 5 */
+    HN_ULONG_TO_UBASE(0x00000005)
+};
+
+
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_x448_h[] =
+{
+
+    /* h = 04 */
+    HN_ULONG_TO_UBASE(0x00000004)
+};
+
+
+NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_x25519 =
+{
+    "x25519",
+    NX_CRYPTO_EC_X25519,
+    5,
+    255,
+    {
+        .fp =
+        {
+            (HN_UBASE *)_nx_crypto_ec_x25519_p,
+            sizeof(_nx_crypto_ec_x25519_p) >> HN_SIZE_SHIFT,
+            sizeof(_nx_crypto_ec_x25519_p),
+            (UINT)NX_CRYPTO_FALSE
+        }
+    },
+    {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u},
+    {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u},
+    {
+        NX_CRYPTO_EC_POINT_AFFINE,
+        {
+            (HN_UBASE *)_nx_crypto_ec_x25519_gx,
+            sizeof(_nx_crypto_ec_x25519_gx) >> HN_SIZE_SHIFT,
+            sizeof(_nx_crypto_ec_x25519_gx),
+            (UINT)NX_CRYPTO_FALSE
+        },
+        {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u},
+        {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u}
+    },
+    {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u},
+    {
+        (HN_UBASE *)_nx_crypto_ec_x25519_h,
+        sizeof(_nx_crypto_ec_x25519_h) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_x25519_h),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    (NX_CRYPTO_EC_FIXED_POINTS *)NX_CRYPTO_NULL,
+    NX_CRYPTO_NULL,
+    NX_CRYPTO_NULL,
+    _nx_crypto_ec_x25519_448_multiple,
+    NX_CRYPTO_NULL
+};
+
+NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_x448 =
+{
+    "x448",
+    NX_CRYPTO_EC_X448,
+    5,
+    448,
+    {
+        .fp =
+        {
+            (HN_UBASE *)_nx_crypto_ec_x448_p,
+            sizeof(_nx_crypto_ec_x448_p) >> HN_SIZE_SHIFT,
+            sizeof(_nx_crypto_ec_x448_p),
+            (UINT)NX_CRYPTO_FALSE
+        }
+    },
+    {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u},
+    {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u},
+    {
+        NX_CRYPTO_EC_POINT_AFFINE,
+        {
+            (HN_UBASE *)_nx_crypto_ec_x448_gx,
+            sizeof(_nx_crypto_ec_x448_gx) >> HN_SIZE_SHIFT,
+            sizeof(_nx_crypto_ec_x448_gx),
+            (UINT)NX_CRYPTO_FALSE
+        },
+        {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u},
+        {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u}
+    },
+    {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u},
+    {
+        (HN_UBASE *)_nx_crypto_ec_x448_h,
+        sizeof(_nx_crypto_ec_x448_h) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_x448_h),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    (NX_CRYPTO_EC_FIXED_POINTS *)NX_CRYPTO_NULL,
+    NX_CRYPTO_NULL,
+    NX_CRYPTO_NULL,
+    _nx_crypto_ec_x25519_448_multiple,
+    NX_CRYPTO_NULL
+};
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_ec_x25519_448_multiple                   PORTABLE C      */
+/*                                                           6.1.12       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function performs the scalar multiplication on X25519 and X448 */
+/*    curves.                                                             */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    curve                                 Pointer to curve              */
+/*    u                                     U coordinate                  */
+/*    k                                     Scalar                        */
+/*    r                                     Result                        */
+/*    scratch                               Pointer to scratch buffer     */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    NX_CRYPTO_EC_POINT_INITIALIZE         Initialize EC point           */
+/*    NX_CRYPTO_HUGE_NUMBER_COPY            Copy huge number              */
+/*    _nx_crypto_ec_cswap                   Swap two huge numbers         */
+/*    _nx_crypto_huge_number_add            Addition for huge numbers     */
+/*    _nx_crypto_huge_number_subtract       Calculate subtraction for     */
+/*                                            huge numbers                */
+/*    _nx_crypto_huge_number_modulus        Perform a modulus operation   */
+/*    _nx_crypto_huge_number_multiply       Multiply two huge numbers     */
+/*    _nx_crypto_huge_number_square         Compute the square of a value */
+/*    _nx_crypto_huge_number_inverse_modulus_prime                        */
+/*                                          Perform an inverse modulus    */
+/*                                            operation for prime number  */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            added x448 curve,           */
+/*                                            resulting in version 6.1.12 */
+/*                                                                        */
+/**************************************************************************/
+NX_CRYPTO_KEEP VOID _nx_crypto_ec_x25519_448_multiple(NX_CRYPTO_EC* curve,
+                                                      NX_CRYPTO_EC_POINT* u,
+                                                      NX_CRYPTO_HUGE_NUMBER* k,
+                                                      NX_CRYPTO_EC_POINT* r,
+                                                      HN_UBASE* scratch)
+{
+NX_CRYPTO_HUGE_NUMBER k_2;
+NX_CRYPTO_HUGE_NUMBER x_1;
+NX_CRYPTO_HUGE_NUMBER x_2;
+NX_CRYPTO_HUGE_NUMBER z_2;
+NX_CRYPTO_HUGE_NUMBER x_3;
+NX_CRYPTO_HUGE_NUMBER z_3;
+NX_CRYPTO_HUGE_NUMBER t_1;
+NX_CRYPTO_HUGE_NUMBER t_2;
+INT t;
+UINT k_t;
+UINT swap;
+UINT clen;
+ULONG a24;
+HN_UBASE* k_buf;
+
+    clen = (curve -> nx_crypto_ec_bits + 7) >> 3;
+
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&k_2, scratch, clen);
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&x_1, scratch, clen);
+    clen = clen << 1;
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&x_2, scratch, clen);
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&z_2, scratch, clen);
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&x_3, scratch, clen);
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&z_3, scratch, clen);
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&t_1, scratch, clen);
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&t_2, scratch, clen);
+
+    NX_CRYPTO_HUGE_NUMBER_COPY(&k_2, k);
+    NX_CRYPTO_HUGE_NUMBER_COPY(&x_1, &u -> nx_crypto_ec_point_x);
+
+    if (curve -> nx_crypto_ec_id == NX_CRYPTO_EC_X25519)
+    {
+        /* x25519 */
+        x_1.nx_crypto_huge_number_data[7] &= 0x7FFFFFFF;
+
+        k_buf = k_2.nx_crypto_huge_number_data;
+
+        k_buf[0] &= 0xFFFFFFF8;
+        k_buf[7] &= 0x7FFFFFFF;
+        k_buf[7] |= 0x40000000;
+        a24 = 121665;
+    }
+    else
+    {
+        /* x448 */
+
+        k_buf = k_2.nx_crypto_huge_number_data;
+
+        k_buf[0] &= 0xFFFFFFFC;
+        k_buf[13] |= 0x80000000;
+        a24 = 39081;
+    }
+
+    NX_CRYPTO_HUGE_NUMBER_SET_DIGIT(&x_2, 1);
+    NX_CRYPTO_HUGE_NUMBER_COPY(&x_3, &x_1);
+    NX_CRYPTO_HUGE_NUMBER_SET_DIGIT(&z_3, 1);
+
+    swap = 0;
+
+    for (t = (INT)(curve -> nx_crypto_ec_bits - 1); t >= 0; t--)
+    {
+        k_t = 1 & (k_buf[t >> 5] >> (t & 31));
+        swap ^= k_t;
+        _nx_crypto_ec_cswap(swap, &x_2, &x_3);
+        _nx_crypto_ec_cswap(swap, &z_2, &z_3);
+        swap = k_t;
+
+        /* A = x_2 + z_2 */
+        NX_CRYPTO_HUGE_NUMBER_COPY(&t_1, &x_2);
+        _nx_crypto_huge_number_add(&t_1, &z_2);
+        _nx_crypto_huge_number_modulus(&t_1, &curve->nx_crypto_ec_field.fp);
+
+        /* B = x_2 - z_2 */
+        _nx_crypto_huge_number_subtract(&x_2, &z_2);
+
+        /* C = x_3 + z_3 */
+        NX_CRYPTO_HUGE_NUMBER_COPY(&t_2, &x_3);
+        _nx_crypto_huge_number_add(&t_2, &z_3);
+
+        /* D = x_3 - z_3 */
+        _nx_crypto_huge_number_subtract(&x_3, &z_3);
+
+        /* DA = D * A */
+        _nx_crypto_huge_number_multiply(&x_3, &t_1, &z_3);
+        _nx_crypto_huge_number_modulus(&z_3, &curve -> nx_crypto_ec_field.fp);
+
+        /* CB = C * B */
+        _nx_crypto_huge_number_multiply(&x_2, &t_2, &z_2);
+        _nx_crypto_huge_number_modulus(&z_2, &curve -> nx_crypto_ec_field.fp);
+
+        /* t_2 = DA + CB */
+        NX_CRYPTO_HUGE_NUMBER_COPY(&t_2, &z_2);
+        _nx_crypto_huge_number_add(&t_2, &z_3);
+        _nx_crypto_huge_number_modulus(&t_2, &curve->nx_crypto_ec_field.fp);
+
+        /* z_3 = DA - CB */
+        _nx_crypto_huge_number_subtract(&z_3, &z_2);
+
+        /* x_3 = (DA + CB)^2 */
+        _nx_crypto_huge_number_square(&t_2, &x_3);
+        _nx_crypto_huge_number_modulus(&x_3, &curve -> nx_crypto_ec_field.fp);
+
+        /* t_2 = (DA - CB)^2 */
+        _nx_crypto_huge_number_square(&z_3, &t_2);
+        _nx_crypto_huge_number_modulus(&t_2, &curve -> nx_crypto_ec_field.fp);
+
+        /* z_3 = x_1 * (DA - CB)^2 */
+        _nx_crypto_huge_number_multiply(&t_2, &x_1, &z_3);
+        _nx_crypto_huge_number_modulus(&z_3, &curve -> nx_crypto_ec_field.fp);
+
+        /* AA = A^2 */
+        _nx_crypto_huge_number_square(&t_1, &z_2);
+        _nx_crypto_huge_number_modulus(&z_2, &curve -> nx_crypto_ec_field.fp);
+
+        /* BB = B^2 */
+        _nx_crypto_huge_number_square(&x_2, &t_1);
+        _nx_crypto_huge_number_modulus(&t_1, &curve -> nx_crypto_ec_field.fp);
+
+        /* E = AA - BB */
+        NX_CRYPTO_HUGE_NUMBER_COPY(&t_2, &z_2);
+        _nx_crypto_huge_number_subtract(&t_2, &t_1);
+
+        /* x_2 = AA * BB */
+        _nx_crypto_huge_number_multiply(&z_2, &t_1, &x_2);
+        _nx_crypto_huge_number_modulus(&x_2, &curve -> nx_crypto_ec_field.fp);
+
+        /* z_2 = E * (AA + a24 * E) */
+        _nx_crypto_huge_number_multiply_digit(&t_2, a24, &t_1);
+
+        _nx_crypto_huge_number_add(&t_1, &z_2);
+        _nx_crypto_huge_number_modulus(&t_1, &curve -> nx_crypto_ec_field.fp);
+
+        _nx_crypto_huge_number_multiply(&t_1, &t_2, &z_2);
+        _nx_crypto_huge_number_modulus(&z_2, &curve -> nx_crypto_ec_field.fp);
+
+    }
+
+    _nx_crypto_ec_cswap(swap, &x_2, &x_3);
+    _nx_crypto_ec_cswap(swap, &z_2, &z_3);
+
+    /* Return x_2 * (z_2^(p - 2)) = x_2 * (z_2^-1) */
+    _nx_crypto_huge_number_inverse_modulus_prime(&z_2, &curve -> nx_crypto_ec_field.fp, &t_1, scratch);
+    _nx_crypto_huge_number_multiply(&x_2, &t_1, &r -> nx_crypto_ec_point_x);
+    _nx_crypto_huge_number_modulus(&r -> nx_crypto_ec_point_x, &curve -> nx_crypto_ec_field.fp);
+
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_ec_cswap                                 PORTABLE C      */
+/*                                                           6.1.11       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function performs conditional swap of two huge number in       */
+/*    constant time.                                                      */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    swap                                  Swap condition                */
+/*    h1                                    First huge number             */
+/*    h2                                    Second huge number            */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_crypto_ec_x25519_448_multiple     Scalar multiplication         */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*                                                                        */
+/**************************************************************************/
+NX_CRYPTO_KEEP VOID _nx_crypto_ec_cswap(UINT swap, NX_CRYPTO_HUGE_NUMBER *h1, NX_CRYPTO_HUGE_NUMBER *h2)
+{
+UINT i;
+HN_UBASE hswap = (HN_UBASE)(0 - swap);
+HN_UBASE dummy;
+
+
+    for (i = 0; i < (h1 -> nx_crypto_huge_buffer_size >> HN_SIZE_SHIFT); i++)
+    {
+        dummy = hswap & (h1 -> nx_crypto_huge_number_data[i] ^ h2 -> nx_crypto_huge_number_data[i]);
+        h1 -> nx_crypto_huge_number_data[i] = h1 -> nx_crypto_huge_number_data[i] ^ dummy;
+        h2 -> nx_crypto_huge_number_data[i] = h2 -> nx_crypto_huge_number_data[i] ^ dummy;
+    }
+
+    i = hswap & (h1 -> nx_crypto_huge_number_size ^ h2 -> nx_crypto_huge_number_size);
+    h1 -> nx_crypto_huge_number_size ^= i;
+    h2 -> nx_crypto_huge_number_size ^= i;
+
+    i = hswap & (h1 -> nx_crypto_huge_number_is_negative ^ h2 -> nx_crypto_huge_number_is_negative);
+    h1 -> nx_crypto_huge_number_is_negative ^= i;
+    h2 -> nx_crypto_huge_number_is_negative ^= i;
+
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_method_ec_x25519_operation               PORTABLE C      */
+/*                                                           6.1.11       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function returns the x25519 curve.                             */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    op                                    Operation                     */
+/*    handle                                Crypto handle                 */
+/*    method                                Cryption Method Object        */
+/*    key                                   Encryption Key                */
+/*    key_size_in_bits                      Key size in bits              */
+/*    input                                 Input data                    */
+/*    input_length_in_byte                  Input data size               */
+/*    iv_ptr                                Initial vector                */
+/*    output                                Output buffer                 */
+/*    output_length_in_byte                 Output buffer size            */
+/*    crypto_metadata                       Metadata area                 */
+/*    crypto_metadata_size                  Metadata area size            */
+/*    packet_ptr                            Pointer to packet             */
+/*    nx_crypto_hw_process_callback         Callback function pointer     */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*                                                                        */
+/**************************************************************************/
+NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_x25519_operation(UINT op,
+                                                          VOID *handle,
+                                                          struct NX_CRYPTO_METHOD_STRUCT *method,
+                                                          UCHAR *key, NX_CRYPTO_KEY_SIZE key_size_in_bits,
+                                                          UCHAR *input, ULONG input_length_in_byte,
+                                                          UCHAR *iv_ptr,
+                                                          UCHAR *output, ULONG output_length_in_byte,
+                                                          VOID *crypto_metadata, ULONG crypto_metadata_size,
+                                                          VOID *packet_ptr,
+                                                          VOID (*nx_crypto_hw_process_callback)(VOID *, UINT))
+{
+    NX_CRYPTO_PARAMETER_NOT_USED(handle);
+    NX_CRYPTO_PARAMETER_NOT_USED(method);
+    NX_CRYPTO_PARAMETER_NOT_USED(key);
+    NX_CRYPTO_PARAMETER_NOT_USED(key_size_in_bits);
+    NX_CRYPTO_PARAMETER_NOT_USED(input);
+    NX_CRYPTO_PARAMETER_NOT_USED(input_length_in_byte);
+    NX_CRYPTO_PARAMETER_NOT_USED(iv_ptr);
+    NX_CRYPTO_PARAMETER_NOT_USED(output);
+    NX_CRYPTO_PARAMETER_NOT_USED(output_length_in_byte);
+    NX_CRYPTO_PARAMETER_NOT_USED(crypto_metadata);
+    NX_CRYPTO_PARAMETER_NOT_USED(crypto_metadata_size);
+    NX_CRYPTO_PARAMETER_NOT_USED(packet_ptr);
+    NX_CRYPTO_PARAMETER_NOT_USED(nx_crypto_hw_process_callback);
+
+    if (op != NX_CRYPTO_EC_CURVE_GET)
+    {
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    *((NX_CRYPTO_EC **)output) = (NX_CRYPTO_EC *)&_nx_crypto_ec_x25519;
+
+    return(NX_CRYPTO_SUCCESS);
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_method_ec_x448_operation                 PORTABLE C      */
+/*                                                           6.1.12       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function returns the x448 curve.                               */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    op                                    Operation                     */
+/*    handle                                Crypto handle                 */
+/*    method                                Cryption Method Object        */
+/*    key                                   Encryption Key                */
+/*    key_size_in_bits                      Key size in bits              */
+/*    input                                 Input data                    */
+/*    input_length_in_byte                  Input data size               */
+/*    iv_ptr                                Initial vector                */
+/*    output                                Output buffer                 */
+/*    output_length_in_byte                 Output buffer size            */
+/*    crypto_metadata                       Metadata area                 */
+/*    crypto_metadata_size                  Metadata area size            */
+/*    packet_ptr                            Pointer to packet             */
+/*    nx_crypto_hw_process_callback         Callback function pointer     */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    Application Code                                                    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  07-29-2022     Yuxin Zhou               Initial Version 6.1.12        */
+/*                                                                        */
+/**************************************************************************/
+NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_x448_operation(UINT op,
+                                                        VOID *handle,
+                                                        struct NX_CRYPTO_METHOD_STRUCT *method,
+                                                        UCHAR *key, NX_CRYPTO_KEY_SIZE key_size_in_bits,
+                                                        UCHAR *input, ULONG input_length_in_byte,
+                                                        UCHAR *iv_ptr,
+                                                        UCHAR *output, ULONG output_length_in_byte,
+                                                        VOID *crypto_metadata, ULONG crypto_metadata_size,
+                                                        VOID *packet_ptr,
+                                                        VOID (*nx_crypto_hw_process_callback)(VOID *, UINT))
+{
+    NX_CRYPTO_PARAMETER_NOT_USED(handle);
+    NX_CRYPTO_PARAMETER_NOT_USED(method);
+    NX_CRYPTO_PARAMETER_NOT_USED(key);
+    NX_CRYPTO_PARAMETER_NOT_USED(key_size_in_bits);
+    NX_CRYPTO_PARAMETER_NOT_USED(input);
+    NX_CRYPTO_PARAMETER_NOT_USED(input_length_in_byte);
+    NX_CRYPTO_PARAMETER_NOT_USED(iv_ptr);
+    NX_CRYPTO_PARAMETER_NOT_USED(output);
+    NX_CRYPTO_PARAMETER_NOT_USED(output_length_in_byte);
+    NX_CRYPTO_PARAMETER_NOT_USED(crypto_metadata);
+    NX_CRYPTO_PARAMETER_NOT_USED(crypto_metadata_size);
+    NX_CRYPTO_PARAMETER_NOT_USED(packet_ptr);
+    NX_CRYPTO_PARAMETER_NOT_USED(nx_crypto_hw_process_callback);
+
+    if (op != NX_CRYPTO_EC_CURVE_GET)
+    {
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    *((NX_CRYPTO_EC **)output) = (NX_CRYPTO_EC *)&_nx_crypto_ec_x448;
+
+    return(NX_CRYPTO_SUCCESS);
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_ec_key_pair_generation_x25519_448        PORTABLE C      */
+/*                                                           6.1.12       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function generates an elliptic curve key pair.                 */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    curve                                 Pointer to curve              */
+/*    g                                     Base point g                  */
+/*    private_key                           Private key generated         */
+/*    public_key                            Public key generated          */
+/*    scratch                               Pointer to scratch buffer     */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    NX_CRYPTO_RBG                         Generate random huge number   */
+/*    [nx_crypto_ec_multiple]               Perform multiplication for EC */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_crypto_ecdh_setup_x25519_448      Setup ECDH local key pair     */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            added x448 curve,           */
+/*                                            resulting in version 6.1.12 */
+/*                                                                        */
+/**************************************************************************/
+NX_CRYPTO_KEEP UINT _nx_crypto_ec_key_pair_generation_x25519_448(NX_CRYPTO_EC *curve,
+                                                                 NX_CRYPTO_EC_POINT *g,
+                                                                 NX_CRYPTO_HUGE_NUMBER *private_key,
+                                                                 NX_CRYPTO_EC_POINT *public_key,
+                                                                 HN_UBASE *scratch)
+{
+UINT status;
+UINT buffer_size = (curve -> nx_crypto_ec_bits + 7) >> 3;
+
+    /* Get random number with specified length. */
+    status = NX_CRYPTO_RBG(buffer_size << 3, (UCHAR*)private_key -> nx_crypto_huge_number_data);
+
+    if (status)
+    {
+        return(status);
+    }
+
+    private_key -> nx_crypto_huge_number_size = buffer_size >> HN_SIZE_SHIFT;
+
+    /* Q = dG */
+    curve -> nx_crypto_ec_multiple(curve, g, private_key, public_key, scratch);
+
+    return(NX_CRYPTO_SUCCESS);
+}
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_ec_extract_fixed_size_le                 PORTABLE C      */
+/*                                                           6.1.11       */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function extracts huge number in little-endian order to a      */
+/*    buffer with fixed size.                                             */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    number                                Huge number                   */
+/*    byte_stream                           Output buffer                 */
+/*    byte_stream_size                      Size of output buffer         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    Status                                Operation result status       */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    NX_CRYPTO_MEMSET                      Copy the number data memory   */
+/*    NX_CRYPTO_MEMSET                      Set the memory                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_crypto_ecdh_setup_x25519_448      Setup ECDH local key pair     */
+/*    _nx_crypto_ecdh_compute_secret_x25519_448                           */
+/*                                          Compute ECDH shared secret    */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
+/*                                                                        */
+/**************************************************************************/
+NX_CRYPTO_KEEP UINT _nx_crypto_ec_extract_fixed_size_le(NX_CRYPTO_HUGE_NUMBER *number,
+                                                        UCHAR *byte_stream, UINT byte_stream_size)
+{
+UINT number_size = number -> nx_crypto_huge_number_size << HN_SIZE_SHIFT;
+
+    if (number_size > byte_stream_size)
+    {
+
+        /* User byte stream buffer too small. */
+        return(NX_CRYPTO_SIZE_ERROR);
+    }
+
+    NX_CRYPTO_MEMCPY(byte_stream, number -> nx_crypto_huge_number_data, number_size); /* Use case of memcpy is verified. */
+
+    if (byte_stream_size > number_size)
+    {
+        NX_CRYPTO_MEMSET(&byte_stream[number_size], 0, byte_stream_size - number_size);
+    }
+
+    return(NX_CRYPTO_SUCCESS);
+}
+#endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */

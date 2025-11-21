@@ -25,6 +25,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_arp_static_entry_create.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_arp_static_entry_delete.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_arp_static_entry_delete_internal.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_http_proxy_client.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_icmp_cleanup.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_icmp_enable.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_icmp_info_get.c
@@ -162,6 +163,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_ipv6_process_hop_by_hop_option.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_ipv6_process_routing_option.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_ipv6_util.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_link.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_md5.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_nd_cache_add.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_nd_cache_add_entry.c
@@ -187,6 +189,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_packet_pool_low_watermark_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_packet_release.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_packet_transmit_release.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_packet_vlan_priority_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_ram_network_driver.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_rarp_disable.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_rarp_enable.c
@@ -226,6 +229,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_receive_cleanup.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_server_socket_accept.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_server_socket_listen.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_server_socket_driver_listen.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_server_socket_relisten.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_server_socket_unaccept.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_server_socket_unlisten.c
@@ -236,6 +240,8 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_socket_delete.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_socket_disconnect.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_socket_disconnect_complete_notify.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_socket_driver_establish.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_socket_driver_packet_receive.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_socket_establish_notify.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_socket_info_get.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_socket_mss_get.c
@@ -270,6 +276,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_socket_window_update_notify_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_transmit_cleanup.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_window_scaling_option_get.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_tcp_socket_vlan_priority_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_trace_event_insert.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_trace_event_update.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_trace_object_register.c
@@ -287,6 +294,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_socket_checksum_enable.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_socket_create.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_socket_delete.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_socket_driver_packet_receive.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_socket_info_get.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_socket_port_get.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_socket_receive.c
@@ -295,6 +303,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_socket_source_send.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_socket_unbind.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_source_extract.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_udp_socket_vlan_priority_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_utility.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxd_icmp_enable.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxd_icmp_ping.c
@@ -447,6 +456,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_packet_pool_low_watermark_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_packet_release.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_packet_transmit_release.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nxe_packet_vlan_priority_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_rarp_disable.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_rarp_enable.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_rarp_info_get.c
@@ -482,6 +492,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_tcp_socket_timed_wait_callback.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_tcp_socket_transmit_configure.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_tcp_socket_window_update_notify_set.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nxe_tcp_socket_vlan_priority_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_udp_enable.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_udp_free_port_find.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_udp_info_get.c
@@ -500,6 +511,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_udp_socket_source_send.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_udp_socket_unbind.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_udp_source_extract.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nxe_udp_socket_vlan_priority_set.c
 
     # {{END_TARGET_SOURCES}}
 )

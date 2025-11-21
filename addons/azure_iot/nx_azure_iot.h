@@ -1,15 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
-
-/* Version: 6.1 */
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 /**
  * @file nx_azure_iot.h
@@ -48,6 +46,18 @@ extern   "C" {
 #define NX_AZURE_IOT_LOG_LEVEL    2
 #endif /* NX_AZURE_IOT_LOG_LEVEL */
 
+/* Define maximum trusted certificates count.  */
+#ifndef NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS
+#define NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS 3
+#endif /* NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS */
+
+/* Define maximum device certificates count.  */
+#ifndef NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS
+#define NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS 2
+#endif /* NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS */
+
+#define NX_AZURE_IOT_ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+
 /* Define the az iot log function. */
 #define LogError(...)
 #define LogInfo(...)
@@ -65,15 +75,15 @@ UINT nx_azure_iot_log(UCHAR *type_ptr, UINT type_len, UCHAR *msg_ptr, UINT msg_l
 
 #if NX_AZURE_IOT_LOG_LEVEL > 0
 #undef LogError
-#define LogError(...) nx_azure_iot_log(LogLiteralArgs("[ERROR] "), ##__VA_ARGS__)
+#define LogError(...) nx_azure_iot_log(LogLiteralArgs("[ERROR] "), __VA_ARGS__)
 #endif /* NX_AZURE_IOT_LOG_LEVEL > 0 */
 #if NX_AZURE_IOT_LOG_LEVEL > 1
 #undef LogInfo
-#define LogInfo(...) nx_azure_iot_log(LogLiteralArgs("[INFO] "), ##__VA_ARGS__)
+#define LogInfo(...) nx_azure_iot_log(LogLiteralArgs("[INFO] "), __VA_ARGS__)
 #endif /* NX_AZURE_IOT_LOG_LEVEL > 1 */
 #if NX_AZURE_IOT_LOG_LEVEL > 2
 #undef LogDebug
-#define LogDebug(...) nx_azure_iot_log(LogLiteralArgs("[DEBUG] "), ##__VA_ARGS__)
+#define LogDebug(...) nx_azure_iot_log(LogLiteralArgs("[DEBUG] "), __VA_ARGS__)
 #endif /* NX_AZURE_IOT_LOG_LEVEL > 2 */
 
 #define NX_AZURE_IOT_MQTT_QOS_0                           0
@@ -128,6 +138,10 @@ UINT nx_azure_iot_log(UCHAR *type_ptr, UINT type_len, UCHAR *msg_ptr, UINT msg_l
 #define NX_AZURE_IOT_NO_SUBSCRIBE_ACK                     0x20014
 #define NX_AZURE_IOT_THROTTLED                            0x20015
 
+#define NX_AZURE_IOT_EMPTY_JSON                           0x20016
+#define NX_AZURE_IOT_SAS_TOKEN_EXPIRED                    0x20017
+#define NX_AZURE_IOT_NO_MORE_ENTRIES                      0x20018
+
 /* Resource type managed by AZ_IOT.  */
 #define NX_AZURE_IOT_RESOURCE_IOT_HUB                     0x1
 #define NX_AZURE_IOT_RESOURCE_IOT_PROVISIONING            0x2
@@ -145,6 +159,9 @@ UINT nx_azure_iot_log(UCHAR *type_ptr, UINT type_len, UCHAR *msg_ptr, UINT msg_l
 
 /* MQTT Subscribe topic offset.  */
 #define NX_AZURE_IOT_MQTT_SUBSCRIBE_TOPIC_OFFSET          6
+
+/* MQTT Publish offset.  */
+#define NX_AZURE_IOT_PUBLISH_PACKET_START_OFFSET          7
 
 /**
  * @brief Resource struct
@@ -170,8 +187,8 @@ typedef struct NX_AZURE_IOT_RESOURCE_STRUCT
     UINT                                   resource_cipher_map_size;
     UCHAR                                 *resource_metadata_ptr;
     UINT                                   resource_metadata_size;
-    NX_SECURE_X509_CERT                   *resource_trusted_certificate;
-    NX_SECURE_X509_CERT                   *resource_device_certificate;
+    NX_SECURE_X509_CERT                   *resource_trusted_certificates[NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS];
+    NX_SECURE_X509_CERT                   *resource_device_certificates[NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS];
     const UCHAR                           *resource_hostname;
     UINT                                   resource_hostname_length;
     struct NX_AZURE_IOT_RESOURCE_STRUCT   *resource_next;
@@ -198,22 +215,22 @@ typedef struct NX_AZURE_IOT_STRUCT
     UINT                                 (*nx_azure_iot_unix_time_get)(ULONG *unix_time);
 } NX_AZURE_IOT;
 
+typedef struct NX_AZURE_IOT_THREAD_STRUCT
+{
+    TX_THREAD                           *thread_ptr;
+    struct NX_AZURE_IOT_THREAD_STRUCT   *thread_next;
+    UINT                                 thread_message_type;
+    UINT                                 thread_expected_id;     /* Used by device twin. */
+    NX_PACKET                           *thread_received_message;
+} NX_AZURE_IOT_THREAD;
+
 /**
  * @brief Create the Azure IoT subsystem
  *
  * @details This routine creates the Azure IoT subsystem. An internal thread is created to
  *          manage activities related to Azure IoT services. Only one NX_AZURE_IOT instance
- *          is needed to manage instances for Azure IoT hub, IoT Central, Device Provisioning
- *          Services (DPS), and Azure Security Center (ASC).
- * 
- * @remarks This routine enables ASC by default. ASC provides a comprehensive security solution for
- *          Azure RTOS devices in which it collects network information and send it to the IoTHub.
- *          More details can be found https://docs.microsoft.com/en-us/azure/defender-for-iot/iot-security-azure-rtos.
- *          To disable ASC from your application, we provide both compile time and runtime option:
- *              - compile-time : NX_AZURE_DISABLE_IOT_SECURITY_MODULE in NetXDuo header file such as nx_port.h
- *                               when building the middleware.
- *              - runtime : Call UINT nx_azure_iot_security_module_disable(NX_AZURE_IOT *nx_azure_iot_ptr)
- *                          in your application code.
+ *          is needed to manage instances for Azure IoT hub, IoT Central, and Device Provisioning
+ *          Services (DPS).
  * 
  * @param[in] nx_azure_iot_ptr A pointer to a #NX_AZURE_IOT
  * @param[in] name_ptr A pointer to a NULL-terminated string indicating the name of the Azure IoT instance.
@@ -287,7 +304,7 @@ UINT nx_azure_iot_publish_mqtt_packet(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *pa
                                       UINT topic_len, UCHAR *packet_id, UINT qos, UINT wait_option);
 UINT nx_azure_iot_publish_packet_get(NX_AZURE_IOT *nx_azure_iot_ptr, NXD_MQTT_CLIENT *client_ptr,
                                      NX_PACKET **packet_pptr, UINT wait_option);
-UINT nx_azure_iot_mqtt_packet_id_get(NXD_MQTT_CLIENT *client_ptr, UCHAR *packet_id, UINT wait_option);
+UINT nx_azure_iot_mqtt_packet_id_get(NXD_MQTT_CLIENT *client_ptr, UCHAR *packet_id);
 VOID nx_azure_iot_mqtt_packet_adjust(NX_PACKET *packet_ptr);
 UINT nx_azure_iot_mqtt_tls_setup(NXD_MQTT_CLIENT *client_ptr, NX_SECURE_TLS_SESSION *tls_session,
                                  NX_SECURE_X509_CERT *certificate,
@@ -297,7 +314,6 @@ UINT nx_azure_iot_base64_hmac_sha256_calculate(NX_AZURE_IOT_RESOURCE *resource_p
                                                const UCHAR *message_ptr, UINT message_size,
                                                UCHAR *buffer_ptr, UINT buffer_len,
                                                UCHAR **output_ptr, UINT *output_len_ptr);
-
 
 #ifdef __cplusplus
 }

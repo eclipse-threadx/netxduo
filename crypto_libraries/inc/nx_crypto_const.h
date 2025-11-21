@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -26,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_crypto_const.h                                  PORTABLE C       */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -43,6 +43,16 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s), added    */
 /*                                            new constants,              */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
+/*                                            renamed FIPS symbol to      */
+/*                                            self-test,                  */
+/*                                            resulting in version 6.1.7  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), added    */
+/*                                            x25519 and x448 curves,     */
+/*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
+/*                                            EC curve type macro,        */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -191,6 +201,8 @@ extern   "C" {
 #define NX_CRYPTO_EC_BRAINPOOLP256r1             0x0006001A
 #define NX_CRYPTO_EC_BRAINPOOLP384r1             0x0006001B
 #define NX_CRYPTO_EC_BRAINPOOLP512r1             0x0006001C
+#define NX_CRYPTO_EC_X25519                      0x0006001D
+#define NX_CRYPTO_EC_X448                        0x0006001E
 #define NX_CRYPTO_EC_FFDHE2048                   0x00060100
 #define NX_CRYPTO_EC_FFDHE3072                   0x00060101
 #define NX_CRYPTO_EC_FFDHE4096                   0x00060102
@@ -203,6 +215,11 @@ extern   "C" {
 #define NX_CRYPTO_EC_POINT_UNCOMPRESSED              0
 #define NX_CRYPTO_EC_POINT_ANSIX962_COMPRESSED_PRIME 1
 #define NX_CRYPTO_EC_POINT_ANSIX962_COMPRESSED_CHAR2 2
+
+/* Elliptic curve type definitions. */
+#define NX_CRYPTO_EC_CURVE_TYPE_EXPLICIT_PRIME       1
+#define NX_CRYPTO_EC_CURVE_TYPE_EXPLICIT_CHAR2       2
+#define NX_CRYPTO_EC_CURVE_TYPE_NAMED_CURVE          3
 
 /* Define crypto ICV bits size. */
 #define NX_CRYPTO_AUTHENTICATION_ICV_TRUNC_BITS  96
@@ -319,13 +336,13 @@ typedef UINT NX_CRYPTO_KEY_SIZE;
 /* The following symbols are mapped to the error code for backward compatibility. */
 #define NX_CRYPTO_AES_UNSUPPORTED_KEY_SIZE       NX_CRYPTO_UNSUPPORTED_KEY_SIZE
 
-#ifdef NX_CRYPTO_FIPS
+#ifdef NX_CRYPTO_SELF_TEST
 #define NX_CRYPTO_LIBRARY_STATE_UNINITIALIZED            0x00000001U
 #define NX_CRYPTO_LIBRARY_STATE_POST_IN_PROGRESS         0x00000002U
 #define NX_CRYPTO_LIBRARY_STATE_POST_FAILED              0x00000004U
 #define NX_CRYPTO_LIBRARY_STATE_OPERATIONAL              0x80000000U
 
-#endif /* NX_CRYPTO_FIPS */
+#endif /* NX_CRYPTO_SELF_TEST */
 
 
 #ifdef __cplusplus

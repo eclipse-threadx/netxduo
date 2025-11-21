@@ -1,15 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
-
-/* Version: 6.1 */
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 #include "nx_azure_iot_provisioning_client.h"
 
@@ -33,10 +31,7 @@
 #define NX_AZURE_IOT_PROVISIONING_CLIENT_PAYLOAD_END                  "}"
 #define NX_AZURE_IOT_PROVISIONING_CLIENT_POLICY_NAME                  "registration"
 
-/* Set the default timeout for connecting on cloud thread.  */
-#ifndef NX_AZURE_IOT_PROVISIONING_CLIENT_CONNECT_TIMEOUT
-#define NX_AZURE_IOT_PROVISIONING_CLIENT_CONNECT_TIMEOUT              (20 * NX_IP_PERIODIC_RATE)
-#endif /* NX_AZURE_IOT_PROVISIONING_CLIENT_CONNECT_TIMEOUT */
+#define NX_AZURE_IOT_PROVISIONING_CLIENT_WEB_SOCKET_PATH              "/$iothub/websocket"
 
 /* Set the default retry to Provisioning service.  */
 #ifndef NX_AZURE_IOT_PROVISIONING_CLIENT_DEFAULT_RETRY
@@ -97,7 +92,7 @@ UINT status;
                                                                   &response -> register_response);
     if (az_result_failed(core_result))
     {
-        LogError(LogLiteralArgs("IoTProvisioning client failed to parse packet, error status: "), core_result);
+        LogError(LogLiteralArgs("IoTProvisioning client failed to parse packet, error status: %d"), core_result);
         return(NX_AZURE_IOT_SDK_CORE_ERROR);
     }
 
@@ -139,6 +134,7 @@ UINT status;
 NXD_ADDRESS server_address;
 NXD_MQTT_CLIENT *mqtt_client_ptr;
 NX_AZURE_IOT_RESOURCE *resource_ptr;
+UINT server_port;
 
     /* Resolve the host name.  */
     status = nxd_dns_host_by_name_get(prov_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_dns_ptr,
@@ -156,18 +152,43 @@ NX_AZURE_IOT_RESOURCE *resource_ptr;
     mqtt_client_ptr = &(resource_ptr -> resource_mqtt);
 
     /* Set login info.  */
-    status = nxd_mqtt_client_login_set(mqtt_client_ptr, (CHAR *)resource_ptr -> resource_mqtt_user_name,
-                                       resource_ptr -> resource_mqtt_user_name_length,
-                                       (CHAR *)resource_ptr -> resource_mqtt_sas_token,
-                                       resource_ptr -> resource_mqtt_sas_token_length);
+    if (resource_ptr -> resource_mqtt_sas_token_length == 0)
+    {
+
+        /* X509 authentication. Set NULL for password.  */
+        status = nxd_mqtt_client_login_set(mqtt_client_ptr, (CHAR *)resource_ptr -> resource_mqtt_user_name,
+                                        resource_ptr -> resource_mqtt_user_name_length,
+                                        NX_NULL, 0);
+    }
+    else
+    {
+        status = nxd_mqtt_client_login_set(mqtt_client_ptr, (CHAR *)resource_ptr -> resource_mqtt_user_name,
+                                        resource_ptr -> resource_mqtt_user_name_length,
+                                        (CHAR *)resource_ptr -> resource_mqtt_sas_token,
+                                        resource_ptr -> resource_mqtt_sas_token_length);
+    }
+
     if (status)
     {
         LogError(LogLiteralArgs("IoTProvisioning client connect fail: MQTT CLIENT LOGIN SET FAIL status: %d"), status);
         return(status);
     }
 
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+    if (mqtt_client_ptr -> nxd_mqtt_client_use_websocket == NX_TRUE)
+    {
+        server_port = NXD_MQTT_OVER_WEBSOCKET_TLS_PORT;
+    }
+    else
+    {
+        server_port = NXD_MQTT_TLS_PORT;
+    }
+#else
+    server_port = NXD_MQTT_TLS_PORT;
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
+
     /* Start MQTT connection.  */
-    status = nxd_mqtt_client_secure_connect(mqtt_client_ptr, &server_address, NXD_MQTT_TLS_PORT,
+    status = nxd_mqtt_client_secure_connect(mqtt_client_ptr, &server_address, server_port,
                                             nx_azure_iot_mqtt_tls_setup, NX_AZURE_IOT_MQTT_KEEP_ALIVE,
                                             NX_FALSE, wait_option);
 
@@ -465,7 +486,7 @@ UINT status;
         {
 
             /* Start new operation.  */
-            status = nx_azure_iot_provisioning_client_send_req(context, NULL, NX_AZURE_IOT_PROVISIONING_CLIENT_CONNECT_TIMEOUT);
+            status = nx_azure_iot_provisioning_client_send_req(context, NULL, NX_NO_WAIT);
         }
 
         if (status)
@@ -627,7 +648,7 @@ az_result core_result;
     buffer_size = (UINT)(packet_ptr -> nx_packet_data_end - packet_ptr -> nx_packet_prepend_ptr);
 
     status = nx_azure_iot_mqtt_packet_id_get(&(prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_mqtt),
-                                             packet_id, wait_option);
+                                             packet_id);
     if (status)
     {
         LogError(LogLiteralArgs("failed to get packetId "));
@@ -635,16 +656,20 @@ az_result core_result;
         return(status);
     }
 
-    if (register_response == NULL)
+    /* if no registration response or operation Id is missing, send new registration request. */
+    if ((register_response == NULL) ||
+        (az_span_size(register_response -> operation_id) == 0))
     {
         core_result = az_iot_provisioning_client_register_get_publish_topic(&(prov_client_ptr -> nx_azure_iot_provisioning_client_core),
-                                                                            (CHAR *)buffer_ptr, buffer_size, &mqtt_topic_length);
+                                                                            (CHAR *)buffer_ptr, buffer_size,
+                                                                            (size_t *)&mqtt_topic_length);
     }
     else
     {
         core_result = az_iot_provisioning_client_query_status_get_publish_topic(&(prov_client_ptr -> nx_azure_iot_provisioning_client_core),
                                                                                 register_response -> operation_id, (CHAR *)buffer_ptr,
-                                                                                buffer_size, &mqtt_topic_length);
+                                                                                buffer_size,
+                                                                                (size_t *)&mqtt_topic_length);
     }
 
     if (az_result_failed(core_result))
@@ -772,7 +797,7 @@ az_span policy_name = AZ_SPAN_LITERAL_FROM_STR(NX_AZURE_IOT_PROVISIONING_CLIENT_
                                                               buffer_span, expiry_time_secs, policy_name,
                                                               (CHAR *)resource_ptr -> resource_mqtt_sas_token,
                                                               prov_client_ptr -> nx_azure_iot_provisioning_client_sas_token_buff_size,
-                                                              &(resource_ptr -> resource_mqtt_sas_token_length));
+                                                              (size_t *)&(resource_ptr -> resource_mqtt_sas_token_length));
     if (az_result_failed(core_result))
     {
         LogError(LogLiteralArgs("IoTProvisioning failed to generate token with error : %d"), core_result);
@@ -837,7 +862,7 @@ az_span registration_id_span = az_span_create((UCHAR *)registration_id, (INT)reg
     prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_cipher_map_size = cipher_map_size;
     prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_metadata_ptr = metadata_memory;
     prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_metadata_size = memory_size;
-    prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_trusted_certificate = trusted_certificate;
+    prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_trusted_certificates[0] = trusted_certificate;
     prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_hostname = endpoint;
     prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_hostname_length = endpoint_length;
     resource_ptr -> resource_mqtt_client_id_length = prov_client_ptr -> nx_azure_iot_provisioning_client_registration_id_length;
@@ -892,7 +917,8 @@ az_span registration_id_span = az_span_create((UCHAR *)registration_id, (INT)reg
 
     /* Build user name.  */
     if (az_result_failed(az_iot_provisioning_client_get_user_name(&(prov_client_ptr -> nx_azure_iot_provisioning_client_core),
-                                                                  (CHAR *)buffer_ptr, buffer_size, &mqtt_user_name_length)))
+                                                                  (CHAR *)buffer_ptr, buffer_size,
+                                                                  (size_t *)&mqtt_user_name_length)))
     {
         LogError(LogLiteralArgs("IoTProvisioning client connect fail: NX_AZURE_IOT_Provisioning_CLIENT_USERNAME_SIZE is too small."));
         nx_azure_iot_buffer_free(buffer_context);
@@ -1009,9 +1035,54 @@ UINT status;
     return(NX_AZURE_IOT_SUCCESS);
 }
 
+UINT nx_azure_iot_provisioning_client_trusted_cert_add(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr,
+                                                       NX_SECURE_X509_CERT *trusted_certificate)
+{
+UINT i;
+NX_AZURE_IOT_RESOURCE *resource_ptr;
+
+    if ((prov_client_ptr == NX_NULL) ||
+        (prov_client_ptr -> nx_azure_iot_ptr == NX_NULL) ||
+        (trusted_certificate == NX_NULL))
+    {
+        LogError(LogLiteralArgs("IoTHub device certificate set fail: INVALID POINTER"));
+        return(NX_AZURE_IOT_INVALID_PARAMETER);
+    }
+
+    /* Obtain the mutex.  */
+    tx_mutex_get(prov_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr, TX_WAIT_FOREVER);
+
+    resource_ptr = &(prov_client_ptr -> nx_azure_iot_provisioning_client_resource);
+    for (i = 0; i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_trusted_certificates); i++)
+    {
+        if (resource_ptr -> resource_trusted_certificates[i] == NX_NULL)
+        {
+            resource_ptr -> resource_trusted_certificates[i] = trusted_certificate;
+            break;
+        }
+    }
+
+    /* Release the mutex.  */
+    tx_mutex_put(prov_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr);
+
+    if (i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_trusted_certificates))
+    {
+        return(NX_AZURE_IOT_SUCCESS);
+    }
+    else
+    {
+
+        /* No more space to store trusted certificate.  */
+        return(NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE);
+    }
+}
+
 UINT nx_azure_iot_provisioning_client_device_cert_set(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr,
                                                       NX_SECURE_X509_CERT *x509_cert)
 {
+UINT i;
+NX_AZURE_IOT_RESOURCE *resource_ptr;
+
     if ((prov_client_ptr == NX_NULL) || (prov_client_ptr -> nx_azure_iot_ptr == NX_NULL) || (x509_cert == NX_NULL))
     {
         LogError(LogLiteralArgs("IoTProvisioning device cert set fail: INVALID POINTER"));
@@ -1021,14 +1092,49 @@ UINT nx_azure_iot_provisioning_client_device_cert_set(NX_AZURE_IOT_PROVISIONING_
     /* Obtain the mutex.  */
     tx_mutex_get(prov_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr, NX_WAIT_FOREVER);
 
-    prov_client_ptr -> nx_azure_iot_provisioning_client_resource.resource_device_certificate = x509_cert;
+    resource_ptr = &(prov_client_ptr -> nx_azure_iot_provisioning_client_resource);
+    for (i = 0; i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_device_certificates); i++)
+    {
+        if (resource_ptr -> resource_device_certificates[i] == NX_NULL)
+        {
+            resource_ptr -> resource_device_certificates[i] = x509_cert;
+            break;
+        }
+    }
 
     /* Release the mutex.  */
     tx_mutex_put(prov_client_ptr -> nx_azure_iot_ptr -> nx_azure_iot_mutex_ptr);
 
-    return(NX_AZURE_IOT_SUCCESS);
+    if (i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_device_certificates))
+    {
+        return(NX_AZURE_IOT_SUCCESS);
+    }
+    else
+    {
+
+        /* No more space to store device certificate.  */
+        return(NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE);
+    }
 }
 
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+UINT nx_azure_iot_provisioning_client_websocket_enable(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr)
+{
+NX_AZURE_IOT_RESOURCE *resource_ptr;
+
+    if (prov_client_ptr == NX_NULL)
+    {
+        LogError(LogLiteralArgs("IoTProvisioning client WebSocket enable fail: INVALID POINTER"));
+        return(NX_AZURE_IOT_INVALID_PARAMETER);
+    }
+
+    /* Set resource pointer.  */
+    resource_ptr = &(prov_client_ptr -> nx_azure_iot_provisioning_client_resource);
+
+    return(nxd_mqtt_client_websocket_set(&(resource_ptr -> resource_mqtt), (UCHAR *)resource_ptr -> resource_hostname, resource_ptr -> resource_hostname_length, 
+                                         (UCHAR *)NX_AZURE_IOT_PROVISIONING_CLIENT_WEB_SOCKET_PATH, sizeof(NX_AZURE_IOT_PROVISIONING_CLIENT_WEB_SOCKET_PATH) - 1));
+}
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
 
 static VOID nx_azure_iot_provisioning_client_event_process(NX_AZURE_IOT *nx_azure_iot_ptr,
                                                            ULONG common_events, ULONG module_own_events)

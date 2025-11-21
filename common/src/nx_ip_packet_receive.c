@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -35,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_packet_receive                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -74,6 +74,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added new ip filter,        */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ip_packet_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -98,6 +101,21 @@ UCHAR version_byte;
         packet_ptr -> nx_packet_address.nx_packet_interface_ptr = &(ip_ptr -> nx_ip_interface[0]);
     }
 
+#ifndef NX_DISABLE_IPV4
+    /* GHSA-pf5q-r6q5-6j2f:  
+       This is an IPv4 packet. Therefore the header length must be at least 20 bytes.
+       Validate the payload size before accessing the IP header. */
+    if(packet_ptr -> nx_packet_length < sizeof(NX_IPV4_HEADER))
+    {
+        /* Invalid payload length */
+
+        /* Drop the packet. */
+        _nx_packet_release(packet_ptr);
+
+        return;        
+    }
+#endif
+
     /* It's assumed that the IP link driver has positioned the top pointer in the
        packet to the start of the IP address... so that's where we will start.  */
     version_byte =  *(packet_ptr -> nx_packet_prepend_ptr);
@@ -117,6 +135,20 @@ UCHAR version_byte;
         /* Yes, call the IP packet filter routine. */
         if (ip_ptr -> nx_ip_packet_filter((VOID *)(packet_ptr -> nx_packet_prepend_ptr),
                                           NX_IP_PACKET_IN) != NX_SUCCESS)
+        {
+
+            /* Drop the packet. */
+            _nx_packet_release(packet_ptr);
+            return;
+        }
+    }
+
+    /* Check if the IP packet filter extended is set. */
+    if (ip_ptr -> nx_ip_packet_filter_extended)
+    {
+
+        /* Yes, call the IP packet filter extended routine. */
+        if (ip_ptr -> nx_ip_packet_filter_extended(ip_ptr, packet_ptr, NX_IP_PACKET_IN) != NX_SUCCESS)
         {
 
             /* Drop the packet. */

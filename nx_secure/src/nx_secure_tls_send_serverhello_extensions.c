@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -32,7 +32,7 @@ static UINT _nx_secure_tls_send_serverhello_sec_reneg_extension(NX_SECURE_TLS_SE
                                                                 ULONG available_size);
 #endif
 
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
 static UINT _nx_secure_tls_send_serverhello_supported_versions_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                           UCHAR *packet_buffer, ULONG *packet_offset,
                                                           USHORT *extension_length,
@@ -56,7 +56,7 @@ static UINT _nx_secure_tls_send_serverhello_psk_extension(NX_SECURE_TLS_SESSION 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello_extensions          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -96,6 +96,12 @@ static UINT _nx_secure_tls_send_serverhello_psk_extension(NX_SECURE_TLS_SESSION 
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed unused code,        */
+/*                                            resulting in version 6.1.11 */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_serverhello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -104,15 +110,15 @@ UINT _nx_secure_tls_send_serverhello_extensions(NX_SECURE_TLS_SESSION *tls_sessi
 {
 ULONG  length = *packet_offset;
 UCHAR *extension_offset;
-#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) || (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) || ((NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED))
 USHORT extension_length = 0;
 #endif /* !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) || (NX_SECURE_TLS_TLS_1_3_ENABLED)  */
 USHORT total_extensions_length;
 UINT   status = NX_SUCCESS;
 
-#if defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) && (!NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) || (!NX_SECURE_TLS_TLS_1_3_ENABLED)
     NX_PARAMETER_NOT_USED(tls_session);
-#endif /* defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) && (!NX_SECURE_TLS_TLS_1_3_ENABLED) */
+#endif /* defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) || (!NX_SECURE_TLS_TLS_1_3_ENABLED) */
 
     if (available_size < (*packet_offset + 2u))
     {
@@ -130,7 +136,7 @@ UINT   status = NX_SUCCESS;
     total_extensions_length = 0;
 
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
     /* Renegotiation is deprecated in TLS 1.3 so don't send extension. */
     if(!tls_session->nx_secure_tls_1_3)
 #endif
@@ -148,7 +154,7 @@ UINT   status = NX_SUCCESS;
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
 
 
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
     if(tls_session->nx_secure_tls_1_3)
     {
 
@@ -198,7 +204,6 @@ UINT   status = NX_SUCCESS;
     {
         /* No extensions written, back up our pointer and length. */
         length -= 2;
-        packet_buffer = extension_offset;
     }
     else
     {
@@ -219,7 +224,7 @@ UINT   status = NX_SUCCESS;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello_sec_reneg_extension PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -363,9 +368,9 @@ UINT   data_length;
         offset++;
 
         /* Copy the verify data into the packet. */
-        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_remote_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_remote_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
         offset += NX_SECURE_TLS_FINISHED_HASH_SIZE;
-        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_local_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(&packet_buffer[offset], tls_session -> nx_secure_tls_local_verify_data, NX_SECURE_TLS_FINISHED_HASH_SIZE); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
         offset += NX_SECURE_TLS_FINISHED_HASH_SIZE;
     }
 
@@ -387,7 +392,7 @@ UINT   data_length;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_supported_versions_extension        */
 /*                                                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -427,7 +432,7 @@ UINT   data_length;
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
 static UINT _nx_secure_tls_send_serverhello_supported_versions_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                           UCHAR *packet_buffer, ULONG *packet_offset,
                                                           USHORT *extension_length, ULONG available_size)
@@ -490,7 +495,7 @@ UINT   data_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello_key_share_extension PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -529,14 +534,20 @@ UINT   data_length;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
+/*                                            compilation issue with      */
+/*                                            TLS 1.3 and disabling TLS   */
+/*                                            server,                     */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
 static UINT _nx_secure_tls_send_serverhello_key_share_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                                 UCHAR *packet_buffer, ULONG *packet_offset,
                                                                 USHORT *extension_length,
                                                                 ULONG available_size)
 {
+#ifndef NX_SECURE_TLS_SERVER_DISABLED            
 ULONG  offset;
 ULONG  length_offset;
 USHORT ext;
@@ -716,6 +727,10 @@ USHORT named_curve;
 
 
     return(NX_SUCCESS);
+#else
+    /* Server is disabled, we shouldn't be processing a ClientHello - error! */
+    return(NX_SECURE_TLS_INVALID_STATE);
+#endif            
 }
 #endif
 
@@ -724,7 +739,7 @@ USHORT named_curve;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello_psk_extension       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -765,7 +780,7 @@ USHORT named_curve;
 /*                                                                        */
 /**************************************************************************/
 
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && defined (NX_SECURE_ENABLE_PSK_CIPHERSUITES)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && defined (NX_SECURE_ENABLE_PSK_CIPHERSUITES) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
 static UINT _nx_secure_tls_send_serverhello_psk_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                    UCHAR *packet_buffer, ULONG *packet_length,
                                                    USHORT *extension_length, ULONG available_size)

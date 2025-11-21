@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -40,7 +40,7 @@ static const ULONG _nx_ipv6_unspecified_address[4] = {0, 0, 0, 0};
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_send_ns                                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -226,13 +226,13 @@ NX_IP_DRIVER  driver_request;
         /* Fill in the source MAC address */
         mac_addr = &nd_options ->  nx_icmpv6_option_data;
         mac_addr[0] = (USHORT)(outgoing_address -> nxd_ipv6_address_attached -> nx_interface_physical_address_msw);
-        mac_addr[1] = (USHORT)((outgoing_address -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0xFFFF0000) >> 16);
-        mac_addr[2] = (USHORT)(outgoing_address -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0x0000FFFF);
+        mac_addr[1] = (USHORT)((outgoing_address -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0xFFFF0000) >> 16); /* lgtm[cpp/overflow-buffer] */
+        mac_addr[2] = (USHORT)(outgoing_address -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0x0000FFFF); /* lgtm[cpp/overflow-buffer] */
 
         /* Byte swapping. */
         NX_CHANGE_USHORT_ENDIAN(mac_addr[0]);
-        NX_CHANGE_USHORT_ENDIAN(mac_addr[1]);
-        NX_CHANGE_USHORT_ENDIAN(mac_addr[2]);
+        NX_CHANGE_USHORT_ENDIAN(mac_addr[1]); /* lgtm[cpp/overflow-buffer] */
+        NX_CHANGE_USHORT_ENDIAN(mac_addr[2]); /* lgtm[cpp/overflow-buffer] */
     }
 
 #ifdef NX_DISABLE_ICMPV6_TX_CHECKSUM

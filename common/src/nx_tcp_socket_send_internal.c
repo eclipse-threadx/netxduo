@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -38,12 +38,179 @@
 #endif /* NX_IPSEC_ENABLE */
 
 
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_tcp_socket_driver_send                          PORTABLE C      */
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sends a TCP packet through TCP/IP offload interface.  */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    socket_ptr                            Pointer to socket             */
+/*    packet_ptr                            Pointer to packet to send     */
+/*    wait_option                           Suspension option             */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_ip_packet_send                    Packet send function          */
+/*    _nx_ipv6_packet_send                  Packet send function          */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_tcp_socket_send_internal                                        */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
+/*  12-31-2023     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN,             */
+/*                                            resulting in version 6.4.0  */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_tcp_socket_driver_send(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr, ULONG wait_option)
+{
+UINT            status;
+NX_IP          *ip_ptr;
+NX_INTERFACE   *interface_ptr = socket_ptr -> nx_tcp_socket_connect_interface;
+#ifdef NX_ENABLE_IP_PACKET_FILTER
+UCHAR          *original_ptr = packet_ptr -> nx_packet_prepend_ptr;
+ULONG           original_length = packet_ptr -> nx_packet_length;
+NX_TCP_HEADER  *header_ptr;
+#endif /* NX_ENABLE_IP_PACKET_FILTER */
+
+    /* Setup the pointer to the associated IP instance.  */
+    ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
+
+#ifdef NX_ENABLE_IP_PACKET_FILTER
+    /* Check if the IP packet filter is set. */
+    if (ip_ptr -> nx_ip_packet_filter || ip_ptr -> nx_ip_packet_filter_extended)
+    {
+
+        /* Yes, add the TCP and IP Header to trigger filtering.  */          
+        /* Prepend the TCP header to the packet.  First, make room for the TCP header.  */
+        packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr - sizeof(NX_TCP_HEADER);
+
+        /* Add the length of the TCP header.  */
+        packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length + (ULONG)sizeof(NX_TCP_HEADER);
+
+        /* Pickup the pointer to the head of the TCP packet.  */
+        /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
+        header_ptr =  (NX_TCP_HEADER *)packet_ptr -> nx_packet_prepend_ptr;
+
+        /* Build the output request in the TCP header.  */
+        header_ptr -> nx_tcp_header_word_0 = (((ULONG)(socket_ptr -> nx_tcp_socket_port)) << NX_SHIFT_BY_16) |
+                                                (ULONG)socket_ptr -> nx_tcp_socket_connect_port;
+        header_ptr -> nx_tcp_acknowledgment_number = 0;
+        header_ptr -> nx_tcp_sequence_number = 0;            
+        header_ptr -> nx_tcp_header_word_3 = NX_TCP_HEADER_SIZE | NX_TCP_ACK_BIT | NX_TCP_PSH_BIT;
+        header_ptr -> nx_tcp_header_word_4 = 0;
+        
+        /* Endian swapping logic.  If NX_LITTLE_ENDIAN is specified, these macros will
+            swap the endian of the TCP header.  */
+        NX_CHANGE_ULONG_ENDIAN(header_ptr -> nx_tcp_header_word_0);
+        NX_CHANGE_ULONG_ENDIAN(header_ptr -> nx_tcp_header_word_3);
+
+#ifndef NX_DISABLE_IPV4
+        if (socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_version == NX_IP_VERSION_V4)
+        {
+            _nx_ip_header_add(ip_ptr, packet_ptr,
+                              socket_ptr -> nx_tcp_socket_connect_interface -> nx_interface_ip_address,
+                              socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_address.v4,
+                              socket_ptr -> nx_tcp_socket_type_of_service,
+                              socket_ptr -> nx_tcp_socket_time_to_live,
+                              NX_IP_TCP,
+                              socket_ptr -> nx_tcp_socket_fragment_enable);
+        }
+#endif /* !NX_DISABLE_IPV4  */
+
+#ifdef FEATURE_NX_IPV6
+        if (socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_version == NX_IP_VERSION_V6)
+        {
+            if (_nx_ipv6_header_add(ip_ptr, &packet_ptr,
+                                    NX_PROTOCOL_TCP,
+                                    packet_ptr -> nx_packet_length,
+                                    ip_ptr -> nx_ipv6_hop_limit,
+                                    socket_ptr -> nx_tcp_socket_ipv6_addr -> nxd_ipv6_address,
+                                    socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_address.v6,
+                                    NX_NULL))
+            {
+
+                /* Invalid interface address. Just return success.  */
+                return(NX_SUCCESS);
+            }
+        }
+#endif /* FEATURE_NX_IPV6 */
+
+        if (ip_ptr -> nx_ip_packet_filter)
+        {
+            if (ip_ptr -> nx_ip_packet_filter((VOID *)(packet_ptr -> nx_packet_prepend_ptr),
+                                              NX_IP_PACKET_OUT) != NX_SUCCESS)
+            {
+
+                /* Packet consumed by IP filter. Just return success.  */
+                _nx_packet_transmit_release(packet_ptr);
+                return(NX_SUCCESS);
+            }
+        }
+
+        /* Check if the IP packet filter extended is set. */
+        if (ip_ptr -> nx_ip_packet_filter_extended)
+        {
+
+            /* Yes, call the IP packet filter extended routine. */
+            if (ip_ptr -> nx_ip_packet_filter_extended(ip_ptr, packet_ptr, NX_IP_PACKET_OUT) != NX_SUCCESS)
+            {
+
+                /* Packet consumed by IP filter. Just return success.  */
+                _nx_packet_transmit_release(packet_ptr);
+                return(NX_SUCCESS);
+            }
+        }
+
+        /* Reset UDP and IP header.  */
+        packet_ptr -> nx_packet_prepend_ptr = original_ptr;
+        packet_ptr -> nx_packet_length = original_length;
+    }
+#endif /* NX_ENABLE_IP_PACKET_FILTER */
+
+    /* Let TCP/IP offload interface send the packet.  */
+    status = interface_ptr -> nx_interface_tcpip_offload_handler(ip_ptr, interface_ptr, socket_ptr,
+                                                                 NX_TCPIP_OFFLOAD_TCP_SOCKET_SEND,
+                                                                 packet_ptr, NX_NULL, NX_NULL, 0, NX_NULL,
+                                                                 wait_option);
+
+    if (status)
+    {
+        return(NX_TCPIP_OFFLOAD_ERROR);
+    }
+    else
+    {
+        return(NX_SUCCESS);
+    }
+}
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_send_internal                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -70,6 +237,7 @@
 /*    _nx_tcp_socket_thread_suspend         Suspend calling thread        */
 /*    tx_mutex_get                          Get protection mutex          */
 /*    tx_mutex_put                          Put protection mutex          */
+/*    _nx_tcp_socket_driver_send            TCP/IP offload send function  */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -88,6 +256,17 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed the bug of race       */
+/*                                            condition,                  */
+/*                                            resulting in version 6.1.9  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the throughput of  */
+/*                                            TCP transmission,           */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_send_internal(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr, ULONG wait_option)
@@ -116,6 +295,10 @@ UCHAR           preempted = NX_FALSE;
 UCHAR           adjust_packet;
 UINT            old_threshold = 0;
 ULONG           window_size;
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+UINT            status;
+NX_INTERFACE   *interface_ptr;
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 #if defined(NX_DISABLE_TCP_TX_CHECKSUM) || defined(NX_ENABLE_INTERFACE_CAPABILITY) || defined(NX_IPSEC_ENABLE)
 UINT            compute_checksum = 1;
 #endif /* defined(NX_DISABLE_TCP_TX_CHECKSUM) || defined(NX_ENABLE_INTERFACE_CAPABILITY) || defined(NX_IPSEC_ENABLE) */
@@ -146,6 +329,14 @@ UINT            compute_checksum = 1;
         return(NX_NOT_BOUND);
     }
 
+    /* Pickup the important information from the socket.  */
+
+    /* Setup the pointer to the associated IP instance.  */
+    ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
+
+    /* Restore interrupts.  */
+    TX_RESTORE
+
     /* Check if the connection is in progress. */
     if ((socket_ptr -> nx_tcp_socket_state == NX_TCP_SYN_SENT) || (socket_ptr -> nx_tcp_socket_state == NX_TCP_SYN_RECEIVED))
     {
@@ -154,24 +345,19 @@ UINT            compute_checksum = 1;
         _nx_tcp_socket_state_wait(socket_ptr, NX_TCP_ESTABLISHED, wait_option);
     }
 
+    /* Obtain the IP mutex.  */
+    tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
+
     /* Check for the socket being in an established state.  */
     if ((socket_ptr -> nx_tcp_socket_state != NX_TCP_ESTABLISHED) && (socket_ptr -> nx_tcp_socket_state != NX_TCP_CLOSE_WAIT))
     {
 
-        /* Restore interrupts.  */
-        TX_RESTORE
+        /* Release the protection.  */
+        tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
         /* Socket is not connected, return an error message.  */
         return(NX_NOT_CONNECTED);
     }
-
-    /* Pickup the important information from the socket.  */
-
-    /* Setup the pointer to the associated IP instance.  */
-    ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
-
-    /* Restore interrupts.  */
-    TX_RESTORE
 
     /* Add debug information. */
     NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
@@ -183,7 +369,7 @@ UINT            compute_checksum = 1;
         /* Set the source address. */
         source_ip = &socket_ptr -> nx_tcp_socket_connect_interface -> nx_interface_ip_address;
 
-        /* Set the destinatino address. */
+        /* Set the destination address. */
         dest_ip = &socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_address.v4;
 
         /* The outgoing interface should have been stored in the socket structure. */
@@ -202,6 +388,9 @@ UINT            compute_checksum = 1;
         if (socket_ptr -> nx_tcp_socket_ipv6_addr -> nxd_ipv6_address_state != NX_IPV6_ADDR_STATE_VALID)
         {
 
+            /* Release the protection.  */
+            tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
             /* Add debug information. */
             NX_PACKET_DEBUG(__FILE__, __LINE__, packet_ptr);
 
@@ -210,7 +399,7 @@ UINT            compute_checksum = 1;
         /* Set the source address. */
         source_ip = socket_ptr -> nx_tcp_socket_ipv6_addr -> nxd_ipv6_address;
 
-        /* Set the destinatino address. */
+        /* Set the destination address. */
         dest_ip = socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_address.v6;
 
         /* The outgoing address should have been stored in the socket structure. */
@@ -220,6 +409,22 @@ UINT            compute_checksum = 1;
         data_offset = NX_PHYSICAL_HEADER + sizeof(NX_IPV6_HEADER) + sizeof(NX_TCP_HEADER);
     }
 #endif /* FEATURE_NX_IPV6 */
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+    interface_ptr = socket_ptr -> nx_tcp_socket_connect_interface;
+    if ((interface_ptr -> nx_interface_capability_flag & NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD) &&
+        (interface_ptr -> nx_interface_tcpip_offload_handler))
+    {
+
+        /* This interface supports TCP/IP offload.  */
+        status = _nx_tcp_socket_driver_send(socket_ptr, packet_ptr, wait_option);
+
+        /* Release the IP protection.  */
+        tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+        return(status);
+    }
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
 #ifdef NX_IPSEC_ENABLE
     /* Increase the data offset when IPsec is enabled. */
@@ -238,9 +443,6 @@ UINT            compute_checksum = 1;
     /* Loop to send the packet. */
     for (;;)
     {
-
-        /* Place protection while we check the sequence number for the new TCP packet.  */
-        tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
 
         /* Pick up the min(cwnd, swnd) */
         if (socket_ptr -> nx_tcp_socket_tx_window_advertised > socket_ptr -> nx_tcp_socket_tx_window_congestion)
@@ -626,6 +828,9 @@ UINT            compute_checksum = 1;
                 {
                     _nx_packet_release(send_packet);
                 }
+
+                /* Regain exclusive access to IP instance. */
+                tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
                 continue;
             }
 
@@ -715,6 +920,13 @@ UINT            compute_checksum = 1;
             socket_ptr -> nx_tcp_socket_packets_sent++;
             socket_ptr -> nx_tcp_socket_bytes_sent += send_packet -> nx_packet_length - (ULONG)sizeof(NX_TCP_HEADER);
 #endif /* NX_DISABLE_TCP_INFO */
+
+#ifdef NX_ENABLE_VLAN
+            if (socket_ptr -> nx_tcp_socket_vlan_priority != NX_VLAN_PRIORITY_INVALID)
+            {
+                send_packet -> nx_packet_vlan_priority = socket_ptr -> nx_tcp_socket_vlan_priority;
+            }
+#endif /* NX_ENABLE_VLAN */
 
             /* If trace is enabled, insert this event into the trace buffer.  */
             NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_TCP_DATA_SEND, ip_ptr, socket_ptr, send_packet, socket_ptr -> nx_tcp_socket_tx_sequence - (send_packet -> nx_packet_length - sizeof(NX_TCP_HEADER)), NX_TRACE_INTERNAL_EVENTS, 0, 0);
@@ -809,6 +1021,9 @@ UINT            compute_checksum = 1;
 
                 /* Release the protection.  */
                 tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+                /* Regain exclusive access to IP instance. */
+                tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
             }
         }
         else if ((wait_option) && (_tx_thread_current_ptr != &(ip_ptr -> nx_ip_thread)))
@@ -908,4 +1123,3 @@ UINT            compute_checksum = 1;
         }
     }
 }
-

@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_psk_find                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -89,12 +89,18 @@ UINT i;
     /* Loop through all PSKs, looking for a matching identity string. */
     for (i = 0; i < psk_list_size; ++i)
     {
-        /* Save off the PSK and its length. */
-        compare_val = (UINT)NX_SECURE_MEMCMP(tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_id, psk_identity, identity_length);
+        /* GHSA-8h38-qjhh-mf2h */
+        /* PSK length must be equal */
+    	  if (identity_length != tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_id_size) {
+    		    continue;
+    	  }
+      
+        /* compare the PSK using stored psk length */
+        compare_val = (UINT)NX_SECURE_MEMCMP(tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_id, psk_identity, 
+          tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_id_size);
 
-        /* See if the identity matched, and the length is the same (without the length, we could have a
-           matching prefix which could be a possible attack vector... */
-        if (compare_val == 0 && identity_length == tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_id_size)
+        /* See if the identity matched */
+        if (compare_val == 0)
         {
             /* Found a matching identity, return the associated PSK. */
             *psk_data = tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_data;

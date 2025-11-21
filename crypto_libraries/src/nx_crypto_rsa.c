@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -28,7 +28,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_rsa_operation                            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -85,6 +85,9 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-08-2023     Yanwu Cai                Modified comment(s), aligned  */
+/*                                            buffer size of huge number, */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_rsa_operation(const UCHAR *exponent, UINT exponent_length, const UCHAR *modulus, UINT modulus_length,
@@ -92,7 +95,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_rsa_operation(const UCHAR *exponent, UINT expone
                                               const UCHAR *input, UINT input_length, UCHAR *output,
                                               USHORT *scratch_buf_ptr, UINT scratch_buf_length)
 {
-UCHAR                *scratch;
+HN_UBASE             *scratch;
 UINT                  mod_length;
 NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
 
@@ -100,27 +103,19 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
 
     /* The RSA operation is reversible so both encryption and decryption can be done with the same operation. */
     /* Local pointer for pointer arithmetic. */
-    scratch = (UCHAR *)scratch_buf_ptr;
+    scratch = (HN_UBASE *)scratch_buf_ptr;
 
     /* Set up each of the buffers - point into the scratch buffer at increments of the DH buffer size. */
-    modulus_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-    scratch += modulus_length;
-    modulus_hn.nx_crypto_huge_buffer_size = modulus_length;
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&modulus_hn, scratch, modulus_length);
 
     /* Input buffer(and scratch). */
-    input_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-    scratch += modulus_length;
-    input_hn.nx_crypto_huge_buffer_size = modulus_length;
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&input_hn, scratch, modulus_length);
 
     /* Exponent  buffer (and scratch). */
-    exponent_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-    scratch += modulus_length;
-    exponent_hn.nx_crypto_huge_buffer_size = modulus_length;
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&exponent_hn, scratch, modulus_length);
 
     /* Output buffer (and scratch). */
-    output_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-    scratch += modulus_length * 2;
-    output_hn.nx_crypto_huge_buffer_size = modulus_length * 2;
+    NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&output_hn, scratch, modulus_length << 1);
 
     /* Copy the exponent from the caller's buffer. */
     _nx_crypto_huge_number_setup(&exponent_hn, exponent, exponent_length);
@@ -134,13 +129,9 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
     if (p && q)
     {
 
-        p_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-        scratch += (modulus_length >> 1);
-        p_hn.nx_crypto_huge_buffer_size = (modulus_length >> 1);
+        NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&p_hn, scratch, modulus_length >> 1);
 
-        q_hn.nx_crypto_huge_number_data = (HN_UBASE *)scratch;
-        scratch += (modulus_length >> 1);
-        q_hn.nx_crypto_huge_buffer_size = (modulus_length >> 1);
+        NX_CRYPTO_HUGE_NUMBER_INITIALIZE(&q_hn, scratch, modulus_length >> 1);
 
         /* Copy the prime p and q from the caller's buffer. */
         _nx_crypto_huge_number_setup(&p_hn, p, p_length);
@@ -151,7 +142,7 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
            where the "**" denotes exponentiation. */
         _nx_crypto_huge_number_crt_power_modulus(&input_hn, &exponent_hn, &p_hn, &q_hn,
                                                  &modulus_hn, &output_hn,
-                                                 (HN_UBASE *)scratch);
+                                                 scratch);
     }
     else
     {
@@ -160,7 +151,7 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
            The actual calculation is "shared_secret = (public_key**private_key) % modulus"
            where the "**" denotes exponentiation. */
         _nx_crypto_huge_number_mont_power_modulus(&input_hn, &exponent_hn, &modulus_hn,
-                                                  &output_hn, (HN_UBASE *)scratch);
+                                                  &output_hn, scratch);
     }
 
     /* Copy the shared secret into the return buffer. */
@@ -174,7 +165,7 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_rsa_init                           PORTABLE C     */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -211,6 +202,8 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_rsa_init(struct NX_CRYPTO_METHOD_STRUCT *method,
@@ -230,7 +223,7 @@ NX_CRYPTO_RSA *ctx;
         return(NX_CRYPTO_PTR_ERROR);
     }
 
-    /* Verify the metadata addrsss is 4-byte aligned. */
+    /* Verify the metadata address is 4-byte aligned. */
     if((((ULONG)crypto_metadata) & 0x3) != 0)
     {
         return(NX_CRYPTO_PTR_ERROR);
@@ -262,7 +255,7 @@ NX_CRYPTO_RSA *ctx;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_rsa_cleanup                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -320,7 +313,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_rsa_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_rsa_operation                      PORTABLE C     */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -366,6 +359,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_rsa_cleanup(VOID *crypto_metadata)
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_rsa_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -394,7 +389,7 @@ UINT           return_value = NX_CRYPTO_SUCCESS;
 
     NX_CRYPTO_STATE_CHECK
 
-    /* Verify the metadata addrsss is 4-byte aligned. */
+    /* Verify the metadata address is 4-byte aligned. */
     if((method == NX_CRYPTO_NULL) || (crypto_metadata == NX_CRYPTO_NULL) || ((((ULONG)crypto_metadata) & 0x3) != 0))
     {
         return(NX_CRYPTO_PTR_ERROR);

@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_create_ext                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -82,6 +82,20 @@
 /*                                            added ECC initialization,   */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
+/*                                            added null pointer checking,*/
+/*                                            resulting in version 6.1.10 */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            added null pointer checking,*/
+/*                                            removed unused code,        */
+/*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), and added*/
+/*                                            custom secret generation,   */
+/*                                            resulting in version 6.2.0  */
+/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            fixed compiler errors when  */
+/*                                            x509 is disabled,           */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -352,21 +366,21 @@ const UCHAR all_found =     sig_found | key_ex_found | symm_found | hash_found |
 }
 
 
-
+#ifndef NX_SECURE_DISABLE_X509
 static UINT _map_x509_ciphersuites(NX_SECURE_TLS_SESSION *tls_session,
                                   const NX_CRYPTO_METHOD **crypto_array, UINT crypto_array_size,
                                   const NX_CRYPTO_CIPHERSUITE **cipher_map, UINT cipher_map_size, UINT *metadata_size)
 {
-NX_CRYPTO_ROLE_ENTRY            current_cipher;
-const NX_CRYPTO_METHOD                *cipher_method;
-NX_SECURE_X509_CRYPTO          *cert_crypto;
-NX_SECURE_TLS_CRYPTO *          crypto_table;
-UINT                            cipher_id;
-UINT                            suite;
-UINT                            cipher_counter;
-UINT                            status;
-UINT                            remaining_size;
-UCHAR                           crypto_found;
+NX_CRYPTO_ROLE_ENTRY    current_cipher;
+const NX_CRYPTO_METHOD *cipher_method;
+NX_SECURE_X509_CRYPTO  *cert_crypto;
+NX_SECURE_TLS_CRYPTO   *crypto_table;
+UINT                    cipher_id;
+UINT                    suite;
+UINT                    cipher_counter;
+UINT                    status;
+UINT                    remaining_size;
+UCHAR                   crypto_found;
 
 /* Constants for marking ciphers as found. */
 const UCHAR pub_key_found = 0x1;
@@ -455,7 +469,7 @@ const UCHAR all_found =     pub_key_found | hash_found;
 
     return(NX_SUCCESS);
 }
-
+#endif
 
 
 UINT _nx_secure_tls_session_create_ext(NX_SECURE_TLS_SESSION *tls_session,
@@ -484,8 +498,10 @@ NX_SECURE_TLS_CRYPTO *          crypto_table;
 
 NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_table;
 USHORT                          ciphersuite_table_size;
-NX_SECURE_X509_CRYPTO           *cert_crypto;
+#ifndef NX_SECURE_DISABLE_X509
+NX_SECURE_X509_CRYPTO          *cert_crypto;
 USHORT                          cert_crypto_size;
+#endif
 
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
 NX_CRYPTO_METHOD              **curve_crypto_list = NX_NULL;
@@ -526,6 +542,11 @@ ULONG metadata_size_sha256 = 0;
 
         /* Coming from the old-style API. Don't allocate crypto table. */
         crypto_table = tls_session->nx_secure_tls_crypto_table;
+
+        if (crypto_table == NX_NULL)
+        {
+            return(NX_PTR_ERROR);
+        }
 
         /* Start by assuming all versions are enabled, remove versions without the appropriate ciphers. */
         tls_session->nx_secure_tls_supported_versions = NX_SECURE_TLS_BITFIELD_VERSIONS_ALL;
@@ -571,6 +592,8 @@ ULONG metadata_size_sha256 = 0;
         metadata_size -= cipher_table_bytes;
         cipher_table_bytes = metadata_size;
 
+#ifndef NX_SECURE_DISABLE_X509
+
         /* Carve out space for our dynamic X.509 ciphersuite table. */
         crypto_table->nx_secure_tls_x509_cipher_table = (NX_SECURE_X509_CRYPTO*)(&metadata_area[0]);
         crypto_table->nx_secure_tls_x509_cipher_table_size = 0;
@@ -583,9 +606,11 @@ ULONG metadata_size_sha256 = 0;
             return(status);
         }
 
+
         /* Advance the metadata area past the end of the crypto table. */
         metadata_area += cipher_table_bytes;
         metadata_size -= cipher_table_bytes;
+#endif
 
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
         curve_crypto_list = (NX_CRYPTO_METHOD **)(&metadata_area[0]);
@@ -631,51 +656,55 @@ ULONG metadata_size_sha256 = 0;
                 supported_groups[i] = (USHORT)(curve_crypto_list[i] -> nx_crypto_algorithm & 0xFFFF);
             }
 
-            status = _nx_secure_tls_ecc_initialize(tls_session, supported_groups, ecc_curves_count, (const NX_CRYPTO_METHOD **)curve_crypto_list);
-            if (status != NX_SUCCESS)
-            {
-                return(status);
-            }
+            _nx_secure_tls_ecc_initialize(tls_session, supported_groups, ecc_curves_count, (const NX_CRYPTO_METHOD **)curve_crypto_list);
         }
 #endif
 
     }
 
     /* Get working pointers to our crypto methods. */
-    ciphersuite_table = crypto_table->nx_secure_tls_ciphersuite_lookup_table;
-    ciphersuite_table_size = crypto_table->nx_secure_tls_ciphersuite_lookup_table_size;
-
-    cert_crypto = crypto_table -> nx_secure_tls_x509_cipher_table;
-    cert_crypto_size = crypto_table -> nx_secure_tls_x509_cipher_table_size;
+    ciphersuite_table = crypto_table -> nx_secure_tls_ciphersuite_lookup_table;
+    ciphersuite_table_size = crypto_table -> nx_secure_tls_ciphersuite_lookup_table_size;
 
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
     crypto_method_md5 = crypto_table -> nx_secure_tls_handshake_hash_md5_method;
     crypto_method_sha1 = crypto_table -> nx_secure_tls_handshake_hash_sha1_method;
-    metadata_size_md5 = crypto_method_md5 -> nx_crypto_metadata_area_size;
-    metadata_size_sha1 = crypto_method_sha1 -> nx_crypto_metadata_area_size;
 
-    /* Align metadata size to four bytes. */
-    if (metadata_size_md5 & 0x3)
+    if (crypto_method_md5 != NX_NULL)
     {
-        metadata_size_md5 += 4 - (metadata_size_md5 & 0x3);
+        metadata_size_md5 = crypto_method_md5 -> nx_crypto_metadata_area_size;
+
+        /* Align metadata size to four bytes. */
+        if (metadata_size_md5 & 0x3)
+        {
+            metadata_size_md5 += 4 - (metadata_size_md5 & 0x3);
+        }
     }
 
-    if (metadata_size_sha1 & 0x3)
+    if (crypto_method_sha1 != NX_NULL)
     {
-        metadata_size_sha1 += 4 - (metadata_size_sha1 & 0x3);
+        metadata_size_sha1 = crypto_method_sha1 -> nx_crypto_metadata_area_size;
+
+        if (metadata_size_sha1 & 0x3)
+        {
+            metadata_size_sha1 += 4 - (metadata_size_sha1 & 0x3);
+        }
     }
 #endif
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
     crypto_method_sha256 = crypto_table -> nx_secure_tls_handshake_hash_sha256_method;
-    metadata_size_sha256 = crypto_method_sha256 -> nx_crypto_metadata_area_size;
-
-    if (metadata_size_sha256 & 0x3)
+    if (crypto_method_sha256 != NX_NULL)
     {
-        metadata_size_sha256 += 4 - (metadata_size_sha256 & 0x3);
+        metadata_size_sha256 = crypto_method_sha256 -> nx_crypto_metadata_area_size;
+
+        if (metadata_size_sha256 & 0x3)
+        {
+            metadata_size_sha256 += 4 - (metadata_size_sha256 & 0x3);
+        }
     }
 #endif
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-    tls_session->nx_secure_tls_1_3_supported = NX_FALSE;
+    tls_session -> nx_secure_tls_1_3_supported = NX_FALSE;
 #endif
 
     /* Loop through the ciphersuite table and find the largest metadata for each type of cipher. */
@@ -720,6 +749,10 @@ ULONG metadata_size_sha256 = 0;
     tls_session -> nx_secure_tls_1_3 = tls_session -> nx_secure_tls_1_3_supported;
 #endif
 
+#ifndef NX_SECURE_DISABLE_X509
+    cert_crypto = crypto_table->nx_secure_tls_x509_cipher_table;
+    cert_crypto_size = crypto_table->nx_secure_tls_x509_cipher_table_size;
+
     /* Loop through the certificate cipher table as well. */
     for (i = 0; i < cert_crypto_size; ++i)
     {
@@ -738,6 +771,7 @@ ULONG metadata_size_sha256 = 0;
             max_handshake_hash_scratch_size = cert_crypto[i].nx_secure_x509_hash_method -> nx_crypto_metadata_area_size;
         }
     }
+#endif
 
     /* We also need metadata space for the TLS handshake hash, so add that into the total.
        We need some scratch space to copy the handshake hash metadata during final hash generation
@@ -751,9 +785,12 @@ ULONG metadata_size_sha256 = 0;
             max_handshake_hash_scratch_size = metadata_size_md5 + metadata_size_sha1;
         }
 
-        if (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_prf_1_method -> nx_crypto_metadata_area_size)
+        if (crypto_table -> nx_secure_tls_prf_1_method != NX_NULL)
         {
-            max_tls_prf_metadata_size = crypto_table -> nx_secure_tls_prf_1_method -> nx_crypto_metadata_area_size;
+            if (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_prf_1_method -> nx_crypto_metadata_area_size)
+            {
+                max_tls_prf_metadata_size = crypto_table -> nx_secure_tls_prf_1_method -> nx_crypto_metadata_area_size;
+            }
         }
     }
 #endif
@@ -766,17 +803,25 @@ ULONG metadata_size_sha256 = 0;
         max_handshake_hash_scratch_size = metadata_size_sha256;
     }
 
-    if (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_prf_sha256_method -> nx_crypto_metadata_area_size)
+    if ((crypto_table -> nx_secure_tls_prf_sha256_method != NX_NULL) &&
+        (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_prf_sha256_method -> nx_crypto_metadata_area_size))
     {
         max_tls_prf_metadata_size = crypto_table -> nx_secure_tls_prf_sha256_method -> nx_crypto_metadata_area_size;
     }
 #endif
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-    max_handshake_hash_scratch_size += crypto_table -> nx_secure_tls_hmac_method -> nx_crypto_metadata_area_size;
-    if (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_hkdf_method -> nx_crypto_metadata_area_size)
+    if (crypto_table -> nx_secure_tls_hmac_method != NX_NULL)
     {
-        max_tls_prf_metadata_size = crypto_table -> nx_secure_tls_hkdf_method -> nx_crypto_metadata_area_size;
+        max_handshake_hash_scratch_size += crypto_table -> nx_secure_tls_hmac_method -> nx_crypto_metadata_area_size;
+    }
+
+    if (crypto_table -> nx_secure_tls_hkdf_method != NX_NULL)
+    {
+        if (max_tls_prf_metadata_size < crypto_table -> nx_secure_tls_hkdf_method -> nx_crypto_metadata_area_size)
+        {
+            max_tls_prf_metadata_size = crypto_table -> nx_secure_tls_hkdf_method -> nx_crypto_metadata_area_size;
+        }
     }
 #endif
 
@@ -828,12 +873,14 @@ ULONG metadata_size_sha256 = 0;
     /* Get the protection. */
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 
+#ifndef NX_SECURE_DISABLE_X509
 
     /* Clear out the X509 certificate stores when we create a new TLS Session. */
     tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store.nx_secure_x509_remote_certificates = NX_NULL;
     tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store.nx_secure_x509_local_certificates = NX_NULL;
     tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store.nx_secure_x509_trusted_certificates = NX_NULL;
     tls_session -> nx_secure_tls_credentials.nx_secure_tls_active_certificate = NX_NULL;
+#endif
 
     /* Release the protection. */
     tx_mutex_put(&_nx_secure_tls_protection);
@@ -851,11 +898,11 @@ ULONG metadata_size_sha256 = 0;
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
     if (tls_session -> nx_secure_tls_supported_versions & (USHORT)(NX_SECURE_TLS_BITFIELD_VERSION_1_0 | NX_SECURE_TLS_BITFIELD_VERSION_1_1))
     {
-    tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata = &metadata_area[offset];
+        tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata = &metadata_area[offset];
         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_md5_metadata_size = metadata_size_md5;
         offset += metadata_size_md5;
 
-    tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata = &metadata_area[offset];
+        tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata = &metadata_area[offset];
         tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size = metadata_size_sha1;
         offset += metadata_size_sha1;
     }
@@ -897,7 +944,6 @@ ULONG metadata_size_sha256 = 0;
     /* TLS PRF metadata. */
     tls_session -> nx_secure_tls_prf_metadata_area = &metadata_area[offset];
     tls_session -> nx_secure_tls_prf_metadata_size = max_tls_prf_metadata_size;
-    offset += max_tls_prf_metadata_size;
 
     /* Place the new TLS control block on the list of created TLS. */
     if (_nx_secure_tls_created_ptr)
@@ -927,7 +973,7 @@ ULONG metadata_size_sha256 = 0;
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
     /* Flag to indicate when a session renegotiation is enabled. Enabled by default. */
-    if(tls_session->nx_secure_tls_1_3)
+    if (tls_session -> nx_secure_tls_1_3)
     {
         tls_session -> nx_secure_tls_renegotation_enabled = NX_FALSE;
     }
@@ -937,6 +983,33 @@ ULONG metadata_size_sha256 = 0;
         tls_session -> nx_secure_tls_renegotation_enabled = NX_TRUE;
     }
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
+
+    /* Set the secret generation functions to the default implementation. */
+    tls_session -> nx_secure_generate_premaster_secret = _nx_secure_generate_premaster_secret;
+    tls_session -> nx_secure_generate_master_secret = _nx_secure_generate_master_secret;
+    tls_session -> nx_secure_generate_session_keys = _nx_secure_generate_session_keys;
+    tls_session -> nx_secure_session_keys_set = _nx_secure_session_keys_set;
+#ifndef NX_SECURE_TLS_CLIENT_DISABLED
+    tls_session -> nx_secure_process_server_key_exchange = _nx_secure_process_server_key_exchange;
+    tls_session -> nx_secure_generate_client_key_exchange = _nx_secure_generate_client_key_exchange;
+#endif
+#ifndef NX_SECURE_TLS_SERVER_DISABLED
+    tls_session -> nx_secure_process_client_key_exchange = _nx_secure_process_client_key_exchange;
+    tls_session -> nx_secure_generate_server_key_exchange = _nx_secure_generate_server_key_exchange;
+#endif
+    tls_session -> nx_secure_verify_mac = _nx_secure_verify_mac;
+    tls_session -> nx_secure_remote_certificate_verify = _nx_secure_remote_certificate_verify;
+    tls_session -> nx_secure_trusted_certificate_add = _nx_secure_trusted_certificate_add;
+
+#ifdef NX_SECURE_CUSTOM_SECRET_GENERATION
+
+    /* Customized secret generation functions can be set by the user in nx_secure_custom_secret_generation_init. */
+    status = nx_secure_custom_secret_generation_init(tls_session);
+    if (status != NX_SUCCESS)
+    {
+        return(status);
+    }
+#endif
 
     /* Set ID to check initialization status. */
     tls_session -> nx_secure_tls_id = NX_SECURE_TLS_ID;

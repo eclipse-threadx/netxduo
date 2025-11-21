@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -38,7 +38,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_server_socket_relisten                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -80,6 +80,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_server_socket_relisten(NX_IP *ip_ptr, UINT port, NX_TCP_SOCKET *socket_ptr)
@@ -149,6 +152,19 @@ VOID                         (*listen_callback)(NX_TCP_SOCKET *socket_ptr, UINT 
 
                 /* Yes, a listen request was found for this port, with an empty
                    socket designation.  */
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+                /* Listen to TCP/IP offload interfaces.  */
+                if (_nx_tcp_server_socket_driver_listen(ip_ptr, port, socket_ptr))
+                {
+
+                    /* Listen request failure, release the protection.  */
+                    tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+                    /* Return an already bound error code.  */
+                    return(NX_TCPIP_OFFLOAD_ERROR);
+                }
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
                 /* Determine if there are any connection requests queued up.  */
                 if (!listen_ptr -> nx_tcp_listen_queue_current)

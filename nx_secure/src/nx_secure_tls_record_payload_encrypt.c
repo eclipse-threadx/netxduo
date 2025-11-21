@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -36,7 +36,7 @@ UCHAR _nx_secure_tls_record_block_buffer[NX_SECURE_TLS_MAX_CIPHER_BLOCK_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_payload_encrypt               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -77,6 +77,14 @@ UCHAR _nx_secure_tls_record_block_buffer[NX_SECURE_TLS_MAX_CIPHER_BLOCK_SIZE];
 /*                                            fixed data copy in chained  */
 /*                                            packet,                     */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), called   */
+/*                                            NX_CRYPTO_ENCRYPT_CALCULATE */
+/*                                            to finalize the encryption  */
+/*                                            of this record, resulting   */
+/*                                            in version 6.1.8            */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            reorganized internal logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_record_payload_encrypt(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
@@ -96,6 +104,8 @@ ULONG                                 remainder_length;
 UINT                                  data_offset = 0;
 VOID                                 *handler = NX_NULL;
 VOID                                 *crypto_method_metadata;
+UINT                                 icv_size = 0;
+UCHAR                                *icv_ptr = NX_NULL;
 
     if (tls_session -> nx_secure_tls_session_ciphersuite == NX_NULL)
     {
@@ -193,7 +203,7 @@ VOID                                 *crypto_method_metadata;
                 {
 
                     /* New IV is the last encrypted block of the output. */
-                    NX_SECURE_MEMCPY(iv, &current_packet -> nx_packet_prepend_ptr[current_length + data_offset - iv_size],
+                    NX_SECURE_MEMCPY(iv, &current_packet -> nx_packet_prepend_ptr[current_length + data_offset - iv_size], /*  lgtm[cpp/banned-api-usage-required-any] */
                                      iv_size); /* Use case of memcpy is verified. */
                 }
             }
@@ -250,7 +260,7 @@ VOID                                 *crypto_method_metadata;
                  */
 
                 /* Offset for remainder bytes is rounded_length + data_offset. */
-                NX_SECURE_MEMCPY(&_nx_secure_tls_record_block_buffer[0],
+                NX_SECURE_MEMCPY(&_nx_secure_tls_record_block_buffer[0], /*  lgtm[cpp/banned-api-usage-required-any] */
                                  &current_packet -> nx_packet_prepend_ptr[rounded_length + data_offset],
                                  remainder_length); /* Use case of memcpy is verified. */
                 copy_length = (ULONG)(current_packet -> nx_packet_next -> nx_packet_append_ptr -
@@ -259,7 +269,7 @@ VOID                                 *crypto_method_metadata;
                 {
                     copy_length = (ULONG)(block_size - remainder_length);
                 }
-                NX_SECURE_MEMCPY(&_nx_secure_tls_record_block_buffer[remainder_length],
+                NX_SECURE_MEMCPY(&_nx_secure_tls_record_block_buffer[remainder_length], /* lgtm[cpp/banned-api-usage-required-any] */
                                  current_packet -> nx_packet_next -> nx_packet_prepend_ptr,
                                  copy_length); /* Use case of memcpy is verified. */
 
@@ -288,9 +298,9 @@ VOID                                 *crypto_method_metadata;
                 }
 
                 /* Copy data from temporary buffer back into packets. */
-                NX_SECURE_MEMCPY(&current_packet -> nx_packet_prepend_ptr[rounded_length + data_offset],
+                NX_SECURE_MEMCPY(&current_packet -> nx_packet_prepend_ptr[rounded_length + data_offset], /*  lgtm[cpp/banned-api-usage-required-any] */
                                  &_nx_secure_tls_record_block_buffer[0], remainder_length); /* Use case of memcpy is verified. */
-                NX_SECURE_MEMCPY(current_packet -> nx_packet_next -> nx_packet_prepend_ptr,
+                NX_SECURE_MEMCPY(current_packet -> nx_packet_next -> nx_packet_prepend_ptr, /* lgtm[cpp/banned-api-usage-required-any] */
                                  &_nx_secure_tls_record_block_buffer[remainder_length],
                                  copy_length); /* Use case of memcpy is verified. */
 
@@ -299,7 +309,7 @@ VOID                                 *crypto_method_metadata;
                 {
 
                     /* New IV is the last encrypted block of the output. */
-                    NX_SECURE_MEMCPY(iv, &_nx_secure_tls_record_block_buffer, iv_size); /* Use case of memcpy is verified. */
+                    NX_SECURE_MEMCPY(iv, &_nx_secure_tls_record_block_buffer, iv_size); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
                 }
 
 #ifdef NX_SECURE_KEY_CLEAR
@@ -320,17 +330,22 @@ VOID                                 *crypto_method_metadata;
         current_packet = current_packet -> nx_packet_next;
     } while (current_packet != NX_NULL);
 
-#ifdef NX_SECURE_ENABLE_AEAD_CIPHER
     if (session_cipher_method -> nx_crypto_ICV_size_in_bits > 0)
     {
+
+        /* Get icv_size and icv_ptr for AEAD cipher */
         if ((session_cipher_method -> nx_crypto_ICV_size_in_bits >> 3) >
             sizeof(_nx_secure_tls_record_block_buffer))
         {
             return(NX_SIZE_ERROR);
         }
 
-        /* Get TAG.  */
-        status = session_cipher_method -> nx_crypto_operation(NX_CRYPTO_ENCRYPT_CALCULATE,
+        icv_size = session_cipher_method -> nx_crypto_ICV_size_in_bits >> 3;
+        icv_ptr = _nx_secure_tls_record_block_buffer;
+    }
+
+    /* Call NX_CRYPTO_ENCRYPT_CALCULATE to finalize the encryption of this record. */
+    status = session_cipher_method -> nx_crypto_operation(NX_CRYPTO_ENCRYPT_CALCULATE,
                                                               handler,
                                                               (NX_CRYPTO_METHOD*)session_cipher_method,
                                                               NX_NULL,
@@ -338,26 +353,26 @@ VOID                                 *crypto_method_metadata;
                                                               NX_NULL,
                                                               0,
                                                               NX_NULL,
-                                                              _nx_secure_tls_record_block_buffer,
-                                                              (session_cipher_method -> nx_crypto_ICV_size_in_bits >> 3),
+                                                              icv_ptr,
+                                                              icv_size,
                                                               crypto_method_metadata,
                                                               tls_session -> nx_secure_session_cipher_metadata_size,
                                                               NX_NULL, NX_NULL);
-        if (status)
-        {
-            return(status);
-        }
-
-        status = nx_packet_data_append(send_packet, _nx_secure_tls_record_block_buffer,
-                                       (session_cipher_method -> nx_crypto_ICV_size_in_bits >> 3),
-                                       tls_session -> nx_secure_tls_packet_pool, NX_WAIT_FOREVER);
-        if (status)
-        {
-            return(status);
-        }
+    if (status)
+    {
+        return(status);
     }
-#endif /* NX_SECURE_ENABLE_AEAD_CIPHER */
 
+    if (icv_ptr && icv_size)
+    {
+
+        /* Append data for AEAD cipher */
+        status = nx_packet_data_append(send_packet, icv_ptr, icv_size,
+                                           tls_session -> nx_secure_tls_packet_pool, NX_WAIT_FOREVER);
+
+        return(status);
+    }
+    
     return(NX_SUCCESS);
 }
 
@@ -366,7 +381,7 @@ VOID                                 *crypto_method_metadata;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_record_data_encrypt_init             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.11       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -405,6 +420,9 @@ VOID                                 *crypto_method_metadata;
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            reorganized internal logic, */
+/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_record_data_encrypt_init(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
@@ -637,7 +655,7 @@ UINT                                  message_length;
 
             /* IV size is equal to the AES block size. Copy our IV into our data buffer
                at the head of the payload. */
-            NX_SECURE_MEMCPY(send_packet -> nx_packet_prepend_ptr, iv, iv_size); /* Use case of memcpy is verified. */
+            NX_SECURE_MEMCPY(send_packet -> nx_packet_prepend_ptr, iv, iv_size); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
             *data_offset = iv_size;
         }
 
@@ -686,10 +704,7 @@ UINT                                  message_length;
         NX_SECURE_MEMSET(_nx_secure_tls_record_block_buffer, 0, block_size);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
-        if (status)
-        {
-            return(status);
-        }
+        return(status);
     }
 
     return(NX_SUCCESS);

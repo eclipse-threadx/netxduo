@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_dtls_session_end                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,6 +73,12 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            released packet securely,   */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed out-of-order handling,*/
+/*                                            resulting in version 6.1.10 */  
+/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
+/*                                            handled close notify packet,*/
+/*                                            resulting in version 6.3.0  */   
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_secure_dtls_session_end(NX_SECURE_DTLS_SESSION *dtls_session, UINT wait_option)
@@ -105,6 +111,16 @@ NX_SECURE_TLS_SESSION  *tls_session;
         tls_session -> nx_secure_record_decrypted_packet = NX_NULL;
     }
 
+    /* If the remote session is already finished, don't try to send. */
+    if(!dtls_session -> nx_secure_dtls_tls_session.nx_secure_tls_remote_session_active)
+    {
+        /* Reset the TLS state so this socket can be reused. */        
+        tx_mutex_put(&_nx_secure_tls_protection);
+        status = _nx_secure_dtls_session_reset(dtls_session);
+        return(status);
+    }
+
+
     /* Release the protection before suspending on nx_packet_allocate. */
     tx_mutex_put(&_nx_secure_tls_protection);
 
@@ -114,7 +130,7 @@ NX_SECURE_TLS_SESSION  *tls_session;
     /* Check for errors in allocating packet. */
     if (status != NX_SUCCESS)
     {
-
+        _nx_secure_dtls_session_reset(dtls_session);
         return(status);
     }
 
@@ -129,8 +145,9 @@ NX_SECURE_TLS_SESSION  *tls_session;
 
     if (status)
     {
-
-        /* Release the protection. */
+        /* Failed to send, release the packet. */
+        nx_secure_tls_packet_release(send_packet);
+        _nx_secure_dtls_session_reset(dtls_session);
         tx_mutex_put(&_nx_secure_tls_protection);
         return(status);
     }
@@ -138,21 +155,22 @@ NX_SECURE_TLS_SESSION  *tls_session;
     /* Release the protection. */
     tx_mutex_put(&_nx_secure_tls_protection);
 
-    /* Wait for the CloseNotify response. */
-    while (status != NX_SECURE_TLS_ALERT_RECEIVED)
+    /* See if we received the CloseNotify, or if we need to wait. */
+    if(tls_session -> nx_secure_tls_received_alert_level != NX_SECURE_TLS_ALERT_LEVEL_WARNING ||
+       tls_session -> nx_secure_tls_received_alert_value != NX_SECURE_TLS_ALERT_CLOSE_NOTIFY)
     {
-
-        status = _nx_secure_dtls_session_receive(dtls_session, &incoming_packet, wait_option);
-
-        if (status == NX_SUCCESS)
+        while (status == NX_SUCCESS)
         {
+            /* Wait for the CloseNotify response. */
 
-            /* Release the alert packet. */
-            nx_secure_tls_packet_release(incoming_packet);
-        }
-        else if ((status == NX_NO_PACKET) || (status == NX_SECURE_TLS_SESSION_UNINITIALIZED))
-        {
-            break;
+            status = _nx_secure_dtls_session_receive(dtls_session, &incoming_packet, wait_option);
+
+            if (status == NX_SUCCESS)
+            {
+
+                /* Release the packet. */
+                nx_secure_tls_packet_release(incoming_packet);
+            }
         }
     }
 
@@ -162,7 +180,7 @@ NX_SECURE_TLS_SESSION  *tls_session;
     /* Reset the TLS state so this socket can be reused. */
     status = _nx_secure_dtls_session_reset(dtls_session);
 
-    if(error_status != NX_SECURE_TLS_ALERT_RECEIVED)
+    if(error_status != NX_SECURE_TLS_ALERT_RECEIVED && error_status != NX_SECURE_TLS_CLOSE_NOTIFY_RECEIVED)
     {
         status = error_status;
     }

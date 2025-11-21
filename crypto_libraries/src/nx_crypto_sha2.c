@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -46,6 +46,9 @@ const ULONG _sha2_round_constants[64] =
 #define SMALL_SIGMA_0(x)           (RIGHT_SHIFT_CIRCULAR((x),  7) ^ RIGHT_SHIFT_CIRCULAR((x), 18) ^ ((x) >> 3))
 #define SMALL_SIGMA_1(x)           (RIGHT_SHIFT_CIRCULAR((x), 17) ^ RIGHT_SHIFT_CIRCULAR((x), 19) ^ ((x) >> 10))
 
+#define W0(t) ((((ULONG)buffer[(t) * 4]) << 24) | (((ULONG)buffer[((t) * 4) + 1]) << 16) | (((ULONG)buffer[((t) * 4) + 2]) << 8) | ((ULONG)buffer[((t) * 4) + 3]))
+#define W16(t) (SMALL_SIGMA_1(w[(t) - 2]) + w[(t) - 7] + SMALL_SIGMA_0(w[(t) - 15]) + w[(t) - 16])
+
 /* Define the padding array.  This is used to pad the message such that its length is
    64 bits shy of being a multiple of 512 bits long.  */
 const UCHAR   _nx_crypto_sha256_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -56,7 +59,7 @@ const UCHAR   _nx_crypto_sha256_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha256_initialize                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -142,7 +145,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_sha256_initialize(NX_CRYPTO_SHA256 *context, UIN
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha256_update                            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -271,7 +274,7 @@ ULONG needed_fill_bytes;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha256_digest_calculate                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -308,24 +311,23 @@ ULONG needed_fill_bytes;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_sha256_digest_calculate(NX_CRYPTO_SHA256 *context, UCHAR *digest, UINT algorithm)
 {
-UCHAR bit_count_string[8];
+UINT bit_count_string[2];
 ULONG current_byte_count;
 ULONG padding_bytes;
 
 
     /* Move the lower portion of the bit count into the array.  */
-    bit_count_string[0] =  (UCHAR)(context -> nx_sha256_bit_count[1] >> 24);
-    bit_count_string[1] =  (UCHAR)(context -> nx_sha256_bit_count[1] >> 16);
-    bit_count_string[2] =  (UCHAR)(context -> nx_sha256_bit_count[1] >> 8);
-    bit_count_string[3] =  (UCHAR)(context -> nx_sha256_bit_count[1]);
-    bit_count_string[4] =  (UCHAR)(context -> nx_sha256_bit_count[0] >> 24);
-    bit_count_string[5] =  (UCHAR)(context -> nx_sha256_bit_count[0] >> 16);
-    bit_count_string[6] =  (UCHAR)(context -> nx_sha256_bit_count[0] >> 8);
-    bit_count_string[7] =  (UCHAR)(context -> nx_sha256_bit_count[0]);
+    bit_count_string[0] = context -> nx_sha256_bit_count[1];
+    NX_CRYPTO_CHANGE_ULONG_ENDIAN(bit_count_string[0]);
+    bit_count_string[1] = context -> nx_sha256_bit_count[0];
+    NX_CRYPTO_CHANGE_ULONG_ENDIAN(bit_count_string[1]);
 
     /* Calculate the current byte count.  */
     current_byte_count =  (context -> nx_sha256_bit_count[0] >> 3) & 0x3F;
@@ -337,7 +339,7 @@ ULONG padding_bytes;
     _nx_crypto_sha256_update(context, (UCHAR*)_nx_crypto_sha256_padding, padding_bytes);
 
     /* Add the in the length.  */
-    _nx_crypto_sha256_update(context, bit_count_string, 8);
+    _nx_crypto_sha256_update(context, (UCHAR*)bit_count_string, 8);
 
     /* Now store the digest in the caller specified destination.  */
     digest[0] =  (UCHAR)(context -> nx_sha256_states[0] >> 24);
@@ -391,7 +393,7 @@ ULONG padding_bytes;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha256_process_buffer                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -427,6 +429,9 @@ ULONG padding_bytes;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
+/*                                            improved performance,       */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_sha256_process_buffer(NX_CRYPTO_SHA256 *context, UCHAR buffer[64])
@@ -440,21 +445,6 @@ ULONG  a, b, c, d, e, f, g, h;
     /* Setup pointers to the word array.  */
     w =  context -> nx_sha256_word_array;
 
-    /* Initialize the first 16 words of the word array, taking care of the
-       endian issues at the same time.  */
-    for (t = 0; t < 16; t++)
-    {
-        /* Setup each entry.  */
-        w[t] =  (((ULONG)buffer[t * 4]) << 24) | (((ULONG)buffer[(t * 4) + 1]) << 16) | (((ULONG)buffer[(t * 4) + 2]) << 8) | ((ULONG)buffer[(t * 4) + 3]);
-    }
-
-    /* Setup the remaining entries of the word array.  */
-    for (t = 16; t < 64; t++)
-    {
-        /* Setup each entry.  */
-        w[t] =  SMALL_SIGMA_1(w[t - 2]) + w[t - 7] + SMALL_SIGMA_0(w[t - 15]) + w[t - 16];
-    }
-
     /* Initialize the state variables.  */
     a =  context -> nx_sha256_states[0];
     b =  context -> nx_sha256_states[1];
@@ -466,18 +456,113 @@ ULONG  a, b, c, d, e, f, g, h;
     h =  context -> nx_sha256_states[7];
 
     /* Now, perform Round operations.  */
-    for (t = 0; t < 64; t++)
+    for (t = 0; t < 16; t += 8)
     {
+
+        /* Setup each entry.  */
+        w[t] =  W0(t);
         temp1 = h + LARGE_SIGMA_1(e) + CH_FUNC(e, f, g) + _sha2_round_constants[t] + w[t];
         temp2 = LARGE_SIGMA_0(a) + MAJ_FUNC(a, b, c);
-        h = g;
-        g = f;
-        f = e;
-        e = d + temp1;
-        d = c;
-        c = b;
-        b = a;
+        d = d + temp1;
+        h = temp1 + temp2;
+
+        w[t + 1] =  W0(t + 1);
+        temp1 = g + LARGE_SIGMA_1(d) + CH_FUNC(d, e, f) + _sha2_round_constants[t + 1] + w[t + 1];
+        temp2 = LARGE_SIGMA_0(h) + MAJ_FUNC(h, a, b);
+        c = c + temp1;
+        g = temp1 + temp2;
+
+        w[t + 2] =  W0(t + 2);
+        temp1 = f + LARGE_SIGMA_1(c) + CH_FUNC(c, d, e) + _sha2_round_constants[t + 2] + w[t + 2];
+        temp2 = LARGE_SIGMA_0(g) + MAJ_FUNC(g, h, a);
+        b = b + temp1;
+        f = temp1 + temp2;
+
+        w[t + 3] =  W0(t + 3);
+        temp1 = e + LARGE_SIGMA_1(b) + CH_FUNC(b, c, d) + _sha2_round_constants[t + 3] + w[t + 3];
+        temp2 = LARGE_SIGMA_0(f) + MAJ_FUNC(f, g, h);
+        a = a + temp1;
+        e = temp1 + temp2;
+
+        w[t + 4] =  W0(t + 4);
+        temp1 = d + LARGE_SIGMA_1(a) + CH_FUNC(a, b, c) + _sha2_round_constants[t + 4] + w[t + 4];
+        temp2 = LARGE_SIGMA_0(e) + MAJ_FUNC(e, f, g);
+        h = h + temp1;
+        d = temp1 + temp2;
+
+
+        w[t + 5] =  W0(t + 5);
+        temp1 = c + LARGE_SIGMA_1(h) + CH_FUNC(h, a, b) + _sha2_round_constants[t + 5] + w[t + 5];
+        temp2 = LARGE_SIGMA_0(d) + MAJ_FUNC(d, e, f);
+        g = g + temp1;
+        c = temp1 + temp2;
+
+        w[t + 6] =  W0(t + 6);
+        temp1 = b + LARGE_SIGMA_1(g) + CH_FUNC(g, h, a) + _sha2_round_constants[t + 6] + w[t + 6];
+        temp2 = LARGE_SIGMA_0(c) + MAJ_FUNC(c, d, e);
+        f = f + temp1;
+        b = temp1 + temp2;
+
+        w[t + 7] =  W0(t + 7);
+        temp1 = a + LARGE_SIGMA_1(f) + CH_FUNC(f, g, h) + _sha2_round_constants[t + 7] + w[t + 7];
+        temp2 = LARGE_SIGMA_0(b) + MAJ_FUNC(b, c, d);
+        e = e + temp1;
         a = temp1 + temp2;
+    }
+
+    for (; t < 64; t += 8)
+    {
+
+        /* Setup each entry.  */
+        w[t] =  W16(t);
+        temp1 = h + LARGE_SIGMA_1(e) + CH_FUNC(e, f, g) + _sha2_round_constants[t] + w[t];
+        temp2 = LARGE_SIGMA_0(a) + MAJ_FUNC(a, b, c);
+        d = d + temp1;
+        h = temp1 + temp2;
+
+        w[t + 1] =  W16(t + 1);
+        temp1 = g + LARGE_SIGMA_1(d) + CH_FUNC(d, e, f) + _sha2_round_constants[t + 1] + w[t + 1];
+        temp2 = LARGE_SIGMA_0(h) + MAJ_FUNC(h, a, b);
+        c = c + temp1;
+        g = temp1 + temp2;
+
+        w[t + 2] =  W16(t + 2);
+        temp1 = f + LARGE_SIGMA_1(c) + CH_FUNC(c, d, e) + _sha2_round_constants[t + 2] + w[t + 2];
+        temp2 = LARGE_SIGMA_0(g) + MAJ_FUNC(g, h, a);
+        b = b + temp1;
+        f = temp1 + temp2;
+
+        w[t + 3] =  W16(t + 3);
+        temp1 = e + LARGE_SIGMA_1(b) + CH_FUNC(b, c, d) + _sha2_round_constants[t + 3] + w[t + 3];
+        temp2 = LARGE_SIGMA_0(f) + MAJ_FUNC(f, g, h);
+        a = a + temp1;
+        e = temp1 + temp2;
+
+        w[t + 4] =  W16(t + 4);
+        temp1 = d + LARGE_SIGMA_1(a) + CH_FUNC(a, b, c) + _sha2_round_constants[t + 4] + w[t + 4];
+        temp2 = LARGE_SIGMA_0(e) + MAJ_FUNC(e, f, g);
+        h = h + temp1;
+        d = temp1 + temp2;
+
+
+        w[t + 5] =  W16(t + 5);
+        temp1 = c + LARGE_SIGMA_1(h) + CH_FUNC(h, a, b) + _sha2_round_constants[t + 5] + w[t + 5];
+        temp2 = LARGE_SIGMA_0(d) + MAJ_FUNC(d, e, f);
+        g = g + temp1;
+        c = temp1 + temp2;
+
+        w[t + 6] =  W16(t + 6);
+        temp1 = b + LARGE_SIGMA_1(g) + CH_FUNC(g, h, a) + _sha2_round_constants[t + 6] + w[t + 6];
+        temp2 = LARGE_SIGMA_0(c) + MAJ_FUNC(c, d, e);
+        f = f + temp1;
+        b = temp1 + temp2;
+
+        w[t + 7] =  W16(t + 7);
+        temp1 = a + LARGE_SIGMA_1(f) + CH_FUNC(f, g, h) + _sha2_round_constants[t + 7] + w[t + 7];
+        temp2 = LARGE_SIGMA_0(b) + MAJ_FUNC(b, c, d);
+        e = e + temp1;
+        a = temp1 + temp2;
+
     }
 
     /* Save the resulting in this SHA256 context.  */
@@ -503,7 +588,7 @@ ULONG  a, b, c, d, e, f, g, h;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha256_init                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -541,6 +626,8 @@ ULONG  a, b, c, d, e, f, g, h;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -561,7 +648,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_init(struct  NX_CRYPTO_METHOD_STRU
         return(NX_CRYPTO_PTR_ERROR);
     }
 
-    /* Verify the metadata addrsss is 4-byte aligned. */
+    /* Verify the metadata address is 4-byte aligned. */
     if((((ULONG)crypto_metadata) & 0x3) != 0)
     {
         return(NX_CRYPTO_PTR_ERROR);
@@ -581,7 +668,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_init(struct  NX_CRYPTO_METHOD_STRU
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha256_cleanup                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -639,7 +726,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha256_operation                 PORTABLE C       */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -688,6 +775,8 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_cleanup(VOID *crypto_metadata)
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha256_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -721,7 +810,7 @@ NX_CRYPTO_SHA256 *ctx;
         return(NX_CRYPTO_PTR_ERROR);
     }
 
-    /* Verify the metadata addrsss is 4-byte aligned. */
+    /* Verify the metadata address is 4-byte aligned. */
     if((crypto_metadata == NX_CRYPTO_NULL) || ((((ULONG)crypto_metadata) & 0x3) != 0))
     {
         return(NX_CRYPTO_PTR_ERROR);

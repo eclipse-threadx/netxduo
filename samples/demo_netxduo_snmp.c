@@ -453,6 +453,17 @@ UINT    status;
     if (mib2_mib[i].object_set_callback)
     {
 
+        /* If the object data type is string.  */
+        if (object_data -> nx_snmp_object_data_type == NX_SNMP_ANS1_OCTET_STRING)
+        {
+
+            /* Check the string length of the object value.  */
+            if (object_data -> nx_snmp_object_octet_string_size > mib2_mib[i].length)
+            {
+                return(NX_SNMP_ERROR_TOOBIG);
+            }
+        }
+
         /* Yes, call the set function.  */
         status =  (mib2_mib[i].object_set_callback)(mib2_mib[i].object_value_ptr, object_data);
     }

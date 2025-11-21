@@ -1,32 +1,23 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
-
-/* Version: 6.1 */
-
-#include "nx_azure_iot.h"
-#ifndef NX_AZURE_DISABLE_IOT_SECURITY_MODULE
-#include "nx_azure_iot_security_module.h"
-#endif /* NX_AZURE_DISABLE_IOT_SECURITY_MODULE */
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "nx_azure_iot.h"
 #include "azure/core/internal/az_log_internal.h"
 
 #ifndef NX_AZURE_IOT_WAIT_OPTION
 #define NX_AZURE_IOT_WAIT_OPTION NX_WAIT_FOREVER
 #endif /* NX_AZURE_IOT_WAIT_OPTION */
-
-/* Define offset of MQTT telemetry packet.  */
-#define NX_AZURE_IOT_PUBLISH_PACKET_START_OFFSET   7
 
 /* Convert number to upper hex.  */
 #define NX_AZURE_IOT_NUMBER_TO_UPPER_HEX(number)    (CHAR)(number + (number < 10 ? '0' : 'A' - 10))
@@ -37,9 +28,7 @@ NX_AZURE_IOT *_nx_azure_iot_created_ptr;
 /* Define the callback for logging.  */
 static VOID(*_nx_azure_iot_log_callback)(az_log_classification classification, UCHAR *msg, UINT msg_len);
 
-/* Define the base64 letters.  */
-static CHAR _nx_azure_iot_base64_array[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
+extern UINT _nxd_mqtt_client_packet_allocate(NXD_MQTT_CLIENT *client_ptr, NX_PACKET **packet_ptr, ULONG wait_option);
 extern UINT _nxd_mqtt_client_publish_packet_send(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr,
                                                  USHORT packet_id, UINT QoS, ULONG wait_option);
 
@@ -170,14 +159,6 @@ static VOID nx_azure_iot_log_listener(az_log_classification classification, az_s
 
 VOID nx_azure_iot_log_init(VOID(*log_callback)(az_log_classification classification, UCHAR *msg, UINT msg_len))
 {
-static az_log_classification const classifications[] = {AZ_LOG_IOT_AZURERTOS,
-                                                        AZ_LOG_MQTT_RECEIVED_TOPIC,
-                                                        AZ_LOG_MQTT_RECEIVED_PAYLOAD,
-                                                        AZ_LOG_IOT_RETRY,
-                                                        AZ_LOG_IOT_SAS_TOKEN,
-                                                        _az_LOG_END_OF_LIST};
-
-    _az_log_set_classifications(classifications);
     _nx_azure_iot_log_callback = log_callback;
     az_log_set_message_callback(nx_azure_iot_log_listener);
 }
@@ -289,17 +270,6 @@ UINT status;
     /* Set created IoT pointer.  */
     _nx_azure_iot_created_ptr = nx_azure_iot_ptr;
 
-#ifndef NX_AZURE_DISABLE_IOT_SECURITY_MODULE
-    /* Enable Azure IoT Security Module.  */
-    status = nx_azure_iot_security_module_enable(nx_azure_iot_ptr);
-    if (status)
-    {
-        LogError(LogLiteralArgs("IoT failed to enable IoT Security Module, status: %d"), status);
-        nx_azure_iot_delete(nx_azure_iot_ptr);
-        return(status);
-    }
-#endif /* NX_AZURE_DISABLE_IOT_SECURITY_MODULE */
-
     return(NX_AZURE_IOT_SUCCESS);
 }
 
@@ -318,16 +288,6 @@ UINT status;
         LogError(LogLiteralArgs("IoT delete fail: Resource NOT DELETED"));
         return(NX_AZURE_IOT_DELETE_ERROR);
     }
-
-#ifndef NX_AZURE_DISABLE_IOT_SECURITY_MODULE
-    /* Disable IoT Security Module.  */
-    status = nx_azure_iot_security_module_disable(nx_azure_iot_ptr);
-    if (status != NX_AZURE_IOT_SUCCESS)
-    {
-        LogError(LogLiteralArgs("IoT failed to disable IoT Security Module, status: %d"), status);
-        return(status);
-    }
-#endif /* NX_AZURE_DISABLE_IOT_SECURITY_MODULE */
 
     /* Deregister SDK module on cloud helper.  */
     nx_cloud_module_deregister(&(nx_azure_iot_ptr -> nx_azure_iot_cloud), &(nx_azure_iot_ptr -> nx_azure_iot_cloud_module));
@@ -376,9 +336,9 @@ UINT nx_azure_iot_publish_packet_get(NX_AZURE_IOT *nx_azure_iot_ptr, NXD_MQTT_CL
 {
 UINT status;
 
-    status = nx_secure_tls_packet_allocate(&(client_ptr -> nxd_mqtt_tls_session),
-                                           nx_azure_iot_ptr -> nx_azure_iot_pool_ptr,
-                                           packet_pptr, wait_option);
+    NX_PARAMETER_NOT_USED(nx_azure_iot_ptr);
+
+    status = _nxd_mqtt_client_packet_allocate(client_ptr, packet_pptr, wait_option);
     if (status)
     {
         LogError(LogLiteralArgs("Create publish packet failed"));
@@ -421,12 +381,12 @@ USHORT id = 0;
     return(NX_AZURE_IOT_SUCCESS);
 }
 
-UINT nx_azure_iot_mqtt_packet_id_get(NXD_MQTT_CLIENT *client_ptr, UCHAR *packet_id, UINT wait_option)
+UINT nx_azure_iot_mqtt_packet_id_get(NXD_MQTT_CLIENT *client_ptr, UCHAR *packet_id)
 {
 UINT status;
 
     /* Get packet id under mutex */
-    status = tx_mutex_get(client_ptr -> nxd_mqtt_client_mutex_ptr, wait_option);
+    status = tx_mutex_get(client_ptr -> nxd_mqtt_client_mutex_ptr, NX_WAIT_FOREVER);
     if (status)
     {
         return(status);
@@ -435,6 +395,7 @@ UINT status;
     /* Do nothing if the client is not connected.  */
     if (client_ptr -> nxd_mqtt_client_state != NXD_MQTT_CLIENT_STATE_CONNECTED)
     {
+        tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
         LogError(LogLiteralArgs("MQTT NOT CONNECTED"));
         return(NX_AZURE_IOT_DISCONNECTED);
     }
@@ -622,6 +583,7 @@ UINT nx_azure_iot_mqtt_tls_setup(NXD_MQTT_CLIENT *client_ptr, NX_SECURE_TLS_SESS
                                  NX_SECURE_X509_CERT *trusted_certificate)
 {
 UINT status;
+UINT i;
 NX_AZURE_IOT_RESOURCE *resource_ptr;
 
     NX_PARAMETER_NOT_USED(certificate);
@@ -654,21 +616,30 @@ NX_AZURE_IOT_RESOURCE *resource_ptr;
         LogError(LogLiteralArgs("Failed to create TLS session status: %d"), status);
         return(status);
     }
-
-    status = nx_secure_tls_trusted_certificate_add(tls_session, resource_ptr -> resource_trusted_certificate);
-    if (status)
+    
+    for (i = 0; i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_trusted_certificates); i++)
     {
-        LogError(LogLiteralArgs("Failed to add trusted CA certificate to session status: %d"), status);
-        return(status);
+        if (resource_ptr -> resource_trusted_certificates[i])
+        {
+            status = nx_secure_tls_trusted_certificate_add(tls_session, resource_ptr -> resource_trusted_certificates[i]);
+            if (status)
+            {
+                LogError(LogLiteralArgs("Failed to add trusted CA certificate to session status: %d"), status);
+                return(status);
+            }
+        }
     }
 
-    if (resource_ptr -> resource_device_certificate)
+    for (i = 0; i < NX_AZURE_IOT_ARRAY_SIZE(resource_ptr -> resource_device_certificates); i++)
     {
-        status = nx_secure_tls_local_certificate_add(tls_session, resource_ptr -> resource_device_certificate);
-        if (status)
+        if (resource_ptr -> resource_device_certificates[i])
         {
-            LogError(LogLiteralArgs("Failed to add device certificate to session status: %d"), status);
-            return(status);
+            status = nx_secure_tls_local_certificate_add(tls_session, resource_ptr -> resource_device_certificates[i]);
+            if (status)
+            {
+                LogError(LogLiteralArgs("Failed to add device certificate to session status: %d"), status);
+                return(status);
+            }
         }
     }
 
@@ -711,198 +682,6 @@ UINT nx_azure_iot_unix_time_get(NX_AZURE_IOT *nx_azure_iot_ptr, ULONG *unix_time
     }
 
     return(nx_azure_iot_ptr -> nx_azure_iot_unix_time_get(unix_time));
-}
-
-static UINT nx_azure_iot_base64_decode(CHAR *base64name, UINT length, UCHAR *name, UINT name_size, UINT *bytes_copied)
-{
-UINT    i, j;
-UINT    value1, value2;
-UINT    step;
-UINT    sourceLength = length;
-
-    /* Adjust the length to represent the ASCII name.  */
-    length =  ((length * 6) / 8);
-
-    if (base64name[sourceLength - 1] == '=')
-    {
-        if (base64name[sourceLength - 2] == '=')
-        {
-            length --;
-        }
-        length--;
-    }
-
-    if (name_size < length)
-    {
-        LogError(LogLiteralArgs("Failed to find enough memory"));
-        return(NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE);
-    }
-
-    /* Setup index into the ASCII name.  */
-    j =  0;
-
-    /* Compute the ASCII name.  */
-    step =  0;
-    i =     0;
-    while ((j < length) && (base64name[i]) && (base64name[i] != '='))
-    {
-
-        /* Derive values of the Base64 name.  */
-        if ((base64name[i] >= 'A') && (base64name[i] <= 'Z'))
-            value1 =  (UINT) (base64name[i] - 'A');
-        else if ((base64name[i] >= 'a') && (base64name[i] <= 'z'))
-            value1 =  (UINT) (base64name[i] - 'a') + 26;
-        else if ((base64name[i] >= '0') && (base64name[i] <= '9'))
-            value1 =  (UINT) (base64name[i] - '0') + 52;
-        else if (base64name[i] == '+')
-            value1 =  62;
-        else if (base64name[i] == '/')
-            value1 =  63;
-        else
-            value1 =  0;
-
-        /* Derive value for the next character.  */
-        if ((base64name[i+1] >= 'A') && (base64name[i+1] <= 'Z'))
-            value2 =  (UINT) (base64name[i+1] - 'A');
-        else if ((base64name[i+1] >= 'a') && (base64name[i+1] <= 'z'))
-            value2 =  (UINT) (base64name[i+1] - 'a') + 26;
-        else if ((base64name[i+1] >= '0') && (base64name[i+1] <= '9'))
-            value2 =  (UINT) (base64name[i+1] - '0') + 52;
-        else if (base64name[i+1] == '+')
-            value2 =  62;
-        else if (base64name[i+1] == '/')
-            value2 =  63;
-        else
-            value2 =  0;
-
-        /* Determine which step we are in.  */
-        if (step == 0)
-        {
-
-            /* Use first value and first 2 bits of second value.  */
-            name[j++] =    (UCHAR) (((value1 & 0x3f) << 2) | ((value2 >> 4) & 3));
-            i++;
-            step++;
-        }
-        else if (step == 1)
-        {
-
-            /* Use last 4 bits of first value and first 4 bits of next value.  */
-            name[j++] =    (UCHAR) (((value1 & 0xF) << 4) | (value2 >> 2));
-            i++;
-            step++;
-        }
-        else if (step == 2)
-        {
-
-            /* Use first 2 bits and following 6 bits of next value.  */
-            name[j++] =   (UCHAR) (((value1 & 3) << 6) | (value2 & 0x3f));
-            i++;
-            i++;
-            step =  0;
-        }
-    }
-
-    /* Put a NULL character in.  */
-    name[j] =  NX_NULL;
-    *bytes_copied = j;
-
-    return(NX_AZURE_IOT_SUCCESS);
-}
-
-static UINT nx_azure_iot_base64_encode(UCHAR *name, UINT length, CHAR *base64name, UINT base64name_size)
-{
-UINT    pad;
-UINT    i, j;
-UINT    step;
-
-
-    /* Adjust the length to represent the base64 name.  */
-    length =  ((length * 8) / 6);
-
-    /* Default padding to none.  */
-    pad =  0;
-
-    /* Determine if an extra conversion is needed.  */
-    if ((length * 6) % 24)
-    {
-
-        /* Some padding is needed.  */
-
-        /* Calculate the number of pad characters.  */
-        pad =  (length * 6) % 24;
-        pad =  (24 - pad) / 6;
-        pad =  pad - 1;
-
-        /* Adjust the length to pickup the character fraction.  */
-        length++;
-    }
-
-    if (base64name_size <= length)
-    {
-        LogError(LogLiteralArgs("Failed to find enough memory"));
-        return(NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE);
-    }
-
-    /* Setup index into the base64name.  */
-    j =  0;
-
-    /* Compute the base64name.  */
-    step =  0;
-    i =     0;
-    while (j < length)
-    {
-
-        /* Determine which step we are in.  */
-        if (step == 0)
-        {
-
-            /* Use first 6 bits of name character for index.  */
-            base64name[j++] =  (CHAR)_nx_azure_iot_base64_array[((UINT) name[i]) >> 2];
-            step++;
-        }
-        else if (step == 1)
-        {
-
-            /* Use last 2 bits of name character and first 4 bits of next name character for index.  */
-            base64name[j++] =  (CHAR)_nx_azure_iot_base64_array[((((UINT) name[i]) & 0x3) << 4) | (((UINT) name[i+1]) >> 4)];
-            i++;
-            step++;
-        }
-        else if (step == 2)
-        {
-
-            /* Use last 4 bits of name character and first 2 bits of next name character for index.  */
-            base64name[j++] =  (CHAR)_nx_azure_iot_base64_array[((((UINT) name[i]) & 0xF) << 2) | (((UINT) name[i+1]) >> 6)];
-            i++;
-            step++;
-        }
-        else /* Step 3 */
-        {
-
-            /* Use last 6 bits of name character for index.  */
-            base64name[j++] =  (CHAR)_nx_azure_iot_base64_array[(((UINT) name[i]) & 0x3F)];
-            i++;
-            step = 0;
-        }
-    }
-
-    /* Determine if the index needs to be advanced.  */
-    if (step != 3)
-        i++;
-
-    /* Now add the PAD characters.  */
-    while ((pad--) && (j < base64name_size))
-    {
-
-        /* Pad base64name with '=' characters.  */
-        base64name[j++] = '=';
-    }
-
-    /* Put a NULL character in.  */
-    base64name[j] =  NX_NULL;
-
-    return(NX_AZURE_IOT_SUCCESS);
 }
 
 /* HMAC-SHA256(master key, message ) */
@@ -979,13 +758,14 @@ UINT nx_azure_iot_base64_hmac_sha256_calculate(NX_AZURE_IOT_RESOURCE *resource_p
 UINT status;
 UCHAR *hash_buf;
 UINT hash_buf_size = 33;
-CHAR *encoded_hash_buf;
+UCHAR *encoded_hash_buf;
 UINT encoded_hash_buf_size = 48;
+UINT encoded_hash_size;
 UINT binary_key_buf_size;
 
     binary_key_buf_size = buffer_len;
-    status = nx_azure_iot_base64_decode((CHAR *)key_ptr, key_size,
-                                        buffer_ptr, binary_key_buf_size, &binary_key_buf_size);
+    status = _nx_utility_base64_decode((UCHAR *)key_ptr, key_size,
+                                       buffer_ptr, binary_key_buf_size, &binary_key_buf_size);
     if (status)
     {
         LogError(LogLiteralArgs("Failed to base64 decode"));
@@ -1009,20 +789,20 @@ UINT binary_key_buf_size;
     }
 
     buffer_len -= hash_buf_size;
-    encoded_hash_buf = (CHAR *)(hash_buf + hash_buf_size);
+    encoded_hash_buf = hash_buf + hash_buf_size;
 
     /* Additional space is required by encoder.  */
     hash_buf[hash_buf_size - 1] = 0;
-    status = nx_azure_iot_base64_encode(hash_buf, hash_buf_size - 1,
-                                        encoded_hash_buf, encoded_hash_buf_size);
+    status = _nx_utility_base64_encode(hash_buf, hash_buf_size - 1,
+                                       encoded_hash_buf, encoded_hash_buf_size, &encoded_hash_size);
     if (status)
     {
         LogError(LogLiteralArgs("Failed to base64 encode"));
         return(status);
     }
 
-    *output_pptr = (UCHAR *)(encoded_hash_buf);
-    *output_len_ptr = strlen(encoded_hash_buf);
+    *output_pptr = encoded_hash_buf;
+    *output_len_ptr = encoded_hash_size;
 
     return(NX_AZURE_IOT_SUCCESS);
 }

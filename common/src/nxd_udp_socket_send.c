@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -28,6 +28,7 @@
 #include "nx_api.h"
 #include "nx_udp.h"
 #include "nx_ip.h"
+#include "nx_packet.h"
 #ifdef FEATURE_NX_IPV6
 #include "nx_ipv6.h"
 #endif /* FEATURE_NX_IPV6 */
@@ -36,12 +37,202 @@
 #include "nx_ipsec.h"
 #endif /* NX_IPSEC_ENABLE */
 
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_udp_socket_driver_send                          PORTABLE C      */
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function sends a UDP packet through TCP/IP offload interface.  */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    socket_ptr                            Pointer to UDP socket         */
+/*    packet_ptr                            Pointer to UDP packet         */
+/*    ip_src_address                        Source IP address             */
+/*    ip_dst_address                        Destination IP address        */
+/*    port                                  16-bit UDP port number        */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_ip_packet_send                    Packet send function          */
+/*    _nx_ipv6_packet_send                  Packet send function          */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nxd_udp_socket_send                                                */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), corrected*/
+/*                                            the logic for queued packet,*/
+/*                                            resulting in version 6.1.10 */
+/*  12-31-2023     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN,             */
+/*                                            resulting in version 6.4.0  */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_udp_socket_driver_send(NX_UDP_SOCKET *socket_ptr,
+                                       NX_PACKET     *packet_ptr,
+                                       NXD_ADDRESS   *ip_src_address,
+                                       NXD_ADDRESS   *ip_dst_address,
+                                       UINT           port)
+{
+UINT            status;
+NX_IP          *ip_ptr;
+NX_INTERFACE   *interface_ptr = NX_NULL;
+UCHAR          *original_ptr = packet_ptr -> nx_packet_prepend_ptr + sizeof(NX_UDP_HEADER);
+ULONG           original_length = packet_ptr -> nx_packet_length - sizeof(NX_UDP_HEADER);
+UINT            packet_reset = NX_FALSE;
+
+    /* Set up the pointer to the associated IP instance.  */
+    ip_ptr =  socket_ptr -> nx_udp_socket_ip_ptr;
+
+    /* Get the outgoing interface. */
+#ifndef NX_DISABLE_IPV4
+    if (ip_dst_address -> nxd_ip_version == NX_IP_VERSION_V4)
+    {
+        interface_ptr = packet_ptr -> nx_packet_address.nx_packet_interface_ptr;
+    }
+#endif /* NX_DISABLE_IPV4 */
+#ifdef FEATURE_NX_IPV6
+    if (ip_dst_address -> nxd_ip_version == NX_IP_VERSION_V6)
+    {
+        interface_ptr = packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr -> nxd_ipv6_address_attached;
+    }
+#endif /* FEATURE_NX_IPV6 */
+
+#ifdef NX_ENABLE_IP_PACKET_FILTER
+    /* Check if the IP packet filter is set. */
+    if (ip_ptr -> nx_ip_packet_filter || ip_ptr -> nx_ip_packet_filter_extended)
+    {
+
+        /* Add the IP Header to trigger filtering.  */
+#ifndef NX_DISABLE_IPV4
+        if (ip_dst_address -> nxd_ip_version == NX_IP_VERSION_V4)
+        {
+            _nx_ip_header_add(ip_ptr, packet_ptr,
+                              ip_src_address -> nxd_ip_address.v4,
+                              ip_dst_address -> nxd_ip_address.v4,
+                              socket_ptr -> nx_udp_socket_type_of_service,
+                              socket_ptr -> nx_udp_socket_time_to_live,
+                              NX_IP_UDP, socket_ptr -> nx_udp_socket_fragment_enable);
+        }
+#endif /* !NX_DISABLE_IPV4  */
+
+#ifdef FEATURE_NX_IPV6
+        if (ip_dst_address -> nxd_ip_version == NX_IP_VERSION_V6)
+        {
+            if (_nx_ipv6_header_add(ip_ptr, &packet_ptr, NX_PROTOCOL_UDP,
+                                    packet_ptr -> nx_packet_length,
+                                    ip_ptr -> nx_ipv6_hop_limit,
+                                    ip_src_address -> nxd_ip_address.v6,
+                                    ip_dst_address -> nxd_ip_address.v6, NX_NULL))
+            {
+
+                /* Packet consumed by IPv6 layer. Just return success.  */
+                tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+                return(NX_SUCCESS);
+            }
+
+            /* Reset IP header.  */
+            packet_ptr -> nx_packet_prepend_ptr = packet_ptr -> nx_packet_prepend_ptr + sizeof(NX_IPV6_HEADER);
+            packet_ptr -> nx_packet_length = packet_ptr -> nx_packet_length - sizeof(NX_IPV6_HEADER);
+        }
+#endif /* FEATURE_NX_IPV6 */
+
+        if (ip_ptr -> nx_ip_packet_filter)
+        {
+            if (ip_ptr -> nx_ip_packet_filter((VOID *)(packet_ptr -> nx_packet_prepend_ptr),
+                                              NX_IP_PACKET_OUT) != NX_SUCCESS)
+            {
+
+                /* Packet consumed by IP filter. Just return success.  */
+                _nx_packet_transmit_release(packet_ptr);
+                return(NX_SUCCESS);
+            }
+        }
+
+        /* Check if the IP packet filter extended is set. */
+        if (ip_ptr -> nx_ip_packet_filter_extended)
+        {
+
+            /* Yes, call the IP packet filter extended routine. */
+            if (ip_ptr -> nx_ip_packet_filter_extended(ip_ptr, packet_ptr, NX_IP_PACKET_OUT) != NX_SUCCESS)
+            {
+
+                /* Packet consumed by IP filter. Just return success.  */
+                _nx_packet_transmit_release(packet_ptr);
+                return(NX_SUCCESS);
+            }
+        }
+    }
+#endif /* NX_ENABLE_IP_PACKET_FILTER */
+
+    /* Reset UDP and IP header.  */
+    packet_ptr -> nx_packet_prepend_ptr = original_ptr;
+    packet_ptr -> nx_packet_length = original_length;
+
+    /* Determine if the packet is a queued data packet. _nx_packet_transmit_release in Offload handler
+       does not release the packet immediately and only adjusts the prepend pointer to User data,
+       since the packet may need to be resent. To keep the same logic for retransmission in upper layer,
+       the prepend pointer must be reset to UDP header.  */
+    if ((packet_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next != ((NX_PACKET*)NX_PACKET_ALLOCATED)) &&
+        (packet_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next != ((NX_PACKET*)NX_PACKET_FREE)))
+    {
+        packet_reset = NX_TRUE;
+    }
+
+    /* Let TCP/IP offload interface send the packet.  */
+    status = interface_ptr -> nx_interface_tcpip_offload_handler(ip_ptr, interface_ptr, socket_ptr,
+                                                                 NX_TCPIP_OFFLOAD_UDP_SOCKET_SEND,
+                                                                 packet_ptr, ip_src_address, ip_dst_address,
+                                                                 socket_ptr -> nx_udp_socket_port,
+                                                                 &port, NX_NO_WAIT);
+
+    /* Release the IP protection.  */
+    tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+    if (status)
+    {
+        return(NX_TCPIP_OFFLOAD_ERROR);
+    }
+    else
+    {
+
+        /* Reset prepend pointer to UDP header for queued packet.  */
+        if (packet_reset == NX_TRUE)
+        {
+            packet_ptr -> nx_packet_prepend_ptr = original_ptr - sizeof(NX_UDP_HEADER);
+            packet_ptr -> nx_packet_length = original_length + sizeof(NX_UDP_HEADER);
+        }
+
+        return(NX_SUCCESS);
+    }
+}
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_udp_socket_send                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -87,6 +278,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_udp_socket_send(NX_UDP_SOCKET *socket_ptr,
@@ -108,6 +302,10 @@ NX_INTERFACE  *interface_ptr = NX_NULL;
 #ifdef FEATURE_NX_IPV6
 UINT           status;
 #endif /* FEATURE_NX_IPV6 */
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+NXD_ADDRESS    ip_src_address;
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
 #ifdef NX_IPSEC_ENABLE
 VOID          *sa = NX_NULL;
@@ -199,6 +397,11 @@ UINT           compute_checksum = 1;
         /* Fill in the IP src/dest address */
         ip_dest_addr = &ip_address -> nxd_ip_address.v4;
         ip_src_addr = &interface_ptr -> nx_interface_ip_address;
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+        ip_src_address.nxd_ip_version = NX_IP_VERSION_V4;
+        ip_src_address.nxd_ip_address.v4 = interface_ptr -> nx_interface_ip_address;
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
     }
 #endif /* NX_DISABLE_IPV4 */
 
@@ -229,6 +432,11 @@ UINT           compute_checksum = 1;
         /* Get the packet interface information. */
         interface_ptr = packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr -> nxd_ipv6_address_attached;
 #endif /* NX_ENABLE_INTERFACE_CAPABILITY  */
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+        ip_src_address.nxd_ip_version = NX_IP_VERSION_V6;
+        COPY_IPV6_ADDRESS(ip_src_addr, ip_src_address.nxd_ip_address.v6);
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
     }
 #endif /* FEATURE_NX_IPV6 */
 
@@ -281,7 +489,7 @@ UINT           compute_checksum = 1;
         }
     }
 #endif /* NX_IPSEC_ENABLE */
-
+        
     /* Prepend the UDP header to the packet.  First, make room for the UDP header.  */
     packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr - sizeof(NX_UDP_HEADER);
 
@@ -320,16 +528,16 @@ UINT           compute_checksum = 1;
     NX_TRACE_IN_LINE_INSERT(NX_TRACE_INTERNAL_UDP_SEND, ip_ptr, socket_ptr, packet_ptr, udp_header_ptr -> nx_udp_header_word_0, NX_TRACE_INTERNAL_EVENTS, 0, 0);
 
     /* Endian swapping logic.  If NX_LITTLE_ENDIAN is specified, these macros will
-       swap the endian of the UDP header.  */
+    swap the endian of the UDP header.  */
     NX_CHANGE_ULONG_ENDIAN(udp_header_ptr -> nx_udp_header_word_0);
     NX_CHANGE_ULONG_ENDIAN(udp_header_ptr -> nx_udp_header_word_1);
 
     /* Determine if we need to compute the UDP checksum.
 
-       Note that with IPv6, UDP packet checksum is mandatory. However if the underly device
-       driver is able to compute UDP checksum in hardware, let the driver handle the checksum
-       computation.
-     */
+    Note that with IPv6, UDP packet checksum is mandatory. However if the underly device
+    driver is able to compute UDP checksum in hardware, let the driver handle the checksum
+    computation.
+    */
 
     if ((!socket_ptr -> nx_udp_socket_disable_checksum) ||
         (ip_address -> nxd_ip_version == NX_IP_VERSION_V6))
@@ -343,8 +551,8 @@ UINT           compute_checksum = 1;
 
 #ifdef NX_IPSEC_ENABLE
         /* In case this packet is going through the IPsec protected channel, the checksum would have to be computed
-           in software even if the hardware checksum is available at driver layer.  The checksum value must be present
-           in order when applying IPsec process. */
+        in software even if the hardware checksum is available at driver layer.  The checksum value must be present
+        in order when applying IPsec process. */
 
         if ((packet_ptr -> nx_packet_ipsec_sa_ptr != NX_NULL) && (((NX_IPSEC_SA *)(packet_ptr -> nx_packet_ipsec_sa_ptr)) -> nx_ipsec_sa_encryption_method != NX_CRYPTO_NONE))
         {
@@ -391,6 +599,21 @@ UINT           compute_checksum = 1;
 
     /* Get mutex protection.  */
     tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+    if ((interface_ptr -> nx_interface_capability_flag & NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD) &&
+        (interface_ptr -> nx_interface_tcpip_offload_handler))
+    {
+        return(_nx_udp_socket_driver_send(socket_ptr, packet_ptr, &ip_src_address, ip_address, port));
+    }
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
+#ifdef NX_ENABLE_VLAN
+    if (socket_ptr -> nx_udp_socket_vlan_priority != NX_VLAN_PRIORITY_INVALID)
+    {
+        packet_ptr -> nx_packet_vlan_priority = socket_ptr -> nx_udp_socket_vlan_priority;
+    }
+#endif /* NX_ENABLE_VLAN */
 
 #ifndef NX_DISABLE_IPV4
     /* Send the UDP packet to the IPv4 component.  */

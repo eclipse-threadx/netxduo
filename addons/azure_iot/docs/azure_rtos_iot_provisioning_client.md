@@ -89,6 +89,40 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
+**nx_azure_iot_provisioning_client_trusted_cert_add**
+***
+<div style="text-align: right"> Add trusted certificate </div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_provisioning_client_trusted_cert_add(NX_AZURE_IOT_PROVISIONING_CLIENT *prov_client_ptr,
+                                                       NX_SECURE_X509_CERT *trusted_certificate);
+```
+**Description**
+
+<p>This routine adds trusted certificate. It can be called multiple times to set certificate chain.</p>
+
+**Parameters**
+| Name | Description |
+| - |:-|
+| prov_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_PROVISIONING_CLIENT` |
+| trusted_certificate [in]    | A pointer to a `NX_SECURE_X509_CERT` |
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successfully add trusted certs to AZ IoT Provisioning Client Instance.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to add trusted certs to AZ IoT Provisioning Client Instance due to invalid parameter.
+* NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to add trusted certificate due to `NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS` is too small.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
 **nx_azure_iot_provisioning_client_device_cert_set**
 ***
 <div style="text-align: right"> Set client certificate </div>
@@ -100,7 +134,7 @@ UINT nx_azure_iot_provisioning_client_device_cert_set(NX_AZURE_IOT_PROVISIONING_
 ```
 **Description**
 
-<p>This routine sets device certificate.</p>
+<p>This routine sets device certificate. It can be called multiple times to set certificate chain.</p>
 
 **Parameters**
 | Name | Description |
@@ -111,6 +145,7 @@ UINT nx_azure_iot_provisioning_client_device_cert_set(NX_AZURE_IOT_PROVISIONING_
 **Return Values**
 * NX_AZURE_IOT_SUCCESS Successfully set device certs to AZ IoT Provisioning Client Instance.
 * NX_AZURE_IOT_INVALID_PARAMETER Fail to set device certs to AZ IoT Provisioning Client Instance due to invalid parameter.
+* NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to set device certificate due to `NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS` is too small.
 
 **Allowed From**
 

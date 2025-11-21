@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -34,7 +34,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_ipv6_stateless_address_autoconfig_disable      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -70,6 +70,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_ipv6_stateless_address_autoconfig_disable(NX_IP *ip_ptr, UINT interface_index)
@@ -98,8 +101,10 @@ NX_INTERFACE *interface_ptr;
     /* Install IPv6 packet receive processing function pointer */
     interface_ptr -> nx_ipv6_stateless_address_autoconfig_status = NX_STATELESS_ADDRESS_AUTOCONFIG_DISABLED;
 
+#ifndef NX_DISABLE_ICMPV6_ROUTER_SOLICITATION
     /* Reset the RS count. */
     interface_ptr -> nx_ipv6_rtr_solicitation_count = 0;
+#endif /* NX_DISABLE_ICMPV6_ROUTER_SOLICITATION */
 
     /* Release the IP protection. */
     tx_mutex_put(&(ip_ptr -> nx_ip_protection));

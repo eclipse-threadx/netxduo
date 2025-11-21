@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -47,7 +47,7 @@ const UCHAR _nx_secure_tls_1_1_random[8] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -85,10 +85,16 @@ const UCHAR _nx_secure_tls_1_1_random[8] =
 /*                                            buffer length verification, */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
+/*                                            compilation issue with      */
+/*                                            TLS 1.3 and disabling TLS   */
+/*                                            server,                     */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_serverhello(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet)
 {
+#ifndef NX_SECURE_TLS_SERVER_DISABLED
 ULONG  length;
 UINT   gmt_time;
 UINT   random_value;
@@ -134,7 +140,7 @@ UINT   status;
     }
     NX_CHANGE_ULONG_ENDIAN(gmt_time);
 
-    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random, (UCHAR *)&gmt_time, sizeof(gmt_time)); /* Use case of memcpy is verified. */
+    NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random, (UCHAR *)&gmt_time, sizeof(gmt_time)); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
     if (tls_session -> nx_secure_tls_server_state == NX_SECURE_TLS_SERVER_STATE_SEND_HELLO_RETRY)
@@ -187,7 +193,7 @@ UINT   status;
     }
 
     /* Copy the random data into the packet. */
-    NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random,
+    NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random, /* lgtm[cpp/banned-api-usage-required-any] */
                      sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random)); /* Use case of memcpy is verified. */
     length += sizeof(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random);
 
@@ -243,6 +249,17 @@ UINT   status;
     send_packet -> nx_packet_append_ptr = send_packet -> nx_packet_append_ptr + length;
     send_packet -> nx_packet_length = send_packet -> nx_packet_length + length;
 
-    return(status);
+    return(status);  
+#else
+
+    NX_PARAMETER_NOT_USED(send_packet);
+
+    /* If TLS Server is disabled and we have processed a ClientKeyExchange, something is wrong... */
+    tls_session -> nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_ERROR;   
+    
+    /* Server is disabled, we shouldn't be sending a ServerHello - error! */
+    return(NX_SECURE_TLS_INVALID_STATE);
+#endif    
+    
 }
 

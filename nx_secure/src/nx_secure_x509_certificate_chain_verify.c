@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -30,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_chain_verify            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.12       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -71,10 +70,20 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            reorganized internal logic, */
+/*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            checked expiration for all  */
+/*                                            the certs in the chain,     */
+/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_chain_verify(NX_SECURE_X509_CERTIFICATE_STORE *store,
-                                              NX_SECURE_X509_CERT *certificate)
+                                              NX_SECURE_X509_CERT *certificate, ULONG current_time)
 {
 UINT                 status;
 NX_SECURE_X509_CERT *current_certificate;
@@ -92,16 +101,19 @@ INT                  compare_result;
     /* Get working pointer to certificate chain entry. */
     current_certificate = certificate;
 
-    if (current_certificate == NX_NULL)
-    {
-        return(NX_PTR_ERROR);
-    }
-
-    while (current_certificate != NX_NULL)
+    while (current_certificate != NX_CRYPTO_NULL)
     {
 
         /* Check the certificate expiration against the current time. */
+        if (current_time != 0)
+        {
+            status = _nx_secure_x509_expiration_check(current_certificate, current_time);
 
+            if (status != NX_SECURE_X509_SUCCESS)
+            {
+                return(status);
+            }
+        }
 
         /* See if the certificate is self-signed or not. */
         compare_result = _nx_secure_x509_distinguished_name_compare(&current_certificate -> nx_secure_x509_distinguished_name,
@@ -112,16 +124,16 @@ INT                  compare_result;
             /* Find the certificate issuer in the store. */
             status = _nx_secure_x509_store_certificate_find(store, &current_certificate -> nx_secure_x509_issuer, 0, &issuer_certificate, &issuer_location);
 
-            if (status != NX_SUCCESS)
+            if (status != NX_SECURE_X509_SUCCESS)
             {
-                return(NX_SECURE_TLS_ISSUER_CERTIFICATE_NOT_FOUND);
+                return(NX_SECURE_X509_ISSUER_CERTIFICATE_NOT_FOUND);
             }
         }
         else
         {
 #ifndef NX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES
             /* The certificate is self-signed. If we don't allow that, return error. */
-            return(NX_SECURE_TLS_INVALID_SELF_SIGNED_CERT);
+            return(NX_SECURE_X509_INVALID_SELF_SIGNED_CERT);
 #else
             /* Certificate is self-signed and we are configured to accept them. */
             issuer_certificate = current_certificate;
@@ -142,7 +154,7 @@ INT                  compare_result;
                then continue the verification process. */
             if (issuer_location == NX_SECURE_X509_CERT_LOCATION_TRUSTED)
             {
-                return(NX_SUCCESS);
+                return(NX_SECURE_X509_SUCCESS);
             }
 
 #ifdef NX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES
@@ -152,12 +164,12 @@ INT                  compare_result;
                 /* Check for self-signed certificate in trusted store. */
                 status = _nx_secure_x509_store_certificate_find(store, &current_certificate -> nx_secure_x509_distinguished_name, 0, &issuer_certificate, &issuer_location);
                 
-                if(status == NX_SUCCESS && issuer_location == NX_SECURE_X509_CERT_LOCATION_TRUSTED)
+                if(status == NX_SECURE_X509_SUCCESS && issuer_location == NX_SECURE_X509_CERT_LOCATION_TRUSTED)
                 {
-                    return(NX_SUCCESS);
+                    return(NX_SECURE_X509_SUCCESS);
                 }
                 /* Self-signed certificate is not trusted. */
-                return(NX_SECURE_X509_CHAIN_VERIFY_FAILURE);
+                break;
             }
 #endif
         }
@@ -166,7 +178,7 @@ INT                  compare_result;
         current_certificate = issuer_certificate;
     } /* End while. */
 
-    /* Certificate is valid. */
+    /* Certificate is invalid. */
     return(NX_SECURE_X509_CHAIN_VERIFY_FAILURE);
 }
 

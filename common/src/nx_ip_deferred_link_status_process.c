@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -27,6 +27,7 @@
 #include "nx_tcp.h"
 #include "nx_arp.h"
 #include "nx_icmpv6.h"
+#include "nx_link.h"
 
 
 /**************************************************************************/
@@ -34,7 +35,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ip_diferred_link_status_process                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -73,6 +74,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2023     Yajun Xia                Modified comment(s),          */
+/*                                            supported VLAN and generic  */
+/*                                            link layer,                 */
+/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_ip_deferred_link_status_process(NX_IP *ip_ptr)
@@ -108,6 +113,11 @@ ULONG        link_up;
             /* Invoke the callback function. */
             /*lint -e{644} suppress variable might not be initialized, since "link_up" was initialized in nx_interface_link_driver_entry. */
             ip_ptr -> nx_ip_link_status_change_callback(ip_ptr, i, link_up);
+
+#ifdef NX_ENABLE_VLAN
+            /* Link status change need to propagate to vlan sub interface */
+            nx_link_vlan_interface_status_change(ip_ptr, i);
+#endif /* NX_ENABLE_VLAN */
         }
     }
 }

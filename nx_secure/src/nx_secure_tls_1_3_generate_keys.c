@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -58,7 +58,7 @@ static UINT _nx_secure_tls_hkdf_extract(NX_SECURE_TLS_SESSION *tls_session, UCHA
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_psk_secrets             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -169,7 +169,7 @@ UINT is_resumption_psk = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_handshake_keys          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -200,6 +200,9 @@ UINT is_resumption_psk = NX_FALSE;
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            cleanup for session cipher, */
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -373,6 +376,17 @@ UINT                                  hash_size;
     /* Initialize the crypto method used in the session cipher. */
     if (session_cipher_method -> nx_crypto_init != NULL)
     {
+        if (tls_session -> nx_secure_tls_session_cipher_client_initialized && session_cipher_method -> nx_crypto_cleanup)
+        {
+            status = session_cipher_method -> nx_crypto_cleanup(tls_session -> nx_secure_session_cipher_metadata_area_client);
+            if (status != NX_CRYPTO_SUCCESS)
+            {
+                return(status);
+            }
+
+            tls_session -> nx_secure_tls_session_cipher_client_initialized = 0;
+        }
+
         /* Set client write key. */
         status = session_cipher_method -> nx_crypto_init((NX_CRYPTO_METHOD*)session_cipher_method,
                                                          tls_session -> nx_secure_tls_key_material.nx_secure_tls_client_write_key,
@@ -384,6 +398,19 @@ UINT                                  hash_size;
         if (status != NX_CRYPTO_SUCCESS)
         {
             return(status);
+        }
+
+        tls_session -> nx_secure_tls_session_cipher_client_initialized = 1;
+
+        if (tls_session -> nx_secure_tls_session_cipher_server_initialized && session_cipher_method -> nx_crypto_cleanup)
+        {
+            status = session_cipher_method -> nx_crypto_cleanup(tls_session -> nx_secure_session_cipher_metadata_area_server);
+            if (status != NX_CRYPTO_SUCCESS)
+            {
+                return(status);
+            }
+
+            tls_session -> nx_secure_tls_session_cipher_server_initialized = 0;
         }
 
         /* Set server write key. */
@@ -398,6 +425,8 @@ UINT                                  hash_size;
         {
             return(status);
         }
+
+        tls_session -> nx_secure_tls_session_cipher_server_initialized = 1;
     }
 
     return(NX_SUCCESS);
@@ -410,7 +439,7 @@ UINT                                  hash_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_session_keys            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -596,7 +625,7 @@ UINT                                  key_offset;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_generate_session_psk                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -679,7 +708,7 @@ const NX_CRYPTO_METHOD *hash_method;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_handshake_secrets       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -990,7 +1019,7 @@ UINT is_resumption_psk = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_generate_session_secrets         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1149,7 +1178,7 @@ UCHAR (*transcript_hashes)[NX_SECURE_TLS_MAX_HASH_SIZE] = tls_session->nx_secure
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_derive_secret                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1318,7 +1347,7 @@ UINT hash_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_hkdf_expand_label                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1495,7 +1524,7 @@ const NX_CRYPTO_METHOD                     *session_hmac_method = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_hkdf_extract                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */

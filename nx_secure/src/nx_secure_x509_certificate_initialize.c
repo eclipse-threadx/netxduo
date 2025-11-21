@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -15,14 +15,13 @@
 /**                                                                       */
 /** NetX Secure Component                                                 */
 /**                                                                       */
-/**    X509 Digital Certificates                                          */
+/**    X.509 Digital Certificates                                         */
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
 
 #define NX_SECURE_SOURCE_CODE
 
-#include "nx_secure_tls.h"
 #include "nx_secure_x509.h"
 
 /**************************************************************************/
@@ -30,14 +29,14 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_initialize              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
 /*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
-/*      This function initializes an NX_SECURE_X509_CERTI                 */
+/*      This function initializes an NX_SECURE_X509_CERT                  */
 /*      structure with a DER-encoded X509 digital certificate, and        */
 /*      in the case of a server or client local certificate, the          */
 /*      associated private key.                                           */
@@ -84,8 +83,6 @@
 /*    _nx_secure_x509_pkcs1_rsa_private_key_parse                         */
 /*                                          Parse RSA key (PKCS#1 format) */
 /*    _nx_secure_x509_ec_private_key_parse  Parse EC key                  */
-/*    tx_mutex_get                          Get protection mutex          */
-/*    tx_mutex_put                          Put protection mutex          */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -99,6 +96,16 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  03-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed unnecessary mutex,  */
+/*                                            resulting in version 6.1.5  */
+/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            removed dependency on TLS,  */
+/*                                            resulting in version 6.1.6  */
+/*  06-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            supported hardware EC       */
+/*                                            private key,                */
+/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_initialize(NX_SECURE_X509_CERT *certificate,
@@ -114,14 +121,11 @@ UINT bytes_processed;
 NX_SECURE_EC_PRIVATE_KEY *ec_key;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
-    /* Get the protection. */
-    tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
     NX_SECURE_MEMSET(certificate, 0, sizeof(NX_SECURE_X509_CERT));
 
     /* Set up the certificate with raw data. */
     certificate -> nx_secure_x509_certificate_raw_data_length = length;
-    if (raw_data_buffer == NX_NULL)
+    if (raw_data_buffer == NX_CRYPTO_NULL)
     {
         /* No buffer was passed in so just point to the certificate itself. */
         certificate -> nx_secure_x509_certificate_raw_buffer_size = length;
@@ -132,14 +136,12 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
         /* Make sure we have enough space in the buffer for the certificate. */
         if (length > buffer_size)
         {
-            /* Release the protection. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-            return(NX_SECURE_TLS_INSUFFICIENT_CERT_SPACE);
+            return(NX_SECURE_X509_INSUFFICIENT_CERT_SPACE);
         }
         /* Use the caller-supplied buffer for the certificate. */
         certificate -> nx_secure_x509_certificate_raw_buffer_size = buffer_size;
         certificate -> nx_secure_x509_certificate_raw_data = raw_data_buffer;
-        NX_SECURE_MEMCPY(certificate -> nx_secure_x509_certificate_raw_data, certificate_data, length); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(certificate -> nx_secure_x509_certificate_raw_data, certificate_data, length); /* Use case of memcpy is verified. lgtm[cpp/banned-api-usage-required-any] */
     }
 
     /* Parse the DER-encoded X509 certificate to extract the public key data.
@@ -152,9 +154,7 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
 
     if (status != 0)
     {
-        /* Release the protection. */
-        tx_mutex_put(&_nx_secure_tls_protection);
-        return(NX_SECURE_TLS_INVALID_CERTIFICATE);
+        return(NX_SECURE_X509_INVALID_CERTIFICATE);
     }
 
     /* If the optional private key is supplied, save it for later use. */
@@ -184,6 +184,12 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
                 status = _nx_secure_x509_ec_private_key_parse(private_key, priv_len, &bytes_processed, ec_key);
                 break;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
+
+            case NX_SECURE_X509_KEY_TYPE_HARDWARE:
+                certificate -> nx_secure_x509_private_key.user_key.key_data = private_key;
+                certificate -> nx_secure_x509_private_key.user_key.key_length = priv_len;
+                status = NX_SUCCESS;
+                break;
             case NX_SECURE_X509_KEY_TYPE_NONE:
             default:
                 /* Unknown or invalid key type, return error. */
@@ -194,25 +200,21 @@ NX_SECURE_EC_PRIVATE_KEY *ec_key;
             /* See if we had any issues in parsing. */
             if (status != 0)
             {
-                /* Release the protection. */
-                tx_mutex_put(&_nx_secure_tls_protection);
                 return(status);
             }
         }
 
         /* We have a private key, this is a server or client identity certificate. */
-        certificate -> nx_secure_x509_certificate_is_identity_cert = NX_TRUE;
+        certificate -> nx_secure_x509_certificate_is_identity_cert = NX_CRYPTO_TRUE;
     }
     else
     {
         /* No private key? Cannot be an identity certificate. */
-        certificate -> nx_secure_x509_certificate_is_identity_cert = NX_FALSE;
+        certificate -> nx_secure_x509_certificate_is_identity_cert = NX_CRYPTO_FALSE;
     }
 
     certificate -> nx_secure_x509_next_certificate = NULL;
 
-    /* Release the protection. */
-    tx_mutex_put(&_nx_secure_tls_protection);
-    return(NX_SUCCESS);
+    return(NX_SECURE_X509_SUCCESS);
 }
 

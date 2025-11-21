@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -27,6 +27,9 @@
 #include "nx_packet.h"
 #include "nx_ip.h"
 #include "nx_tcp.h"
+#ifdef NX_ENABLE_HTTP_PROXY
+#include "nx_http_proxy_client.h"
+#endif /* NX_ENABLE_HTTP_PROXY */
 
 
 /**************************************************************************/
@@ -34,7 +37,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_data_trim                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -69,6 +72,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported HTTP Proxy,       */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_tcp_socket_state_data_trim(NX_PACKET *packet_ptr, ULONG amount)
@@ -137,7 +143,7 @@ NX_PACKET *work_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_data_trim_front                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -276,7 +282,7 @@ ULONG      work_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_data_check                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -317,6 +323,19 @@ ULONG      work_length;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed unsigned integers     */
+/*                                            comparison,                 */
+/*                                            resulting in version 6.1.10 */
+/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported HTTP Proxy,       */
+/*                                            resulting in version 6.2.0  */
+/*  10-31-2023     Bo Chen                 Modified comment(s), corrected */
+/*                                            the acked packet count,     */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_state_data_check(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr)
@@ -339,6 +358,9 @@ ULONG          trim_data_length;
 TX_THREAD     *thread_ptr;
 ULONG          acked_packets = 0;
 UINT           need_ack = NX_FALSE;
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+ULONG          tcpip_offload;
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 #ifdef NX_ENABLE_LOW_WATERMARK
 UCHAR          drop_packet = NX_FALSE;
 #endif /* NX_ENABLE_LOW_WATERMARK */
@@ -349,6 +371,10 @@ NX_IP         *ip_ptr;
     ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
 #endif
 
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+    tcpip_offload = socket_ptr -> nx_tcp_socket_connect_interface -> nx_interface_capability_flag &
+                    NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD;
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
     /* Pickup the pointer to the head of the TCP packet.  */
     /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
@@ -370,11 +396,15 @@ NX_IP         *ip_ptr;
     packet_end_sequence =  tcp_header_ptr -> nx_tcp_sequence_number + packet_data_length;
 
     /* Trim the data that out of the receive window, make sure all data are in receive window.  */
-    if (packet_data_length)
+    if (packet_data_length
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+        && (!tcpip_offload)
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+       )
     {
 
         /* Step1. trim the data on the left side of the receive window.  */
-        if (((INT)socket_ptr -> nx_tcp_socket_rx_sequence - (INT)packet_begin_sequence) > 0)
+        if (((INT)(socket_ptr -> nx_tcp_socket_rx_sequence - packet_begin_sequence)) > 0)
         {
 
             /* Calculate the data length that out of window.  */
@@ -392,8 +422,8 @@ NX_IP         *ip_ptr;
         }
 
         /* Step2. trim the data on the right side of the receive window.  */
-        if ((((INT)packet_end_sequence - (INT)socket_ptr -> nx_tcp_socket_rx_sequence) -
-             (INT)socket_ptr -> nx_tcp_socket_rx_window_current) > 0)
+        if (((INT)((packet_end_sequence - socket_ptr -> nx_tcp_socket_rx_sequence) -
+                   socket_ptr -> nx_tcp_socket_rx_window_current)) > 0)
         {
 
             /* Calculate the data length that out of window.  */
@@ -480,13 +510,17 @@ NX_IP         *ip_ptr;
         search_end_sequence =  socket_ptr -> nx_tcp_socket_rx_sequence;
     }
 
-#ifdef NX_ENABLE_LOW_WATERMARK
     /* Does the number of queued packets exceed the maximum rx queue length, or the number of
      * available packets in the default packet pool reaches low watermark? */
-    if ((socket_ptr -> nx_tcp_socket_receive_queue_count >=
-         socket_ptr -> nx_tcp_socket_receive_queue_maximum) ||
-        (packet_ptr -> nx_packet_pool_owner -> nx_packet_pool_available <
-         packet_ptr -> nx_packet_pool_owner -> nx_packet_pool_low_watermark))
+#ifdef NX_ENABLE_LOW_WATERMARK
+    if (((socket_ptr -> nx_tcp_socket_receive_queue_count >=
+          socket_ptr -> nx_tcp_socket_receive_queue_maximum) ||
+         (packet_ptr -> nx_packet_pool_owner -> nx_packet_pool_available <
+          packet_ptr -> nx_packet_pool_owner -> nx_packet_pool_low_watermark))
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+         && (!tcpip_offload)
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+       )
     {
 
         /* Yes it is. The last packet in queue should be dropped. */
@@ -497,8 +531,12 @@ NX_IP         *ip_ptr;
     /* Determine if we have a simple case of TCP data coming in the correct order.  This means
        the socket's sequence number matches the incoming packet sequence number and the last packet's
        data on the socket's receive queue (if any) matches the current sequence number.  */
-    if ((tcp_header_ptr -> nx_tcp_sequence_number == socket_ptr -> nx_tcp_socket_rx_sequence) &&
-        (search_end_sequence == socket_ptr -> nx_tcp_socket_rx_sequence))
+    if (((tcp_header_ptr -> nx_tcp_sequence_number == socket_ptr -> nx_tcp_socket_rx_sequence) &&
+         (search_end_sequence == socket_ptr -> nx_tcp_socket_rx_sequence))
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+         || tcpip_offload
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+       )
     {
 
         /* Yes, this is the simple case of adding receive packets in sequence.  */
@@ -534,7 +572,12 @@ NX_IP         *ip_ptr;
                 socket_ptr -> nx_tcp_socket_receive_queue_tail =  packet_ptr;
 
                 /* Setup a new delayed ACK timeout.  */
-                socket_ptr -> nx_tcp_socket_delayed_ack_timeout =  _nx_tcp_ack_timer_rate;
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+                if (!tcpip_offload)
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+                {
+                    socket_ptr -> nx_tcp_socket_delayed_ack_timeout =  _nx_tcp_ack_timer_rate;
+                }
             }
 
             /* Increment the receive TCP packet count.  */
@@ -631,7 +674,7 @@ NX_IP         *ip_ptr;
            packet_begin_sequence is to the right of the end of it. */
 
         /* Packet data begins to the right of the expected sequence (out of sequence data). Force an ACK. */
-        if (((INT)packet_begin_sequence - (INT)socket_ptr -> nx_tcp_socket_rx_sequence) > 0)
+        if (((INT)(packet_begin_sequence - socket_ptr -> nx_tcp_socket_rx_sequence)) > 0)
         {
             _nx_tcp_packet_send_ack(socket_ptr, socket_ptr -> nx_tcp_socket_tx_sequence);
         }
@@ -885,14 +928,15 @@ NX_IP         *ip_ptr;
             if ((INT)(expected_sequence - search_begin_sequence) >= 0)
             {
 
+                /* Increment the acked packet count.  */
+                acked_packets++;
+
                 if ((INT)(search_end_sequence - expected_sequence) > 0)
                 {
                     /* Sequence number is within this packet.  Advance sequence number. */
                     expected_sequence = search_end_sequence;
 
                     socket_ptr -> nx_tcp_socket_rx_sequence = expected_sequence;
-
-                    acked_packets++;
 
                     /* Mark this packet as ready for retrieval.  */
                     /*lint -e{923} suppress cast of ULONG to pointer.  */
@@ -1059,8 +1103,12 @@ NX_IP         *ip_ptr;
     /* At this point, we can use the packet TCP header pointers since the received
        packet is already queued.  */
 
-    /* Any packets for receving? */
-    while (acked_packets && socket_ptr -> nx_tcp_socket_receive_suspension_list)
+    /* Any packets for receiving? */
+    while (acked_packets && socket_ptr -> nx_tcp_socket_receive_suspension_list
+#ifdef NX_ENABLE_HTTP_PROXY
+           && (socket_ptr -> nx_tcp_socket_http_proxy_state != NX_HTTP_PROXY_STATE_CONNECTING)
+#endif /* NX_ENABLE_HTTP_PROXY */
+          )
     {
 
         /* Setup a pointer to the first queued packet.  */
@@ -1134,15 +1182,28 @@ NX_IP         *ip_ptr;
 
     /* If the incoming packet caused the sequence number to move forward,
        indicating the new piece of data is in order, in sequence, and valid for receiving. */
-    if (original_rx_sequence != socket_ptr -> nx_tcp_socket_rx_sequence)
+    if ((original_rx_sequence != socket_ptr -> nx_tcp_socket_rx_sequence)
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+        || tcpip_offload
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+       )
     {
-        /* Determine if there is a socket receive notification function specified.  */
-        if (socket_ptr -> nx_tcp_receive_callback)
+
+#ifdef NX_ENABLE_HTTP_PROXY
+
+        /* If HTTP Proxy is connecting, the data is the response from HTTP Proxy server, don't need to notify application.  */
+        if (socket_ptr -> nx_tcp_socket_http_proxy_state != NX_HTTP_PROXY_STATE_CONNECTING)
+#endif /* NX_ENABLE_HTTP_PROXY */
         {
 
-            /* Yes, notification is requested.  Call the application's receive notification
-               function for this socket.  */
-            (socket_ptr -> nx_tcp_receive_callback)(socket_ptr);
+            /* Determine if there is a socket receive notification function specified.  */
+            if (socket_ptr -> nx_tcp_receive_callback)
+            {
+
+                /* Yes, notification is requested.  Call the application's receive notification
+                   function for this socket.  */
+                (socket_ptr -> nx_tcp_receive_callback)(socket_ptr);
+            }
         }
 
 #ifdef NX_TCP_ACK_EVERY_N_PACKETS

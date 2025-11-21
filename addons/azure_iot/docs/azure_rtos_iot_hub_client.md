@@ -1,6 +1,74 @@
 # Azure IoT Hub Client
 
-**nx_azure_iot_hub_client_initialize**
+## APIs:
+
+### Connect
+
+* [nx_azure_iot_hub_client_initialize](#nx_azure_iot_hub_client_initialize)
+* [nx_azure_iot_hub_client_deinitialize](#nx_azure_iot_hub_client_deinitialize)
+* [nx_azure_iot_hub_client_model_id_set](#nx_azure_iot_hub_client_model_id_set)
+* [nx_azure_iot_hub_client_component_add](#nx_azure_iot_hub_client_component_add)
+* [nx_azure_iot_hub_client_trusted_cert_add](#nx_azure_iot_hub_client_trusted_cert_add)
+* [nx_azure_iot_hub_client_device_cert_set](#nx_azure_iot_hub_client_device_cert_set)
+* [nx_azure_iot_hub_client_symmetric_key_set](#nx_azure_iot_hub_client_symmetric_key_set)
+* [nx_azure_iot_hub_client_websocket_enable](#nx_azure_iot_hub_client_websocket_enable)
+* [nx_azure_iot_hub_client_connect](#nx_azure_iot_hub_client_connect)
+* [nx_azure_iot_hub_client_disconnect](#nx_azure_iot_hub_client_disconnect)
+* [nx_azure_iot_hub_client_connection_status_callback_set](#nx_azure_iot_hub_client_connection_status_callback_set)
+* [nx_azure_iot_hub_client_receive_callback_set](#nx_azure_iot_hub_client_receive_callback_set)
+
+### C2D
+
+* [nx_azure_iot_hub_client_cloud_message_enable](#nx_azure_iot_hub_client_cloud_message_enable)
+* [nx_azure_iot_hub_client_cloud_message_disable](#nx_azure_iot_hub_client_cloud_message_disable)
+* [nx_azure_iot_hub_client_cloud_message_receive](#nx_azure_iot_hub_client_cloud_message_receive)
+* [nx_azure_iot_hub_client_cloud_message_property_get](#nx_azure_iot_hub_client_cloud_message_property_get)
+
+### Telemetry
+
+* [nx_azure_iot_hub_client_telemetry_message_create](#nx_azure_iot_hub_client_telemetry_message_create)
+* [nx_azure_iot_hub_client_telemetry_message_delete](#nx_azure_iot_hub_client_telemetry_message_delete)
+* [nx_azure_iot_hub_client_telemetry_component_set](#nx_azure_iot_hub_client_telemetry_component_set)
+* [nx_azure_iot_hub_client_telemetry_property_add](#nx_azure_iot_hub_client_telemetry_property_add)
+* [nx_azure_iot_hub_client_telemetry_send](#nx_azure_iot_hub_client_telemetry_send)
+* [nx_azure_iot_hub_client_telemetry_send_extended](#nx_azure_iot_hub_client_telemetry_send_extended)
+* [nx_azure_iot_hub_client_telemetry_ack_callback_set](#nx_azure_iot_hub_client_telemetry_ack_callback_set)
+
+### Command
+
+* [nx_azure_iot_hub_client_command_enable](#nx_azure_iot_hub_client_command_enable)
+* [nx_azure_iot_hub_client_command_disable](#nx_azure_iot_hub_client_command_disable)
+* [nx_azure_iot_hub_client_command_message_receive](#nx_azure_iot_hub_client_command_message_receive)
+* [nx_azure_iot_hub_client_command_message_response](#nx_azure_iot_hub_client_command_message_response)
+
+### Direct Method
+
+* [nx_azure_iot_hub_client_direct_method_enable](#nx_azure_iot_hub_client_direct_method_enable)
+* [nx_azure_iot_hub_client_direct_method_disable](#nx_azure_iot_hub_client_direct_method_disable)
+* [nx_azure_iot_hub_client_direct_method_message_receive](#nx_azure_iot_hub_client_direct_method_message_receive)
+* [nx_azure_iot_hub_client_direct_method_message_response](#nx_azure_iot_hub_client_direct_method_message_response)
+
+### Properties
+
+* [nx_azure_iot_hub_client_properties_enable](#nx_azure_iot_hub_client_properties_enable)
+* [nx_azure_iot_hub_client_properties_disable](#nx_azure_iot_hub_client_properties_disable)
+* [nx_azure_iot_hub_client_reported_properties_response_callback_set](#nx_azure_iot_hub_client_reported_properties_response_callback_set)
+* [nx_azure_iot_hub_client_reported_properties_create](#nx_azure_iot_hub_client_reported_properties_create)
+* [nx_azure_iot_hub_client_reported_properties_send](#nx_azure_iot_hub_client_reported_properties_send)
+* [nx_azure_iot_hub_client_properties_request](#nx_azure_iot_hub_client_properties_request)
+* [nx_azure_iot_hub_client_properties_receive](#nx_azure_iot_hub_client_properties_receive)
+* [nx_azure_iot_hub_client_writable_properties_receive](#nx_azure_iot_hub_client_writable_properties_receive)
+
+### Device Twin
+
+* [nx_azure_iot_hub_client_device_twin_enable](#nx_azure_iot_hub_client_device_twin_enable)
+* [nx_azure_iot_hub_client_device_twin_disable](#nx_azure_iot_hub_client_device_twin_disable)
+* [nx_azure_iot_hub_client_device_twin_reported_properties_send](#nx_azure_iot_hub_client_device_twin_reported_properties_send)
+* [nx_azure_iot_hub_client_device_twin_properties_request](#nx_azure_iot_hub_client_device_twin_properties_request)
+* [nx_azure_iot_hub_client_device_twin_properties_receive](#nx_azure_iot_hub_client_device_twin_properties_receive)
+* [nx_azure_iot_hub_client_device_twin_desired_properties_receive](#nx_azure_iot_hub_client_device_twin_desired_properties_receive)
+
+#### **nx_azure_iot_hub_client_initialize**
 ***
 <div style="text-align: right"> Initialize Azure IoT hub instance</div>
 
@@ -55,7 +123,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_deinitialize**
+#### **nx_azure_iot_hub_client_deinitialize**
 ***
 <div style="text-align: right"> Cleanup the Azure IoT Hub</div>
 
@@ -87,29 +155,30 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_device_cert_set**
+#### **nx_azure_iot_hub_client_trusted_cert_add**
 ***
-<div style="text-align: right"> Set client certificate </div>
+<div style="text-align: right"> Add trusted certificate </div>
 
 **Prototype**
 ```c
-UINT nx_azure_iot_hub_client_device_cert_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
-                                             NX_SECURE_X509_CERT *device_certificate);
+UINT nx_azure_iot_hub_client_trusted_cert_add(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                              NX_SECURE_X509_CERT *trusted_certificate);
 ```
 **Description**
 
-<p>This routine sets the device certificate.</p>
+<p>This routine adds the trusted certificate. It can be called multiple times to set multiple trusted certificates.</p>
 
 **Parameters**
 
 | Name | Description |
 | - |:-|
 | hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT` |
-| device_certificate [in]    | A pointer to a `NX_SECURE_X509_CERT` |
+| trusted_certificate [in]    | A pointer to a `NX_SECURE_X509_CERT` |
 
 **Return Values**
-* NX_AZURE_IOT_SUCCESS Successfully set device certificate to AZ IoT Hub Instance.
-* NX_AZURE_IOT_INVALID_PARAMETER Fail to set device certificate to AZ IoT Hub Instance due to invalid parameter.
+* NX_AZURE_IOT_SUCCESS Successfully add trusted certificate to Azure IoT Hub Instance.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to add trusted certificate to Azure IoT Hub Instance due to invalid parameter.
+* NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to add trusted certificate due to `NX_AZURE_IOT_MAX_NUM_OF_TRUSTED_CERTS` is too small.
 
 **Allowed From**
 
@@ -121,7 +190,42 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_symmetric_key_set**
+#### **nx_azure_iot_hub_client_device_cert_set**
+***
+<div style="text-align: right"> Set client certificate </div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_device_cert_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                             NX_SECURE_X509_CERT *device_certificate);
+```
+**Description**
+
+<p>This routine sets the device certificate. It can be called multiple times to set certificate chain.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT` |
+| device_certificate [in]    | A pointer to a `NX_SECURE_X509_CERT` |
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successfully set device certificate to Azure IoT Hub Instance.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to set device certificate to Azure IoT Hub Instance due to invalid parameter.
+* NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to set device certificate due to `NX_AZURE_IOT_MAX_NUM_OF_DEVICE_CERTS` is too small.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_symmetric_key_set**
 ***
 <div style="text-align: right"> Set symmetric key </div>
 
@@ -156,7 +260,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_model_id_set**
+#### **nx_azure_iot_hub_client_model_id_set**
 ***
 <div style="text-align: right"> Set Device Twin model id in the IoT Hub client. </div>
 
@@ -167,7 +271,7 @@ UINT nx_azure_iot_hub_client_model_id_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_pt
 ```
 **Description**
 
-<p>This routine sets the Device Twin model id. Note: THIS FUNCTION IS TEMPORARY. IT IS SUBJECT TO CHANGE OR BE REMOVED IN THE FUTURE.</p>
+<p>This routine sets the model id in the IoT Hub client to enable PnP.</p>
 
 **Parameters**
 
@@ -191,7 +295,76 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_connect**
+#### **nx_azure_iot_hub_client_component_add**
+***
+<div style="text-align: right"> Add component to IoT Hub client </div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_component_add(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                           const UCHAR *component_name_ptr,
+                                           USHORT component_name_length);
+```
+**Description**
+
+<p>This routine should be called for all the components in the IoT hub model.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT` |
+| component_name_ptr [in]    | A pointer to component, that is part of IoT hub model. |
+| component_name_length [in]    | Length of the `component_name_ptr`. |
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successfully set device certificate to AZ IoT Hub Instance.
+* NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to add the component name due to out of memory.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_websocket_enable**
+***
+<div style="text-align: right"> Enables MQTT over WebSocket to connect to IoT Hub</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_websocket_enable(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr);
+```
+**Description**
+
+<p>This routine enables MQTT over WebSocket to connect to the Azure IoT Hub.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT` |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if MQTT over Websocket is enabled.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to enable MQTT over WebSocket due to invalid parameter.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_connect**
 ***
 <div style="text-align: right"> Connects to IoT Hub</div>
 
@@ -241,7 +414,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_disconnect**
+#### **nx_azure_iot_hub_client_disconnect**
 ***
 <div style="text-align: right"> Disconnects the client</div>
 
@@ -274,7 +447,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_connection_status_callback_set**
+#### **nx_azure_iot_hub_client_connection_status_callback_set**
 ***
 <div style="text-align: right"> Sets connection status callback function</div>
 
@@ -296,6 +469,7 @@ UINT nx_azure_iot_hub_client_connection_status_callback_set(NX_AZURE_IOT_HUB_CLI
 * NXD_MQTT_ERROR_SERVER_UNAVAILABLE
 * NXD_MQTT_ERROR_NOT_AUTHORIZED
 * NX_AZURE_IOT_DISCONNECTED
+* NX_AZURE_IOT_SAS_TOKEN_EXPIRED
 
 **Parameters**
 
@@ -319,7 +493,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_receive_callback_set**
+#### **nx_azure_iot_hub_client_receive_callback_set**
 ***
 <div style="text-align: right"> Sets receive callback function</div>
 
@@ -333,7 +507,7 @@ UINT nx_azure_iot_hub_client_receive_callback_set(NX_AZURE_IOT_HUB_CLIENT *hub_c
 ```
 **Description**
 
-<p>This routine sets the IoT Hub receive callback function. This callback function is invoked when a message is received from Azure IoT hub. Setting the callback function to NULL disables the callback function. Message types can be NX_AZURE_IOT_HUB_CLOUD_TO_DEVICE_MESSAGE, NX_AZURE_IOT_HUB_DIRECT_METHOD, NX_AZURE_IOT_HUB_DEVICE_TWIN_DESIRED_PROPERTIES and NX_AZURE_IOT_HUB_DEVICE_TWIN_PROPERTIES. </p>
+<p>This routine sets the IoT Hub receive callback function. This callback function is invoked when a message is received from Azure IoT hub. Setting the callback function to NULL disables the callback function. Message types can be NX_AZURE_IOT_HUB_CLOUD_TO_DEVICE_MESSAGE, NX_AZURE_IOT_HUB_COMMAND, NX_AZURE_IOT_HUB_PROPERTIES, NX_AZURE_IOT_HUB_WRITABLE_PROPERTIES, NX_AZURE_IOT_HUB_DIRECT_METHOD, NX_AZURE_IOT_HUB_DEVICE_TWIN_PROPERTIES and NX_AZURE_IOT_HUB_DEVICE_TWIN_DESIRED_PROPERTIES. </p>
 
 **Parameters**
 
@@ -360,7 +534,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_telemetry_message_create**
+#### **nx_azure_iot_hub_client_telemetry_message_create**
 ***
 <div style="text-align: right"> Creates telemetry message</div>
 
@@ -399,7 +573,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_telemetry_message_delete**
+#### **nx_azure_iot_hub_client_telemetry_message_delete**
 ***
 <div style="text-align: right"> Deletes telemetry message</div>
 
@@ -431,7 +605,47 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_telemetry_property_add**
+#### **nx_azure_iot_hub_client_telemetry_component_set**
+***
+<div style="text-align: right"> Sets component to telemetry message</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_telemetry_component_set(NX_PACKET *packet_ptr,
+                                                     const UCHAR *component_name_ptr,
+                                                     USHORT component_name_length,
+                                                     UINT wait_option));
+```
+**Description**
+
+<p>This routine allows an application to set a component name to a telemetry message before it is being sent. The component is stored in the sequence which the routine is called. The component must be set after a telemetry packet is created, and before the telemetry message is being sent.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| packet_ptr [in]    | A pointer to telemetry component packet. |
+| component_name_ptr [in]    |  A pointer to a component name. |
+| component_name_length [in]    | Length of component name. |
+| wait_option [in]    | Ticks to wait if packet needs to be expanded. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if component is set.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to set component due to invalid parameter.
+* NX_NO_PACKET Fail to set component due to no available packet in pool.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_telemetry_property_add**
 ***
 <div style="text-align: right"> Adds property to telemetry message</div>
 
@@ -473,7 +687,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_telemetry_send**
+#### **nx_azure_iot_hub_client_telemetry_send**
 ***
 <div style="text-align: right"> Sends telemetry message to IoTHub</div>
 
@@ -515,7 +729,90 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_cloud_message_enable**
+#### **nx_azure_iot_hub_client_telemetry_send_extended**
+***
+<div style="text-align: right"> Sends telemetry message to IoTHub, and return the packet id</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_telemetry_send_extended(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                     NX_PACKET *packet_ptr,
+                                                     const UCHAR *telemetry_data, UINT data_size,
+                                                     USHORT *packet_id, UINT wait_option);
+```
+**Description**
+
+<p>This routine sends telemetry to IoTHub, with packet_ptr containing all the properties. On successful return of this function, ownership of `NX_PACKET` is released, and packet id is returned to caller. User also can use nx_azure_iot_hub_client_telemetry_ack_callback_set() to register the callback for tracking the telemetry ack, packet_id ties the correlation between telemetry send and ack.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| packet_ptr [in]    | A pointer to telemetry property packet. |
+| telemetry_data [in]    | Pointer to telemetry data. |
+| data_size [in]    | Size of telemetry data. |
+| packet_id [out]   | Packet id of telemetry message. |
+| wait_option [in]    | Ticks to wait for message to be sent. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if telemetry message is sent out.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to send telemetry message due to invalid parameter.
+* NX_AZURE_IOT_INVALID_PACKET Fail to send telemetry message due to packet is invalid.
+* NXD_MQTT_PACKET_POOL_FAILURE Fail to send telemetry message due to no available packet in pool.
+* NXD_MQTT_COMMUNICATION_FAILURE Fail to send telemetry message due to TCP/TLS error.
+* NX_NO_PACKET Fail to send telemetry message due to no available packet in pool.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_telemetry_ack_callback_set**
+***
+<div style="text-align: right">Sets telemetry ack callback function</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_telemetry_ack_callback_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                        VOID (*callback_ptr)(
+                                                              NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                              USHORT packet_id));
+```
+**Description**
+
+<p>This routine sets the telemetry ack receive callback function. This callback function is invoked when a telemetry ack is received from Azure IoT hub. Setting the callback function to NULL disables the callback function.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| callback_ptr [in]    | Pointer to a callback function invoked. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if callback function is set.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to set callback due to invalid parameter.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_cloud_message_enable**
 ***
 <div style="text-align: right"> Enables receiving C2D message from IoTHub</div>
 
@@ -551,7 +848,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_cloud_message_disable**
+#### **nx_azure_iot_hub_client_cloud_message_disable**
 ***
 <div style="text-align: right"> Disables receiving C2D message from IoTHub</div>
 
@@ -587,7 +884,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_cloud_message_receive**
+#### **nx_azure_iot_hub_client_cloud_message_receive**
 ***
 <div style="text-align: right"> Receives C2D message from IoTHub</div>
 
@@ -627,7 +924,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_cloud_message_property_get**
+#### **nx_azure_iot_hub_client_cloud_message_property_get**
 ***
 <div style="text-align: right"> Retrieve the property with given property name in the C2D message</div>
 
@@ -670,7 +967,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_direct_method_enable**
+#### **nx_azure_iot_hub_client_direct_method_enable**
 ***
 <div style="text-align: right"> Enables receiving direct method messages from IoTHub </div>
 
@@ -705,7 +1002,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_direct_method_disable**
+#### **nx_azure_iot_hub_client_direct_method_disable**
 ***
 <div style="text-align: right"> Disables receiving direct method messages from IoTHub</div>
 
@@ -741,7 +1038,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_direct_method_message_receive**
+#### **nx_azure_iot_hub_client_direct_method_message_receive**
 ***
 <div style="text-align: right"> Receives direct method message from IoTHub</div>
 
@@ -788,7 +1085,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_direct_method_message_response**
+#### **nx_azure_iot_hub_client_direct_method_message_response**
 ***
 <div style="text-align: right"> Return response to direct method message from IoTHub</div>
 
@@ -829,10 +1126,178 @@ Threads
 
 **See Also**
 
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_command_enable**
+***
+<div style="text-align: right"> Enables receiving command messages from IoTHub </div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_command_enable(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr);
+
+```
+**Description**
+
+<p>This routine enables receiving command messages from IoT Hub. </p>
+
+**Parameters**
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT` |
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if command message receiving is enabled.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to enable command message receiving due to invalid parameter.
+* NXD_MQTT_NOT_CONNECTED Fail to enable command message receiving due to MQTT not connected.
+* NXD_MQTT_PACKET_POOL_FAILURE Fail to enable command message receiving due to no available packet in pool.
+* NXD_MQTT_COMMUNICATION_FAILURE Fail to enable command message receiving due to TCP/TLS error.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_device_twin_enable**
+#### **nx_azure_iot_hub_client_command_disable**
+***
+<div style="text-align: right"> Disables receiving command messages from IoTHub</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_command_disable(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr);
+```
+**Description**
+
+<p>This routine disables receiving command messages from IoT Hub.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if command message receiving is disabled.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to disable command message receiving due to invalid parameter.
+* NXD_MQTT_NOT_CONNECTED Fail to disable command message receiving due to MQTT not connected.
+* NXD_MQTT_PACKET_POOL_FAILURE Fail to disable command message receiving due to no available packet in pool.
+* NXD_MQTT_COMMUNICATION_FAILURE Fail to disable command message receiving due to TCP/TLS error.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_command_message_receive**
+***
+<div style="text-align: right"> Receives IoT Hub command message from IoTHub</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_command_message_receive(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                     const UCHAR **component_name_pptr, 
+                                                     USHORT *component_name_length_ptr,
+                                                     const UCHAR **pnp_command_name_pptr, 
+                                                     USHORT *pnp_command_name_length_ptr,
+                                                     VOID **context_pptr, 
+                                                     USHORT *context_length_ptr,
+                                                     NX_PACKET **packet_pptr, 
+                                                     UINT wait_option);
+```
+**Description**
+
+<p>This routine receives IoT Hub command message from IoT Hub. If there are no messages in the receive queue, this routine can block.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| component_name_pptr [out]    | Return a pointer to IoT Hub component name on success. |
+| component_name_length_ptr [out]    | Return length of `*component_name_pptr` on success. |
+| pnp_command_name_pptr [out]    | Return a pointer to IoT Hub command name on success. |
+| pnp_command_name_length_ptr [out]    | Return length of `*pnp_command_name_pptr` on success. |
+| context_pptr [out]    | Return a pointer to context pointer on success. |
+| context_length_ptr [out]    | Return length of context on success. |
+| packet_pptr [out]    | Return `NX_PACKET` containing the command payload on success. Caller owns the `NX_PACKET` memory. |
+| wait_option [in]    | Ticks to wait for message to arrive. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if IoT Hub command message is received.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to receive IoT Hub command message due to invalid parameter.
+* NX_AZURE_IOT_NOT_ENABLED Fail to receive IoT Hub command message due to it is not enabled.
+* NX_AZURE_IOT_NO_PACKET Fail to receive IoT Hub command message due to timeout.
+* NX_AZURE_IOT_INVALID_PACKET Fail to receive IoT Hub command message due to invalid packet.
+* NX_AZURE_IOT_SDK_CORE_ERROR Fail to receive IoT Hub command message due to SDK core error.
+* NX_AZURE_IOT_DISCONNECTED Fail to receive IoT Hub command message due to disconnect.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_command_message_response**
+***
+<div style="text-align: right"> Return response to IoT hub command message from IoTHub</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_command_message_response(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                      UINT status_code, VOID *context_ptr,
+                                                      USHORT context_length, const UCHAR *payload_ptr,
+                                                      UINT payload_length, UINT wait_option);
+```
+**Description**
+
+<p>This routine returns response to the IoT hub command message from IoT Hub. Note: request_id ties the correlation between command receive and response.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| status_code [in]    | Status code for pnp command message. |
+| context_ptr [in]    | Pointer to context return from nx_azure_iot_hub_client_command_receive. |
+| context_length [in]    | Length of context. |
+| payload [in]    | Pointer to `UCHAR` containing the payload for the IoT Hub command response. Payload is in JSON format. |
+| payload_length [in]    | Length of the payload |
+| wait_option [in]    | Ticks to wait for message to send. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if IoT Hub command response is send.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to send IoT Hub command response due to invalid parameter.
+* NX_AZURE_IOT_SDK_CORE_ERROR Fail to send IoT Hub command response due to SDK core error.
+* NX_NO_PACKET Fail send IoT Hub command response due to no available packet in pool.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_device_twin_enable**
 ***
 <div style="text-align: right">Enables device twin feature</div>
 
@@ -869,7 +1334,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_device_twin_disable**
+#### **nx_azure_iot_hub_client_device_twin_disable**
 ***
 <div style="text-align: right">Disables device twin feature</div>
 
@@ -906,20 +1371,20 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_report_properties_response_callback_set**
+#### **nx_azure_iot_hub_client_reported_properties_response_callback_set**
 ***
 <div style="text-align: right">Sets reported properties response callback function</div>
 
 **Prototype**
 ```c
-UINT nx_azure_iot_hub_client_report_properties_response_callback_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
-                                                                     VOID (*callback_ptr)(
-                                                                           NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
-                                                                           UINT request_id,
-                                                                           UINT response_status,
-                                                                           ULONG version,
-                                                                           VOID *args),
-                                                                     VOID *callback_args);
+UINT nx_azure_iot_hub_client_reported_properties_response_callback_set(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                                       VOID (*callback_ptr)(
+                                                                             NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                                             UINT request_id,
+                                                                             UINT response_status,
+                                                                             ULONG version,
+                                                                             VOID *args),
+                                                                       VOID *callback_args);
 ```
 **Description**
 
@@ -949,7 +1414,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_device_twin_reported_properties_send**
+#### **nx_azure_iot_hub_client_device_twin_reported_properties_send**
 ***
 <div style="text-align: right">Send device twin reported properties to IoT Hub</div>
 
@@ -998,7 +1463,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_device_twin_properties_request**
+#### **nx_azure_iot_hub_client_device_twin_properties_request**
 ***
 <div style="text-align: right">Request complete device twin properties</div>
 
@@ -1038,7 +1503,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_device_twin_properties_receive**
+#### **nx_azure_iot_hub_client_device_twin_properties_receive**
 ***
 <div style="text-align: right">Receive complete device twin properties</div>
 
@@ -1080,7 +1545,7 @@ Threads
 
 <div style="page-break-after: always;"></div>
 
-**nx_azure_iot_hub_client_device_twin_desired_properties_receive**
+#### **nx_azure_iot_hub_client_device_twin_desired_properties_receive**
 ***
 <div style="text-align: right">Receive desired properties form IoTHub</div>
 
@@ -1119,3 +1584,291 @@ Threads
 **See Also**
 
 <div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_properties_enable**
+***
+<div style="text-align: right">Enables properties feature</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_properties_enable(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr);
+```
+**Description**
+
+<p>This routine enables properties feature.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if properties feature is enabled.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to enable properties feature due to invalid parameter.
+* NXD_MQTT_NOT_CONNECTED Fail to enable properties feature due to MQTT not connected.
+* NXD_MQTT_PACKET_POOL_FAILURE Fail to enable properties feature due to no available packet in pool.
+* NXD_MQTT_COMMUNICATION_FAILURE Fail to enable properties feature due to TCP/TLS error.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_properties_disable**
+***
+<div style="text-align: right">Disables properties feature</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_properties_disable(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr);
+```
+**Description**
+
+<p>This routine disables properties feature.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if properties feature is disabled.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to disable properties feature due to invalid parameter.
+* NXD_MQTT_NOT_CONNECTED Fail to disable properties feature due to MQTT not connected.
+* NXD_MQTT_PACKET_POOL_FAILURE Fail to disable properties feature due to no available packet in pool.
+* NXD_MQTT_COMMUNICATION_FAILURE Fail to disable properties feature due to TCP/TLS error.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_reported_properties_create**
+***
+<div style="text-align: right">Creates IoT Hub reported property message.</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_reported_properties_create(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                        NX_PACKET **packet_pptr,
+                                                        UINT wait_option)
+```
+**Description**
+
+<p>This routine creates a reported properties message.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| packet_pptr [out]    | Return allocated packet on success. |
+| wait_option [in]    | Ticks to wait for writer creation. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if a message writer is created.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to create message writer due to invalid parameter.
+* NX_AZURE_IOT_SDK_CORE_ERROR Fail to create message writer due to SDK core error.
+* NX_NO_PACKET Fail to create message writer due to no available packet in pool.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_reported_properties_send**
+***
+<div style="text-align: right">Sends IoT Hub reported properties message to IoTHub.</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_reported_properties_send(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                      NX_PACKET *packet_ptr,
+                                                      UINT *request_id_ptr, UINT *response_status_ptr,
+                                                      ULONG *version_ptr, UINT wait_option);
+```
+**Description**
+
+<p>This routine sends the reported properties contain in the packet.</p>
+<p>Note: The return status of the API indicates if the reported properties is sent out successfully or not,
+the response status is used to track if the reported properties is accepted or not by IoT Hub, and the
+reponse status is available only when the return status is NX_AZURE_IOT_SUCCESS.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| packet_ptr [in]    | A pointer to a #NX_PACKET. |
+| request_id_ptr [out]    | Request Id assigned to the request. |
+| response_status_ptr [out]    | Status return for successful send of reported properties. |
+| version_ptr [out]    | Version return for successful send of reported properties. |
+| wait_option [in]    | Ticks to wait for message to send. |
+
+
+**Return Values**
+ * NX_AZURE_IOT_SUCCESS Successful if reported properties is sent.
+ * NX_AZURE_IOT_INVALID_PARAMETER Fail to send reported properties due to invalid parameter.
+ * NX_AZURE_IOT_NOT_ENABLED Fail to send reported properties due to property is not enabled.
+ * NX_AZURE_IOT_SDK_CORE_ERROR Fail to send reported properties due to SDK core error.
+ * NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to send reported properties due to buffer size is too small.
+ * NX_NO_PACKET Fail to send reported properties due to no packet available.
+ * NX_AZURE_IOT_DISCONNECTED Fail to send reported properties due to disconnect.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_properties_request**
+***
+<div style="text-align: right">Request complete properties</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_properties_request(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                UINT wait_option);
+```
+**Description**
+
+<p>This routine requests complete properties.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| wait_option [in]    | Ticks to wait for to wait for sending request. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if request get all properties is sent..
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to request get all properties due to invalid parameter.
+* NX_AZURE_IOT_NO_SUBSCRIBE_ACK Fail to request get all properties due to no subscribe ack.
+* NX_AZURE_IOT_SDK_CORE_ERROR Fail to request get all properties due to SDK core error.
+* NX_AZURE_IOT_INSUFFICIENT_BUFFER_SPACE Fail to request get all properties due to buffer size is too small.
+* NX_AZURE_IOT_NO_PACKET Fail to request get all properties due to no packet available.
+* NX_NO_PACKET Fail to request get all properties due to no packet available.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_properties_receive**
+***
+<div style="text-align: right">Receive all the properties</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_properties_receive(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                NX_PACKET **packet_pptr,
+                                                UINT wait_option);
+```
+**Description**
+
+<p>This routine receives all the properties.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| packet_pptr [out]    | A pointer to a #NX_PACKET containing all the properties. |
+| wait_option [in]    | Ticks to wait for message to receive. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if all properties is received.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to receive all properties due to invalid parameter.
+* NX_AZURE_IOT_NOT_ENABLED Fail to receive all properties due to it is not enabled.
+* NX_AZURE_IOT_NO_PACKET Fail to receive all properties due to timeout.
+* NX_AZURE_IOT_INVALID_PACKET Fail to receive all properties due to invalid packet.
+* NX_AZURE_IOT_SDK_CORE_ERROR Fail to receive all properties due to SDK core error.
+* NX_AZURE_IOT_SERVER_RESPONSE_ERROR Response code from server is not 2xx.
+* NX_AZURE_IOT_DISCONNECTED Fail to receive all properties due to disconnect.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+
+#### **nx_azure_iot_hub_client_writable_properties_receive**
+***
+<div style="text-align: right">Receive writable properties form IoTHub</div>
+
+**Prototype**
+```c
+UINT nx_azure_iot_hub_client_writable_properties_receive(NX_AZURE_IOT_HUB_CLIENT *hub_client_ptr,
+                                                         NX_PACKET **packet_pptr,
+                                                         UINT wait_option);
+```
+**Description**
+
+<p>This routine receives writable properties from IoTHub.</p>
+
+**Parameters**
+
+| Name | Description |
+| - |:-|
+| hub_client_ptr [in]    | A pointer to a `NX_AZURE_IOT_HUB_CLIENT`. |
+| packet_pptr [out]    | A pointer to a #NX_PACKET containing writable properties. |
+| wait_option [in]    | Ticks to wait for message to receive. |
+
+
+**Return Values**
+* NX_AZURE_IOT_SUCCESS Successful if writable properties is received.
+* NX_AZURE_IOT_INVALID_PARAMETER Fail to receive writable properties due to invalid parameter.
+* NX_AZURE_IOT_NOT_ENABLED Fail to receive writable properties due to it is not enabled.
+* NX_AZURE_IOT_NO_PACKET Fail to receive writable properties due to timeout.
+* NX_AZURE_IOT_INVALID_PACKET Fail to receive writable properties due to invalid packet.
+* NX_AZURE_IOT_DISCONNECTED Fail to receive writable properties due to disconnect.
+
+**Allowed From**
+
+Threads
+
+**Example**
+
+**See Also**
+
+<div style="page-break-after: always;"></div>
+

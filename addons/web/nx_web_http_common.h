@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_web_http_common.h                                PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -46,6 +46,10 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            improved the logic of       */
+/*                                            parsing base64,             */
+/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -103,8 +107,8 @@ extern   "C" {
 #define NX_PHYSICAL_TRAILER                     4
 #endif
 
-/* NX_WEB_HTTP_MAX_STRING is base64 of "name:password" and plus 1 if an extra conversion is needed. */
-#define NX_WEB_HTTP_MAX_STRING                  ((NX_WEB_HTTP_MAX_NAME + NX_WEB_HTTP_MAX_PASSWORD  + 1 ) * 4 / 3 + 1)
+/* NX_WEB_HTTP_MAX_STRING is base64 of "name:password" and plus 1 if an extra conversion is needed and plus 2 pad if needed.. */
+#define NX_WEB_HTTP_MAX_STRING                  ((NX_WEB_HTTP_MAX_NAME + NX_WEB_HTTP_MAX_PASSWORD  + 1 ) * 4 / 3 + 1 + 2)
 
 #define NX_WEB_HTTP_MAX_BINARY_MD5              16
 #define NX_WEB_HTTP_MAX_ASCII_MD5               32
@@ -174,6 +178,7 @@ extern   "C" {
 #define NX_WEB_HTTP_STATUS_CODE_SERVICE_UNAVAILABLE    0x3003E        /* "503 Service Unavailable"                            */
 #define NX_WEB_HTTP_STATUS_CODE_GATEWAY_TIMEOUT        0x3003F        /* "504 Gateway Time-out"                               */
 #define NX_WEB_HTTP_STATUS_CODE_VERSION_ERROR          0x30040        /* "505 HTTP Version not supported"                     */
+#define NX_WEB_HTTP_STATUS_CODE_TOO_MANY_REQUESTS      0x30041        /* "429 Too Many Requests"                              */
 #define NX_WEB_HTTP_AUTHENTICATION_ERROR               NX_WEB_HTTP_STATUS_CODE_UNAUTHORIZED        /* HTTP client authentication failed                    */
 
 /* Define the HTTP Server TCP port number */

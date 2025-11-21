@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_start                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -77,6 +77,12 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            supported chained packet,   */
 /*                                            resulting in version 6.1    */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s), removed  */
+/*                                            internal unreachable logic, */
+/*                                            resulting in version 6.1.11 */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
+/*                                            custom packet pool support, */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_start(NX_SECURE_TLS_SESSION *tls_session, NX_TCP_SOCKET *tcp_socket,
@@ -91,8 +97,11 @@ NX_PACKET *send_packet;
     /* Get the protection. */
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 
-    /* Assign the packet pool from which TLS will allocate internal message packets. */
-    tls_session -> nx_secure_tls_packet_pool = tcp_socket -> nx_tcp_socket_ip_ptr -> nx_ip_default_packet_pool;
+    if (!tls_session -> nx_secure_tls_packet_pool)
+    {
+        /* Assign the packet pool from which TLS will allocate internal message packets. */
+        tls_session -> nx_secure_tls_packet_pool = tcp_socket -> nx_tcp_socket_ip_ptr -> nx_ip_default_packet_pool;
+    }
 
     /* Assign the TCP socket to the TLS session. */
     tls_session -> nx_secure_tls_tcp_socket = tcp_socket;
@@ -184,7 +193,7 @@ NX_PACKET *send_packet;
        or an error/timeout occurs. */
     status = _nx_secure_tls_handshake_process(tls_session, wait_option);
 
-    if ((status == NX_CONTINUE) && (wait_option == 0))
+    if (status == NX_CONTINUE)
     {
         
         /* It is non blocking mode. */

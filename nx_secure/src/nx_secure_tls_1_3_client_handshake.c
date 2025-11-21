@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -30,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_1_3_client_handshake                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -108,6 +108,21 @@
 /*                                            fixed certificate buffer    */
 /*                                            allocation,                 */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.3  */
+/*  02-02-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            support for fragmented TLS  */
+/*                                            Handshake messages,         */
+/*                                            resulting in version 6.1.4  */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            updated alert message for   */
+/*                                            downgrade protection,       */
+/*                                            resulting in version 6.1.12 */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            corrected metadata cleanup, */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -141,15 +156,12 @@ UINT _nx_secure_tls_1_3_client_handshake(NX_SECURE_TLS_SESSION *tls_session, UCH
 #ifndef NX_SECURE_TLS_CLIENT_DISABLED
 UINT            status;
 USHORT          message_type = NX_SECURE_TLS_INVALID_MESSAGE;
-USHORT          header_bytes;
+UINT            header_bytes;
 UINT            message_length;
 UINT            packet_buffer_length = data_length;
 UCHAR          *packet_start;
 NX_PACKET      *send_packet = NX_NULL;
 NX_PACKET_POOL *packet_pool;
-UINT            error_number;
-UINT            alert_number;
-UINT            alert_level;
 const NX_CRYPTO_METHOD
                *method_ptr = NX_NULL;
 const UCHAR    *server_random;
@@ -215,13 +227,24 @@ const UCHAR    *server_random;
          * so we can hash it. */
         packet_start = packet_buffer;
 
-        /* First, process the handshake message to get our state and any data therein. */
-        _nx_secure_tls_process_handshake_header(packet_buffer, &message_type, &header_bytes, &message_length);
+        header_bytes = data_length;
 
-        /* Check for fragmented records. */
+        /* First, process the handshake message to get our state and any data therein. */
+        status = _nx_secure_tls_process_handshake_header(packet_buffer, &message_type, &header_bytes, &message_length);
+
+        if (status != NX_SECURE_TLS_SUCCESS)
+        {
+            return(status);
+        }
+
+        /* Check for fragmented message. */
         if((message_length + header_bytes) > data_length)
         {
-            /* Incomplete record! We need to obtain the next fragment. */
+            /* Incomplete message! A single message is fragmented across several records. We need to obtain the next fragment. */
+            tls_session -> nx_secure_tls_handshake_record_expected_length = message_length + header_bytes;
+
+            tls_session -> nx_secure_tls_handshake_record_fragment_state = NX_SECURE_TLS_HANDSHAKE_RECEIVED_FRAGMENT;
+
             return(NX_SECURE_TLS_HANDSHAKE_FRAGMENT_RECEIVED);
         }
 
@@ -267,7 +290,7 @@ const UCHAR    *server_random;
                 if (NX_SECURE_MEMCMP(&(tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random[24]),
                                      server_random, 8) == 0)
                 {
-                    status = NX_SECURE_TLS_UNKNOWN_TLS_VERSION;
+                    status = NX_SECURE_TLS_DOWNGRADE_DETECTED;
                 }
                 else
                 {
@@ -334,13 +357,6 @@ const UCHAR    *server_random;
 
             /* Update the transcript hash with the Finished.  */
             _nx_secure_tls_handshake_hash_update(tls_session, packet_start, message_length + header_bytes);
-
-            /* For client, cleanup hash handler after received the finished message from server. */
-            method_ptr = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_sha256_method;
-            if (method_ptr -> nx_crypto_cleanup != NX_NULL)
-            {
-                status = method_ptr -> nx_crypto_cleanup(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata);
-            }
             break;
         case NX_SECURE_TLS_CERTIFICATE_VERIFY:
             /* Handle server-sent certificate verify. */
@@ -368,29 +384,8 @@ const UCHAR    *server_random;
         /* Check for errors in processing messages. */
         if (status != NX_SECURE_TLS_SUCCESS)
         {
-            /* Get our alert number and level from our status. */
-            error_number = status;
-            _nx_secure_tls_map_error_to_alert(error_number, &alert_number, &alert_level);
 
-            /* Release the protection before suspending on nx_packet_allocate. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-
-            status = _nx_secure_tls_packet_allocate(tls_session, packet_pool, &send_packet, wait_option);
-
-            /* Get the protection after nx_packet_allocate. */
-            tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-            if (status == NX_SUCCESS)
-            {
-                _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-                status = _nx_secure_tls_send_record(tls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
-
-                if (status != NX_SUCCESS)
-                {
-                    nx_secure_tls_packet_release(send_packet);
-                }
-            }
-            return(error_number);
+            return(status);
         }
 
         /* Now take any actions based on state set in the message processing. */
@@ -655,6 +650,12 @@ const UCHAR    *server_random;
                 break;
             }
 
+            /* For client, cleanup hash handler after sent the finished message to server. */
+            method_ptr = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_sha256_method;
+            if (method_ptr -> nx_crypto_cleanup != NX_NULL)
+            {
+                status = method_ptr -> nx_crypto_cleanup(tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata);
+            }
 
             break;
 /*      Cases not handled in TLS 1.3 (for reference):
@@ -668,34 +669,11 @@ const UCHAR    *server_random;
         }
 
         /* If we have an error at this point, we have experienced a problem in sending
-           handshake messages, which is some type of internal issue. Send an alert
-           back to the remote host indicating the error. */
+           handshake messages, which is some type of internal issue. */
         if (status != NX_SUCCESS)
         {
-            /* Get our alert number and level from our status. */
-            error_number = status;
-            _nx_secure_tls_map_error_to_alert(error_number, &alert_number, &alert_level);
 
-            /* Release the protection before suspending on nx_packet_allocate. */
-            tx_mutex_put(&_nx_secure_tls_protection);
-
-            status = _nx_secure_tls_packet_allocate(tls_session, packet_pool, &send_packet, wait_option);
-
-            /* Get the protection after nx_packet_allocate. */
-            tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
-
-            if (status == NX_SUCCESS)
-            {
-                _nx_secure_tls_send_alert(tls_session, send_packet, (UCHAR)alert_number, (UCHAR)alert_level);
-                status = _nx_secure_tls_send_record(tls_session, send_packet, NX_SECURE_TLS_ALERT, wait_option);
-
-                if (status != NX_SUCCESS)
-                {
-                    nx_secure_tls_packet_release(send_packet);
-                }
-            }
-
-            return(error_number);
+            return(status);
         }
 
         /* Advance the buffer pointer past the message. */

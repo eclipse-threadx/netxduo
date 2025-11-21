@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -40,7 +40,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_socket_state_ack_check                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -81,10 +81,24 @@
 /*                                            corrected the calculation of*/
 /*                                            ending packet sequence,     */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed compiler warnings,    */
+/*                                            resulting in version 6.1.7  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            fixed the bug of race       */
+/*                                            condition, removed useless  */
+/*                                            code,                       */
+/*                                            resulting in version 6.1.9  */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            fixed unsigned integers     */
+/*                                            comparison,                 */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_tcp_socket_state_ack_check(NX_TCP_SOCKET *socket_ptr, NX_TCP_HEADER *tcp_header_ptr)
 {
+
+TX_INTERRUPT_SAVE_AREA
 
 NX_TCP_HEADER *search_header_ptr = NX_NULL;
 NX_PACKET     *search_ptr;
@@ -132,6 +146,7 @@ UINT           wrapped_flag = NX_FALSE;
                 search_header_ptr =  (NX_TCP_HEADER *)(search_ptr -> nx_packet_ip_header +
                                                        sizeof(NX_IPV4_HEADER));
             }
+            else
 #endif /* NX_DISABLE_IPV4 */
 #ifdef FEATURE_NX_IPV6
             if (search_ptr -> nx_packet_ip_version == NX_IP_VERSION_V6)
@@ -141,7 +156,11 @@ UINT           wrapped_flag = NX_FALSE;
                 search_header_ptr =  (NX_TCP_HEADER *)(search_ptr -> nx_packet_ip_header +
                                                        sizeof(NX_IPV6_HEADER));
             }
+            else
 #endif /* FEATURE_NX_IPV6 */
+            {
+                return(NX_FALSE);
+            }
 
             /* Determine the size of the TCP header.  */
             temp =  search_header_ptr -> nx_tcp_header_word_3;
@@ -222,10 +241,6 @@ UINT           wrapped_flag = NX_FALSE;
             /*lint -e{923} suppress cast of ULONG to pointer.  */
             if ((search_ptr) && (search_ptr -> nx_packet_queue_next == ((NX_PACKET *)NX_DRIVER_TX_DONE)))
             {
-
-                /* Setup a pointer to header of this packet in the sent list.  */
-                /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
-                search_header_ptr =  (NX_TCP_HEADER *)search_ptr -> nx_packet_prepend_ptr;
 
                 /* Determine if the incoming ACK matches the front of our transmit queue. */
                 if (tcp_header_ptr -> nx_tcp_acknowledgment_number == starting_tx_sequence)
@@ -425,7 +440,7 @@ UINT           wrapped_flag = NX_FALSE;
             {
 
                 /* If the ACK is a duplicate, it can be ignored. */
-                if ((INT)tcp_header_ptr -> nx_tcp_acknowledgment_number - (INT)ending_tx_sequence > 0)
+                if ((INT)(tcp_header_ptr -> nx_tcp_acknowledgment_number - ending_tx_sequence) > 0)
                 {
 
                     /* The ACK sequence is invalid. Respond with an ACK to let the other
@@ -474,23 +489,6 @@ UINT           wrapped_flag = NX_FALSE;
 
             /* Reset the duplicated ACK counter. */
             socket_ptr -> nx_tcp_socket_duplicated_ack_received = 0;
-
-            /* Determine if the packet has been transmitted.  */
-            /*lint -e{923} suppress cast of ULONG to pointer.  */
-            if (socket_ptr -> nx_tcp_socket_transmit_sent_head -> nx_packet_queue_next != ((NX_PACKET *)NX_DRIVER_TX_DONE))
-            {
-
-                /* Setup a pointer to header of this packet in the sent list.  */
-                search_header_ptr =  (NX_TCP_HEADER *)(socket_ptr -> nx_tcp_socket_transmit_sent_head -> nx_packet_ip_header +
-                                                       socket_ptr -> nx_tcp_socket_transmit_sent_head -> nx_packet_ip_header_length);
-            }
-            else
-            {
-
-                /* Setup a pointer to header of this packet in the sent list.  */
-                /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
-                search_header_ptr =  (NX_TCP_HEADER *)socket_ptr -> nx_tcp_socket_transmit_sent_head -> nx_packet_prepend_ptr;
-            }
 
             /* Set previous cumulative acknowlesgement. */
             socket_ptr -> nx_tcp_socket_previous_highest_ack = starting_tx_sequence;
@@ -555,11 +553,11 @@ UINT           wrapped_flag = NX_FALSE;
          * 2. SND.WL1 < SEG.SEQ or
          * 3. SND.WL1 = SEG.SEQ and SND.WL2 =< SEG.ACK
          * RFC793, Section 3.9, Page72. */
-        if ((((INT)tcp_header_ptr -> nx_tcp_acknowledgment_number - (INT)starting_tx_sequence > 0) &&
-             ((INT)tcp_header_ptr -> nx_tcp_acknowledgment_number - (INT)ending_tx_sequence <= 0)) ||
-            ((INT)tcp_header_ptr -> nx_tcp_sequence_number - (INT)ending_rx_sequence > 0) ||
-            (((INT)tcp_header_ptr -> nx_tcp_sequence_number == (INT)ending_rx_sequence) &&
-             ((INT)tcp_header_ptr -> nx_tcp_acknowledgment_number - (INT)starting_tx_sequence >= 0)))
+        if ((((INT)(tcp_header_ptr -> nx_tcp_acknowledgment_number - starting_tx_sequence) > 0) &&
+             ((INT)(tcp_header_ptr -> nx_tcp_acknowledgment_number - ending_tx_sequence) <= 0)) ||
+            ((INT)(tcp_header_ptr -> nx_tcp_sequence_number - ending_rx_sequence) > 0) ||
+            (((INT)(tcp_header_ptr -> nx_tcp_sequence_number == ending_rx_sequence)) &&
+             ((INT)(tcp_header_ptr -> nx_tcp_acknowledgment_number - starting_tx_sequence) >= 0)))
         {
 
             /* Update this socket's transmit window with the advertised window size in the ACK message.  */
@@ -665,6 +663,9 @@ UINT           wrapped_flag = NX_FALSE;
                next pointer.  */
             search_ptr =  search_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next;
 
+            /* Disable interrupts temporarily.  */
+            TX_DISABLE
+
             /* Set the packet to allocated to indicate it is no longer part of the TCP queue.  */
             /*lint -e{923} suppress cast of ULONG to pointer.  */
             previous_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next =  ((NX_PACKET *)NX_PACKET_ALLOCATED);
@@ -677,6 +678,9 @@ UINT           wrapped_flag = NX_FALSE;
             /*lint -e{923} suppress cast of ULONG to pointer.  */
             if (previous_ptr -> nx_packet_queue_next ==  ((NX_PACKET *)NX_DRIVER_TX_DONE))
             {
+
+                /* Restore interrupts.  */
+                TX_RESTORE
 
                 /* Yes, the driver has already released the packet.  */
 
@@ -722,8 +726,8 @@ UINT           wrapped_flag = NX_FALSE;
                     socket_ptr -> nx_tcp_socket_tx_outstanding_bytes = 0;
                 }
 
-                /* Let driver release the packet.  */
-                previous_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next = ((NX_PACKET *)NX_PACKET_ALLOCATED);
+                /* Restore interrupts.  */
+                TX_RESTORE
             }
         }
 

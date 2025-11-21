@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -44,7 +44,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_process_ns                               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -89,6 +89,9 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
+/*                                            packet length verification, */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_icmpv6_process_ns(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
@@ -124,6 +127,26 @@ ULONG             dest_address[4];
     /* Get a pointer to the IPv6 header. */
     /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
     ipv6_header = (NX_IPV6_HEADER *)packet_ptr -> nx_packet_ip_header;
+
+#ifndef NX_DISABLE_RX_SIZE_CHECKING
+    /* Check packet length is at least sizeof(NX_ICMPV6_ND). */
+    if ((packet_ptr -> nx_packet_length < sizeof(NX_ICMPV6_ND))
+#ifndef NX_DISABLE_PACKET_CHAIN
+        || (packet_ptr -> nx_packet_next) /* Ignore chained packet.  */
+#endif /* NX_DISABLE_PACKET_CHAIN */
+        )
+    {
+#ifndef NX_DISABLE_ICMP_INFO
+
+        /* Increment the ICMP invalid packet error. */
+        ip_ptr -> nx_ip_icmp_invalid_packets++;
+#endif /* NX_DISABLE_ICMP_INFO */
+
+        /* Release the packet and we are done. */
+        _nx_packet_release(packet_ptr);
+        return;
+    }
+#endif /* NX_DISABLE_RX_SIZE_CHECKING */
 
     /* Get a pointer to the Neighbor Discovery message. */
     /*lint -e{929} suppress cast of pointer to pointer, since it is necessary  */
@@ -285,7 +308,7 @@ ULONG             dest_address[4];
                 mac_lsw = ((ULONG)(nd_entry -> nx_nd_cache_mac_addr[2]) << 24) | ((ULONG)(nd_entry -> nx_nd_cache_mac_addr[3]) << 16) |
                           ((ULONG)(nd_entry -> nx_nd_cache_mac_addr[4]) << 8) | nd_entry -> nx_nd_cache_mac_addr[5];
                 new_msw = ((ULONG)(new_mac[0]) << 8) | (new_mac[1]);
-                new_lsw = ((ULONG)(new_mac[2]) << 24) | ((ULONG)(new_mac[3]) << 16) | ((ULONG)(new_mac[4]) << 8) | new_mac[5];
+                new_lsw = ((ULONG)(new_mac[2]) << 24) | ((ULONG)(new_mac[3]) << 16) | ((ULONG)(new_mac[4]) << 8) | new_mac[5]; /* lgtm[cpp/overflow-buffer] */
                 if ((mac_msw != new_msw) || (mac_lsw != new_lsw)) /* If the new MAC is different from what we have in the table. */
                 {
 
@@ -410,12 +433,12 @@ ULONG             dest_address[4];
     mac_addr = &option_ptr -> nx_icmpv6_option_data;
 
     mac_addr[0] = (USHORT)(interface_addr -> nxd_ipv6_address_attached -> nx_interface_physical_address_msw);
-    mac_addr[1] = (USHORT)((interface_addr -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0xFFFF0000) >> 16);
-    mac_addr[2] = (USHORT)(interface_addr -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0x0000FFFF);
+    mac_addr[1] = (USHORT)((interface_addr -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0xFFFF0000) >> 16); /* lgtm[cpp/overflow-buffer] */
+    mac_addr[2] = (USHORT)(interface_addr -> nxd_ipv6_address_attached -> nx_interface_physical_address_lsw & 0x0000FFFF); /* lgtm[cpp/overflow-buffer] */
 
     NX_CHANGE_USHORT_ENDIAN(mac_addr[0]);
-    NX_CHANGE_USHORT_ENDIAN(mac_addr[1]);
-    NX_CHANGE_USHORT_ENDIAN(mac_addr[2]);
+    NX_CHANGE_USHORT_ENDIAN(mac_addr[1]); /* lgtm[cpp/overflow-buffer] */
+    NX_CHANGE_USHORT_ENDIAN(mac_addr[2]); /* lgtm[cpp/overflow-buffer] */
 
 #ifdef NX_DISABLE_ICMPV6_TX_CHECKSUM
     compute_checksum = 0;

@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -26,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */ 
 /*                                                                        */ 
 /*    nx_pppoe_client.h                                   PORTABLE C      */  
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -44,6 +44,12 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
+/*                                            string length verification, */
+/*                                            resulting in version 6.1.3  */
+/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
+/*                                            necessary header file,      */
+/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -59,6 +65,8 @@
 extern   "C" {
 
 #endif
+
+#include "nx_api.h"
 
 /* Note: Prerequisite for using PPPoE.
          Redefine NX_PHYSICAL_HEADER to 24 to ensure enough space for filling in physical header.
@@ -228,7 +236,9 @@ typedef struct NX_PPPOE_CLIENT_STRUCT
     UINT                        nx_pppoe_state;
     NX_PPPOE_SERVER_SESSION     nx_pppoe_server_session;
     UCHAR                      *nx_pppoe_service_name;
+    UINT                        nx_pppoe_service_name_length;
     UCHAR                      *nx_pppoe_host_uniq;
+    UINT                        nx_pppoe_host_uniq_length;
     UCHAR                       nx_pppoe_ac_name[NX_PPPOE_CLIENT_MAX_AC_NAME_SIZE];
     UINT                        nx_pppoe_ac_name_size;
     UCHAR                       nx_pppoe_ac_cookie[NX_PPPOE_CLIENT_MAX_AC_COOKIE_SIZE];

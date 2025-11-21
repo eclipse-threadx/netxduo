@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -34,7 +34,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_packet_data_append                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -265,7 +265,7 @@ NX_PACKET *work_ptr;               /* Working packet pointer     */
 #endif /* NX_DISABLE_PACKET_CHAIN */
 
         /* Copy the data into the current packet buffer.  */
-        memcpy(work_ptr -> nx_packet_append_ptr, source_ptr, copy_size); /* Use case of memcpy is verified. */
+        memcpy(work_ptr -> nx_packet_append_ptr, source_ptr, copy_size); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
 
         /* Adjust the remaining data size.  */
         data_size =  data_size - copy_size;

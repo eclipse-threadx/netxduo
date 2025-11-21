@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 #ifndef NX_AZURE_IOT_CIPHERSUITES_H
 #define NX_AZURE_IOT_CIPHERSUITES_H
@@ -23,7 +23,7 @@ extern const UINT _nx_azure_iot_tls_ciphersuite_map_size;
 
 /* Define the metadata size for _nx_azure_iot_tls_ciphers.  */
 #ifndef NX_AZURE_IOT_TLS_METADATA_BUFFER_SIZE
-#define NX_AZURE_IOT_TLS_METADATA_BUFFER_SIZE                     (9 * 1024)
+#define NX_AZURE_IOT_TLS_METADATA_BUFFER_SIZE                     (10 * 1024)
 #endif /* NX_AZURE_IOT_TLS_METADATA_BUFFER_SIZE  */
 
 #endif /* NX_AZURE_IOT_CIPHERSUITES_H */

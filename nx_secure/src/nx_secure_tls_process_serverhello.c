@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -32,7 +32,7 @@ extern const UCHAR _nx_secure_tls_hello_retry_request_random[32];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -78,11 +78,18 @@ extern const UCHAR _nx_secure_tls_hello_retry_request_random[32];
 /*                                            verified memcpy use cases,  */
 /*                                            fixed renegotiation bug,    */
 /*                                            resulting in version 6.1    */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
+/*                                            TLS 1.3 compilation issue,  */
+/*                                            resulting in version 6.1.9  */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), fixed    */
+/*                                            TLS 1.3 version negotiation,*/
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_serverhello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
                                         UINT message_length)
 {
+#ifndef NX_SECURE_TLS_CLIENT_DISABLED
 UINT                                  length;
 UCHAR                                 compression_method;
 USHORT                                version, total_extensions_length;
@@ -93,6 +100,7 @@ NX_SECURE_TLS_HELLO_EXTENSION         extension_data[NX_SECURE_TLS_HELLO_EXTENSI
 UINT                                  num_extensions;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 USHORT                                tls_1_3 = tls_session -> nx_secure_tls_1_3;
+USHORT                                no_extension = NX_FALSE;
 NX_SECURE_TLS_SERVER_STATE            old_client_state = tls_session -> nx_secure_tls_client_state;
 
     tls_session -> nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_IDLE;
@@ -159,7 +167,7 @@ NX_SECURE_TLS_SERVER_STATE            old_client_state = tls_session -> nx_secur
     {
             
         /* Set the Server random data, used in key generation. First 4 bytes is GMT time. */
-        NX_SECURE_MEMCPY(&tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random[0], &packet_buffer[length], NX_SECURE_TLS_RANDOM_SIZE); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(&tls_session -> nx_secure_tls_key_material.nx_secure_tls_server_random[0], &packet_buffer[length], NX_SECURE_TLS_RANDOM_SIZE); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
     }
     length += NX_SECURE_TLS_RANDOM_SIZE;
 
@@ -175,7 +183,7 @@ NX_SECURE_TLS_SERVER_STATE            old_client_state = tls_session -> nx_secur
     /* Session ID follows. */
     if (tls_session -> nx_secure_tls_session_id_length > 0)
     {
-        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_session_id, &packet_buffer[length], tls_session -> nx_secure_tls_session_id_length); /* Use case of memcpy is verified. */
+        NX_SECURE_MEMCPY(tls_session -> nx_secure_tls_session_id, &packet_buffer[length], tls_session -> nx_secure_tls_session_id_length); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
         length += tls_session -> nx_secure_tls_session_id_length;
     }
 
@@ -254,7 +262,41 @@ NX_SECURE_TLS_SERVER_STATE            old_client_state = tls_session -> nx_secur
                 }
             }
         }
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+        else
+        {
+            no_extension = NX_TRUE;
+        }
+#endif
     }
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    else
+    {
+        no_extension = NX_TRUE;
+    }
+
+    if ((tls_session -> nx_secure_tls_1_3) && (no_extension == NX_TRUE))
+    {
+
+        /* Server negotiates a version of TLS prior to TLS 1.3. */
+        if (tls_session -> nx_secure_tls_protocol_version_override == 0)
+        {
+            tls_session -> nx_secure_tls_1_3 = NX_FALSE;
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
+            tls_session -> nx_secure_tls_renegotation_enabled = NX_TRUE;
+#endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
+
+            return(NX_SUCCESS);
+        }
+        else
+        {
+
+            /* Protocol version is overridden to TLS 1.3. */
+            return(NX_SECURE_TLS_UNSUPPORTED_TLS_VERSION);
+        }
+
+    }
+#endif
 
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
 #ifdef NX_SECURE_TLS_REQUIRE_RENEGOTIATION_EXT
@@ -311,5 +353,13 @@ NX_SECURE_TLS_SERVER_STATE            old_client_state = tls_session -> nx_secur
 
     return(NX_SUCCESS);
 #endif
+#else /* NX_SECURE_TLS_SERVER_DISABLED */
+    /* If Server TLS is disabled and we recieve a serverhello, error! */    
+    NX_PARAMETER_NOT_USED(tls_session);
+    NX_PARAMETER_NOT_USED(packet_buffer);
+    NX_PARAMETER_NOT_USED(message_length);
+    
+    return(NX_SECURE_TLS_UNEXPECTED_MESSAGE);
+#endif    
 }
 

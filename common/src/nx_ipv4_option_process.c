@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -36,7 +36,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ipv4_option_process                             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -138,6 +138,19 @@ UINT            op_timestamp_counter = 0;
                 /* Option length error, send a Parameter Problem Message .  */
                 /*lint -e{835} -e{845} suppress operating on zero. */
                 NX_ICMPV4_SEND_PARAMETER_PROBLEM(ip_ptr, packet_ptr, NX_ICMP_ZERO_CODE, (ip_normal_length + index + 2));
+#endif
+                /* Return NX_FALSE.  */
+                return(NX_FALSE);
+            }
+
+            /* GHSA-vwh7-h99r-fvwq:
+               Validate that there are at least 3 bytes in the packet, which allows the option_process logic to read type/length/offset. */
+            if((ip_option_length - index) < 3)
+            {
+#ifndef NX_DISABLE_ICMPV4_ERROR_MESSAGE
+                /* Option length error, send a Parameter Problem Message .  */
+                /*lint -e{835} -e{845} suppress operating on zero. */
+                NX_ICMPV4_SEND_PARAMETER_PROBLEM(ip_ptr, packet_ptr, NX_ICMP_ZERO_CODE, (ip_normal_length + index));
 #endif
                 /* Return NX_FALSE.  */
                 return(NX_FALSE);

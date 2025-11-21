@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -24,13 +24,16 @@
 
 
 /* Force error checking to be disabled in this module */
+#include "tx_port.h"
 
 #ifndef NX_DISABLE_ERROR_CHECKING
 #define NX_DISABLE_ERROR_CHECKING
 #endif
 
+#ifndef TX_SAFETY_CRITICAL
 #ifndef TX_DISABLE_ERROR_CHECKING
 #define TX_DISABLE_ERROR_CHECKING
+#endif
 #endif
 
 
@@ -101,7 +104,7 @@ NX_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_thread_entry                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -502,7 +505,7 @@ ULONG       count;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_driver                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -780,7 +783,7 @@ UINT            i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_get                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -817,6 +820,10 @@ UINT            i;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported processing        */
+/*                                            compressed data,            */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_receive_packet_get(NX_PPP *ppp_ptr, NX_PACKET **return_packet_ptr)
@@ -1131,8 +1138,65 @@ UINT        status;
             /* Check the CRC of the packet.  */
             status =  _nx_ppp_check_crc(packet_head_ptr);
 
-            /* Determine if there was an error.  */
-            if (status != NX_SUCCESS)
+            if (status == NX_SUCCESS)
+            {
+
+                /* Remove the FCS (2 bytes) and Flag (1 byte).  */
+                packet_head_ptr -> nx_packet_length =  packet_head_ptr -> nx_packet_length - 3;  
+                packet_ptr -> nx_packet_append_ptr =  packet_ptr -> nx_packet_append_ptr - 3;
+
+#ifndef NX_DISABLE_PACKET_CHAIN
+                /* Check for the condition where there is essentially no data in the last packet. */
+                if (packet_ptr -> nx_packet_append_ptr <= packet_ptr -> nx_packet_prepend_ptr)
+                {
+                    ULONG diff = (ULONG)(packet_ptr -> nx_packet_prepend_ptr - packet_ptr -> nx_packet_append_ptr);
+
+                    packet_ptr -> nx_packet_append_ptr =  packet_ptr -> nx_packet_prepend_ptr;
+
+                    if (packet_head_ptr != packet_ptr)
+                    {
+
+
+                        NX_PACKET *tmp_packet_ptr = packet_head_ptr;  
+                        NX_PACKET *prev_packet_ptr = tmp_packet_ptr;
+                        while (tmp_packet_ptr -> nx_packet_next != 0x0)
+                        {
+                            prev_packet_ptr = tmp_packet_ptr;
+                            tmp_packet_ptr = tmp_packet_ptr -> nx_packet_next;
+                        }
+
+                        nx_packet_release(tmp_packet_ptr);
+                        prev_packet_ptr -> nx_packet_next = NX_NULL;
+                        prev_packet_ptr -> nx_packet_append_ptr -= diff;
+                    }
+                }
+#endif  /* NX_DISABLE_PACKET_CHAIN */
+
+#ifdef NX_PPP_COMPRESSION_ENABLE
+                if (((UINT)(packet_head_ptr -> nx_packet_append_ptr - packet_head_ptr -> nx_packet_prepend_ptr) < 3) ||
+                    (packet_head_ptr -> nx_packet_prepend_ptr[1] != 0xff) ||
+                    (packet_head_ptr -> nx_packet_prepend_ptr[2] != 0x03))
+                {
+
+                    /* Address and control fields are compressed. Remove the compressed HDLC header.  */
+                    packet_head_ptr -> nx_packet_prepend_ptr++;
+                    packet_head_ptr -> nx_packet_length--;
+                }
+#else
+                if ((UINT)(packet_head_ptr -> nx_packet_append_ptr - packet_head_ptr -> nx_packet_prepend_ptr) < 3)
+                {
+                    status = NX_PPP_BAD_PACKET;
+                }
+#endif /* NX_PPP_COMPRESSION_ENABLE */
+                else
+                {
+
+                    /* Remove the HDLC header.  */
+                    packet_head_ptr -> nx_packet_prepend_ptr += 3;
+                    packet_head_ptr -> nx_packet_length -= 3;
+                }
+            }
+            else
             {
 
                 /* CRC error is present, just give up on the current frame.  */
@@ -1142,6 +1206,11 @@ UINT        status;
                 /* Increment the frame CRC error counter.  */
                 ppp_ptr -> nx_ppp_frame_crc_errors++;
 #endif
+            }
+
+            /* Determine if there was an error.  */
+            if (status != NX_SUCCESS)
+            {
 
                 /* Release the current packet.  */
                 nx_packet_release(packet_head_ptr);
@@ -1184,41 +1253,6 @@ UINT        status;
 
                 break;
             }
-
-            /* Remove the FCS (2 bytes) and Flag (1 byte).  */
-            packet_head_ptr -> nx_packet_length =  packet_head_ptr -> nx_packet_length - 3;  
-            packet_ptr -> nx_packet_append_ptr =  packet_ptr -> nx_packet_append_ptr - 3;
-
-#ifndef NX_DISABLE_PACKET_CHAIN
-            /* Check for the condition where there is essentially no data in the last packet. */
-            if (packet_ptr -> nx_packet_append_ptr <= packet_ptr -> nx_packet_prepend_ptr)
-            {
-                ULONG diff = (ULONG)(packet_ptr -> nx_packet_prepend_ptr - packet_ptr -> nx_packet_append_ptr);
-
-                packet_ptr -> nx_packet_append_ptr =  packet_ptr -> nx_packet_prepend_ptr;
-
-                if (packet_head_ptr != packet_ptr)
-                {
-
-
-                    NX_PACKET *tmp_packet_ptr = packet_head_ptr;  
-                    NX_PACKET *prev_packet_ptr = tmp_packet_ptr;
-                    while (tmp_packet_ptr -> nx_packet_next != 0x0)
-                    {
-                        prev_packet_ptr = tmp_packet_ptr;
-                        tmp_packet_ptr = tmp_packet_ptr -> nx_packet_next;
-                    }
-
-                    nx_packet_release(tmp_packet_ptr);
-                    prev_packet_ptr -> nx_packet_next = NX_NULL;
-                    prev_packet_ptr -> nx_packet_append_ptr -= diff;
-                }
-            }
-#endif  /* NX_DISABLE_PACKET_CHAIN */
-
-            /* Remove the HDLC header.  */
-            packet_head_ptr -> nx_packet_prepend_ptr += 3;
-            packet_head_ptr -> nx_packet_length -= 3;
 
             /* Return the pointer.  */
             *return_packet_ptr =  packet_head_ptr;
@@ -1274,11 +1308,23 @@ UINT        status;
 
         /* We need to perform packet chaining at this point, but only for IP data frames. Non PPP data and
            the other PPP protocol packets must fit within the payload of one packet.  */
-        else if ((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
-                 (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0xff) &&
-                 (packet_head_ptr -> nx_packet_prepend_ptr[2] == 0x03) &&
-                 (packet_head_ptr -> nx_packet_prepend_ptr[3] == 0x00) &&
-                 (packet_head_ptr -> nx_packet_prepend_ptr[4] == 0x21)) /* 0x0021 is NX_PPP_DATA */
+        else if (((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
+                  (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0xff) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[2] == 0x03) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[3] == 0x00) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[4] == 0x21)) /* 0x0021 is NX_PPP_DATA */
+#ifdef NX_PPP_COMPRESSION_ENABLE
+              || ((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
+                  (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0xff) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[2] == 0x03) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[3] == 0x21)) /* Protocol field is compressed */
+              || ((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
+                  (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0x00) &&
+                  (packet_head_ptr -> nx_packet_prepend_ptr[2] == 0x21)) /* Address and Control fields are compressed */
+              || ((packet_head_ptr -> nx_packet_prepend_ptr[0] == 0x7e) && 
+                  (packet_head_ptr -> nx_packet_prepend_ptr[1] == 0x21)) /* Protocol, Address and Control fields are compressed */
+#endif /* NX_PPP_COMPRESSION_ENABLE */
+                 )
         {
 
             /* We need to move to the next packet and chain them.  */
@@ -1401,7 +1447,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_process                      PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1444,6 +1490,10 @@ UINT        status;
 /*                                            improved packet length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.2  */
+/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported processing        */
+/*                                            compressed data,            */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_receive_packet_process(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -1460,9 +1510,16 @@ UINT        length;
     /* Increment the number of IP frames sent.  */
     ppp_ptr -> nx_ppp_total_frames_received++;
 #endif
+    
+#ifdef NX_PPP_COMPRESSION_ENABLE
+
+    /* Check for valid packet length for Protocol (if compressed, it should be 1 byte).  */
+    if (packet_ptr -> nx_packet_length < 1)
+#else
 
     /* Check for valid packet length for Protocol (2 bytes).  */
     if (packet_ptr -> nx_packet_length < 2)
+#endif /* NX_PPP_COMPRESSION_ENABLE */
     {
 
         /* Release the packet. */
@@ -1472,8 +1529,22 @@ UINT        length;
         return;
     }
 
+#ifdef NX_PPP_COMPRESSION_ENABLE
+
     /* Pickup the protocol type.  */
-    protocol =  (((UINT) packet_ptr -> nx_packet_prepend_ptr[0]) << 8) | ((UINT) packet_ptr -> nx_packet_prepend_ptr[1]);
+    if (packet_ptr -> nx_packet_prepend_ptr[0] & NX_PPP_PROTOCOL_LSB_MARK)
+    {
+
+        /* The protocol field is compressed to 1 byte.  */
+        protocol =  (UINT) packet_ptr -> nx_packet_prepend_ptr[0];
+    }
+    else
+#endif /* NX_PPP_COMPRESSION_ENABLE */
+    {
+
+        /* The protocol field is 2 bytes.  */
+        protocol =  (((UINT) packet_ptr -> nx_packet_prepend_ptr[0]) << 8) | ((UINT) packet_ptr -> nx_packet_prepend_ptr[1]);
+    }
 
     /* Check protocol.  */
     if (protocol != NX_PPP_DATA)
@@ -1721,7 +1792,7 @@ UINT        length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_timeout                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1811,7 +1882,7 @@ void _nx_ppp_timeout(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_timer_entry                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1870,7 +1941,7 @@ NX_PPP  *ppp_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_netx_packet_transfer                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1905,6 +1976,10 @@ NX_PPP  *ppp_ptr;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported processing        */
+/*                                            compressed data,            */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 void _nx_ppp_netx_packet_transfer(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -1920,11 +1995,29 @@ ULONG   offset;
     /* Add the incoming interface pointer.  */
     packet_ptr -> nx_packet_ip_interface =  ppp_ptr -> nx_ppp_interface_ptr;
 
-    /* Remove the PPP header [00,21] in the front of the IP packet.  */
-    packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + 2;
+#ifdef NX_PPP_COMPRESSION_ENABLE
 
-    /* Adjust the packet length.  */
-    packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length - 2;
+    /* Check whether the protocol field is 1 byte or 2 bytes.  */
+    if (packet_ptr -> nx_packet_prepend_ptr[0] & NX_PPP_PROTOCOL_LSB_MARK)
+    {
+
+        /* Remove the PPP header [21] in the front of the IP packet.  */
+        packet_ptr -> nx_packet_prepend_ptr = packet_ptr -> nx_packet_prepend_ptr + 1;
+
+        /* Adjust the packet length.  */
+        packet_ptr -> nx_packet_length = packet_ptr -> nx_packet_length - 1;
+
+    }
+    else
+#endif /* NX_PPP_COMPRESSION_ENABLE */
+    {
+
+        /* Remove the PPP header [00,21] in the front of the IP packet.  */
+        packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + 2;
+
+        /* Adjust the packet length.  */
+        packet_ptr -> nx_packet_length =  packet_ptr -> nx_packet_length - 2;
+    }
 
     /* Calculate the offset for four byte alignment.  */
     offset = (((ULONG)packet_ptr -> nx_packet_prepend_ptr) & 3);
@@ -1952,7 +2045,7 @@ ULONG   offset;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_process_deferred_raw_string_send            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2082,7 +2175,7 @@ UINT            release_packet;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_process_deferred_ip_packet_send             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2210,7 +2303,7 @@ NX_PACKET       *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update                    PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2257,6 +2350,9 @@ NX_PACKET       *packet_ptr;
 /*                                            improved packet length      */
 /*                                            verification,               */
 /*                                            resulting in version 6.1.2  */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            the logic of retransmission,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_state_machine_update(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
@@ -2801,9 +2897,6 @@ UINT    status;
                         /* Yes, the peer can accept larger messages than the default.  */
                         (ppp_ptr -> nx_ppp_interface_ptr) -> nx_interface_ip_mtu_size =  ppp_ptr -> nx_ppp_mru;
                     }
-                    
-                    /* Disable the LCP timeout.  */
-                    ppp_ptr -> nx_ppp_timeout =  0;
                 }
 
                 /* Send configuration reply.  */
@@ -2922,7 +3015,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_code_reject                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3036,7 +3129,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_configure_reply_send                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3251,7 +3344,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_configure_request_send                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3284,13 +3377,18 @@ NX_PACKET   *packet_ptr;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported processing        */
+/*                                            compressed data,            */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_configure_request_send(NX_PPP *ppp_ptr)
 {
-    
 UINT        status;
 NX_PACKET   *packet_ptr;
+UINT        index = 0;
+UINT        length_index = 0;
 
 
     /* Allocate a packet for the PPP packet.  */
@@ -3314,52 +3412,58 @@ NX_PACKET   *packet_ptr;
     ppp_ptr -> nx_ppp_transmit_id++;
 
     /* Build the configuration request.  */
-    packet_ptr -> nx_packet_prepend_ptr[0] =  (NX_PPP_LCP_PROTOCOL & 0xFF00) >> 8;
-    packet_ptr -> nx_packet_prepend_ptr[1] =  NX_PPP_LCP_PROTOCOL & 0xFF;
-    packet_ptr -> nx_packet_prepend_ptr[2] =  NX_PPP_LCP_CONFIGURE_REQUEST;
-    packet_ptr -> nx_packet_prepend_ptr[3] =  ppp_ptr -> nx_ppp_transmit_id;
-    packet_ptr -> nx_packet_prepend_ptr[4] =  0;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  (NX_PPP_LCP_PROTOCOL & 0xFF00) >> 8;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  NX_PPP_LCP_PROTOCOL & 0xFF;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  NX_PPP_LCP_CONFIGURE_REQUEST;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  ppp_ptr -> nx_ppp_transmit_id;
+
+    /* Store the index of length field and skip the length field.  */
+    length_index = index;
+    index += 2;
 
     /* Load the MRU.  */
-    packet_ptr -> nx_packet_prepend_ptr[6] =  1;
-    packet_ptr -> nx_packet_prepend_ptr[7] =  4;
-    packet_ptr -> nx_packet_prepend_ptr[8] =  (UCHAR) ((NX_PPP_MRU) >> 8);
-    packet_ptr -> nx_packet_prepend_ptr[9] =  (UCHAR) ((NX_PPP_MRU) & 0xff);
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  1;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  4;
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  (UCHAR) ((NX_PPP_MRU) >> 8);
+    packet_ptr -> nx_packet_prepend_ptr[index++] =  (UCHAR) ((NX_PPP_MRU) & 0xff);
 
     /* Load the authentication protocol type. */
     if ((ppp_ptr -> nx_ppp_verify_authentication_protocol == NX_PPP_PAP_PROTOCOL) && (ppp_ptr -> nx_ppp_pap_verify_login))
     {
 
-        /* Set the length for PAP authentication protocol.  */
-        packet_ptr -> nx_packet_prepend_ptr[5] =   12;
-
-        packet_ptr -> nx_packet_prepend_ptr[10] =  3;
-        packet_ptr -> nx_packet_prepend_ptr[11] =  4;
-        packet_ptr -> nx_packet_prepend_ptr[12] =  (NX_PPP_PAP_PROTOCOL & 0xFF00) >> 8;
-        packet_ptr -> nx_packet_prepend_ptr[13] =  NX_PPP_PAP_PROTOCOL & 0xFF;
+        /* Set the PAP authentication protocol.  */
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  3;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  4;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  (NX_PPP_PAP_PROTOCOL & 0xFF00) >> 8;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  NX_PPP_PAP_PROTOCOL & 0xFF;
     }
     else if ((ppp_ptr -> nx_ppp_verify_authentication_protocol == NX_PPP_CHAP_PROTOCOL) && 
              (ppp_ptr -> nx_ppp_chap_get_challenge_values) && (ppp_ptr -> nx_ppp_chap_get_verification_values))
     {
 
-        /* Set the length for CHAP authentication protocol.  */
-        packet_ptr -> nx_packet_prepend_ptr[5] =   13;
-
-        packet_ptr -> nx_packet_prepend_ptr[10] =  3;
-        packet_ptr -> nx_packet_prepend_ptr[11] =  5;
-        packet_ptr -> nx_packet_prepend_ptr[12] =  (NX_PPP_CHAP_PROTOCOL & 0xFF00) >> 8;
-        packet_ptr -> nx_packet_prepend_ptr[13] =   NX_PPP_CHAP_PROTOCOL & 0xFF;
-        packet_ptr -> nx_packet_prepend_ptr[14] =  0x05;
+        /* Set the CHAP authentication protocol.  */
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  3;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  5;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  (NX_PPP_CHAP_PROTOCOL & 0xFF00) >> 8;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =   NX_PPP_CHAP_PROTOCOL & 0xFF;
+        packet_ptr -> nx_packet_prepend_ptr[index++] =  0x05;
     }
-    else
-    {
 
-        /* Set the length for no authentication protocol.  */
-        packet_ptr -> nx_packet_prepend_ptr[5] =  8;
-    }
+#ifdef NX_PPP_COMPRESSION_ENABLE
+
+    /* Add PFC and ACFC options.  */
+    packet_ptr -> nx_packet_prepend_ptr[index++] = 7;
+    packet_ptr -> nx_packet_prepend_ptr[index++] = 2;
+    packet_ptr -> nx_packet_prepend_ptr[index++] = 8;
+    packet_ptr -> nx_packet_prepend_ptr[index++] = 2;
+#endif /* NX_PPP_COMPRESSION_ENABLE */
+
+    /* Update the length field.  */
+    packet_ptr -> nx_packet_prepend_ptr[length_index] = (UCHAR)((index - 2) >> 8);
+    packet_ptr -> nx_packet_prepend_ptr[length_index + 1] = (UCHAR)((index - 2) & 0xff);
 
     /* Setup the append pointer and the packet length (LCP length + PPP header).  */
-    packet_ptr -> nx_packet_length =  (ULONG)(packet_ptr -> nx_packet_prepend_ptr[5] + 2);
+    packet_ptr -> nx_packet_length =  (ULONG)(index);
     packet_ptr -> nx_packet_append_ptr =  packet_ptr -> nx_packet_prepend_ptr + packet_ptr -> nx_packet_length;
 
 #ifndef NX_PPP_DISABLE_INFO
@@ -3381,7 +3485,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_configuration_retrieve                  PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3672,7 +3776,7 @@ UCHAR   *option_data;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_nak_configure_list                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3729,7 +3833,7 @@ UINT    i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_terminate_ack_send                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3819,7 +3923,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_terminate_request_send                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3909,7 +4013,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_state_machine_update                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4260,7 +4364,7 @@ UINT        valid;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_authentication_request                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4407,7 +4511,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_login_valid                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4544,7 +4648,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_authentication_ack                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4639,7 +4743,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_authentication_nak                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4735,7 +4839,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_state_machine_update                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5498,7 +5602,7 @@ UINT        valid;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_challenge_send                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5651,7 +5755,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_challenge_respond                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5861,7 +5965,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_challenge_validate                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6098,7 +6202,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_state_machine_update                   PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6790,7 +6894,7 @@ UCHAR   code;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_configure_check                        PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7163,7 +7267,7 @@ UCHAR   option;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_configure_request_send                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7310,7 +7414,7 @@ UINT        index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_response_extract                       PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7449,7 +7553,7 @@ ULONG   length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_response_send                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7627,7 +7731,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_terminate_send                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7718,7 +7822,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_terminate_ack_send                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7809,7 +7913,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_packet_transmit                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8079,7 +8183,7 @@ UINT        release_packet = NX_TRUE;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_check_crc                                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8185,7 +8289,7 @@ USHORT      crc_value;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_crc_append                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8311,7 +8415,7 @@ UCHAR       control = 0x03;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_debug_log_capture                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8459,7 +8563,7 @@ NX_PPP_DEBUG_ENTRY *entry_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_debug_log_capture_protocol                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8544,7 +8648,7 @@ void  _nx_ppp_debug_log_capture_protocol(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_hash_generator                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8635,7 +8739,7 @@ NX_MD5  context;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_byte_receive                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8695,7 +8799,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_byte_receive                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8826,7 +8930,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_create                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8904,7 +9008,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_create                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9057,7 +9161,7 @@ NX_PPP      *tail_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_delete                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9118,7 +9222,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_delete                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9245,7 +9349,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_link_up_notify                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9308,7 +9412,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_link_up_notify                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9362,7 +9466,7 @@ UINT  _nx_ppp_link_up_notify(NX_PPP *ppp_ptr, VOID (*ppp_link_up_callback)(NX_PP
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_link_down_notify                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9425,7 +9529,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_link_down_notify                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9479,7 +9583,7 @@ UINT  _nx_ppp_link_down_notify(NX_PPP *ppp_ptr, VOID (*ppp_link_down_callback)(N
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_pap_enable                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9548,7 +9652,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_enable                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9643,7 +9747,7 @@ UINT  _nx_ppp_pap_enable(NX_PPP *ppp_ptr, UINT (*generate_login)(CHAR *name, CHA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_chap_challenge                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9705,7 +9809,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_challenge                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9785,7 +9889,7 @@ UINT  _nx_ppp_chap_challenge(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_chap_enable                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9866,7 +9970,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_enable                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9969,7 +10073,7 @@ UINT  _nx_ppp_chap_enable(NX_PPP *ppp_ptr,
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_dns_address_get                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10032,7 +10136,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_dns_address_get                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10102,7 +10206,7 @@ UINT  _nx_ppp_dns_address_get(NX_PPP *ppp_ptr, ULONG *dns_address_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_dns_address_set                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10168,7 +10272,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_dns_address_set                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10221,7 +10325,7 @@ UINT  _nx_ppp_dns_address_set(NX_PPP *ppp_ptr, ULONG dns_address)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_secondary_dns_address_get                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10284,7 +10388,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_secondary_dns_address_get                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10355,7 +10459,7 @@ UINT  _nx_ppp_secondary_dns_address_get(NX_PPP *ppp_ptr, ULONG *secondary_dns_ad
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_secondary_dns_address_set                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10421,7 +10525,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_secondary_dns_address_set                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10474,7 +10578,7 @@ UINT  _nx_ppp_secondary_dns_address_set(NX_PPP *ppp_ptr, ULONG secondary_dns_add
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_interface_index_get                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10536,7 +10640,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_interface_index_get                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10599,7 +10703,7 @@ UINT  _nx_ppp_interface_index_get(NX_PPP *ppp_ptr, UINT *index_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_ip_address_assign                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10663,7 +10767,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ip_address_assign                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10742,7 +10846,7 @@ UINT    i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_nak_authentication_notify                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10805,7 +10909,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_nak_authentication_notify                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10858,7 +10962,7 @@ UINT  _nx_ppp_nak_authentication_notify(NX_PPP *ppp_ptr, void (*nak_authenticati
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_raw_string_send                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10924,7 +11028,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_raw_string_send                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11055,7 +11159,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_start                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11114,7 +11218,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_start                                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11176,7 +11280,7 @@ UINT  _nx_ppp_start(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_stop                                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11235,7 +11339,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_stop                                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11329,7 +11433,7 @@ UINT  _nx_ppp_stop(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_restart                                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11388,7 +11492,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_restart                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11443,7 +11547,7 @@ UINT  _nx_ppp_restart(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_status_get                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11504,7 +11608,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_status_get                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11653,7 +11757,7 @@ UINT  _nx_ppp_status_get(NX_PPP *ppp_ptr, UINT *status_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_ping_reply                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11723,7 +11827,7 @@ void  _nx_ppp_lcp_ping_reply(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_ping_process_echo_reply                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11788,7 +11892,7 @@ void   _nx_ppp_lcp_ping_process_echo_reply(NX_PPP *ppp_ptr, NX_PACKET *packet_pt
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_ping_request                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11855,7 +11959,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ping_request                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11993,7 +12097,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_packet_receive                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12057,7 +12161,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_packet_receive                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12166,7 +12270,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_packet_send_set                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12230,7 +12334,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_packet_send_set                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */

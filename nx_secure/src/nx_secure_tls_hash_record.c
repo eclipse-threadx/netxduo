@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -29,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_hash_record                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -73,22 +73,26 @@
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            supported chained packet,   */
 /*                                            resulting in version 6.1    */
+/*  06-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            fixed compiler warning,     */
+/*                                            resulting in version 6.1.7  */
+/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
+/*                                            adjusted parameters list,   */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_secure_tls_hash_record(NX_SECURE_TLS_SESSION *tls_session,
+UINT _nx_secure_tls_hash_record(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite,
                                 ULONG sequence_num[NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE],
                                 UCHAR *header, UINT header_length, NX_PACKET *packet_ptr,
                                 ULONG offset, UINT length, UCHAR *record_hash, UINT *hash_length,
-                                UCHAR *mac_secret)
+                                UCHAR *mac_secret, VOID *metadata, ULONG metadata_size)
 {
-UINT                                  hash_size;
-UINT                                  status = NX_SECURE_TLS_MISSING_CRYPTO_ROUTINE;;
-const NX_CRYPTO_METHOD               *authentication_method;
-UCHAR                                 adjusted_sequence_num[8];
-VOID                                 *metadata;
-UINT                                  metadata_size;
-VOID                                 *handler = NX_NULL;
-ULONG                                 current_length;
+UINT                    hash_size;
+UINT                    status = NX_SECURE_TLS_MISSING_CRYPTO_ROUTINE;
+const NX_CRYPTO_METHOD *authentication_method;
+UCHAR                   adjusted_sequence_num[8];
+VOID                   *handler = NX_NULL;
+ULONG                   current_length;
 
     NX_PARAMETER_NOT_USED(header_length);
 
@@ -102,20 +106,11 @@ ULONG                                 current_length;
 
      */
 
-    if (tls_session -> nx_secure_tls_session_ciphersuite == NX_NULL)
-    {
-
-        /* Likely internal error since at this point ciphersuite negotiation was theoretically completed. */
-        return(NX_SECURE_TLS_UNKNOWN_CIPHERSUITE);
-    }
-
     /* Get our authentication method from the ciphersuite. */
-    authentication_method = tls_session -> nx_secure_tls_session_ciphersuite -> nx_secure_tls_hash;
-    metadata = tls_session -> nx_secure_hash_mac_metadata_area;
-    metadata_size = tls_session -> nx_secure_hash_mac_metadata_size;
+    authentication_method = ciphersuite -> nx_secure_tls_hash;
 
     /* Get the hash size and MAC secret for our current session. */
-    hash_size = tls_session -> nx_secure_tls_session_ciphersuite -> nx_secure_tls_hash_size;
+    hash_size = ciphersuite -> nx_secure_tls_hash_size;
 
     /* Correct the endianness of our sequence number before hashing. */
     adjusted_sequence_num[0] = (UCHAR)(sequence_num[1] >> 24);

@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -31,13 +31,167 @@
 #include "nx_ipv6.h"
 #include "nx_ipv4.h"
 #include "nx_ip.h"
+#ifdef NX_ENABLE_HTTP_PROXY
+#include "nx_http_proxy_client.h"
+#endif /* NX_ENABLE_HTTP_PROXY */
+
+
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nxd_tcp_client_socket_driver_connect               PORTABLE C      */
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Yuxin Zhou, Microsoft Corporation                                   */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function handles the connect request for TCP/IP offload        */
+/*    interface.                                                          */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    socket_ptr                            Pointer to TCP client socket  */
+/*    server_ip                             IP address of server          */
+/*    server_port                           Port number of server         */
+/*    wait_option                           Suspension option             */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    tx_mutex_get                          Obtain protection             */
+/*    tx_mutex_put                          Release protection            */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nxd_tcp_client_socket_connect                                      */
+/*                                                                        */
+/*  RELEASE HISTORY                                                       */
+/*                                                                        */
+/*    DATE              NAME                      DESCRIPTION             */
+/*                                                                        */
+/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nxd_tcp_client_socket_driver_connect(NX_TCP_SOCKET *socket_ptr,
+                                                  NXD_ADDRESS *server_ip,
+                                                  UINT server_port,
+                                                  ULONG wait_option)
+{
+UINT          status;
+NX_INTERFACE *interface_ptr;
+NX_IP        *ip_ptr;
+
+
+    /* Setup the pointer to the associated IP instance.  */
+    ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
+
+    /* Clear the socket timeout.  */
+    socket_ptr -> nx_tcp_socket_timeout =  0;
+
+    /* Let TCP/IP offload interface make the connection.  */
+    interface_ptr = socket_ptr -> nx_tcp_socket_connect_interface;
+    status = interface_ptr -> nx_interface_tcpip_offload_handler(ip_ptr, interface_ptr, socket_ptr,
+                                                                 NX_TCPIP_OFFLOAD_TCP_CLIENT_SOCKET_CONNECT,
+                                                                 NX_NULL, NX_NULL, server_ip,
+                                                                 socket_ptr -> nx_tcp_socket_port,
+                                                                 &server_port, wait_option);
+    if ((status == NX_SUCCESS) || (status == NX_IN_PROGRESS))
+    {
+
+        /* Set MSS.  */
+#ifndef NX_DISABLE_IPV4
+        if (server_ip -> nxd_ip_version == NX_IP_VERSION_V4)
+        {
+            socket_ptr -> nx_tcp_socket_mss =
+                (ULONG)((interface_ptr -> nx_interface_ip_mtu_size - sizeof(NX_IPV4_HEADER)) - sizeof(NX_TCP_HEADER));
+        }
+#endif /* !NX_DISABLE_IPV4  */
+#ifdef FEATURE_NX_IPV6
+        if (server_ip -> nxd_ip_version == NX_IP_VERSION_V6)
+        {
+            socket_ptr -> nx_tcp_socket_mss =
+                (ULONG)((interface_ptr -> nx_interface_ip_mtu_size - sizeof(NX_IPV6_HEADER)) - sizeof(NX_TCP_HEADER));
+        }
+#endif /* FEATURE_NX_IPV6 */
+        socket_ptr -> nx_tcp_socket_connect_mss = socket_ptr -> nx_tcp_socket_mss;
+        socket_ptr -> nx_tcp_socket_peer_mss = socket_ptr -> nx_tcp_socket_mss;
+
+        if (status == NX_SUCCESS)
+        {
+
+            /* Connected to server.  */
+            socket_ptr -> nx_tcp_socket_state =  NX_TCP_ESTABLISHED;
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+
+            /* Is a connection completion callback registered with the TCP socket?  */
+            if (socket_ptr -> nx_tcp_establish_notify)
+            {
+
+                /* Call the application's establish callback function.    */
+                (socket_ptr -> nx_tcp_establish_notify)(socket_ptr);
+            }
+#endif
+
+            /* Release the IP protection.  */
+            tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+            return(NX_SUCCESS);
+        }
+        else
+        {
+
+            /* Connected to server.  */
+            socket_ptr -> nx_tcp_socket_state =  NX_TCP_SYN_SENT;
+        }
+    }
+    else
+    {
+
+        /* Unable to connect to server.  */
+
+#ifndef NX_DISABLE_TCP_INFO
+
+        /* Reduce the active connections count.  */
+        ip_ptr -> nx_ip_tcp_active_connections--;
+
+        /* Reduce the TCP connections count.  */
+        ip_ptr -> nx_ip_tcp_connections--;
+#endif
+
+        /* Restore the socket state. */
+        socket_ptr -> nx_tcp_socket_state = NX_TCP_CLOSED;
+
+        /* Reset server port and server IP address. */
+        memset(&socket_ptr -> nx_tcp_socket_connect_ip, 0, sizeof(NXD_ADDRESS));
+        socket_ptr -> nx_tcp_socket_connect_port = 0;
+
+        /* Reset the next_hop_address information. */
+        socket_ptr -> nx_tcp_socket_next_hop_address = 0;
+
+        /* Release the IP protection.  */
+        tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+        return(NX_TCPIP_OFFLOAD_ERROR);
+    }
+
+    /* Release the IP protection.  */
+    tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+    return(NX_SUCCESS);
+}
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+
 
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_tcp_client_socket_connect                     PORTABLE C       */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -67,6 +221,7 @@
 /*                                            interface.                  */
 /*    tx_mutex_get                          Obtain protection             */
 /*    tx_mutex_put                          Release protection            */
+/*    _nx_http_proxy_client_initialize      Initialize the HTTP Proxy     */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -79,6 +234,12 @@
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
+/*                                            supported TCP/IP offload,   */
+/*                                            resulting in version 6.1.8  */
+/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
+/*                                            supported HTTP Proxy,       */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tcp_client_socket_connect(NX_TCP_SOCKET *socket_ptr,
@@ -101,6 +262,15 @@ ULONG         ip_address_log = 0;
 
     /* Setup IP pointer.  */
     ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
+
+#ifdef NX_ENABLE_HTTP_PROXY
+    if (ip_ptr -> nx_ip_http_proxy_enable)
+    {
+
+        /* Initialize the HTTP Proxy info and replace the peer IP and port with HTTP proxy server's IP and port.  */
+        _nx_http_proxy_client_initialize(socket_ptr, &server_ip, &server_port);
+    }
+#endif /* NX_ENABLE_HTTP_PROXY */
 
     /* Make sure the server IP address is accesible. */
 #ifndef NX_DISABLE_IPV4
@@ -307,8 +477,30 @@ ULONG         ip_address_log = 0;
     socket_ptr -> nx_tcp_socket_receive_queue_head   = NX_NULL;
     socket_ptr -> nx_tcp_socket_receive_queue_tail   = NX_NULL;
 
-    /* Send the SYN message.  */
-    _nx_tcp_packet_send_syn(socket_ptr, (socket_ptr -> nx_tcp_socket_tx_sequence - 1));
+#ifdef NX_ENABLE_TCPIP_OFFLOAD
+    if ((outgoing_interface -> nx_interface_capability_flag & NX_INTERFACE_CAPABILITY_TCPIP_OFFLOAD) &&
+        (outgoing_interface -> nx_interface_tcpip_offload_handler))
+    {
+        
+        /* This interface supports TCP/IP offload.  */
+        return(_nxd_tcp_client_socket_driver_connect(socket_ptr, server_ip, server_port, wait_option));
+    }
+    else
+#endif /* NX_ENABLE_TCPIP_OFFLOAD */
+    {
+
+        /* Send the SYN message.  */
+        _nx_tcp_packet_send_syn(socket_ptr, (socket_ptr -> nx_tcp_socket_tx_sequence - 1));
+    }
+
+#ifdef NX_ENABLE_HTTP_PROXY
+    if (ip_ptr -> nx_ip_http_proxy_enable)
+    {
+
+        /* Set HTTP Proxy state as waiting for TCP connection.  */
+        socket_ptr -> nx_tcp_socket_http_proxy_state = NX_HTTP_PROXY_STATE_WAITING;
+    }
+#endif /* NX_ENABLE_HTTP_PROXY */
 
     /* Optionally suspend the thread.  If timeout occurs, return a connection timeout status.  If
        immediate response is selected, return a connection in progress status.  Only on a real

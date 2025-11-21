@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 /**************************************************************************/
 /**************************************************************************/
@@ -24,7 +24,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_sntp_client.c                                   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -72,8 +72,6 @@ extern  volatile ULONG      _tx_thread_system_state;
 
 TX_EVENT_FLAGS_GROUP        nx_sntp_client_events;
 
-static UINT _nx_sntp_client_number_to_ascii(CHAR *buffer_ptr, UINT buffer_size, UINT number);
-
 /* Define internal time variables for offsets between
    receipt of SNTP packet and application to 
    SNTP Client local time. */
@@ -87,7 +85,7 @@ static ULONG process_timerticks = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_create                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -128,6 +126,9 @@ static ULONG process_timerticks = 0;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-08-2023     Wenhui Xie               Modified comment(s),          */
+/*                                            checked the client ID,      */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_sntp_client_create(NX_SNTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT iface_index, NX_PACKET_POOL *packet_pool_ptr,   
@@ -145,6 +146,14 @@ UINT status;
 
         /* Return error status.  */
        return(NX_PTR_ERROR);
+    }
+
+    /* Check for the client ID.  */
+    if ((client_ptr == NX_NULL) || (client_ptr -> nx_sntp_client_id == NXD_SNTP_ID))
+    {
+
+        /* Return error status.  */
+        return(NX_PTR_ERROR);
     }
 
     /* Check for invalid network interface input. */
@@ -168,7 +177,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_create                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -386,7 +395,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_delete                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -451,7 +460,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_delete                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -491,10 +500,16 @@ UINT status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  03-08-2023     Wenhui Xie               Modified comment(s),          */
+/*                                            cleared the client ID,      */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_delete(NX_SNTP_CLIENT *client_ptr)
 {
+
+    /* Clear the client ID.  */
+    client_ptr -> nx_sntp_client_id = 0;
 
     /* Suspend the SNTP Client thread.  */
     tx_thread_suspend(&client_ptr -> nx_sntp_client_thread);
@@ -533,7 +548,7 @@ UINT  _nx_sntp_client_delete(NX_SNTP_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_update_timeout_entry                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -617,7 +632,7 @@ NX_SNTP_CLIENT *client_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_create_time_request_packet          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -698,7 +713,7 @@ UINT  _nx_sntp_client_create_time_request_packet(NX_SNTP_CLIENT *client_ptr, NX_
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_sntp_client_initialize_unicast                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -765,7 +780,7 @@ UINT  status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_sntp_client_initialize_unicast                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -855,7 +870,7 @@ UINT  _nxd_sntp_client_initialize_unicast(NX_SNTP_CLIENT *client_ptr, NXD_ADDRES
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_initialize_unicast                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -935,7 +950,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_initialize_unicast                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1001,7 +1016,7 @@ NXD_ADDRESS duo_unicast_time_server;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_run_unicast                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1064,7 +1079,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_run_unicast                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1229,7 +1244,7 @@ ULONG   startup_ticks;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_run_unicast                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1378,7 +1393,7 @@ ULONG   sntp_events;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_sntp_client_initialize_broadcast              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1460,7 +1475,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_sntp_client_initialize_broadcast               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1568,7 +1583,7 @@ UINT  _nxd_sntp_client_initialize_broadcast(NX_SNTP_CLIENT *client_ptr, NXD_ADDR
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_initialize_broadcast               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1652,7 +1667,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_initialize_broadcast                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1735,7 +1750,7 @@ NXD_ADDRESS server_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_stop                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1795,7 +1810,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_stop                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1917,7 +1932,7 @@ UINT    current_preemption;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_run_broadcast                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1982,7 +1997,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_run_broadcast                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2121,7 +2136,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_process_broadcast                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2240,7 +2255,7 @@ ULONG sntp_events;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_send_unicast_request                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2434,7 +2449,7 @@ NX_SNTP_TIME local_time;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_receive_time_update                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2482,6 +2497,12 @@ NX_SNTP_TIME local_time;
 /*                                            added support for disabling */
 /*                                            message check,              */
 /*                                            resulting in version 6.1    */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
+/*                                            corrected the port check,   */
+/*                                            resulting in version 6.1.12 */
+/*  10-31-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            fixed packet chain issue,   */
+/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_receive_time_update(NX_SNTP_CLIENT *client_ptr, ULONG timeout)
@@ -2523,7 +2544,7 @@ NXD_ADDRESS     source_ip_address, destination_ip_address;
         sender_port = (UINT)udp_header_ptr -> nx_udp_header_word_0 >> NX_SHIFT_BY_16; 
 
         /* Check if this is the server port the Client expects.  */
-        if (sender_port != NX_SNTP_CLIENT_UDP_PORT) 
+        if (sender_port != NX_SNTP_SERVER_UDP_PORT) 
         {
 
             /* No, reject the packet.  */
@@ -2710,6 +2731,18 @@ NXD_ADDRESS     source_ip_address, destination_ip_address;
             continue;
         }
 
+#ifndef NX_DISABLE_PACKET_CHAIN
+        /* Ignore packet chain.  */
+        if (receive_packet -> nx_packet_next)
+        {
+
+            /* No further need for the receive packet. Release back to the client pool.  */
+            nx_packet_release(receive_packet);
+
+            continue;
+        }
+#endif /* NX_DISABLE_PACKET_CHAIN */
+
         memset(&(client_ptr -> nx_sntp_current_server_time_message), 0, sizeof(NX_SNTP_TIME_MESSAGE));
 
         /* Extract time message data from packet data into time message.  */
@@ -2728,7 +2761,7 @@ NXD_ADDRESS     source_ip_address, destination_ip_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_extract_time_message_from_packet    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.1.10       */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2763,6 +2796,9 @@ NXD_ADDRESS     source_ip_address, destination_ip_address;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memcpy use cases,  */
 /*                                            resulting in version 6.1    */
+/*  01-31-2022     Yuxin Zhou               Modified comment(s), corrected*/
+/*                                            the Reference Identifier,  */
+/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_extract_time_message_from_packet(NX_SNTP_CLIENT *client_ptr, NX_PACKET *packet_ptr) 
@@ -2805,7 +2841,6 @@ NX_SNTP_TIME_MESSAGE *time_message_ptr;
 
     /* Advance to the next 32 bit field and extract the reference clock ID field.  */
     ntp_word_0++;
-    NX_CHANGE_ULONG_ENDIAN(*ntp_word_0);
     memcpy(time_message_ptr -> reference_clock_id, ntp_word_0, 4); /* Use case of memcpy is verified. */
 
     /* Advance to the next field (64 bit field) and extract the reference time stamp field.  */
@@ -2894,7 +2929,7 @@ NX_SNTP_TIME_MESSAGE *time_message_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_reset_current_time_message          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2959,7 +2994,7 @@ UINT  _nx_sntp_client_reset_current_time_message(NX_SNTP_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_process_update_packet               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3072,7 +3107,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_duplicate_update_check              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3144,7 +3179,7 @@ UINT  _nx_sntp_client_duplicate_update_check(NX_SNTP_TIME_MESSAGE *timeA_msg_ptr
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_apply_sanity_checks                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3410,7 +3445,7 @@ NX_SNTP_TIME_MESSAGE *server_time_msg_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_check_server_clock_dispersion       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3522,7 +3557,7 @@ ULONG   dispersion_usecs;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_thread_entry                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3618,7 +3653,7 @@ UINT    current_preemption;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_receive_notify                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3672,7 +3707,7 @@ VOID  _nx_sntp_client_receive_notify(NX_UDP_SOCKET *socket_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_process                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3735,7 +3770,7 @@ VOID  _nx_sntp_client_process(NX_SNTP_CLIENT *client_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_process_time_data                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3888,7 +3923,7 @@ NX_SNTP_TIME    local_time;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_calculate_roundtrip                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3961,7 +3996,7 @@ ULONG x;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_get_local_time                      PORTABLE C     */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4028,7 +4063,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_get_local_time                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4084,7 +4119,7 @@ UINT  status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_get_local_time_extended             PORTABLE C     */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4154,7 +4189,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_get_local_time_extended             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4180,8 +4215,8 @@ UINT status;
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_fraction_to_usecs                           */ 
-/*                                       Convert NTP fraction to usecs    */
-/*    _nx_sntp_client_number_to_ascii  Converts number to ascii text      */ 
+/*                                      Convert NTP fraction to usecs     */
+/*    _nx_utility_uint_to_string        Converts number to ascii text     */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -4195,6 +4230,10 @@ UINT status;
 /*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
 /*                                            verified memmove use cases, */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved the logic of       */
+/*                                            converting number to string,*/
+/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_sntp_client_get_local_time_extended(NX_SNTP_CLIENT *client_ptr, ULONG *seconds, ULONG *fraction, CHAR *buffer, UINT buffer_size) 
@@ -4228,8 +4267,8 @@ UINT length = 0;
         buffer[offset++] = 'e';
         buffer[offset++] = ':';
         buffer[offset++] = ' ';
-        length = _nx_sntp_client_number_to_ascii(&buffer[offset], buffer_size - offset,
-                                                 client_ptr->nx_sntp_client_local_ntp_time.seconds);
+        length = _nx_utility_uint_to_string(client_ptr -> nx_sntp_client_local_ntp_time.seconds,
+                                            10, &buffer[offset], buffer_size - offset);
         if (length == 0)
         {
             return(NX_SIZE_ERROR);
@@ -4240,7 +4279,7 @@ UINT length = 0;
             return(NX_SIZE_ERROR);
         }
         buffer[offset++] = '.';
-        length = _nx_sntp_client_number_to_ascii(&buffer[offset], 6, usecs);
+        length = _nx_utility_uint_to_string(usecs, 10, &buffer[offset], buffer_size - offset);
         if (length == 0)
         {
             return(NX_SIZE_ERROR);
@@ -4253,6 +4292,8 @@ UINT length = 0;
             memmove(&buffer[offset + (6 - length)], &buffer[offset], length); /* Use case of memmove is verified.  */
             memset(&buffer[offset], '0', (6 - length));
         }
+
+        offset += 6;
         buffer[offset++] = ' ';
         buffer[offset++] = 's';
         buffer[offset++] = 'e';
@@ -4272,7 +4313,7 @@ UINT length = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_convert_time_to_UCHAR       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4365,7 +4406,7 @@ ULONG *buffer;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_convert_seconds_to_date     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4627,7 +4668,7 @@ UINT seconds_into_currenthour;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_utility_display_date_time          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4703,7 +4744,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_request_unicast_time               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4758,7 +4799,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_request_unicast_time                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4840,7 +4881,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_display_date_time           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4869,8 +4910,8 @@ UINT status;
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*    _nx_sntp_client_utility_convert_seconds_to_date                     */ 
-/*                                     Converts seconds to year, month    */
-/*    _nx_sntp_client_number_to_ascii  Converts number to ascii text      */ 
+/*                                      Converts seconds to year, month   */
+/*    _nx_utility_uint_to_string        Converts number to ascii text     */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
@@ -4883,6 +4924,13 @@ UINT status;
 /*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
 /*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
+/*                                            improved the logic of       */
+/*                                            converting number to string,*/
+/*                                            resulting in version 6.1.8  */
+/*  10-31-2022     Yuxin Zhou               Modified comment(s), fixed    */
+/*                                            the typo of August string,  */
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_sntp_client_utility_display_date_time(NX_SNTP_CLIENT *client_ptr, CHAR *buffer, UINT length)
@@ -4893,7 +4941,7 @@ UINT                offset;
 UINT                return_length;
 NX_SNTP_DATE_TIME   DisplayTime;
 const CHAR         *months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                                  "Jul", "Aud", "Sep", "Oct", "Nov", "Dec"};
+                                  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 
 #ifndef  NX_SNTP_CURRENT_YEAR  
@@ -4935,48 +4983,48 @@ const CHAR         *months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
     offset = 4;
 
     /* Write in the rest of the data as numeric from the Date Time objext. */
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.day);
+    return_length = _nx_utility_uint_to_string(DisplayTime.day, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 2))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = ',';
     buffer[offset++] = ' ';
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.year);
+    return_length = _nx_utility_uint_to_string(DisplayTime.year, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 1))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = ' ';
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.hour);
+    return_length = _nx_utility_uint_to_string(DisplayTime.hour, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 1))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = ':';
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.minute);
+    return_length = _nx_utility_uint_to_string(DisplayTime.minute, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 1))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = ':';
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.second);
+    return_length = _nx_utility_uint_to_string(DisplayTime.second, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 1))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = '.';
-    return_length = _nx_sntp_client_number_to_ascii(&buffer[offset], length - offset, DisplayTime.millisecond);
+    return_length = _nx_utility_uint_to_string(DisplayTime.millisecond, 10, &buffer[offset], length - offset);
+    offset += return_length;
     if ((return_length == 0) || ((length - offset) < 5))
     {
        return NX_SNTP_ERROR_CONVERTING_DATETIME;
     }
-    offset += return_length;
     buffer[offset++] = ' ';
     buffer[offset++] = 'U';
     buffer[offset++] = 'T';
@@ -4995,7 +5043,7 @@ const CHAR         *months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_add_msecs_to_ntp_time       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5125,7 +5173,7 @@ LONG  usecs;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_receiving_updates                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5186,7 +5234,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_receiving_updates                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5255,7 +5303,7 @@ UINT _nx_sntp_client_receiving_updates(NX_SNTP_CLIENT *client_ptr, UINT *receive
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_set_local_time                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5318,7 +5366,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_set_local_time                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5389,7 +5437,7 @@ UINT  _nx_sntp_client_set_local_time(NX_SNTP_CLIENT *client_ptr, ULONG seconds, 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_set_time_update_notify             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5450,7 +5498,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_set_time_update_notify              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5504,7 +5552,7 @@ UINT    _nx_sntp_client_set_time_update_notify(NX_SNTP_CLIENT *client_ptr,
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_get_msec_diff               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5683,7 +5731,7 @@ ULONG    temp;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_is_zero_data                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5754,7 +5802,7 @@ UINT is_zero;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_convert_fraction_to_msecs   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5820,7 +5868,7 @@ ULONG usecs;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_utility_usecs_to_fraction          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5881,7 +5929,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_usecs_to_fraction           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5943,7 +5991,7 @@ ULONG _frac = usecs * 3962;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_utility_msecs_to_fraction          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6004,7 +6052,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_msecs_to_fraction           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6086,7 +6134,7 @@ ULONG   usecs;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_sntp_client_utility_fraction_to_usecs          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6145,7 +6193,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_fraction_to_usecs           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6213,7 +6261,7 @@ int i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_convert_refID_KOD_code      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6331,7 +6379,7 @@ UINT  _nx_sntp_client_utility_convert_refID_KOD_code(UCHAR *reference_id, UINT *
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_sntp_client_utility_addition_overflow_check     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6404,105 +6452,4 @@ UINT  carry;
 
     /* Ok to add operands!*/
     return NX_SUCCESS;
-}
-
-
-/**************************************************************************/ 
-/*                                                                        */ 
-/*  FUNCTION                                               RELEASE        */ 
-/*                                                                        */ 
-/*    _nx_sntp_client_number_to_ascii                     PORTABLE C      */ 
-/*                                                           6.1          */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    Yuxin Zhou, Microsoft Corporation                                   */
-/*                                                                        */
-/*  DESCRIPTION                                                           */ 
-/*                                                                        */ 
-/*   This function converts a number to ascii text.                       */
-/*                                                                        */ 
-/*   INPUT                                                                */ 
-/*                                                                        */ 
-/*    buffer_ptr                     Pointer to output string buffer      */
-/*    buffer_size                    Size of output buffer                */
-/*    number                         Number to convert to ASCII           */
-/*                                                                        */
-/*  OUTPUT                                                                */ 
-/*                                                                        */ 
-/*    size                           Size of converted string             */ 
-/*                                                                        */ 
-/*  CALLS                                                                 */ 
-/*                                                                        */ 
-/*    None                                                                */ 
-/*                                                                        */ 
-/*  CALLED BY                                                             */ 
-/*                                                                        */ 
-/*    _nx_sntp_client_utility_display_date_time                           */ 
-/*                                     Convert an NTP time                */
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
-/**************************************************************************/
-static UINT _nx_sntp_client_number_to_ascii(CHAR *buffer_ptr, UINT buffer_size, UINT number)
-{
-
-UINT    i;
-UINT    digit;
-UINT    size;
-
-    /* Initialize counters.  */
-    size = 0;
-
-    /* Loop to convert the number to ASCII.  */
-    while (size < buffer_size)
-    {
-
-        /* Shift the current digits over one.  */
-        for (i = size; i != 0; i--)
-        {
-
-            /* Move each digit over one place.  */
-            buffer_ptr[i] =  buffer_ptr[i - 1];
-        }
-
-        /* Compute the next decimal digit.  */
-        digit = (number % 10);
-
-        /* Update the input number.  */
-        number = (number / 10);
-
-        /* Store the new digit in ASCII form.  */
-        if (digit < 10)
-        {
-            buffer_ptr[0] = (CHAR)(digit + '0');
-        }
-        else
-        {
-            buffer_ptr[0] = (CHAR)((digit - 10) + 'a');
-        }
-
-        /* Increment the size.  */
-        size++;
-
-        /* Determine if the number is now zero.  */
-        if (number == 0)
-            break;
-    }
-
-    /* Determine if there is an overflow error.  */
-    if (number)
-    {
-
-        /* Error, return bad values to user.  */
-        return(0);
-    }
-
-    /* Return size to caller.  */
-    return(size);
 }

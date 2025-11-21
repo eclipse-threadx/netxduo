@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -31,7 +31,7 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_record                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -84,6 +84,27 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*                                            supported chained packet,   */
 /*                                            fixed compiler warnings,    */
 /*                                            resulting in version 6.1    */
+/* 02-02-2021      Timothy Stapko           Modified comment(s), added    */
+/*                                            support for fragmented TLS  */
+/*                                            Handshake messages,         */
+/*                                            resulting in version 6.1.4  */
+/* 08-02-2021      Timothy Stapko           Modified comment(s), checked  */
+/*                                            TLS state before processing,*/
+/*                                            resulting in version 6.1.8  */
+/* 10-15-2021      Timothy Stapko           Modified comment(s), fixed    */
+/*                                            TLS 1.3 compile issue,      */
+/*                                            resulting in version 6.1.9  */
+/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            removed unnecessary code,   */
+/*                                            resulting in version 6.1.11 */
+/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
+/*                                            checked seq number overflow,*/
+/*                                            improved buffer length      */
+/*                                            verification,               */
+/*                                            resulting in version 6.1.12 */
+/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
+/*                                            corrected data cleanup,     */
+/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
@@ -126,6 +147,18 @@ NX_PACKET *decrypted_packet;
     status = NX_CONTINUE;
     *bytes_processed = 0;
 
+    /* Make sure the TLS socket is not closed. */
+    if (tls_session -> nx_secure_tls_socket_type == NX_SECURE_TLS_SESSION_TYPE_NONE)
+    {
+
+        /* Session already closed. Release the packet. */
+        if (packet_ptr != NX_NULL)
+        {
+            nx_packet_release(packet_ptr);
+        }
+        return(NX_SECURE_TLS_INVALID_STATE);
+    }
+
     /* Process the packet. */
     if (packet_ptr != NX_NULL)
     {
@@ -153,6 +186,15 @@ NX_PACKET *decrypted_packet;
         }
     }
 
+    /* Reset nx_secure_tls_packet_buffer_bytes_copied if there is no fragmented message to be processed. */
+    if (tls_session->nx_secure_tls_handshake_record_fragment_state == NX_SECURE_TLS_HANDSHAKE_NO_FRAGMENT)
+    {
+        tls_session->nx_secure_tls_packet_buffer_bytes_copied = 0;
+    }
+
+    /* Get packet from record queue. */
+    packet_ptr = tls_session -> nx_secure_record_queue_header;
+    
     /* Process multiple records per packet. */
     while (status == NX_CONTINUE)
     {
@@ -165,8 +207,14 @@ NX_PACKET *decrypted_packet;
         }
         decrypted_packet = NX_NULL;
 
-        /* Get packet from record queue. */
-        packet_ptr = tls_session -> nx_secure_record_queue_header;
+        /* Retrieve the saved record offset when more TCP packet is received for this one record. */
+        if (tls_session -> nx_secure_tls_record_offset)
+        {
+            record_offset = tls_session -> nx_secure_tls_record_offset;
+            tls_session -> nx_secure_tls_record_offset = 0;
+            *bytes_processed = tls_session -> nx_secure_tls_bytes_processed;
+            tls_session -> nx_secure_tls_bytes_processed = 0;
+        }
 
         /* Process the TLS record header, which will set the state. */
         status = _nx_secure_tls_process_header(tls_session, packet_ptr, record_offset, &message_type, &message_length, header_data, &header_length);
@@ -189,12 +237,15 @@ NX_PACKET *decrypted_packet;
         if ((header_length + record_offset + message_length) > packet_ptr -> nx_packet_length)
         {
 
-            /* Wait more TCP packets for this one record. */
+            /* Wait more TCP packets for this one record, save record_offset and bytes_processed for next record processing. */
+            tls_session -> nx_secure_tls_record_offset = record_offset;
+            tls_session -> nx_secure_tls_bytes_processed = *bytes_processed;
             return(NX_CONTINUE);
         }
 
         /* Update the number of bytes we processed. */
         *bytes_processed += (ULONG)header_length + message_length;
+        tls_session -> nx_secure_tls_bytes_processed = *bytes_processed;
         record_offset += (ULONG)header_length;
         record_offset_next = record_offset + message_length;
 
@@ -280,6 +331,14 @@ NX_PACKET *decrypted_packet;
                     {
                         /* Check for overflow of the 32-bit unsigned number. */
                         tls_session -> nx_secure_tls_remote_sequence_number[1]++;
+
+                        if (tls_session -> nx_secure_tls_remote_sequence_number[1] == 0)
+                        {
+
+                            /* Check for overflow of the 64-bit unsigned number. As it should not reach here
+                               in practical, we return a general error to prevent overflow theoretically. */
+                            return(NX_NOT_SUCCESSFUL);
+                        }
                     }
                     tls_session -> nx_secure_tls_remote_sequence_number[0]++;
                 }
@@ -338,7 +397,7 @@ NX_PACKET *decrypted_packet;
             /* For message other than application data, extract to packet buffer to make sure all data are in contiguous memory. */
             /* Check available area of buffer. */
             packet_data = tls_session -> nx_secure_tls_packet_buffer;
-            if (message_length > tls_session -> nx_secure_tls_packet_buffer_size)
+            if (tls_session->nx_secure_tls_packet_buffer_bytes_copied + message_length > tls_session -> nx_secure_tls_packet_buffer_size)
             {
                 return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
             }
@@ -346,19 +405,45 @@ NX_PACKET *decrypted_packet;
             if (decrypted_packet == NX_NULL)
             {
                 status = nx_packet_data_extract_offset(packet_ptr, record_offset,
-                                                       tls_session -> nx_secure_tls_packet_buffer,
+                                                       tls_session -> nx_secure_tls_packet_buffer + tls_session->nx_secure_tls_packet_buffer_bytes_copied,
                                                        message_length, &bytes_copied);
             }
             else
             {
                 status = nx_packet_data_extract_offset(decrypted_packet, 0,
-                                                       tls_session -> nx_secure_tls_packet_buffer,
+                                                       tls_session -> nx_secure_tls_packet_buffer + tls_session->nx_secure_tls_packet_buffer_bytes_copied,
                                                        message_length, &bytes_copied);
             }
 
-            if (status || (bytes_copied != message_length))
+            if (status)
             {
                 return(NX_SECURE_TLS_INVALID_PACKET);
+            }
+
+            tls_session -> nx_secure_tls_packet_buffer_bytes_copied += bytes_copied;
+
+            /* fragment is assembled, or continue to process another message in the same record, or need to read a new TCP packet. */
+            if (tls_session->nx_secure_tls_handshake_record_fragment_state == NX_SECURE_TLS_HANDSHAKE_RECEIVED_FRAGMENT)
+            {
+
+                if (tls_session -> nx_secure_tls_packet_buffer_bytes_copied > tls_session->nx_secure_tls_handshake_record_expected_length)
+                {
+                    return(NX_SECURE_TLS_INVALID_PACKET);
+                }
+                /* All fragments are received and copied to tls_session -> nx_secure_tls_packet_buffer. */
+                else if (tls_session -> nx_secure_tls_packet_buffer_bytes_copied == tls_session->nx_secure_tls_handshake_record_expected_length)
+                {
+                    tls_session->nx_secure_tls_handshake_record_fragment_state = NX_SECURE_TLS_HANDSHAKE_NO_FRAGMENT;
+                    message_length = tls_session->nx_secure_tls_handshake_record_expected_length;
+                    tls_session->nx_secure_tls_handshake_record_expected_length = 0;
+                }
+                else
+                {
+                    /* process another message in the same record. */
+                    record_offset += message_length;
+                    status = NX_CONTINUE;
+                    continue;
+                }
             }
         }
 
@@ -371,6 +456,13 @@ NX_PACKET *decrypted_packet;
 
             break;
         case NX_SECURE_TLS_ALERT:
+
+            if (message_length < 2)
+            {
+                status = NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH;
+                break;
+            }
+
             /* We have received an alert. Check what the alert was and take appropriate action. */
             /* The alert level is the first octet in the alert. The alert number is the second. */
             if(packet_data[0] == NX_SECURE_TLS_ALERT_LEVEL_FATAL)
@@ -386,7 +478,7 @@ NX_PACKET *decrypted_packet;
             status = NX_SECURE_TLS_ALERT_RECEIVED;
             break;
         case NX_SECURE_TLS_HANDSHAKE:
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_CLIENT_DISABLED)
             /* TLS 1.3 can send post-handshake messages with TLS HANDSHAKE record type. Process those separately. */
             if(tls_session->nx_secure_tls_1_3 && tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HANDSHAKE_FINISHED)
             {
@@ -449,8 +541,31 @@ NX_PACKET *decrypted_packet;
                 {
                     status = _nx_secure_tls_client_handshake(tls_session, packet_data, message_length, wait_option);
                 }
+
             }
+
 #endif
+
+            if (status == NX_SECURE_TLS_HANDSHAKE_FRAGMENT_RECEIVED)
+            {
+                /* Update record_offset.*/
+                record_offset = record_offset_next;
+
+                /* Check if reaching the end of this TCP packet. */
+                if (record_offset == packet_ptr -> nx_packet_length)
+                {
+                    /* Wait more TCP packets for this one record, save record_offset and bytes_processed for next record processing. */
+                    tls_session -> nx_secure_tls_record_offset = record_offset;
+                    tls_session -> nx_secure_tls_bytes_processed = *bytes_processed;
+                    return(NX_CONTINUE);
+                }
+                else
+                {
+                    /* Did not reach the end, continue to process this packet. */
+                    status = NX_CONTINUE;
+                }
+            }
+
             break;
         case NX_SECURE_TLS_APPLICATION_DATA:
             /* The remote host is sending application data records now. Pass decrypted data back
@@ -476,7 +591,8 @@ NX_PACKET *decrypted_packet;
         }
 
 #ifdef NX_SECURE_KEY_CLEAR
-        if (message_type != NX_SECURE_TLS_APPLICATION_DATA)
+        if ((message_type != NX_SECURE_TLS_APPLICATION_DATA) &&
+            (status != NX_CONTINUE))
         {
             NX_SECURE_MEMSET(packet_data, 0, message_length);
         }
@@ -491,7 +607,7 @@ NX_PACKET *decrypted_packet;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_packet_trim                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */

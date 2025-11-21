@@ -1,13 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/*       Copyright (c) Microsoft Corporation. All rights reserved.        */
-/*                                                                        */
-/*       This software is licensed under the Microsoft Software License   */
-/*       Terms for Microsoft Azure RTOS. Full text of the license can be  */
-/*       found in the LICENSE file at https://aka.ms/AzureRTOS_EULA       */
-/*       and in the root directory of this software.                      */
-/*                                                                        */
-/**************************************************************************/
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
 
 
 /**************************************************************************/
@@ -26,7 +26,7 @@
 /*  PORT SPECIFIC C INFORMATION                            RELEASE        */
 /*                                                                        */
 /*    nx_secure_user.h                                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -48,6 +48,16 @@
 /*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
 /*  09-30-2020     Timothy Stapko           Modified comment(s),          */
 /*                                            resulting in version 6.1    */
+/*  08-02-2021     Timothy Stapko           Modified comment(s),          */
+/*                                            resulting in version 6.1.8  */
+/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
+/*                                            macro to disable client     */
+/*                                            initiated renegotiation for */
+/*                                            TLS server instances,       */
+/*                                            resulting in version 6.1.9  */
+/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
+/*                                            macro to custom secret size,*/
+/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -93,11 +103,12 @@
    #define NX_SECURE_ENABLE_PSK_CIPHERSUITES
  */
 
-/* NX_SECURE_AEAD_CIPHER_CHECK AEAD ciphersuites other than AES-CCM or AES-GCM.
+/* NX_SECURE_AEAD_CIPHER_CHECK allows to detect user-implemented AEAD algorithms other than AES-CCM or
+   AES-GCM. It can be defined like #define NX_SECURE_AEAD_CIPHER_CHECK(a) ((a) == NEW_ALGORITHM_ID).
    It works only when NX_SECURE_ENABLE_AEAD_CIPHER is defined.
    By default this feature is not enabled. */
 /*
-   #define NX_SECURE_AEAD_CIPHER_CHECK
+   #define NX_SECURE_AEAD_CIPHER_CHECK(a) NX_FALSE
 */
 
 /* NX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES enables self signed certificates. By default
@@ -251,10 +262,22 @@
    #define NX_SECURE_TLS_MINIMUM_MESSAGE_BUFFER_SIZE 4000
 */
 
-/* NX_SECURE_TLS_PREMASTER_SIZE defines the sie of pre-master secret.
+/* NX_SECURE_TLS_PREMASTER_SIZE defines the size of pre-master secret.
    The default value is 48. */
 /*
    #define NX_SECURE_TLS_PREMASTER_SIZE 48
+*/
+
+/* NX_SECURE_TLS_MASTER_SIZE defines the size of master secret.
+   The default value is 48. */
+/*
+   #define NX_SECURE_TLS_MASTER_SIZE 48
+*/
+
+/* NX_SECURE_TLS_KEY_MATERIAL_SIZE defines the size of key material.
+   The default value is (2 * (NX_SECURE_TLS_MAX_HASH_SIZE + NX_SECURE_TLS_MAX_KEY_SIZE + NX_SECURE_TLS_MAX_IV_SIZE)). */
+/*
+   #define NX_SECURE_TLS_KEY_MATERIAL_SIZE (2 * (NX_SECURE_TLS_MAX_HASH_SIZE + NX_SECURE_TLS_MAX_KEY_SIZE + NX_SECURE_TLS_MAX_IV_SIZE))
 */
 
 /* NX_SECURE_TLS_CLIENT_DISABLED disables TLS server. By default TLS server is enabled. */
@@ -287,6 +310,20 @@
    #define NX_SECURE_TLS_REQUIRE_RENEGOTIATION_EXT
 */
 
+/* NX_SECURE_TLS_DISABLE_CLIENT_INITIATED_RENEGOTIATION disables client-initiated renegotiation for TLS
+   servers. In some instances, client-initiated renegotiation can become a possible denial-of-service 
+   vulnerability. */
+/*
+  #define NX_SECURE_TLS_DISABLE_CLIENT_INITIATED_RENEGOTIATION
+*/
+
+/* NX_SECURE_CUSTOM_SECRET_GENERATION enables the user to pass pointers of customized secret generation functions to
+   TLS in the user defined nx_secure_custom_secret_generation_init function. This will allow TLS to use customized
+   secret generation functions. */
+/*
+  #define NX_SECURE_CUSTOM_SECRET_GENERATION
+*/
+
 /* NX_SECURE_X509_DISABLE_CRL disables X509 Certificate Revocation List check.
    By default this feature is enabled. */
 /*
@@ -303,6 +340,18 @@
    for strict X509 comparisons. By default this feature is not enabled. */
 /*
    #define NX_SECURE_X509_USE_EXTENDED_DISTINGUISHED_NAMES
+*/
+
+/* If the handshake hash state cannot be copied using memory copy on metadata,
+   NX_SECURE_HASH_METADATA_CLONE should be defined to a function that clones the hash state.
+   UINT nx_crypto_hash_clone(VOID *dest_metadata, VOID *source_metadata, ULONG length);
+   #define NX_SECURE_HASH_METADATA_CLONE nx_crypto_hash_clone
+*/
+
+/* If cleaning up is required for the handshake hash crypto after being cloned,
+   NX_SECURE_HASH_CLONE_CLEANUP macro should be defined to a clean up function:
+   UINT nx_crypto_clone_cleanup(VOID *metadata, ULONG length);
+   #define NX_SECURE_HASH_CLONE_CLEANUP nx_crypto_clone_cleanup
 */
 
 #endif /* SRC_NX_SECURE_USER_H */
