@@ -163,6 +163,20 @@ NX_INTERFACE              *if_ptr;
         status = _nx_icmpv6_dest_table_add(ip_ptr, original_destination_ip,
                                            &dest_entry_ptr, &default_next_hop_address[0], mtu, 0,
                                            packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr);
+
+        /* If a new ND cache is created, force the entry to be "INCOMPLETE" so that the timer logic will
+           re-try, and then timeout if no responses are received. */
+        if(dest_entry_ptr -> nx_ipv6_destination_entry_nd_entry != NX_NULL)
+        {
+            ND_CACHE_ENTRY *nd_entry = dest_entry_ptr -> nx_ipv6_destination_entry_nd_entry;
+            if(nd_entry -> nx_nd_cache_nd_status == ND_CACHE_STATE_CREATED)
+            {
+                _nx_icmpv6_send_ns(ip_ptr, &nd_entry -> nx_nd_cache_dest_ip[0], 1, 
+                                   nd_entry -> nx_nd_cache_outgoing_address, 0, nd_entry);
+                nd_entry->nx_nd_cache_num_solicit = NX_MAX_MULTICAST_SOLICIT - 1;
+                nd_entry->nx_nd_cache_timer_tick = ip_ptr -> nx_ipv6_retrans_timer_ticks;
+            }
+        }
     }
 
     /* Release the packet. */
