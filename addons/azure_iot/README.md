@@ -52,7 +52,7 @@ Azure IoT Middleware for Azure RTOS stays as an addon module for the Azure RTOS 
 
 [Device Update for IoT Hub](https://learn.microsoft.com/azure/iot-hub-device-update/understand-device-update) is an Azure service that enables you to deploy over-the-air updates (OTA) for your IoT devices. The [Device Update for IoT Hub agent](https://learn.microsoft.com/azure/iot-hub-device-update/device-update-azure-real-time-operating-system) in the IoT Middleware provides simple APIs for device builders to integrate the OTA capability easily.
 
-See the [samples](https://github.com/eclipse-threadx/samples) of semiconductor's hero development boards with detailed guides to learn configure, build and deploy the over-the-air (OTA) updates to the devices.
+See the [samples](https://github.com/eclipse-threadx/samples) of semiconductor's hero development boards with detailed guides to learn how to configure, build and deploy the over-the-air (OTA) updates to the devices.
 
 ## APIs
 
