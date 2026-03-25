@@ -81,7 +81,8 @@ NX_CALLER_CHECKING_EXTERNS
 #define NX_FTP_CODE_BAD_NAME         "553"  /* Requested action not taken, File name not allowed.  */
 
 static VOID _nx_ftp_server_number_to_ascii(UCHAR *buffer_ptr, UINT buffer_size, UINT number, UCHAR pad);
-                                   
+static VOID _nx_ftp_server_logout_client(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_CLIENT_REQUEST *client_request_ptr);
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
@@ -1445,6 +1446,7 @@ ULONG                   events;
 /*    nx_tcp_socket_transmit_configure      Configure data transer socket */
 /*    _nx_utility_uint_to_string            Convert number to string      */
 /*    _nx_ftp_server_data_socket_cleanup    Clean up data socket          */
+/*    _nx_ftp_server_logout_client          Logout the client             */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -1720,39 +1722,9 @@ ULONG                   block_size;
                     /* Increment the number of disconnection requests.  */
                     ftp_server_ptr -> nx_ftp_server_disconnection_requests++;
 
-                    /* Check if this client login.  */
-                    if (client_req_ptr -> nx_ftp_client_request_login)
-                    {
-
-                        /* Call the logout function.  */
-
-#ifndef NX_DISABLE_IPV4
-                        /* Does this server have an IPv4 login function? */
-                        if (ftp_server_ptr -> nx_ftp_logout_ipv4)
-                        {
-
-                            /* Call the logout which takes IPv4 address input. */
-                            (ftp_server_ptr -> nx_ftp_logout_ipv4)(ftp_server_ptr, 
-                                    client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_ip.nxd_ip_address.v4,
-                                    client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_port,
-                                    client_req_ptr -> nx_ftp_client_request_username,
-                                    client_req_ptr -> nx_ftp_client_request_password, NX_NULL);
-                        }
-#endif /* NX_DISABLE_IPV4 */
-                        if (ftp_server_ptr -> nx_ftp_logout)
-                        {
-
-                            /* Call the 'duo' logout function which takes IPv6 or IPv4 IP addresses. */
-                            (ftp_server_ptr -> nx_ftp_logout)(ftp_server_ptr, &(client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_ip),
-                                                            client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_port,
-                                                            client_req_ptr -> nx_ftp_client_request_username,
-                                                            client_req_ptr -> nx_ftp_client_request_password, NX_NULL);
-                        }
-
-                        /* Set the login as FALSE.  */
-                        client_req_ptr -> nx_ftp_client_request_login = NX_FALSE;
-                    }
-                    
+                    /* Logout the client */
+                    _nx_ftp_server_logout_client(ftp_server_ptr, client_req_ptr);
+                   
                     /* Clear authentication.  */
                     client_req_ptr -> nx_ftp_client_request_authenticated =  NX_FALSE;
 
@@ -4554,6 +4526,7 @@ NX_FTP_SERVER   *server_ptr;
 /*    fx_file_close                         Close file                    */
 /*    nx_ftp_packet_allocate                Allocate a packet             */
 /*    _nx_ftp_server_data_socket_cleanup    Clean up data socket          */
+/*    _nx_ftp_server_logout_client          Logout the client             */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -5133,6 +5106,7 @@ NX_FTP_SERVER   *server_ptr;
 /*    nx_tcp_server_socket_unaccept         Unaccept server connection    */
 /*    nx_tcp_socket_disconnect              Disconnect socket             */
 /*    _nx_ftp_server_data_socket_cleanup    Clean up data socket          */
+/*    _nx_ftp_server_logout_client          Logout the client             */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -5186,6 +5160,9 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 
                 /* Reset the block bytes.  */
                 client_req_ptr -> nx_ftp_client_request_block_bytes = 0;
+
+                /* Logout the client. */
+                _nx_ftp_server_logout_client(ftp_server_ptr, client_req_ptr);
 
                 /* Now disconnect the command socket.  */
                 nx_tcp_socket_disconnect(&(client_req_ptr -> nx_ftp_client_request_control_socket), NX_NO_WAIT);
@@ -5344,38 +5321,8 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
             /* Reset the block bytes.  */
             client_req_ptr -> nx_ftp_client_request_block_bytes = 0;
 
-            /* Check if this client login.  */
-            if (client_req_ptr -> nx_ftp_client_request_login)
-            {
-
-                /* Call the logout function.  */
-
-#ifndef NX_DISABLE_IPV4
-                /* Does this server have an IPv4 login function? */
-                if (ftp_server_ptr -> nx_ftp_logout_ipv4)
-                {
-
-                    /* Call the logout which takes IPv4 address input. */
-                    (ftp_server_ptr -> nx_ftp_logout_ipv4)(ftp_server_ptr, 
-                                client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_ip.nxd_ip_address.v4,
-                                client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_port,
-                                client_req_ptr -> nx_ftp_client_request_username,
-                                client_req_ptr -> nx_ftp_client_request_password, NX_NULL);
-                }
-#endif /* NX_DISABLE_IPV4 */
-                if (ftp_server_ptr -> nx_ftp_logout)
-                {
-
-                    /* Call the 'duo' logout function which takes IPv6 or IPv4 IP addresses. */
-                    (ftp_server_ptr -> nx_ftp_logout)(ftp_server_ptr, &(client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_ip),
-                                                      client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_port,
-                                                      client_req_ptr -> nx_ftp_client_request_username,
-                                                      client_req_ptr -> nx_ftp_client_request_password, NX_NULL);
-                }
-
-                /* Set the login as FALSE.  */
-                client_req_ptr -> nx_ftp_client_request_login = NX_FALSE;
-            }
+            /* Logout the client. */
+            _nx_ftp_server_logout_client(ftp_server_ptr, client_req_ptr);
 
             /* Now disconnect the command socket.  */
             nx_tcp_socket_disconnect(&(client_req_ptr -> nx_ftp_client_request_control_socket), NX_FTP_SERVER_TIMEOUT);
@@ -6498,6 +6445,78 @@ UINT    size;
     }
 }
 
+/**************************************************************************/ 
+/*                                                                        */ 
+/*  FUNCTION                                               RELEASE        */ 
+/*                                                                        */ 
+/*    _nx_ftp_server_logout_client                        PORTABLE C      */ 
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*      TBD                                                               */
+/*                                                                        */
+/*  DESCRIPTION                                                           */ 
+/*                                                                        */ 
+/*   This function logs out the client if it was previously logged in     */
+/*                                                                        */ 
+/*   INPUT                                                                */ 
+/*                                                                        */ 
+/*    ftp_server_ptr                 Pointer to output string buffer      */
+/*    client_request_ptr             Pointer to FTP client                */ 
+/*                                                                        */
+/*  OUTPUT                                                                */ 
+/*                                                                        */ 
+/*    None                                                                */ 
+/*                                                                        */ 
+/*  CALLS                                                                 */ 
+/*                                                                        */ 
+/*    None                                                                */ 
+/*                                                                        */ 
+/*  CALLED BY                                                             */ 
+/*     _nx_ftp_server_control_disconnect_processing                          */
+/*                                     Disconnect processing                  */
+/*     _nx_ftp_server_command_process                                      */
+/*                                     QUIT command                          */
+/*     _nx_ftp_server_timeout_processing                                  */
+/*                                     Timeout proccessing                  */
+/*                                                                        */ 
+/**************************************************************************/
+
+static VOID _nx_ftp_server_logout_client(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_CLIENT_REQUEST *client_request_ptr)
+{
+    /* Check if this client login.  */
+    if (client_request_ptr -> nx_ftp_client_request_login)
+    {
+
+        /* Call the logout function.  */
+
+#ifndef NX_DISABLE_IPV4
+        /* Does this server have an IPv4 logout function? */
+        if (ftp_server_ptr -> nx_ftp_logout_ipv4)
+        {
+
+            /* Call the logout which takes IPv4 address input. */
+            (ftp_server_ptr -> nx_ftp_logout_ipv4)(ftp_server_ptr, 
+                    client_request_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_ip.nxd_ip_address.v4,
+                    client_request_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_port,
+                    client_request_ptr -> nx_ftp_client_request_username,
+                    client_request_ptr -> nx_ftp_client_request_password, NX_NULL);
+        }
+#endif /* NX_DISABLE_IPV4 */
+        if (ftp_server_ptr -> nx_ftp_logout)
+        {
+
+            /* Call the 'duo' logout function which takes IPv6 or IPv4 IP addresses. */
+            (ftp_server_ptr -> nx_ftp_logout)(ftp_server_ptr, &(client_request_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_ip),
+                                            client_request_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_port,
+                                            client_request_ptr -> nx_ftp_client_request_username,
+                                            client_request_ptr -> nx_ftp_client_request_password, NX_NULL);
+        }
+
+        /* Set the login as FALSE.  */
+        client_req_ptr -> nx_ftp_client_request_login = NX_FALSE;
+    }
+}
 
 /**************************************************************************/ 
 /*                                                                        */ 
