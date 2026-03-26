@@ -6461,8 +6461,8 @@ UINT    size;
 /*                                                                        */ 
 /*   INPUT                                                                */ 
 /*                                                                        */ 
-/*    ftp_server_ptr                 Pointer to output string buffer      */
-/*    client_request_ptr             Pointer to FTP client                */ 
+/*    ftp_server_ptr                        Pointer to FTP server         */
+/*    client_request_ptr                    Pointer to FTP client         */
 /*                                                                        */
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
@@ -6473,12 +6473,12 @@ UINT    size;
 /*    None                                                                */ 
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
-/*     _nx_ftp_server_control_disconnect_processing                          */
-/*                                     Disconnect processing                  */
-/*     _nx_ftp_server_command_process                                      */
-/*                                     QUIT command                          */
+/*     _nx_ftp_server_control_disconnect_processing                       */
+/*                                     Disconnect processing              */
+/*     _nx_ftp_server_command_process                                     */
+/*                                     QUIT command                       */
 /*     _nx_ftp_server_timeout_processing                                  */
-/*                                     Timeout proccessing                  */
+/*                                     Timeout proccessing                */
 /*                                                                        */ 
 /**************************************************************************/
 
