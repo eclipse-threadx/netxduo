@@ -6514,7 +6514,7 @@ static VOID _nx_ftp_server_logout_client(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_C
         }
 
         /* Set the login as FALSE.  */
-        client_req_ptr -> nx_ftp_client_request_login = NX_FALSE;
+        client_request_ptr -> nx_ftp_client_request_login = NX_FALSE;
     }
 }
 
