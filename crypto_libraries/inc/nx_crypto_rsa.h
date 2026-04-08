@@ -123,6 +123,12 @@ UINT _nx_crypto_method_rsa_init(struct NX_CRYPTO_METHOD_STRUCT *method,
                                 VOID **handle,
                                 VOID *crypto_metadata, ULONG crypto_metadata_size);
 
+UINT _nx_crypto_rsa_pss_verify(const UCHAR *message_hash, UINT hash_length,
+                                const UCHAR *em, UINT em_bits,
+                                const NX_CRYPTO_METHOD *hash_method,
+                                VOID *hash_metadata, ULONG hash_metadata_size,
+                                UCHAR *scratch, UINT scratch_length);
+
 #ifdef __cplusplus
 }
 #endif

@@ -168,6 +168,7 @@ extern   "C" {
 #define NX_CRYPTO_DIGITAL_SIGNATURE_RSA          0x00050001
 #define NX_CRYPTO_DIGITAL_SIGNATURE_DSA          0x00050002
 #define NX_CRYPTO_DIGITAL_SIGNATURE_ECDSA        0x00050003
+#define NX_CRYPTO_DIGITAL_SIGNATURE_RSAPSS       0x00050004
 
 /*Define the elliptic curve algorithm */
 /* Values of 16 least significant bits are the same as named curve defined in RFC 4492, section 5.1.1 */
