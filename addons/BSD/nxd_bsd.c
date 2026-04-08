@@ -4891,7 +4891,24 @@ UINT                 index;
             /* Release the mutex while disconnecting. */
             tx_mutex_put(nx_bsd_protection_ptr);
 
-            nx_tcp_socket_disconnect(tcp_socket_ptr, timeout);
+            if (tcp_socket_ptr -> so_linger.l_onoff == 0)
+            {
+                nx_tcp_socket_disconnect(tcp_socket_ptr, timeout);
+            }
+
+            // sending RST packet
+            else if (tcp_socket_ptr -> so_linger.l_onoff != 0 && tcp_socket_ptr -> so_linger.l_linger == 0)
+            {
+                nx_tcp_socket_disconnect(tcp_socket_ptr, NX_NO_WAIT);
+            }
+
+            // waiting
+            else if (tcp_socket_ptr -> so_linger.l_onoff != 0 && tcp_socket_ptr -> so_linger.l_linger > 0)
+            {
+                ULONG ticks = tcp_socket_ptr -> so_linger.l_linger * NX_IP_PERIODIC_RATE;
+
+                nx_tcp_socket_disconnect(tcp_socket_ptr, ticks);
+            }
 
             tx_mutex_get(nx_bsd_protection_ptr, NX_BSD_TIMEOUT);
 
@@ -6061,6 +6078,7 @@ INT                                     status;
 NX_BSD_SOCKET                           *bsd_socket_ptr;
 struct          nx_bsd_sock_errno       *so_errno;
 struct          nx_bsd_sock_keepalive   *so_keepalive;
+struct          nx_bsd_linger           *so_linger;
 struct          nx_bsd_sock_reuseaddr   *so_reuseaddr;
 struct          nx_bsd_timeval          *so_rcvtimeval;
 struct          nx_bsd_sock_winsize     *soc_window_size;
@@ -6092,7 +6110,7 @@ ULONG                                   ticks;
     if (option_level == IPPROTO_IP)
     {
 
-        if((option_name <= SO_MAX) ||  (option_name > IP_OPTION_MAX))
+        if (option_name > IP_OPTION_MAX)
         {
 
             /* Error, one or more invalid arguments.  */
@@ -6108,6 +6126,20 @@ ULONG                                   ticks;
     {
 
         if((option_name > SO_MAX) || (option_name < SO_MIN))
+        {
+
+            /* Error, one or more invalid arguments.  */
+
+            /* Set the socket error if extended socket options enabled. */
+            nx_bsd_set_errno(ENOPROTOOPT);
+
+            NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+            return NX_SOC_ERROR;
+        }
+    }
+    else if(option_level == IPPROTO_TCP)
+    {
+        if((option_name != TCP_NODELAY))
         {
 
             /* Error, one or more invalid arguments.  */
@@ -6155,6 +6187,28 @@ ULONG                                   ticks;
     switch (option_name)
     {
 
+        case IP_TOS:
+
+            if (*option_length == (INT)sizeof(int))
+            {
+                ULONG tmp_option_value;
+
+                if (bsd_socket_ptr -> nx_bsd_socket_tcp_socket)
+                {
+                    tmp_option_value = bsd_socket_ptr -> nx_bsd_socket_tcp_socket ->nx_tcp_socket_type_of_service;
+                }
+                else if (bsd_socket_ptr -> nx_bsd_socket_udp_socket)
+                {
+                    tmp_option_value = bsd_socket_ptr -> nx_bsd_socket_udp_socket ->nx_udp_socket_type_of_service;
+                }
+
+                tmp_option_value = tmp_option_value >> 16;
+
+                *((int*)option_value) = (int)tmp_option_value;
+            }
+
+        break;
+
         case SO_ERROR:
         {
 
@@ -6195,6 +6249,13 @@ ULONG                                   ticks;
 
         break;
 
+        case SO_BROADCAST:
+
+            /* This is the default behavior of NetX. All sockets have this capability. */
+            *((INT *)option_value) = 1;
+
+        break;
+
         case SO_KEEPALIVE:
 
             /* Determine if NetX Duo supports keepalive. */
@@ -6219,6 +6280,30 @@ ULONG                                   ticks;
             so_keepalive -> keepalive_enabled = (INT)(bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_keepalive_enabled);
 #endif /* NX_ENABLE_TCP_KEEPALIVE */
             *option_length = sizeof(struct nx_bsd_sock_keepalive);
+
+        break;
+
+        case SO_LINGER:
+
+            /* Only available to TCP BSD sockets. */
+            if (bsd_socket_ptr -> nx_bsd_socket_tcp_socket && *option_length == sizeof(struct nx_bsd_linger))
+            {
+                (*((struct nx_bsd_linger *)option_value)).l_onoff = bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> so_linger.l_onoff;
+                (*((struct nx_bsd_linger *)option_value)).l_linger = bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> so_linger.l_linger;
+            }
+            else
+            {
+                /* Not a TCP socket. */
+
+                tx_mutex_put(nx_bsd_protection_ptr);
+
+                /* Set the socket error if extended socket options enabled. */
+                nx_bsd_set_errno(ENOPROTOOPT);
+
+                /* Return an error status. */
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
 
         break;
 
@@ -6250,6 +6335,20 @@ ULONG                                   ticks;
 
         case SO_RCVBUF:
 
+            /* Only available to TCP sockets. */
+            if (!bsd_socket_ptr -> nx_bsd_socket_tcp_socket)
+            {
+
+                tx_mutex_put(nx_bsd_protection_ptr);
+
+                /* Set the socket error if extended socket options enabled. */
+                nx_bsd_set_errno(ENOPROTOOPT);
+
+                /* Return an error status. */
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
             soc_window_size = (struct nx_bsd_sock_winsize *)option_value;
             soc_window_size -> winsize = (INT)(bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_rx_window_default);
             *option_length = sizeof(soc_window_size);
@@ -6277,6 +6376,14 @@ ULONG                                   ticks;
 
         break;
 
+        case TCP_NODELAY:
+
+            /* This is the default behavior of NetX. All sockets have this attribute. */
+            *((INT *)option_value) = 1;
+
+        break;
+
+        case IP_TTL:
         case IP_MULTICAST_TTL:
 
             /* Validate the option length. */
@@ -6305,22 +6412,49 @@ ULONG                                   ticks;
                 return NX_SOC_ERROR;
             }
 
-            /* Make sure socket is UDP type. */
-            if(bsd_socket_ptr -> nx_bsd_socket_udp_socket == NX_NULL)
+            /* Socket is UDP type. */
+            if(bsd_socket_ptr -> nx_bsd_socket_udp_socket != NX_NULL)
             {
 
-                tx_mutex_put(nx_bsd_protection_ptr);
+                /* Set the TTL value. */
+                *(UCHAR*)option_value = (UCHAR)(bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live);
+            }
+            /* Socket is TCP type. */
+            else
+            {
 
-                /* Set the socket error if extended socket options enabled. */
-                nx_bsd_set_errno(ENOPROTOOPT);
+                if(option_name == IP_MULTICAST_TTL)
+                {
 
-                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return NX_SOC_ERROR;
+                    tx_mutex_put(nx_bsd_protection_ptr);
+
+                    /* Set the socket error if extended socket options enabled. */
+                    nx_bsd_set_errno(ENOPROTOOPT);
+
+                    NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                    return NX_SOC_ERROR;
+                }
+
+                /* Set the TTL value. */
+                *(UCHAR*)option_value = (UCHAR)(bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_time_to_live);
             }
 
-            /* Set the TTL value. */
-            *(UCHAR*)option_value = (UCHAR)(bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live);
             break;
+
+        case IP_MULTICAST_IF:
+
+            /* This is not supported yet. */
+
+            tx_mutex_put(nx_bsd_protection_ptr);
+
+            /* Set the socket error if extended socket options enabled. */
+            nx_bsd_set_errno(ENOPROTOOPT);
+
+            /* Return an error status. */
+            NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+            return NX_SOC_ERROR;
+
+        break;
 
         default:
 
@@ -6431,7 +6565,7 @@ ULONG           physical_addr_lsw;
     if (option_level == IPPROTO_IP)
     {
 
-        if((option_name <= SO_MAX) ||  (option_name > IP_OPTION_MAX))
+        if (option_name > IP_OPTION_MAX)
         {
 
             /* Error, one or more invalid arguments.  */
@@ -6507,9 +6641,43 @@ ULONG           physical_addr_lsw;
     switch (option_name)
     {
 
+        case IP_TOS:
+
+            if (option_length == sizeof(int))
+            {
+                ULONG type_of_service = *((int*)option_value);
+
+                if (type_of_service >= 0x00 && type_of_service <= 0xFF)
+                {
+                    type_of_service = type_of_service << 16;
+
+                    if (bsd_socket_ptr -> nx_bsd_socket_tcp_socket)
+                    {
+                        bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_type_of_service = type_of_service;
+                    }
+                    else if (bsd_socket_ptr -> nx_bsd_socket_udp_socket)
+                    {
+                        bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_type_of_service = type_of_service;
+                    }
+                }
+            }
+
+        break;
+
         case SO_BROADCAST:
 
             /* This is the default behavior of NetX. All sockets have this capability. */
+            if (*((INT *)option_value) == 0)
+            {
+
+                nx_bsd_set_errno(EINVAL);
+
+                /* Return an error status. */
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+
+                return NX_SOC_ERROR;
+            }
+
         break;
 
         case SO_KEEPALIVE:
@@ -6564,9 +6732,25 @@ ULONG           physical_addr_lsw;
 
         case SO_LINGER:
 
-            /* The Linger socket option is not supported in NetX Duo BSD. */
+            /* Only available to TCP BSD sockets. */
+            if (bsd_socket_ptr -> nx_bsd_socket_tcp_socket && option_length == sizeof(struct nx_bsd_linger))
+            {
+                bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> so_linger.l_onoff = (*((struct nx_bsd_linger *)option_value)).l_onoff;
+                bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> so_linger.l_linger = (*((struct nx_bsd_linger *)option_value)).l_linger;
+            }
+            else
+            {
+                /* Not a TCP socket. */
 
-            return NX_NOT_ENABLED;
+                /* Set the socket error if extended socket options enabled. */
+                nx_bsd_set_errno(ENOPROTOOPT);
+
+                /* Return an error status. */
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
+        break;
 
         case SO_SNDTIMEO:
 
@@ -6640,9 +6824,20 @@ ULONG           physical_addr_lsw;
         case TCP_NODELAY:
 
             /* This is the default behavior of NetX. All sockets have this attribute. */
+            if (*((INT *)option_value) == 0)
+            {
+
+                nx_bsd_set_errno(EINVAL);
+
+                /* Return an error status. */
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+
+                return NX_SOC_ERROR;
+            }
 
         break;
 
+        case IP_TTL:
         case IP_MULTICAST_TTL:
 
             /* Validate the option length. */
@@ -6667,24 +6862,47 @@ ULONG           physical_addr_lsw;
                 return NX_SOC_ERROR;
             }
 
-            /* Make sure socket is UDP type. */
-            if(bsd_socket_ptr -> nx_bsd_socket_udp_socket == NX_NULL)
+            /* Socket is UDP type. */
+            if(bsd_socket_ptr -> nx_bsd_socket_udp_socket != NX_NULL)
             {
-                /* Set the socket error if extended socket options enabled. */
-                nx_bsd_set_errno(ENOPROTOOPT);
 
-                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return NX_SOC_ERROR;
-            }
+                /* Set the TTL value. */
+                if (option_length == sizeof(UCHAR))
+                {
 
-            /* Set the TTL value. */
-            if (option_length == sizeof(UCHAR))
-            {
-                bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live = *(UCHAR*)option_value;
+                    bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live = *(UCHAR*)option_value;
+                }
+                else
+                {
+
+                    bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live = (UCHAR)(*(INT*)option_value);
+                }
             }
+            /* Socket is TCP type. */
             else
             {
-                bsd_socket_ptr -> nx_bsd_socket_udp_socket -> nx_udp_socket_time_to_live = (UCHAR)(*(INT*)option_value);
+
+                if (option_name == IP_MULTICAST_TTL)
+                {
+
+                    /* Set the socket error if extended socket options enabled. */
+                    nx_bsd_set_errno(ENOPROTOOPT);
+
+                    NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                    return NX_SOC_ERROR;
+                }
+
+                /* Set the TTL value. */
+                if (option_length == sizeof(UCHAR))
+                {
+
+                    bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_time_to_live = *(UCHAR*)option_value;
+                }
+                else
+                {
+
+                    bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_time_to_live = (UCHAR)(*(INT*)option_value);
+                }
             }
         break;
 
@@ -6697,6 +6915,13 @@ ULONG           physical_addr_lsw;
         case IP_MULTICAST_IF:
 
             /* This is not supported yet. */
+
+            /* Set the socket error if extended socket options enabled. */
+            nx_bsd_set_errno(ENOPROTOOPT);
+
+            /* Return an error status. */
+            NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+            return NX_SOC_ERROR;
 
         break;
 #if defined(NX_BSD_RAW_SUPPORT) && defined(NX_ENABLE_VLAN)
