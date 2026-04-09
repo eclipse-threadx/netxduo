@@ -238,6 +238,7 @@ extern   "C" {
 #define nx_bsd_inet_ntop        inet_ntop
 #define nx_bsd_listen           listen
 #define nx_bsd_recvfrom         recvfrom
+#define nx_bsd_recvfromto       recvfromto
 #define nx_bsd_recv             recv
 #define nx_bsd_recvmsg          recvmsg
 #define nx_bsd_sendto           sendto
