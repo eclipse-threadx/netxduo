@@ -139,6 +139,7 @@ static UINT nx_bsd_isxdigit(UCHAR c);
 /* Standard BSD callback functions to register with NetX Duo. */
 
 static VOID  nx_bsd_tcp_receive_notify(NX_TCP_SOCKET *socket_ptr);
+static VOID  nx_bsd_tcp_exception_notify(NX_TCP_SOCKET *socket_ptr);
 static VOID  nx_bsd_tcp_socket_disconnect_notify(NX_TCP_SOCKET *socket_ptr);
 static VOID  nx_bsd_udp_receive_notify(NX_UDP_SOCKET *socket_ptr);
 #ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
@@ -934,7 +935,8 @@ UINT            index;
            including the ones covered by tcp_socket_disconnect_notify. */
 
         status =  nx_tcp_socket_create(nx_bsd_default_ip, tcp_socket_ptr, "NetX BSD TCP Socket",
-                                       NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, NX_BSD_TCP_WINDOW, NX_NULL,
+                                       NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, NX_BSD_TCP_WINDOW,
+                                       nx_bsd_tcp_exception_notify,
                                        nx_bsd_tcp_socket_disconnect_notify);
 
         /* Check for a successful status.  */
@@ -3014,11 +3016,6 @@ struct nx_bsd_sockaddr_in6
     /* Reset the master_socket_id */
     ret = nx_bsd_tcp_create_listen_socket(sockID, 0);
 
-    if(ret < 0)
-    {
-        (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id = NX_BSD_MAX_SOCKETS;
-    }
-
     /* Make sure this thread is still the owner.  */
     if (bsd_socket_ptr -> nx_bsd_socket_busy == tx_thread_identify())
     {
@@ -3029,6 +3026,11 @@ struct nx_bsd_sockaddr_in6
 
     /* Release the protection mutex.  */
     tx_mutex_put(nx_bsd_protection_ptr);
+
+    if(ret < 0)
+    {
+        return ret;
+    }
 
     return(secondary_socket_id + NX_BSD_SOCKFD_START);
 
@@ -3747,7 +3749,7 @@ USHORT               peer_port = 0;
 
         /* This is a UDP or raw socket.  */
 
-        /* Check whther or not the socket is AF_PACKET family. */
+        /* Check whether or not the socket is AF_PACKET family. */
         if(bsd_socket_ptr -> nx_bsd_socket_family == AF_PACKET)
         {
 
@@ -4248,7 +4250,7 @@ struct nx_bsd_sockaddr_in6
                 status =  nx_tcp_socket_receive(tcp_socket_ptr, &packet_ptr, TX_NO_WAIT);
 
                 /* Check for no packet on the queue.  */
-                if (status == NX_NOT_CONNECTED)
+                if (status == NX_NOT_CONNECTED || status == NX_NOT_BOUND)
                 {
 
                     /* Release the protection mutex.  */
@@ -5041,6 +5043,8 @@ UINT                 index;
 
         tx_mutex_put(nx_bsd_protection_ptr);
 
+        nx_bsd_select_wakeup((UINT)sockID, FDSET_READ);
+
         /* Return */
         return(NX_SOC_OK);
 
@@ -5119,6 +5123,8 @@ UINT                 index;
 
         /* Release the protection mutex.  */
         tx_mutex_put(nx_bsd_protection_ptr);
+
+        nx_bsd_select_wakeup((UINT)sockID, FDSET_READ);
 
         return(NX_SOC_OK);
     }
@@ -8204,26 +8210,41 @@ INT                     ret;
             /* Yes, decrement the number of read selectors left to search for.  */
             writefds_left--;
 
-            /* Is this BSD socket in use?  */
-            if (!(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
-            {
-
-                /* Yes, add this socket to the write ready list.  */
-                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
-            }
-
             /* Check to see if there is a connection request pending.  */
-            else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTION_REQUEST)
+            if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTION_REQUEST)
             {
 
-                /* Yes, add this socket to the write ready list.  */
-                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+                if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET)
+                {
+                    // empty
+                }
+                else
+                {
+                    /* Yes, add this socket to the write ready list.  */
+                    NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+                }
             }
 
             /* Check to see if there is an error.*/
             else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
             {
 
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+            }
+            /* Is this a TCP socket? */
+            else if (nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket)
+            {
+                if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED)
+                {
+                    /* Yes, add this socket to the write ready list.  */
+                    NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+                }
+            }
+            /* Is this BSD socket bound?  */
+            else if ((nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_BOUND))
+            {
+
+                /* Yes, add this socket to the write ready list.  */
                 NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
         }
@@ -8255,6 +8276,25 @@ INT                     ret;
             {
 
                 NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
+            }
+
+            /* Is this a TCP socket? */
+            else if (nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket)
+            {
+                if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED)
+                {
+                    packet_ptr = nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket->nx_tcp_socket_receive_queue_head;
+
+                    if (packet_ptr != NX_NULL)
+                    {
+                        NX_TCP_HEADER *tcp_header_ptr = (NX_TCP_HEADER *)packet_ptr->nx_packet_prepend_ptr;
+
+                        if (tcp_header_ptr->nx_tcp_header_word_3 & NX_TCP_URG_BIT)
+                        {
+                            NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
+                        }
+                    }
+                }
             }
         }
     }
@@ -8337,6 +8377,12 @@ INT                     ret;
            This happens if the wait option is set to zero. */
         if (status == TX_NO_EVENTS)
         {
+            if(readfds)
+                NX_BSD_FD_ZERO(readfds);
+            if(writefds)
+                NX_BSD_FD_ZERO(writefds);
+            if(exceptfds)
+                NX_BSD_FD_ZERO(exceptfds);
 
             /* Determine if the effected sockets are non blocking (zero ticks for the wait option). */
             if (ticks == 0)
@@ -8445,6 +8491,38 @@ UINT                    bsd_socket_index;
 
     /* Check the suspended socket list for one ready to receive or send packets. */
     nx_bsd_select_wakeup(bsd_socket_index, FDSET_READ);
+
+
+    return;
+}
+
+
+
+static VOID  nx_bsd_tcp_exception_notify(NX_TCP_SOCKET *socket_ptr)
+{
+UINT                    bsd_socket_index;
+
+    /* Figure out what BSD socket this is.  */
+    bsd_socket_index =  (UINT) socket_ptr -> nx_tcp_socket_reserved_ptr;
+
+    /* Determine if this is a good index into the BSD socket array.  */
+    if (bsd_socket_index >= NX_BSD_MAX_SOCKETS)
+    {
+
+        /* Bad socket index... simply return!  */
+        return;
+    }
+
+    /* Now check if the socket may have been released (e.g. socket closed) while
+       waiting for the mutex. */
+    if( socket_ptr -> nx_tcp_socket_id == 0 )
+    {
+
+        return;
+    }
+
+    /* Check the suspended socket list for one ready to receive or send packets. */
+    nx_bsd_select_wakeup(bsd_socket_index, FDSET_EXCEPTION);
 
 
     return;
