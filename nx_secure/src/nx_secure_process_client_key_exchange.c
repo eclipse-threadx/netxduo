@@ -178,6 +178,14 @@ UINT                                private_key_length;
         /* Check for PSK ciphersuites and generate the pre-master-secret. */
         if (ciphersuite -> nx_secure_tls_public_auth -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_PSK)
         {
+            /* Store the requested PSK ID in the TLS credentials. */
+            if (message_length < 2)
+            {
+                return NX_INVALID_PACKET;
+            }
+            tls_credentials -> nx_secure_tls_remote_psk_id_size = ((packet_buffer[0] << 8) | packet_buffer[1]);
+            NX_SECURE_MEMCPY(tls_credentials -> nx_secure_tls_remote_psk_id, &packet_buffer[2], tls_credentials -> nx_secure_tls_remote_psk_id_size);
+
             status = _nx_secure_generate_premaster_secret(ciphersuite, protocol_version, tls_key_material, tls_credentials,
                                                           NX_SECURE_TLS_SESSION_TYPE_SERVER, received_remote_credentials,
                                                           public_cipher_metadata, public_cipher_metadata_size, tls_ecc_curves);

@@ -280,9 +280,24 @@ UINT					   pre_master_secret_size;
         /* Now, using the identity as a key, find the PSK in our PSK store. */
         if (session_type == NX_SECURE_TLS_SESSION_TYPE_SERVER)
         {
-            /* Server just uses its PSK. */
-            psk_data = tls_credentials -> nx_secure_tls_psk_store[0].nx_secure_tls_psk_data;
-            psk_length = tls_credentials -> nx_secure_tls_psk_store[0].nx_secure_tls_psk_data_size;
+            /* Attempt to find the PSK ID requested by the client in the ClientKeyExchange message. */
+            psk_length = 0;
+            const UINT client_psk_id_size = tls_credentials -> nx_secure_tls_remote_psk_id_size;
+            const UCHAR* client_psk_id = tls_credentials -> nx_secure_tls_remote_psk_id;
+            for (i = 0; i < NX_SECURE_TLS_MAX_PSK_KEYS; i++)
+            {
+                if ((client_psk_id_size == tls_credentials -> nx_secure_tls_psk_store[i].nx_secure_tls_psk_id_size) &&
+                    (NX_SECURE_MEMCMP(client_psk_id, tls_credentials -> nx_secure_tls_psk_store[i].nx_secure_tls_psk_id, client_psk_id_size) == 0))
+                {
+                    psk_data = tls_credentials -> nx_secure_tls_psk_store[i].nx_secure_tls_psk_data;
+                    psk_length = tls_credentials -> nx_secure_tls_psk_store[i].nx_secure_tls_psk_data_size;
+                    break;
+                }
+            }
+            if (psk_length == 0)
+            {
+                return(NX_OPTION_ERROR);
+            }
         }
         else
         {
