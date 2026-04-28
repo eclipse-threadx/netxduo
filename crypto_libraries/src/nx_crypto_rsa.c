@@ -488,6 +488,13 @@ UCHAR  hash_buf[64]; /* large enough for SHA-512 */
 VOID  *handler = NX_CRYPTO_NULL;
 
     hash_len = (UINT)(hash_method -> nx_crypto_ICV_size_in_bits >> 3);
+
+    /* Sanity check: hash_buf must be large enough to hold one hash output. */
+    if (hash_len == 0u || hash_len > sizeof(hash_buf))
+    {
+        return(NX_CRYPTO_INVALID_BUFFER_SIZE);
+    }
+
     offset   = 0;
 
     for (counter = 0; offset < mask_length; counter++)

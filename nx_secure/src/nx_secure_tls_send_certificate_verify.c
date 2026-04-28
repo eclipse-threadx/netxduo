@@ -27,7 +27,7 @@
 #endif /* NX_SECURE_ENABLE_DTLS */
 
 #ifndef NX_SECURE_DISABLE_X509
-static UCHAR handshake_hash[64 + 34 + 32]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256. */
+static UCHAR handshake_hash[64 + 34 + 64]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256/384/512. */
 static UCHAR _nx_secure_padded_signature[600];
 
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
@@ -270,18 +270,21 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
              NX_SECURE_MEMCPY(&handshake_hash[64], server_context, 34); /* Use case of memcpy is verified. */
          }
 
-         /* Copy in transcript hash. */
-         NX_SECURE_MEMCPY(&handshake_hash[64 + 34], transcript_hash, 32); /* Use case of memcpy is verified. */
-
-         handshake_hash_length = 130;
-
-
-         /* Generate a hash of the data we just produced. */
-         /* Use SHA-256 for now... */
+         /* Determine hash method and transcript hash length before copying.
+            hash_method drives the transcript hash size: 32 (SHA-256), 48 (SHA-384), 64 (SHA-512). */
          hash_method = crypto_methods -> nx_secure_x509_hash_method;
 
          metadata = tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch;
          metadata_size = tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch_size;
+
+         {
+         UINT transcript_hash_len = (UINT)(hash_method -> nx_crypto_ICV_size_in_bits >> 3);
+
+         /* Copy in transcript hash — length depends on negotiated hash algorithm. */
+         NX_SECURE_MEMCPY(&handshake_hash[64 + 34], transcript_hash, transcript_hash_len); /* Use case of memcpy is verified. */
+
+         handshake_hash_length = 64u + 34u + transcript_hash_len;
+         }
 
 
          if (hash_method -> nx_crypto_init)
