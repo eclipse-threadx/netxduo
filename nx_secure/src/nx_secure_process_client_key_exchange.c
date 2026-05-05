@@ -184,6 +184,10 @@ UINT                                private_key_length;
                 return NX_INVALID_PACKET;
             }
             tls_credentials -> nx_secure_tls_remote_psk_id_size = ((packet_buffer[0] << 8) | packet_buffer[1]);
+            if (tls_credentials -> nx_secure_tls_remote_psk_id_size > NX_SECURE_TLS_MAX_PSK_ID_SIZE)
+            {
+                return NX_SIZE_ERROR;
+            }
             NX_SECURE_MEMCPY(tls_credentials -> nx_secure_tls_remote_psk_id, &packet_buffer[2], tls_credentials -> nx_secure_tls_remote_psk_id_size);
 
             status = _nx_secure_generate_premaster_secret(ciphersuite, protocol_version, tls_key_material, tls_credentials,
