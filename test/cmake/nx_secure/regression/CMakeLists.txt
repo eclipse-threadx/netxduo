@@ -13,6 +13,7 @@ set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_finished_hash_generate_coverage_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_generate_keys_coverage_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_generate_premaster_secret_coverage_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_psk_identity_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_handshake_hash_init_coverage_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_ecc_generate_keys_coverage_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_session_renegotiate_coverage_test.c
