@@ -259,7 +259,7 @@ UINT status;
     ecdhe_data -> nx_secure_tls_ecdhe_private_key[0] = 1;
     ecdhe_data -> nx_secure_tls_ecdhe_private_key_length = 1;
 
-    groups[0] = NX_CRYPTO_EC_SECP256R1;
+    groups[0] = (USHORT)NX_CRYPTO_EC_SECP256R1;
     curves[0] = &crypto_method_test_curve;
     ecc.nx_secure_tls_ecc_supported_groups = groups;
     ecc.nx_secure_tls_ecc_supported_groups_count = 1;

@@ -99,6 +99,66 @@ UINT i;
 
     return(NX_SECURE_TLS_NO_MATCHING_PSK);
 }
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_secure_tls_client_psk_save                      PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Eclipse ThreadX Contributors                                        */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function saves the PSK store entry selected by the server      */
+/*    identity hint so the client sends the matching identity in          */
+/*    ClientKeyExchange.                                                  */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    tls_credentials                       TLS credentials               */
+/*    psk_store_index                       Selected PSK store index      */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    tx_mutex_get                          Get TLS protection            */
+/*    tx_mutex_put                          Release TLS protection        */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_secure_generate_premaster_secret  Generate pre-master secret    */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_secure_tls_client_psk_save(NX_SECURE_TLS_CREDENTIALS *tls_credentials, UINT psk_store_index)
+{
+UINT status;
+
+    /* Get the protection. */
+    tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
+
+    if (psk_store_index < tls_credentials -> nx_secure_tls_psk_count)
+    {
+        NX_SECURE_MEMCPY(&tls_credentials -> nx_secure_tls_client_psk,
+                         &tls_credentials -> nx_secure_tls_psk_store[psk_store_index],
+                         sizeof(NX_SECURE_TLS_PSK_STORE)); /* Use case of memcpy is verified. */
+        status = NX_SUCCESS;
+    }
+    else
+    {
+        status = NX_SECURE_TLS_NO_MATCHING_PSK;
+    }
+
+    /* Release the protection. */
+    tx_mutex_put(&_nx_secure_tls_protection);
+
+    return(status);
+}
 #endif
 
 /**************************************************************************/
@@ -157,6 +217,7 @@ UINT                       status = NX_SECURE_TLS_SUCCESS;
 UCHAR                     *psk_data;
 UINT                       psk_length;
 UINT                       index;
+UINT                       psk_store_index;
 #endif
 #if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 NX_SECURE_X509_CERT       *server_certificate;
@@ -214,7 +275,11 @@ UINT					   pre_master_secret_size;
                 /* Client has to search for the PSK based on the identity hint. */
                 status = _nx_secure_tls_psk_find(tls_credentials, &psk_data, &psk_length,
                                                  tls_credentials -> nx_secure_tls_remote_psk_id,
-                                                 tls_credentials -> nx_secure_tls_remote_psk_id_size, NX_NULL);
+                                                 tls_credentials -> nx_secure_tls_remote_psk_id_size, &psk_store_index);
+                if (status == NX_SUCCESS)
+                {
+                    status = _nx_secure_tls_client_psk_save(tls_credentials, psk_store_index);
+                }
             }
 
     		if (status != NX_SUCCESS)
@@ -382,8 +447,14 @@ UINT					   pre_master_secret_size;
         {
             /*  Client has to search for the PSK based on the identity hint. */
             status = _nx_secure_tls_psk_find(tls_credentials, &psk_data, &psk_length, tls_credentials -> nx_secure_tls_remote_psk_id,
-                                             tls_credentials -> nx_secure_tls_remote_psk_id_size, NX_NULL);
+                                             tls_credentials -> nx_secure_tls_remote_psk_id_size, &psk_store_index);
 
+            if (status != NX_SUCCESS)
+            {
+                return(status);
+            }
+
+            status = _nx_secure_tls_client_psk_save(tls_credentials, psk_store_index);
             if (status != NX_SUCCESS)
             {
                 return(status);
