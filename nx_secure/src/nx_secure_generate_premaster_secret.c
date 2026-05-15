@@ -114,7 +114,7 @@ UINT					   pre_master_secret_size;
 #if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
     if (ciphersuite -> nx_secure_tls_public_cipher -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_ECDHE)
     {
-    #ifdef NX_SECURE_ENABLE_PSK_CIPHERSUITES    
+    #ifdef NX_SECURE_ENABLE_PSK_CIPHERSUITES
     	if(ciphersuite->nx_secure_tls_public_auth->nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_PSK)
     	{
     		/* From RFC 5489:
@@ -296,7 +296,7 @@ UINT					   pre_master_secret_size;
             }
             if (psk_length == 0)
             {
-                return(NX_OPTION_ERROR);
+                return(NX_SECURE_TLS_NO_MATCHING_PSK);
             }
         }
         else

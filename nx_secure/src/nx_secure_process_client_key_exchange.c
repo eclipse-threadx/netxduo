@@ -188,6 +188,10 @@ UINT                                private_key_length;
             {
                 return NX_SIZE_ERROR;
             }
+            if (message_length < 2 + tls_credentials -> nx_secure_tls_remote_psk_id_size)
+            {
+                return NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH;
+            }
             NX_SECURE_MEMCPY(tls_credentials -> nx_secure_tls_remote_psk_id, &packet_buffer[2], tls_credentials -> nx_secure_tls_remote_psk_id_size);
 
             status = _nx_secure_generate_premaster_secret(ciphersuite, protocol_version, tls_key_material, tls_credentials,
