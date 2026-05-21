@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -85,7 +86,7 @@ static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SE
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions          PORTABLE C      */
-/*                                                           6.2.1        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -124,23 +125,6 @@ static UINT _nx_secure_tls_send_clienthello_sec_reneg_extension(NX_SECURE_TLS_SE
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello       Send TLS ClientHello          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yajun Xia                Modified comment(s),          */
-/*                                            added exception case,       */
-/*                                            resulting in version 6.1.11 */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            x509 is disabled,           */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_clienthello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -316,17 +300,6 @@ UINT   status;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions                          */
 /*                                          Send TLS ClientHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            removed unused code,        */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_DISABLE_X509
@@ -532,7 +505,7 @@ UCHAR sig_algo = 0;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_supported_versions_extension        */
 /*                                                        PORTABLE C      */
-/*                                                           6.2.1        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -562,17 +535,6 @@ UCHAR sig_algo = 0;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions                          */
 /*                                          Send TLS ClientHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  03-08-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -672,7 +634,7 @@ INT    i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_key_share_extension PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -702,15 +664,6 @@ INT    i;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions                          */
 /*                                          Send TLS ClientHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -820,7 +773,7 @@ USHORT named_curve;
     packet_buffer[offset + 1] = (UCHAR)(ext & 0x00FF);
     offset += 2;
     
-    /* Add Total Length (2 bytes) and List length (2 bytes) to packet after we 
+    /* Add Total Length (2 bytes) and List length (2 bytes) to packet after we
        fill in the key data. */
     length_offset = offset;
     data_length = 0;
@@ -875,7 +828,7 @@ USHORT named_curve;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_psk_extension       PORTABLE C      */
-/*                                                           6.1.8        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -905,18 +858,6 @@ USHORT named_curve;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions                          */
 /*                                          Send TLS ClientHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            hash clone and cleanup,     */
-/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -1232,7 +1173,7 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_psk_kem_extension   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1261,14 +1202,6 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions                          */
 /*                                          Send TLS ClientHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -1337,7 +1270,7 @@ USHORT length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_sni_extension       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1368,15 +1301,6 @@ USHORT length;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions                          */
 /*                                          Send TLS ClientHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_SNI_EXTENSION_DISABLED
@@ -1489,7 +1413,7 @@ UINT   data_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_sec_reneg_extension PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1521,16 +1445,6 @@ UINT   data_length;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions                          */
 /*                                          Send TLS ClientHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
@@ -1665,7 +1579,7 @@ UINT   data_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_sec_spf_extensions  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1696,14 +1610,6 @@ UINT   data_length;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions                          */
 /*                                          Send TLS ClientHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE

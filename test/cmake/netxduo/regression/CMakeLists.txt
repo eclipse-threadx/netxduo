@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 cmake_policy(SET CMP0057 NEW)
 
 project(regression_test LANGUAGES C)
@@ -52,7 +52,8 @@ if("-DNX_BSD_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
       ${SOURCE_DIR}/bsd_test/netx_bsd_getaddrinfo_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_getsockname_without_bind_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_rcvbuf_test.c
-      ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_fionread_test.c)
+      ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_fionread_test.c
+      ${SOURCE_DIR}/bsd_test/netx_bsd_select_spurious_event_test.c)
   if("-DNX_BSD_RAW_SUPPORT" IN_LIST ${CMAKE_BUILD_TYPE})
     list(
       APPEND

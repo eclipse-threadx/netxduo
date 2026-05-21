@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -29,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_sha256_init                  PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -59,16 +60,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -109,7 +100,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_init(struct  NX_CRYPTO_METHOD
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_sha256_cleanup               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -133,14 +124,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_init(struct  NX_CRYPTO_METHOD
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_cleanup(VOID *crypto_metadata)
@@ -167,7 +150,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_cleanup(VOID *crypto_metadata
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_hmac_sha256_operation             PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -208,16 +191,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_cleanup(VOID *crypto_metadata
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_sha256_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */

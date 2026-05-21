@@ -338,7 +338,7 @@ NX_PTP_TIME *t1;
          t2 is timestamp of Sync received.
          t3 is timestamp of DelayRequest sent. Also equals client_clock in the test
          t4 is timestamp of DelayRequest in DelayResponse packet.
-         
+
        meanPathDelay between client and server is,
          [(t2-t1)+(t4-t3)]/2
 

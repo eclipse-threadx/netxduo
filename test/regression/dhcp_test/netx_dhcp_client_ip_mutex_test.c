@@ -3,12 +3,12 @@
 /* This is the DHCP Client that will run on both interfaces independently.
    Interface 0 stays bound; interface 1 declines the IP address and tries
    again at the INIT state to get a unique IP address.
- 
+
    Required: NX_MAX_PHYSICAL_INTERFACES >= 2 and NX_DHCP_CLIENT_MAX_INTERFACES >= 2.
    Also NX_DHCP_CLIENT_SEND_ARP_PROBE must be enabled. Requires longer timeout in regression
    test netxtestcontrol.
-  
-   There is one server thread handling DHCP Client messages on both interfaces. 
+
+   There is one server thread handling DHCP Client messages on both interfaces.
 */
 
 

@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -25,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nx_api.h                                            PORTABLE C      */
-/*                                                           6.4.1        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -38,77 +39,6 @@
 /*    definitions are defined in this file. Please note that basic data   */
 /*    type definitions and other architecture-specific information is     */
 /*    contained in the file nx_port.h.                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), fixed    */
-/*                                            ThreadX version check,      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1.2  */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), added    */
-/*                                            PTP timestamp capability,   */
-/*                                            added function to convert   */
-/*                                            string to unsigned integer, */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1.3  */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1.4  */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1.5  */
-/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added functions for base64, */
-/*                                            resulting in version 6.1.6  */
-/*  06-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1.7  */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            supported TCP/IP offload,   */
-/*                                            added new ip filter,        */
-/*                                            added function to convert   */
-/*                                            unsigned integer to string, */
-/*                                            resulting in version 6.1.8  */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added support for getting   */
-/*                                            interface type,             */
-/*                                            resulting in version 6.1.9  */
-/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1.10 */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            added internal ip address   */
-/*                                            change notification,        */
-/*                                            resulting in version 6.1.11 */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            fixed compiler errors when  */
-/*                                            TX_SAFETY_CRITICAL is       */
-/*                                            enabled,                    */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
-/*                                            supported HTTP Proxy,       */
-/*                                            resulting in version 6.2.0  */
-/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.2.1  */
-/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            supported random IP id,     */
-/*                                            resulting in version 6.3.0  */
-/*  12-31-2023     Yajun Xia                Modified comment(s),          */
-/*                                            supported VLAN and generic  */
-/*                                            link layer,                 */
-/*                                            resulting in version 6.4.0  */
-/*  03-01-2024      Tiejun Zhou             Modified comment(s),          */
-/*                                            update version number,      */
-/*                                            resulting in version 6.4.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -524,8 +454,10 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 /* Define basic constants for the NetX TCP/IP Stack.  */
 #define AZURE_RTOS_NETXDUO
 #define NETXDUO_MAJOR_VERSION                    6
-#define NETXDUO_MINOR_VERSION                    4
-#define NETXDUO_PATCH_VERSION                    1
+#define NETXDUO_MINOR_VERSION                    5
+#define NETXDUO_PATCH_VERSION                    0
+#define NETXDUO_BUILD_VERSION                    202601
+#define NETXDUO_HOTFIX_VERSION                   ' '
 
 /* Define the following symbols for backward compatibility */
 #define EL_PRODUCT_NETXDUO
@@ -1237,7 +1169,7 @@ typedef struct NX_IPV6_DEFAULT_ROUTER_ENTRY_STRUCT
 #define NX_HTTP_PROXY_MAX_PASSWORD                 20
 #endif
 
-/* NX_HTTP_PROXY_MAX_AUTHENTICATION is the max length of base64 of "name:password", 
+/* NX_HTTP_PROXY_MAX_AUTHENTICATION is the max length of base64 of "name:password",
    1 bytes for an extra conversion if needed, 2 bytes for pad if needed, 1 byte for null terminator and four byte alignment. */
 #define NX_HTTP_PROXY_MAX_AUTHENTICATION           (((((NX_HTTP_PROXY_MAX_USERNAME + NX_HTTP_PROXY_MAX_PASSWORD  + 1 ) * 4 / 3) + 1 + 2 + 1) / 4 + 1) * 4)
 
@@ -1779,7 +1711,7 @@ typedef struct NX_ARP_STRUCT
 #endif /* NX_DISABLE_IPV4 */
 
 
-/* Determine if the UDP control block has an extension defined. If not, 
+/* Determine if the UDP control block has an extension defined. If not,
    define the extension to whitespace.  */
 
 #ifndef NX_UDP_SOCKET_MODULE_EXTENSION
@@ -1890,14 +1822,14 @@ typedef struct NX_UDP_SOCKET_STRUCT
     VOID        *nx_udp_socket_tcpip_offload_context;
 #endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
-    /* Define the port extension in the UDP socket control block. This 
+    /* Define the port extension in the UDP socket control block. This
        is typically defined to whitespace in nx_port.h.  */
     NX_UDP_SOCKET_MODULE_EXTENSION
     
 } NX_UDP_SOCKET;
 
 
-/* Determine if the TCP control block has an extension defined. If not, 
+/* Determine if the TCP control block has an extension defined. If not,
    define the extension to whitespace.  */
 
 #ifndef NX_TCP_SOCKET_MODULE_EXTENSION
@@ -2195,7 +2127,7 @@ typedef struct NX_TCP_SOCKET_STRUCT
     VOID *nx_tcp_socket_tcpip_offload_context;
 #endif /* NX_ENABLE_TCPIP_OFFLOAD */
 
-    /* Define the port extension in the TCP socket control block. This 
+    /* Define the port extension in the TCP socket control block. This
        is typically defined to whitespace in nx_port.h.  */
     NX_TCP_SOCKET_MODULE_EXTENSION
     
@@ -2225,6 +2157,12 @@ typedef struct NX_TCP_LISTEN_STRUCT
     ULONG       nx_tcp_listen_queue_current;
     NX_PACKET   *nx_tcp_listen_queue_head,
                 *nx_tcp_listen_queue_tail;
+
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+    /* Define the callback function for notifying the host application of
+       a new connect request in the listen queue. */
+    VOID        (*nx_tcp_listen_queue_notify)(struct NX_TCP_LISTEN_STRUCT *listen_ptr);
+#endif
 
     /* Define the link between other TCP listen structures created by the application.  */
     struct NX_TCP_LISTEN_STRUCT
@@ -2490,7 +2428,7 @@ typedef struct NX_IPV6_MULTICAST_STRUCT
 #endif /* NX_ENABLE_IPV6_MULTICAST  */
 
 
-/* Determine if the IP control block has an extension defined. If not, 
+/* Determine if the IP control block has an extension defined. If not,
    define the extension to whitespace.  */
 
 #ifndef NX_IP_MODULE_EXTENSION
@@ -3129,7 +3067,7 @@ typedef struct NX_IP_STRUCT
     UINT        (*nx_ip_packet_filter_extended)(struct NX_IP_STRUCT *ip_ptr, NX_PACKET *packet_ptr, UINT direction);
 #endif /* NX_ENABLE_IP_PACKET_FILTER */
 
-    /* Define the port extension in the IP control block. This 
+    /* Define the port extension in the IP control block. This
        is typically defined to whitespace in nx_port.h.  */
     NX_IP_MODULE_EXTENSION
     

@@ -1,7 +1,7 @@
-/* 
-   This is a small demo of the NetX SNTP Client on the high-performance NetX TCP/IP stack.  
+/*
+   This is a small demo of the NetX SNTP Client on the high-performance NetX TCP/IP stack.
    This demo relies on Thread, NetX and NetX SNTP Client API to execute the Simple Network Time
-   Protocol in unicast and broadcast modes.  
+   Protocol in unicast and broadcast modes.
 
  */
 
@@ -44,7 +44,7 @@ TX_EVENT_FLAGS_GROUP sntp_flags;
 
 #define DEMO_SNTP_UPDATE_EVENT  1
 
-/* Configure the SNTP Client to use IPv6. If not enabled, the 
+/* Configure the SNTP Client to use IPv6. If not enabled, the
    Client will use IPv4.  Note: IPv6 must be enabled in NetX Duo
    for the Client to communicate over IPv6.    */
 #ifdef FEATURE_NX_IPV6
@@ -259,7 +259,7 @@ NXD_ADDRESS client_ip_address;
         return;
     }
 
-     /* Set the host global IP address. We are assuming a 64 
+     /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&client_ip, iface_index, &client_ip_address, prefix, &address_index);
 
@@ -295,7 +295,7 @@ NXD_ADDRESS client_ip_address;
 
     /* Initialize the Client for broadcast mode, no roundtrip calculation required and a broadcast SNTP service. */
 #ifdef USE_IPV6
-    /* Use the duo service to initialize the Client and set IPv6 SNTP all hosts multicast address. 
+    /* Use the duo service to initialize the Client and set IPv6 SNTP all hosts multicast address.
        (Note: This can take either an IPv4 or IPv6 address.)*/
     status = nxd_sntp_client_initialize_broadcast(&demo_sntp_client, &sntp_server_address, NX_NULL);
 #else
@@ -311,10 +311,10 @@ NXD_ADDRESS client_ip_address;
         return;
     }
 
-    /* Set the base time which is approximately the number of seconds since the turn of the last century. 
+    /* Set the base time which is approximately the number of seconds since the turn of the last century.
        If this is not available in SNTP format, the nx_sntp_client_utility_add_msecs_to_ntp_time service
-       can convert milliseconds to fraction.  For how to compute NTP seconds from real time, read the 
-       NetX SNTP User Guide. 
+       can convert milliseconds to fraction.  For how to compute NTP seconds from real time, read the
+       NetX SNTP User Guide.
 
        Otherwise set the base time to zero and set NX_SNTP_CLIENT_IGNORE_MAX_ADJUST_STARTUP to NX_TRUE for
        the SNTP CLient to accept the first time update without applying a minimum or maximum adjustment
@@ -366,7 +366,7 @@ NXD_ADDRESS client_ip_address;
                 /* If this happens repeatedly, consider stopping the SNTP Client thread, picking another
                    SNTP server and resuming the SNTP Client thread task (more details about that in the
                    comments at the end of this function).
-                 
+
                    If SNTP Client configurable parameters are too restrictive, such as Max Adjustment, that may also cause
                    valid server updates to be rejected. Configurable parameters, however, cannot be changed at run time.*/
                  
@@ -399,7 +399,7 @@ NXD_ADDRESS client_ip_address;
         {
 
             /* No SNTP update event.
-             
+
                In the meantime, if we have an RTC we might want to check its notion of time.
                In this demo, we simulate the passage of time on our 'RTC' really just the CPU counter,
                assuming that seconds and milliseconds have previously been set to a base (starting) time
@@ -423,7 +423,7 @@ NXD_ADDRESS client_ip_address;
     }
 
     /* We can stop the SNTP service if for example we think the SNTP server has stopped sending updates.
-     
+
        To restart the SNTP Client, simply call the nx_sntp_client_initialize_unicast or nx_sntp_client_initialize_broadcast
        using another SNTP server IP address as input, and resume the SNTP Client by calling nx_sntp_client_run_unicast or
        nx_sntp_client_run_braodcast. */
@@ -456,10 +456,10 @@ UINT leap_second_handler(NX_SNTP_CLIENT *client_ptr, UINT leap_indicator)
 }
 
 /* This application defined handler for handling a Kiss of Death packet is not
-   required by the SNTP Client. A KOD handler should determine 
+   required by the SNTP Client. A KOD handler should determine
    if the Client task should continue vs. abort sending/receiving time data
    from its current time server, and if aborting if it should remove
-   the server from its active server list. 
+   the server from its active server list.
 
    Note that the KOD list of codes is subject to change. The list
    below is current at the time of this software release. */

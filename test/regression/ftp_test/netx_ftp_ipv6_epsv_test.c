@@ -53,7 +53,7 @@ static void    client_thread_entry(ULONG thread_input);
 static void    thread_server_entry(ULONG thread_input);
 
 
-/* Define server login/logout functions.  These are stubs for functions that would 
+/* Define server login/logout functions.  These are stubs for functions that would
 validate a client login request.   */
 static UINT server_login6(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, NXD_ADDRESS *client_ipduo_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info);
 static UINT server_logout6(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, NXD_ADDRESS *client_ipduo_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info);
@@ -214,7 +214,7 @@ UINT        iface_index, address_index;
         error_counter++;
      }
     
-     /* Set the host global IP address. We are assuming a 64 
+     /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&client_ip, iface_index, &client_ip_address, 64, &address_index);
 
@@ -278,7 +278,7 @@ UINT        iface_index, address_index;
         nx_packet_release(my_packet);
     }
     
-    /* This does not send a command. The data port is closed and the client state set to CONNECTED.  
+    /* This does not send a command. The data port is closed and the client state set to CONNECTED.
        The server initiates closing the data socket connection. */
     status =  nx_ftp_client_file_close(&ftp_client, NX_IP_PERIODIC_RATE);
 
@@ -310,7 +310,7 @@ UINT        iface_index, address_index;
         error_counter++;
     }
     
-    /* This does not send a command. The data port is closed and the client state set to CONNECTED.  
+    /* This does not send a command. The data port is closed and the client state set to CONNECTED.
        The server initiates closing the data socket connection. */
     status =  nx_ftp_client_file_close(&ftp_client, NX_IP_PERIODIC_RATE);
 
@@ -392,7 +392,7 @@ UINT    iface_index, address_index;
         error_counter++;
      }
 
-    /* Set the host global IP address. We are assuming a 64 
+    /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&server_ip, iface_index, &server_ip_address, 64, &address_index);
 

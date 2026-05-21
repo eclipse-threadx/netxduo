@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -29,7 +30,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_wildcard_compare                    PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -61,17 +62,6 @@
 /*    _nx_secure_x509_common_name_dns_check Check Common Name by DNS      */
 /*    _nx_secure_x509_subject_alt_names_find                              */
 /*                                          Find subject alt names        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            removed dependency on TLS,  */
-/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 INT _nx_secure_x509_wildcard_compare(const UCHAR *dns_name, UINT dns_name_len,

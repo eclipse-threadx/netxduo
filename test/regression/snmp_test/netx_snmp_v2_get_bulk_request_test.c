@@ -1,7 +1,7 @@
 /* This NetX test concentrates on the SNMPv2 get bulk request.  The first exchange is to 'contact'
    the SNMP agent. Then the manager makes a bulk request.  The test is successful if the internal
    statistics show the correct number of variables requested, requests received, and bulk responses
-   sent, and there are no internal errors.  This does not require packet chaining. 
+   sent, and there are no internal errors.  This does not require packet chaining.
  */
 
 #include   "tx_api.h"
@@ -373,7 +373,7 @@ static void  snmp_test_initialize()
      /* Contact - no security*/
      snmp_query[0].snmp_query_pkt_data = &get_next_request_packet[0];
      snmp_query[0].snmp_query_pkt_size = get_next_request_size;
-     //snmp_query[1].snmp_query_pkt_data = &get_bulk_request_packet[0];  
+     //snmp_query[1].snmp_query_pkt_data = &get_bulk_request_packet[0];
      //snmp_query[1].snmp_query_pkt_size = get_bulk_request_size;
 
 
@@ -568,7 +568,7 @@ UINT    status;
 /* Create an error code if matching user not found. */
 #define USER_NOT_FOUND 1
 
-/* Define the username callback routine routine. Usernames should be 
+/* Define the username callback routine routine. Usernames should be
    associated with permissions (public or private string) and what version
    of SNMP the user is configured for. The username callback should verify
    the incoming username MIB access permissions.  */

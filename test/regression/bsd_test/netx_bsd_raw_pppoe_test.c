@@ -1,8 +1,8 @@
 /* This NetX test concentrates on the BSD RAW Packet blocking operation for PPPoE traffic.  */
-/* This test case covers the following scenarios: 
-   Be able to create socket_1 of PPPOE_SESS for receiving SESS traffice, 
+/* This test case covers the following scenarios:
+   Be able to create socket_1 of PPPOE_SESS for receiving SESS traffice,
    socket_2 for receiving PPPOE_DISC traffic
-   socket_3 for sending either PPPOE_DISC or PPPOE_SESS traffic. 
+   socket_3 for sending either PPPOE_DISC or PPPOE_SESS traffic.
 */
 
 

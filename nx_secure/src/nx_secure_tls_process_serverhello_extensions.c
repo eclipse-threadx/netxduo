@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -60,7 +61,7 @@ static UINT _nx_secure_tls_proc_serverhello_ecjpake_key_kp_pair(NX_SECURE_TLS_SE
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello_extensions       PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -97,18 +98,6 @@ static UINT _nx_secure_tls_proc_serverhello_ecjpake_key_kp_pair(NX_SECURE_TLS_SE
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_server_handshake       Process ServerHello           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
-/*                                            TLS 1.3 compilation issue,  */
-/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_serverhello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -392,7 +381,7 @@ USHORT                                supported_version = tls_session -> nx_secu
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_serverhello_ecc_point_formats   PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -421,14 +410,6 @@ USHORT                                supported_version = tls_session -> nx_secu
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello_extensions                       */
 /*                                          Process ServerHello extensions*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE
@@ -496,7 +477,7 @@ UINT                                  offset;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_serverhello_ecjpake_key_kp_pair PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -525,14 +506,6 @@ UINT                                  offset;
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello_extensions                       */
 /*                                          Process ServerHello extensions*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE
@@ -587,7 +560,7 @@ NX_CRYPTO_METHOD                     *crypto_method;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_serverhello_sec_reneg_extension PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -617,15 +590,6 @@ NX_CRYPTO_METHOD                     *crypto_method;
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello_extensions                       */
 /*                                          Process ServerHello extensions*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
@@ -761,7 +725,7 @@ INT    compare_value;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_proc_serverhello_keyshare_extension  PORTABLE C      */
-/*                                                           6.2.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -789,21 +753,6 @@ INT    compare_value;
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello_extensions                       */
 /*                                          Process ServerHello extensions*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), update   */
-/*                                            ECC find curve method,      */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), removed  */
-/*                                            public key format checking, */
-/*                                            resulting in version 6.1.11 */
-/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
-/*                                            updated parameters list,    */
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -1001,7 +950,7 @@ NX_SECURE_TLS_ECC *ecc_info;
 /*                                                                        */
 /*    _nx_secure_tls_proc_serverhello_supported_versions_extension        */
 /*                                                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1031,14 +980,6 @@ NX_SECURE_TLS_ECC *ecc_info;
 /*                                                                        */
 /*    _nx_secure_tls_process_serverhello_extensions                       */
 /*                                          Process ServerHello extensions*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_proc_serverhello_supported_versions_extension(NX_SECURE_TLS_SESSION *tls_session,

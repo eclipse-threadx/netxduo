@@ -1,6 +1,6 @@
 /* If the client includes a list fo parameters in a DHCPDISCOVER message, it MUST include that list in any subsequent DHCPREQUEST messsages.
  * rfc 2131, page 21, 3.5 Client parameters in DHCP
- * 
+ *
  */
 #include   "tx_api.h"
 #include   "nx_api.h"

@@ -1,10 +1,10 @@
-/* 
-   This is a small demo of POP3 Client on the high-performance NetX TCP/IP stack.  
-   This demo relies on Thread, NetX and POP3 Client API to conduct 
-   a POP3 mail session. 
+/*
+   This is a small demo of POP3 Client on the high-performance NetX TCP/IP stack.
+   This demo relies on Thread, NetX and POP3 Client API to conduct
+   a POP3 mail session.
 
    The POP3 'server' is a TCP socket that sends responses and downloads 2 mail items
-   of three packets each.  
+   of three packets each.
  */
 
 #include  "tx_api.h"
@@ -346,7 +346,7 @@ UCHAR   *free_memory_pointer;
 
     free_memory_pointer =  free_memory_pointer + DEMO_STACK_SIZE;
 
-    /* The demo client username and password is the authentication 
+    /* The demo client username and password is the authentication
        data used when the server attempts to authentication the client. */
 
     /* Create Client packet pool. */
@@ -532,7 +532,7 @@ NX_PACKET   *packet_ptr;
     /* Let the IP instance get initialized with driver parameters. */
     tx_thread_sleep(10);
 
-    /* Create a NetX POP3 Client instance with no byte or block memory pools. 
+    /* Create a NetX POP3 Client instance with no byte or block memory pools.
        Note that it uses its password for its APOP shared secret. */
     status =  nx_pop3_client_create(&pop3_client,
                                     NX_FALSE /* if true, enables Client to send APOP command to authenticate */,
@@ -563,7 +563,7 @@ NX_PACKET   *packet_ptr;
         /* This submits a RETR request and gets the mail message size. */
         status = nx_pop3_client_mail_item_get(&pop3_client, mail_item, &mail_item_size);
 
-        /* Loop to get the next mail message packet until the last mail item 
+        /* Loop to get the next mail message packet until the last mail item
            packet is downloaded. */
         do
         {

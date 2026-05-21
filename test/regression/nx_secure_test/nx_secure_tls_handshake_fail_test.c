@@ -1,7 +1,7 @@
 /* 14.19 TCP MUST include an SWS avoidance algorithm in the receiver when effective send MSS < (1/ 2)*RCV_BUFF.  */
 
 /*  Procedure
-    1.Connection successfully  
+    1.Connection successfully
     2.First Client sends 40 data to Server, then check if the last_sent changed
     3.Then Client sends more 20 data to Server, also check if the last_sent changed
     4.If the last_sent changed, the SWS avoidance algorithm has not been used.  */
@@ -795,7 +795,7 @@ UINT       status;
 /* Timestamp function - should return Unix time formatted 32-bit integer. */
 static ULONG tls_timestamp_function(void)
 {
-    // Return a fixed epoch - 1500939067 seconds = 07/24/2017 @ 11:31pm (UTC) 
+    // Return a fixed epoch - 1500939067 seconds = 07/24/2017 @ 11:31pm (UTC)
     // 1541030400 = 0x5BDA4200L = 11/01/2018 @ 12:00AM (UTC)
     return(0x5BDA4200L); 
 }

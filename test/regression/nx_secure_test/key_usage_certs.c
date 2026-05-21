@@ -1,4 +1,4 @@
-/*  
+/*
 
 KeyUsage Test PKI
 - root CA has correct KeyUsage - Certificate Sign, CRL Sign
@@ -12,14 +12,14 @@ KeyUsage Test PKI
 - ICA CRL should be rejected because ICA has improper key usage
      - ICA CRL fails verification at KeyUsage Check
 
-PKI structure 
+PKI structure
 root_ca_cert - root_crl  # Good - Correct KeyUsage
      |  \
      |   revoked_cert # Good - Correct KeyUsage in root CA, but revoked in CRL
      |
-  ica_cert - ica_crl  # BAD - wrong Key Usage 
+  ica_cert - ica_crl  # BAD - wrong Key Usage
      |
-device_cert # Bad - wrong key usage in ICA 
+device_cert # Bad - wrong key usage in ICA
 
 */
 
@@ -143,7 +143,7 @@ unsigned int ica_crl_der_len = 443;
 
 
 /* "device_cert" not revoked */
-/*  
+/*
 unsigned char ica_crl_der[] = {
   0x30, 0x82, 0x01, 0xa1, 0x30, 0x81, 0x8a, 0x02, 0x01, 0x01, 0x30, 0x0d,
   0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0b, 0x05,

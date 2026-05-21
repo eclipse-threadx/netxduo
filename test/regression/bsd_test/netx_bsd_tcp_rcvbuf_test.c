@@ -718,7 +718,7 @@ int                ret;
 #endif
 
     tx_semaphore_get(&sema_0, 5 * NX_IP_PERIODIC_RATE);
-    /* Now open another socket and attempt to connect to the correct remote 
+    /* Now open another socket and attempt to connect to the correct remote
        host but an unexpected port so we expect an unsuccessful connections. */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd < 0)
@@ -737,7 +737,7 @@ int                ret;
     if(ret < 0)
         error_counter++;
     
-    /* Now open another socket and attempt to connect to the an incorrect 
+    /* Now open another socket and attempt to connect to the an incorrect
        remote host so we expect an unsuccessful connections. */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd < 0)

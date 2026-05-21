@@ -1,4 +1,4 @@
-/* 12.27 TCP MUST ignore MSS option in data segment When using TCP over IPv6, 
+/* 12.27 TCP MUST ignore MSS option in data segment When using TCP over IPv6,
    the MSS must be computed as the maximum packet size minus 60 octets.  */
 
 /* Procedure

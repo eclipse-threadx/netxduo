@@ -106,7 +106,7 @@ UINT        status;
     if(status)
         error_counter++;
 
-    /* Create a Link Layer Plus Time DUID for the DHCPv6 Client. Set time ID field 
+    /* Create a Link Layer Plus Time DUID for the DHCPv6 Client. Set time ID field
        to NULL; the DHCPv6 Client API will supply one. */
     status = nx_dhcpv6_create_client_duid(&dhcp_client, NX_DHCPV6_DUID_TYPE_LINK_TIME, 
             NX_DHCPV6_HW_TYPE_IEEE_802, 0);

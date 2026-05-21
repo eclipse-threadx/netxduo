@@ -894,7 +894,7 @@ UCHAR test_iv[16];
     nx_packet_release(send_packet);
     EXPECT_EQ(NX_SUCCESS, status);
 
-    /* No remote endpoint certificate is allocated earlier. 
+    /* No remote endpoint certificate is allocated earlier.
        As of 5.12, it is OK if no certificates are allocated - _nx_secure_tls_process_remote_certificate will
        instead allocate certificate space from the packet reassembly buffer. This function as tested now should
        return an incorrect message length error. */

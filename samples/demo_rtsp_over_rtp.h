@@ -72,7 +72,7 @@ extern TX_EVENT_FLAGS_GROUP demo_test_events;
    2. DEMO_VIDEO_DATA_READ could be its default value NX_NULL if user does not implement video data reading and transmitting.
       Otherwise, user MUST! define a callback with the prototype "UINT (*demo_video_data_read_callback)(ULONG *ntp_msw, ULONG *ntp_lsw, UCHAR **data_ptr, ULONG *data_size)"
       and implement the callback function.
-      Both MJPEG and H264 video formats are frame based, so the callback function should return a complete frame data each time. 
+      Both MJPEG and H264 video formats are frame based, so the callback function should return a complete frame data each time.
 
    3. DEMO_AUDIO_DATA_READ could be its default value NX_NULL if user does not implement audio data reading and transmitting.
       Otherwise, user MUST! define a callback with the prototype "UINT (*demo_audio_data_read_callback)(ULONG *ntp_msw, ULONG *ntp_lsw, UCHAR **data_ptr, ULONG *data_size)"

@@ -14,3 +14,4 @@ compile_commands.json
 CTestTestfile.cmake
 .run.sh
 
+scripts/openssl*

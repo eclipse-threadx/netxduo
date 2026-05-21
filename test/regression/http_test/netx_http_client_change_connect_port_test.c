@@ -324,7 +324,7 @@ NX_PACKET       *send_packet;
     /* wait for the server to set up */
     tx_thread_sleep(20);
 
-    /* Format the RAM disk - the memory for the RAM disk was setup in 
+    /* Format the RAM disk - the memory for the RAM disk was setup in
       tx_application_define above.  This must be set up before the client(s) start
       sending requests. */
     status = fx_media_format(&ram_disk, 
@@ -369,11 +369,11 @@ NX_PACKET       *send_packet;
     /* Upload the 1st file to the server domain. */
 #ifdef __PRODUCT_NETXDUO__
 
-    status =  nxd_http_client_put_start(&my_client, &server_ip_address, "http://www.abc.com/client_test.htm", 
+    status =  nxd_http_client_put_start(&my_client, &server_ip_address, "http://www.abc.com/client_test.htm",
                                             "name", "password", 103, 3 * NX_IP_PERIODIC_RATE);
 #else
 
-    status =  nx_http_client_put_start(&my_client, server_ip_address, "http://www.abc.com/client_test.htm", 
+    status =  nx_http_client_put_start(&my_client, server_ip_address, "http://www.abc.com/client_test.htm",
                                        "name", "password", 103, 3 * NX_IP_PERIODIC_RATE);
 #endif
 
@@ -432,11 +432,11 @@ NX_PACKET       *send_packet;
     /* Send the 1st GET request to the server. */  
 #ifdef __PRODUCT_NETXDUO__ 
 
-    status =  nxd_http_client_get_start(&my_client, &server_ip_address, "http://www.abc.com/client_test.htm", 
+    status =  nxd_http_client_get_start(&my_client, &server_ip_address, "http://www.abc.com/client_test.htm",
                                         NX_NULL, 0, "name", "password", 100);
 #else
 
-    status =  nx_http_client_get_start(&my_client, server_ip_address, "http://www.abc.com/client_test.htm", 
+    status =  nx_http_client_get_start(&my_client, server_ip_address, "http://www.abc.com/client_test.htm",
                                        NX_NULL, 0, "name", "password", 100);
 #endif  /* USE_DUO */
 

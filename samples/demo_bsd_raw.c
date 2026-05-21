@@ -1,4 +1,4 @@
-/* This is a small demo of the high-performance BSD socket using the NetX Duo TCP/IP stack.  This 
+/* This is a small demo of the high-performance BSD socket using the NetX Duo TCP/IP stack.  This
    demo concentrates on raw packet sending and receiving using a simulated Ethernet driver.  */
 
 #include   "tx_api.h"

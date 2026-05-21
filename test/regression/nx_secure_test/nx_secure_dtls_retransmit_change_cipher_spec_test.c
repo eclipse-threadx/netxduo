@@ -1,5 +1,5 @@
 /* This test concentrates on DTLS retransmit ChangeCipherSpec message.  */
-/* RFC 6347, section 4.2.5. 
+/* RFC 6347, section 4.2.5.
    As with TLS, the ChangeCipherSpec message is not technically a
    handshake message but MUST be treated as part of the same flight as
    the associated Finished message for the purposes of timeout and

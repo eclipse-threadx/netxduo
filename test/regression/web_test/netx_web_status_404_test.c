@@ -78,8 +78,8 @@ static UINT loop = 1;
 extern UINT _nx_web_http_client_receive(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET **packet_ptr, ULONG wait_option);
 extern UINT _nx_web_http_client_send(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, ULONG wait_option);
 
-/* This is a HTTP get packet captured by wireshark. 
- * curl 192.168.0.123/aaa.index 
+/* This is a HTTP get packet captured by wireshark.
+ * curl 192.168.0.123/aaa.index
  * */
 static char pkt[] = {
     0x00, 0x11, 0x22, 0x33, 0x44, 0x57, 0xb8, 0xca, /* .."3DW.. */
@@ -377,7 +377,7 @@ UINT            server_port = NX_WEB_HTTP_SERVER_PORT;
                     512,                          // Sector size
                     8,                            // Sectors per cluster
                     1,                            // Heads
-                    1);                           // Sectors per track   
+                    1);                           // Sectors per track
     
     /* Open the RAM disk.  */
     status = fx_media_open(&ram_disk, "RAM DISK", _fx_ram_driver, ram_disk_memory, media_memory, sizeof(media_memory)) ;

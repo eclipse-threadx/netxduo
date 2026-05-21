@@ -198,7 +198,7 @@ UINT        packet_available;
 
 
 
-    /* Test _nx_igmp_multicast_interface_leave_internal 
+    /* Test _nx_igmp_multicast_interface_leave_internal
      173         [ -  + ]:         42 :                 if (ip_ptr -> nx_ip_igmp_router_version == NX_IGMP_HOST_VERSION_1)
      174                 :            :                 {
      177                 :          0 :                     tx_mutex_put(&(ip_ptr -> nx_ip_protection));

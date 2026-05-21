@@ -142,7 +142,7 @@ UINT        max;
     /* Setup driver callback. */
     advanced_packet_process_callback = packet_process;
 
-    /* 1. Do not set low watermark or receive queue maximum. 
+    /* 1. Do not set low watermark or receive queue maximum.
      * All packets in pool_1 should be queued in TCP socket.
      * */
     verify_tcp(0, POOL_1_COUNT, 0, POOL_1_COUNT);

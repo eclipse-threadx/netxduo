@@ -1,7 +1,7 @@
 /* This NetX test concentrates on the ICMPv6 ping operation.  */
 /*
   thread 0 send ICMPv6 Echo Request to the existent IP address IP_ADDRESS(1, 2, 3, 5),
-  thread 1 send ICMPv6 Echo Request to the existent IP address IP_ADDRESS(1, 2, 3, 5),                                           
+  thread 1 send ICMPv6 Echo Request to the existent IP address IP_ADDRESS(1, 2, 3, 5),
   Delay the first ICMPv6 Echo Reply in driver, let thread 1 first receive the ICMPv6 Echo Reply before thread 0 receive the ICMPv6 Echo Reply.
 */
 

@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -25,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_crypto_const.h                                  PORTABLE C       */
-/*                                                           6.2.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -33,25 +34,6 @@
 /*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This file defines the NetX Security Encryption component.           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), added    */
-/*                                            new constants,              */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed FIPS symbol to      */
-/*                                            self-test,                  */
-/*                                            resulting in version 6.1.7  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), added    */
-/*                                            x25519 and x448 curves,     */
-/*                                            resulting in version 6.1.11 */
-/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
-/*                                            EC curve type macro,        */
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -311,7 +293,7 @@ extern   "C" {
 typedef UINT NX_CRYPTO_KEY_SIZE;
 
 #define NX_CRYPTO_SUCCESS                        0x0           /* Function returned successfully. */
-#define NX_CRYPTO_INVALID_LIBRARY                0x20001       /* Crypto library has not been initialized or failed 
+#define NX_CRYPTO_INVALID_LIBRARY                0x20001       /* Crypto library has not been initialized or failed
                                                                   the Power On Self Test (POST). */
 #define NX_CRYPTO_UNSUPPORTED_KEY_SIZE           0x20002       /* Unsupported key size.  */
 #define NX_CRYPTO_AUTHENTICATION_FAILED          0x20003       /* Authentication failed.  */

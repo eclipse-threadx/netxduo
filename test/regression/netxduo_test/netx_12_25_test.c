@@ -3,7 +3,7 @@
 
 /* Procedure
    1. Client send a SYN to Server.
-   2. Use packet_process function to receive and deal with the SYN packet, 
+   2. Use packet_process function to receive and deal with the SYN packet,
       then change the MSS to 536.
    3. Use packet_process function to receive and deal with the SYN packet,
       Judge the MSS options.  */

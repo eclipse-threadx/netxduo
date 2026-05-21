@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -25,7 +26,7 @@
 /*  COMPONENT DEFINITION                                   RELEASE        */
 /*                                                                        */
 /*    nx_secure_tls.h                                     PORTABLE C      */
-/*                                                           6.4.1        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -34,81 +35,6 @@
 /*                                                                        */
 /*    This file defines all service prototypes and data structure         */
 /*    definitions for TLS implementation.                                 */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), and      */
-/*                                            fixed race condition for    */
-/*                                            multithread transmission,   */
-/*                                            supported chained packet,   */
-/*                                            priority ciphersuite and ECC*/
-/*                                            curve logic, updated product*/
-/*                                            constants, fixed compiler   */
-/*                                            warning, fixed renegotiation*/
-/*                                            bug, fixed certificate      */
-/*                                            buffer allocation,          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            updated product constants,  */
-/*                                            improved buffer length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1.3  */
-/*  02-02-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            support for fragmented TLS  */
-/*                                            Handshake messages,         */
-/*                                            resulting in version 6.1.4  */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1.5  */
-/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1.6  */
-/*  06-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1.7  */
-/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            hash clone and cleanup,     */
-/*                                            added state to cleanup      */
-/*                                            session cipher,             */
-/*                                            resulting in version 6.1.8  */
-/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            support to disable client   */
-/*                                            initiated renegotiation,    */
-/*                                            resulting in version 6.1.9  */
-/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.1.10 */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            enabled AEAD for TLS 1.3,   */
-/*                                            resulting in version 6.1.11 */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            fixed compiler errors when  */
-/*                                            TX_SAFETY_CRITICAL is       */
-/*                                            enabled, increased default  */
-/*                                            pre-master sec size for PSK,*/
-/*                                            updated alert message for   */
-/*                                            downgrade protection,       */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2022     Yanwu Cai                Modified comment(s), and added*/
-/*                                            custom secret generation,   */
-/*                                            fixed renegotiation when    */
-/*                                            receiving in non-block mode,*/
-/*                                            added function to set packet*/
-/*                                            pool,                       */
-/*                                            resulting in version 6.2.0  */
-/*  10-31-2022     Bo Chen                  Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.3.0  */
-/*  12-31-2022     Bo Chen                  Modified comment(s), and      */
-/*                                            updated product constants,  */
-/*                                            resulting in version 6.4.0  */
-/*  03-01-2024      Tiejun Zhou             Modified comment(s),          */
-/*                                            update version number,      */
-/*                                            resulting in version 6.4.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -172,7 +98,7 @@ extern   "C" {
 #define AZURE_RTOS_NETX_SECURE
 #define NETX_SECURE_MAJOR_VERSION                       6
 #define NETX_SECURE_MINOR_VERSION                       4
-#define NETX_SECURE_PATCH_VERSION                       1
+#define NETX_SECURE_PATCH_VERSION                       3
 
 /* The following symbols are defined for backward compatibility reasons. */
 #define EL_PRODUCT_NETX_SECURE
@@ -223,7 +149,7 @@ extern   "C" {
 /* Configuration macro: disable secure session renegotiation extension (RFC 5746).
    #define NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
  */
-/* Configuration macro: terminate the connection immediately upon failure to receive the 
+/* Configuration macro: terminate the connection immediately upon failure to receive the
    secure renegotiation extension during the initial handshake.
    #define NX_SECURE_TLS_REQUIRE_RENEGOTIATION_EXT
  */
@@ -521,6 +447,8 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
 #define TLS_RSA_WITH_AES_256_GCM_SHA384                    0x009D
 #define TLS_PSK_WITH_AES_128_CBC_SHA256                    0x00AE
 #define TLS_PSK_WITH_AES_128_CCM_8                         0xC0A8
+#define TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA				   0xC035
+#define TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA				   0xC036
 
 /* EC Ciphersuites. */
 #define TLS_ECDH_ECDSA_WITH_NULL_SHA                       0xC001

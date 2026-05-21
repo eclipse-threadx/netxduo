@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -50,7 +51,7 @@ static UINT _nx_crypto_drbg_block_cipher_df(NX_CRYPTO_DRBG *drbg_ptr, UINT input
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_ctr_add_one                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -75,14 +76,6 @@ static UINT _nx_crypto_drbg_block_cipher_df(NX_CRYPTO_DRBG *drbg_ptr, UINT input
 /*                                                                        */
 /*    _nx_crypto_drbg_generate                                            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_drbg_ctr_add_one(UCHAR *ctr)
 {
@@ -106,7 +99,7 @@ INT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_update                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -129,16 +122,6 @@ INT i;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), verified */
-/*                                            memcpy use cases, disabled  */
-/*                                            unaligned access by default,*/
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static UINT _nx_crypto_drbg_update(NX_CRYPTO_DRBG *drbg_ptr, UCHAR *provided_data)
@@ -237,7 +220,7 @@ VOID *handler = NX_CRYPTO_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_instantiate                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -260,16 +243,6 @@ VOID *handler = NX_CRYPTO_NULL;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), verified */
-/*                                            memcpy use cases, disabled  */
-/*                                            unaligned access by default,*/
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_drbg_instantiate(NX_CRYPTO_DRBG *drbg_ptr,
@@ -378,7 +351,7 @@ UINT entropy_len;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_reseed                              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -401,16 +374,6 @@ UINT entropy_len;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), verified */
-/*                                            memcpy use cases, disabled  */
-/*                                            unaligned access by default,*/
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_drbg_reseed(NX_CRYPTO_DRBG *drbg_ptr,
@@ -505,7 +468,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_generate                            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -528,15 +491,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_drbg_generate(NX_CRYPTO_DRBG *drbg_ptr,
@@ -705,7 +659,7 @@ VOID *handler = NX_CRYPTO_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_drbg_block_cipher_df                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -728,16 +682,6 @@ VOID *handler = NX_CRYPTO_NULL;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            and updated constants,      */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static UINT _nx_crypto_drbg_block_cipher_df(NX_CRYPTO_DRBG *drbg_ptr, UINT input_len,
@@ -920,7 +864,7 @@ VOID *handler = NX_CRYPTO_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_drbg_init                         PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -950,16 +894,6 @@ VOID *handler = NX_CRYPTO_NULL;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -1000,7 +934,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_drbg_cleanup                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1024,14 +958,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_cleanup(VOID *crypto_metadata)
@@ -1058,7 +984,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_drbg_operation                    PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1094,16 +1020,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_drbg_cleanup(VOID *crypto_metadata)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_drbg_operation(UINT op,

@@ -1,7 +1,7 @@
-/* 
-   This is a small demo of the NetX SMTP Client on the high-performance NetX TCP/IP stack.  
-   This demo relies on Thread, NetX and SMTP Client API to perform simple SMTP mail 
-   transfers in an SMTP client application to an SMTP mail server.  
+/*
+   This is a small demo of the NetX SMTP Client on the high-performance NetX TCP/IP stack.
+   This demo relies on Thread, NetX and SMTP Client API to perform simple SMTP mail
+   transfers in an SMTP client application to an SMTP mail server.
  */
 /* Note: This demo works for IPv4 only. */
 
@@ -25,7 +25,7 @@
                                "reports using the most universal Internet application, email.\r\n"
 
 
-/* See the NetX SMTP Client User Guide for how to set the authentication type.  
+/* See the NetX SMTP Client User Guide for how to set the authentication type.
    The most common authentication type is PLAIN. */
 #define CLIENT_AUTHENTICATION_TYPE  NX_SMTP_CLIENT_AUTH_PLAIN
 
@@ -74,11 +74,11 @@ CHAR    *free_memory_pointer;
     /* Create SMTP Client packet pool. This is only for transmitting packets to the server.
        It need not be a separate packet pool than the IP default packet pool but for more efficient
        resource use, we use two different packet pools because the CLient SMTP messages
-       generally require more payload than IP control packets. 
+       generally require more payload than IP control packets.
 
-       Packet payload depends on the SMTP Client application requirements.  Size of packet payload 
-       must include IP and TCP headers. For IPv6 connections, IP and TCP header data is 60 bytes. For IPv4  
-       IP and TCP header data is 40 bytes (not including TCP options). 
+       Packet payload depends on the SMTP Client application requirements.  Size of packet payload
+       must include IP and TCP headers. For IPv6 connections, IP and TCP header data is 60 bytes. For IPv4
+       IP and TCP header data is 40 bytes (not including TCP options).
     */
 
     status |=  nx_packet_pool_create(&client_packet_pool, "SMTP Client Packet Pool", 
@@ -165,7 +165,7 @@ NXD_ADDRESS server_ip_address;
     server_ip_address.nxd_ip_version = NX_IP_VERSION_V4;
     server_ip_address.nxd_ip_address.v4 = SERVER_IP_ADDRESS;
 
-    /* The demo client username and password is the authentication 
+    /* The demo client username and password is the authentication
        data used when the server attempts to authentication the client. */
 
     status =  nxd_smtp_client_create(&demo_client, &client_ip, &client_packet_pool,

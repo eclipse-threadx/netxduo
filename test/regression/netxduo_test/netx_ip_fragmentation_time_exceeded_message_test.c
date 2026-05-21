@@ -1,13 +1,13 @@
 /* This NetX test concentrates on ICMP Time Exceeded Message for IP fragmentation.  */
 /* Requirement: __PRODUCT_NETXDUO__ is defined, NX_DISABLE_ICMPV4_ERROR_MESSAGE is not defined. NX_DISABLE_FRAGMENTATION is not defined. */
 /* Test sequence:
- * 1. ip_0 send ICMP Ping with 600 bytes to ip_2. It is fragmented into three packets.  
- * 2. Delay 5 seconds for second fragmentation packet of ip_0 to update the timeout of fragmentation to let ip_1 fragmentation timeout first. 
+ * 1. ip_0 send ICMP Ping with 600 bytes to ip_2. It is fragmented into three packets.
+ * 2. Delay 5 seconds for second fragmentation packet of ip_0 to update the timeout of fragmentation to let ip_1 fragmentation timeout first.
  * 3. Delay NX_IP_TIME_TO_LIVE + 4 seconds for third fragmentation  of ip_0, send the third fragmentation before ip_0 fragmentation timeout, after ip_1 fragmentation timeout.
- * 4. ip_1 send ICMP Ping with 600 bytes to ip_2. It is fragmented into three packets. 
- * 5. Discard the third fragmentation packet of ip_1 to let ip_1 fragmentation timeout. 
- * 6. Check if ip_1 instance get the fragmentation time exceeded message from ip_2 instance. 
- * 7. Check if ip_1 instance get the response from ip_2 instance.              
+ * 4. ip_1 send ICMP Ping with 600 bytes to ip_2. It is fragmented into three packets.
+ * 5. Discard the third fragmentation packet of ip_1 to let ip_1 fragmentation timeout.
+ * 6. Check if ip_1 instance get the fragmentation time exceeded message from ip_2 instance.
+ * 7. Check if ip_1 instance get the response from ip_2 instance.
  * 7. Check if ip_0 instance get the response from ip_2 instance.
  */
 

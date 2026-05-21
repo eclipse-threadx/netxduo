@@ -4,19 +4,19 @@
    test cases where the NAT table is manually filled in with a variety of
    non TCP and TCP entries.  The non TCP response timeouts use the standard NAT timeout
    defined by NX_NAT_NON_TCP_SESSION_TIMEOUT. The TCP timeouts use the extended timeout
-   NX_NAT_TCP_SESSION_TIMEOUT.  None of the entries should timeout. 
- 
+   NX_NAT_TCP_SESSION_TIMEOUT.  None of the entries should timeout.
+
    Once the table is filled, the TCP client attempts to make a connection on a
    new port to an external host (we don't create the TCP server).
    The outbound SYN packet will require an entry for this outbound packet.
- 
+
    The success case is if NAT removes the oldest non TCP entry and inerts the new
    TCP entry at the head of the list.
- 
+
    Each test case varies with respect to where the oldest entry is to verify
    that the removal of the link leaves the remaining entries properly linked
    and the NAT available list parameters updated.
- 
+
 */
 
 #include   "tx_api.h"

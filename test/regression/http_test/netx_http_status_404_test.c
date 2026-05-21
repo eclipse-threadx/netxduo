@@ -22,8 +22,8 @@ extern void     _fx_ram_driver(FX_MEDIA *media_ptr);
 extern void     _nx_ram_network_driver_1024(NX_IP_DRIVER *driver_req_ptr);
 
 
-/* This is a HTTP get packet captured by wireshark. 
- * curl 192.168.0.123/aaa.index 
+/* This is a HTTP get packet captured by wireshark.
+ * curl 192.168.0.123/aaa.index
  * */
 static char pkt[] = {
     0x00, 0x11, 0x22, 0x33, 0x44, 0x57, 0xb8, 0xca, /* .."3DW.. */
@@ -199,7 +199,7 @@ CHAR            *buffer_ptr;
 NX_PACKET       *recv_packet;
 NX_PACKET       *send_packet;
 
-    /* Format the RAM disk - the memory for the RAM disk was setup in 
+    /* Format the RAM disk - the memory for the RAM disk was setup in
       tx_application_define above.  This must be set up before the client(s) start
       sending requests. */
     status = fx_media_format(&ram_disk, 

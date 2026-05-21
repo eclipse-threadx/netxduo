@@ -474,7 +474,7 @@ static UINT  authentication_check(NX_WEB_HTTP_SERVER *server_ptr, UINT request_t
                                   CHAR *resource, CHAR **name, CHAR **password, CHAR **realm)
 {
 
-    /* Just use a simple name, password, and realm for all 
+    /* Just use a simple name, password, and realm for all
        requests and resources.  */
     *name =     "Placeholdername";
     *password = "Placeholderpassword";

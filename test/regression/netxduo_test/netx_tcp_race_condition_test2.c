@@ -178,7 +178,7 @@ NX_PACKET   *my_packet;
         }
     }
 
-    /* Cover nx_tcp_socket_send_internal.c 
+    /* Cover nx_tcp_socket_send_internal.c
        [+ -] line 837 if (preempted == NX_TRUE) */
     tx_thread_resume(&thread_test);
     status = nx_tcp_socket_send(&client_socket, my_packet, 5 * NX_IP_PERIODIC_RATE);
@@ -230,7 +230,7 @@ NX_PACKET   *my_packet;
         error_counter++;
     }
 
-    /* Cover nx_tcp_socket_send_internal.c 
+    /* Cover nx_tcp_socket_send_internal.c
        [+ -] line 1072 if (socket_ptr -> nx_tcp_socket_zero_window_probe_has_data == NX_FALSE) */
     status = nx_tcp_socket_send(&client_socket, my_packet, NX_NO_WAIT);
     if (status == NX_SUCCESS)
@@ -238,7 +238,7 @@ NX_PACKET   *my_packet;
         error_counter++;
     }
 
-    /* Cover nx_tcp_socket_send_internal.c 
+    /* Cover nx_tcp_socket_send_internal.c
        [+ -] line 846 if (send_packet != packet_ptr) */
     tx_thread_resume(&thread_test);
     status = nx_tcp_socket_send(&client_socket, my_packet, 5 * NX_IP_PERIODIC_RATE);

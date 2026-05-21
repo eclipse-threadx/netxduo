@@ -212,7 +212,7 @@ void    tx_application_define(void *first_unused_memory)
     test_free_memory_ptr = pointer;
 }
 
-/* Define the test control thread.  This thread is responsible for dispatching all of the 
+/* Define the test control thread.  This thread is responsible for dispatching all of the
 tests in the ThreadX test suite.  */
 
 void  test_control_thread_entry(ULONG thread_input)

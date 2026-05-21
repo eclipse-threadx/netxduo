@@ -789,11 +789,11 @@ INT reuseaddr = 0;
 #endif
     }
 
-    /* Test UDP sockets binding to address1, 2, 3 are able to receive packets according to their 
+    /* Test UDP sockets binding to address1, 2, 3 are able to receive packets according to their
        binding information */
     test_udp_bind_to_three_interfaces(0, 1, 2);
 
-    /* Test UDP sockets binding to address1, 3, and another bind to INADDR_ANY. 
+    /* Test UDP sockets binding to address1, 3, and another bind to INADDR_ANY.
        Traffic to address 1 goes to the INADDR_ANY bind. */
     test_udp_bind_to_three_interfaces(0, 2, 3);
 

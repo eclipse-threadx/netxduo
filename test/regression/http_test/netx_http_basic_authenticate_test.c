@@ -66,7 +66,7 @@ static UINT  authentication_check(NX_HTTP_SERVER *server_ptr, UINT request_type,
             CHAR *resource, CHAR **name, CHAR **password, CHAR **realm)
 {
 
-    /* Just use a simple name, password, and realm for all 
+    /* Just use a simple name, password, and realm for all
        requests and resources.  */
     *name =     "name";
     *password = "password";
@@ -80,7 +80,7 @@ static UINT  authentication_check_extended(NX_HTTP_SERVER *server_ptr, UINT requ
                                            CHAR **password, UINT *password_length, CHAR **realm, UINT *realm_length)
 {
 
-    /* Just use a simple name, password, and realm for all 
+    /* Just use a simple name, password, and realm for all
        requests and resources.  */
     *name =     "name";
     *password = "password";
@@ -207,7 +207,7 @@ void thread_client_entry(ULONG thread_input)
 UINT            status;
 NX_PACKET       *send_packet;
 
-    /* Format the RAM disk - the memory for the RAM disk was setup in 
+    /* Format the RAM disk - the memory for the RAM disk was setup in
       tx_application_define above.  This must be set up before the client(s) start
       sending requests. */
     status = fx_media_format(&ram_disk, 

@@ -1,4 +1,4 @@
-/* This NetX test concentrates on sending TCP packets in multiple threads simultaneously.  
+/* This NetX test concentrates on sending TCP packets in multiple threads simultaneously.
    Hit the conidtion in _nx_tcp_socket_send_internal: 684 [ +  - ]: if (send_packet != packet_ptr)  */
 
 #include   "nx_api.h"

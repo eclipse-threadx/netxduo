@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -89,20 +90,6 @@ extern UCHAR _nx_secure_tls_record_block_buffer[NX_SECURE_TLS_MAX_CIPHER_BLOCK_S
 /*                                                                        */
 /*    _nx_secure_dtls_process_record        Process DTLS record data      */
 /*    _nx_secure_tls_process_record         Process TLS record data       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), fixed    */
-/*                                            AES-CBC padding oracle,     */
-/*                                            verified memcpy use cases,  */
-/*                                            supported chained packet,   */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            reorganized internal logic, */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_record_payload_decrypt(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *encrypted_packet,
@@ -525,15 +512,6 @@ UCHAR                                 nonce[13];
 /*                                                                        */
 /*    _nx_secure_tls_record_payload_decrypt Decrypt TLS record payload    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            reorganized internal logic, */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_record_chained_packet_decrypt(NX_SECURE_TLS_SESSION *tls_session,
                                                          NX_PACKET *encrypted_packet, UINT offset,
@@ -723,15 +701,6 @@ const NX_CRYPTO_METHOD *session_cipher_method;
 /*    _nx_secure_tls_record_chained_packet_decrypt                        */
 /*                                          Decrypt chained packet        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), fixed    */
-/*                                            the issue of endless loop,  */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_record_packet_decrypt(NX_SECURE_TLS_SESSION *tls_session,
                                                  const NX_CRYPTO_METHOD *session_cipher_method,
@@ -913,7 +882,7 @@ UINT original_offset = offset;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_data_decrypt                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -942,12 +911,6 @@ UINT original_offset = offset;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_record_packet_decrypt  Decrypt data in packet        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_data_decrypt(NX_SECURE_TLS_SESSION *tls_session,

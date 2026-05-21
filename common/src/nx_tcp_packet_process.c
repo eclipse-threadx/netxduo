@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -43,7 +44,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_tcp_packet_process                              PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -84,17 +85,6 @@
 /*    _nx_tcp_queue_process                 Process TCP packet queue      */
 /*    _nx_tcp_packet_receive                Receive packet processing     */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            validated TCP header buffer,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_packet_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
 {
@@ -108,6 +98,9 @@ NX_TCP_SOCKET               *socket_ptr;
 NX_TCP_HEADER               *tcp_header_ptr;
 struct NX_TCP_LISTEN_STRUCT *listen_ptr;
 VOID                         (*listen_callback)(NX_TCP_SOCKET *socket_ptr, UINT port);
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+VOID                         (*queue_callback)(struct NX_TCP_LISTEN_STRUCT *listen_ptr);
+#endif
 ULONG                        option_words;
 ULONG                        mss = 0;
 ULONG                        checksum;
@@ -1011,6 +1004,17 @@ ULONG                        rwin_scale = 0xFF;
                         /* Release the packet.  */
                         _nx_packet_release(packet_ptr);
                     }
+
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+                    /* If extended notify is enabled, call the listen_queue_notify function.
+                       This user-supplied function notifies the host application of
+                       a new connect request in the listen queue. */
+                    queue_callback = listen_ptr -> nx_tcp_listen_queue_notify;
+                    if (queue_callback)
+                    {
+                        (queue_callback)(listen_ptr);
+                    }
+#endif
                 }
 
                 /* Finished processing, just return.  */

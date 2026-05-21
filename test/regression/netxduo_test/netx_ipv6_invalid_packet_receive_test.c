@@ -306,7 +306,7 @@ NX_IPV6_HEADER  *ip_header_ptr;
         /* Convert to host byte order. */
         NX_CHANGE_ULONG_ENDIAN(ip_header_ptr -> nx_ip_header_word_1);
 
-        /* Set the address state as NX_IPV6_ADDR_STATE_UNKNOWN, and receive the packet again, then recover the state.  
+        /* Set the address state as NX_IPV6_ADDR_STATE_UNKNOWN, and receive the packet again, then recover the state.
            Cover the code if (interface_ipv6_address_next -> nxd_ipv6_address_state != NX_IPV6_ADDR_STATE_UNKNOWN) in _nx_ipv6_packet_receive.  */
         ip_1.nx_ipv6_address[0].nxd_ipv6_address_state = NX_IPV6_ADDR_STATE_UNKNOWN;
         _nx_ipv6_packet_receive(&ip_1, my_packet);

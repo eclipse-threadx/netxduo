@@ -74,6 +74,7 @@ static void thread_server_entry(ULONG thread_input);
 #define TEST_HOST_NAME       "1.2.3.4"
 #define TEST_URI_PATH        "/test"
 #define TEST_PROTOCOL        "test"
+#define TEST_BEARER          ""
 
 static UCHAR server_switch_101[] =
 {
@@ -325,6 +326,7 @@ UINT            code;
                                          TEST_HOST_NAME, sizeof(TEST_HOST_NAME) - 1,
                                          (UCHAR *)TEST_URI_PATH, sizeof(TEST_URI_PATH) - 1,
                                          (UCHAR *)TEST_PROTOCOL, sizeof(TEST_PROTOCOL) - 1,
+                                         (UCHAR *)TEST_BEARER, sizeof(TEST_BEARER) -1,
                                          NX_NO_WAIT); /* Set 0 to do non-blocking test */
     if (status != NX_IN_PROGRESS || client_websocket.nx_websocket_client_mutex.tx_mutex_ownership_count != 0)
         SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
@@ -376,6 +378,7 @@ UINT            code;
                                                 TEST_HOST_NAME, sizeof(TEST_HOST_NAME) - 1,
                                                 (UCHAR *)TEST_URI_PATH, sizeof(TEST_URI_PATH) - 1,
                                                 (UCHAR *)TEST_PROTOCOL, sizeof(TEST_PROTOCOL) - 1,
+                                                (UCHAR *)TEST_BEARER, sizeof(TEST_BEARER) -1,
                                                 NX_NO_WAIT);
     if (status != NX_IN_PROGRESS || client_websocket.nx_websocket_client_mutex.tx_mutex_ownership_count != 0)
         SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);

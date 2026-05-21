@@ -405,7 +405,7 @@ UINT            server_port = NX_WEB_HTTP_SERVER_PORT;
                     512,                          // Sector size
                     8,                            // Sectors per cluster
                     1,                            // Heads
-                    1);                           // Sectors per track   
+                    1);                           // Sectors per track
     
     /* Open the RAM disk.  */
     status = fx_media_open(&ram_disk, "RAM DISK", _fx_ram_driver, ram_disk_memory, media_memory, sizeof(media_memory)) ;

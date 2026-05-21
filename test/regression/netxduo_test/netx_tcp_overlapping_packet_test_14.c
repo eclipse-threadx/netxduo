@@ -179,7 +179,7 @@ ULONG          seq1, seq2;
         error_counter++;
 
     /* Fill in the packet with data.      */
-    /* The full message to send is: 11122222333333344444444 
+    /* The full message to send is: 11122222333333344444444
                     Packet 1 sends: 111
                     Packet 2 sends: 111222223333333
                     Packet 3 sends:    22222333333344444444 */

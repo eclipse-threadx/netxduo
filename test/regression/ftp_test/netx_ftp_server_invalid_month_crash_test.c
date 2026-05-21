@@ -53,7 +53,7 @@ static UINT    ftp_client_directory_listing_get(NX_FTP_CLIENT *ftp_client_ptr, C
                                                 NX_PACKET **packet_ptr, ULONG wait_option);
 
 
-/* Define server login/logout functions.  These are stubs for functions that would 
+/* Define server login/logout functions.  These are stubs for functions that would
    validate a client login request.   */
 static UINT    ftp_server_login(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, ULONG client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info);
 static UINT    ftp_server_logout(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, ULONG client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info);
@@ -423,7 +423,7 @@ UINT        status;
     UINT        index;
     UINT        ipduo_size;
 
-        /* EPRT command: EPRT |2|1080::8:800:200C:417A|5282|  
+        /* EPRT command: EPRT |2|1080::8:800:200C:417A|5282|
            RFC2428, Section2, Page3. */
 
         buffer_ptr[0] =  'E';
@@ -676,7 +676,7 @@ UINT        status;
     /* We have a packet, setup pointer to the buffer area.  */
     buffer_ptr =  new_packet_ptr -> nx_packet_prepend_ptr;
 
-    /* Check for 1xx message, signaling the data port was connected properly and ready for 
+    /* Check for 1xx message, signaling the data port was connected properly and ready for
        transfer.  */
     if (buffer_ptr[0] != '1')
     {

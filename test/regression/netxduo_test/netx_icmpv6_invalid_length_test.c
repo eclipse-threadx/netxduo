@@ -24,7 +24,7 @@ static VOID    thread_0_entry(ULONG thread_input);
 extern VOID    test_control_return(UINT status);       
 extern VOID    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
 
-/* RA packet. 
+/* RA packet.
  * ICMPv6 option type: 0.
  * ICMPv6 option length: 8.
  * Actual ICMPv6 option length: 4. */

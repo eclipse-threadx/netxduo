@@ -1,9 +1,9 @@
 /* This case tests status 400.
- * 1. If Request-URIis an absoluteURI, the host is part of the Request-URI. Any Host header 
+ * 1. If Request-URIis an absoluteURI, the host is part of the Request-URI. Any Host header
  * field value in the request MUST be ignored.
- * 2. If the Request-URIis not an absoluteURI, and the request includes a Hostheader field, 
+ * 2. If the Request-URIis not an absoluteURI, and the request includes a Hostheader field,
  * the host is determined by the Hostheader field value.
- * 3.  If the host as determined by rule 1 or 2 is not a valid host on the server, the response 
+ * 3.  If the host as determined by rule 1 or 2 is not a valid host on the server, the response
  * MUST be a 400 (Bad Request) error message.
  *
  * Change Host field value from 192.168.0.123 to 192.168.0.120 .
@@ -85,8 +85,8 @@ static UINT loop = 1;
 extern UINT _nx_web_http_client_receive(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET **packet_ptr, ULONG wait_option);
 extern UINT _nx_web_http_client_send(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, ULONG wait_option);
 
-/* This is a HTTP get packet captured by wireshark. 
- * curl 192.168.0.123 
+/* This is a HTTP get packet captured by wireshark.
+ * curl 192.168.0.123
  * 123: pkt[120] = 0x31, pkt[121] = 0x32, pkt[122] = 0x33
  * 122: pkt[120] = 0x31, pkt[121] = 0x32, pkt[122] = 0x32
  * */
@@ -400,7 +400,7 @@ UINT            server_port = NX_WEB_HTTP_SERVER_PORT;
                     512,                          // Sector size
                     8,                            // Sectors per cluster
                     1,                            // Heads
-                    1);                           // Sectors per track   
+                    1);                           // Sectors per track
     
     /* Open the RAM disk.  */
     status = fx_media_open(&ram_disk, "RAM DISK", _fx_ram_driver, ram_disk_memory, media_memory, sizeof(media_memory)) ;

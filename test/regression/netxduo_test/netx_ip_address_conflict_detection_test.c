@@ -296,7 +296,7 @@ NX_PACKET   *my_packet[30];
     /* Delay before announcing.  */
     tx_thread_sleep(NX_IP_PERIODIC_RATE * NX_ARP_ANNOUNCE_WAIT);
 
-    /* It is now time to go into an announce phase to indicate local IP address is ours!  
+    /* It is now time to go into an announce phase to indicate local IP address is ours!
        Note:NetX do not give up its address during announce pahse.  */
     for (i = 0; i < NX_ARP_ANNOUNCE_NUM; i++)
     {

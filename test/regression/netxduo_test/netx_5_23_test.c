@@ -3,7 +3,7 @@
 /* Procedure
    1. Connection.
    2. Client calls disconnect and sends a FIN packet..
-   3. Server replies an ACK packet and calls disconnect command.  
+   3. Server replies an ACK packet and calls disconnect command.
    4. Server becomes LSAT_ACK state.
    5. Server calls send command and checks the status is NX_NOT_CONNECTED.  */
 

@@ -3,7 +3,7 @@
 /* Procedure
    1. Connection.
    2. Client calls disconnect and sends a FIN packet..
-   3. Client interrupts the FIN packet and calls send command.  
+   3. Client interrupts the FIN packet and calls send command.
    4. Check the state of client is FIN_WAIT_1 and the status is NX_NOT_CONNECTED.  */
 
 #include   "tx_api.h"

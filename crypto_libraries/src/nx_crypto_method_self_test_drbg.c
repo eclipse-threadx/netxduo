@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -137,7 +138,7 @@ static UCHAR drbg_test_entropy_count_npr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    drbg_test_get_entropy_pr                            PORTABLE C      */
-/*                                                           6.1.7        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -165,19 +166,6 @@ static UCHAR drbg_test_entropy_count_npr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    DRBG internal logic                                                 */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed FIPS symbol to      */
-/*                                            self-test,                  */
-/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_pr(UCHAR *entropy, UINT *entropy_len, UINT entropy_max_len)
@@ -222,7 +210,7 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_pr(UCHAR *entropy, UINT *entrop
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    drbg_test_get_entropy_npr                           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -250,15 +238,6 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_pr(UCHAR *entropy, UINT *entrop
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    DRBG internal logic                                                 */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_npr(UCHAR *entropy, UINT *entropy_len, UINT entropy_max_len)
@@ -298,7 +277,7 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_npr(UCHAR *entropy, UINT *entro
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_crypto_method_self_test_drbg                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -328,14 +307,6 @@ NX_CRYPTO_KEEP static UINT drbg_test_get_entropy_npr(UCHAR *entropy, UINT *entro
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_self_test_drbg(NX_CRYPTO_METHOD *crypto_method_drbg,

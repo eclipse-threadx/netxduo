@@ -1,4 +1,4 @@
-/* This test verifies that a TLS server will select the top-priority ciphersuite in the local ciphersuite table from the selection provided 
+/* This test verifies that a TLS server will select the top-priority ciphersuite in the local ciphersuite table from the selection provided
    by the remote client. The priority is determined by the order in the ciphersuite table, thus the highest priority ciphersuite has
    the lowest-value index in the table. */
 #include   "tx_api.h"
@@ -397,7 +397,7 @@ UINT       status;
 /* Timestamp function - should return Unix time formatted 32-bit integer. */
 ULONG tls_timestamp_function(void)
 {
-    // Return a fixed epoch - 1500939067 seconds = 07/24/2017 @ 11:31pm (UTC) 
+    // Return a fixed epoch - 1500939067 seconds = 07/24/2017 @ 11:31pm (UTC)
     // 1541030400 = 0x5BDA4200L = 11/01/2018 @ 12:00AM (UTC)
     return(0x5BDA4200L); 
 }

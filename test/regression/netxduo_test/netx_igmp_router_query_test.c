@@ -117,7 +117,7 @@ UINT       status;
     }                                 
 
     /* Sleep 2000 ticks to trigger the NX_IP_PERIODIC_EVENT event
-       1. Receive the IGMP Host response message,    
+       1. Receive the IGMP Host response message,
        2. Send the IGMP Router query message with invalid checksum,
        3. Send the IGMP Router query message,
        4. Send the IGMP Router query message with not joined group address,
@@ -217,7 +217,7 @@ UINT            i;
             /* Prepare a IGMP Router Query and send on the "all hosts" multicast
               address.  */     
 
-            /* Calculate the IGMP response message size and store it in the 
+            /* Calculate the IGMP response message size and store it in the
                packet header.  */
             my_packet -> nx_packet_length =  NX_IGMP_HEADER_SIZE;
 
@@ -291,7 +291,7 @@ UINT            i;
                 /* Prepare a IGMP Router Query and send on the "all hosts" multicast
                   address.  */     
 
-                /* Calculate the IGMP response message size and store it in the 
+                /* Calculate the IGMP response message size and store it in the
                 packet header.  */
                 my_packet -> nx_packet_length =  NX_IGMP_HEADER_SIZE;
 
@@ -337,7 +337,7 @@ UINT            i;
             /* Prepare a IGMP Router Query and send on the "all hosts" multicast
               address.  */     
 
-            /* Calculate the IGMP response message size and store it in the 
+            /* Calculate the IGMP response message size and store it in the
             packet header.  */
             my_packet -> nx_packet_length =  NX_IGMP_HEADER_SIZE;
 
@@ -382,7 +382,7 @@ UINT            i;
             /* Prepare a IGMP Router Query and send on the "all hosts" multicast
               address.  */     
 
-            /* Calculate the IGMP response message size and store it in the 
+            /* Calculate the IGMP response message size and store it in the
             packet header.  */
             my_packet -> nx_packet_length =  NX_IGMP_HEADER_SIZE;
 

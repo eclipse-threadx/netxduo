@@ -577,8 +577,8 @@ UINT     i = 200;
 UINT     j = 0;
 #endif /* NX_MDNS_DISABLE_CLIENT  */
 #ifndef NX_MDNS_DISABLE_CLIENT
-ULONG    service_mask = 0x00000000;     /* Set the service mask to select service types it wishes to monitor. 
-                                           A list of services being monitored ar hard-coded 
+ULONG    service_mask = 0x00000000;     /* Set the service mask to select service types it wishes to monitor.
+                                           A list of services being monitored ar hard-coded
                                            in the table nx_mdns_service_types in nxd_mdns.c.  */
 #endif /* NX_MDNS_DISABLE_CLIENT  */
 

@@ -217,7 +217,7 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
     nxd_ipv6_enable(&client_ip);
     nxd_icmp_enable(&client_ip);  
 
-    /* Create a Link Layer Plus Time DUID for the DHCPv6 Client. Set time ID field 
+    /* Create a Link Layer Plus Time DUID for the DHCPv6 Client. Set time ID field
        to NULL; the DHCPv6 Client API will supply one. */
     status = nx_dhcpv6_create_client_duid(&dhcp_client, NX_DHCPV6_DUID_TYPE_LINK_TIME, 
                                           NX_DHCPV6_CLIENT_HARDWARE_TYPE_ETHERNET, 0);
@@ -228,11 +228,11 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
         return;
     }
 
-    /* Create the DHCPv6 client's Identity Association (IA-NA) now. 
+    /* Create the DHCPv6 client's Identity Association (IA-NA) now.
 
        Note that if this host had already been assigned in IPv6 lease, it
        would have to use the assigned T1 and T2 values in loading the DHCPv6
-       client with an IANA block. 
+       client with an IANA block.
     */
     status = nx_dhcpv6_create_client_iana(&dhcp_client, DHCPV6_IANA_ID, DHCPV6_T1,  DHCPV6_T2); 
 
@@ -250,10 +250,10 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
     ipv6_address.nxd_ip_address.v6[2] = 0x00000000;
     ipv6_address.nxd_ip_address.v6[3] = 0x0000abcd;
 
-    /* Create an IA address option. 
+    /* Create an IA address option.
         Note that if this host had already been assigned in IPv6 lease, it
-        would have to use the assigned IPv6 address, preferred and valid lifetime 
-        values in loading the DHCPv6 Client with an IA block. 
+        would have to use the assigned IPv6 address, preferred and valid lifetime
+        values in loading the DHCPv6 Client with an IA block.
     */
     status = nx_dhcpv6_add_client_ia(&dhcp_client, &ipv6_address,DHCPV6_RENEW_TIME, DHCPV6_REBIND_TIME);
 
@@ -263,7 +263,7 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
         return;
     }
 
-    /* If the DHCPv6 Client is configured for a maximum number of IA addresses 
+    /* If the DHCPv6 Client is configured for a maximum number of IA addresses
        greater than 1, we can add another IA address if the device requires
        multiple global IPv6 addresses.  */
     if(NX_DHCPV6_MAX_IA_ADDRESS >= 2)
@@ -296,9 +296,9 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
 
 
 #ifdef NX_DHCPV6_REQUEST_FQDN_OPTION
-    /* Set the DHCPv6 Client FQDN option. 
-       operation: NX_DHCPV6_CLIENT_DESIRES_UPDATE_AAAA_RR         DHCPv6 Client choose to updating the FQDN-to-IPv6 address mapping for FQDN and address(es) used by the client.  
-                  NX_DHCPV6_CLIENT_DESIRES_SERVER_DO_DNS_UPDATE   DHCPv6 Client choose to updating the FQDN-to-IPv6 address mapping for FQDN and address(es) used by the client to the server.  
+    /* Set the DHCPv6 Client FQDN option.
+       operation: NX_DHCPV6_CLIENT_DESIRES_UPDATE_AAAA_RR         DHCPv6 Client choose to updating the FQDN-to-IPv6 address mapping for FQDN and address(es) used by the client.
+                  NX_DHCPV6_CLIENT_DESIRES_SERVER_DO_DNS_UPDATE   DHCPv6 Client choose to updating the FQDN-to-IPv6 address mapping for FQDN and address(es) used by the client to the server.
                   NX_DHCPV6_CLIENT_DESIRES_NO_SERVER_DNS_UPDATE   DHCPv6 Client choose to request that the server perform no DNS updatest on its behalf.  */
     nx_dhcpv6_request_option_FQDN(&dhcp_client, "DHCPv6-Client", NX_DHCPV6_CLIENT_DESIRES_UPDATE_AAAA_RR);
 #endif /* NX_DHCPV6_REQUEST_FQDN_OPTION */                             
@@ -329,8 +329,8 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
     if (status == NX_SUCCESS)
     {
 
-        /* If Duplicate Address Detection (DAD) is enabled in NetX Duo, e.g. #NX_DISABLE_IPV6_DAD 
-           not defined, allow time for NetX Duo to verify the address is unique on our network. 
+        /* If Duplicate Address Detection (DAD) is enabled in NetX Duo, e.g. #NX_DISABLE_IPV6_DAD
+           not defined, allow time for NetX Duo to verify the address is unique on our network.
          */
         tx_thread_sleep(5 * NX_IP_PERIODIC_RATE);                              
 
@@ -357,7 +357,7 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
     
         }
 
-        /* Regardless if the DHCPv6 Client achieved a bound state, check for DAD 
+        /* Regardless if the DHCPv6 Client achieved a bound state, check for DAD
            failures. */
         if (address_failed_dad > 0)
         {
@@ -380,7 +380,7 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
         }
         
         /* Get the IPv6 address and related lifetimes by address index. This index is the
-           index into the DHCPv6 Client address table.  Not to be confused with the IP 
+           index into the DHCPv6 Client address table.  Not to be confused with the IP
            instance address table! */
         status = nx_dhcpv6_get_valid_ip_address_lease_time(&dhcp_client, address_index, 
                                                            &valid_ipv6_address, &preferred_lifetime, 
@@ -392,8 +392,8 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
             error_counter++;
         }   
 
-        /* Get the IANA options for when to start renew/rebind requests. These time 
-           parameters are the same for all IPv6 addresses assigned in the Client 
+        /* Get the IANA options for when to start renew/rebind requests. These time
+           parameters are the same for all IPv6 addresses assigned in the Client
            e.g. IANA returned from Server.  */
         status = nx_dhcpv6_get_iana_lease_time(&dhcp_client, &T1, &T2);
 
@@ -404,8 +404,8 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
         }
 
         /*****************************************************************************/
-        /* These are 'legacy' DHCPv6 services and are for the most part identical to the services 
-           above except they default to the primary global IPv6 address regardless if the 
+        /* These are 'legacy' DHCPv6 services and are for the most part identical to the services
+           above except they default to the primary global IPv6 address regardless if the
            Client was assigned more than one global IPv6 address. */
 
         /* Now check the assigned lease times. */
@@ -502,8 +502,8 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
             return;
         }   
 
-        /* If Duplicate Address Detection (DAD) is enabled in NetX Duo, e.g. #NX_DISABLE_IPV6_DAD 
-           not defined, allow time for NetX Duo to verify the address is unique on our network. 
+        /* If Duplicate Address Detection (DAD) is enabled in NetX Duo, e.g. #NX_DISABLE_IPV6_DAD
+           not defined, allow time for NetX Duo to verify the address is unique on our network.
          */
         tx_thread_sleep(5 * NX_IP_PERIODIC_RATE);
 
@@ -545,11 +545,11 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
         memset(buffer, 0, sizeof(buffer));
 
         /* Get the time zone.  */
-        nx_dhcpv6_get_other_option_data(&dhcp_client, NX_DHCPV6_NEW_POSIX_TIMEZONE_OPTION, buffer, 200); // Try to get DNS info got from DHCPv6 Server     
+        nx_dhcpv6_get_other_option_data(&dhcp_client, NX_DHCPV6_NEW_POSIX_TIMEZONE_OPTION, buffer, 200); // Try to get DNS info got from DHCPv6 Server
 #endif                 
 
         /* At some point, we may wish to release the IPv6 address lease e.g. the device
-           is leaving the network or powering down. In that case we inform the 
+           is leaving the network or powering down. In that case we inform the
            DHCPv6 Server that we are releasing the address lease. */
         status = nx_dhcpv6_request_release(&dhcp_client);
 
@@ -623,7 +623,7 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
         error_counter++;
     }
 
-    /* Now delete the DHCPv6 client and release ThreadX and 
+    /* Now delete the DHCPv6 client and release ThreadX and
        NetX Duo resources back to the system. */
     nx_dhcpv6_client_delete(&dhcp_client);        
 
@@ -633,10 +633,10 @@ NX_DHCPV6_CLIENT_RECORD dhcpv6_client_record;
 }
 
 
-/* This is the notification from the DHCPv6 Client task that it has changed 
-   state in the DHCPv6 protocol, for example getting assigned an IPv6 lease and 
-   achieving the bound state or an IPv6 lease expires and being reset to 
-   the init state.   
+/* This is the notification from the DHCPv6 Client task that it has changed
+   state in the DHCPv6 protocol, for example getting assigned an IPv6 lease and
+   achieving the bound state or an IPv6 lease expires and being reset to
+   the init state.
 */
 VOID dhcpv6_state_change_notify(NX_DHCPV6 *dhcpv6_ptr, UINT old_state, UINT new_state)
 {
@@ -661,7 +661,7 @@ VOID dhcpv6_state_change_notify(NX_DHCPV6 *dhcpv6_ptr, UINT old_state, UINT new_
         bound_addresses++;
     }
 
-   /* Check if the Client was bound, but failed the uniqueness check 
+   /* Check if the Client was bound, but failed the uniqueness check
        (Duplicate Address Detection) and was reset to the INIT state. */
     if ((old_state == NX_DHCPV6_STATE_SENDING_DECLINE) && (new_state == NX_DHCPV6_STATE_INIT))
     {
@@ -686,7 +686,7 @@ VOID dhcpv6_state_change_notify(NX_DHCPV6 *dhcpv6_ptr, UINT old_state, UINT new_
 }
 
 /* This is the notification from the DHCPv6 Client task that it received an error
-   from the server (status code) in response to the Client's last DHCPv6 message.   
+   from the server (status code) in response to the Client's last DHCPv6 message.
 */
 
 VOID dhcpv6_server_error_handler(NX_DHCPV6 *dhcpv6_ptr, UINT op_code, UINT status_code, UINT message_type)

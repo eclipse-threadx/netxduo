@@ -304,7 +304,7 @@ UINT            previously_available = 0;
     /* wait for the server to set up */
     tx_thread_sleep(50);
 
-    /* Format the RAM disk - the memory for the RAM disk was setup in 
+    /* Format the RAM disk - the memory for the RAM disk was setup in
       tx_application_define above.  This must be set up before the client(s) start
       sending requests. */
     status = fx_media_format(&ram_disk, 

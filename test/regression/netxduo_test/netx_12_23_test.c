@@ -1,6 +1,6 @@
 /* 12.23 TCP MUST implement sending the MSS option.   */
 
-/* RFC 1122, Section 4.2.2.6, page 85, Maximum Segment Size Option: RFC-793 Section 3.1. 
+/* RFC 1122, Section 4.2.2.6, page 85, Maximum Segment Size Option: RFC-793 Section 3.1.
 TCP MUST implement both sending and receiving the Maximum Segment Size option.  */
 
 /* Procedure

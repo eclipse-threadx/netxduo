@@ -1,5 +1,5 @@
 /* This is a small demo of BSD Wrapper for the high-performance NetX TCP/IP stack.
-   This demo used standard BSD services for TCP connection, disconnection, sending, and 
+   This demo used standard BSD services for TCP connection, disconnection, sending, and
    receiving using a simulated Ethernet driver.  */
 
 
@@ -196,7 +196,7 @@ struct      sockaddr_in ClientAddr;
     ip_address.nxd_ip_address.v6[2] = 0;
     ip_address.nxd_ip_address.v6[3] = 0x101;
     
-    /* Set the host global IP address. We are assuming a 64 
+    /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = (INT)nxd_ipv6_address_set(&bsd_ip, iface_index, &ip_address, 64, &address_index);
 
@@ -329,7 +329,7 @@ struct      sockaddr_in ClientAddr;
                     if (status == ERROR)
                     {
                         /* This is a blocking socket. If no data is received, but the connection is still good,
-                           the EAGAIN error is set. If it was a non blocking socket, the EWOULDBLOCK socket 
+                           the EAGAIN error is set. If it was a non blocking socket, the EWOULDBLOCK socket
                            error is set. */
                         if (errno == EAGAIN) 
                         {

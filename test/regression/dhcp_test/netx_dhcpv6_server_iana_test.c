@@ -226,7 +226,7 @@ NX_PACKET   *my_packet;
         test_control_return(1);
     }
 
-     /* Note: For DUID types that do not require time, the 'duid_time' input can be left at zero. 
+     /* Note: For DUID types that do not require time, the 'duid_time' input can be left at zero.
         The DUID_TYPE and HW_TYPE are configurable options that are user defined in nx_dhcpv6_server.h.  */
 
     /* Set the DUID time as the start of the millenium. */

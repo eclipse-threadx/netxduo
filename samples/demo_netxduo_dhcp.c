@@ -297,11 +297,11 @@ NX_PACKET   *my_packet;
             tx_thread_sleep(NX_IP_PERIODIC_RATE);
         }
     
-        /* Use this API to send a message to the server, e.g. a DECLINE if the IP address is owned by another host. 
+        /* Use this API to send a message to the server, e.g. a DECLINE if the IP address is owned by another host.
         nx_dhcp_send_request(&dhcp_client, NX_DHCP_TYPE_DHCPDECLINE);
         */
 
-        /* Use this API to release an IP address if the host is switching networks or running the host through DHCP cycles. 
+        /* Use this API to release an IP address if the host is switching networks or running the host through DHCP cycles.
         nx_dhcp_release(&dhcp_client);
         */
     

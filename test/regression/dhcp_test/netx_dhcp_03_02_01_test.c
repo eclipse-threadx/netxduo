@@ -1,4 +1,4 @@
-/* As the client has not received its network address, it MUST NOT fill in the 'ciaddr' field. And servers with knowledge of 
+/* As the client has not received its network address, it MUST NOT fill in the 'ciaddr' field. And servers with knowledge of
  * the client's configuration parameters respond with a DHCPACK message to the client.
  * rfc 2131, page 18, 3.2 Client-server interaction - resuing a previously allocated network address
  *

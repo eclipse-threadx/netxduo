@@ -54,7 +54,7 @@
 /* Defined NX_PPP_PPPOE_ENABLE if using PPP, since PPP module has been modified to match PPPoE module under this definition.  */
 #ifdef NX_PPP_PPPOE_ENABLE
 
-/* If the driver is not initialized in other module, define NX_PPPOE_CLIENT_INITIALIZE_DRIVER_ENABLE to initialize the driver in PPPoE module .  
+/* If the driver is not initialized in other module, define NX_PPPOE_CLIENT_INITIALIZE_DRIVER_ENABLE to initialize the driver in PPPoE module .
    In this demo, the driver has been initialized in IP module.  */
 #ifndef NX_PPPOE_CLIENT_INITIALIZE_DRIVER_ENABLE
 
@@ -262,7 +262,7 @@ ULONG   ip_status;
 
     /* Get the PPPoE Server physical address and Session ID after establish PPPoE Session.  */
     /*
-    status = nx_pppoe_client_session_get(&pppoe_client, &server_mac_msw, &server_mac_lsw, &session_id);  
+    status = nx_pppoe_client_session_get(&pppoe_client, &server_mac_msw, &server_mac_lsw, &session_id);
     if (status)
         error_counter++;
     */

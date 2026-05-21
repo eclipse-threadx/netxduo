@@ -3,8 +3,8 @@
 /* Procedure
    1. Connection.
    2. Client calls disconnect and sends a FIN packet..
-   3. Server interrupts the FIN packet and call disconnect command.  
-   4. Client receives the FIN packet and becomes CLOSING state.  
+   3. Server interrupts the FIN packet and call disconnect command.
+   4. Client receives the FIN packet and becomes CLOSING state.
    5. Client calls send command and checks the status is NX_NOT_CONNECTED.  */
 
 #include   "tx_api.h"

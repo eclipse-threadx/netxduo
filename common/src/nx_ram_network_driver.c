@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -110,7 +111,7 @@ static _nx_ram_network_driver_instance_type nx_ram_driver[NX_MAX_RAM_INTERFACES]
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver                              PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -138,22 +139,6 @@ static _nx_ram_network_driver_instance_type nx_ram_driver[NX_MAX_RAM_INTERFACES]
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX IP processing                                                  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added sample of returning   */
-/*                                            link's interface type,      */
-/*                                            resulting in version 6.1.9  */
-/*  12-31-2023     Yajun Xia                Modified comment(s),          */
-/*                                            supported VLAN and generic  */
-/*                                            link layer,                 */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr)
@@ -666,7 +651,7 @@ ULONG        *ethernet_frame_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver_output                       PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -696,18 +681,6 @@ ULONG        *ethernet_frame_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX IP processing                                                  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2023     Yajun Xia                Modified comment(s),          */
-/*                                            supported VLAN and generic  */
-/*                                            link layer,                 */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ram_network_driver_output(NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -877,7 +850,7 @@ UINT   j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_ram_network_driver_receive                      PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -912,18 +885,6 @@ UINT   j;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX IP processing                                                  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2023     Yajun Xia                Modified comment(s),          */
-/*                                            supported VLAN and generic  */
-/*                                            link layer,                 */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 void  _nx_ram_network_driver_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)

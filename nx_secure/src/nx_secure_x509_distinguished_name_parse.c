@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -32,7 +33,7 @@ static UINT _nx_secure_x509_extract_name_oid_data(const UCHAR *buffer, UINT oid,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_distinguished_name_parse            PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -65,17 +66,6 @@ static UINT _nx_secure_x509_extract_name_oid_data(const UCHAR *buffer, UINT oid,
 /*    _nx_secure_x509_crl_issuer_parse      Parse issuer in crl           */
 /*    _nx_secure_x509_parse_issuer          Parse issuer in certificate   */
 /*    _nx_secure_x509_parse_subject         Parse subject in certificate  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            removed dependency on TLS,  */
-/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_distinguished_name_parse(const UCHAR *buffer, UINT length, UINT *bytes_processed,
@@ -186,7 +176,7 @@ UINT         oid;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_extract_name_oid_data               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -217,14 +207,6 @@ UINT         oid;
 /*                                                                        */
 /*    _nx_secure_x509_distinguished_name_parse                            */
 /*                                          Parse Distinguished Name      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_extract_name_oid_data(const UCHAR *buffer, UINT oid, ULONG length,

@@ -76,7 +76,7 @@ UINT index;
         printf("year: %d, month: %d, day: %d, hour: %d, minute: %d, second: %d\n", year, month, day, hour, minute, second);
 
         /* Now we have our time in integers, calculate leap years. We aren't concerned with years outside the UNIX
-           time range of 1970-2038 so we can assume every 4 years starting with 1972 is a leap year (years divisible 
+           time range of 1970-2038 so we can assume every 4 years starting with 1972 is a leap year (years divisible
            by 100 are NOT leap years unless also divisible by 400, which the year 2000 is). Using integer division gives
            us the floor of the number of 4 year periods, so add 1. */
         if(year >= 70)

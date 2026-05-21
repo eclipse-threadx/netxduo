@@ -1,4 +1,4 @@
-/* The DHCPREQUEST message MUST use the same value in the DHCP message header's 'secs' field and be sent to the same IP 
+/* The DHCPREQUEST message MUST use the same value in the DHCP message header's 'secs' field and be sent to the same IP
  * broadcast address as the original DHCPDISCOVER message.
  * rfc 2131, page 16, 3.1 Client-server interaction - allocating a network address
  */

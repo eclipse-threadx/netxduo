@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -32,7 +33,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_is_zero                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -74,14 +75,6 @@
 /*                                          Perform an inverse modulus    */
 /*                                            operation for prime number  */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_is_zero(NX_CRYPTO_HUGE_NUMBER *x)
 {
@@ -106,7 +99,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_add                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -158,14 +151,6 @@ UINT i;
 /*                                            operation for prime number  */
 /*    _nx_crypto_huge_number_crt_power_modulus                            */
 /*                                          Raise a huge number for CRT   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_add(NX_CRYPTO_HUGE_NUMBER *left, NX_CRYPTO_HUGE_NUMBER *right)
@@ -254,17 +239,6 @@ UINT cmp;
 /*    _nx_crypto_huge_number_crt_power_modulus                            */
 /*                                          Raise a huge number for CRT   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
-/*                                            improved performance,       */
-/*                                            resulting in version 6.1.10 */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_subtract(NX_CRYPTO_HUGE_NUMBER *left, NX_CRYPTO_HUGE_NUMBER *right)
 {
@@ -300,7 +274,7 @@ UINT cmp;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_add_unsigned                 PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -336,14 +310,6 @@ UINT cmp;
 /*                                            huge numbers                */
 /*    _nx_crypto_huge_number_subtract       Calculate subtraction for     */
 /*                                             huge numbers               */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_add_unsigned(NX_CRYPTO_HUGE_NUMBER *left, NX_CRYPTO_HUGE_NUMBER *right)
@@ -408,7 +374,7 @@ UINT      right_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_subtract_unsigned            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -441,14 +407,6 @@ UINT      right_size;
 /*                                            huge numbers                */
 /*    _nx_crypto_huge_number_subtract       Calculate subtraction for     */
 /*                                             huge numbers               */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_subtract_unsigned(NX_CRYPTO_HUGE_NUMBER *left,
@@ -490,7 +448,7 @@ HN_UBASE *result_buffer = result -> nx_crypto_huge_number_data;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_add_digit_unsigned           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -519,14 +477,6 @@ HN_UBASE *result_buffer = result -> nx_crypto_huge_number_data;
 /*                                                                        */
 /*    _nx_crypto_huge_number_add_digit                                    */
 /*    _nx_crypto_huge_number_subtract_digit                               */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_add_digit_unsigned(NX_CRYPTO_HUGE_NUMBER *value, HN_UBASE digit)
@@ -559,7 +509,7 @@ UINT      size = value -> nx_crypto_huge_number_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_subtract_digit_unsigned      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -595,14 +545,6 @@ UINT      size = value -> nx_crypto_huge_number_size;
 /*    _nx_crypto_huge_number_subtract_digit Calculate subtraction for     */
 /*                                            huge number and digit       */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_subtract_digit_unsigned(NX_CRYPTO_HUGE_NUMBER *value, HN_UBASE digit)
 {
@@ -629,7 +571,7 @@ UINT      size = value -> nx_crypto_huge_number_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_left                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -658,14 +600,6 @@ UINT      size = value -> nx_crypto_huge_number_size;
 /*    _nx_crypto_ec_secp384r1_reduce        Reduce the value of curve     */
 /*                                            secp384r1                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_shift_left(NX_CRYPTO_HUGE_NUMBER *x, UINT shift)
 {
@@ -692,7 +626,7 @@ HN_UBASE *x_buffer = x -> nx_crypto_huge_number_data;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_shift_right                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -728,14 +662,6 @@ HN_UBASE *x_buffer = x -> nx_crypto_huge_number_data;
 /*    _nx_crypto_ec_secp521r1_reduce        Reduce the value of curve     */
 /*                                            secp521r1                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_shift_right(NX_CRYPTO_HUGE_NUMBER *x, UINT shift)
 {
@@ -757,7 +683,7 @@ HN_UBASE *x_buffer = x -> nx_crypto_huge_number_data;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_adjust_size                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -797,14 +723,6 @@ HN_UBASE *x_buffer = x -> nx_crypto_huge_number_data;
 /*    _nx_crypto_huge_number_mont_power_modulus                           */
 /*                                          Raise a huge number for       */
 /*                                            montgomery reduction        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_adjust_size(NX_CRYPTO_HUGE_NUMBER *val)
 {
@@ -834,7 +752,7 @@ INT size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_compare                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -883,14 +801,6 @@ INT size;
 /*    _nx_crypto_huge_number_mont           Perform Montgomery reduction  */
 /*                                            for multiplication          */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_compare(NX_CRYPTO_HUGE_NUMBER *left, NX_CRYPTO_HUGE_NUMBER *right)
 {
@@ -922,7 +832,7 @@ NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_compare(NX_CRYPTO_HUGE_NUMBER *left, 
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_compare_unsigned             PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -973,14 +883,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_compare(NX_CRYPTO_HUGE_NUMBER *left, 
 /*                                             huge numbers               */
 /*    _nx_crypto_huge_number_compare        Compare two huge numbers      */
 /*    _nx_crypto_huge_number_modulus        Perform a modulus operation   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_compare_unsigned(NX_CRYPTO_HUGE_NUMBER *left,
@@ -1036,7 +938,7 @@ UINT right_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_multiply                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1072,14 +974,6 @@ UINT right_size;
 /*    _nx_crypto_huge_number_power_modulus  Raise a huge number           */
 /*    _nx_crypto_huge_number_crt_power_modulus                            */
 /*                                          Raise a huge number for CRT   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_multiply(NX_CRYPTO_HUGE_NUMBER *left,
@@ -1155,7 +1049,7 @@ HN_UBASE *temp_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_multiply_digit               PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1183,14 +1077,6 @@ HN_UBASE *temp_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_multiply_digit(NX_CRYPTO_HUGE_NUMBER *value,
@@ -1243,7 +1129,7 @@ HN_UBASE *result_buffer;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_square                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1275,14 +1161,6 @@ HN_UBASE *result_buffer;
 /*    _nx_crypto_huge_number_mont_power_modulus                           */
 /*                                          Raise a huge number for       */
 /*                                            montgomery reduction        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_square(NX_CRYPTO_HUGE_NUMBER *value, NX_CRYPTO_HUGE_NUMBER *result)
@@ -1402,18 +1280,6 @@ UINT      i, j;
 /*                                            montgomery reduction        */
 /*    _nx_crypto_huge_number_crt_power_modulus                            */
 /*                                          Raise a huge number for CRT   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), and      */
-/*                                            fixed variable type issue,  */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed division by zero bug, */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_modulus(NX_CRYPTO_HUGE_NUMBER *dividend, NX_CRYPTO_HUGE_NUMBER *divisor)
@@ -1593,7 +1459,7 @@ NX_CRYPTO_HUGE_NUMBER *result;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_setup                         PORTABLE C     */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1647,14 +1513,6 @@ NX_CRYPTO_HUGE_NUMBER *result;
 /*    _nx_crypto_ecjpake_schnorr_zkp_hash   Perform Schnorr ZKP hash      */
 /*                                            calculation                 */
 /*    _nx_crypto_rsa_operation              Perform an RSA operation      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_setup(NX_CRYPTO_HUGE_NUMBER *number, const UCHAR *byte_stream, UINT size)
@@ -1749,7 +1607,7 @@ UINT      num_words;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_rbg                          PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1775,14 +1633,6 @@ UINT      num_words;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_rbg(UINT bits, UCHAR *result)
@@ -1855,7 +1705,7 @@ UINT mask;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_extract                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1904,14 +1754,6 @@ UINT mask;
 /*                                          Generate pre master secret    */
 /*    _nx_crypto_rsa_operation              Perform an RSA operation      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_extract(NX_CRYPTO_HUGE_NUMBER *number, UCHAR *byte_stream,
                                                    UINT byte_stream_size, UINT *huge_number_size)
@@ -1955,7 +1797,7 @@ UCHAR    *bytes;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_extract_fixed_size           PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -1981,14 +1823,6 @@ UCHAR    *bytes;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_ecdsa_sign                 Sign hash data using ECDSA.   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_extract_fixed_size(NX_CRYPTO_HUGE_NUMBER *number,
@@ -2097,7 +1931,7 @@ UINT      num_size_adjusted;
 /*                                                                        */
 /*    _nx_crypto_huge_number_inverse_modulus_prime                        */
 /*                                                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2146,14 +1980,6 @@ UINT      num_size_adjusted;
 /*                                            to affine                   */
 /*    _nx_crypto_huge_number_crt_power_modulus                            */
 /*                                          Raise a huge number for CRT   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_inverse_modulus_prime(NX_CRYPTO_HUGE_NUMBER *a,
@@ -2237,7 +2063,7 @@ UINT                  buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_inverse_modulus              PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2282,15 +2108,6 @@ UINT                  buffer_size;
 /*    _nx_crypto_huge_number_mont_power_modulus                           */
 /*                                          Raise a huge number for       */
 /*                                            montgomery reduction        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), and      */
-/*                                            fixed input validation,     */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_huge_number_inverse_modulus(NX_CRYPTO_HUGE_NUMBER *a,
@@ -2406,7 +2223,7 @@ UINT                  buffer_size;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_mont                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2442,14 +2259,6 @@ UINT                  buffer_size;
 /*    _nx_crypto_huge_number_mont_power_modulus                           */
 /*                                          Raise a huge number for       */
 /*                                            montgomery reduction        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_mont(NX_CRYPTO_HUGE_NUMBER *m, UINT mi,
@@ -2544,7 +2353,7 @@ HN_UBASE *result_buffer = result -> nx_crypto_huge_number_data;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_mont_power_modulus           PORTABLE C      */
-/*                                                           6.1.9        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2596,16 +2405,6 @@ HN_UBASE *result_buffer = result -> nx_crypto_huge_number_data;
 /*    _nx_crypto_huge_number_crt_power_modulus                            */
 /*                                          Raise a huge number for CRT   */
 /*    _nx_crypto_rsa_operation              Perform an RSA operation      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_mont_power_modulus(NX_CRYPTO_HUGE_NUMBER *x,
@@ -2726,7 +2525,7 @@ NX_CRYPTO_HUGE_NUMBER *operand, *temp_result, *temp_swap;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_huge_number_crt_power_modulus            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -2782,14 +2581,6 @@ NX_CRYPTO_HUGE_NUMBER *operand, *temp_result, *temp_swap;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_rsa_operation              Perform an RSA operation      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_huge_number_crt_power_modulus(NX_CRYPTO_HUGE_NUMBER *x,

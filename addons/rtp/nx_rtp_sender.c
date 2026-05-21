@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -72,7 +73,7 @@ static VOID _nx_rtcp_packet_receive_notify(NX_UDP_SOCKET *socket_ptr);
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_create                             PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -103,12 +104,6 @@ static VOID _nx_rtcp_packet_receive_notify(NX_UDP_SOCKET *socket_ptr);
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_create(NX_RTP_SENDER *rtp_sender, NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr, CHAR *cname, UCHAR cname_length)
 {
@@ -134,7 +129,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_create                               PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -175,12 +170,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_create(NX_RTP_SENDER *rtp_sender, NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr, CHAR *cname, UCHAR cname_length)
@@ -328,7 +317,7 @@ UINT free_port;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_delete                             PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -353,12 +342,6 @@ UINT free_port;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_delete(NX_RTP_SENDER *rtp_sender)
@@ -385,7 +368,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_delete                              PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -412,12 +395,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_delete(NX_RTP_SENDER *rtp_sender)
@@ -452,7 +429,7 @@ UINT _nx_rtp_sender_delete(NX_RTP_SENDER *rtp_sender)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_port_get                           PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -482,12 +459,6 @@ UINT _nx_rtp_sender_delete(NX_RTP_SENDER *rtp_sender)
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_port_get(NX_RTP_SENDER *rtp_sender, UINT *rtp_port, UINT *rtcp_port)
 {
@@ -514,7 +485,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_port_get                            PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -542,12 +513,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_port_get(NX_RTP_SENDER *rtp_sender, UINT *rtp_port, UINT *rtcp_port)
 {
@@ -565,7 +530,7 @@ UINT _nx_rtp_sender_port_get(NX_RTP_SENDER *rtp_sender, UINT *rtp_port, UINT *rt
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_create                     PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -598,12 +563,6 @@ UINT _nx_rtp_sender_port_get(NX_RTP_SENDER *rtp_sender, UINT *rtp_port, UINT *rt
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_create(NX_RTP_SENDER *rtp_sender, NX_RTP_SESSION *session, ULONG payload_type,
@@ -641,7 +600,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_create                      PORTABLE C       */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -679,15 +638,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*  12-31-2023     Haiqing Zhao            Modified comments(s),          */
-/*                                           supported VLAN,              */
-/*                                           resulting in version 6.4.0   */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_create(NX_RTP_SENDER *rtp_sender, NX_RTP_SESSION *session, ULONG payload_type,
@@ -777,7 +727,7 @@ UINT _nx_rtp_sender_session_create(NX_RTP_SENDER *rtp_sender, NX_RTP_SESSION *se
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_delete                     PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -804,12 +754,6 @@ UINT _nx_rtp_sender_session_create(NX_RTP_SENDER *rtp_sender, NX_RTP_SESSION *se
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_delete(NX_RTP_SESSION *session)
 {
@@ -835,7 +779,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_delete                      PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -863,12 +807,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_delete(NX_RTP_SESSION *session)
 {
@@ -891,7 +829,7 @@ UINT _nx_rtp_sender_session_delete(NX_RTP_SESSION *session)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_rtcp_receiver_report_callback_set   PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -921,12 +859,6 @@ UINT _nx_rtp_sender_session_delete(NX_RTP_SESSION *session)
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_rtcp_receiver_report_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtcp_rr_cb)(NX_RTP_SESSION *, NX_RTCP_RECEIVER_REPORT *))
 {
@@ -952,7 +884,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_rtcp_receiver_report_callback_set    PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -982,12 +914,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_rtcp_receiver_report_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtcp_rr_cb)(NX_RTP_SESSION *, NX_RTCP_RECEIVER_REPORT *))
 {
@@ -1001,7 +927,7 @@ UINT _nx_rtp_sender_rtcp_receiver_report_callback_set(NX_RTP_SENDER *rtp_sender,
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_rtcp_sdes_callback_set              PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -1029,12 +955,6 @@ UINT _nx_rtp_sender_rtcp_receiver_report_callback_set(NX_RTP_SENDER *rtp_sender,
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_rtcp_sdes_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtcp_sdes_cb)(NX_RTCP_SDES_INFO *))
 {
@@ -1060,7 +980,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_rtcp_sdes_callback_set               PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -1090,12 +1010,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_rtcp_sdes_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtcp_sdes_cb)(NX_RTCP_SDES_INFO *))
 {
@@ -1109,7 +1023,7 @@ UINT _nx_rtp_sender_rtcp_sdes_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtc
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_packet_allocate            PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1139,12 +1053,6 @@ UINT _nx_rtp_sender_rtcp_sdes_callback_set(NX_RTP_SENDER *rtp_sender, UINT (*rtc
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_packet_allocate(NX_RTP_SESSION *session, NX_PACKET **packet_ptr, ULONG wait_option)
 {
@@ -1170,7 +1078,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_packet_allocate             PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1198,12 +1106,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_packet_allocate(NX_RTP_SESSION *session, NX_PACKET **packet_ptr, ULONG wait_option)
 {
@@ -1222,7 +1124,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_packet_send                PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1257,12 +1159,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_packet_send(NX_RTP_SESSION *session, NX_PACKET *packet_ptr, ULONG timestamp, ULONG ntp_msw, ULONG ntp_lsw, UINT marker)
 {
@@ -1294,7 +1190,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_packet_send                 PORTABLE C       */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1329,15 +1225,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*  12-31-2023     Haiqing Zhao            Modified comments(s),          */
-/*                                           supported VLAN,              */
-/*                                           resulting in version 6.4.0   */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_packet_send(NX_RTP_SESSION *session, NX_PACKET *packet_ptr, ULONG timestamp, ULONG ntp_msw, ULONG ntp_lsw, UINT marker)
@@ -1554,7 +1441,7 @@ UINT           fragmentation = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_sequence_number_get        PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1583,12 +1470,6 @@ UINT           fragmentation = NX_FALSE;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_sequence_number_get(NX_RTP_SESSION *session, UINT *sequence_number)
 {
@@ -1614,7 +1495,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_sequence_number_get         PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1640,12 +1521,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_sequence_number_get(NX_RTP_SESSION *session, UINT *sequence_number)
 {
@@ -1661,7 +1536,7 @@ UINT _nx_rtp_sender_session_sequence_number_get(NX_RTP_SESSION *session, UINT *s
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_sample_factor_set          PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1690,12 +1565,6 @@ UINT _nx_rtp_sender_session_sequence_number_get(NX_RTP_SESSION *session, UINT *s
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_sample_factor_set(NX_RTP_SESSION *session, UINT factor)
 {
@@ -1721,7 +1590,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_sample_factor_set           PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1759,12 +1628,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_sample_factor_set(NX_RTP_SESSION *session, UINT factor)
 {
@@ -1780,7 +1643,7 @@ UINT _nx_rtp_sender_session_sample_factor_set(NX_RTP_SESSION *session, UINT fact
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_ssrc_get                   PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1808,12 +1671,6 @@ UINT _nx_rtp_sender_session_sample_factor_set(NX_RTP_SESSION *session, UINT fact
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_ssrc_get(NX_RTP_SESSION *session, ULONG *ssrc)
 {
@@ -1839,7 +1696,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_ssrc_get                    PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1865,12 +1722,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_ssrc_get(NX_RTP_SESSION *session, ULONG *ssrc)
 {
@@ -1886,7 +1737,7 @@ UINT _nx_rtp_sender_session_ssrc_get(NX_RTP_SESSION *session, ULONG *ssrc)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_vlan_priority_set          PORTABLE C       */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1914,12 +1765,6 @@ UINT _nx_rtp_sender_session_ssrc_get(NX_RTP_SESSION *session, ULONG *ssrc)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Haiqing Zhao            Initial Version 6.4.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan_priority)
@@ -1953,7 +1798,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_vlan_priority_set          PORTABLE C       */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -1982,12 +1827,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Haiqing Zhao            Initial Version 6.4.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan_priority)
 {
@@ -2010,7 +1849,7 @@ UINT _nx_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_cleanup                             PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -2038,12 +1877,6 @@ UINT _nx_rtp_sender_session_vlan_priority_set(NX_RTP_SESSION *session, UINT vlan
 /*    _nx_rtp_sender_create                Create RTP sender              */
 /*    _nx_rtp_sender_delete                Delete RTP sender              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_cleanup(NX_RTP_SENDER *rtp_sender)
 {
@@ -2065,7 +1898,7 @@ UINT _nx_rtp_sender_cleanup(NX_RTP_SENDER *rtp_sender)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_find                         PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -2093,12 +1926,6 @@ UINT _nx_rtp_sender_cleanup(NX_RTP_SENDER *rtp_sender)
 /*                                                                        */
 /*    _nx_rtcp_packet_rr_process            Handle RTCP RR packet         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_find(NX_RTP_SENDER *rtp_sender, UINT ssrc, NX_RTP_SESSION **session)
 {
@@ -2124,7 +1951,7 @@ NX_RTP_SESSION *start = rtp_sender -> nx_rtp_sender_session_created_ptr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_link                         PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -2149,12 +1976,6 @@ NX_RTP_SESSION *start = rtp_sender -> nx_rtp_sender_session_created_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtp_sender_session_create         Create RTP session            */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_rtp_sender_session_link(NX_RTP_SENDER *rtp_sender, NX_RTP_SESSION *session)
@@ -2190,7 +2011,7 @@ NX_RTP_SESSION *tail;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_unlink                       PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -2216,12 +2037,6 @@ NX_RTP_SESSION *tail;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtp_sender_session_delete         Delete RTP session            */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_unlink(NX_RTP_SENDER *rtp_sender, NX_RTP_SESSION *session)
@@ -2262,7 +2077,7 @@ NX_RTP_SESSION *pre;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtcp_packet_process                             PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -2289,12 +2104,6 @@ NX_RTP_SESSION *pre;
 /*                                                                        */
 /*    _nx_rtcp_packet_receive_notify        RTCP packet receive notify    */
 /*                                             service                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtcp_packet_process(NX_RTP_SENDER *rtp_sender, NX_PACKET *packet_ptr)
@@ -2386,7 +2195,7 @@ UCHAR          *end;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtcp_packet_rr_process                          PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -2415,12 +2224,6 @@ UCHAR          *end;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtcp_packet_process                Handle RTCP packet           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtcp_packet_rr_process(NX_RTP_SENDER *rtp_sender, NX_RTCP_HEADER *header)
@@ -2491,7 +2294,7 @@ NX_RTP_SESSION         *session;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtcp_packet_sdes_process                        PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -2517,12 +2320,6 @@ NX_RTP_SESSION         *session;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtcp_packet_process                Handle RTCP packet           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtcp_packet_sdes_process(NX_RTP_SENDER *rtp_sender, NX_RTCP_HEADER *header)
@@ -2598,7 +2395,7 @@ INT                 count;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtcp_sr_data_append                             PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -2625,12 +2422,6 @@ INT                 count;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtcp_packet_send                  Send RTCP packet              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtcp_sr_data_append(NX_RTP_SESSION *session, NX_PACKET *packet_ptr)
@@ -2670,7 +2461,7 @@ NX_RTCP_SR rtcp_sr;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtcp_sdes_data_append                           PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -2697,12 +2488,6 @@ NX_RTCP_SR rtcp_sr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtcp_packet_send                  Send RTCP packet              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtcp_sdes_data_append(NX_RTP_SESSION *session, NX_PACKET *packet_ptr)
@@ -2802,7 +2587,7 @@ SDES item format for CNAME:
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtcp_packet_send                                PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -2832,12 +2617,6 @@ SDES item format for CNAME:
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtp_sender_session_packet_send    Send rtp packet               */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtcp_packet_send(NX_RTP_SESSION *session)
@@ -2896,7 +2675,7 @@ UINT       current_time = tx_time_get();
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtcp_packet_receive_notify                      PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Ting Zhu, Microsoft Corporation                                     */
@@ -2924,12 +2703,6 @@ UINT       current_time = tx_time_get();
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtp_sender_create                 Create RTP sender             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Ting Zhu                 Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_rtcp_packet_receive_notify(NX_UDP_SOCKET *socket_ptr)
@@ -2964,7 +2737,7 @@ NX_RTP_SENDER *rtp_sender;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_jpeg_send                  PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -3000,12 +2773,6 @@ NX_RTP_SENDER *rtp_sender;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_jpeg_send(NX_RTP_SESSION *session, UCHAR *frame_data, ULONG frame_data_size,
                                        ULONG timestamp, ULONG ntp_msw, ULONG ntp_lsw, UINT marker)
@@ -3032,7 +2799,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_jpeg_send                   PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -3078,12 +2845,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_jpeg_send(NX_RTP_SESSION *session, UCHAR *frame_data, ULONG frame_data_size,
@@ -3493,7 +3254,7 @@ NX_PACKET *send_packet = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_h264_send                  PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -3529,12 +3290,6 @@ NX_PACKET *send_packet = NX_NULL;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_h264_send(NX_RTP_SESSION *session, UCHAR *frame_data, ULONG frame_data_size,
                                        ULONG timestamp, ULONG ntp_msw, ULONG ntp_lsw, UINT marker)
@@ -3561,7 +3316,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_h264_send                   PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -3611,12 +3366,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_h264_send(NX_RTP_SESSION *session, UCHAR *frame_data, ULONG frame_data_size,
@@ -3915,7 +3664,7 @@ NX_PACKET *send_packet = NX_NULL;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_rtp_sender_session_aac_send                   PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -3951,12 +3700,6 @@ NX_PACKET *send_packet = NX_NULL;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtp_sender_session_aac_send(NX_RTP_SESSION *session, UCHAR *frame_data, ULONG frame_data_size,
                                       ULONG timestamp, ULONG ntp_msw, ULONG ntp_lsw, UINT marker)
@@ -3983,7 +3726,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_rtp_sender_session_aac_send                    PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Haiqing Zhao, Microsoft Corporation                                 */
@@ -4028,12 +3771,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao            Initial Version 6.3.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtp_sender_session_aac_send(NX_RTP_SESSION *session, UCHAR *frame_data, ULONG frame_data_size,

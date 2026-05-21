@@ -1,7 +1,7 @@
 /* 14.19 TCP MUST include an SWS avoidance algorithm in the receiver when effective send MSS < (1/ 2)*RCV_BUFF.  */
 
 /*  Procedure
-    1.Connection successfully  
+    1.Connection successfully
     2.First Client sends 40 data to Server, then check if the last_sent changed
     3.Then Client sends more 20 data to Server, also check if the last_sent changed
     4.If the last_sent changed, the SWS avoidance algorithm has not been used.  */
@@ -477,7 +477,7 @@ ULONG bytes;
     /* Accept a client socket connection.  */
     status = nx_tcp_server_socket_accept(&server_socket, NX_IP_PERIODIC_RATE);
     
-    //tx_thread_suspend(&ntest_0);    
+    //tx_thread_suspend(&ntest_0);
     
 
     /* Check for error.  */
@@ -638,7 +638,7 @@ ULONG bytes;
 
 #ifdef NX_SECURE_ENABLE_PSK_CIPHERSUITES
     /* For PSK ciphersuites, add a PSK and identity hint.  For the client, we need to add the identity
-       and set it for the particular server with which we want to communicate. 
+       and set it for the particular server with which we want to communicate.
        "Client_identity" is the identity hint used by default in the OpenSSL s_server application
        when uisng PSK ciphersuites. */       
     nx_secure_tls_psk_add(&client_tls_session, tls_psk, sizeof(tls_psk), "Client_identity", 15, "12345678", 8);
@@ -652,7 +652,7 @@ ULONG bytes;
     if(status)
         error_counter++;
 
-    //tx_thread_resume(&ntest_0); 
+    //tx_thread_resume(&ntest_0);
     
     status = nx_secure_tls_session_start(&client_tls_session, &client_socket, NX_WAIT_FOREVER);
 

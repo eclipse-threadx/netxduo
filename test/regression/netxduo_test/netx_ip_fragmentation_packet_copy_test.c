@@ -2,7 +2,7 @@
 /* Requirement: __PRODUCT_NETXDUO__ is defined, NX_DISABLE_FRAGMENTATION is not defined. */
 /* Test sequence:
  * 1. Client send 1500 bytes to Server.
- * 2. Driver copy the second fragment packet and send the copy packet to Server. 
+ * 2. Driver copy the second fragment packet and send the copy packet to Server.
  * 3. Check if Server receive the 1500 bytes.
  */
 

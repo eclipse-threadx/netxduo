@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -46,7 +47,7 @@ NX_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */
 /*    _nxde_tftp_client_create                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -78,14 +79,6 @@ NX_CALLER_CHECKING_EXTERNS
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_tftp_client_create(NX_TFTP_CLIENT *tftp_client_ptr, CHAR *tftp_client_name, NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr, UINT ip_type)
 {
@@ -117,7 +110,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_tftp_client_create                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -152,14 +145,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tftp_client_create(NX_TFTP_CLIENT *tftp_client_ptr, CHAR *tftp_client_name, NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr, UINT ip_type)
 {
@@ -233,7 +218,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */  
 /*    _nxde_tftp_client_delete                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -260,14 +245,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_tftp_client_delete(NX_TFTP_CLIENT *tftp_client_ptr)
 {
@@ -295,7 +272,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_tftp_client_delete                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -322,14 +299,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tftp_client_delete(NX_TFTP_CLIENT *tftp_client_ptr)
 {
@@ -352,7 +321,7 @@ UINT  _nxd_tftp_client_delete(NX_TFTP_CLIENT *tftp_client_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */  
 /*    _nxde_tftp_client_set_interface                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -382,14 +351,6 @@ UINT  _nxd_tftp_client_delete(NX_TFTP_CLIENT *tftp_client_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_tftp_client_set_interface(NX_TFTP_CLIENT *tftp_client_ptr, UINT if_index)
 {
@@ -422,7 +383,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */   
 /*    _nxd_tftp_client_set_interface                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -452,14 +413,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tftp_client_set_interface(NX_TFTP_CLIENT *tftp_client_ptr, UINT if_index)
 {
@@ -479,7 +432,7 @@ UINT  _nxd_tftp_client_set_interface(NX_TFTP_CLIENT *tftp_client_ptr, UINT if_in
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */     
 /*    _nxde_tftp_client_error_info_get                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -513,14 +466,6 @@ UINT  _nxd_tftp_client_set_interface(NX_TFTP_CLIENT *tftp_client_ptr, UINT if_in
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_tftp_client_error_info_get(NX_TFTP_CLIENT *tftp_client_ptr, UINT *error_code, CHAR **error_string)
 {
@@ -548,7 +493,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_tftp_client_error_info_get                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -581,14 +526,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tftp_client_error_info_get(NX_TFTP_CLIENT *tftp_client_ptr, UINT *error_code, CHAR **error_string)
 {
@@ -607,7 +544,7 @@ UINT  _nxd_tftp_client_error_info_get(NX_TFTP_CLIENT *tftp_client_ptr, UINT *err
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */  
 /*    _nxde_tftp_client_file_close                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -636,14 +573,6 @@ UINT  _nxd_tftp_client_error_info_get(NX_TFTP_CLIENT *tftp_client_ptr, UINT *err
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_tftp_client_file_close(NX_TFTP_CLIENT *tftp_client_ptr, UINT ip_type)
 {
@@ -676,7 +605,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_tftp_client_file_close                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -706,14 +635,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tftp_client_file_close(NX_TFTP_CLIENT *tftp_client_ptr, UINT ip_type)
 {
@@ -813,7 +734,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_tftp_client_file_open                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -848,14 +769,6 @@ UINT        status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_tftp_client_file_open(NX_TFTP_CLIENT *tftp_client_ptr, CHAR *file_name, ULONG server_ip_address, UINT open_type, ULONG wait_option)
 {
@@ -900,7 +813,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_tftp_client_file_open                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -932,14 +845,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_tftp_client_file_open(NX_TFTP_CLIENT *tftp_client_ptr, CHAR *file_name, ULONG server_ip_address, UINT open_type, ULONG wait_option)
 {
@@ -976,7 +881,7 @@ NXD_ADDRESS server_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_tftp_client_file_open                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1013,14 +918,6 @@ NXD_ADDRESS server_address;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_tftp_client_file_open(NX_TFTP_CLIENT *tftp_client_ptr, CHAR *file_name, NXD_ADDRESS *server_ip_address, UINT open_type, ULONG wait_option, UINT ip_type)
 {
@@ -1062,7 +959,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_tftp_client_file_open                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1099,14 +996,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tftp_client_file_open(NX_TFTP_CLIENT *tftp_client_ptr, CHAR *file_name, NXD_ADDRESS *server_ip_address, UINT open_type, ULONG wait_option, UINT ip_type)
 {
@@ -1127,7 +1016,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_tftp_client_file_open_internal                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1167,14 +1056,6 @@ UINT        status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_tftp_client_file_open_internal(NX_TFTP_CLIENT *tftp_client_ptr, CHAR *file_name, NXD_ADDRESS *server_ip_address, UINT open_type, ULONG wait_option, UINT  ip_type)
 
@@ -1484,7 +1365,7 @@ UINT        matching = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_tftp_client_file_read                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1516,14 +1397,6 @@ UINT        matching = NX_FALSE;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_tftp_client_file_read(NX_TFTP_CLIENT *tftp_client_ptr, NX_PACKET **packet_ptr, ULONG wait_option, UINT ip_type)
 {
@@ -1557,7 +1430,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_tftp_client_file_read                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1598,14 +1471,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tftp_client_file_read(NX_TFTP_CLIENT *tftp_client_ptr, NX_PACKET **packet_ptr, ULONG wait_option, UINT ip_type)
 {
@@ -1746,7 +1611,7 @@ UCHAR       resend_ACK_packet = NX_FALSE;
         {
 
             /*  The Server will resend previous packet till it times out.
-                set a flag to indicate we need to resend the ACK packet to 
+                set a flag to indicate we need to resend the ACK packet to
                 prevent this. */
             resend_ACK_packet = NX_TRUE;
         }
@@ -1809,7 +1674,7 @@ UCHAR       resend_ACK_packet = NX_FALSE;
 
         ack_packet -> nx_packet_append_ptr = ack_packet -> nx_packet_prepend_ptr;
 
-        /* Valid block number, we need to send an ACK back to server. So now 
+        /* Valid block number, we need to send an ACK back to server. So now
            build the TFTP ACK message.  */
 
         /* Setup a pointer to the packet payload.  */
@@ -1947,7 +1812,7 @@ UCHAR       resend_ACK_packet = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */  
 /*    _nxde_tftp_client_file_write                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1978,14 +1843,6 @@ UCHAR       resend_ACK_packet = NX_FALSE;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_tftp_client_file_write(NX_TFTP_CLIENT *tftp_client_ptr, NX_PACKET *packet_ptr, ULONG wait_option, UINT ip_type)
 {
@@ -2020,7 +1877,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */    
 /*    _nxd_tftp_client_file_write                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2054,14 +1911,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tftp_client_file_write(NX_TFTP_CLIENT *tftp_client_ptr, NX_PACKET *packet_ptr, ULONG wait_option, UINT ip_type)
 {
@@ -2211,7 +2060,7 @@ UINT        matching = NX_FALSE;
         buffer_ptr++;
         code =  *(buffer_ptr);
 
-        /* Check if this is a error reported by the server. If so save it to 
+        /* Check if this is a error reported by the server. If so save it to
            the TFTP Client. */
         if (code == NX_TFTP_CODE_ERROR)
         {
@@ -2283,7 +2132,7 @@ UINT        matching = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_tftp_client_packet_allocate                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2316,14 +2165,6 @@ UINT        matching = NX_FALSE;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_tftp_client_packet_allocate(NX_PACKET_POOL *pool_ptr, NX_PACKET **packet_ptr, ULONG wait_option, UINT ip_type)
 {
@@ -2357,7 +2198,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_tftp_client_packet_allocate                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2389,14 +2230,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_tftp_client_packet_allocate(NX_PACKET_POOL *pool_ptr, NX_PACKET **packet_ptr, ULONG wait_option, UINT ip_type)
 {
@@ -2426,7 +2259,7 @@ UINT    status;
 
     (*packet_ptr) -> nx_packet_append_ptr = (*packet_ptr) -> nx_packet_prepend_ptr;
 
-    /* Successful packet allocation.  Adjust the prepend and append pointers forward to 
+    /* Successful packet allocation.  Adjust the prepend and append pointers forward to
        accommodate the TFTP header.  */
     (*packet_ptr) -> nx_packet_prepend_ptr +=  4;
     (*packet_ptr) -> nx_packet_append_ptr  +=  4;

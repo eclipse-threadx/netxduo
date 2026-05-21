@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -36,7 +37,7 @@ static NX_MSRP_ATTRIBUTE msrp_attribute_array[NX_MSRP_ATTRIBUTE_ARRAY_MAX_SIZE];
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_init                                        PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -61,12 +62,6 @@ static NX_MSRP_ATTRIBUTE msrp_attribute_array[NX_MSRP_ATTRIBUTE_ARRAY_MAX_SIZE];
 /*                                                                        */
 /*    nx_srp_init                           Initialize SRP                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_init(NX_MSRP *msrp_ptr)
 {
@@ -90,7 +85,7 @@ UINT nx_msrp_init(NX_MSRP *msrp_ptr)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_attribute_find                              PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -126,12 +121,6 @@ UINT nx_msrp_init(NX_MSRP *msrp_ptr)
 /*    nx_msrp_register_domain_request       MSRP register domain requset  */
 /*    nx_msrp_deregister_domain_request     MSRP deregister domain requset*/
 /*    nx_msrp_mrpdu_parse                   MSRP parse MRP date unit      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_attribute_find(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE **attribute_ptr, UCHAR attribute_type, UCHAR *attribute_value)
@@ -370,7 +359,7 @@ NX_MRP_ATTRIBUTE *attribute_head = participant -> inused_head;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_register_stream_request                     PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -399,12 +388,6 @@ NX_MRP_ATTRIBUTE *attribute_head = participant -> inused_head;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_srp_talker_start                   Start SRP talker              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_register_stream_request(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MSRP_TALKER_ADVERTISE *talker_advertise, UINT new_request)
@@ -463,7 +446,7 @@ UCHAR             mrp_event;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_register_attach_request                     PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -491,12 +474,6 @@ UCHAR             mrp_event;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_msrp_register_stream_indication    Indication MSRP register      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_register_attach_request(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, UCHAR *stream_id, UINT mrp_event, UCHAR fourpacked_value)
@@ -539,7 +516,7 @@ UCHAR             attribute_type = NX_MSRP_TALKER_LISTENER_VECTOR;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_deregister_stream_request                   PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -566,12 +543,6 @@ UCHAR             attribute_type = NX_MSRP_TALKER_LISTENER_VECTOR;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_srp_talker_stop                    Stop SRP talker               */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_deregister_stream_request(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, UCHAR *stream_id)
@@ -607,7 +578,7 @@ UCHAR             attribute_type = NX_MSRP_TALKER_ADVERTISE_VECTOR;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_deregister_attach_request                   PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -635,12 +606,6 @@ UCHAR             attribute_type = NX_MSRP_TALKER_ADVERTISE_VECTOR;
 /*                                                                        */
 /*    nx_msrp_deregister_stream_indication  receive deregister stream     */
 /*    nx_srp_listener_stop                  Stop SRP listener             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_deregister_attach_request(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, UCHAR *stream_id)
@@ -677,7 +642,7 @@ UCHAR             attribute_type = NX_MSRP_TALKER_LISTENER_VECTOR;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_register_domain_request                     PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -705,12 +670,6 @@ UCHAR             attribute_type = NX_MSRP_TALKER_LISTENER_VECTOR;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_srp_talker_start                   Start SRP talker              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_register_domain_request(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MSRP_DOMAIN *domain, UINT new_request)
@@ -767,7 +726,7 @@ UINT              status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_deregister_domain_request                   PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -797,12 +756,6 @@ UINT              status;
 /*    nx_srp_listener_stop                  Stop SRP listener             */
 /*    nx_msrp_deregister_domain_indication  Deregister MSRP domain        */
 /*                                          indication                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_deregister_domain_request(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MSRP_DOMAIN *domain)
@@ -839,7 +792,7 @@ UINT              status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_register_stream_indication                  PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -867,12 +820,6 @@ UINT              status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_msrp_indication_process            Process MSRP indication       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_register_stream_indication(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UINT indication_type)
@@ -925,7 +872,7 @@ NX_MRP_EVENT_CALLBACK event_callback;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_deregister_stream_indication                PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -953,12 +900,6 @@ NX_MRP_EVENT_CALLBACK event_callback;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_msrp_indication_process            Process MSRP indication       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_deregister_stream_indication(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR indication_type)
@@ -994,7 +935,7 @@ UCHAR *stream_id;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_register_attach_indication                  PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -1021,12 +962,6 @@ UCHAR *stream_id;
 /*                                                                        */
 /*    nx_msrp_indication_process            Process MSRP indication       */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_register_attach_indication(NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR indication_type)
 {
@@ -1049,7 +984,7 @@ NX_MRP_EVENT_CALLBACK event_callback;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_deregister_attach_indication                PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -1076,12 +1011,6 @@ NX_MRP_EVENT_CALLBACK event_callback;
 /*                                                                        */
 /*    nx_msrp_indication_process            Process MSRP indication       */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_deregister_attach_indication(NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR indication_type)
 {
@@ -1104,7 +1033,7 @@ NX_MRP_EVENT_CALLBACK event_callback;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_register_domain_indication                  PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -1132,12 +1061,6 @@ NX_MRP_EVENT_CALLBACK event_callback;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_msrp_indication_process            Process MSRP indication       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_register_domain_indication(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR indication_type)
@@ -1171,7 +1094,7 @@ NX_MSRP_DOMAIN *domain;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_deregister_domain_indication                PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -1199,12 +1122,6 @@ NX_MSRP_DOMAIN *domain;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_msrp_indication_process            Process MSRP indication       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_deregister_domain_indication(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR indication_type)
@@ -1237,7 +1154,7 @@ NX_MSRP_DOMAIN *domain;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_indication_process                          PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -1273,12 +1190,6 @@ NX_MSRP_DOMAIN *domain;
 /*                                                                        */
 /*    nx_mrp_registrar_event_process        Process registrar mrp_event   */
 /*    nx_mrp_attribute_evict                Evict MRP attribute           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_indication_process(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR indication_type)
@@ -1396,7 +1307,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_mrpdu_parse                                 PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -1425,12 +1336,6 @@ UINT status;
 /*                                                                        */
 /*    nx_mrp_registrar_event_process        Process registrar mrp_event   */
 /*    nx_mrp_attribute_evict                Evict MRP attribute           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_mrpdu_parse(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_PACKET *packet_ptr)
@@ -1650,7 +1555,7 @@ UCHAR                    *data_ptr = packet_ptr -> nx_packet_data_start;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_mrpdu_pack_attribute                        PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -1681,12 +1586,6 @@ UCHAR                    *data_ptr = packet_ptr -> nx_packet_data_start;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_msrp_mrpdu_pack                    MSRP pack MRP data unit       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_mrpdu_pack_attribute(NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, USHORT num_of_value,
@@ -1930,7 +1829,7 @@ USHORT attribute_list_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_msrp_mrpdu_pack                                  PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -1959,12 +1858,6 @@ USHORT attribute_list_length;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_mrp_join_timeout_process           MRP join timer timeout process*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_msrp_mrpdu_pack(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_PACKET *packet_ptr)

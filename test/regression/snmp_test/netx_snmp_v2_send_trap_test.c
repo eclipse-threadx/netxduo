@@ -626,7 +626,7 @@ UINT    status;
 /* Create an error code if matching user not found. */
 #define USER_NOT_FOUND 1
 
-/* Define the username callback routine routine. Usernames should be 
+/* Define the username callback routine routine. Usernames should be
    associated with permissions (public or private string) and what version
    of SNMP the user is configured for. The username callback should verify
    the incoming username MIB access permissions.  */

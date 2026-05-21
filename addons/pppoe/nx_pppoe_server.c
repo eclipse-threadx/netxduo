@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -74,7 +75,7 @@ static UCHAR   *nx_pppoe_service_name[1];
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_create                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -109,14 +110,6 @@ static UCHAR   *nx_pppoe_service_name[1];
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_create(NX_PPPOE_SERVER *pppoe_server_ptr, UCHAR *name, NX_IP *ip_ptr, UINT interface_index,
                                VOID (*pppoe_link_driver)(struct NX_IP_DRIVER_STRUCT *), NX_PACKET_POOL *pool_ptr,
@@ -167,7 +160,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_create                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -203,14 +196,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_create(NX_PPPOE_SERVER *pppoe_server_ptr, UCHAR *name, NX_IP *ip_ptr, UINT interface_index,
                               VOID (*pppoe_link_driver)(struct NX_IP_DRIVER_STRUCT *), NX_PACKET_POOL *pool_ptr,
@@ -289,7 +274,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_ac_name_set                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -318,14 +303,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_ac_name_set(NX_PPPOE_SERVER *pppoe_server_ptr, UCHAR *ac_name, UINT ac_name_length)
 {   
@@ -349,7 +326,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_ac_name_set                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -379,14 +356,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_ac_name_set(NX_PPPOE_SERVER *pppoe_server_ptr, UCHAR *ac_name, UINT ac_name_length)
 {
@@ -422,7 +391,7 @@ UINT temp_name_length = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_delete                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -449,14 +418,6 @@ UINT temp_name_length = 0;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_delete(NX_PPPOE_SERVER *pppoe_server_ptr)              
 {
@@ -480,7 +441,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_delete                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -508,14 +469,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_delete(NX_PPPOE_SERVER *pppoe_server_ptr)
 {
@@ -564,7 +517,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_enable                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -590,14 +543,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_enable(NX_PPPOE_SERVER *pppoe_server_ptr)              
 {
@@ -608,7 +553,7 @@ UINT    status;
     if ((pppoe_server_ptr == NX_NULL) || (pppoe_server_ptr -> nx_pppoe_id != NX_PPPOE_SERVER_ID))
         return(NX_PPPOE_SERVER_PTR_ERROR);
 
-    /* Make sure the data receive callback function is set before enable.  
+    /* Make sure the data receive callback function is set before enable.
        Setting this function by nx_pppoe_server_callback_notify_set() API.  */
     if (pppoe_server_ptr -> nx_pppoe_data_receive_notify == NX_NULL)
         return(NX_PPPOE_SERVER_PTR_ERROR);
@@ -626,7 +571,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_enable                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -653,14 +598,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_enable(NX_PPPOE_SERVER *pppoe_server_ptr)
 {
@@ -687,7 +624,7 @@ UINT  _nx_pppoe_server_enable(NX_PPPOE_SERVER *pppoe_server_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_disable                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -713,14 +650,6 @@ UINT  _nx_pppoe_server_enable(NX_PPPOE_SERVER *pppoe_server_ptr)
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_disable(NX_PPPOE_SERVER *pppoe_server_ptr)              
 {
@@ -744,7 +673,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_disable                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -771,14 +700,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_disable(NX_PPPOE_SERVER *pppoe_server_ptr)
 {
@@ -805,7 +726,7 @@ UINT  _nx_pppoe_server_disable(NX_PPPOE_SERVER *pppoe_server_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_callback_notify_set               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -844,14 +765,6 @@ UINT  _nx_pppoe_server_disable(NX_PPPOE_SERVER *pppoe_server_ptr)
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_callback_notify_set(NX_PPPOE_SERVER *pppoe_server_ptr, 
                                             VOID (* pppoe_discover_initiation_notify)(UINT session_index), 
@@ -887,7 +800,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_callback_notify_set                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -925,14 +838,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_callback_notify_set(NX_PPPOE_SERVER *pppoe_server_ptr, 
                                            VOID (* pppoe_discover_initiation_notify)(UINT session_index), 
@@ -967,7 +872,7 @@ UINT  _nx_pppoe_server_callback_notify_set(NX_PPPOE_SERVER *pppoe_server_ptr,
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_service_name_set                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -999,14 +904,6 @@ UINT  _nx_pppoe_server_callback_notify_set(NX_PPPOE_SERVER *pppoe_server_ptr,
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_service_name_set(NX_PPPOE_SERVER *pppoe_server_ptr, UCHAR **service_name, UINT service_name_count)
 {
@@ -1030,7 +927,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_service_name_set                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1061,14 +958,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_service_name_set(NX_PPPOE_SERVER *pppoe_server_ptr, UCHAR **service_name, UINT service_name_count)
 {
@@ -1096,7 +985,7 @@ UINT  _nx_pppoe_server_service_name_set(NX_PPPOE_SERVER *pppoe_server_ptr, UCHAR
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_session_send                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1126,14 +1015,6 @@ UINT  _nx_pppoe_server_service_name_set(NX_PPPOE_SERVER *pppoe_server_ptr, UCHAR
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_session_send(NX_PPPOE_SERVER *pppoe_server_ptr, UINT session_index, UCHAR *data_ptr, UINT data_length)
 {
@@ -1174,7 +1055,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_session_send                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1210,14 +1091,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_session_send(NX_PPPOE_SERVER *pppoe_server_ptr, UINT session_index, UCHAR *data_ptr, UINT data_length)
 {               
@@ -1250,11 +1123,11 @@ UINT                        status;
 
     /* Added the PPPoE header.  */
     /*
-     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      * |  VER | TYPE  |      CODE       |         SESSION_ID           |
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * |           LENGTH               |          payload             
+     * |           LENGTH               |          payload
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     */
 
@@ -1318,7 +1191,7 @@ UINT                        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_session_packet_send               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1347,14 +1220,6 @@ UINT                        status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_session_packet_send(NX_PPPOE_SERVER *pppoe_server_ptr, UINT session_index, NX_PACKET *packet_ptr)
 {
@@ -1447,7 +1312,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_session_packet_send                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1481,14 +1346,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_session_packet_send(NX_PPPOE_SERVER *pppoe_server_ptr, UINT session_index, NX_PACKET *packet_ptr)
 {
@@ -1527,11 +1384,11 @@ UCHAR                      *work_ptr;
 
     /* Added the PPPoE header.  */
     /*
-     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      * |  VER | TYPE  |      CODE       |         SESSION_ID           |
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * |           LENGTH               |          payload             
+     * |           LENGTH               |          payload
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     */
 
@@ -1566,7 +1423,7 @@ UCHAR                      *work_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_session_terminate                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1594,14 +1451,6 @@ UCHAR                      *work_ptr;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_session_terminate(NX_PPPOE_SERVER *pppoe_server_ptr, UINT session_index)
 {
@@ -1638,7 +1487,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_session_terminate                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1667,14 +1516,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_session_terminate(NX_PPPOE_SERVER *pppoe_server_ptr, UINT session_index)
 {
@@ -1720,7 +1561,7 @@ UINT                        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_pppoe_server_session_get                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1751,14 +1592,6 @@ UINT                        status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_server_session_get(NX_PPPOE_SERVER *pppoe_server_ptr, UINT session_index, ULONG *client_mac_msw, ULONG *client_mac_lsw, ULONG *session_id)
 {
@@ -1786,7 +1619,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_session_get                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1817,14 +1650,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_server_session_get(NX_PPPOE_SERVER *pppoe_server_ptr, UINT session_index, ULONG *client_mac_msw, ULONG *client_mac_lsw, ULONG *session_id)
 {  
@@ -1869,7 +1694,7 @@ UINT  _nx_pppoe_server_session_get(NX_PPPOE_SERVER *pppoe_server_ptr, UINT sessi
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_packet_deferred_receive            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1897,14 +1722,6 @@ UINT  _nx_pppoe_server_session_get(NX_PPPOE_SERVER *pppoe_server_ptr, UINT sessi
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_pppoe_server_packet_deferred_receive(NX_PACKET *packet_ptr)
 {
@@ -1971,7 +1788,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_thread_entry                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2008,14 +1825,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */
 /*    ThreadX Scheduler                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_pppoe_server_thread_entry(ULONG pppoe_server_ptr_value)
 {
@@ -2218,7 +2027,7 @@ UINT                i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_packet_receive                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2250,14 +2059,6 @@ UINT                i;
 /*                                                                        */ 
 /*    _nx_pppoe_server_thread_entry                                       */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_pppoe_server_packet_receive(NX_PPPOE_SERVER *pppoe_server_ptr, NX_PACKET *packet_ptr)
 {
@@ -2347,7 +2148,7 @@ UINT                        is_broadcast = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_discovery_packet_process           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2381,15 +2182,6 @@ UINT                        is_broadcast = NX_FALSE;
 /*                                                                        */ 
 /*    _nx_pppoe_server_packet_receive       Receive the PPPoE packet      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_pppoe_server_discovery_packet_process(NX_PPPOE_SERVER *pppoe_server_ptr, NX_PACKET *packet_ptr, ULONG client_mac_msw, ULONG client_mac_lsw, UINT is_broadcast)
 {
@@ -2434,7 +2226,7 @@ NX_PPPOE_CLIENT_SESSION    *client_session_ptr = NX_NULL;
         return;
     }
 
-    /* For PADI, the destination address should be broadcast. 
+    /* For PADI, the destination address should be broadcast.
        For PADR and PART, the destination address should be unicast.  */
     if (((code == NX_PPPOE_SERVER_CODE_PADI) && (is_broadcast != NX_TRUE)) ||
         ((code != NX_PPPOE_SERVER_CODE_PADI) && (is_broadcast == NX_TRUE)))
@@ -2448,7 +2240,7 @@ NX_PPPOE_CLIENT_SESSION    *client_session_ptr = NX_NULL;
     /* Pickup the session id.  */   
     session_id = _nx_pppoe_server_data_get(pppoe_header_ptr + NX_PPPOE_SERVER_OFFSET_SESSION_ID, 2);
 
-    /* Check the session id. 
+    /* Check the session id.
        Session ID must be zero for PADI and PADR,
        Session ID must be not zero for PADT.  */
     if (((code != NX_PPPOE_SERVER_CODE_PADT) && (session_id != 0)) ||
@@ -2497,7 +2289,7 @@ NX_PPPOE_CLIENT_SESSION    *client_session_ptr = NX_NULL;
     if (status)
     {
 
-        /* If the Access Concentrator does not like the Service-Name in the PADR, 
+        /* If the Access Concentrator does not like the Service-Name in the PADR,
            then it MUST reply with a PADS containing a TAG of TAG_TYPE Service-Name-Error (and any number of other TAG types).
            In this case the SESSION_ID MUST be set to 0x0000. RFC2516, Section5.4, Page6.  */
         if ((status == NX_PPPOE_SERVER_SERVICE_NAME_ERROR) && (code == NX_PPPOE_SERVER_CODE_PADR))
@@ -2543,7 +2335,7 @@ NX_PPPOE_CLIENT_SESSION    *client_session_ptr = NX_NULL;
         if (client_session_ptr -> nx_pppoe_session_id == 0)
         {
 
-            /* The Session ID should not be zero and 0xFFFF.  
+            /* The Session ID should not be zero and 0xFFFF.
                RFC2516, Section4, Page4.  */
             if ((pppoe_server_ptr -> nx_pppoe_session_id == 0) ||
                 (pppoe_server_ptr -> nx_pppoe_session_id == 0xFFFF))
@@ -2606,7 +2398,7 @@ NX_PPPOE_CLIENT_SESSION    *client_session_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_session_packet_process             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2636,14 +2428,6 @@ NX_PPPOE_CLIENT_SESSION    *client_session_ptr = NX_NULL;
 /*                                                                        */ 
 /*    _nx_pppoe_server_packet_receive       Receive the PPPoE packet      */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_pppoe_server_session_packet_process(NX_PPPOE_SERVER *pppoe_server_ptr, NX_PACKET *packet_ptr, ULONG client_mac_msw, ULONG client_mac_lsw)
 {
@@ -2792,7 +2576,7 @@ NX_PPPOE_CLIENT_SESSION    *client_session_ptr = NX_NULL;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_discovery_send                     PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2829,17 +2613,6 @@ NX_PPPOE_CLIENT_SESSION    *client_session_ptr = NX_NULL;
 /*    _nx_pppoe_server_discovery_packet_process                           */ 
 /*                                          Process PPPoE Discovery packet*/ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the compiler errors,  */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT    _nx_pppoe_server_discovery_send(NX_PPPOE_SERVER *pppoe_server_ptr, NX_PPPOE_CLIENT_SESSION *client_session_ptr, UINT code)
 {               
@@ -2881,11 +2654,11 @@ UCHAR          *service_name_ptr;
     /* The PPPoE payload contains zero or more TAGs.  A TAG is a TLV (type-length-value) construct and is defined as follows.  */
 
     /*                      1                   2                   3
-     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      * |          TAG_TYPE              |         TAG_LENGTH           |
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * |          TAG_VALUE  ...                                        
+     * |          TAG_VALUE  ...
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     */
 
@@ -2908,7 +2681,7 @@ UCHAR          *service_name_ptr;
             _nx_pppoe_server_tag_string_add(work_ptr, NX_PPPOE_SERVER_TAG_TYPE_AC_NAME, pppoe_server_ptr -> nx_pppoe_name_length, (UCHAR *)(pppoe_server_ptr -> nx_pppoe_name), &index);
         }            
                                                                                                                                              
-        /* The PADO packet MUST contain a Service-Name TAG identical to the one in the PADI, 
+        /* The PADO packet MUST contain a Service-Name TAG identical to the one in the PADI,
            and any number of other Service-Name TAGs indicating other services. RFC2516, Section 5.2, Page6.  */
 
         /* Added a Service-Name TAG identical to the one in the PADI.  */
@@ -2982,7 +2755,7 @@ UCHAR          *service_name_ptr;
         }
 #endif
 
-        /* If the Access Concentrator receives this Host-Uniq TAG, it MUST include the TAG unmodified in associated PADO or PADS response. 
+        /* If the Access Concentrator receives this Host-Uniq TAG, it MUST include the TAG unmodified in associated PADO or PADS response.
            RFC2516, Appendix A, Host-Uniq.  */         
         if  (client_session_ptr -> nx_pppoe_host_uniq_size)
         {
@@ -2991,7 +2764,7 @@ UCHAR          *service_name_ptr;
             _nx_pppoe_server_tag_string_add(work_ptr, NX_PPPOE_SERVER_TAG_TYPE_HOST_UNIQ, client_session_ptr -> nx_pppoe_host_uniq_size, client_session_ptr -> nx_pppoe_host_uniq, &index);
         } 
                                                                                                                                                                                         
-        /* If either the Host or Access Concentrator receives this Relay-Session-Id TAG, they MUST include it unmodified in any discovery packet they send as a response. 
+        /* If either the Host or Access Concentrator receives this Relay-Session-Id TAG, they MUST include it unmodified in any discovery packet they send as a response.
            RFC2516, Appendix A, Relay-Session-Id.  */
         if  (client_session_ptr -> nx_pppoe_relay_session_id_size)
         {
@@ -3034,7 +2807,7 @@ UCHAR          *service_name_ptr;
             _nx_pppoe_server_tag_string_add(work_ptr, NX_PPPOE_SERVER_TAG_TYPE_SERVICE_NAME, 0, NX_NULL, &index); 
         }
 
-        /* If the Access Concentrator receives this Host-Uniq TAG, it MUST include the TAG unmodified in associated PADO or PADS response. 
+        /* If the Access Concentrator receives this Host-Uniq TAG, it MUST include the TAG unmodified in associated PADO or PADS response.
            RFC2516, Appendix A, Host-Uniq.  */         
         if  (client_session_ptr -> nx_pppoe_host_uniq_size)
         {
@@ -3043,7 +2816,7 @@ UCHAR          *service_name_ptr;
             _nx_pppoe_server_tag_string_add(work_ptr, NX_PPPOE_SERVER_TAG_TYPE_HOST_UNIQ, client_session_ptr -> nx_pppoe_host_uniq_size, client_session_ptr -> nx_pppoe_host_uniq, &index);
         }
 
-        /* If either the Host or Access Concentrator receives this Relay-Session-Id TAG, they MUST include it unmodified in any discovery packet they send as a response. 
+        /* If either the Host or Access Concentrator receives this Relay-Session-Id TAG, they MUST include it unmodified in any discovery packet they send as a response.
            RFC2516, Appendix A, Relay-Session-Id.  */
         if  (client_session_ptr -> nx_pppoe_relay_session_id_size)
         {
@@ -3076,11 +2849,11 @@ UCHAR          *service_name_ptr;
 
     /* Add the PPPoE header.  */     
     /*
-     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      * |  VER | TYPE  |      CODE       |         SESSION_ID           |
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * |           LENGTH               |          payload             
+     * |           LENGTH               |          payload
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     */
 
@@ -3124,7 +2897,7 @@ UCHAR          *service_name_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_packet_send                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3153,14 +2926,6 @@ UCHAR          *service_name_ptr;
 /*    _nx_pppoe_server_discovery_send       Send PPPoE Discovery packet   */ 
 /*    _nx_pppoe_server_session_send         Send PPPoE Session packet     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID    _nx_pppoe_server_packet_send(NX_PPPOE_SERVER *pppoe_server_ptr, NX_PPPOE_CLIENT_SESSION *client_session_ptr, NX_PACKET *packet_ptr, UINT command)
 {
@@ -3186,7 +2951,7 @@ NX_IP_DRIVER                driver_request;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_tag_process                        PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3216,20 +2981,6 @@ NX_IP_DRIVER                driver_request;
 /*    _nx_pppoe_server_discovery_packet_process                           */ 
 /*                                          Process PPPoE Discovery packet*/  
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            string length verification, */
-/*                                            fixed the compiler errors,  */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_pppoe_server_tag_process(NX_PPPOE_SERVER *pppoe_server_ptr, NX_PPPOE_CLIENT_SESSION *client_session_ptr, UINT code, UCHAR *tag_ptr, ULONG length)
 {
@@ -3512,7 +3263,7 @@ UCHAR          *service_name_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_data_get                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3543,14 +3294,6 @@ UCHAR          *service_name_ptr;
 /*                                          Process PPPoE Session packet  */  
 /*    _nx_pppoe_server_tag_process          Process PPPoE TAGs            */  
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static ULONG  _nx_pppoe_server_data_get(UCHAR *data, UINT size)
 {
@@ -3576,7 +3319,7 @@ ULONG   value = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_data_add                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3605,14 +3348,6 @@ ULONG   value = 0;
 /*    _nx_pppoe_server_session_send         Send PPPoE Session packet     */  
 /*    _nx_pppoe_server_tag_string_add       Add PPPoE string TAG          */  
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_pppoe_server_data_add(UCHAR *data, UINT size, ULONG value)
 {
@@ -3656,7 +3391,7 @@ static VOID  _nx_pppoe_server_data_add(UCHAR *data, UINT size, ULONG value)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_string_add                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3683,14 +3418,6 @@ static VOID  _nx_pppoe_server_data_add(UCHAR *data, UINT size, ULONG value)
 /*                                                                        */  
 /*    _nx_pppoe_server_tag_string_add       Add PPPoE string TAG          */  
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_pppoe_server_string_add(UCHAR *dest, UCHAR *source, UINT size)
 {
@@ -3710,7 +3437,7 @@ static VOID  _nx_pppoe_server_string_add(UCHAR *dest, UCHAR *source, UINT size)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_tag_string_add                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3741,14 +3468,6 @@ static VOID  _nx_pppoe_server_string_add(UCHAR *dest, UCHAR *source, UINT size)
 /*                                                                        */ 
 /*    _nx_pppoe_server_discovery_send       Send PPPoE Discovery packet   */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_pppoe_server_tag_string_add(UCHAR *data_ptr, UINT tag_type, UINT tag_length, UCHAR *tag_value_string, UINT *index)
 {
@@ -3775,7 +3494,7 @@ static UINT  _nx_pppoe_server_tag_string_add(UCHAR *data_ptr, UINT tag_type, UIN
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_session_find                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3812,14 +3531,6 @@ static UINT  _nx_pppoe_server_tag_string_add(UCHAR *data_ptr, UINT tag_type, UIN
 /*    _nx_pppoe_server_session_packet_process                             */ 
 /*                                          Process PPPoE Session packet  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_pppoe_server_session_find(NX_PPPOE_SERVER *pppoe_server_ptr, ULONG client_mac_msw, ULONG client_mac_lsw, 
                                            ULONG session_id, UINT *session_index, NX_PPPOE_CLIENT_SESSION **client_session_ptr)
@@ -3904,7 +3615,7 @@ UINT                available_index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_pppoe_server_session_cleanup                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3931,14 +3642,6 @@ UINT                available_index;
 /*    _nx_pppoe_server_session_packet_process                             */ 
 /*                                          Process PPPoE Session packet  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_pppoe_server_session_cleanup(NX_PPPOE_CLIENT_SESSION *client_session_ptr)
 {
@@ -3990,7 +3693,7 @@ NX_PACKET   *current_packet;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppInitInd                                          PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4017,17 +3720,6 @@ NX_PACKET   *current_packet;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the compiler errors,  */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 VOID  PppInitInd(UINT length, UCHAR *aData)
 {
@@ -4061,7 +3753,7 @@ VOID  PppInitInd(UINT length, UCHAR *aData)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppDiscoverCnf                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4090,14 +3782,6 @@ VOID  PppInitInd(UINT length, UCHAR *aData)
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID PppDiscoverCnf(UINT length, UCHAR *aData, UINT interfaceHandle)
 {
@@ -4156,7 +3840,7 @@ NX_PPPOE_CLIENT_SESSION *client_session_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppOpenCnf                                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4185,14 +3869,6 @@ NX_PPPOE_CLIENT_SESSION *client_session_ptr;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID PppOpenCnf(UCHAR accept, UINT interfaceHandle)
 {
@@ -4248,7 +3924,7 @@ NX_PPPOE_CLIENT_SESSION *client_session_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppCloseInd                                         PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4274,17 +3950,6 @@ NX_PPPOE_CLIENT_SESSION *client_session_ptr;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the compiler errors,  */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 VOID PppCloseInd(UINT interfaceHandle, UCHAR *causeCode)
 {
@@ -4328,7 +3993,7 @@ VOID PppCloseInd(UINT interfaceHandle, UCHAR *causeCode)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppCloseCnf                                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4353,14 +4018,6 @@ VOID PppCloseInd(UINT interfaceHandle, UCHAR *causeCode)
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID PppCloseCnf(UINT interfaceHandle)
 {
@@ -4390,7 +4047,7 @@ VOID PppCloseCnf(UINT interfaceHandle)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppTransmitDataCnf                                  PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4417,17 +4074,6 @@ VOID PppCloseCnf(UINT interfaceHandle)
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the compiler errors,  */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 VOID PppTransmitDataCnf(UINT interfaceHandle, UCHAR *data_ptr, UINT packet_id)
 {
@@ -4476,7 +4122,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    PppReceiveDataInd                                   PORTABLE C      */ 
-/*                                                           6.1.4        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4501,17 +4147,6 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the compiler errors,  */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 VOID PppReceiveDataInd(UINT interfaceHandle, UINT data_length, UCHAR *data_ptr)
 {                                                                                          

@@ -1,5 +1,5 @@
 /* This NetX test case verifies that the IGMP packet data is included in the checksum, not just the header,
-   and that it handles 2 byte data when there is zero length left. Also it must handled chained 
+   and that it handles 2 byte data when there is zero length left. Also it must handled chained
    packets.  */
 
 #include    "tx_api.h"

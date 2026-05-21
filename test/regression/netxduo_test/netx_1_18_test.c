@@ -2,7 +2,7 @@
 
 /* Procedure
    1. Client sends a SYN packet and becomes SYN_SENT state.
-   2. Server receives the SYN packet and replies a SYN + ACK packet.  
+   2. Server receives the SYN packet and replies a SYN + ACK packet.
    3. Check the state of client is SYN_SENT.
    4. Let client deal with the SYN + ACK packet and checks the state of client is ESTABLISHED.  */
 

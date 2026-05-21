@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -28,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_session_create_ext                   PORTABLE C      */
-/*                                                           6.2.1        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -69,32 +70,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), and      */
-/*                                            fixed race condition for    */
-/*                                            multithread transmission,   */
-/*                                            added ECC initialization,   */
-/*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
-/*                                            added null pointer checking,*/
-/*                                            resulting in version 6.1.10 */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added null pointer checking,*/
-/*                                            removed unused code,        */
-/*                                            resulting in version 6.1.11 */
-/*  10-31-2022     Yanwu Cai                Modified comment(s), and added*/
-/*                                            custom secret generation,   */
-/*                                            resulting in version 6.2.0  */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            x509 is disabled,           */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 

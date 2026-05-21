@@ -1,9 +1,9 @@
 /* This test checks for the Telnet Server to negotiate with a Telnet Client for three common
    Telnet options.  It offers to ECHO, Suppress Go Ahead and asks the peer not to ECHO (Don't Echo).
-   The Telnet Client is programmed to acknowledge the ECHO and SGA, and Won't Echo.  
+   The Telnet Client is programmed to acknowledge the ECHO and SGA, and Won't Echo.
 
    Required configuration settings:
-      
+
    NX_TELNET_SERVER_OPTION_DISABLE not defined
    NX_TELNET_SERVER_USER_CREATE_PACKET_POOL  defined
 */
@@ -346,7 +346,7 @@ UINT        status;
 }
 
 
-/* This routine is called by the NetX Telnet Server whenever a new Telnet client 
+/* This routine is called by the NetX Telnet Server whenever a new Telnet client
    connection is established.  */
 void  telnet_new_connection(NX_TELNET_SERVER *server_ptr, UINT logical_connection)
 {
@@ -384,7 +384,7 @@ NX_PACKET   *packet_ptr;
 }
 
 
-/* This routine is called by the NetX Telnet Server whenever data is present on a Telnet client 
+/* This routine is called by the NetX Telnet Server whenever data is present on a Telnet client
    connection.  */          
 void  telnet_receive_data(NX_TELNET_SERVER *server_ptr, UINT logical_connection, NX_PACKET *packet_ptr)
 {
@@ -395,7 +395,7 @@ UCHAR   alpha;
 
 
     /* This demo just echoes the character back and on <cr,lf> sends a new prompt back to the
-       client.  A real system would most likely buffer the character(s) received in a buffer 
+       client.  A real system would most likely buffer the character(s) received in a buffer
        associated with the supplied logical connection and process according to it.  */
 
 

@@ -1,10 +1,10 @@
-/* 12.26 TCP over IPv6 MUST assume a default send MSS of 1220 if MSS 
+/* 12.26 TCP over IPv6 MUST assume a default send MSS of 1220 if MSS
    option is not received at connection setup When using TCP over IPv6,
    the MSS must be computed as the maximum packet size minus 60 octets.  */
 
 /* Procedure
    1. Client send a SYN to Server.
-   2. Use packet_process function to receive and deal with the SYN packet, 
+   2. Use packet_process function to receive and deal with the SYN packet,
       then change the MSS option.
    3. Use packet_process function to receive and deal with the SYN+ACK packet,
       Check the MSS.  */

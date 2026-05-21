@@ -1,4 +1,4 @@
-/* 12.01 TCP MUST be prepared to handle an illegal option length for MSS, in a SYN segment, without crashing; 
+/* 12.01 TCP MUST be prepared to handle an illegal option length for MSS, in a SYN segment, without crashing;
          a suggested procedure is to reset the connection and log the reason.  */
 
 /* Procedure

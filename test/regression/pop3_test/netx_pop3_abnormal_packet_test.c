@@ -1,5 +1,5 @@
-/* 
-   This tests POP3 client process abnormal packet.  
+/*
+   This tests POP3 client process abnormal packet.
  */
 
 #include  "tx_api.h"
@@ -56,7 +56,7 @@ UCHAR   *free_memory_pointer;
 
     free_memory_pointer =  free_memory_pointer + DEMO_STACK_SIZE;
 
-    /* The demo client username and password is the authentication 
+    /* The demo client username and password is the authentication
        data used when the server attempts to authentication the client. */
 
     /* Create Client packet pool. */

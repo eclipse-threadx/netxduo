@@ -273,7 +273,7 @@ static void invalid_packet_handler(NX_PACKET *packet_ptr)
     /* Print out the non-PPP byte. In Windows, the string "CLIENT" will
        be sent before Windows PPP starts. Once CLIENT is received, we need
        to send "CLIENTSERVER" to establish communication. It's also possible
-       to receive modem commands here that might need some response to 
+       to receive modem commands here that might need some response to
        continue.  */
     nx_packet_release(packet_ptr);
 }

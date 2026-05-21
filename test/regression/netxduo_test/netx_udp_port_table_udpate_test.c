@@ -1,4 +1,4 @@
-/* This NetX test concentrates on the UDP port table is updated 
+/* This NetX test concentrates on the UDP port table is updated
  * when the receiving socket is not the header of port table.  */
 
 

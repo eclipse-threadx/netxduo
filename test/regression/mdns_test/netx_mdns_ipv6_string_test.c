@@ -219,7 +219,7 @@ UINT        dns_sd_ptr_string_len = 0;
     tx_thread_sleep(5 * NX_IP_PERIODIC_RATE);
 
     /* Inject two packet to store the response in peer cache.
-       If the IPv6 address is added into cache as string, 
+       If the IPv6 address is added into cache as string,
        The logic for deleting string in _nx_mdns_cache_delete_string() is incorrect.
        For example,
        Step1. Add ipv6_address_string (0x000080fe, ...). into cache.

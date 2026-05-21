@@ -1,7 +1,7 @@
-/* A client that can't receive unicast IP datagrams until its protocol software has been configured with an IP address SHOULD set the BROADCAST 
+/* A client that can't receive unicast IP datagrams until its protocol software has been configured with an IP address SHOULD set the BROADCAST
  * bit in the 'flags' field to 1 in any DHCPDISCOVER or DHCPREQUEST messages that client sends.
  * rfc 2131, page 25, 4.1 Constructing and sending DHCP messages
- * 
+ *
  */
 
 #include   "tx_api.h"

@@ -4918,7 +4918,7 @@ TAHI_TEST_SEQ tahi_04_005[] = {
 
     {INJECT, &pkt20[0], sizeof(pkt20), 0},
     {CHECK, &pkt21[0], sizeof(pkt21), 5},
-    {N_CHECK, (char *)NS, 0, 6},              //19:03:42 vRecv(Link0,ucast_ns_tn1_from_global ucast_ns_tn1_from_linklocal ucast_ns_tn1_from_linklocal_sll ucast_ns_tn1_from_global_sll) timeout:6 
+    {N_CHECK, (char *)NS, 0, 6},              //19:03:42 vRecv(Link0,ucast_ns_tn1_from_global ucast_ns_tn1_from_linklocal ucast_ns_tn1_from_linklocal_sll ucast_ns_tn1_from_global_sll) timeout:6
 
     {INJECT, &pkt22[0], sizeof(pkt22), 0},
     {INJECT, &pkt23[0], sizeof(pkt23), 0},

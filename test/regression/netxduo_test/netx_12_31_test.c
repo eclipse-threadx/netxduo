@@ -2,7 +2,7 @@
 
 /*  Procedure
     1.Intercept the ACK + SYN packet
-    2.Modify the option_words to the 1220                       
+    2.Modify the option_words to the 1220
     3.Check whether the connection is reset  */
 
 #include   "tx_api.h"

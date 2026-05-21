@@ -1,4 +1,4 @@
-/* Frame (83 bytes) SNMPv2 GET REQUEST 
+/* Frame (83 bytes) SNMPv2 GET REQUEST
     community: public
     data: get-request (0)
 */           
@@ -14,7 +14,7 @@ const unsigned char simple_get_query_pkt[42] = {
 int simple_get_query_size = 42;
 
 
-/* Frame (81 bytes) SNMPv2 GET NEXT REQUEST 
+/* Frame (81 bytes) SNMPv2 GET NEXT REQUEST
     community: public
     data: get-next request (1)
 */
@@ -30,7 +30,7 @@ const unsigned char simple_get_next_query_pkt[42] = {
 int simple_get_next_query_size = 42;
 
 
-/* Frame (76 bytes) SNMPv2 GET BULK REQUEST 
+/* Frame (76 bytes) SNMPv2 GET BULK REQUEST
     community: public
     data: getBulkRequest (5)
         getBulkRequest
@@ -47,7 +47,7 @@ const unsigned char simple_get_bulk_query_pkt[42] = {
 
 int simple_get_bulk_query_size = 42;
 
-/* Frame (83 bytes) SNMPv2 GET REQUEST for unknown item 
+/* Frame (83 bytes) SNMPv2 GET REQUEST for unknown item
     community: public
     data: get-request (0)
 */           

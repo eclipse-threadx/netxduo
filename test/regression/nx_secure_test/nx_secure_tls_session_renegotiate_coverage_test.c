@@ -106,7 +106,7 @@ NX_SECURE_X509_CERTIFICATE_STORE *store;
     tls_session.nx_secure_tls_secure_renegotiation = NX_TRUE;
     tls_session.nx_secure_tls_socket_type = NX_SECURE_TLS_SESSION_TYPE_CLIENT;
     status = _nx_secure_tls_session_renegotiate(&tls_session, NX_NO_WAIT);
-    //EXPECT_EQ(NX_SECURE_TLS_ALLOCATE_PACKET_FAILED, status);    
+    //EXPECT_EQ(NX_SECURE_TLS_ALLOCATE_PACKET_FAILED, status);
     
     nx_packet_pool_delete(&pool_0);
  

@@ -1,4 +1,4 @@
-/* This case verifies bug reported by trac #138.  
+/* This case verifies bug reported by trac #138.
  * https://192.168.100.2/trac/netx/ticket/138 */
 
 #include   "tx_api.h"

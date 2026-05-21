@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -32,7 +33,7 @@ static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, US
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_x509_expiration_check                    PORTABLE C      */
-/*                                                           6.1.6        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -60,17 +61,6 @@ static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, US
 /*                                                                        */
 /*    _nx_secure_tls_remote_certificate_verify                            */
 /*                                          Verify the server certificate */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            removed dependency on TLS,  */
-/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_expiration_check(NX_SECURE_X509_CERT *certificate, ULONG current_time)
@@ -156,19 +146,6 @@ static const UINT days_before_month[12] = {0, 31, 59, 90, 120, 151, 181, 212, 24
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_x509_expiration_check      Verify expiration of cert     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            changed LONG to ULONG to    */
-/*                                            extend the time range,      */
-/*                                            removed unused code,        */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_asn1_time_to_unix_convert(const UCHAR *asn1_time, USHORT asn1_length,

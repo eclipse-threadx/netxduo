@@ -1,5 +1,5 @@
-/* This is a small demo of HTTP on the high-performance NetX TCP/IP stack.  
-   This demo relies on ThreadX, NetX, and FileX to show a simple HTML 
+/* This is a small demo of HTTP on the high-performance NetX TCP/IP stack.
+   This demo relies on ThreadX, NetX, and FileX to show a simple HTML
    transfer from the client and then back from the server.  */
 
 #include  "tx_api.h"
@@ -47,7 +47,7 @@ static UINT  authentication_check(NX_WEB_HTTP_SERVER *server_ptr, UINT request_t
             CHAR *resource, CHAR **name, CHAR **password, CHAR **realm)
 {
 
-    /* Just use a simple name, password, and realm for all 
+    /* Just use a simple name, password, and realm for all
        requests and resources.  */
     *name =     "name";
     *password = "password";
@@ -120,16 +120,16 @@ UINT    status;
                             _fx_ram_driver,         // Driver entry
                             ram_disk_memory,        // RAM disk memory pointer
                             pointer,           // Media buffer pointer
-                            4096,             // Media buffer size 
+                            4096,             // Media buffer size
                             "MY_RAM_DISK",          // Volume Name
                             1,                      // Number of FATs
                             32,                     // Directory Entries
                             0,                      // Hidden sectors
-                            511,                    // Total sectors 
-                            128,                    // Sector size   
+                            511,                    // Total sectors
+                            128,                    // Sector size
                             1,                      // Sectors per cluster
                             1,                      // Heads
-                            1);                     // Sectors per track 
+                            1);                     // Sectors per track
     EXPECT_EQ(0, status);
 
     status = fx_media_open(&ram_disk, "RAM DISK", 

@@ -1,4 +1,4 @@
-/* DHCPREQUEST generated during RENEWING state: 'server identifier' MUST NOT be filled in, 'requested IP address' option MUST NOT 
+/* DHCPREQUEST generated during RENEWING state: 'server identifier' MUST NOT be filled in, 'requested IP address' option MUST NOT
  * be filled in, 'ciaddr' MUST be filled in with client's IP address.
  * rfc 2131, page 32, 4.3.2 DHCPREQUEST message
  *

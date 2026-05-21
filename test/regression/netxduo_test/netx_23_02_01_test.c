@@ -3,7 +3,7 @@
 
 /* Procedure
    1. Client send a SYN to Server.
-   2. Use packet_process function to receive and deal with the SYN packet,change the IP address. 
+   2. Use packet_process function to receive and deal with the SYN packet,change the IP address.
    3. Check whether the SYN packet is rejected.  */
 
 #include    "tx_api.h"

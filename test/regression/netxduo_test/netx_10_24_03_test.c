@@ -2,12 +2,12 @@
 /*This is 10.24_03 in LAST-ACK state*/
 
 /*  Procedure
-    1.Connection successfully  
+    1.Connection successfully
     2.Disconnect the Server socket.
     3.Drop the packet sent form the Client to the Sever.
     4.Disconnect the Client socket.
     5.Drop the packet sent form the Client to the Sever.
-    6.The Server will retransmit the FIN packet. 
+    6.The Server will retransmit the FIN packet.
     7.Check whether the state of the client socket has been changed. */
 
 

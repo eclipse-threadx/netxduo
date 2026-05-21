@@ -58,7 +58,7 @@ static UINT  authentication_check(NX_HTTP_SERVER *server_ptr, UINT request_type,
             CHAR *resource, CHAR **name, CHAR **password, CHAR **realm)
 {
 
-    /* Just use a simple name, password, and realm for all 
+    /* Just use a simple name, password, and realm for all
        requests and resources.  */
     *name =     "name";
     *password = "password";
@@ -180,7 +180,7 @@ UINT            status;
 NX_PACKET       *send_packet;
 NX_PACKET       *recv_packet;
 
-    /* Format the RAM disk - the memory for the RAM disk was setup in 
+    /* Format the RAM disk - the memory for the RAM disk was setup in
       tx_application_define above.  This must be set up before the client(s) start
       sending requests. */
     status = fx_media_format(&ram_disk, 

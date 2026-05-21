@@ -1,4 +1,4 @@
-/* This NetX test concentrates on the multicast forward. 
+/* This NetX test concentrates on the multicast forward.
  * Multicast packet must not be forward. */
 
 #include   "tx_api.h"

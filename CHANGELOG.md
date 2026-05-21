@@ -1,0 +1,4 @@
+| Maintenance Type | Status | Version | Description | Files Modified or Created | Date Resolved (DD/MM/YYYY) | Resolved By |
+| ---------------- | ------ | ------- | ----------- | ------------------------- | --------------------- | ----------- |
+| NetX Duo Release | Closed | 6.4.3 | Release | NextX Duo 6.4.3 release | 18/03/2025 | Frédéric Desbiens |
+| Bug Fix | Closed | 6.4.3 | Addresses the following CVEs: <br/>[CVE-2025-2258](https://github.com/eclipse-threadx/netxduo/security/advisories/GHSA-chqp-8vf8-cj25)<br/>[CVE-2025-2259](https://github.com/eclipse-threadx/netxduo/security/advisories/GHSA-chhp-gmxc-46rq)<br/>[CVE-2025-2260](https://github.com/eclipse-threadx/netxduo/security/advisories/GHSA-f42f-6fvv-xqx3) | addons/http/nxd_http_server.c | 18/03/2025 | Frédéric Desbiens |

@@ -1,15 +1,15 @@
 /* This NetX test concentrates on basic IPv6 fragmentation.  */
 /* Test sequence:
- * 1. ip_0 allocate 1000 bytes.     
+ * 1. ip_0 allocate 1000 bytes.
  * 2. ip_0 discard the packets excpet the header packet, packet length also is 1000.
- * 3. ip_0 call nxd_ip_raw_packet_send to send packet.  
- * 4. ip_0 call nx_ipv6_fragment_process to fragment packet and send the fragmentation packets. 
+ * 3. ip_0 call nxd_ip_raw_packet_send to send packet.
+ * 4. ip_0 call nx_ipv6_fragment_process to fragment packet and send the fragmentation packets.
  * 5. check if the driver receive fragmentation packet form ip_0.
  Test pointer:
  * 1. in _nx_ipv6_packet_copy failure since the next packet of source packet is NX_NULL, cover the following code.
         if ((source_pkt == NX_NULL) || (dest_pkt == NX_NULL))
             return(NX_NOT_SUCCESSFUL);
- * 2. in nx_ipv6_fragment_process failure since _nx_ipv6_packet_copy failure, cover the following code: 
+ * 2. in nx_ipv6_fragment_process failure since _nx_ipv6_packet_copy failure, cover the following code:
         // Copy the rest of the frame.
         if (_nx_ipv6_packet_copy(source_packet, first_fragment, fragment_size))
             break;

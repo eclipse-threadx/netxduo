@@ -1,6 +1,6 @@
 /* 9.18 TCP, in ESTABLISHED state, MUST return to CLOSED state on RESET.  */
 
-/* RFC 793, Section 3.9, page 70, Event Processing. 
+/* RFC 793, Section 3.9, page 70, Event Processing.
 ESTABLISHED
 If the RST bit is set then, Users should receive an unsolicited general
 "connection reset" signal. Enter the CLOSED state, delete the TCB,

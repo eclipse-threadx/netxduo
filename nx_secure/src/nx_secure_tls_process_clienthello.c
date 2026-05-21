@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -35,7 +36,7 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_clienthello                  PORTABLE C      */
-/*                                                           6.2.1        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -78,33 +79,6 @@ static UINT _nx_secure_tls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_INF
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_server_handshake       TLS Server state machine      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), added    */
-/*                                            priority ciphersuite logic, */
-/*                                            verified memcpy use cases,  */
-/*                                            fixed renegotiation bug,    */
-/*                                            improved negotiation logic, */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            ability to disable client   */
-/*                                            initiated renegotiation,    */
-/*                                            resulting in version 6.1.9  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),  fixed   */
-/*                                            the bug of processing       */
-/*                                            extensions,                 */
-/*                                            resulting in version 6.1.11 */
-/*  10-31-2022     Yanwu Cai                Modified comment(s), fixed    */
-/*                                            TLS 1.3 version negotiation,*/
-/*                                            resulting in version 6.2.0  */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            x509 is disabled,           */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_clienthello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -168,11 +142,11 @@ USHORT                                no_extension = NX_FALSE;
 #endif
 
 #if !defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) 
-        /* If Client initiated renegotiation is enabled, handle the renegotiation 
+        /* If Client initiated renegotiation is enabled, handle the renegotiation
            handshake if appropriate. Otherwise return "no renegotiation allowed" error. */
         if (tls_session -> nx_secure_tls_renegotation_enabled && tls_session -> nx_secure_tls_secure_renegotiation 
 #if defined(NX_SECURE_TLS_DISABLE_CLIENT_INITIATED_RENEGOTIATION)
-            /* If client initiated renegotiation is disabled for TLS servers, only allow 
+            /* If client initiated renegotiation is disabled for TLS servers, only allow
                server-initiated renegotiations requested by the server itself. */
             && tls_session -> nx_secure_tls_server_renegotiation_requested
 #endif
@@ -279,6 +253,12 @@ USHORT                                no_extension = NX_FALSE;
         length += session_id_length;
     }
 
+    /* GHSA-5vrv-8j5h-h6h6 2504xx */
+    if ((length + 1) >= message_length)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
+  
     /* Negotiate the ciphersuite we want to use. */
     ciphersuite_list_length = (USHORT)((packet_buffer[length] << 8) + packet_buffer[length + 1]);
     length += 2;
@@ -293,6 +273,12 @@ USHORT                                no_extension = NX_FALSE;
 
     length += ciphersuite_list_length;
 
+    /* GHSA-5vrv-8j5h-h6h6 2504xx */
+    if (length >= message_length)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
+  
     /* Compression methods length - one byte. For now we only support the NULL method. */
     compression_methods_length = packet_buffer[length];
     length++;
@@ -582,7 +568,7 @@ USHORT                                no_extension = NX_FALSE;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_check_ciphersuite                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -611,14 +597,6 @@ USHORT                                no_extension = NX_FALSE;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_server_handshake       TLS Server state machine      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)

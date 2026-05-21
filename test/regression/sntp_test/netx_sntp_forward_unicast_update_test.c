@@ -1,10 +1,10 @@
-/* 
+/*
    netx_sntp_forward_unicast_update_test.c
- 
+
    This demonstrates the time update notify feature in NetX SNTP Client.  The Client
    connects to the SNTP server in unicast mode (simulated server) and sends a unicast
-   request.  If a valid reply is received, the time update notify callback should be called 
-   for a successful completion.  
+   request.  If a valid reply is received, the time update notify callback should be called
+   for a successful completion.
 
  */
 
@@ -109,7 +109,7 @@ UCHAR    *free_memory_pointer;
 
     /* Create Client IP instances */
     status = nx_ip_create(&client_ip, "SNTP IP Instance", CLIENT_IP_ADDRESS, 
-                          0xFFFFFF00UL, &client_packet_pool, _nx_ram_network_driver, //_nx_ram_network_driver, 
+                          0xFFFFFF00UL, &client_packet_pool, _nx_ram_network_driver, //_nx_ram_network_driver,
                           free_memory_pointer, 2048, 1);
     
     /* Check for error. */

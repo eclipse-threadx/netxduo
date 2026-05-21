@@ -3,7 +3,7 @@
 
 /* Procedure
    1. Client send a SYN to Server.
-   2. Use advanced_packet_process function to receive and deal with the SYN packet, 
+   2. Use advanced_packet_process function to receive and deal with the SYN packet,
       then change the MSS.
 */
 

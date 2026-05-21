@@ -24,8 +24,8 @@ extern VOID    test_control_return(UINT status);
 extern VOID    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
 
 /* RA packet.
- * destination: 0xfe80::1. 
- * reachable time: 1ms. 
+ * destination: 0xfe80::1.
+ * reachable time: 1ms.
  * retrans timer: 1ms. */
 static char ra_pkt[] = {
 0x33, 0x33, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, /* 33...... */

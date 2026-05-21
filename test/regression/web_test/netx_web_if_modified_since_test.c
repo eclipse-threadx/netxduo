@@ -1,10 +1,10 @@
-/* This case tests filed If-Modified-field. 
- * if the requested variant has not been modified since the time specified in this field, 
- * an entity will not be returned from the server; instead, a 304 (not modified) response 
+/* This case tests filed If-Modified-field.
+ * if the requested variant has not been modified since the time specified in this field,
+ * an entity will not be returned from the server; instead, a 304 (not modified) response
  * will be returned without any message-body.
  *
- * In this case, client get the index.htm with If-Modified-Since = 20130101, and index.htm is 
- * modified on 2013...., So server should send 304. 
+ * In this case, client get the index.htm with If-Modified-Since = 20130101, and index.htm is
+ * modified on 2013...., So server should send 304.
  * */
 #include    "tx_api.h"
 #include    "nx_api.h"
@@ -395,7 +395,7 @@ UINT            server_port = NX_WEB_HTTP_SERVER_PORT;
                     512,                          // Sector size
                     8,                            // Sectors per cluster
                     1,                            // Heads
-                    1);                           // Sectors per track   
+                    1);                           // Sectors per track
     
     /* Open the RAM disk.  */
     status = fx_media_open(&ram_disk, "RAM DISK", _fx_ram_driver, ram_disk_memory, media_memory, sizeof(media_memory)) ;

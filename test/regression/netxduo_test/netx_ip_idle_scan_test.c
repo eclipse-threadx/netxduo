@@ -1,4 +1,4 @@
-/* This NetX test concentrates on idle-scan as described in https://www.youtube.com/watch?v=v5QEB-T6pH0. 
+/* This NetX test concentrates on idle-scan as described in https://www.youtube.com/watch?v=v5QEB-T6pH0.
    Idle scans are a way for an attacker to perform a port scan in a way that might evade network restrictions and detection mechanisms. The basic defense is to avoid predictably incrementing the IP Identification field. */
 
 #include   "nx_api.h"

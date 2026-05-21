@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -44,7 +45,7 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_secure_tls_process_certificate_verify           PORTABLE C      */
-/*                                                           6.2.1        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -80,32 +81,6 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    None                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), update   */
-/*                                            ECC find curve method,      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            updated X.509 return value, */
-/*                                            resulting in version 6.1.6  */
-/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            hash clone and cleanup,     */
-/*                                            resulting in version 6.1.8  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            removed unnecessary code,   */
-/*                                            resulting in version 6.1.11 */
-/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
-/*                                            updated parameters list,    */
-/*                                            resulting in version 6.2.0  */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            x509 is disabled,           */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_certificate_verify(NX_SECURE_TLS_SESSION *tls_session,

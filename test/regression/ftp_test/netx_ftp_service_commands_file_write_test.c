@@ -2,8 +2,8 @@
    back to the FTP Client from the Server.  The first file is small enough there is enough
    memory in the FileX ram disk space so it should succeed.  The second file is large enough
    there is not enough ram disk space available so it should fail.  Further, the test
-   checks that there are two STOR commands received by the FTP server as part of the 
-   requirements for successful outcome.  
+   checks that there are two STOR commands received by the FTP server as part of the
+   requirements for successful outcome.
 
    Note that the ram_disk_memory is much smaller than the typical FileX demo (only 3200 bytes)
    and the number of sectors is reduced from 256 to 25. */
@@ -76,7 +76,7 @@ static void    client_thread_entry(ULONG thread_input);
 static void    thread_server_entry(ULONG thread_input);
 
 
-/* Define server login/logout functions.  These are stubs for functions that would 
+/* Define server login/logout functions.  These are stubs for functions that would
    validate a client login request.   */
 static UINT    server_login(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, ULONG client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info);
 static UINT    server_logout(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, ULONG client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info);

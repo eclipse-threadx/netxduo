@@ -23,7 +23,7 @@ static VOID    thread_0_entry(ULONG thread_input);
 extern VOID    test_control_return(UINT status);       
 extern VOID    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
 
-/* ARP packet. 
+/* ARP packet.
  * src MAC: 20:0b:c7:94:45:96
  * src IP: 1.2.3.5.
  * dst MAC: 00:00:00:00:00:00

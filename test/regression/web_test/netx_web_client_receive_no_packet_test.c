@@ -1,4 +1,4 @@
-/* This case tests client didn't receive response in time. 
+/* This case tests client didn't receive response in time.
    If client receive no packet, it can continue to get response untill get done. */
 #include    "tx_api.h"
 #include    "nx_api.h"

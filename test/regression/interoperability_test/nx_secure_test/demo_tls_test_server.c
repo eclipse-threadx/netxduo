@@ -156,7 +156,7 @@ void server_thread_entry(ULONG thread_input)
     status = nx_secure_tls_session_packet_buffer_set(&tls_session, tls_packet_buffer, sizeof(tls_packet_buffer));
     show_error_message_if_fail( NX_SUCCESS == status);
     
-    // Initialize our certificates        
+    // Initialize our certificates
     nx_secure_tls_remote_certificate_allocate(&tls_session, &remote_certificate, remote_cert_buffer, sizeof(remote_cert_buffer));
     nx_secure_tls_remote_certificate_allocate(&tls_session, &remote_issuer, remote_issuer_buffer, sizeof(remote_issuer_buffer));
     

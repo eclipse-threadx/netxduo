@@ -1,7 +1,7 @@
 /* This demo tests the feature to create the Telnet packet pool instead of the default
-   behavior of the Telnet Server creating its own packet pool. 
-    
-   NX_TELNET_SERVER_USER_CREATE_PACKET_POOL must be defined in the test. 
+   behavior of the Telnet Server creating its own packet pool.
+
+   NX_TELNET_SERVER_USER_CREATE_PACKET_POOL must be defined in the test.
 */
 
 #include  "tx_api.h"
@@ -263,7 +263,7 @@ UINT        status;
 }
 
 
-/* This routine is called by the NetX Telnet Server whenever a new Telnet client 
+/* This routine is called by the NetX Telnet Server whenever a new Telnet client
    connection is established.  */
 void  telnet_new_connection(NX_TELNET_SERVER *server_ptr, UINT logical_connection)
 {
@@ -293,7 +293,7 @@ NX_PACKET   *packet_ptr;
 }
 
 
-/* This routine is called by the NetX Telnet Server whenever data is present on a Telnet client 
+/* This routine is called by the NetX Telnet Server whenever data is present on a Telnet client
    connection.  */          
 void  telnet_receive_data(NX_TELNET_SERVER *server_ptr, UINT logical_connection, NX_PACKET *packet_ptr)
 {
@@ -303,7 +303,7 @@ UCHAR   alpha;
 
 
     /* This demo just echoes the character back and on <cr,lf> sends a new prompt back to the
-       client.  A real system would most likely buffer the character(s) received in a buffer 
+       client.  A real system would most likely buffer the character(s) received in a buffer
        associated with the supplied logical connection and process according to it.  */
 
 

@@ -1,5 +1,5 @@
-/* This is a small demo of NetX FTP on the high-performance NetX TCP/IP stack.  This demo 
-   relies on ThreadX, NetX, and FileX to show a simple directory listing get from the client 
+/* This is a small demo of NetX FTP on the high-performance NetX TCP/IP stack.  This demo
+   relies on ThreadX, NetX, and FileX to show a simple directory listing get from the client
    in passive mode transfer, except the server refuses the passive mode request.  */
 
 

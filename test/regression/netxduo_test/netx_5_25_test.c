@@ -2,9 +2,9 @@
 
 /* Procedure
 1. Client sends a SYN packet and becomes SYN_SENT state.
-2. Server receives the SYN packet and becomes SYN_RCVD state.  
+2. Server receives the SYN packet and becomes SYN_RCVD state.
 3. Server calls the send command.
-4. Check the status, test error.  
+4. Check the status, test error.
 5. After entering ESTABLISHED state, check if server sends the packet. */
 
 #include   "tx_api.h"

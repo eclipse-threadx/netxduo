@@ -1,4 +1,4 @@
-/* 3.17 TCP in SYN-SENT state MUST send RST after receiving a segment carrying 
+/* 3.17 TCP in SYN-SENT state MUST send RST after receiving a segment carrying
    an unacceptable ACK and send the SYN again, SEQ number is taken from SEG.ACK.  */
 
 #include   "tx_api.h"

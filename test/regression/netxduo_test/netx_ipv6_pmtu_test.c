@@ -1,4 +1,4 @@
-/* This test case is modified from IPv6 TAHI 4-13. 
+/* This test case is modified from IPv6 TAHI 4-13.
  * It aims to test PMTU when NA is received. */
 
 #include    "nx_api.h"

@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -25,7 +26,7 @@
 /*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
 /*                                                                        */
 /*    nxd_mqtt_client.h                                   PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -35,32 +36,6 @@
 /*    This file defines the NetX MQTT Client component, including all     */
 /*    data types and external references.  It is assumed that nx_api.h    */
 /*    and nx_port.h have already been included.                           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added ack receive notify,   */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added packet id parameter,  */
-/*                                            resulting in version 6.1.2  */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            supported maximum transmit  */
-/*                                            queue depth,                */
-/*                                            resulting in version 6.1.8  */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
-/*                                            necessary header file,      */
-/*                                            resulting in version 6.1.9  */
-/*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
-/*                                            mqtt over websocket,        */
-/*                                            resulting in version 6.2.0  */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), added    */
-/*                                            the function prototype for  */
-/*                                            packet allocation,          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -391,6 +366,8 @@ typedef struct NXD_MQTT_CLIENT_STRUCT
     UINT                           nxd_mqtt_client_websocket_host_length;
     UCHAR                         *nxd_mqtt_client_websocket_uri_path;
     UINT                           nxd_mqtt_client_websocket_uri_path_length;
+    UCHAR                         *nxd_mqtt_client_websocket_bearer; 
+    UINT                           nxd_mqtt_client_websocket_bearer_length;
 #endif /* NXD_MQTT_OVER_WEBSOCKET */
 } NXD_MQTT_CLIENT;
 
@@ -552,8 +529,8 @@ UINT _nxde_mqtt_client_secure_connect(NXD_MQTT_CLIENT *client_ptr, NXD_ADDRESS *
 #endif /* NX_SECURE_ENABLE */
 
 #ifdef NXD_MQTT_OVER_WEBSOCKET
-UINT _nxd_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length);
-UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length);
+UINT _nxd_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length, UCHAR *bearer, UINT bearer_length);
+UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length, UCHAR *bearer, UINT bearer_length);
 VOID _nxd_mqtt_client_websocket_connection_status_callback(NX_WEBSOCKET_CLIENT *websocket_client_ptr, VOID *context, UINT status);
 #endif /* NXD_MQTT_OVER_WEBSOCKET */
 

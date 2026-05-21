@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -27,7 +28,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_srp_init                                         PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -63,12 +64,6 @@
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_srp_init(NX_SRP *srp_ptr, NX_IP *ip_ptr, UINT interface_index, NX_PACKET_POOL *pkt_pool_ptr,
                   VOID *stack_ptr, ULONG stack_size, UINT priority)
@@ -100,7 +95,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_srp_talker_start                                 PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -135,12 +130,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_srp_talker_start(NX_SRP *srp_ptr, NX_MSRP_DOMAIN *domain, UCHAR *stream_id, UCHAR *dst_addr,
@@ -270,7 +259,7 @@ INT                      i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_srp_listener_start                               PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -298,12 +287,6 @@ INT                      i;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_srp_listener_start(NX_SRP *srp_ptr, NX_MRP_EVENT_CALLBACK event_callback, UCHAR *stream_id)
 {
@@ -325,7 +308,7 @@ UINT nx_srp_listener_start(NX_SRP *srp_ptr, NX_MRP_EVENT_CALLBACK event_callback
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_srp_talker_stop                                 PORTABLE C       */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -354,12 +337,6 @@ UINT nx_srp_listener_start(NX_SRP *srp_ptr, NX_MRP_EVENT_CALLBACK event_callback
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_srp_talker_stop(NX_SRP *srp_ptr, UCHAR *stream_id, NX_MSRP_DOMAIN *domain)
@@ -393,7 +370,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_srp_listener_stop                                PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -422,12 +399,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_srp_listener_stop(NX_SRP *srp_ptr, UCHAR *stream_id, NX_MSRP_DOMAIN *domain)
@@ -472,7 +443,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_srp_cbs_config_get                               PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -503,12 +474,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_srp_talker_cbs_set                 Set CBS parameter             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_srp_cbs_config_get(UINT sr_class, INT port_rate, UINT interval, UINT frames_per_interval, UINT max_frame_size, UINT non_sr_frame_size, INT idle_slope_a, UINT max_frame_size_a, NX_SHAPER_CBS_PARAMETER *cbs_param)
@@ -551,7 +516,7 @@ UINT nx_srp_cbs_config_get(UINT sr_class, INT port_rate, UINT interval, UINT fra
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_srp_talker_cbs_set                               PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Wen Wang,  Microsoft Corporation                                    */
@@ -581,12 +546,6 @@ UINT nx_srp_cbs_config_get(UINT sr_class, INT port_rate, UINT interval, UINT fra
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_srp_talker_start                   Start SRP talker              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023        Wen Wang              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_srp_talker_cbs_set(NX_SRP *srp_ptr, UINT index)

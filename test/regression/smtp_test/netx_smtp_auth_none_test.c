@@ -1,6 +1,6 @@
 /* This NetX tests an SMTP Server configured for no authentication (the server
    response to EHLO message contains no AUTH parameters).  The client if configured
-   for LOGIN or PLAIN authentication can still try to authenticate itself but the 
+   for LOGIN or PLAIN authentication can still try to authenticate itself but the
    server may send an error message which will cause the client to abort.
 
    In this test case, the Client is configured for AUTH NONE, so the Client should
@@ -211,7 +211,7 @@ CHAR    *pointer;
         error_counter++;
 
 
-    /* The demo client username and password is the authentication 
+    /* The demo client username and password is the authentication
    data used when the server attempts to authentication the client. */
 
 #if defined(__PRODUCT_NETXDUO__) 

@@ -1,15 +1,15 @@
 /* This demo tests the nx_ppp_restart() function.  To simulate a link down in the middle of the IPCP
    negotiation, the thread_0/PPP_0 promotes the PPP 1 instance to LCP complete, and its IPCP state to STARTED.
-   Then the PPP0 instance is suspended as part of simulating link down.  
+   Then the PPP0 instance is suspended as part of simulating link down.
 
    PPP_1 should go into a FAILED state after the max number of retries, and call the link down callback.
    NetX PPP has a restart function which reinitializes the PPP instance so it can restart the PPP
    protocol using nx_ppp_restart().
 
    The process is started again, PPP 0 is resumed, and thread 0 promotes the PPP 1 instance ahead
-   to the LCP complete state, and ICP start state.  After the second link down event, the test is complete.    
+   to the LCP complete state, and ICP start state.  After the second link down event, the test is complete.
 
-   This test verifies that the NetX PPP properly clears and restarts a PPP instance, including resetting 
+   This test verifies that the NetX PPP properly clears and restarts a PPP instance, including resetting
    the PPP state to restart the  IPCP negotiation.
 */
 

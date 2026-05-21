@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -37,7 +38,7 @@ extern void  COPY_NXD_ADDRESS(NXD_ADDRESS *copy_from, NXD_ADDRESS  *copy_to);
 #endif
 
 
-/* To enable debug output, define this option.  
+/* To enable debug output, define this option.
 #define NX_SNMPV3_PRINT_DEBUG_MESSAGE
 */
 
@@ -86,7 +87,7 @@ UCHAR *_nx_snmp_v3_trap_ids[] =  {  (UCHAR *) "1.3.6.1.6.3.1.1.5.1.0" /* (coldSt
    created. Note that this information isn't used for SNMP v1 and v2.  Note the host application
    should use the nx_snmp_agent_context_engine_set() service to set its own IPv4 (or MAC address
    depending on format type) when creating the Engine ID. The engine size must match the total engine
-   data including the input context engine data as well. See documentation for more details.  
+   data including the input context engine data as well. See documentation for more details.
 
    Note that this information isn't used for SNMP v1 and v2.  */
       
@@ -107,7 +108,7 @@ CHAR   _nx_snmp_default_initial_user_name[] =  "initial";
 #define     NX_SNMP_DISCOVERY_RESPONSE_UNKNOWN_ENGINEID       "1.3.6.1.6.3.15.1.1.4.0"
 #define     NX_SNMP_DISCOVERY_RESPONSE_UNKNOWN_ENGINEID_NUM   4
 
-/* Define the maximum difference between local time (in seconds) and browser notion of 
+/* Define the maximum difference between local time (in seconds) and browser notion of
    local time recommended by RFC 3413. */
 #define     NX_SNMP_TIME_WINDOW                          150 
 
@@ -123,7 +124,7 @@ NX_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_authenticate_key_use                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -152,14 +153,6 @@ NX_CALLER_CHECKING_EXTERNS
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_authenticate_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURITY_KEY *key)
 {
@@ -197,7 +190,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_authenticate_key_use                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -224,14 +217,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_authenticate_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURITY_KEY *key)
 {
@@ -255,7 +240,7 @@ UINT  _nx_snmp_agent_authenticate_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECU
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_trap_auth_key_use                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -284,14 +269,6 @@ UINT  _nx_snmp_agent_authenticate_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECU
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_auth_trap_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURITY_KEY *key)
 {
@@ -329,7 +306,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_auth_trap_key_use                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -356,14 +333,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT    _nx_snmp_agent_auth_trap_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURITY_KEY *key)
 {
@@ -390,7 +359,7 @@ UINT    _nx_snmp_agent_auth_trap_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECUR
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_community_get                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -418,14 +387,6 @@ UINT    _nx_snmp_agent_auth_trap_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECUR
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_community_get(NX_SNMP_AGENT *agent_ptr, UCHAR **community_string_ptr)
 {
@@ -451,7 +412,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_community_get                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -478,14 +439,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_community_get(NX_SNMP_AGENT *agent_ptr, UCHAR **community_string_ptr)
 {
@@ -504,7 +457,7 @@ UINT  _nx_snmp_agent_community_get(NX_SNMP_AGENT *agent_ptr, UCHAR **community_s
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_context_engine_set                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -534,14 +487,6 @@ UINT  _nx_snmp_agent_community_get(NX_SNMP_AGENT *agent_ptr, UCHAR **community_s
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_context_engine_set(NX_SNMP_AGENT *agent_ptr, UCHAR *context_engine, UINT context_engine_size)
 {
@@ -571,7 +516,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_context_engine_set                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -599,14 +544,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_context_engine_set(NX_SNMP_AGENT *agent_ptr, UCHAR *context_engine, UINT context_engine_size)
 {
@@ -649,7 +586,7 @@ UINT    i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_context_name_set                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -679,14 +616,6 @@ UINT    i;
 /*                                                                        */ 
 /*    Initialization                                                      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_context_name_set(NX_SNMP_AGENT *agent_ptr, UCHAR *context_name, UINT context_name_size)
 {
@@ -716,7 +645,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_context_name_set                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -744,14 +673,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Initialization                                                      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_context_name_set(NX_SNMP_AGENT *agent_ptr, UCHAR *context_name, UINT context_name_size)
 {
@@ -787,7 +708,7 @@ UINT    i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_v3_context_boots_set                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -817,14 +738,6 @@ UINT    i;
 /*                                                                        */ 
 /*    Initialization                                                      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_v3_context_boots_set(NX_SNMP_AGENT *agent_ptr, UINT boots)
 {
@@ -849,7 +762,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_v3_context_boots_set                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -877,14 +790,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Initialization                                                      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_v3_context_boots_set(NX_SNMP_AGENT *agent_ptr, UINT boots)
 {
@@ -904,7 +809,7 @@ UINT  _nx_snmp_agent_v3_context_boots_set(NX_SNMP_AGENT *agent_ptr, UINT boots)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_create                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -940,14 +845,6 @@ UINT  _nx_snmp_agent_v3_context_boots_set(NX_SNMP_AGENT *agent_ptr, UINT boots)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_create(NX_SNMP_AGENT *agent_ptr, CHAR *snmp_agent_name, NX_IP *ip_ptr, VOID *stack_ptr, ULONG stack_size, NX_PACKET_POOL *pool_ptr,
                 UINT (*snmp_agent_username_process)(struct NX_SNMP_AGENT_STRUCT *agent_ptr, UCHAR *username),
@@ -982,7 +879,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_create                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1027,14 +924,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_create(NX_SNMP_AGENT *agent_ptr, CHAR *snmp_agent_name, NX_IP *ip_ptr, VOID *stack_ptr, ULONG stack_size, NX_PACKET_POOL *pool_ptr,
                 UINT (*snmp_agent_username_process)(struct NX_SNMP_AGENT_STRUCT *agent_ptr, UCHAR *username),
@@ -1098,12 +987,12 @@ UINT        i;
     /* Default the SNMP network interface to the primary interface. */
     agent_ptr -> nx_snmp_agent_interface_index = 0;
 
-    /* Initialize the agent as configured for all versions. 
+    /* Initialize the agent as configured for all versions.
 
-       Note that the #define options for disabling version support override dynamic version status. 
+       Note that the #define options for disabling version support override dynamic version status.
 
-       For example if  NX_SNMP_DISABLE_V2 is disabled, setting nx_snmp_agent_v2_enabled 
-       to NX_TRUE has no effect. If NX_SNMP_DISABLE_V2 is not disabled, then 
+       For example if  NX_SNMP_DISABLE_V2 is disabled, setting nx_snmp_agent_v2_enabled
+       to NX_TRUE has no effect. If NX_SNMP_DISABLE_V2 is not disabled, then
        nx_snmp_agent_v2_enabled determines at run time if the SNMP is enabled for V2.*/
 
     agent_ptr -> nx_snmp_agent_v1_enabled = NX_TRUE;                       
@@ -1149,7 +1038,7 @@ UINT        i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_request_get_type_test               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1176,14 +1065,6 @@ UINT        i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_snmp_agent_request_get_type_test(NX_SNMP_AGENT *agent_ptr, UINT *is_get_type)
 {
@@ -1204,7 +1085,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_request_get_type_test                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1234,14 +1115,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_request_get_type_test(NX_SNMP_AGENT *agent_ptr, UINT *is_get_type)
 {
@@ -1256,7 +1129,7 @@ UINT  _nx_snmp_agent_request_get_type_test(NX_SNMP_AGENT *agent_ptr, UINT *is_ge
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_delete                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1282,14 +1155,6 @@ UINT  _nx_snmp_agent_request_get_type_test(NX_SNMP_AGENT *agent_ptr, UINT *is_ge
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_delete(NX_SNMP_AGENT *agent_ptr)
 {
@@ -1314,7 +1179,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_delete                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1342,14 +1207,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_delete(NX_SNMP_AGENT *agent_ptr)
 {
@@ -1379,7 +1236,7 @@ UINT  _nx_snmp_agent_delete(NX_SNMP_AGENT *agent_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_current_version_get                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1407,14 +1264,6 @@ UINT  _nx_snmp_agent_delete(NX_SNMP_AGENT *agent_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_snmp_agent_current_version_get(NX_SNMP_AGENT *agent_ptr, UINT *version)
 {
@@ -1436,7 +1285,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_current_version_get                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1462,14 +1311,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_agent_current_version_get(NX_SNMP_AGENT *agent_ptr, UINT *version)
 {
@@ -1485,7 +1326,7 @@ UINT _nx_snmp_agent_current_version_get(NX_SNMP_AGENT *agent_ptr, UINT *version)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_set_version                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1516,14 +1357,6 @@ UINT _nx_snmp_agent_current_version_get(NX_SNMP_AGENT *agent_ptr, UINT *version)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_snmp_agent_version_set(NX_SNMP_AGENT *agent_ptr, UINT enabled_v1, UINT enable_v2, UINT enable_v3)
 {
@@ -1547,7 +1380,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_version_set                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1584,14 +1417,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_agent_version_set(NX_SNMP_AGENT *agent_ptr, UINT enabled_v1, UINT enable_v2, UINT enable_v3)
 {
@@ -1612,7 +1437,7 @@ UINT _nx_snmp_agent_version_set(NX_SNMP_AGENT *agent_ptr, UINT enabled_v1, UINT 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_set_interface                        PORTABLE C      */ 
-/*                                                           6.1.6        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1638,17 +1463,6 @@ UINT _nx_snmp_agent_version_set(NX_SNMP_AGENT *agent_ptr, UINT enabled_v1, UINT 
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            checked the interface index,*/
-/*                                            resulting in version 6.1.6  */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_snmp_agent_set_interface(NX_SNMP_AGENT *agent_ptr, UINT if_index)
 {
@@ -1676,7 +1490,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_set_interface                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1702,14 +1516,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_agent_set_interface(NX_SNMP_AGENT *agent_ptr, UINT if_index)
 {
@@ -1726,7 +1532,7 @@ UINT _nx_snmp_agent_set_interface(NX_SNMP_AGENT *agent_ptr, UINT if_index)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_md5_key_create                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1755,14 +1561,6 @@ UINT _nx_snmp_agent_set_interface(NX_SNMP_AGENT *agent_ptr, UINT if_index)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_md5_key_create(NX_SNMP_AGENT *agent_ptr, UCHAR *password, NX_SNMP_SECURITY_KEY *destination_key)
 {
@@ -1788,7 +1586,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_md5_key_create                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1819,14 +1617,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_md5_key_create(NX_SNMP_AGENT *agent_ptr, UCHAR *password, NX_SNMP_SECURITY_KEY *destination_key)
 {
@@ -1872,7 +1662,7 @@ UINT        password_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_md5_key_create_extended             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1903,14 +1693,6 @@ UINT        password_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_md5_key_create_extended(NX_SNMP_AGENT *agent_ptr, UCHAR *password, UINT password_length, NX_SNMP_SECURITY_KEY *destination_key)
 {
@@ -1936,7 +1718,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_md5_key_create_extended              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1969,15 +1751,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_md5_key_create_extended(NX_SNMP_AGENT *agent_ptr, UCHAR *password, UINT password_length, NX_SNMP_SECURITY_KEY *destination_key)
 {
@@ -2019,7 +1792,7 @@ UINT        temp_password_length;
         for (i = 0; i < 64; i++) 
         {
         
-            /* Take the next octet of the password, wrapping 
+            /* Take the next octet of the password, wrapping
                to the beginning of the password as necessary.  */
             *cp++ = password[password_index++ % password_length];
          }
@@ -2028,9 +1801,9 @@ UINT        temp_password_length;
     }
     _nx_md5_digest_calculate(&MD, destination_key -> nx_snmp_security_key);          /* tell MD5 we're done */
 
-    /* Now localize the key with the engineID and pass   
-       through MD5 to produce final key                  
-       May want to ensure that engineLength <= 32,      
+    /* Now localize the key with the engineID and pass
+       through MD5 to produce final key
+       May want to ensure that engineLength <= 32,
        otherwise need to use a buffer larger than 64  */
     if(agent_ptr -> nx_snmp_agent_v3_context_engine_size > 32)
         return(NX_SNMP_FAILED);
@@ -2058,7 +1831,7 @@ UINT        temp_password_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_privacy_key_use                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2088,14 +1861,6 @@ UINT        temp_password_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_privacy_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURITY_KEY *key)
 {
@@ -2130,7 +1895,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_privacy_key_use                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2159,14 +1924,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_privacy_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURITY_KEY *key)
 {
@@ -2191,7 +1948,7 @@ UINT  _nx_snmp_agent_privacy_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURITY_
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_priv_trap_key_use                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2221,14 +1978,6 @@ UINT  _nx_snmp_agent_privacy_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURITY_
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_priv_trap_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURITY_KEY *key)
 {
@@ -2265,7 +2014,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_priv_trap_key_use                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2293,14 +2042,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_priv_trap_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURITY_KEY *key)
 {
@@ -2324,7 +2065,7 @@ UINT  _nx_snmp_agent_priv_trap_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURIT
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_sha_key_create                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2353,14 +2094,6 @@ UINT  _nx_snmp_agent_priv_trap_key_use(NX_SNMP_AGENT *agent_ptr, NX_SNMP_SECURIT
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_sha_key_create(NX_SNMP_AGENT *agent_ptr, UCHAR *password, NX_SNMP_SECURITY_KEY *destination_key)
 {
@@ -2386,7 +2119,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_sha_key_create                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2418,14 +2151,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_sha_key_create(NX_SNMP_AGENT *agent_ptr, UCHAR *password, NX_SNMP_SECURITY_KEY *destination_key)
 {
@@ -2472,7 +2197,7 @@ UINT        password_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_sha_key_create_extended             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2502,14 +2227,6 @@ UINT        password_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_sha_key_create_extended(NX_SNMP_AGENT *agent_ptr, UCHAR *password, UINT password_length, NX_SNMP_SECURITY_KEY *destination_key)
 {
@@ -2535,7 +2252,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_sha_key_create_extended              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2568,15 +2285,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_sha_key_create_extended(NX_SNMP_AGENT *agent_ptr, UCHAR *password, UINT password_length, NX_SNMP_SECURITY_KEY *destination_key)
 {
@@ -2622,7 +2330,7 @@ UINT        temp_password_length;
         for (i = 0; i < 64; i++) 
         {
 
-            /* Take the next octet of the password, wrapping 
+            /* Take the next octet of the password, wrapping
                to the beginning of the password as necessary.  */
              *cp++ = password[password_index++ % password_length];
          }
@@ -2631,8 +2339,8 @@ UINT        temp_password_length;
     }
     _nx_sha1_digest_calculate(&SH, destination_key -> nx_snmp_security_key);          /* tell SHA we're done */
 
-    /* Now localize the key with the engineID and pass 
-       through SHA to produce final key                  
+    /* Now localize the key with the engineID and pass
+       through SHA to produce final key
        May want to ensure that engineLength <= 32,
        otherwise need to use a buffer larger than 72.  */
     if(agent_ptr -> nx_snmp_agent_v3_context_engine_size > 32)
@@ -2663,7 +2371,7 @@ UINT        temp_password_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_public_string_test                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2691,14 +2399,6 @@ UINT        temp_password_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_snmp_agent_public_string_test(NX_SNMP_AGENT *agent_ptr, UCHAR *community_string, UINT *is_public)
 {
@@ -2721,7 +2421,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_public_string_test                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2752,14 +2452,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_agent_public_string_test(NX_SNMP_AGENT *agent_ptr, UCHAR *community_string, UINT *is_public)
 {
@@ -2803,7 +2495,7 @@ UINT string_length1, string_length2;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_private_string_test                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2833,14 +2525,6 @@ UINT string_length1, string_length2;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_snmp_agent_private_string_test(NX_SNMP_AGENT *agent_ptr, UCHAR *community_string, UINT *is_private)
 {
@@ -2863,7 +2547,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_private_string_test                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2896,14 +2580,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_agent_private_string_test(NX_SNMP_AGENT *agent_ptr, UCHAR *community_string, UINT *is_private)
 {
@@ -2946,7 +2622,7 @@ UINT string_length1, string_length2;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_private_string_set                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2973,14 +2649,6 @@ UINT string_length1, string_length2;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_snmp_agent_private_string_set(NX_SNMP_AGENT *agent_ptr, UCHAR *community_string)
 {
@@ -3006,7 +2674,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_private_string_set                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3036,14 +2704,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_agent_private_string_set(NX_SNMP_AGENT *agent_ptr, UCHAR *community_string)
 {
@@ -3077,7 +2737,7 @@ UINT length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_public_string_set                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3104,14 +2764,6 @@ UINT length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_snmp_agent_public_string_set(NX_SNMP_AGENT *agent_ptr, UCHAR *community_string)
 {
@@ -3134,7 +2786,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_public_string_set                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3164,14 +2816,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_agent_public_string_set(NX_SNMP_AGENT *agent_ptr, UCHAR *community_string)
 {
@@ -3204,7 +2848,7 @@ UINT length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_start                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3230,14 +2874,6 @@ UINT length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_start(NX_SNMP_AGENT *agent_ptr)
 {
@@ -3262,7 +2898,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_start                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3287,14 +2923,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_start(NX_SNMP_AGENT *agent_ptr)
 {
@@ -3329,7 +2957,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_stop                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3355,14 +2983,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_stop(NX_SNMP_AGENT *agent_ptr)
 {
@@ -3387,7 +3007,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_stop                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3412,14 +3032,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_stop(NX_SNMP_AGENT *agent_ptr)
 {
@@ -3440,7 +3052,7 @@ UINT  _nx_snmp_agent_stop(NX_SNMP_AGENT *agent_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_thread_entry                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3473,14 +3085,6 @@ UINT  _nx_snmp_agent_stop(NX_SNMP_AGENT *agent_ptr)
 /*                                                                        */ 
 /*    ThreadX                                                             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_agent_thread_entry(ULONG snmp_agent_address)
 {
@@ -3734,7 +3338,7 @@ NX_PACKET               *new_packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_trap_send                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3774,14 +3378,6 @@ NX_PACKET               *new_packet_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_trap_send(NX_SNMP_AGENT *agent_ptr, ULONG ip_address, UCHAR *community, UCHAR *enterprise, 
                                 UINT trap_type, UINT trap_code, ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -3824,7 +3420,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_trap_send                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3867,14 +3463,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 
 UINT  _nx_snmp_agent_trap_send(NX_SNMP_AGENT *agent_ptr, ULONG ip_address, UCHAR *community, UCHAR *enterprise, 
@@ -3913,7 +3501,7 @@ NXD_ADDRESS  ip_netxduo_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_snmp_agent_trap_send                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3950,14 +3538,6 @@ NXD_ADDRESS  ip_netxduo_address;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_snmp_agent_trap_send(NX_SNMP_AGENT *agent_ptr, NXD_ADDRESS *ip_address, UCHAR *community, UCHAR *enterprise, 
                                 UINT trap_type, UINT trap_code, ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -3984,7 +3564,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_snmp_agent_trap_send                           PORTABLE C      */ 
-/*                                                           6.1.6        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4035,17 +3615,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            checked the interface index,*/
-/*                                            resulting in version 6.1.6  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_snmp_agent_trap_send(NX_SNMP_AGENT *agent_ptr, NXD_ADDRESS *ip_address, UCHAR *community, UCHAR *enterprise, 
                                UINT trap_type, UINT trap_code, ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -4119,7 +3688,7 @@ UINT                 packet_type;
        update it later with the actual length of the trap.  */
     trap_sequence_ptr =  trap_buffer_ptr;
 
-    /* First, write the sequence in the trap packet.  A zero is written for now.  This will be 
+    /* First, write the sequence in the trap packet.  A zero is written for now.  This will be
        updated later.  */
     trap_length =  _nx_snmp_utility_sequence_set(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
 
@@ -4388,7 +3957,7 @@ UINT                 packet_type;
     /* Remember the start of the trap's variable list field.  */
     trap_variable_list_ptr =  trap_buffer_ptr;
 
-    /* Set up the variable list.  For now, the length will be zero.  We 
+    /* Set up the variable list.  For now, the length will be zero.  We
        will overwrite this with the actual length later.  */
     trap_length =  _nx_snmp_utility_sequence_set(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
 
@@ -4447,7 +4016,7 @@ UINT                 packet_type;
         /* Remember the start of the variable.  */
         trap_variable_ptr =  trap_buffer_ptr;
 
-        /* Setup the variable trap sequence.  For now, the length will be zero.  We 
+        /* Setup the variable trap sequence.  For now, the length will be zero.  We
            will overwrite this with the actual length later.  */
         trap_length =  _nx_snmp_utility_sequence_set(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
 
@@ -4616,7 +4185,7 @@ UINT                 packet_type;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_trapv2_send                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4653,14 +4222,6 @@ UINT                 packet_type;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_trapv2_send(NX_SNMP_AGENT *agent_ptr, ULONG ip_address, UCHAR *community, UINT trap_type, ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
 {
@@ -4697,7 +4258,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_trapv2_send                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4737,14 +4298,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_trapv2_send(NX_SNMP_AGENT *agent_ptr, ULONG ip_address, UCHAR *community, UINT trap_type, ULONG elapsed_time, 
                                  NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -4779,7 +4332,7 @@ NXD_ADDRESS ip_nxduo_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_snmp_agent_trapv2_send                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4813,14 +4366,6 @@ NXD_ADDRESS ip_nxduo_address;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_snmp_agent_trapv2_send(NX_SNMP_AGENT *agent_ptr, NXD_ADDRESS *ip_address, UCHAR *community, UINT trap_type, ULONG elapsed_time, 
                                    NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -4847,7 +4392,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_snmp_agent_trapv2_send                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4897,14 +4442,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_snmp_agent_trapv2_send(NX_SNMP_AGENT *agent_ptr, NXD_ADDRESS *ip_address, UCHAR *community, UINT trap_type,  
                                   ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -4978,7 +4515,7 @@ UINT                 packet_type;
        update it later with the actual length of the trap.  */
     trap_sequence_ptr =  trap_buffer_ptr;
 
-    /* First, write the sequence in the trap packet.  A zero is written for now.  This will be 
+    /* First, write the sequence in the trap packet.  A zero is written for now.  This will be
        updated later.  */
     trap_length =  _nx_snmp_utility_sequence_set(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
 
@@ -5127,7 +4664,7 @@ UINT                 packet_type;
     /* Remember the start of the trap's variable list field.  */
     trap_variable_list_ptr =  trap_buffer_ptr;
 
-    /* Setup the variable list.  For now, the length will be zero.  We 
+    /* Setup the variable list.  For now, the length will be zero.  We
        will overwrite this with the actual length later.  */
     trap_length =  _nx_snmp_utility_sequence_set(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
 
@@ -5157,7 +4694,7 @@ UINT                 packet_type;
     /* Remember the start of the variable.  */
     trap_variable_ptr =  trap_buffer_ptr;
 
-    /* Setup the variable trap sequence.  For now, the length will be zero.  We 
+    /* Setup the variable trap sequence.  For now, the length will be zero.  We
        will overwrite this with the actual length later.  */
     trap_length =  _nx_snmp_utility_sequence_set(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
 
@@ -5289,7 +4826,7 @@ UINT                 packet_type;
     if (trap_type <= TRAP_ID_MAX)
     {
 
-        /* Set up the variable trap sequence.  For now, the length will be zero.  We 
+        /* Set up the variable trap sequence.  For now, the length will be zero.  We
            will overwrite this with the actual length later.  */
         trap_length =  _nx_snmp_utility_sequence_set(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
     
@@ -5421,7 +4958,7 @@ UINT                 packet_type;
         /* Remember the start of the variable.  */
         trap_variable_ptr =  trap_buffer_ptr;
 
-        /* Setup the variable trap sequence.  For now, the length will be zero.  We 
+        /* Setup the variable trap sequence.  For now, the length will be zero.  We
            will overwrite this with the actual length later.  */
         trap_length =  _nx_snmp_utility_sequence_set(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
 
@@ -5591,7 +5128,7 @@ UINT                 packet_type;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_snmp_agent_trapv2_oid_send                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5625,14 +5162,6 @@ UINT                 packet_type;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_trapv2_oid_send(NX_SNMP_AGENT *agent_ptr, ULONG ip_address, UCHAR *community, UCHAR *oid, ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -5673,7 +5202,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_snmp_agent_trapv2__oid_send                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5708,14 +5237,6 @@ UINT    status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_trapv2_oid_send(NX_SNMP_AGENT *agent_ptr, ULONG ip_address, UCHAR *community, UCHAR *oid, ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
 {
@@ -5748,7 +5269,7 @@ NXD_ADDRESS ipduo_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxde_snmp_agent_trapv2_oid_send                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5783,14 +5304,6 @@ NXD_ADDRESS ipduo_address;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_snmp_agent_trapv2_oid_send(NX_SNMP_AGENT *agent_ptr, NXD_ADDRESS *ipduo_address, UCHAR *community, UCHAR *oid, ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
 {
@@ -5818,7 +5331,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_snmp_agent_trapv2_oid_send                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5869,14 +5382,6 @@ UINT    status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_snmp_agent_trapv2_oid_send(NX_SNMP_AGENT *agent_ptr, NXD_ADDRESS *ipduo_address, UCHAR *community, UCHAR *oid, ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -6520,7 +6025,7 @@ UINT                 packet_type = NX_UDP_PACKET;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_agent_trapv3_send                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6555,14 +6060,6 @@ UINT                 packet_type = NX_UDP_PACKET;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_trapv3_send(NX_SNMP_AGENT *agent_ptr, ULONG ip_address, UCHAR *username, UINT trap_type, 
                                   ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -6600,7 +6097,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_trapv3_send                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6640,14 +6137,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_agent_trapv3_send(NX_SNMP_AGENT *agent_ptr, ULONG ip_address, UCHAR *username, UINT trap_type, 
                                  ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -6680,7 +6169,7 @@ NXD_ADDRESS ip_nxduo_address;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxde_snmp_agent_trapv3_send                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6717,14 +6206,6 @@ NXD_ADDRESS ip_nxduo_address;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_snmp_agent_trapv3_send(NX_SNMP_AGENT *agent_ptr, NXD_ADDRESS *ip_address, UCHAR *username, UINT trap_type, 
                                   ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -6751,7 +6232,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxd_snmp_agent_trapv3_send                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6809,14 +6290,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_snmp_agent_trapv3_send(NX_SNMP_AGENT *agent_ptr, NXD_ADDRESS *ip_address, UCHAR *username, UINT trap_type, ULONG elapsed_time, 
                                   NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -6904,7 +6377,7 @@ UINT                username_length;
        update it later with the actual length of the response.  */
     trap_sequence_ptr =  trap_buffer_ptr;
 
-    /* First, write the sequence in the trap packet.  A zero is written for now.  This will be 
+    /* First, write the sequence in the trap packet.  A zero is written for now.  This will be
        updated later.  */
     trap_length =  _nx_snmp_utility_sequence_set(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
 
@@ -6956,7 +6429,7 @@ UINT                username_length;
     NX_SNMPV3_DBG_PRINTF("Starting trap3 header header at 0x%x\n", trap_header_ptr);
 #endif
 
-    /* Write the sequence for the global header in the trap packet.  A zero is written for now.  
+    /* Write the sequence for the global header in the trap packet.  A zero is written for now.
        This will be updated later.  */
     trap_length =  _nx_snmp_utility_sequence_set_1byte(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
 
@@ -7101,7 +6574,7 @@ UINT                username_length;
 
     /************************** Start the security parameters field. ************************/
 
-    /* First set up the octet string field. For now just put in zeros... we will update when 
+    /* First set up the octet string field. For now just put in zeros... we will update when
       the actual size is known.  */  
     trap_buffer_ptr[0] =  NX_SNMP_ANS1_OCTET_STRING;
     trap_buffer_ptr[1] =  0;
@@ -7570,7 +7043,7 @@ UINT                username_length;
 #ifdef NX_SNMPV3_PRINT_DEBUG_MESSAGE
     NX_SNMPV3_DBG_PRINTF("Starting trap_variable_list_ptr: 0x%x\n", trap_variable_list_ptr);
 #endif
-    /* Setup the variable list.  For now, the length will be zero.  We 
+    /* Setup the variable list.  For now, the length will be zero.  We
        will overwrite this with the actual length later.  */
     trap_length =  _nx_snmp_utility_sequence_set(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end); 
 
@@ -7770,7 +7243,7 @@ UINT                username_length;
     if (trap_type <= TRAP_ID_MAX)
     {
     
-        /* Setup the variable trap sequence.  For now, the length will be zero.  We 
+        /* Setup the variable trap sequence.  For now, the length will be zero.  We
            will overwrite this with the actual length later.  */
         trap_length =  _nx_snmp_utility_sequence_set_1byte(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
     
@@ -7910,7 +7383,7 @@ UINT                username_length;
         /* Remember the start of the variable.  */
         trap_variable_ptr =  trap_buffer_ptr;
 
-        /* Setup the variable trap sequence.  For now, the length will be zero.  We 
+        /* Setup the variable trap sequence.  For now, the length will be zero.  We
            will overwrite this with the actual length later.  */
         trap_length =  _nx_snmp_utility_sequence_set_1byte(trap_buffer_ptr, 0, trap_packet_ptr -> nx_packet_data_end);
 
@@ -8295,7 +7768,7 @@ UINT                username_length;
             return(NX_SNMP_ERROR);
         }
 
-        /* At this point, key2 contains the computed digest of the message.  This needs to be 
+        /* At this point, key2 contains the computed digest of the message.  This needs to be
            place in the outgoing message.  */
 
         /* Loop to setup the outgoing digest.  */
@@ -8336,7 +7809,7 @@ UINT                username_length;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxe_snmp_agent_trapv3_oid_send                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8370,14 +7843,6 @@ UINT                username_length;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_agent_trapv3_oid_send(NX_SNMP_AGENT *agent_ptr, ULONG ip_address, UCHAR *username, UCHAR *oid, ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
@@ -8418,7 +7883,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_snmp_agent_trapv3_oid_send                      PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8451,14 +7916,6 @@ UINT    status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -8493,7 +7950,7 @@ NXD_ADDRESS ipduo_address;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxde_snmp_agent_trapv3_oid_send                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8528,14 +7985,6 @@ NXD_ADDRESS ipduo_address;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_snmp_agent_trapv3_oid_send(NX_SNMP_AGENT *agent_ptr, NXD_ADDRESS *ipduo_address, UCHAR *username, UCHAR *oid, ULONG elapsed_time, NX_SNMP_TRAP_OBJECT *object_list_ptr)
 {
@@ -8563,7 +8012,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nxd_snmp_agent_trapv3_oid_send                     PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8619,14 +8068,6 @@ UINT    status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -10060,7 +9501,7 @@ UINT                username_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_compare                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10088,14 +9529,6 @@ UINT                username_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_compare(UCHAR *requested_object, UCHAR *actual_object)
 {
@@ -10120,7 +9553,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_compare                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10148,14 +9581,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_compare(UCHAR *requested_object, UCHAR *actual_object)
 {
@@ -10185,7 +9610,7 @@ UINT    actual_object_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_compare_extended                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10215,14 +9640,6 @@ UINT    actual_object_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_compare_extended(UCHAR *requested_object, UINT requested_object_length, UCHAR *actual_object, UINT actual_object_length)
 {
@@ -10242,7 +9659,7 @@ UINT  _nxe_snmp_object_compare_extended(UCHAR *requested_object, UINT requested_
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_compare_extended                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10273,14 +9690,6 @@ UINT  _nxe_snmp_object_compare_extended(UCHAR *requested_object, UINT requested_
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_compare_extended(UCHAR *requested_object, UINT requested_object_length, UCHAR *actual_object, UINT actual_object_length)
 {
@@ -10383,7 +9792,7 @@ UINT    temp_actual_object_lenght;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_copy                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10412,14 +9821,6 @@ UINT    temp_actual_object_lenght;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_copy(UCHAR *source_object_name, UCHAR *destination_object_name)
 {
@@ -10444,7 +9845,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_copy                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10474,14 +9875,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_copy(UCHAR *source_object_name, UCHAR *destination_object_name)
 {
@@ -10519,7 +9912,7 @@ UINT    i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_copy_extended                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10550,14 +9943,6 @@ UINT    i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_copy_extended(UCHAR *source_object_name, UINT source_object_name_length,
                                      UCHAR *destination_object_name_buffer, UINT destination_object_name_buffer_size)
@@ -10578,7 +9963,7 @@ UINT  _nxe_snmp_object_copy_extended(UCHAR *source_object_name, UINT source_obje
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_copy_extended                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10611,15 +9996,6 @@ UINT  _nxe_snmp_object_copy_extended(UCHAR *source_object_name, UINT source_obje
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_copy_extended(UCHAR *source_object_name, UINT source_object_name_length,
                                     UCHAR *destination_object_name_buffer, UINT destination_object_name_buffer_size)
@@ -10653,7 +10029,7 @@ UINT    temp_object_name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_counter_get                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10681,14 +10057,6 @@ UINT    temp_object_name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_counter_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -10713,7 +10081,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_counter_get                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10740,14 +10108,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_counter_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -10774,7 +10134,7 @@ ULONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_counter_set                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10802,14 +10162,6 @@ ULONG   *value_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_counter_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -10834,7 +10186,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_counter_set                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10861,14 +10213,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_counter_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -10900,7 +10244,7 @@ ULONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_counter64_get                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10928,14 +10272,6 @@ ULONG   *value_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_counter64_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -10960,7 +10296,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_counter64_get                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10987,14 +10323,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_counter64_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11022,7 +10350,7 @@ ULONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_counter64_set                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11050,14 +10378,6 @@ ULONG   *value_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_counter64_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11082,7 +10402,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_counter64_set                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11109,14 +10429,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_counter64_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11181,7 +10493,7 @@ LONG         temp = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_end_of_mib                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11209,14 +10521,6 @@ LONG         temp = 0;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_end_of_mib(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11241,7 +10545,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_end_of_mib                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11268,14 +10572,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_end_of_mib(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11296,7 +10592,7 @@ UINT  _nx_snmp_object_end_of_mib(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *object
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_gauge_get                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11324,14 +10620,6 @@ UINT  _nx_snmp_object_end_of_mib(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *object
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_gauge_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11356,7 +10644,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_gauge_get                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11383,14 +10671,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_gauge_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11417,7 +10697,7 @@ ULONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_gauge_set                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11445,14 +10725,6 @@ ULONG   *value_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_gauge_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11477,7 +10749,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_gauge_set                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11504,14 +10776,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_gauge_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11543,7 +10807,7 @@ ULONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_id_get                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11571,14 +10835,6 @@ ULONG   *value_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_id_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11603,7 +10859,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_id_get                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11630,15 +10886,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_id_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11682,7 +10929,7 @@ CHAR   *copy_source = (CHAR*)source_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_id_set                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11710,14 +10957,6 @@ CHAR   *copy_source = (CHAR*)source_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_id_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11742,7 +10981,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_id_set                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11769,14 +11008,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_id_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11802,7 +11033,7 @@ UINT  _nx_snmp_object_id_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_integer_get                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11830,14 +11061,6 @@ UINT  _nx_snmp_object_id_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_integer_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11862,7 +11085,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_integer_get                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11889,14 +11112,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_integer_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11923,7 +11138,7 @@ LONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_integer_set                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11951,14 +11166,6 @@ LONG   *value_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_integer_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -11983,7 +11190,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_integer_set                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12010,14 +11217,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_integer_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12050,7 +11249,7 @@ LONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_ipv6_address_set                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12077,14 +11276,6 @@ LONG   *value_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_ipv6_address_set(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12109,7 +11300,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_ipv6_address_set                    PORTABLE C      */ 
-/*                                                           6.1.5        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12139,17 +11330,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            optimized boundary check,   */
-/*                                            resulting in version 6.1.5  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_ipv6_address_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12192,7 +11372,7 @@ UCHAR           *string_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_ipv6_address_get                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12219,14 +11399,6 @@ UCHAR           *string_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_ipv6_address_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12251,7 +11423,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_ipv6_address_get                    PORTABLE C      */ 
-/*                                                           6.1.5        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12280,17 +11452,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            optimized boundary check,   */
-/*                                            resulting in version 6.1.5  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_ipv6_address_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12331,7 +11492,7 @@ UCHAR   *source_string;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_ip_address_get                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12359,14 +11520,6 @@ UCHAR   *source_string;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_ip_address_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12391,7 +11544,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_ip_address_get                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12418,14 +11571,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_ip_address_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12452,7 +11597,7 @@ ULONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_ip_address_set                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12481,14 +11626,6 @@ ULONG   *value_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_ip_address_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12513,7 +11650,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_ip_address_set                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12541,14 +11678,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_ip_address_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12580,7 +11709,7 @@ ULONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_no_instance                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12608,14 +11737,6 @@ ULONG   *value_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_no_instance(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12640,7 +11761,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_no_instance                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12667,14 +11788,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_no_instance(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12695,7 +11808,7 @@ UINT  _nx_snmp_object_no_instance(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *objec
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_not_found                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12723,14 +11836,6 @@ UINT  _nx_snmp_object_no_instance(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *objec
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_not_found(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12755,7 +11860,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_not_found                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12782,14 +11887,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_not_found(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -12810,7 +11907,7 @@ UINT  _nx_snmp_object_not_found(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *object_
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_octet_string_get                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12839,14 +11936,6 @@ UINT  _nx_snmp_object_not_found(VOID *not_used_ptr, NX_SNMP_OBJECT_DATA *object_
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_octet_string_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data, UINT length) 
 {
@@ -12871,7 +11960,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_octet_string_get                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12903,14 +11992,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_octet_string_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data, UINT length)  
 {
@@ -12940,7 +12021,7 @@ UCHAR   *source_string;
         object_data -> nx_snmp_object_octet_string[i] =  source_string[i];
     }
 
-    /* The length input is deprecated. The caller sets the length from the MIB table 
+    /* The length input is deprecated. The caller sets the length from the MIB table
        entry to the object_data instance before calling this function. */
 
     /* Return success.  */
@@ -12953,7 +12034,7 @@ UCHAR   *source_string;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_octet_string_set                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12982,14 +12063,6 @@ UCHAR   *source_string;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_octet_string_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -13014,7 +12087,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_octet_string_set                    PORTABLE C      */ 
-/*                                                           6.1.5        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13043,17 +12116,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            optimized boundary check,   */
-/*                                            resulting in version 6.1.5  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_octet_string_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -13096,7 +12158,7 @@ UCHAR   *string_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_string_get                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13124,14 +12186,6 @@ UCHAR   *string_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_string_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -13156,7 +12210,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_string_get                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13183,14 +12237,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_string_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -13240,7 +12286,7 @@ UCHAR   *source_string;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_string_set                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13269,14 +12315,6 @@ UCHAR   *source_string;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_string_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -13301,7 +12339,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_string_set                          PORTABLE C      */ 
-/*                                                           6.1.5        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13329,17 +12367,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            optimized boundary check,   */
-/*                                            resulting in version 6.1.5  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_string_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -13386,7 +12413,7 @@ UCHAR   *string_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_timetics_get                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13414,14 +12441,6 @@ UCHAR   *string_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_timetics_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -13446,7 +12465,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_timetics_get                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13473,14 +12492,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_timetics_get(VOID *source_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -13507,7 +12518,7 @@ ULONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_snmp_object_timetics_set                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13536,14 +12547,6 @@ ULONG   *value_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_snmp_object_timetics_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -13568,7 +12571,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_object_timetics_set                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13596,14 +12599,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_object_timetics_set(VOID *destination_ptr, NX_SNMP_OBJECT_DATA *object_data)
 {
@@ -13635,7 +12630,7 @@ ULONG   *value_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_community_get                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13665,14 +12660,6 @@ ULONG   *value_ptr;
 /*                                                                        */ 
 /*    _nx_snmp_version_1_and_2_process      SNMP v1, v2 request processing*/ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_community_get(UCHAR *buffer_ptr, UCHAR *community_string, INT buffer_length)
 {
@@ -13803,7 +12790,7 @@ UINT    total;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_community_set                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13835,14 +12822,6 @@ UINT    total;
 /*    _nx_snmp_agent_trapv2_send            Send SNMP v2 trap             */ 
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_community_set(UCHAR *buffer_ptr, UCHAR *community_string, UCHAR *buffer_end)
 {
@@ -13919,7 +12898,7 @@ UINT    length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_error_info_get                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -13950,14 +12929,6 @@ UINT    length;
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_error_info_get(UCHAR *buffer_ptr, UINT *error_code, UINT *error_index, INT buffer_length)
 {
@@ -14009,7 +12980,7 @@ UINT  _nx_snmp_utility_error_info_get(UCHAR *buffer_ptr, UINT *error_code, UINT 
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_error_info_set                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14044,14 +13015,6 @@ UINT  _nx_snmp_utility_error_info_get(UCHAR *buffer_ptr, UINT *error_code, UINT 
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_error_info_set(UCHAR *buffer_ptr, UINT error_code, UINT error_index, UCHAR *buffer_end)
 {
@@ -14119,22 +13082,6 @@ UINT  _nx_snmp_utility_error_info_set(UCHAR *buffer_ptr, UINT error_code, UINT e
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved the logic of       */
-/*                                            converting number to string,*/
-/*                                            resulting in version 6.1.8  */
-/*  01-31-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            initialized the sequence    */
-/*                                            byte value,                 */
-/*                                            resulting in version 6.1.10 */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_object_id_get(UCHAR *buffer_ptr, UCHAR *object_string, INT buffer_length)
 {
@@ -14326,7 +13273,7 @@ UINT    string_length;
         /* Increment the length.  */
         length++;
 
-        /* Determine if the next byte has the additional bytes 
+        /* Determine if the next byte has the additional bytes
            bit set (BIT 7).  */
         if ((byte & NX_SNMP_ANS1_MULTI_BYTES) == 0)
         {
@@ -14337,7 +13284,7 @@ UINT    string_length;
         else
         {
 
-            /* Otherwise, we have a more complicated value that we must loop through 
+            /* Otherwise, we have a more complicated value that we must loop through
                to calculate.  */
 
             /* Loop to calculate how many bytes there are representing the value.  */
@@ -14468,7 +13415,7 @@ UINT    string_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_object_id_set                      PORTABLE C      */ 
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14503,17 +13450,6 @@ UINT    string_length;
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_object_id_set(UCHAR *buffer_ptr, UCHAR *object_string, UCHAR *buffer_end)
 {
@@ -14685,7 +13621,7 @@ UINT    object_string_length;
                 /* Increment the length.  */
                 length++;
                 
-                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the 
+                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the
                    next 128 divisor.  */
                 encoding_started =  NX_TRUE;
             }
@@ -14717,7 +13653,7 @@ UINT    object_string_length;
                 /* Increment the length.  */
                 length++;
 
-                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the 
+                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the
                    next 128 divisor.  */
                 encoding_started =  NX_TRUE;
             }
@@ -14750,7 +13686,7 @@ UINT    object_string_length;
                 length++;
 
 
-                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the 
+                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the
                    next 128 divisor.  */
                 encoding_started =  NX_TRUE;
             }
@@ -14812,7 +13748,7 @@ UINT    object_string_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_object_id_set_1byte                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -14846,14 +13782,6 @@ UINT    object_string_length;
 /*                                                                        */ 
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_object_id_set_1byte(UCHAR *buffer_ptr, UCHAR *object_string, UCHAR *buffer_end)
 {
@@ -15017,7 +13945,7 @@ UCHAR   encoding_started;
                 /* Increment the length.  */
                 length++;
                 
-                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the 
+                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the
                    next 128 divisor.  */
                 encoding_started =  NX_TRUE;
             }
@@ -15049,7 +13977,7 @@ UCHAR   encoding_started;
                 /* Increment the length.  */
                 length++;
 
-                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the 
+                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the
                    next 128 divisor.  */
                 encoding_started =  NX_TRUE;
             }
@@ -15082,7 +14010,7 @@ UCHAR   encoding_started;
                 length++;
 
 
-                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the 
+                /* Set the encoding started flag so that we put 0 bytes below in cases where value is less than the
                    next 128 divisor.  */
                 encoding_started =  NX_TRUE;
             }
@@ -15144,7 +14072,7 @@ UCHAR   encoding_started;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_object_data_get                    PORTABLE C      */ 
-/*                                                           6.2.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -15173,17 +14101,6 @@ UCHAR   encoding_started;
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.2.0  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_object_data_get(UCHAR *buffer_ptr, NX_SNMP_OBJECT_DATA *object_data, INT buffer_length)
 {
@@ -15386,7 +14303,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_object_data_set                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -15420,14 +14337,6 @@ UINT    status;
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_object_data_set(UCHAR *buffer_ptr, NX_SNMP_OBJECT_DATA *object_data, UCHAR *buffer_end)
 {
@@ -15754,7 +14663,7 @@ UINT    data_lsw;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_octet_get                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -15787,14 +14696,6 @@ UINT    data_lsw;
 /*                                                                        */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_octet_get(UCHAR *buffer_ptr, UCHAR *octet_string, UINT max_octet_length, UINT *octet_length, INT buffer_length)
 {
@@ -15924,7 +14825,7 @@ UINT    total;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_octet_set                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -15956,14 +14857,6 @@ UINT    total;
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_octet_set(UCHAR *buffer_ptr, UCHAR *octet_string, UINT octet_length, UCHAR *buffer_end)
 {
@@ -16039,7 +14932,7 @@ UINT    header_size;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_sequence_get                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16071,14 +14964,6 @@ UINT    header_size;
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_sequence_get(UCHAR *buffer_ptr, UINT *sequence_value, INT buffer_length)
 {
@@ -16116,7 +15001,7 @@ UCHAR   byte;
     /* Initialize the length of the sequence field to 2. */
     length =  2;
 
-    /* Determine if the next byte has the additional bytes 
+    /* Determine if the next byte has the additional bytes
        bit set (BIT 7).  */
     if ((byte & NX_SNMP_ANS1_MULTI_BYTES) == 0)
     {
@@ -16128,7 +15013,7 @@ UCHAR   byte;
         return(length);
     }
 
-    /* Otherwise, we have a more complicated sequence length that we must loop through 
+    /* Otherwise, we have a more complicated sequence length that we must loop through
        to calculate the actual sequence length.  */
 
     /* Pickup the number of bytes required to represent the sequence length.  */
@@ -16170,7 +15055,7 @@ UCHAR   byte;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_sequence_set                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16204,14 +15089,6 @@ UCHAR   byte;
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_sequence_set(UCHAR *buffer_ptr, UINT sequence_value, UCHAR *buffer_end)
 {
@@ -16242,7 +15119,7 @@ UINT  _nx_snmp_utility_sequence_set(UCHAR *buffer_ptr, UINT sequence_value, UCHA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_sequence_set_1byte                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16273,14 +15150,6 @@ UINT  _nx_snmp_utility_sequence_set(UCHAR *buffer_ptr, UINT sequence_value, UCHA
 /*                                                                        */ 
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
  
 UINT  _nx_snmp_utility_sequence_set_1byte(UCHAR *buffer_ptr, UINT sequence_value, UCHAR *buffer_end)
@@ -16306,7 +15175,7 @@ UINT  _nx_snmp_utility_sequence_set_1byte(UCHAR *buffer_ptr, UINT sequence_value
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_request_id_get                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16337,14 +15206,6 @@ UINT  _nx_snmp_utility_sequence_set_1byte(UCHAR *buffer_ptr, UINT sequence_value
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_request_id_get(UCHAR *buffer_ptr, ULONG *request_id, INT buffer_length)
 {
@@ -16419,7 +15280,7 @@ UCHAR   byte;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_request_id_set                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16452,14 +15313,6 @@ UCHAR   byte;
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_request_id_set(UCHAR *buffer_ptr, ULONG request_id, UCHAR *buffer_end)
 {
@@ -16556,7 +15409,7 @@ UINT    length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_request_type_get                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16589,14 +15442,6 @@ UINT    length;
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_request_type_get(UCHAR *buffer_ptr, UINT *request_type, UINT *request_length, INT buffer_length)
 {
@@ -16638,7 +15483,7 @@ UCHAR   byte;
     /* Initialize the length of the request field to 2. */
     length =  2;
 
-    /* Determine if the next byte has the additional bytes 
+    /* Determine if the next byte has the additional bytes
        bit set (BIT 7).  */
     if ((byte & NX_SNMP_ANS1_MULTI_BYTES) == 0)
     {
@@ -16650,7 +15495,7 @@ UCHAR   byte;
         return(length);
     }
 
-    /* Otherwise, we have a more complicated request length that we must loop through 
+    /* Otherwise, we have a more complicated request length that we must loop through
        to calculate the actual length.  */
 
     /* Pickup the number of bytes required to represent the request length.  */
@@ -16694,7 +15539,7 @@ UCHAR   byte;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_request_type_set_1byte             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16729,14 +15574,6 @@ UCHAR   byte;
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_request_type_set_1byte(UCHAR *buffer_ptr, UINT request_type, UINT request_length, UCHAR *buffer_end)
 {
@@ -16762,7 +15599,7 @@ UINT  _nx_snmp_utility_request_type_set_1byte(UCHAR *buffer_ptr, UINT request_ty
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_request_type_set_multibyte         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16795,14 +15632,6 @@ UINT  _nx_snmp_utility_request_type_set_1byte(UCHAR *buffer_ptr, UINT request_ty
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_request_type_set_multibyte(UCHAR *buffer_ptr, UINT request_type, UINT request_length, UCHAR *buffer_end)
 {
@@ -16833,7 +15662,7 @@ UINT  _nx_snmp_utility_request_type_set_multibyte(UCHAR *buffer_ptr, UINT reques
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_version_get                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16865,14 +15694,6 @@ UINT  _nx_snmp_utility_request_type_set_multibyte(UCHAR *buffer_ptr, UINT reques
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_version_get(UCHAR *buffer_ptr, UINT *snmp_version, INT buffer_length)
 {
@@ -16921,7 +15742,7 @@ UINT  _nx_snmp_utility_version_get(UCHAR *buffer_ptr, UINT *snmp_version, INT bu
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_utility_version_set                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -16954,14 +15775,6 @@ UINT  _nx_snmp_utility_version_get(UCHAR *buffer_ptr, UINT *snmp_version, INT bu
 /*    _nx_snmp_version_3_report_send        Send SNMP v3 report           */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_snmp_utility_version_set(UCHAR *buffer_ptr, UINT snmp_version, UCHAR *buffer_end)
 {
@@ -16989,7 +15802,7 @@ UINT  _nx_snmp_utility_version_set(UCHAR *buffer_ptr, UINT snmp_version, UCHAR *
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_version_error_response                     PORTABLE C      */ 
-/*                                                           6.1.6        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -17026,17 +15839,6 @@ UINT  _nx_snmp_utility_version_set(UCHAR *buffer_ptr, UINT snmp_version, UCHAR *
 /*    _nx_snmp_version_1_and_2_process      Process SNMP v1 and v2 request*/ 
 /*    _nx_snmp_version_3_process            SNMP v3 message processing    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            verification of encryption, */
-/*                                            resulting in version 6.1.6  */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_version_error_response(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr, UCHAR *request_type_ptr, 
                                       UCHAR *error_string_ptr, UINT error_code, UINT error_index)
@@ -17160,7 +15962,7 @@ ULONG   temp;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_version_1_and_2_process                    PORTABLE C      */ 
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -17207,12 +16009,6 @@ ULONG   temp;
 /*                                                                        */ 
 /*    _nx_snmp_agent_thread_entry           SNMP Agent thread             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Bo Chen                  Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_version_1_and_2_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr)
 {
@@ -17495,7 +16291,7 @@ INT         buffer_length;
     /* The buffer pointer is moved by the length. Update buffer size */
     buffer_length -= (INT)length;
 
-    /* At this point we have parsed the incoming SNMP request up to the first 
+    /* At this point we have parsed the incoming SNMP request up to the first
        variable.  */
 
     /* Now prepare response message so we can process the variables one by one.  */
@@ -17558,7 +16354,7 @@ INT         buffer_length;
        update it later with the actual length of the response.  */
     response_sequence_ptr =  response_buffer_ptr;
 
-    /* First, write the sequence in the response packet.  A zero is written for now.  This will be 
+    /* First, write the sequence in the response packet.  A zero is written for now.  This will be
        updated later.  */
     response_length =  _nx_snmp_utility_sequence_set(response_buffer_ptr, 0, response_packet_ptr -> nx_packet_data_end);
 
@@ -17724,7 +16520,7 @@ INT         buffer_length;
     /* Remember the start of the response's variable list field.  */
     response_variable_list_ptr =  response_buffer_ptr;
 
-    /* Setup the variable list response.  For now, the length will be zero.  We 
+    /* Setup the variable list response.  For now, the length will be zero.  We
        will overwrite this with the actual length later.  */
     response_length =  _nx_snmp_utility_sequence_set(response_buffer_ptr, 0, response_packet_ptr -> nx_packet_data_end);
 
@@ -17754,7 +16550,7 @@ INT         buffer_length;
     /* Adjust the response request type length.  */
     response_type_length =  response_type_length + response_length;
 
-    /* At this point the response buffer is setup to exactly the same position the 
+    /* At this point the response buffer is setup to exactly the same position the
        SNMP Manager's input buffer is - right before the first variable.  We can
        now walk through the variable list to process each request and place the
        result in the response buffer.  */
@@ -17776,7 +16572,7 @@ INT         buffer_length;
             /* Calculate the total variable size.  */
             total_variable_length =  variable_length + length;
 
-            /* Determine if this variable will fit in the remaining length of the 
+            /* Determine if this variable will fit in the remaining length of the
                variable list, buffer length, and if there is integer overflow.  */
             if ((length == 0) || (total_variable_length > variable_list_length) ||
                 (total_variable_length < variable_length) || (total_variable_length > (UINT)buffer_length))
@@ -17871,7 +16667,7 @@ INT         buffer_length;
             }
         }
 
-        /* At this point, we are ready to call the appropriate application request handling routine.  
+        /* At this point, we are ready to call the appropriate application request handling routine.
            It is responsible for extracting or placing information in the object data structure.  */
         if (request_type == NX_SNMP_ANS1_GET_REQUEST)
         {
@@ -18100,7 +16896,7 @@ INT         buffer_length;
             return;
         }
 
-        /* Setup the variable response sequence.  For now, the length will be zero.  We 
+        /* Setup the variable response sequence.  For now, the length will be zero.  We
            will overwrite this with the actual length later.  */
         response_length =  _nx_snmp_utility_sequence_set(response_buffer_ptr, 0, response_packet_ptr -> nx_packet_data_end);
 
@@ -18264,7 +17060,7 @@ INT         buffer_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_version_3_process                          PORTABLE C      */ 
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -18321,23 +17117,6 @@ INT         buffer_length;
 /*                                                                        */ 
 /*    _nx_snmp_agent_thread_entry           SNMP Agent thread             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved boundary check,    */
-/*                                            checked NULL pointer,       */
-/*                                            resulting in version 6.1.6  */
-/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            fixed packet double release,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_version_3_process(NX_SNMP_AGENT *agent_ptr, NX_PACKET *packet_ptr)
 {
@@ -18585,7 +17364,26 @@ INT         buffer_length;
     /* The buffer pointer is moved by the length. Update buffer size */
     buffer_length -= (INT)length;
 
+    /* GHSA-v474-mv4g-v8cx */
+    if (buffer_length < 2) {
+        return;
+    }
+
     /**** Now we are positioned in front of the security parameters field.  ****/
+    if (buffer_length < 2)
+    {
+        /* Increment the invalid packet error counter.  */
+        agent_ptr -> nx_snmp_agent_invalid_packets++;
+
+        /* Increment the internal error counter.  */
+        agent_ptr -> nx_snmp_agent_internal_errors++;
+
+        /* Release the packet.  */
+        nx_packet_release(packet_ptr);
+
+        /* Return to caller.  */
+        return;
+    }
 
     /* Determine if there are security parameters.  */
     if ((buffer_ptr[0] == NX_SNMP_ANS1_OCTET_STRING) && (buffer_ptr[1]))
@@ -19071,7 +17869,7 @@ INT         buffer_length;
         /* Mark the location in the request buffer. */
         pdu_auth_parm_ptr = request_authentication_ptr;
 
-        /* Clear the authentication field in the message.  To calculate the 
+        /* Clear the authentication field in the message.  To calculate the
            digest this must be cleared.  Also position past the string and length.  */
         for (i = 0; i < agent_ptr -> nx_snmp_agent_v3_security_authentication_size; i++)
         {
@@ -19288,7 +18086,7 @@ INT         buffer_length;
        update it later with the actual length of the response.  */
     response_sequence_ptr =  response_buffer_ptr;
 
-    /* First, write the sequence in the response packet.  A zero is written for now.  This will be 
+    /* First, write the sequence in the response packet.  A zero is written for now.  This will be
        updated later.  */
     response_length =  _nx_snmp_utility_sequence_set(response_buffer_ptr, 0, response_packet_ptr -> nx_packet_data_end);
 
@@ -19343,7 +18141,7 @@ INT         buffer_length;
     /* Save the pointer to the global header.  */
     response_header_ptr =  response_buffer_ptr;
 
-    /* Write the sequence for the global header in the response packet.  A zero is written for now.  
+    /* Write the sequence for the global header in the response packet.  A zero is written for now.
        This will be updated later.  */
     response_length =  _nx_snmp_utility_sequence_set(response_buffer_ptr, 0, response_packet_ptr -> nx_packet_data_end);
 
@@ -19496,7 +18294,7 @@ INT         buffer_length;
     /* Adjust the header sequence length.  */
     response_header_length =  response_header_length + response_length;
 
-    /* At this point, we have successfully built the security header.  Now, we need to build 
+    /* At this point, we have successfully built the security header.  Now, we need to build
        the security parameters field.  */
 
     /* First setup the octet string field.  */
@@ -20091,9 +18889,9 @@ INT         buffer_length;
     /*            SET the PDU Sequence Header if the response is encrypted.       */
     /******************************************************************************/
 
-    /* If the message is encrypted we have to insert an PDU "inner" sequence header. Because 
+    /* If the message is encrypted we have to insert an PDU "inner" sequence header. Because
        we will use the multibyte sequence 0x30 82 xx yy format, we have to update the enclosing
-       sequences (total response length and pdu length and their respective pointers accordingly. 
+       sequences (total response length and pdu length and their respective pointers accordingly.
     */
     if (encrypt_message)
     {
@@ -20174,8 +18972,8 @@ INT         buffer_length;
 
  
     /* The browser uses the context name from the SNMP Agent to confirm
-       the response is coming from the SNMP Agent it sent the request to. They must match. 
-       The request ID only matches the request with response.  A user may have multiple 
+       the response is coming from the SNMP Agent it sent the request to. They must match.
+       The request ID only matches the request with response.  A user may have multiple
        requests. There may be circumstances where the SNMP Agent only responds with
        one context name. Don't know what that would be. */
 
@@ -20504,13 +19302,13 @@ INT         buffer_length;
     /* The buffer pointer is moved by the length. Update buffer size */
     buffer_length -= (INT)length;
 
-    /* At this point we have parsed the incoming SNMP request up to the first 
+    /* At this point we have parsed the incoming SNMP request up to the first
        variable.  */
 
     /* Remember the start of the response's variable list field.  */
     response_variable_list_ptr =  response_buffer_ptr;
 
-    /* Setup the variable list response.  For now, the length will be zero.  We 
+    /* Setup the variable list response.  For now, the length will be zero.  We
        will overwrite this with the actual length later.  */
     response_length =  _nx_snmp_utility_sequence_set(response_buffer_ptr, 0, response_packet_ptr -> nx_packet_data_end);
 
@@ -20547,7 +19345,7 @@ INT         buffer_length;
     NX_SNMPV3_DBG_PRINTF("Process the variable binding list, line %d \n\r", __LINE__);
 #endif
 
-    /* At this point the response buffer is setup to exactly the same position the 
+    /* At this point the response buffer is setup to exactly the same position the
        SNMP Manager's input buffer is - right before the first variable.  We can
        now walk through the variable list to process each request and place the
        result in the response buffer.  */
@@ -20660,7 +19458,7 @@ INT         buffer_length;
             }
         }
 
-        /* At this point, we are ready to call the appropriate application request handling routine.  
+        /* At this point, we are ready to call the appropriate application request handling routine.
            It is responsible for extracting or placing information in the object data structure.  */
         if (request_type == NX_SNMP_ANS1_GET_REQUEST)
         {
@@ -20847,7 +19645,7 @@ INT         buffer_length;
             return;
         }
 
-        /* Setup the variable response sequence.  For now, the length will be zero.  We 
+        /* Setup the variable response sequence.  For now, the length will be zero.  We
            will overwrite this with the actual length later.  */
         response_length =  _nx_snmp_utility_sequence_set(response_buffer_ptr, 0, response_packet_ptr -> nx_packet_data_end);
 
@@ -21083,7 +19881,7 @@ INT         buffer_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_version_3_report_send                      PORTABLE C      */ 
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -21123,18 +19921,6 @@ INT         buffer_length;
 /*                                                                        */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_snmp_version_3_report_send(NX_SNMP_AGENT *agent_ptr, UCHAR *buffer_ptr, UINT report_respond, INT buffer_length)
 {
@@ -21346,7 +20132,7 @@ UCHAR               report_security_level;
        update it later with the actual length of the report.  */
     report_sequence_ptr =  report_buffer_ptr;
 
-    /* First, write the sequence in the report packet.  A zero is written for now.  This will be 
+    /* First, write the sequence in the report packet.  A zero is written for now.  This will be
        updated later.  */
     report_length =  _nx_snmp_utility_sequence_set(report_buffer_ptr, 0, report_packet_ptr -> nx_packet_data_end);
 
@@ -21395,7 +20181,7 @@ UCHAR               report_security_level;
     /* Save the pointer to the global header.  */
     report_header_ptr =  report_buffer_ptr;
 
-    /* Write the sequence for the global header in the report packet.  A zero is written for now.  
+    /* Write the sequence for the global header in the report packet.  A zero is written for now.
        This will be updated later.  */
     report_length =  _nx_snmp_utility_sequence_set(report_buffer_ptr, 0, report_packet_ptr -> nx_packet_data_end);
 
@@ -21537,7 +20323,7 @@ UCHAR               report_security_level;
     /* Adjust the header sequence length.  */
     report_header_length =  report_header_length + report_length;
 
-    /* At this point, we have successfully built the security header.  Now, we need to build 
+    /* At this point, we have successfully built the security header.  Now, we need to build
        the security parameters field.  */
 
     /* First setup the octet string field.  */
@@ -21913,7 +20699,7 @@ UCHAR               report_security_level;
     /********************************************************/
     /*                  Set PDU request ID                  */
     /********************************************************/
-    /* Set the PDU request to zero instead of matching the request if the request is encrypted. 
+    /* Set the PDU request to zero instead of matching the request if the request is encrypted.
        Otherwise the request ID must match the request specified by the browser request. */
     if (encryption)
     {
@@ -22314,7 +21100,7 @@ UCHAR               report_security_level;
     /* Increment the sent packet counter.  */
     agent_ptr -> nx_snmp_agent_packets_sent++;
 
-    /* Set the authentication parameter if we have determined it needs to be set, and only if we 
+    /* Set the authentication parameter if we have determined it needs to be set, and only if we
        have a valid user name. (Otherwise there would be no shared key for the other side to check
        our authentication.)*/
     if ((authenticate == NX_TRUE) && (report_respond != NX_SNMP_DISCOVERY_RESPONSE_UNKNOWN_USERNAME_NUM))
@@ -22368,7 +21154,7 @@ UCHAR               report_security_level;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_add_auth_parameter                   PORTABLE C      */ 
-/*                                                           6.1.6        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -22404,17 +21190,6 @@ UCHAR               report_security_level;
 /*    _nx_snmp_version_3_process            Process SNMP v3 request reply */ 
 /*    _nx_snmp_version_3_report_send        Process SNMP v3 report        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            checked NULL pointer,       */
-/*                                            resulting in version 6.1.6  */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_agent_add_auth_parameter(NX_SNMP_AGENT *agent_ptr, NX_PACKET *response_packet_ptr, UCHAR *response_authentication_ptr)
 {
@@ -22535,7 +21310,7 @@ UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
             return NX_SNMP_UNSUPPORTED_AUTHENTICATION;
         }
 
-        /* At this point, key2 contains the computed digest of the message.  This needs to be 
+        /* At this point, key2 contains the computed digest of the message.  This needs to be
            placed in the outgoing message.  */
 
         /* Loop to setup the outgoing digest.  */
@@ -22555,7 +21330,7 @@ UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_encrypt_pdu                          PORTABLE C      */ 
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -22592,20 +21367,6 @@ UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
 /*                                                                        */ 
 /*    _nx_snmp_version_3_process            Process SNMP v3 request reply */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            verification of encryption, */
-/*                                            resulting in version 6.1.6  */
-/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 
 UINT _nx_snmp_agent_encrypt_pdu(NX_SNMP_AGENT *agent_ptr, UINT *response_pdu_length, UINT *response_sequence_length, UCHAR *response_encryption_size_ptr,
@@ -22664,7 +21425,7 @@ UINT  adjusted_pdu_length;
         adjusted_pdu_length = pdu_length;
     }
 
-    /* If this is not for our outgoing response e.g. we are re-encrypting the received packet as part 
+    /* If this is not for our outgoing response e.g. we are re-encrypting the received packet as part
        of an error message, use the length from that packet. */
     if ((response_encryption_size_ptr == NX_NULL) || (response_pdu_length == NX_NULL))
     {
@@ -22684,7 +21445,7 @@ UINT  adjusted_pdu_length;
     if ((response_encryption_size_ptr != NX_NULL) && (response_pdu_length != NX_NULL))
     {
     
-        /* Now we set the PDU "inner" sequence header. Use the multibyte sequence 0x30 82 xx yy format. 
+        /* Now we set the PDU "inner" sequence header. Use the multibyte sequence 0x30 82 xx yy format.
            Note that calling function has already set the pointer for writing encyrpted PDU data past this
            inner header.  */
         response_encryption_size_ptr[2] =  0x30;
@@ -22783,7 +21544,7 @@ UINT  adjusted_pdu_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_decrypt_pdu                          PORTABLE C      */ 
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -22821,17 +21582,6 @@ UINT  adjusted_pdu_length;
 /*    _nx_snmp_version_3_process            Process SNMP v3 request reply */ 
 /*    _nx_snmp_version_3_report_send        PRocess SNMP v3 report        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Bo Chen                  Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 
 UINT _nx_snmp_agent_decrypt_pdu(NX_SNMP_AGENT *agent_ptr, UCHAR **buffer_ptr, UCHAR *response_buffer_ptr,  
@@ -23019,7 +21769,7 @@ UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_snmp_agent_security_response_status             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -23050,14 +21800,6 @@ UCHAR key2[NX_SNMP_DIGEST_WORKING_SIZE];
 /*                                                                        */ 
 /*    _nx_snmp_version_3_report_send        PRocess SNMP v3 report        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_snmp_agent_security_response_status(NX_SNMP_AGENT *agent_ptr, UINT *authenticate, UINT *encryption, UINT *send_reply)
 {
@@ -23103,7 +21845,7 @@ VOID _nx_snmp_agent_security_response_status(NX_SNMP_AGENT *agent_ptr, UINT *aut
 
     }
 
-    /* Now if the incoming message security level is set for authentication regardless 
+    /* Now if the incoming message security level is set for authentication regardless
        of matching privacy levels. */
     if ((agent_ptr -> nx_snmp_agent_v3_message_security_options & NX_SNMP_SECURITY_AUTHORIZE) >= 1) 
     {
@@ -23130,7 +21872,7 @@ VOID _nx_snmp_agent_security_response_status(NX_SNMP_AGENT *agent_ptr, UINT *aut
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_snmp_asn1_tlv_block_parse                       PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -23161,15 +21903,6 @@ VOID _nx_snmp_agent_security_response_status(NX_SNMP_AGENT *agent_ptr, UINT *aut
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_snmp_utility_object_get           Extract data from sender      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_snmp_utility_tlv_block_parse(UCHAR *buffer, INT buffer_length, USHORT *tlv_type,

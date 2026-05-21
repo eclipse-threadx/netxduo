@@ -1,4 +1,4 @@
-/* 23.02.2 TCP in LISTEN state, MUST reject an incoming SYN with 
+/* 23.02.2 TCP in LISTEN state, MUST reject an incoming SYN with
 multicast addresses  as source IP address.  */
 
 /* Update
@@ -6,7 +6,7 @@ multicast addresses  as source IP address.  */
 
 /* Procedure
    1. Client send a SYN to Server.
-   2. Use packet_process function to receive and deal with the SYN packet,change the IP address. 
+   2. Use packet_process function to receive and deal with the SYN packet,change the IP address.
    3. Judge the packet.  */
 
 #include    "tx_api.h"

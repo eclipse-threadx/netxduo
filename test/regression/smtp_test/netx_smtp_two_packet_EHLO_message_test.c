@@ -1,5 +1,5 @@
 /* This NetX tests the SMTP client for handling a server 250 reply to EHLO which has multiple
-   250 parameters. It is supposed to parse the entire message over one or more packets for 
+   250 parameters. It is supposed to parse the entire message over one or more packets for
    the last 250 code. The last 250 code is followed by a space after the 250 code. The previous
    250 codes should have hyphens after them as per the SMTP protocol in RFC 2821*/
 
@@ -254,7 +254,7 @@ CHAR    *pointer;
 
 #endif /* FEATURE_NX_IPV6 */
 
-    /* The demo client username and password is the authentication 
+    /* The demo client username and password is the authentication
    data used when the server attempts to authentication the client. */
 
 #if defined(__PRODUCT_NETXDUO__) 
@@ -459,7 +459,7 @@ ULONG      actual_status;
                 if (i == 2)
                 {
 
-                    /* The Client should be muted; it is waiting for the 
+                    /* The Client should be muted; it is waiting for the
                        second part of the EHLO message. */
 
                     /* But we still want to send the next part of the EHLO message. */

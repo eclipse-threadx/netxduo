@@ -1,4 +1,4 @@
-/* This demonstrates sharing a port between an IPv4 and IPv6 TCP client socket to send 
+/* This demonstrates sharing a port between an IPv4 and IPv6 TCP client socket to send
    and receive packets (e.g emulates a socket that can send/receive iPv4 and Ipv6 packets)
    using a simulated Ethernet driver.  */
 

@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -28,7 +29,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_create                                    PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -57,12 +58,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_create(NX_INTERFACE *interface_ptr,
@@ -141,7 +136,7 @@ NX_SHAPER_DRIVER_PARAMETER driver_request;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_delete                                    PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -167,12 +162,6 @@ NX_SHAPER_DRIVER_PARAMETER driver_request;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_delete(NX_INTERFACE *interface_ptr, NX_SHAPER *shaper)
@@ -221,7 +210,7 @@ UINT i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_config                                    PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -250,12 +239,6 @@ UINT i;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Network driver                                                      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_config(NX_INTERFACE *interface_ptr,
@@ -287,7 +270,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_hw_queue_set                              PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -314,12 +297,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_shaper_config                      Config the shaper HW params   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_hw_queue_set(NX_INTERFACE *interface_ptr, UCHAR hw_queue_id, UCHAR priority, UCHAR type)
@@ -390,7 +367,7 @@ UCHAR i, insert_id;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_default_mapping_get                       PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -417,12 +394,6 @@ UCHAR i, insert_id;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_default_mapping_get(NX_INTERFACE *interface_ptr, UCHAR *pcp_list, UCHAR *queue_id_list, UCHAR list_size)
@@ -621,7 +592,7 @@ UCHAR hw_cbs_queue_number;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_current_mapping_get                       PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -648,12 +619,6 @@ UCHAR hw_cbs_queue_number;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_current_mapping_get(NX_INTERFACE *interface_ptr, UCHAR *pcp_list, UCHAR *queue_id_list, UCHAR list_size)
@@ -695,7 +660,7 @@ UCHAR i, j;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_hw_queue_number_get                       PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -721,12 +686,6 @@ UCHAR i, j;
 /*                                                                        */
 /*    Internal function                                                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_hw_queue_number_get(NX_INTERFACE *interface_ptr, UCHAR *hw_queue_number)
 {
@@ -744,7 +703,7 @@ UINT nx_shaper_hw_queue_number_get(NX_INTERFACE *interface_ptr, UCHAR *hw_queue_
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_hw_cbs_queue_number_get                   PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -770,12 +729,6 @@ UINT nx_shaper_hw_queue_number_get(NX_INTERFACE *interface_ptr, UCHAR *hw_queue_
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_shaper_default_mapping_get                                       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_hw_cbs_queue_number_get(NX_INTERFACE *interface_ptr, UCHAR *hw_cbs_queue_number)
@@ -804,7 +757,7 @@ UCHAR i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_port_rate_get                             PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -830,12 +783,6 @@ UCHAR i;
 /*                                                                        */
 /*    Internal function                                                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_port_rate_get(NX_INTERFACE *interface_ptr, UINT *port_rate)
 {
@@ -853,7 +800,7 @@ UINT nx_shaper_port_rate_get(NX_INTERFACE *interface_ptr, UINT *port_rate)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_mapping_set                               PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -880,12 +827,6 @@ UINT nx_shaper_port_rate_get(NX_INTERFACE *interface_ptr, UINT *port_rate)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_mapping_set(NX_INTERFACE *interface_ptr, UCHAR *pcp_list, UCHAR *queue_id_list, UCHAR list_size)
@@ -932,7 +873,7 @@ UCHAR i;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_cbs_parameter_set                         PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -958,12 +899,6 @@ UCHAR i;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_cbs_parameter_set(NX_INTERFACE *interface_ptr, NX_SHAPER_CBS_PARAMETER *cbs_parameter, UCHAR pcp)
@@ -1037,7 +972,7 @@ UINT                       status;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_hw_queue_id_get                           PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1063,12 +998,6 @@ UINT                       status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Network driver                                                      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_hw_queue_id_get(NX_INTERFACE *interface_ptr, NX_PACKET *packet_ptr, UCHAR *hw_queue_id)
@@ -1107,7 +1036,7 @@ UCHAR  pcp = 0;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_tas_parameter_set                         PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1132,12 +1061,6 @@ UCHAR  pcp = 0;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_tas_parameter_set(NX_INTERFACE *interface_ptr, NX_SHAPER_TAS_CONFIG *tas_config)
@@ -1340,7 +1263,7 @@ NX_SHAPER_FP_PARAMETER    *fp_parameter;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_express_queue_set                         PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1366,12 +1289,6 @@ NX_SHAPER_FP_PARAMETER    *fp_parameter;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_shaper_fp_parameter_set            FP parameter set              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_express_queue_set(NX_INTERFACE *interface_ptr, UCHAR *express_queue_bitmap, UCHAR pcp)
@@ -1404,7 +1321,7 @@ NX_INTERFACE *parent_interface;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_sdu_tx_time_get                           PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1431,12 +1348,6 @@ NX_INTERFACE *parent_interface;
 /*                                                                        */
 /*    nx_shaper_fp_parameter_set                                          */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_sdu_tx_time_get(NX_INTERFACE *interface_ptr, UINT sdu_size, UINT *tx_time)
 {
@@ -1462,7 +1373,7 @@ UINT tmp;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    nx_shaper_fp_parameter_set                          PORTABLE C      */
-/*                                                           6.4.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yajun Xia, Microsoft Corporation                                    */
@@ -1489,12 +1400,6 @@ UINT tmp;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_shaper_fp_parameter_set(NX_INTERFACE *interface_ptr, NX_SHAPER_FP_PARAMETER *fp_parameter)

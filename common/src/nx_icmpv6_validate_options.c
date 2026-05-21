@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -35,7 +36,7 @@
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_icmpv6_validate_options                         PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -65,14 +66,6 @@
 /*    _nx_icmpv6_validate_neighbor_messages                               */
 /*    _nx_icmpv6_validate_ra                                              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_icmpv6_validate_options(NX_ICMPV6_OPTION *option, INT length, INT additional_check)
 {
@@ -80,7 +73,10 @@ UINT _nx_icmpv6_validate_options(NX_ICMPV6_OPTION *option, INT length, INT addit
 UINT option_len;
 
     /* Parse all option headers from the ICMPv6 header. */
-    while (length > 0)
+    /* GHSA-rf32-h832-hg8r:
+       Verify that the length is at least 2 to cover nx_icmpv6_option_length and
+       nx_icmpv6_option_type. */
+    while (length > 2)
     {
         /* Verify that the option length is not zero. */
         if (option -> nx_icmpv6_option_length == 0)

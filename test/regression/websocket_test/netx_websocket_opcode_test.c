@@ -15,6 +15,7 @@ extern void test_control_return(UINT);
 #define TEST_HOST_NAME       "1.2.3.4"
 #define TEST_URI_PATH        "/test"
 #define TEST_PROTOCOL        "test"
+#define TEST_BEARER          ""
 
 /* Define device drivers.  */
 extern void _nx_ram_network_driver_1024(NX_IP_DRIVER *driver_req_ptr);
@@ -47,6 +48,7 @@ static void thread_server_entry(ULONG thread_input);
 #define TEST_SERVER_ADDRESS  IP_ADDRESS(1,2,3,4)
 #define TEST_CLIENT_ADDRESS  IP_ADDRESS(1,2,3,5)
 #define TEST_SERVER_PORT     80
+#define TEST_BEARER          ""
 
 static UCHAR server_switch_101[] =
 {
@@ -233,6 +235,7 @@ UINT            code;
                                         TEST_HOST_NAME, sizeof(TEST_HOST_NAME) - 1,
                                         (UCHAR *)TEST_URI_PATH, sizeof(TEST_URI_PATH) - 1,
                                         (UCHAR *)TEST_PROTOCOL, sizeof(TEST_PROTOCOL) - 1,
+                                        (UCHAR *)TEST_BEARER, sizeof(TEST_BEARER) -1,
                                         NX_WAIT_FOREVER);
 
     if(status)

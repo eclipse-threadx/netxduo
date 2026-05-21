@@ -1,5 +1,5 @@
-/* This is a small demo of the NetX SNMP Agent on the high-performance NetX TCP/IP stack.  
-   This demo relies on ThreadX and NetX to show simple SNMP GET/GETNEXT/SET requests on 
+/* This is a small demo of the NetX SNMP Agent on the high-performance NetX TCP/IP stack.
+   This demo relies on ThreadX and NetX to show simple SNMP GET/GETNEXT/SET requests on
    the SNMP MIB-2 objects.  */
 
 #include  "tx_api.h"
@@ -43,11 +43,11 @@ NX_SNMP_SECURITY_KEY    my_privacy_key;
 /* Define an error counter variable. */
 UINT error_counter = 0;
 
-/* This binds a secondary interfaces to the primary IP network interface 
+/* This binds a secondary interfaces to the primary IP network interface
    if SNMP is required for required for that interface. */
 /* #define  MULTI_HOMED_DEVICE */
 
-/* Define function prototypes.  A generic ram driver is used in this demo.  However to properly 
+/* Define function prototypes.  A generic ram driver is used in this demo.  However to properly
    run an SNMP agent demo, a real driver should be substituted. */
 
 VOID    thread_agent_entry(ULONG thread_input);
@@ -173,7 +173,7 @@ NXD_ADDRESS agent_ipv6_address;
 
 #ifdef USE_IPV6
 
-    /* If using IPv6, enable IPv6 and ICMPv6 services and get IPv6 addresses 
+    /* If using IPv6, enable IPv6 and ICMPv6 services and get IPv6 addresses
        registered with NetX Dou. */
 
     /* Enable IPv6 on the IP instance. */
@@ -217,7 +217,7 @@ NXD_ADDRESS agent_ipv6_address;
         return;
      }
 
-    /* Set the host global IP address. We are assuming a 64 
+    /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&ip_0, iface_index, &agent_ipv6_address, 64, &address_index);
 

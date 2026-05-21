@@ -2,7 +2,7 @@
  * _nx_ip_deferred_link_status_process.c
  * _nx_ip_interface_detach.c
  * _nx_ip_max_payload_size_find.c
- * _nx_ip_packet_receive.c 
+ * _nx_ip_packet_receive.c
  */
 
 #include "nx_ip.h"

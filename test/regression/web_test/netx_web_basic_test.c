@@ -283,7 +283,7 @@ NX_PACKET       *recv_packet;
         else if (i == 1)
         {
             status = nx_web_http_client_get_start_extended(&my_client, &server_ip_address,
-                                                           NX_WEB_HTTP_SERVER_PORT, "http://1.2.3.4/test.txt", sizeof("http://1.2.3.4/test.txt") - 1, 
+                                                           NX_WEB_HTTP_SERVER_PORT, "http://1.2.3.4/test.txt", sizeof("http://1.2.3.4/test.txt") - 1,
                                                            "1.2.3.4", 7, "name", 4, "password", 8, NX_WAIT_FOREVER);
         }
 #ifdef NX_WEB_HTTPS_ENABLE
@@ -297,7 +297,7 @@ NX_PACKET       *recv_packet;
         else
         {
             status = nx_web_http_client_get_secure_start_extended(&my_client, &server_ip_address,
-                                                                  NX_WEB_HTTPS_SERVER_PORT, "https://1.2.3.4/test.txt", sizeof("https://1.2.3.4/test.txt") - 1, 
+                                                                  NX_WEB_HTTPS_SERVER_PORT, "https://1.2.3.4/test.txt", sizeof("https://1.2.3.4/test.txt") - 1,
                                                                   "1.2.3.4", 7, "name", 4, "password", 8, 
                                                                   tls_setup_callback, NX_WAIT_FOREVER);
         }
@@ -542,7 +542,7 @@ static UINT  authentication_check(NX_WEB_HTTP_SERVER *server_ptr, UINT request_t
                                   CHAR *resource, CHAR **name, CHAR **password, CHAR **realm)
 {
 
-    /* Just use a simple name, password, and realm for all 
+    /* Just use a simple name, password, and realm for all
        requests and resources.  */
     *name =     "name";
     *password = "password";

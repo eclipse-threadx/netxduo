@@ -1,4 +1,4 @@
-/* This demoonstrates sharing a port between an IPv4 and IPv6 TCP client socket to send 
+/* This demoonstrates sharing a port between an IPv4 and IPv6 TCP client socket to send
    and receive packets (e.g emulates a socket that can send/receive iPv4 and Ipv6 packets)
    using a simulated Ethernet driver.  */
 
@@ -392,7 +392,7 @@ NXD_ADDRESS ip_address;
     ip_address.nxd_ip_address.v6[3] = 0x101;
 
 
-    /* Set the host global IP address. We are assuming a 64 
+    /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&bsd_ip_server, 0, &ip_address, 64, &address_index);
 

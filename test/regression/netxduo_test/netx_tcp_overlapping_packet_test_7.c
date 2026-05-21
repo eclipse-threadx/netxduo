@@ -170,8 +170,8 @@ UINT       old_threshold;
         error_counter++;
 
     /* Fill in the packet with data.   */
-    /* Packet 0 contains bytes  0 - 19 
-       Packet 1 contains bytes 20 - 39 
+    /* Packet 0 contains bytes  0 - 19
+       Packet 1 contains bytes 20 - 39
        Packet 2 contains bytes 40 - 59
        Packet 3 contains bytes 60 - 79
        Packet 4 contains bytes  0 - 19   */    

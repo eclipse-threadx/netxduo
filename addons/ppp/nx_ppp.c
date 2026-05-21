@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -53,7 +54,7 @@ NX_PPP  *_nx_ppp_created_ptr =       NX_NULL;
 ULONG    _nx_ppp_created_count =     0;
 
 
-/* Define the CRC lookup table.  This is used to improve the 
+/* Define the CRC lookup table.  This is used to improve the
    CRC calculation performance.  */
 
 const USHORT _nx_ppp_crc_table[256] = 
@@ -103,7 +104,7 @@ NX_CALLER_CHECKING_EXTERNS
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_thread_entry                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -142,14 +143,6 @@ NX_CALLER_CHECKING_EXTERNS
 /*                                                                        */ 
 /*    ThreadX                                                             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_thread_entry(ULONG ppp_addr)
 {
@@ -398,7 +391,7 @@ ULONG       count;
                 /* Move the state to the new challenge state.  */
                 ppp_ptr -> nx_ppp_chap_state =  NX_PPP_CHAP_COMPLETED_NEW_STATE;
                 
-                /* Now update the CHAP state machine in order to force the 
+                /* Now update the CHAP state machine in order to force the
                    new CHAP challenge out.  */
                 _nx_ppp_chap_state_machine_update(ppp_ptr, NX_NULL);                
             }
@@ -504,7 +497,7 @@ ULONG       count;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_driver                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -533,14 +526,6 @@ ULONG       count;
 /*                                                                        */ 
 /*    NetX                                                                */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_driver(NX_IP_DRIVER *driver_req_ptr)
 {
@@ -563,7 +548,7 @@ UINT            i;
     /* Default to successful return.  */
     driver_req_ptr -> nx_ip_driver_status =  NX_SUCCESS;
 
-    /* Process according to the driver request type in the driver control 
+    /* Process according to the driver request type in the driver control
        block.  */
     switch (driver_req_ptr -> nx_ip_driver_command)
     {
@@ -571,9 +556,9 @@ UINT            i;
         case NX_LINK_INTERFACE_ATTACH:
         {
         
-            /* First, we need to find the PPP instance that is mapped to 
+            /* First, we need to find the PPP instance that is mapped to
                this IP instance and that doesn't have its interface attach
-               complete yet. This requires that PPP is created prior to 
+               complete yet. This requires that PPP is created prior to
                IP creation.  */
             ppp_ptr =  _nx_ppp_created_ptr; 
             i =  0;
@@ -656,7 +641,7 @@ UINT            i;
             /* Setup the link maximum transfer unit.  */
             interface_ptr -> nx_interface_ip_mtu_size =  NX_PPP_MRU;
 
-            /* Clear the hardware physical address, since there is no 
+            /* Clear the hardware physical address, since there is no
                such thing in PPP.  */
             interface_ptr -> nx_interface_physical_address_msw =  0;
             interface_ptr -> nx_interface_physical_address_lsw =  0;
@@ -782,7 +767,7 @@ UINT            i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_get                          PORTABLE C      */ 
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -812,18 +797,6 @@ UINT            i;
 /*                                                                        */ 
 /*    ThreadX                                                             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
-/*                                            supported processing        */
-/*                                            compressed data,            */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_receive_packet_get(NX_PPP *ppp_ptr, NX_PACKET **return_packet_ptr)
 {
@@ -941,7 +914,7 @@ UINT        status;
 
                 /* Timeout count has been exceeded.  */
 
-                /* Determine if the packet is non-PPP. If so, we should dispatch it to 
+                /* Determine if the packet is non-PPP. If so, we should dispatch it to
                    the non-PPP packet handler.  */
                 if ((buffer_size) && (packet_head_ptr -> nx_packet_prepend_ptr[0] != 0x7e))
                 {
@@ -1256,7 +1229,7 @@ UINT        status;
             /* Return the pointer.  */
             *return_packet_ptr =  packet_head_ptr;
 
-            /* Set the receive packet to NULL to indicate there is no partial packet being 
+            /* Set the receive packet to NULL to indicate there is no partial packet being
                processed.  */
             ppp_ptr -> nx_ppp_receive_partial_packet =  NX_NULL;
 
@@ -1375,7 +1348,7 @@ UINT        status;
         else
         {
 
-            /* At this point we know we have a buffer full of non-PPP characters, in 
+            /* At this point we know we have a buffer full of non-PPP characters, in
                most cases this is simply noise.  */
 
             /* Determine if there is a non-PPP handler.  */
@@ -1446,7 +1419,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_process                      PORTABLE C      */ 
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1478,22 +1451,6 @@ UINT        status;
 /*                                                                        */ 
 /*    _nx_ppp_thread_entry                  PPP thread entry              */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved packet length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1.2  */
-/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
-/*                                            supported processing        */
-/*                                            compressed data,            */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_receive_packet_process(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -1791,7 +1748,7 @@ UINT        length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_timeout                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1820,14 +1777,6 @@ UINT        length;
 /*                                                                        */ 
 /*    ThreadX                                                             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_timeout(NX_PPP *ppp_ptr)
 {
@@ -1881,7 +1830,7 @@ void _nx_ppp_timeout(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_timer_entry                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1907,14 +1856,6 @@ void _nx_ppp_timeout(NX_PPP *ppp_ptr)
 /*                                                                        */ 
 /*    ThreadX                                                             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_timer_entry(ULONG id)
 {
@@ -1940,7 +1881,7 @@ NX_PPP  *ppp_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_netx_packet_transfer                        PORTABLE C      */ 
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -1967,19 +1908,6 @@ NX_PPP  *ppp_ptr;
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_process        Receive packet processing     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memmove use cases, */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
-/*                                            supported processing        */
-/*                                            compressed data,            */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_netx_packet_transfer(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -2044,7 +1972,7 @@ ULONG   offset;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_process_deferred_raw_string_send            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2071,14 +1999,6 @@ ULONG   offset;
 /*                                                                        */ 
 /*    _nx_ppp_thread_entry                  PPP processing thread         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_process_deferred_raw_string_send(NX_PPP *ppp_ptr)
 {
@@ -2174,7 +2094,7 @@ UINT            release_packet;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_process_deferred_ip_packet_send             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2201,14 +2121,6 @@ UINT            release_packet;
 /*                                                                        */ 
 /*    _nx_ppp_thread_entry                  PPP processing thread         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_process_deferred_ip_packet_send(NX_PPP *ppp_ptr)
 {
@@ -2302,7 +2214,7 @@ NX_PACKET       *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update                    PORTABLE C      */ 
-/*                                                           6.1.8        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -2338,21 +2250,6 @@ NX_PACKET       *packet_ptr;
 /*    _nx_ppp_receive_packet_process        Receive packet processing     */ 
 /*    _nx_ppp_timeout                       PPP timeout                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved packet length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1.2  */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s), fixed    */
-/*                                            the logic of retransmission,*/
-/*                                            resulting in version 6.1.8  */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_state_machine_update(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -2550,7 +2447,7 @@ UINT    status;
                     return;
                 }
 
-                /* The peer has ACKed our configuration request. Move to the 
+                /* The peer has ACKed our configuration request. Move to the
                    configure request ACKed state.  */
                 ppp_ptr -> nx_ppp_lcp_state =  NX_PPP_LCP_CONFIGURE_REQUEST_ACKED_STATE;
             
@@ -2709,7 +2606,7 @@ UINT    status;
         case NX_PPP_LCP_PEER_CONFIGURE_REQUEST_ACKED_STATE:
         {
 
-            /* In this state, we have sent our configuration request, but haven't received an ACK. We have also received 
+            /* In this state, we have sent our configuration request, but haven't received an ACK. We have also received
                a peer configuration request and have ACKed that request.  */
            
             /* Process relative to the incoming code.  */
@@ -2730,7 +2627,7 @@ UINT    status;
                     return;
                 }
 
-                /* The peer has ACKed our configuration request. Move to the 
+                /* The peer has ACKed our configuration request. Move to the
                    LCP completed state.  */
                 ppp_ptr -> nx_ppp_lcp_state =  NX_PPP_LCP_COMPLETED_STATE;
             
@@ -3014,7 +2911,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_code_reject                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3041,14 +2938,6 @@ UINT    status;
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update      LCP state machine processing  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_code_reject(NX_PPP *ppp_ptr, UCHAR *lcp_ptr)
 {
@@ -3128,7 +3017,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_configure_reply_send                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3158,14 +3047,6 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update      LCP state machine processing  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_configure_reply_send(NX_PPP *ppp_ptr, UINT configure_status, UCHAR *lcp_ptr, UCHAR *naked_list, UCHAR *rejected_list) 
 {
@@ -3343,7 +3224,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_configure_request_send                  PORTABLE C      */ 
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3369,18 +3250,6 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update      LCP state machine processing  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
-/*                                            supported processing        */
-/*                                            compressed data,            */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_configure_request_send(NX_PPP *ppp_ptr)
 {
@@ -3484,7 +3353,7 @@ UINT        length_index = 0;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_configuration_retrieve                  PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3516,18 +3385,6 @@ UINT        length_index = 0;
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update      LCP state machine processing  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved packet length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1.2  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_lcp_configuration_retrieve(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr, UCHAR *naked_list, UCHAR *rejected_list, UINT *configure_status)
 {
@@ -3644,7 +3501,7 @@ UCHAR   *option_data;
                     if ((rejected_list_index + len) > NX_PPP_OPTION_MESSAGE_LENGTH)
                         break;
 
-                    /* No authentication is supported, simply include requested authentication 
+                    /* No authentication is supported, simply include requested authentication
                        option in the rejected list.  */
                     rejected_list[rejected_list_index++] =  (UCHAR)type; 
                     rejected_list[rejected_list_index++] =  (UCHAR)len; 
@@ -3775,7 +3632,7 @@ UCHAR   *option_data;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_nak_configure_list                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3801,14 +3658,6 @@ UCHAR   *option_data;
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update      LCP state machine processing  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_nak_configure_list(NX_PPP *ppp_ptr, UCHAR *naked_list)
 {
@@ -3832,7 +3681,7 @@ UINT    i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_terminate_ack_send                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3858,14 +3707,6 @@ UINT    i;
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update      LCP state machine processing  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_terminate_ack_send(NX_PPP *ppp_ptr)
 {
@@ -3922,7 +3763,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_terminate_request_send                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -3948,14 +3789,6 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update      LCP state machine processing  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_terminate_request_send(NX_PPP *ppp_ptr)
 {
@@ -4012,7 +3845,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_state_machine_update                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4043,14 +3876,6 @@ NX_PACKET   *packet_ptr;
 /*    _nx_ppp_receive_packet_process        Receive PPP packet processing */ 
 /*    _nx_ppp_timeout                       PPP timeout                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_pap_state_machine_update(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -4170,7 +3995,7 @@ UINT        valid;
         case NX_PPP_PAP_AUTHENTICATE_REQUEST_SENT_STATE:
         {
 
-            /* In this state, this peer has sent an authentication request and is waiting for 
+            /* In this state, this peer has sent an authentication request and is waiting for
                an ACK or NAK from the peer.  */
             if ((code == NX_PPP_PAP_AUTHENTICATE_REQUEST) && (packet_ptr))
             {
@@ -4363,7 +4188,7 @@ UINT        valid;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_authentication_request                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4392,14 +4217,6 @@ UINT        valid;
 /*                                                                        */ 
 /*    _nx_ppp_pap_state_machine_update      PPP state machine update      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_pap_authentication_request(NX_PPP *ppp_ptr)
 {
@@ -4510,7 +4327,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_login_valid                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4538,14 +4355,6 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*    _nx_ppp_pap_state_machine_update      PAP state machine update      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_ppp_pap_login_valid(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -4647,7 +4456,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_authentication_ack                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4674,14 +4483,6 @@ UINT    status;
 /*                                                                        */ 
 /*    _nx_ppp_pap_state_machine_update      PPP state machine update      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_pap_authentication_ack(NX_PPP *ppp_ptr)
 {
@@ -4742,7 +4543,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_authentication_nak                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4769,14 +4570,6 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*    _nx_ppp_pap_state_machine_update      PPP state machine update      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_pap_authentication_nak(NX_PPP *ppp_ptr)
 {
@@ -4838,7 +4631,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_state_machine_update                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -4870,14 +4663,6 @@ NX_PACKET   *packet_ptr;
 /*    _nx_ppp_timeout                       PPP timeout                   */ 
 /*    _nx_ppp_thread_entry                  PPP processing thread         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_chap_state_machine_update(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -5011,7 +4796,7 @@ UINT        valid;
         case NX_PPP_CHAP_CHALLENGE_REQUEST_SENT_STATE:
         {
         
-            /* In this state, this peer has sent a challenge request and is waiting for 
+            /* In this state, this peer has sent a challenge request and is waiting for
                response from the peer.  */
             if ((code == NX_PPP_CHAP_CHALLENGE_REQUEST) && (packet_ptr))
             {
@@ -5128,7 +4913,7 @@ UINT        valid;
         case NX_PPP_CHAP_CHALLENGE_REQUEST_SENT_BOTH_STATE:
         {
         
-            /* In this state, this peer has sent a challenge request and a challenge response and is waiting for 
+            /* In this state, this peer has sent a challenge request and a challenge response and is waiting for
                response from the peer.  */
             if (code == NX_PPP_CHAP_CHALLENGE_SUCCESS)
             {
@@ -5338,7 +5123,7 @@ UINT        valid;
         case NX_PPP_CHAP_CHALLENGE_REQUEST_WAIT_STATE:
         {
 
-            /* In this state we only need the challenge from peer, either this peer doesn't challenge or 
+            /* In this state we only need the challenge from peer, either this peer doesn't challenge or
                the initial challenge has already successfully completed.  */
             if ((code == NX_PPP_CHAP_CHALLENGE_REQUEST) && (packet_ptr))
             {
@@ -5363,7 +5148,7 @@ UINT        valid;
         case NX_PPP_CHAP_CHALLENGE_RESPONSE_WAIT_STATE:
         {
 
-            /* In this state, this peer has sent a challenge response and is waiting for 
+            /* In this state, this peer has sent a challenge response and is waiting for
                response from the peer.  */
             if (code == NX_PPP_CHAP_CHALLENGE_SUCCESS)
             {
@@ -5601,7 +5386,7 @@ UINT        valid;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_challenge_send                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5629,14 +5414,6 @@ UINT        valid;
 /*                                                                        */ 
 /*    _nx_ppp_chap_state_machine_update     Update CHAP state machine     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_chap_challenge_send(NX_PPP *ppp_ptr)
 {
@@ -5754,7 +5531,7 @@ UINT        status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_challenge_respond                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5783,14 +5560,6 @@ UINT        status;
 /*                                                                        */ 
 /*    _nx_ppp_chap_state_machine_update     Update CHAP state machine     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_chap_challenge_respond(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -5964,7 +5733,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_challenge_validate                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -5994,14 +5763,6 @@ UINT        name_length;
 /*                                                                        */ 
 /*    _nx_ppp_chap_state_machine_update     Update CHAP state machine     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_chap_challenge_validate(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -6201,7 +5962,7 @@ UINT        name_length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_state_machine_update                   PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6235,18 +5996,6 @@ UINT        name_length;
 /*    _nx_ppp_receive_packet_process        Receive PPP packet processing */ 
 /*    _nx_ppp_timeout                       PPP timeout                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            corrected the NAKed list    */
-/*                                            pointer,                    */
-/*                                            resulting in version 6.1.2  */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_ipcp_state_machine_update(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {    
@@ -6409,7 +6158,7 @@ UCHAR   code;
                     return;
                 }
 
-                /* The peer has ACKed our configuration request. Move to the 
+                /* The peer has ACKed our configuration request. Move to the
                    configure request ACKed state.  */
                 ppp_ptr -> nx_ppp_ipcp_state =  NX_PPP_IPCP_CONFIGURE_REQUEST_ACKED_STATE;
             
@@ -6434,7 +6183,7 @@ UCHAR   code;
                     return;
                 }
 
-                /* Set the NAK option list, just to indicate to the configure request that 
+                /* Set the NAK option list, just to indicate to the configure request that
                    the IPCP request without DNS option is what we want.  */
                 ppp_ptr -> nx_ppp_naked_list[0] =  1;
 
@@ -6631,7 +6380,7 @@ UCHAR   code;
         case NX_PPP_IPCP_PEER_CONFIGURE_REQUEST_ACKED_STATE:
         {
 
-            /* In this state, we have sent our configuration request, but haven't received an ACK. We have also received 
+            /* In this state, we have sent our configuration request, but haven't received an ACK. We have also received
                a peer configuration request and have ACKed that request.  */
            
             /* Process relative to the incoming code.  */
@@ -6652,7 +6401,7 @@ UCHAR   code;
                     return;
                 }
 
-                /* The peer has ACKed our configuration request. Move to the 
+                /* The peer has ACKed our configuration request. Move to the
                    IPCP completed state.  */
                 ppp_ptr -> nx_ppp_ipcp_state =  NX_PPP_IPCP_COMPLETED_STATE;
             
@@ -6690,7 +6439,7 @@ UCHAR   code;
                     return;
                 }
 
-                /* Set the NAK option list, just to indicate to the configure request that 
+                /* Set the NAK option list, just to indicate to the configure request that
                    the IPCP request without DNS option is what we want.  */
                 ppp_ptr -> nx_ppp_naked_list[0] =  1;
 
@@ -6893,7 +6642,7 @@ UCHAR   code;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_configure_check                        PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -6924,18 +6673,6 @@ UCHAR   code;
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_state_machine_update     IPCP state machine processing */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved packet length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1.2  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_ipcp_configure_check(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr, UCHAR *naked_list, UCHAR *rejected_list, UCHAR *good_data)
 {
@@ -7058,7 +6795,7 @@ UCHAR   option;
              case NX_PPP_IP_COMPRESSION_OPTION:
              {
          
-                /* IP Compression Option.  Since this is the receiver telling us what they 
+                /* IP Compression Option.  Since this is the receiver telling us what they
                    support it is not important to us since we don't support compression.  */
     
                 /* Simply adjust the main index into the option list.  */
@@ -7266,7 +7003,7 @@ UCHAR   option;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_configure_request_send                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7293,14 +7030,6 @@ UCHAR   option;
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_state_machine_update     IPCP state machine processing */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_ipcp_configure_request_send(NX_PPP *ppp_ptr, UCHAR *negotiate_list)
 {
@@ -7413,7 +7142,7 @@ UINT        index;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_response_extract                       PORTABLE C      */ 
-/*                                                           6.1.2        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7440,18 +7169,6 @@ UINT        index;
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_state_machine_update     IPCP state machine processing */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved packet length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1.2  */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_ipcp_response_extract(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -7552,7 +7269,7 @@ ULONG   length;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_response_send                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7582,14 +7299,6 @@ ULONG   length;
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_state_machine_update     IPCP state machine processing */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_ipcp_response_send(NX_PPP *ppp_ptr, UCHAR type, UCHAR *data, UCHAR length, NX_PACKET *cfg_packet_ptr)
 {
@@ -7628,7 +7337,7 @@ NX_PACKET   *packet_ptr;
             return;
         }
 
-        /* Yes, an ACK is requested.  Simply copy the config packet into the new packet and change 
+        /* Yes, an ACK is requested.  Simply copy the config packet into the new packet and change
            the type. */
         for (i = 0; i < cfg_packet_ptr -> nx_packet_length; i++)
         {
@@ -7730,7 +7439,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_terminate_send                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7757,14 +7466,6 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_state_machine_update     IPCP state machine processing */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_ipcp_terminate_send(NX_PPP *ppp_ptr)
 {
@@ -7821,7 +7522,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_terminate_ack_send                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7848,14 +7549,6 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*    _nx_ppp_ipcp_state_machine_update     IPCP state machine processing */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_ipcp_terminate_ack_send(NX_PPP *ppp_ptr)
 {
@@ -7912,7 +7605,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_packet_transmit                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -7957,14 +7650,6 @@ NX_PACKET   *packet_ptr;
 /*    _nx_ppp_ipcp_terminate_send           Send IPCP terminate           */ 
 /*    _nx_ppp_ipcp_terminate_ack_send       Send IPCP terminate ACK       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_packet_transmit(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -8182,7 +7867,7 @@ UINT        release_packet = NX_TRUE;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_check_crc                                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8209,14 +7894,6 @@ UINT        release_packet = NX_TRUE;
 /*                                                                        */ 
 /*    _nx_ppp_receive_packet_get            Receive PPP packet processing */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_check_crc(NX_PACKET *packet_ptr)
 {
@@ -8288,7 +7965,7 @@ USHORT      crc_value;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_crc_append                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8315,14 +7992,6 @@ USHORT      crc_value;
 /*                                                                        */ 
 /*    _nx_ppp_packet_transmit               PPP packet transmit routine   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_crc_append(NX_PACKET *packet_ptr, UCHAR crc[2])
 {
@@ -8414,7 +8083,7 @@ UCHAR       control = 0x03;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_debug_log_capture                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8443,14 +8112,6 @@ UCHAR       control = 0x03;
 /*    _nx_ppp_packet_transmit               Transmit packet processing    */ 
 /*    _nx_ppp_thread_entry                  Receive thread processing     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_debug_log_capture(NX_PPP *ppp_ptr, UCHAR packet_type, NX_PACKET *packet_ptr)
 {
@@ -8562,7 +8223,7 @@ NX_PPP_DEBUG_ENTRY *entry_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_debug_log_capture_protocol                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8587,14 +8248,6 @@ NX_PPP_DEBUG_ENTRY *entry_ptr;
 /*                                                                        */ 
 /*    _nx_ppp_thread_entry                  PPP event processing          */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_debug_log_capture_protocol(NX_PPP *ppp_ptr)
 {
@@ -8647,7 +8300,7 @@ void  _nx_ppp_debug_log_capture_protocol(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_hash_generator                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8686,14 +8339,6 @@ void  _nx_ppp_debug_log_capture_protocol(NX_PPP *ppp_ptr)
 /*    _nx_ppp_chap_challenge_respond        CHAP challenge response       */ 
 /*    _nx_ppp_chap_challenge_validate       CHAP validate response        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void _nx_ppp_hash_generator(unsigned char *hvalue,  unsigned char id, 
                             unsigned char *secret,  unsigned char *rand_value, UINT length)
@@ -8738,7 +8383,7 @@ NX_MD5  context;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_byte_receive                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8766,14 +8411,6 @@ NX_MD5  context;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_byte_receive(NX_PPP *ppp_ptr, UCHAR byte)
 {
@@ -8798,7 +8435,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_byte_receive                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8825,14 +8462,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code (Including ISRs)                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_byte_receive(NX_PPP *ppp_ptr, UCHAR byte)
 {
@@ -8929,7 +8558,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_create                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -8966,14 +8595,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_create(NX_PPP *ppp_ptr, CHAR *name, NX_IP *ip_ptr, 
                VOID *stack_memory_ptr, ULONG stack_size, UINT thread_priority, 
@@ -9007,7 +8628,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_create                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9046,14 +8667,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_create(NX_PPP *ppp_ptr, CHAR *name, NX_IP *ip_ptr, 
                VOID *stack_memory_ptr, ULONG stack_size, UINT thread_priority, 
@@ -9160,7 +8773,7 @@ NX_PPP      *tail_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_delete                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9186,14 +8799,6 @@ NX_PPP      *tail_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_delete(NX_PPP *ppp_ptr)
 {
@@ -9221,7 +8826,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_delete                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9252,14 +8857,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_delete(NX_PPP *ppp_ptr)
 {
@@ -9279,7 +8876,7 @@ TX_INTERRUPT_SAVE_AREA
     /* Set the event to close the PPP thread.  */
     tx_event_flags_set(&(ppp_ptr -> nx_ppp_event), NX_PPP_EVENT_STOP, TX_OR);
 
-    /* Now wait until the PPP thread goes to a closed state before proceeding with the delete. 
+    /* Now wait until the PPP thread goes to a closed state before proceeding with the delete.
        This will give PPP the opportunity to properly release all packets being worked on.  */
     while (ppp_ptr -> nx_ppp_state != NX_PPP_STOPPED)
     {
@@ -9348,7 +8945,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_link_up_notify                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9377,14 +8974,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_link_up_notify(NX_PPP *ppp_ptr, VOID (*ppp_link_up_callback)(NX_PPP *ppp_ptr))
 {
@@ -9411,7 +9000,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_link_up_notify                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9439,14 +9028,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_link_up_notify(NX_PPP *ppp_ptr, VOID (*ppp_link_up_callback)(NX_PPP *ppp_ptr))
 {
@@ -9465,7 +9046,7 @@ UINT  _nx_ppp_link_up_notify(NX_PPP *ppp_ptr, VOID (*ppp_link_up_callback)(NX_PP
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_link_down_notify                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9494,14 +9075,6 @@ UINT  _nx_ppp_link_up_notify(NX_PPP *ppp_ptr, VOID (*ppp_link_up_callback)(NX_PP
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_link_down_notify(NX_PPP *ppp_ptr, VOID (*ppp_link_down_callback)(NX_PPP *ppp_ptr))
 {
@@ -9528,7 +9101,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_link_down_notify                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9556,14 +9129,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_link_down_notify(NX_PPP *ppp_ptr, VOID (*ppp_link_down_callback)(NX_PPP *ppp_ptr))
 {
@@ -9582,7 +9147,7 @@ UINT  _nx_ppp_link_down_notify(NX_PPP *ppp_ptr, VOID (*ppp_link_down_callback)(N
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_pap_enable                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9614,14 +9179,6 @@ UINT  _nx_ppp_link_down_notify(NX_PPP *ppp_ptr, VOID (*ppp_link_down_callback)(N
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_pap_enable(NX_PPP *ppp_ptr, UINT (*generate_login)(CHAR *name, CHAR *password),
                         UINT (*verify_login)(CHAR *name, CHAR *password))
@@ -9651,7 +9208,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_pap_enable                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9687,14 +9244,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_pap_enable(NX_PPP *ppp_ptr, UINT (*generate_login)(CHAR *name, CHAR *password),
                          UINT (*verify_login)(CHAR *name, CHAR *password))
@@ -9746,7 +9295,7 @@ UINT  _nx_ppp_pap_enable(NX_PPP *ppp_ptr, UINT (*generate_login)(CHAR *name, CHA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_chap_challenge                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9773,14 +9322,6 @@ UINT  _nx_ppp_pap_enable(NX_PPP *ppp_ptr, UINT (*generate_login)(CHAR *name, CHA
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_chap_challenge(NX_PPP *ppp_ptr)
 {
@@ -9808,7 +9349,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_challenge                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9834,14 +9375,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_chap_challenge(NX_PPP *ppp_ptr)
 {
@@ -9859,7 +9392,7 @@ UINT  _nx_ppp_chap_challenge(NX_PPP *ppp_ptr)
         (ppp_ptr -> nx_ppp_chap_get_verification_values))
     {
 
-        /* Check for the appropriate CHAP state. If the initial CHAP has not yet 
+        /* Check for the appropriate CHAP state. If the initial CHAP has not yet
            completed, simply discard this request.  */
         if (ppp_ptr -> nx_ppp_chap_state == NX_PPP_CHAP_COMPLETED_STATE)
         {
@@ -9888,7 +9421,7 @@ UINT  _nx_ppp_chap_challenge(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_chap_enable                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -9930,14 +9463,6 @@ UINT  _nx_ppp_chap_challenge(NX_PPP *ppp_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_chap_enable(NX_PPP *ppp_ptr, 
                            UINT (*get_challenge_values)(CHAR *rand_value, CHAR *id, CHAR *name),
@@ -9969,7 +9494,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_chap_enable                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10009,14 +9534,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_chap_enable(NX_PPP *ppp_ptr, 
                           UINT (*get_challenge_values)(CHAR *rand_value, CHAR *id, CHAR *name),
@@ -10072,7 +9589,7 @@ UINT  _nx_ppp_chap_enable(NX_PPP *ppp_ptr,
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_dns_address_get                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10100,14 +9617,6 @@ UINT  _nx_ppp_chap_enable(NX_PPP *ppp_ptr,
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_dns_address_get(NX_PPP *ppp_ptr, ULONG *dns_address_ptr)
 {
@@ -10135,7 +9644,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_dns_address_get                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10161,14 +9670,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_dns_address_get(NX_PPP *ppp_ptr, ULONG *dns_address_ptr)
 {
@@ -10205,7 +9706,7 @@ UINT  _nx_ppp_dns_address_get(NX_PPP *ppp_ptr, ULONG *dns_address_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_dns_address_set                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10233,14 +9734,6 @@ UINT  _nx_ppp_dns_address_get(NX_PPP *ppp_ptr, ULONG *dns_address_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_dns_address_set(NX_PPP *ppp_ptr, ULONG dns_address)
 {
@@ -10271,7 +9764,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_dns_address_set                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10299,14 +9792,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_dns_address_set(NX_PPP *ppp_ptr, ULONG dns_address)
 {
@@ -10324,7 +9809,7 @@ UINT  _nx_ppp_dns_address_set(NX_PPP *ppp_ptr, ULONG dns_address)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_secondary_dns_address_get                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10352,14 +9837,6 @@ UINT  _nx_ppp_dns_address_set(NX_PPP *ppp_ptr, ULONG dns_address)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_secondary_dns_address_get(NX_PPP *ppp_ptr, ULONG *secondary_dns_address_ptr)
 {
@@ -10387,7 +9864,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_secondary_dns_address_get                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10414,14 +9891,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_secondary_dns_address_get(NX_PPP *ppp_ptr, ULONG *secondary_dns_address_ptr)
 {
@@ -10458,7 +9927,7 @@ UINT  _nx_ppp_secondary_dns_address_get(NX_PPP *ppp_ptr, ULONG *secondary_dns_ad
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_secondary_dns_address_set                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10486,14 +9955,6 @@ UINT  _nx_ppp_secondary_dns_address_get(NX_PPP *ppp_ptr, ULONG *secondary_dns_ad
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_secondary_dns_address_set(NX_PPP *ppp_ptr, ULONG secondary_dns_address)
 {
@@ -10524,7 +9985,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_secondary_dns_address_set                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10552,14 +10013,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_secondary_dns_address_set(NX_PPP *ppp_ptr, ULONG secondary_dns_address)
 {
@@ -10577,7 +10030,7 @@ UINT  _nx_ppp_secondary_dns_address_set(NX_PPP *ppp_ptr, ULONG secondary_dns_add
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_interface_index_get                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10605,14 +10058,6 @@ UINT  _nx_ppp_secondary_dns_address_set(NX_PPP *ppp_ptr, ULONG secondary_dns_add
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_interface_index_get(NX_PPP *ppp_ptr, UINT *index_ptr)
 {
@@ -10639,7 +10084,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_interface_index_get                         PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10666,14 +10111,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_interface_index_get(NX_PPP *ppp_ptr, UINT *index_ptr)
 {
@@ -10702,7 +10139,7 @@ UINT  _nx_ppp_interface_index_get(NX_PPP *ppp_ptr, UINT *index_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_ip_address_assign                          PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10731,14 +10168,6 @@ UINT  _nx_ppp_interface_index_get(NX_PPP *ppp_ptr, UINT *index_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_ip_address_assign(NX_PPP *ppp_ptr, ULONG local_ip_address, ULONG peer_ip_address)
 {
@@ -10766,7 +10195,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ip_address_assign                           PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10794,14 +10223,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_ip_address_assign(NX_PPP *ppp_ptr, ULONG local_ip_address, ULONG peer_ip_address)
 {
@@ -10845,7 +10266,7 @@ UINT    i;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_nak_authentication_notify                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10874,14 +10295,6 @@ UINT    i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_nak_authentication_notify(NX_PPP *ppp_ptr, void (*nak_authentication_notify)(void))
 {
@@ -10908,7 +10321,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_nak_authentication_notify                   PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10936,14 +10349,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_nak_authentication_notify(NX_PPP *ppp_ptr, void (*nak_authentication_notify)(void))
 {
@@ -10961,7 +10366,7 @@ UINT  _nx_ppp_nak_authentication_notify(NX_PPP *ppp_ptr, void (*nak_authenticati
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_raw_string_send                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -10992,14 +10397,6 @@ UINT  _nx_ppp_nak_authentication_notify(NX_PPP *ppp_ptr, void (*nak_authenticati
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_raw_string_send(NX_PPP *ppp_ptr, CHAR *string_ptr)
 {
@@ -11027,7 +10424,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_raw_string_send                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11060,14 +10457,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_raw_string_send(NX_PPP *ppp_ptr, CHAR *string_ptr)
 {
@@ -11158,7 +10547,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_start                                      PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11183,14 +10572,6 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_start(NX_PPP *ppp_ptr)
 {
@@ -11217,7 +10598,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_start                                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11243,14 +10624,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_start(NX_PPP *ppp_ptr)
 {
@@ -11279,7 +10652,7 @@ UINT  _nx_ppp_start(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_stop                                       PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11304,14 +10677,6 @@ UINT  _nx_ppp_start(NX_PPP *ppp_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_stop(NX_PPP *ppp_ptr)
 {
@@ -11338,7 +10703,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_stop                                        PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11363,14 +10728,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_stop(NX_PPP *ppp_ptr)
 {
@@ -11432,7 +10789,7 @@ UINT  _nx_ppp_stop(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_restart                                    PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11457,14 +10814,6 @@ UINT  _nx_ppp_stop(NX_PPP *ppp_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_restart(NX_PPP *ppp_ptr)
 {
@@ -11491,7 +10840,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_restart                                     PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11518,14 +10867,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_restart(NX_PPP *ppp_ptr)
 {
@@ -11546,7 +10887,7 @@ UINT  _nx_ppp_restart(NX_PPP *ppp_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_status_get                                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11573,14 +10914,6 @@ UINT  _nx_ppp_restart(NX_PPP *ppp_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_status_get(NX_PPP *ppp_ptr, UINT *status_ptr)
 {
@@ -11607,7 +10940,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_status_get                                  PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11634,14 +10967,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_status_get(NX_PPP *ppp_ptr, UINT *status_ptr)
 {
@@ -11756,7 +11081,7 @@ UINT  _nx_ppp_status_get(NX_PPP *ppp_ptr, UINT *status_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_ping_reply                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11785,14 +11110,6 @@ UINT  _nx_ppp_status_get(NX_PPP *ppp_ptr, UINT *status_ptr)
 /*    _nx_ppp_lcp_state_machine_update      Processes events and updates  */
 /*                                            the PPP in the LCP state    */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_ppp_lcp_ping_reply(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr) 
 {
@@ -11826,7 +11143,7 @@ void  _nx_ppp_lcp_ping_reply(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_lcp_ping_process_echo_reply                 PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11857,14 +11174,6 @@ void  _nx_ppp_lcp_ping_reply(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 /*                                                                        */ 
 /*    _nx_ppp_lcp_state_machine_update      Processes events and updates  */
 /*                                            the PPP in the LCP state    */
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void   _nx_ppp_lcp_ping_process_echo_reply(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -11879,7 +11188,7 @@ void   _nx_ppp_lcp_ping_process_echo_reply(NX_PPP *ppp_ptr, NX_PACKET *packet_pt
         ppp_ptr -> nx_ppp_lcp_echo_replies_received++;
 #endif
 
-        /* Clear the echo ID to indicate we received an LCP echo reply 
+        /* Clear the echo ID to indicate we received an LCP echo reply
            matching the one we just sent out. */
         ppp_ptr -> nx_ppp_lcp_echo_reply_id = 0;
     }
@@ -11891,7 +11200,7 @@ void   _nx_ppp_lcp_ping_process_echo_reply(NX_PPP *ppp_ptr, NX_PACKET *packet_pt
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_ping_request                               PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11923,14 +11232,6 @@ void   _nx_ppp_lcp_ping_process_echo_reply(NX_PPP *ppp_ptr, NX_PACKET *packet_pt
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_ping_request(NX_PPP *ppp_ptr, CHAR *data_ptr, ULONG data_size, ULONG wait_option)
 {
@@ -11958,7 +11259,7 @@ UINT status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_ping_request                                PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -11991,14 +11292,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_ping_request(NX_PPP *ppp_ptr, CHAR *data_ptr, ULONG data_size, ULONG wait_option)
 {
@@ -12096,7 +11389,7 @@ NX_PACKET   *packet_ptr;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_packet_receive                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12124,14 +11417,6 @@ NX_PACKET   *packet_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_packet_receive(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -12160,7 +11445,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_packet_receive                              PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12187,14 +11472,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code (Including ISRs)                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_packet_receive(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 {
@@ -12269,7 +11546,7 @@ TX_INTERRUPT_SAVE_AREA
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nxe_ppp_packet_send_set                            PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12297,14 +11574,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ppp_packet_send_set(NX_PPP *ppp_ptr, VOID (*nx_ppp_packet_send)(NX_PACKET *packet_ptr))
 {
@@ -12333,7 +11602,7 @@ UINT    status;
 /*  FUNCTION                                               RELEASE        */ 
 /*                                                                        */ 
 /*    _nx_ppp_packet_send_set                             PORTABLE C      */ 
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Yuxin Zhou, Microsoft Corporation                                   */
@@ -12359,14 +11628,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ppp_packet_send_set(NX_PPP *ppp_ptr, VOID (*nx_ppp_packet_send)(NX_PACKET *packet_ptr))
 {

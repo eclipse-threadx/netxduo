@@ -1,10 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
- * 
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -77,7 +78,7 @@ const UCHAR   _nx_crypto_sha512_padding[] =
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha512_initialize                        PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -104,14 +105,6 @@ const UCHAR   _nx_crypto_sha512_padding[] =
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_sha512_operation    Handle SHA512 operation       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_sha512_initialize(NX_CRYPTO_SHA512 *context, UINT algorithm)
@@ -192,7 +185,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_sha512_initialize(NX_CRYPTO_SHA512 *context, UIN
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha512_update                            PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -222,15 +215,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_sha512_initialize(NX_CRYPTO_SHA512 *context, UIN
 /*                                                                        */
 /*    _nx_crypto_sha512_digest_calculate    Calculate the SHA512 digest   */
 /*    _nx_crypto_method_sha512_operation    Handle SHA512 operation       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_sha512_update(NX_CRYPTO_SHA512 *context, UCHAR *input_ptr, UINT input_length)
@@ -321,7 +305,7 @@ ULONG64 needed_fill_bytes;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha512_digest_calculate                  PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -351,14 +335,6 @@ ULONG64 needed_fill_bytes;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_sha512_operation    Handle SHA512 operation       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_sha512_digest_calculate(NX_CRYPTO_SHA512 *context, UCHAR *digest, UINT algorithm)
@@ -459,7 +435,7 @@ UINT  loop;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_sha512_process_buffer                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*                                                                        */
 /*  AUTHOR                                                                */
 /*                                                                        */
@@ -487,14 +463,6 @@ UINT  loop;
 /*                                                                        */
 /*    _nx_crypto_sha512_update              Update the digest with padding*/
 /*                                            and length of digest        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_sha512_process_buffer(NX_CRYPTO_SHA512 *context, UCHAR *buffer)
@@ -579,7 +547,7 @@ ULONG64  a, b, c, d, e, f, g, h;
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha512_init                       PORTABLE C      */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -609,16 +577,6 @@ ULONG64  a, b, c, d, e, f, g, h;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha512_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -659,7 +617,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha512_init(struct  NX_CRYPTO_METHOD_STRU
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha512_cleanup                    PORTABLE C      */
-/*                                                           6.1          */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -683,14 +641,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha512_init(struct  NX_CRYPTO_METHOD_STRU
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha512_cleanup(VOID *crypto_metadata)
@@ -717,7 +667,7 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha512_cleanup(VOID *crypto_metadata)
 /*  FUNCTION                                               RELEASE        */
 /*                                                                        */
 /*    _nx_crypto_method_sha512_operation                 PORTABLE C       */
-/*                                                           6.3.0        */
+/*                                                           6.4.3        */
 /*  AUTHOR                                                                */
 /*                                                                        */
 /*    Timothy Stapko, Microsoft Corporation                               */
@@ -758,16 +708,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha512_cleanup(VOID *crypto_metadata)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_sha512_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */

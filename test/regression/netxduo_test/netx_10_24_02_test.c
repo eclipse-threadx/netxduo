@@ -2,7 +2,7 @@
 /*This is 10.24_02 in CLOSING state*/
 
 /*  Procedure
-    1.Connection successfully  
+    1.Connection successfully
     2.Disconnect the Server socket.
     3.Drop the FIN packet sent form the Sever to the Client.
     4.Disconnect the Client socket.

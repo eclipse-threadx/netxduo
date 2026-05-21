@@ -1040,7 +1040,7 @@ TAHI_TEST_SEQ tahi_01_047[] = {
     {WAIT, NX_NULL, 0, 10},
     //{CHECK, &pkt28[0], sizeof(pkt28), 5},
     //{CHECK, &pkt29[0], sizeof(pkt29), 5},
-    //{CHECK, &pkt30[0], sizeof(pkt30), 5}, 
+    //{CHECK, &pkt30[0], sizeof(pkt30), 5},
 
     {CLEANUP, NX_NULL, 0, 0},
     {CLEAN_HOP_LIMIT, NX_NULL, 0, 0},
