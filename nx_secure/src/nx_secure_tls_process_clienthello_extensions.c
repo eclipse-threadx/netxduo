@@ -1303,6 +1303,18 @@ VOID _nx_secure_tls_get_signature_algorithm_id(UINT signature_algorithm, USHORT 
     case NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512:
         *signature_algorithm_id = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512;
         break;
+    /* RSASSA-PSS schemes (RFC 8446 §4.2.3). Mapped to the same internal IDs
+       as PKCS#1 v1.5 so the certificate cipher table lookup finds the (RSA,
+       SHA-x) pair. PSS-vs-PKCS1 dispatch is done at signature-verify time. */
+    case 0x0804u: /* rsa_pss_rsae_sha256 */
+        *signature_algorithm_id = NX_SECURE_TLS_X509_TYPE_RSA_SHA_256;
+        break;
+    case 0x0805u: /* rsa_pss_rsae_sha384 */
+        *signature_algorithm_id = NX_SECURE_TLS_X509_TYPE_RSA_SHA_384;
+        break;
+    case 0x0806u: /* rsa_pss_rsae_sha512 */
+        *signature_algorithm_id = NX_SECURE_TLS_X509_TYPE_RSA_SHA_512;
+        break;
     default:
         return;
     }
