@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -53,15 +53,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_ctr_encrypt                Perform CTR mode encryption   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), disabled */
-/*                                            unaligned access by default,*/
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_ctr_xor(UCHAR *plaintext, UCHAR *key, UCHAR *ciphertext)
@@ -124,14 +115,6 @@ UINT *k = (UINT *)key;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_ctr_encrypt                Perform CTR mode encryption   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_ctr_add_one(UCHAR *control_block)
@@ -196,15 +179,6 @@ USHORT result;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_aes_ctr_operation   Handle AES encrypt or decrypt */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ctr_encrypt(VOID *crypto_metadata, NX_CRYPTO_CTR *ctr_metadata,
@@ -280,15 +254,6 @@ UINT   i;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_aes_ctr_operation   Handle AES encrypt or decrypt */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ctr_encrypt_init(NX_CRYPTO_CTR *ctr_metadata, UCHAR *iv, UINT iv_len,

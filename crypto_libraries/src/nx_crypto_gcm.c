@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -56,15 +56,6 @@
 /*    _nx_crypto_gcm_multi                  Compute multilication in GF   */
 /*    _nx_crypto_gcm_ghash_update           Compute GHASH                 */
 /*    _nx_crypto_gcm_gctr                   Perform GCTR operation        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), disabled */
-/*                                            unaligned access by default,*/
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_xor(UCHAR *plaintext, UCHAR *key, UCHAR *ciphertext)
@@ -131,14 +122,6 @@ UINT *k = (UINT *)key;
 /*    _nx_crypto_gcm_gctr                   Perform GCTR operation        */
 /*    _nx_crypto_gcm_encrypt                Perform GCM encrypt/decrypt   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_inc32(UCHAR *counter_block)
 {
@@ -188,15 +171,6 @@ USHORT result;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_gcm_ghash_update           Compute GHASH                 */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_multi(UCHAR *x, UCHAR *y, UCHAR *output)
@@ -281,15 +255,6 @@ UCHAR mask;
 /*                                                                        */
 /*    _nx_crypto_gcm_encrypt                Perform GCM encrypt/decrypt   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_ghash_update(UCHAR *hkey, UCHAR *input, UINT input_length, UCHAR *output)
 {
@@ -355,15 +320,6 @@ UINT i, n;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_gcm_encrypt                Perform GCM encrypt/decrypt   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_gcm_gctr(VOID *crypto_metadata,
@@ -444,15 +400,6 @@ UINT i, n;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_aes_gcm_operation   Handle AES encrypt or decrypt */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_gcm_encrypt_init(VOID *crypto_metadata, NX_CRYPTO_GCM *gcm_metadata,
@@ -560,14 +507,6 @@ UCHAR iv_len;
 /*                                                                        */
 /*    _nx_crypto_method_aes_gcm_operation   Handle AES encrypt or decrypt */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_gcm_encrypt_update(VOID *crypto_metadata, NX_CRYPTO_GCM *gcm_metadata,
                                                   UINT (*crypto_function)(VOID *, UCHAR *, UCHAR *, UINT),
@@ -630,15 +569,6 @@ UCHAR *counter = gcm_metadata -> nx_crypto_gcm_counter;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_aes_gcm_operation   Handle AES encrypt or decrypt */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_gcm_encrypt_calculate(VOID *crypto_metadata, NX_CRYPTO_GCM *gcm_metadata,
@@ -729,14 +659,6 @@ UINT length;
 /*                                                                        */
 /*    _nx_crypto_method_aes_gcm_operation   Handle AES encrypt or decrypt */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_gcm_decrypt_update(VOID *crypto_metadata, NX_CRYPTO_GCM *gcm_metadata,
                                                   UINT (*crypto_function)(VOID *, UCHAR *, UCHAR *, UINT),
@@ -799,14 +721,6 @@ UCHAR *counter = gcm_metadata -> nx_crypto_gcm_counter;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_aes_gcm_operation   Handle AES encrypt or decrypt */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_gcm_decrypt_calculate(VOID *crypto_metadata, NX_CRYPTO_GCM *gcm_metadata,

@@ -4,7 +4,7 @@
   In this test, both PPP instances restart() when notified of NAK/CHAP failure. PPP1
   reloads the responder value with the same secret and should not succeed on the next
   CHAP authentication challenges.  However it should be able to abort further attempts
-  after a certain number of retries (2). 
+  after a certain number of retries (2).
  */
 
 #include "nx_ppp.h"
@@ -360,7 +360,7 @@ static void invalid_packet_handler(NX_PACKET *packet_ptr)
     /* Print out the non-PPP byte. In Windows, the string "CLIENT" will
        be sent before Windows PPP starts. Once CLIENT is received, we need
        to send "CLIENTSERVER" to establish communication. It's also possible
-       to receive modem commands here that might need some response to 
+       to receive modem commands here that might need some response to
        continue.  */
     nx_packet_release(packet_ptr);
 }

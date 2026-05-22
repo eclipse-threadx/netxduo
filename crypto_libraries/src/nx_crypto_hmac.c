@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -63,14 +63,6 @@
 /*    _nx_crypto_method_hmac_sha1_operation Handle HMAC-SHA1 operation    */
 /*    _nx_crypto_method_hmac_sha256_operation Handle HMAC-SHA256 operation*/
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_hmac(NX_CRYPTO_HMAC *hmac_metadata,
                                     UCHAR *input_ptr, UINT input_length,
@@ -127,15 +119,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_hmac(NX_CRYPTO_HMAC *hmac_metadata,
 /*    _nx_crypto_method_hmac_sha1_operation Handle HMAC-SHA1 operation    */
 /*    _nx_crypto_method_hmac_sha256_operation Handle HMAC-SHA256 operation*/
 /*    _nx_crypto_method_hmac_sha512_operation Handle HMAC-SHA512 operation*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_hmac_initialize(NX_CRYPTO_HMAC *hmac_metadata, UCHAR *key_ptr, UINT key_length)
@@ -231,14 +214,6 @@ UINT  i;
 /*    Application Code                                                    */
 /*    _nx_crypto_hmac                       Calculate the HMAC            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_hmac_update(NX_CRYPTO_HMAC *hmac_metadata, UCHAR *input_ptr, UINT input_length)
 {
@@ -285,15 +260,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_hmac_update(NX_CRYPTO_HMAC *hmac_metadata, UCHAR 
 /*                                                                        */
 /*    Application Code                                                    */
 /*    _nx_crypto_hmac                       Calculate the HMAC            */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_hmac_digest_calculate(NX_CRYPTO_HMAC *hmac_metadata, UCHAR *digest_ptr, UINT digest_length)
@@ -367,14 +333,6 @@ UCHAR icv_ptr[64];
 /*    _nx_crypto_method_hmac_sha256_operation Handle HMAC-SHA256 operation*/
 /*    _nx_crypto_method_hmac_sha512_operation Handle HMAC-SHA512 operation*/
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_hmac_metadata_set(NX_CRYPTO_HMAC *hmac_metadata,
                                                  VOID *context,
@@ -424,14 +382,6 @@ NX_CRYPTO_KEEP VOID _nx_crypto_hmac_metadata_set(NX_CRYPTO_HMAC *hmac_metadata,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    None                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_hmac_hash_initialize(VOID *context, UINT algorithm)
@@ -503,14 +453,6 @@ UINT   status;
 /*                                                                        */
 /*    None                                                                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT   _nx_crypto_hmac_hash_update(VOID *context, UCHAR *input, UINT input_length)
 {
@@ -578,14 +520,6 @@ UINT   status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    None                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT   _nx_crypto_hmac_hash_digest_calculate(VOID *context, UCHAR *digest, UINT algorithm)
@@ -661,16 +595,6 @@ UINT   status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
                                                         UCHAR *key, NX_CRYPTO_KEY_SIZE key_size_in_bits,
@@ -742,14 +666,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_cleanup(VOID *crypto_metadata)
 {
@@ -815,16 +731,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_hmac_cleanup(VOID *crypto_metadata)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_hmac_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */

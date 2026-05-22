@@ -9,7 +9,7 @@
  * _nx_tcp_server_socket_listen.c
  * _nx_tcp_socket_mss_set.c
  * _nx_tcp_socket_state_fin_wait2.c
- * _nx_tcp_socket_state_data_trim.c 
+ * _nx_tcp_socket_state_data_trim.c
  * _nx_tcp_client_socket_unbind.c
  * _nx_tcp_socket_disconnect.c
  * _nx_tcp_client_bind_cleanup.c
@@ -762,7 +762,7 @@ UINT        i;
 
 #ifdef __PRODUCT_NETXDUO__
     /* Test _nx_tcp_socket_state_syn_received */
-    /* Test line: 
+    /* Test line:
      140 [ +  - ][ +  + ]:       2278 :     if ((tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_ACK_BIT) &&
      141                 :       2278 :         (tcp_header_ptr -> nx_tcp_acknowledgment_number == socket_ptr -> nx_tcp_socket_tx_sequence))
     */                          
@@ -817,12 +817,12 @@ UINT        i;
 
 
     /* Test nx_tcp_socket_state_last_ack.c
-     117         [ +  - ]:       1188 :     if (tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_ACK_BIT)       
+     117         [ +  - ]:       1188 :     if (tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_ACK_BIT)
     */
     tcp_header.nx_tcp_header_word_3 = 0;
     _nx_tcp_socket_state_last_ack(&tcp_socket, &tcp_header);
 
-    /* 
+    /*
      121 [ +  + ][ +  - ]:       1188 :         if ((tcp_header_ptr -> nx_tcp_acknowledgment_number == socket_ptr -> nx_tcp_socket_tx_sequence) &&
      122                 :       1187 :             (tcp_header_ptr -> nx_tcp_sequence_number == socket_ptr -> nx_tcp_socket_rx_sequence))
     */
@@ -860,7 +860,7 @@ UINT        i;
     tcp_socket.nx_tcp_socket_receive_queue_head = NX_NULL;
     _nx_tcp_socket_receive(&tcp_socket, &packet_ptr, 0);
     
-    /* Test nx_tcp_server_socket_relisten() 
+    /* Test nx_tcp_server_socket_relisten()
      174 [ +  + ][ -  + ]:       2078 :     if ((socket_ptr -> nx_tcp_socket_bound_next) ||
      175                 :       2076 :         (socket_ptr -> nx_tcp_socket_bind_in_progress))
     */
@@ -879,7 +879,7 @@ UINT        i;
     /* Test nx_tcp_socket_state_fin_wait1.c:
      132 [ +  + ][ +  - ]:         12 :     else if ((socket_ptr -> nx_tcp_socket_fin_acked) &&
      133         [ +  - ]:          1 :              (socket_ptr -> nx_tcp_socket_fin_received) &&
-     134                 :          1 :              (socket_ptr -> nx_tcp_socket_fin_sequence == socket_ptr -> nx_tcp_socket_rx_sequence))       
+     134                 :          1 :              (socket_ptr -> nx_tcp_socket_fin_sequence == socket_ptr -> nx_tcp_socket_rx_sequence))
     */
 
 
@@ -914,7 +914,7 @@ UINT        i;
     tcp_socket.nx_tcp_socket_fin_sequence = tcp_socket.nx_tcp_socket_rx_sequence + 1;
     _nx_tcp_socket_state_fin_wait1(&tcp_socket);
 
-    /* Test nx_tcp_socket_state_closing.c 
+    /* Test nx_tcp_socket_state_closing.c
     118         [ +  - ]:          1 :     if (tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_ACK_BIT)
     */
     tcp_header.nx_tcp_header_word_3 = 0;
@@ -962,7 +962,7 @@ UINT        i;
     _nx_tcp_socket_delete(&tcp_socket); 
     tcp_socket.nx_tcp_socket_bind_in_progress = TX_NULL;
     
-    /* Test nx_tcp_fast_periodic_processing.c 
+    /* Test nx_tcp_fast_periodic_processing.c
      216 [ +  + ][ +  + ]:       2559 :             else if (socket_ptr -> nx_tcp_socket_transmit_sent_head ||
      217         [ +  - ]:        137 :                      ((socket_ptr -> nx_tcp_socket_tx_window_advertised == 0) &&
      218                 :        137 :                       (socket_ptr -> nx_tcp_socket_state <= NX_TCP_CLOSE_WAIT)))
@@ -972,7 +972,7 @@ UINT        i;
     tcp_socket.nx_tcp_socket_state = NX_TCP_FIN_WAIT_2;
     _nx_tcp_fast_periodic_processing(&ip_0);
     
-    /* Test nx_tcp_fast_periodic_processing.c 
+    /* Test nx_tcp_fast_periodic_processing.c
      231 [ +  + ][ +  + ]:       2374 :             else if ((socket_ptr -> nx_tcp_socket_state == NX_TCP_FIN_WAIT_1) ||
      232         [ -  + ]:       2371 :                      (socket_ptr -> nx_tcp_socket_state == NX_TCP_CLOSING)    ||
      233                 :       2371 :                      (socket_ptr -> nx_tcp_socket_state == NX_TCP_LAST_ACK))
@@ -982,7 +982,7 @@ UINT        i;
     tcp_socket.nx_tcp_socket_state = NX_TCP_LAST_ACK;
     _nx_tcp_fast_periodic_processing(&ip_0);
     
-    /* Test nx_tcp_fast_periodic_processing.c 
+    /* Test nx_tcp_fast_periodic_processing.c
      187 [ +  + ][ +  + ]:       2857 :             else if (((socket_ptr -> nx_tcp_socket_timeout_retries >= socket_ptr -> nx_tcp_socket_timeout_max_retries) &&
      188         [ +  + ]:       2856 :                       (socket_ptr -> nx_tcp_socket_zero_window_probe_has_data == NX_FALSE)) ||
      189         [ +  - ]:          4 :                      ((socket_ptr -> nx_tcp_socket_zero_window_probe_failure >= socket_ptr -> nx_tcp_socket_timeout_max_retries) &&
@@ -1005,7 +1005,7 @@ UINT        i;
     _nx_tcp_no_connection_reset(&ip_0, my_packet[0], &tcp_header);
 
 
-    /* Test nx_tcp_packet_process.c 
+    /* Test nx_tcp_packet_process.c
      402         [ +  - ]:    2261852 :                 if (socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_version == packet_ptr -> nx_packet_ip_version)
      */
     tcp_socket.nx_tcp_socket_id = NX_TCP_ID;
@@ -1028,7 +1028,7 @@ UINT        i;
     _nx_ip_packet_deferred_receive(&ip_0, packet_ptr);     
 
 
-    /* Test nx_tcp_packet_process.c 
+    /* Test nx_tcp_packet_process.c
      409         [ +  - ]:    2261688 :                         if (socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_address.v4 == *source_ip)
      */
     tcp_socket.nx_tcp_socket_connect_ip.nxd_ip_version = NX_IP_VERSION_V4;
@@ -1047,7 +1047,7 @@ UINT        i;
 
 
 #ifdef FEATURE_NX_IPV6
-    /* Test nx_tcp_packet_process.c 
+    /* Test nx_tcp_packet_process.c
      415         [ +  - ]:        164 :                     else if (CHECK_IPV6_ADDRESSES_SAME(socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_address.v6, source_ip))
      */
     nxd_ipv6_address_set(&ip_0, 0, NX_NULL, 10, NX_NULL);
@@ -1175,7 +1175,7 @@ UINT        i;
 
 
     /* Test nx_tcp_packet_process.c
-     900 [ +  - ][ +  - ]:          6 :                             if ((*queued_source_ip == *source_ip) && (queued_source_port == source_port)) 
+     900 [ +  - ][ +  - ]:          6 :                             if ((*queued_source_ip == *source_ip) && (queued_source_port == source_port))
     */
     ip_0.nx_ip_tcp_active_listen_requests -> nx_tcp_listen_port = 80;
     ip_0.nx_ip_tcp_active_listen_requests -> nx_tcp_listen_queue_current = 0;
@@ -1342,7 +1342,7 @@ UINT        i;
 
 
     /* Test _nx_tcp_socket_state_transmit_check()  */
-    /* Hit condition:  
+    /* Hit condition:
        169 [ +  + ][ +  - ]:        332 :         if ((tx_window_current) &&
        170                 :        262 :             (socket_ptr -> nx_tcp_socket_transmit_sent_count < socket_ptr -> nx_tcp_socket_transmit_queue_maximum))  */
     /* suspension list is set to NULL. */               
@@ -1541,7 +1541,7 @@ UINT        i;
     /* Test _nx_tcp_socket_send_internal()  */
 
 #ifndef NX_DISABLE_PACKET_CHAIN
-    /* Hit condition:       
+    /* Hit condition:
        377 [ +  + ][ +  + ]:     125717 :             else if ((packet_ptr -> nx_packet_next != NX_NULL) &&
        378         [ +  - ]:       6631 :                      ((packet_ptr -> nx_packet_length + data_offset) < pool_ptr -> nx_packet_pool_payload_size) &&
        379                 :       6631 :                      (pool_ptr -> nx_packet_pool_available > 0))
@@ -1565,7 +1565,7 @@ UINT        i;
     pool_0.nx_packet_pool_available = packet_counter;
 
     
-    /* Hit condition:       
+    /* Hit condition:
        391 [ +  - ][ +  + ]:          5 :                 while ((current_packet != NX_NULL) && (current_packet -> nx_packet_prepend_ptr == current_packet -> nx_packet_append_ptr))
 
        399         [ -  + ]:          2 :                 NX_ASSERT(current_packet != NX_NULL);
@@ -1586,7 +1586,7 @@ UINT        i;
 #endif /* NX_DISABLE_ASSERT  */
 
 
-    /* Hit condition: 
+    /* Hit condition:
        454         [ +  - ]:          1 :                     if (preempted == NX_TRUE)
     */                                                   
     nx_packet_allocate(&pool_0, &my_packet[0], NX_TCP_PACKET, NX_NO_WAIT); 
@@ -1606,7 +1606,7 @@ UINT        i;
     pool_0.nx_packet_pool_available = packet_counter;
     tcp_socket.nx_tcp_socket_tx_window_advertised = 65535;
 
-    /* Hit condition: 
+    /* Hit condition:
        490         [ +  - ]:          2 :                     if (preempted == NX_TRUE)
     */                                                   
     nx_packet_allocate(&pool_0, &my_packet[0], NX_TCP_PACKET, NX_NO_WAIT);                  
@@ -1623,7 +1623,7 @@ UINT        i;
     _nx_tcp_socket_send_internal(&tcp_socket, my_packet[0], 0);
     tcp_socket.nx_tcp_socket_tx_window_advertised = 65535;
 
-    /* Hit condition: 
+    /* Hit condition:
        550         [ +  - ]:          1 :                             if (preempted == NX_TRUE)
     */
     nx_packet_allocate(&pool_0, &my_packet[0], NX_TCP_PACKET, NX_NO_WAIT);                  
@@ -1761,7 +1761,7 @@ NX_PACKET   *packet_ptr;
 
 
     /* Test _nx_tcp_socket_send_internal()  */
-    /* Hit condition:  
+    /* Hit condition:
        867 [ +  + ][ +  - ]:        281 :         else if ((wait_option) && (_tx_thread_current_ptr != &(ip_ptr -> nx_ip_thread)))
     */
     nx_packet_allocate(&pool_0, &packet_ptr, NX_TCP_PACKET, NX_NO_WAIT);                  
@@ -1911,7 +1911,7 @@ NX_PACKET      *packet_ptr;
     /* Test nx_tcp_socket_state_ack_check.c
      479         [ -  + ]:         12 :                             if (tcp_header_ptr -> nx_tcp_acknowledgment_number < ending_packet_sequence)
      480                 :            :                             {
-     481                 :            : 
+     481                 :            :
      482                 :            :                                 / * ACK does not cover the search packet. Break out of the loop.  * /
      483                 :          0 :                                 break;
      484                 :            :                             }
@@ -2116,7 +2116,7 @@ static VOID    thread_for_assert_entry_1(ULONG thread_input)
 {
 NX_PACKET   *test_packet;
 
-    /* Hit condition:       
+    /* Hit condition:
        391 [ +  - ][ +  + ]:          5 :                 while ((current_packet != NX_NULL) && (current_packet -> nx_packet_prepend_ptr == current_packet -> nx_packet_append_ptr))
 
        399         [ -  + ]:          2 :                 NX_ASSERT(current_packet != NX_NULL);

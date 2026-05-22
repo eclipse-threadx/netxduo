@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -33,16 +33,6 @@
 /*                                                                        */
 /*    This file defines the NetX Precision Time Protocol (PTP)            */
 /*    Client component, including all data types and external references. */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -272,12 +262,6 @@ static VOID  _nx_ptp_utility_32_unsigned_write(UCHAR *dest_ptr, ULONG value)
 /*    _nx_ptp_client_sync_received          Process Sync message          */
 /*    _nx_ptp_client_delay_resp_received    Process delay response        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_msg_parse_timestamp(UCHAR *ptr, NX_PTP_TIME *time_ptr)
 {
@@ -322,15 +306,6 @@ ULONG nanoseconds = (ULONG)time_ptr -> nanosecond;
 /*                                                                        */
 /*    _nx_ptp_client_process_event_packet   Process PTP event packet      */
 /*    _nx_ptp_client_process_general_packet Process PTP general packet    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_ptp_msg_parse_hdr(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PTP_MSG_HEADER *hdr)
@@ -468,12 +443,6 @@ UINT   interface_index;
 /*                                                                        */
 /*    _nx_ptp_client_init_packet_received   Process Announce message      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_msg_parse_announce(UCHAR *ptr, NX_PTP_CLIENT_MASTER *master)
 {
@@ -523,12 +492,6 @@ static VOID _nx_ptp_msg_parse_announce(UCHAR *ptr, NX_PTP_CLIENT_MASTER *master)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ptp_client_init_packet_received   Process PTP announce message  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 static INT _nx_ptp_client_master_clock_compare(NX_PTP_CLIENT_MASTER *master1, NX_PTP_CLIENT_MASTER *master2)
@@ -619,12 +582,6 @@ INT gm_compare;
 /*                                                                        */
 /*    _nx_ptp_client_soft_clock_callback    Soft PTP clock                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_soft_clock_adjust(VOID *ptp_instance, LONG offset_ns)
 {
@@ -690,12 +647,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */
 /*    ThreadX Timer                                                       */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_timer_handler(ULONG ptp_instance)
 {
@@ -742,12 +693,6 @@ NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)ptp_instance;
 /*                                                                        */
 /*    NetX UDP                                                            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_socket_receive_notify(NX_UDP_SOCKET *socket_ptr)
 {
@@ -789,12 +734,6 @@ NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)(socket_ptr -> nx_udp_socket_reserv
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX link layer                                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_ptp_client_ethernet_receive_notify(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
@@ -888,15 +827,6 @@ NX_PTP_CLIENT *client_ptr = (NX_PTP_CLIENT *)context;
 /*                                                                        */
 /*    _nx_ptp_client_delay_resp_received    Process delay response        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_clock_adjust(NX_PTP_CLIENT *client_ptr, NX_PTP_TIME *offset_ptr)
 {
@@ -989,16 +919,6 @@ NX_PTP_TIME current;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ptp_client_sync_received          Process Sync message          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_delay_req(NX_PTP_CLIENT *client_ptr)
@@ -1165,16 +1085,6 @@ NX_INTERFACE     *if_ptr;
 /*    _nx_ptp_client_process_event_packet   Process PTP event packet      */
 /*    _nx_ptp_client_process_general_packet Process PTP general packet    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_sync_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr, NX_PTP_MSG_HEADER *hdr)
 {
@@ -1217,7 +1127,7 @@ ULONG64     correctionNS = (hdr -> cFieldHigh << 16) | (hdr -> cFieldLow >> 16);
     }
 
 #if defined(NX_PTP_DEBUG) || defined(NX_PTP_DEBUG_OFFSET)
-    /* Compute neighbor rate ratio.  
+    /* Compute neighbor rate ratio.
        neighborRateRatio = (t1 - prev_t1) / (t2 - prev_t2) */
     _nx_ptp_client_utility_time_diff(&client_ptr -> nx_ptp_client_sync,
                                      &client_ptr -> nx_ptp_client_prev_sync, &delta_t1);
@@ -1336,18 +1246,6 @@ ULONG64     correctionNS = (hdr -> cFieldHigh << 16) | (hdr -> cFieldLow >> 16);
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ptp_client_process_general_packet Process PTP general packet    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1.5  */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            simplified debug output,    */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_delay_resp_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr)
@@ -1469,16 +1367,6 @@ NX_PTP_CLIENT_SYNC sync;
 /*                                                                        */
 /*    _nx_ptp_client_process_general_packet Process PTP general packet    */
 /*    _nx_ptp_client_master_clock_compare   Compare two master clocks     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_init_packet_received(NX_PTP_CLIENT *client_ptr,
@@ -1662,12 +1550,6 @@ INT compare_result;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ptp_client_thread_entry           PTP thread entry              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_pdelay_req(NX_PTP_CLIENT *client_ptr)
@@ -1855,12 +1737,6 @@ NX_INTERFACE     *if_ptr;
 /*    _nx_ptp_client_process_general_packet Process PTP general packet    */
 /*    _nx_ptp_client_process_event_packet   Process PTP event packet      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_pdelay_resp_received(NX_PTP_CLIENT *client_ptr, VOID *ts_ptr)
 {
@@ -1872,27 +1748,27 @@ NX_PTP_TIME a, b, c, d, t3;
     * t2 = nx_ptp_client_pdelay_req_receipt_ts (within pdelay_resp)
     * t3 = nx_ptp_client_pdelay_resp_origin_ts (within pdelay_resp_follow_up or ts_ptr)
     * t4 = (onestep: nx_ptp_client_pdelay_req_receipt_ts)/(twostep:nx_ptp_client_pdelay_resp_ts)
-    * 
+    *
     * C = t2 - t1
     * D = t4 - t3
-    *  
+    *
     * <meanLinkDelay> = [(t2 – t1) + (t4 – t3)]/2
-    * 
+    *
     * A = t1 - t2
     * B = t3 - t4
-    * 
-    * offset = [(t1 - t2) - (t3 - t4)]/2 
+    *
+    * offset = [(t1 - t2) - (t3 - t4)]/2
     *        = [B - A]/2
-    * 
-    * 
+    *
+    *
     * onestep: <meanLinkDelay> = [(t4 − t1) − <correctedPdelayRespCorrectionField>]/2
     * correctedPDelayRespCorrectionField = t3-t2 (turnaround time)
-    * 
+    *
     * onestep offset = (t4 + t1 - (nx_ptp_client_pdelay_req_receipt_ts * 2))/2
     * - the multiply by 2 is here because we are not yet parsing the correction field
-    * 
+    *
     * twostep offset = (t4 + t1 - (nx_ptp_client_pdelay_req_receipt_ts + ts_ptr))/2
-    * 
+    *
     * We will set <delayAsymmetry> to 0 unless a value is provided by the user
     *
     * delay_asymmetry = 0;
@@ -1988,12 +1864,6 @@ NX_PTP_TIME a, b, c, d, t3;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ptp_client_thread_entry           PTP thread entry              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_pdelay_resp_follow_up(NX_PTP_CLIENT *client_ptr)
@@ -2170,12 +2040,6 @@ NX_INTERFACE     *if_ptr;
 /*                                                                        */
 /*    _nx_ptp_client_thread_entry           PTP thread entry              */
 /*    _nx_ptp_client_process_event_packet   Process PTP event packet      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_pdelay_resp(NX_PTP_CLIENT *client_ptr)
@@ -2364,12 +2228,6 @@ NX_INTERFACE     *if_ptr;
 /*                                                                        */
 /*    _nx_ptp_client_thread_entry           PTP thread entry              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_follow_up(NX_PTP_CLIENT *client_ptr)
 {
@@ -2556,12 +2414,6 @@ NX_INTERFACE     *if_ptr;
 /*                                                                        */
 /*    _nx_ptp_client_thread_entry           PTP thread entry              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_sync(NX_PTP_CLIENT *client_ptr)
 {
@@ -2722,12 +2574,6 @@ NX_INTERFACE     *if_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ptp_client_thread_entry           PTP thread entry              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_send_announce(NX_PTP_CLIENT *client_ptr)
@@ -2920,16 +2766,6 @@ NX_INTERFACE     *if_ptr;
 /*    _nx_ptp_client_thread_entry           PTP thread entry              */
 /*    _nx_ptp_client_send_pdelay_resp       Send pdelay response          */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_process_event_packet(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr,
                                                 NX_PTP_MSG_HEADER *hdr)
@@ -3064,16 +2900,6 @@ static VOID _nx_ptp_client_process_event_packet(NX_PTP_CLIENT *client_ptr, NX_PA
 /*                                                                        */
 /*    _nx_ptp_client_thread_entry           PTP thread entry              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_process_general_packet(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr,
                                                   NX_PTP_MSG_HEADER *hdr)
@@ -3182,16 +3008,6 @@ static VOID _nx_ptp_client_process_general_packet(NX_PTP_CLIENT *client_ptr, NX_
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    ThreadX                                                             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_ptp_client_thread_entry(ULONG ptp_instance)
@@ -3503,12 +3319,6 @@ NX_PTP_MSG_HEADER hdr;
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_create(NX_PTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT interface_index,
                             NX_PACKET_POOL *packet_pool_ptr, UINT thread_priority, UCHAR *thread_stack, UINT stack_size,
@@ -3584,15 +3394,6 @@ UINT _nxe_ptp_client_create(NX_PTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT inter
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_create(NX_PTP_CLIENT *client_ptr, NX_IP *ip_ptr, UINT interface_index,
@@ -3742,12 +3543,6 @@ UINT status;
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
 {
@@ -3803,15 +3598,6 @@ UINT _nxe_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
@@ -3886,12 +3672,6 @@ UINT _nx_ptp_client_delete(NX_PTP_CLIENT *client_ptr)
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_start(NX_PTP_CLIENT *client_ptr, UCHAR *client_port_identity_ptr, UINT client_port_identity_length,
                            UINT domain, UINT transport_specific, NX_PTP_CLIENT_EVENT_CALLBACK event_callback,
@@ -3964,16 +3744,6 @@ UINT _nxe_ptp_client_start(NX_PTP_CLIENT *client_ptr, UCHAR *client_port_identit
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_start(NX_PTP_CLIENT *client_ptr, UCHAR *client_port_identity_ptr, UINT client_port_identity_length,
@@ -4209,12 +3979,6 @@ NXD_ADDRESS maddr;
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_stop(NX_PTP_CLIENT *client_ptr)
 {
@@ -4269,15 +4033,6 @@ UINT _nxe_ptp_client_stop(NX_PTP_CLIENT *client_ptr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_stop(NX_PTP_CLIENT *client_ptr)
@@ -4406,12 +4161,6 @@ NXD_ADDRESS maddr;
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_master_enable(NX_PTP_CLIENT *client_ptr, UCHAR role, UCHAR priority1, UCHAR priority2,
                                    UCHAR clock_class, UCHAR clock_accuracy, USHORT clock_variance,
@@ -4481,28 +4230,22 @@ UINT _nxe_ptp_client_master_enable(NX_PTP_CLIENT *client_ptr, UCHAR role, UCHAR 
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_master_enable(NX_PTP_CLIENT *client_ptr, UCHAR role, UCHAR priority1, UCHAR priority2,
                                   UCHAR clock_class, UCHAR clock_accuracy, USHORT clock_variance,
                                   USHORT steps_removed, UCHAR time_source)
 {
 
-    /* 
+    /*
      * nx_ptp_master_priority1:                     0 is reserved. Set at 1 for highest priority
-     * nx_ptp_master_priority2:                     AS2020: 8.6.2.5 The default value for a PTP Relay Instance should be 247. 
+     * nx_ptp_master_priority2:                     AS2020: 8.6.2.5 The default value for a PTP Relay Instance should be 247.
      *                                              The default value for a PTP End Instance should be 248.
-     * nx_ptp_master_clock_class:                   AS2020: 8.6.2.2 If the value that reflects the LocalClock and ClockSource entities is 
-     *                                              not specified or not known, clockClass is set to 248 
-     * nx_ptp_master_clock_accuracy:                User input. 
-     *                                              AS2020:8.6.2.3 If the value that reflects the LocalClock and ClockSource entities is 
+     * nx_ptp_master_clock_class:                   AS2020: 8.6.2.2 If the value that reflects the LocalClock and ClockSource entities is
+     *                                              not specified or not known, clockClass is set to 248
+     * nx_ptp_master_clock_accuracy:                User input.
+     *                                              AS2020:8.6.2.3 If the value that reflects the LocalClock and ClockSource entities is
      *                                              not specified or unknown, clockAccuracy is set to 254 (FE16).
-     *                                              1588-2019: 7.6.2.6 clockAccuracy reference Table 5 enumerations 
+     *                                              1588-2019: 7.6.2.6 clockAccuracy reference Table 5 enumerations
      * nx_ptp_master_offset_scaled_log_variance:    AS2020:8.6.2.4 If the value that reflects these entities is not specified or not known,
      *                                              offsetScaledLogVariance is set to 17258 (436A16)
      * nx_ptp_master_sequenceId                     Sequence ID for master starts at 0
@@ -4559,12 +4302,6 @@ UINT _nx_ptp_client_master_enable(NX_PTP_CLIENT *client_ptr, UCHAR role, UCHAR p
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_time_get(NX_PTP_CLIENT *client_ptr, NX_PTP_TIME *time_ptr)
 {
@@ -4616,12 +4353,6 @@ UINT _nxe_ptp_client_time_get(NX_PTP_CLIENT *client_ptr, NX_PTP_TIME *time_ptr)
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_time_get(NX_PTP_CLIENT *client_ptr, NX_PTP_TIME *time_ptr)
 {
@@ -4666,12 +4397,6 @@ UINT _nx_ptp_client_time_get(NX_PTP_CLIENT *client_ptr, NX_PTP_TIME *time_ptr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_time_set(NX_PTP_CLIENT *client_ptr, NX_PTP_TIME *time_ptr)
@@ -4723,12 +4448,6 @@ UINT _nxe_ptp_client_time_set(NX_PTP_CLIENT *client_ptr, NX_PTP_TIME *time_ptr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_time_set(NX_PTP_CLIENT *client_ptr, NX_PTP_TIME *time_ptr)
@@ -4802,12 +4521,6 @@ UINT state;
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_master_info_get(NX_PTP_CLIENT_MASTER *master_ptr, NXD_ADDRESS *address, UCHAR **port_identity,
                                      UINT *port_identity_length, UCHAR *priority1, UCHAR *priority2, UCHAR *clock_class,
@@ -4873,12 +4586,6 @@ UINT _nxe_ptp_client_master_info_get(NX_PTP_CLIENT_MASTER *master_ptr, NXD_ADDRE
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_master_info_get(NX_PTP_CLIENT_MASTER *master_ptr, NXD_ADDRESS *address, UCHAR **port_identity,
@@ -4976,12 +4683,6 @@ UINT _nx_ptp_client_master_info_get(NX_PTP_CLIENT_MASTER *master_ptr, NXD_ADDRES
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_sync_info_get(NX_PTP_CLIENT_SYNC *sync_ptr, USHORT *flags, SHORT *utc_offset)
 {
@@ -5030,12 +4731,6 @@ UINT _nxe_ptp_client_sync_info_get(NX_PTP_CLIENT_SYNC *sync_ptr, USHORT *flags, 
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_sync_info_get(NX_PTP_CLIENT_SYNC *sync_ptr, USHORT *flags, SHORT *utc_offset)
@@ -5087,16 +4782,6 @@ UINT _nx_ptp_client_sync_info_get(NX_PTP_CLIENT_SYNC *sync_ptr, USHORT *flags, S
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_ptp_client_packet_timestamp_notify(NX_PTP_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PTP_TIME *timestamp_ptr)
@@ -5197,12 +4882,6 @@ VOID _nx_ptp_client_packet_timestamp_notify(NX_PTP_CLIENT *client_ptr, NX_PACKET
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    PTP internal                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_soft_clock_callback(NX_PTP_CLIENT *client_ptr, UINT operation,
@@ -5307,12 +4986,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_utility_time_diff(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time2_ptr, NX_PTP_TIME *result_ptr)
 {
@@ -5363,12 +5036,6 @@ UINT _nxe_ptp_client_utility_time_diff(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_utility_time_sum(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time2_ptr, NX_PTP_TIME *result_ptr)
@@ -5424,12 +5091,6 @@ UINT _nxe_ptp_client_utility_time_sum(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time2
 /*                                                                        */
 /*    Application                                                         */
 /*    _nx_ptp_client_delay_resp_received    Process delay response        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_utility_time_diff(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time2_ptr, NX_PTP_TIME *result_ptr)
@@ -5524,12 +5185,6 @@ LONG  ns;
 /*    Application                                                         */
 /*    _nx_ptp_client_pdelay_resp_received   Process pdelay response       */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_utility_time_sum(NX_PTP_TIME *time1_ptr, NX_PTP_TIME *time2_ptr, NX_PTP_TIME *result_ptr)
 {
@@ -5621,12 +5276,6 @@ LONG  ns;
 /*                                                                        */
 /*    Application                                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_ptp_client_utility_convert_time_to_date(NX_PTP_TIME *time_ptr, LONG offset, NX_PTP_DATE_TIME *date_time_ptr)
 {
@@ -5679,12 +5328,6 @@ UINT _nxe_ptp_client_utility_convert_time_to_date(NX_PTP_TIME *time_ptr, LONG of
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ptp_client_utility_convert_time_to_date(NX_PTP_TIME *time_ptr, LONG offset, NX_PTP_DATE_TIME *date_time_ptr)
@@ -5824,12 +5467,6 @@ UINT  is_leap;
 /*    _nx_ptp_client_utility_convert_time_to_date                         */
 /*                                          Convert time to date          */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_ptp_client_utility_add64(LONG *a_hi, ULONG *a_lo, LONG b_hi, ULONG b_lo)
 {
@@ -5879,12 +5516,6 @@ ULONG r_lo;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ptp_client_utility_time_diff      Diff two PTP times            */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_ptp_client_utility_sub64(LONG *a_hi, ULONG *a_lo, LONG b_hi, ULONG b_lo)
@@ -5937,12 +5568,6 @@ ULONG r_lo;
 /*    _nx_ptp_client_utility_time_diff      Diff two PTP times            */
 /*    _nx_ptp_client_soft_clock_callback    Soft PTP clock                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_ptp_client_utility_inc64(LONG *a_hi, ULONG *a_lo)
 {
@@ -5990,12 +5615,6 @@ ULONG r_lo;
 /*    _nx_ptp_client_clock_adjust           Adjust PTP clock              */
 /*    _nx_ptp_client_utility_time_diff      Diff two PTP times            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_ptp_client_utility_dec64(LONG *a_hi, ULONG *a_lo)
 {
@@ -6041,12 +5660,6 @@ ULONG r_lo;
 /*                                                                        */
 /*    _nx_ptp_client_utility_time_div_by_2  Divide a PTP time by 2        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_ptp_client_utility_neg64(LONG *a_hi, ULONG *a_lo)
 {
@@ -6091,12 +5704,6 @@ LONG r_hi;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ptp_client_delay_resp_received    Process delay response        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_ptp_client_utility_time_div_by_2(NX_PTP_TIME *time_ptr)

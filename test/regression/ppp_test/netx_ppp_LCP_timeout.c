@@ -1,12 +1,12 @@
-/* This demo tests the nx_ppp_restart() function.  The PPP_1 instance is never started.  
-   So PPP_0 fails to complete the LCP protocol. After so many attempts at the LCP 
+/* This demo tests the nx_ppp_restart() function.  The PPP_1 instance is never started.
+   So PPP_0 fails to complete the LCP protocol. After so many attempts at the LCP
    protocol, the PPP_0 should go into a FAILED state and call the link down callback.
-   NetX PPP has a restart function which reinitializes the PPP instance so it can 
+   NetX PPP has a restart function which reinitializes the PPP instance so it can
    restart the PPP protocol again.
 
-   This test runs until the second link down event occurs. This is considered a successful 
-   outcome because it verifies the NetX PPP properly resets the LCP state, removes packets on 
-   the receive queue, resets the buffer markers, and clears authentication status. 
+   This test runs until the second link down event occurs. This is considered a successful
+   outcome because it verifies the NetX PPP properly resets the LCP state, removes packets on
+   the receive queue, resets the buffer markers, and clears authentication status.
 
 */
 

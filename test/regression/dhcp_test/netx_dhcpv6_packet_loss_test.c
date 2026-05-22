@@ -809,7 +809,7 @@ UINT        status;
         test_control_return(1);
     }       
 
-    /* Create a Link Layer Plus Time DUID for the DHCPv6 Client. Set time ID field 
+    /* Create a Link Layer Plus Time DUID for the DHCPv6 Client. Set time ID field
        to NULL; the DHCPv6 Client API will supply one. */
     status = nx_dhcpv6_create_client_duid(&dhcp_client, NX_DHCPV6_DUID_TYPE_LINK_TIME, NX_DHCPV6_HW_TYPE_IEEE_802, 0x990ab526);   
            
@@ -840,9 +840,9 @@ UINT        status;
         test_control_return(1);
     }       
 
-    /* Set the DHCPv6 Client FQDN option. 
-       operation: NX_DHCPV6_CLIENT_DESIRES_UPDATE_AAAA_RR         DHCPv6 Client choose to updating the FQDN-to-IPv6 address mapping for FQDN and address(es) used by the client.  
-                  NX_DHCPV6_CLIENT_DESIRES_SERVER_DO_DNS_UPDATE   DHCPv6 Client choose to updating the FQDN-to-IPv6 address mapping for FQDN and address(es) used by the client to the server.  
+    /* Set the DHCPv6 Client FQDN option.
+       operation: NX_DHCPV6_CLIENT_DESIRES_UPDATE_AAAA_RR         DHCPv6 Client choose to updating the FQDN-to-IPv6 address mapping for FQDN and address(es) used by the client.
+                  NX_DHCPV6_CLIENT_DESIRES_SERVER_DO_DNS_UPDATE   DHCPv6 Client choose to updating the FQDN-to-IPv6 address mapping for FQDN and address(es) used by the client to the server.
                   NX_DHCPV6_CLIENT_DESIRES_NO_SERVER_DNS_UPDATE   DHCPv6 Client choose to request that the server perform no DNS updatest on its behalf.  */
     status = nx_dhcpv6_request_option_FQDN(&dhcp_client, "DHCPv6-Client", NX_DHCPV6_CLIENT_DESIRES_UPDATE_AAAA_RR);
                
@@ -1056,10 +1056,10 @@ ULONG       message_word;
 
     return;
 }     
-/* This is the notification from the DHCPv6 Client task that it has changed 
-   state in the DHCPv6 protocol, for example getting assigned an IPv6 lease and 
-   achieving the bound state or an IPv6 lease expires and being reset to 
-   the init state.   
+/* This is the notification from the DHCPv6 Client task that it has changed
+   state in the DHCPv6 protocol, for example getting assigned an IPv6 lease and
+   achieving the bound state or an IPv6 lease expires and being reset to
+   the init state.
 */
 static VOID dhcpv6_state_change_notify(NX_DHCPV6 *dhcpv6_ptr, UINT old_state, UINT new_state)
 {

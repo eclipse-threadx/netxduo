@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -78,22 +78,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Timothy Stapko           Modified comments(s), added   */
-/*                                            warning supression for      */
-/*                                            obsolete DES/3DES,          */
-/*                                            added x25519 curve,         */
-/*                                            resulting in version 6.1.11 */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            added x448 curve,           */
-/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 

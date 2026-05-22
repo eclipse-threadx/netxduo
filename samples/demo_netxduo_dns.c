@@ -29,7 +29,7 @@ UCHAR                   local_cache[LOCAL_CACHE_SIZE];
 UINT                    error_counter = 0;
                 
 #ifdef FEATURE_NX_IPV6      
-/* If IPv6 is enabled in NetX Duo, allow DNS Client to try using IPv6 
+/* If IPv6 is enabled in NetX Duo, allow DNS Client to try using IPv6
 #define USE_IPV6
 */
 #endif
@@ -78,12 +78,12 @@ UINT    status;
 
 #ifdef NX_DNS_CLIENT_USER_CREATE_PACKET_POOL   
 
-    /* Create the packet pool for the DNS Client to send packets. 
+    /* Create the packet pool for the DNS Client to send packets.
 
-        If the DNS Client is configured for letting the host application create 
+        If the DNS Client is configured for letting the host application create
         the DNS packet pool, (see NX_DNS_CLIENT_USER_CREATE_PACKET_POOL option), see
-       nx_dns_create() for guidelines on packet payload size and pool size. 
-       packet traffic for NetX processes. 
+       nx_dns_create() for guidelines on packet payload size and pool size.
+       packet traffic for NetX processes.
     */
     status =  nx_packet_pool_create(&client_pool, "DNS Client Packet Pool", NX_DNS_PACKET_PAYLOAD, pointer, NX_DNS_PACKET_POOL_SIZE);
 
@@ -239,7 +239,7 @@ USHORT          host_port;
         return;
      }
 
-    /* Set the host global IP address. We are assuming a 64 
+    /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&client_ip, iface_index, &client_ipv6_address, 64, &address_index);
 
@@ -584,7 +584,7 @@ USHORT          host_port;
 
 #if defined(FEATURE_NX_IPV6) && !defined(NX_DISABLE_IPV4)
 
-    /* Create an IPv4 address for the reverse lookup. If the DNS client is IPv6 enabled, it will send this over 
+    /* Create an IPv4 address for the reverse lookup. If the DNS client is IPv6 enabled, it will send this over
        IPv6 to the DNS server; otherwise it will send it over IPv4. In either case the respective server will
        return a PTR record if it has the information. */
     test_ipduo_server_address.nxd_ip_version = NX_IP_VERSION_V4;

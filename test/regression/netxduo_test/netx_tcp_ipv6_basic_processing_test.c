@@ -1,4 +1,4 @@
-/* This NetX test use the second interface send a larger packet with IPv6 address 
+/* This NetX test use the second interface send a larger packet with IPv6 address
    to test the TCP MSS process procedure.  */
 
 #include    "tx_api.h"

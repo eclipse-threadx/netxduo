@@ -226,7 +226,7 @@ NX_PACKET       *recv_packet;
 
     /* Send a GET request.  */
     status = nx_web_http_client_get_secure_start_extended(&my_client, &server_ip_address,
-                                                            NX_WEB_HTTPS_SERVER_PORT, "https://1.2.3.4/test.txt", sizeof("https://1.2.3.4/test.txt") - 1, 
+                                                            NX_WEB_HTTPS_SERVER_PORT, "https://1.2.3.4/test.txt", sizeof("https://1.2.3.4/test.txt") - 1,
                                                             "1.2.3.4", 7, "name", 4, "password", 8, 
                                                             tls_setup_callback, NX_WAIT_FOREVER);
 

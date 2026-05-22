@@ -29,10 +29,10 @@ extern void    test_control_return(UINT status);
 #define REQUEST_CLIENT_IP
 */
 
-/* If defined the client requests to jump to the boot state and skip the DISCOVER message. 
+/* If defined the client requests to jump to the boot state and skip the DISCOVER message.
    If REQUEST_CLIENT_IP is not defined, this has no effect. */
-/* 
-#define SKIP_DISCOVER_MESSAGE 
+/*
+#define SKIP_DISCOVER_MESSAGE
 */
 
 /* Define the ThreadX and NetX object control blocks...  */

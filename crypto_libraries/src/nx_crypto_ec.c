@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -732,14 +732,6 @@ static NX_CRYPTO_CONST NX_CRYPTO_EC *_nx_crypto_ec_named_curves[] =
 /*    _nx_crypto_ec_fp_projective_double    Perform doubling for points of*/
 /*                                            projective                  */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_point_is_infinite(NX_CRYPTO_EC_POINT *point)
 {
@@ -796,14 +788,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_ec_point_is_infinite(NX_CRYPTO_EC_POINT *point)
 /*                                          Convert point from projective */
 /*                                            to affine                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_set_infinite(NX_CRYPTO_EC_POINT *point)
 {
@@ -853,15 +837,6 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_set_infinite(NX_CRYPTO_EC_POINT *point)
 /*    _nx_crypto_ecjpake_hello_process      Process hello message         */
 /*    _nx_crypto_ecjpake_key_exchange_process                             */
 /*                                          Process key exchange message  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), updated  */
-/*                                            constants, resulting        */
-/*                                            in version 6.1              */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_point_setup(NX_CRYPTO_EC_POINT *point, UCHAR *byte_stream, UINT byte_stream_size)
@@ -928,14 +903,6 @@ UINT status;
 /*                                          Generate key exchange message */
 /*    _nx_crypto_ecjpake_schnorr_zkp_hash   Perform Schnorr ZKP hash      */
 /*                                            calculation                 */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_extract_uncompressed(NX_CRYPTO_EC *curve, NX_CRYPTO_EC_POINT *point,
@@ -1013,14 +980,6 @@ UINT clen;
 /*    _nx_crypto_ec_fp_projective_add       Perform addition for points of*/
 /*                                            projective and affine       */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_fp_affine_to_projective(NX_CRYPTO_EC_POINT *point)
 {
@@ -1072,14 +1031,6 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_fp_affine_to_projective(NX_CRYPTO_EC_POI
 /*                                            multiplication              */
 /*    _nx_crypto_ec_fp_projective_multiple  Calculate the projective      */
 /*                                            multiplication              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_point_fp_projective_to_affine(NX_CRYPTO_EC *curve,
@@ -1167,18 +1118,6 @@ UINT                   buffer_size;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memmove use cases, */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
-/*                                            improved performance,       */
-/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp192r1_reduce(NX_CRYPTO_EC *curve,
@@ -1304,18 +1243,6 @@ UINT                  compare_value;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memmove use cases, */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
-/*                                            improved performance,       */
-/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp224r1_reduce(NX_CRYPTO_EC *curve,
@@ -1447,18 +1374,6 @@ UINT                  compare_value;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memmove use cases, */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
-/*                                            improved performance,       */
-/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp256r1_reduce(NX_CRYPTO_EC *curve,
@@ -1612,18 +1527,6 @@ UINT                  compare_value;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memmove use cases, */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
-/*                                            improved performance,       */
-/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp384r1_reduce(NX_CRYPTO_EC *curve,
@@ -1789,15 +1692,6 @@ UINT                  compare_value;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memmove use cases, */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_secp521r1_reduce(NX_CRYPTO_EC *curve,
                                                    NX_CRYPTO_HUGE_NUMBER *value,
@@ -1903,18 +1797,6 @@ UINT                  compare_value;
 /*                                                                        */
 /*   Application                                                          */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed FIPS symbol to      */
-/*                                            self-test,                  */
-/*                                            resulting in version 6.1.7  */
-/*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_digit_reduce(NX_CRYPTO_EC *curve,
@@ -1972,14 +1854,6 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_digit_reduce(NX_CRYPTO_EC *curve,
 /*    _nx_crypto_ec_fp_affine_add           Perform addition for points of*/
 /*                                            affine                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_digit_reduce(NX_CRYPTO_EC *curve,
                                                         NX_CRYPTO_HUGE_NUMBER *value,
@@ -2027,18 +1901,6 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_digit_reduce(NX_CRYPTO_EC *curve,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed FIPS symbol to      */
-/*                                            self-test,                  */
-/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_SELF_TEST
@@ -2094,14 +1956,6 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_reduce(NX_CRYPTO_EC *curve,
 /*                                            projective and affine       */
 /*    _nx_crypto_ec_fp_projective_double    Perform doubling for points of*/
 /*                                            projective                  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_reduce(NX_CRYPTO_EC *curve,
@@ -2169,14 +2023,6 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_add_reduce(NX_CRYPTO_EC *curve,
 /*    _nx_crypto_ec_fp_projective_multiple  Calculate the projective      */
 /*                                            multiplication              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_reduce(NX_CRYPTO_EC *curve,
                                                   NX_CRYPTO_HUGE_NUMBER *left,
@@ -2241,14 +2087,6 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_reduce(NX_CRYPTO_EC *curve,
 /*                                            multiplication              */
 /*    _nx_crypto_ec_fp_projective_multiple  Calculate the projective      */
 /*                                            multiplication              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_projective_add(NX_CRYPTO_EC *curve,
@@ -2392,14 +2230,6 @@ UINT                  buffer_size;
 /*    _nx_crypto_ec_fp_projective_multiple  Calculate the projective      */
 /*                                            multiplication              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_projective_double(NX_CRYPTO_EC *curve,
                                                        NX_CRYPTO_EC_POINT *projective_point,
@@ -2529,14 +2359,6 @@ UINT                  buffer_size;
 /*    _nx_crypto_ec_fp_affine_subtract      Perform subtraction for points*/
 /*                                            of affine                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_affine_add(NX_CRYPTO_EC *curve,
                                                 NX_CRYPTO_EC_POINT *left,
@@ -2651,14 +2473,6 @@ UINT                   buffer_size;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_affine_subtract(NX_CRYPTO_EC *curve,
                                                      NX_CRYPTO_EC_POINT *left,
@@ -2710,14 +2524,6 @@ NX_CRYPTO_EC_POINT point;
 /*                                                                        */
 /*    _nx_crypto_ec_fp_projective_multiple  Calculate the projective      */
 /*                                            multiplication              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_naf_compute(NX_CRYPTO_HUGE_NUMBER *d, HN_UBASE *naf_data, UINT *naf_size)
@@ -2855,14 +2661,6 @@ UINT      i, j;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_projective_multiple(NX_CRYPTO_EC *curve,
                                                          NX_CRYPTO_EC_POINT *g,
@@ -2987,14 +2785,6 @@ UINT               bit;
 /*                                                                        */
 /*    _nx_crypto_ec_fp_projective_multiple  Calculate the projective      */
 /*                                            multiplication              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_fixed_multiple(NX_CRYPTO_EC *curve,
@@ -3135,14 +2925,6 @@ UINT                       j;
 /*    Application Code                                                    */
 /*    _nx_crypto_ec_key_pair_stream_generate                              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_key_pair_generation_extra(NX_CRYPTO_EC *curve,
                                                             NX_CRYPTO_EC_POINT *g,
@@ -3227,14 +3009,6 @@ NX_CRYPTO_HUGE_NUMBER modulus;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application                                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_key_pair_stream_generate(NX_CRYPTO_EC *curve,
@@ -3333,18 +3107,6 @@ NX_CRYPTO_EC_POINT    public_key;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed FIPS symbol to      */
-/*                                            self-test,                  */
-/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_SELF_TEST
@@ -3517,18 +3279,6 @@ UINT                       i, j;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed FIPS symbol to      */
-/*                                            self-test,                  */
-/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_SELF_TEST
@@ -3766,19 +3516,6 @@ const CHAR                *array_name[] = {"", "_2e"};
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), updated  */
-/*                                            constants, resulting        */
-/*                                            in version 6.1              */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed FIPS symbol to      */
-/*                                            self-test,                  */
-/*                                            resulting in version 6.1.7  */
-/*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_get_named_curve(NX_CRYPTO_EC **curve, UINT curve_id)
@@ -3840,14 +3577,6 @@ UINT i;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp192r1_operation(UINT op,
@@ -3929,14 +3658,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp192r1_operation(UINT op,
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp224r1_operation(UINT op,
                                                              VOID *handle,
@@ -4015,14 +3736,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp224r1_operation(UINT op,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp256r1_operation(UINT op,
@@ -4103,14 +3816,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp256r1_operation(UINT op,
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp384r1_operation(UINT op,
                                                              VOID *handle,
@@ -4190,14 +3895,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp384r1_operation(UINT op,
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
                                                              VOID *handle,
@@ -4272,15 +3969,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
-/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
-/*                                            improved performance,       */
-/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_ECC_DISABLE_KEY_VALIDATION
@@ -4563,15 +4251,6 @@ NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_x448 =
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            added x448 curve,           */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_x25519_448_multiple(NX_CRYPTO_EC* curve,
                                                       NX_CRYPTO_EC_POINT* u,
@@ -4759,12 +4438,6 @@ HN_UBASE* k_buf;
 /*                                                                        */
 /*    _nx_crypto_ec_x25519_448_multiple     Scalar multiplication         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_cswap(UINT swap, NX_CRYPTO_HUGE_NUMBER *h1, NX_CRYPTO_HUGE_NUMBER *h2)
 {
@@ -4833,12 +4506,6 @@ HN_UBASE dummy;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_x25519_operation(UINT op,
@@ -4919,12 +4586,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_x25519_operation(UINT op,
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  07-29-2022     Yuxin Zhou               Initial Version 6.1.12        */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_x448_operation(UINT op,
                                                         VOID *handle,
@@ -4996,15 +4657,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_x448_operation(UINT op,
 /*                                                                        */
 /*    _nx_crypto_ecdh_setup_x25519_448      Setup ECDH local key pair     */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            added x448 curve,           */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_key_pair_generation_x25519_448(NX_CRYPTO_EC *curve,
                                                                  NX_CRYPTO_EC_POINT *g,
@@ -5066,12 +4718,6 @@ UINT buffer_size = (curve -> nx_crypto_ec_bits + 7) >> 3;
 /*    _nx_crypto_ecdh_setup_x25519_448      Setup ECDH local key pair     */
 /*    _nx_crypto_ecdh_compute_secret_x25519_448                           */
 /*                                          Compute ECDH shared secret    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ec_extract_fixed_size_le(NX_CRYPTO_HUGE_NUMBER *number,

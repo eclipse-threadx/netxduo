@@ -429,7 +429,7 @@ UINT        address_index;
     ip_0.nx_ipv6_default_router_table[0].nx_ipv6_default_router_entry_neighbor_cache_ptr = NX_NULL;
 
 #if (NX_MAX_PHYSICAL_INTERFACES > 1)
-    /* Hit the branch 
+    /* Hit the branch
      156 [ +  + ][ +  - ]:        408 :         if ((rt_entry -> nx_ipv6_default_router_entry_flag & NX_IPV6_ROUTE_TYPE_VALID) &&
      157                 :        378 :             (rt_entry -> nx_ipv6_default_router_entry_interface_ptr == if_ptr))
      */

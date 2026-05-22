@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -36,25 +36,6 @@
 /*    component, including all data types and external references.        */
 /*    It is assumed that nx_api.h and nx_port.h have already been         */
 /*    included.                                                           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            prevented infinite loop in  */
-/*                                            name compression,           */
-/*                                            resulting in version 6.1.3  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the issue of timer,   */
-/*                                            resulting in version 6.1.11 */
-/*  10-31-2023     Bo Chen                  Modified comment(s), and      */
-/*                                            corrected the symbols check,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -89,14 +70,14 @@ extern   "C" {
 #define NX_MDNS_GET_ULONG_DATA(data)            (ULONG)((*(data) << 24) | (*(data + 1) << 16) | (*(data + 2) << 8) | (*(data + 3)))
 
 /* Disable the mDNS Server functionality.  By default mDNS server
-   function is enabled.  To remove the mDNS server function from 
+   function is enabled.  To remove the mDNS server function from
    the mDNS library, uncomment the following line.  */
 /*
-#define NX_MDNS_DISABLE_SERVER 
+#define NX_MDNS_DISABLE_SERVER
 */
 
 /* Disable the mDNS Client functionality.  By default mDNS client
-   function is enabled.  To remove the mDNS client function from 
+   function is enabled.  To remove the mDNS client function from
    the mDNS library, uncomment the following line.  */
 /*
 #define NX_MDNS_DISABLE_CLIENT
@@ -115,7 +96,7 @@ extern   "C" {
 
 /* Enable the feature for Server to generate the Negative Responses.
    By default is enabled. To remove it from the mDNS library,
-   comment the following line.  
+   comment the following line.
    Note: This will have no effect if NX_MDNS_DISABLE_SERVER is defined.  */
 #define NX_MDNS_ENABLE_SERVER_NEGATIVE_RESPONSES
 
@@ -163,10 +144,10 @@ extern   "C" {
 
 /* Define the mDNS's host name cache size. Keep four-byte alignment.   */
 /* Note: The real host name size plus conflict size (4)
-         must not exceed NX_MDNS_LABEL_MAX and NX_MDNS_HOST_NAME_MAX.  
+         must not exceed NX_MDNS_LABEL_MAX and NX_MDNS_HOST_NAME_MAX.
          such as:
          the real host name: "NETX-MDNS-HOST"
-         the conflict name: " (2)" 
+         the conflict name: " (2)"
          the final name: "NETX-MDNS-HOST (2)".  */
 #ifndef NX_MDNS_HOST_NAME_MAX
 #define NX_MDNS_HOST_NAME_MAX                   64
@@ -178,7 +159,7 @@ extern   "C" {
          must not exceed NX_MDNS_LABEL_MAX and NX_MDNS_SERVICE_NAME_MAX.
          such as:
          the real service name: "NETX-MDNS-SERVICE"
-         the conflict name: " (2)" 
+         the conflict name: " (2)"
          the final service name: "NETX-MDNS-SERVICE (2)".  */
 #ifndef NX_MDNS_SERVICE_NAME_MAX
 #define NX_MDNS_SERVICE_NAME_MAX                64
@@ -201,7 +182,7 @@ extern   "C" {
 #endif
 
 /* Define the conflict count of service name or host name.   */
-/* Note: the confilict count should be less than 8, since we just append " (x)" 
+/* Note: the confilict count should be less than 8, since we just append " (x)"
          between " (2)" and " (9)" during the conflict resolution process.  */
 #ifndef NX_MDNS_CONFLICT_COUNT
 #define NX_MDNS_CONFLICT_COUNT                  8
@@ -298,7 +279,7 @@ extern   "C" {
 
 
 /* Define the mDNS's response delay time interval for multicast query.  */
-/* The time interval, in ticks, in responding to a query to ensure an interval of at least 1s 
+/* The time interval, in ticks, in responding to a query to ensure an interval of at least 1s
    since the last time the record was multicast. The default value is NX_IP_PERIODIC_RATE ticks.  */
 #ifndef NX_MDNS_RESPONSE_INTERVAL
 #define NX_MDNS_RESPONSE_INTERVAL               NX_IP_PERIODIC_RATE
@@ -306,7 +287,7 @@ extern   "C" {
 
 
 /* Define the mDNS's response delay time interval for probe message.  */
-/* The time interval, in ticks, in responding to a probe queries to ensure an interval of 
+/* The time interval, in ticks, in responding to a probe queries to ensure an interval of
    at least 250ms since the last time the record was multicast. The default value is (250 * NX_IP_PERIODIC_RATE / 1000) ticks.  */
 #ifndef NX_MDNS_RESPONSE_PROBING_TIMER_COUNT
 #define NX_MDNS_RESPONSE_PROBING_TIMER_COUNT    (250 * NX_IP_PERIODIC_RATE / 1000)
@@ -363,10 +344,10 @@ extern   "C" {
    If a host sees queries, for which a record in its cache would be
    expected to be given as an answer in a multicast response, but no
    such answer is seen, then the host may take this as an indication
-   that the record may no longer be valid.  
+   that the record may no longer be valid.
    After seesing NX_MDNS_POOF_MIN_COUNT of these queries, and seeing
    no multicast response containing the expected answer with in
-   NX_MDNS_POOF_TIMER_COUNT, delete the RR from the cache.  
+   NX_MDNS_POOF_TIMER_COUNT, delete the RR from the cache.
    RFC6762, Section10.5, Page38.  */
 
 /* Define the Passive Observation Of Failures min count. The defaul value is 2.  */
@@ -624,7 +605,7 @@ extern   "C" {
 
 /* A RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     |                     ADDRESS                   |
     |                                               |
@@ -639,7 +620,7 @@ typedef struct NX_MDNS_RR_A_STRUCT
 
 /* NS RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     NSDNAME                   /
     /                                               /
@@ -653,7 +634,7 @@ typedef struct NX_MDNS_RR_NS_STRUCT
 
 /* MD RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     MADNAME                   /
     /                                               /
@@ -667,7 +648,7 @@ typedef struct NX_MDNS_RR_MD_STRUCT
 
 /* MF RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     MADNAME                   /
     /                                               /
@@ -681,7 +662,7 @@ typedef struct NX_MDNS_RR_MF_STRUCT
 
 /* CNMAE RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     CNAME                     /
     /                                               /
@@ -695,7 +676,7 @@ typedef struct NX_MDNS_RR_CNAME_STRUCT
 
 /* SOA RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     MNAME                     /
     /                                               /
@@ -732,7 +713,7 @@ typedef struct NX_MDNS_RR_SOA_STRUCT
 
 /* MB RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     MADNAME                   /
     /                                               /
@@ -746,7 +727,7 @@ typedef struct NX_MDNS_RR_MB_STRUCT
 
 /* MG RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     MGMNAME                   /
     /                                               /
@@ -760,7 +741,7 @@ typedef struct NX_MDNS_RR_MG_STRUCT
 
 /* MR RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     NEWNAME                   /
     /                                               /
@@ -774,7 +755,7 @@ typedef struct NX_MDNS_RR_MR_STRUCT
 
 /* NULL RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                   <anything>                  /
     /                                               /
@@ -788,7 +769,7 @@ typedef struct NX_MDNS_RR_NULL_STRUCT
 
 /* WKS RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     |                     ADDRESS                   |
     |                                               |
@@ -810,7 +791,7 @@ typedef struct NX_MDNS_RR_WKS_STRUCT
 
 /* PTR RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     PTRDNAME                  /
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
@@ -823,7 +804,7 @@ typedef struct NX_MDNS_RR_PTR_STRUCT
 
 /* HINFO RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     CPU                       /
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
@@ -839,7 +820,7 @@ typedef struct NX_MDNS_RR_HINFO_STRUCT
 
 /* MINFO RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     RMAILBX                   /
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
@@ -855,9 +836,9 @@ typedef struct NX_MDNS_RR_MINFO_STRUCT
 
 /* MX RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
-    |                     PREFERENCE                |                                         
+    |                     PREFERENCE                |
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     NEWNAME                   /
     /                                               /
@@ -873,7 +854,7 @@ typedef struct NX_MDNS_RR_MX_STRUCT
 
 /* TXT RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                     TXT-DATA                  /
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
@@ -886,7 +867,7 @@ typedef struct NX_MDNS_RR_TXT_STRUCT
 
 /* AAAA RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     |                                               |
     |                                               |
@@ -930,7 +911,7 @@ typedef struct NX_MDNS_RR_SRV_STRUCT
 
 /* NSEC RDATA format
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     /                Next Domain Name               /
     /                                               /
@@ -950,9 +931,9 @@ typedef struct NX_MDNS_RR_NSEC_STRUCT
 
 
 /* RR definitions. RFC1035.  */
-/* RR Format.  
+/* RR Format.
       0                             1
-      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5                                           
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
     |--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
     |                                               |
     /                      NAME                     /
@@ -984,7 +965,7 @@ typedef struct NX_MDNS_RR_STRUCT
 
     USHORT  nx_mdns_rr_class;                   /* RR CLASS.                                                            */
 
-    ULONG   nx_mdns_rr_ttl;                     /* The time interval that the RR may be cached before the source of 
+    ULONG   nx_mdns_rr_ttl;                     /* The time interval that the RR may be cached before the source of
                                                    the information should again be consulted.                           */
 
     USHORT  nx_mdns_rr_rdata_length;            /* The length of rdata. nx_mdns_rr_rdata                                */
@@ -1020,19 +1001,19 @@ typedef struct NX_MDNS_RR_STRUCT
     /* Define the state, owner, flag, set of the resource records. This word contains
        the following information:
 
-            bits 0      RR Owner, the owner of resource record, 
+            bits 0      RR Owner, the owner of resource record,
                         0 indicates local RR, 1 indicates peer RR.
             bits 1      RR Set, the set of resource record,
                         0 indicates shared RR, 1 indicates unique RR.
-            bits 2      RR query type, the query type of resource record, 
+            bits 2      RR query type, the query type of resource record,
                         0 indicates query the RR use One-shot method, 1 indicates query the RR use Continuous method.
             bits 3      RR additional flag, send this resource record as the additional RR.
             bits 4      RR query duplicate flag, this resource record is the duplicate quesiton.
-            bits 5      RR updating flag, this resource record need to be maintenance.     
+            bits 5      RR updating flag, this resource record need to be maintenance.
             bits 6      RR delete flag, this resource record need to be deleted.
             bits 7      RR answer flag, this resource record has been added in answer section.
-            bits 8      RR known answer flag, send this resource record as the known answer.    
-            bits 9      RR authority answer flag, send this resource record as the authority answer.  
+            bits 8      RR known answer flag, send this resource record as the known answer.
+            bits 9      RR authority answer flag, send this resource record as the authority answer.
     */
     
     /* Union that holds resource record data. */
@@ -1059,11 +1040,11 @@ typedef struct NX_MDNS_RR_STRUCT
 
 /* Buffer usage. */
 /*
- 
+
     |-----------+-----------+-----------+-----------+-----------+------------+-----------+------------+------------|
     |   HEAD    |NX_MDNS_RR |NX_MDNS_RR | ..........|  STRING   | CNT | LEN  |  STRING   | CNT | LEN  |    TAIL    |
     |-----------+-----------+-----------+-----------+-----------+------------+-----------+------------+------------|
-    
+
     HEAD: First unused memory at the front of cache. The size is 4 bytes.
     NX_MDNS_RR: The Resource Record struct, the size is sizeof(NX_MDNS_RR).
     TAIL: It points to the last used memory at the back of cache. Its size is 4 bytes.
@@ -1136,7 +1117,7 @@ typedef struct NX_MDNS_STRUCT
     UINT                    nx_mdns_ipv6_address_index[NX_MAX_PHYSICAL_INTERFACES]; /* IPv6 link local address index.   */
 #endif /* NX_MDNS_ENABLE_IPV6  */
 
-    /* Define the UDP receive suspension list head associated with a count of 
+    /* Define the UDP receive suspension list head associated with a count of
        how many threads are suspended attempting to receive from the same TCP port.  */
     TX_THREAD*              nx_mdns_rr_receive_suspension_list;                 /* The suspended thread.    */
 
@@ -1197,9 +1178,9 @@ typedef struct NX_MDNS_STRUCT
 
 /* Application caller is present, perform API mapping.  */
 
-/* Determine if error checking is desired. If so, map mDNS API functions 
+/* Determine if error checking is desired. If so, map mDNS API functions
    to the appropriate error checking front-ends.  Otherwise, map API
-   functions to the core functions that actually perform the work. 
+   functions to the core functions that actually perform the work.
    Note: error checking is enabled by default.  */
 
 #ifdef NX_DISABLE_ERROR_CHECKING

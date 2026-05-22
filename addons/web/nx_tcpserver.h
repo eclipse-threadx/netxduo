@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -33,21 +33,6 @@
 /*                                                                        */
 /*    This file defines the NetX TCP Server module component,             */
 /*    including all data types and external references.                   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed packet leak issue,    */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            deprecated unused macros,   */
-/*                                            resulting in version 6.1.9  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            supported ECC configuration,*/
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 

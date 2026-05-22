@@ -3,8 +3,8 @@
 /* Procedure
 1. Connection.
 2. Client calls disconnect and sends a FIN packet..
-3. Server replies an ACK packet.  
-4. Client receives the ACK packet and calls send command.  
+3. Server replies an ACK packet.
+4. Client receives the ACK packet and calls send command.
 5. Check the state of client is FIN_WAIT_2 and the status is NX_NOT_CONNECTED.  */
 
 #include   "tx_api.h"

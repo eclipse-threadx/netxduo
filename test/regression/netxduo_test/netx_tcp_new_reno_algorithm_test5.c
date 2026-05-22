@@ -1,7 +1,7 @@
 /* This NetX test concentrates on fast retransmit.  */
     
 /* Procedure:
-1. Client connect with Server. The sequence number of client is modified to the edge of 32 bit number. 
+1. Client connect with Server. The sequence number of client is modified to the edge of 32 bit number.
 2. Client send five segments to Server.
 3. Drop the first segment in the driver.
 4. Server send three duplicate ACKs with acknowledgment number as the sequence number of first segment.

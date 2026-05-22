@@ -1,4 +1,4 @@
-/* 6.22.01 If RECEIVE call arrives in ESTABLISHED or FINWAIT-1 state, 
+/* 6.22.01 If RECEIVE call arrives in ESTABLISHED or FINWAIT-1 state,
    TCP MUST reassemble queued incoming segments and return to the application.  */
 
 /* Procedure

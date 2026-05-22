@@ -199,7 +199,7 @@ NX_MDNS_SERVICE service;
         error_counter++;
 
     /* Sleep one second and check whether RR is stored. */
-    /* Multicast DNS implementations MUST silently ignore any 
+    /* Multicast DNS implementations MUST silently ignore any
        Multicast DNS responses they receive where the source UDP port is not 5353. */
     tx_thread_sleep(100);
 

@@ -23,7 +23,7 @@ static ULONG                   bsd_thread_area[DEMO_STACK_SIZE / sizeof(ULONG)];
 static ULONG                   error_counter;
 
 
-/* The IPv6 packet assumes 
+/* The IPv6 packet assumes
    src address fe80::f584:1fdb:425:a239
    dst address ff02::1:ffd6:5775
 */
@@ -40,7 +40,7 @@ char ipv6_packet[] = {
 0x00, 0x1e, 0x8c, 0xd5, 0xd3, 0x1f };
 
 
-/* In this test case the source IP address must be 
+/* In this test case the source IP address must be
 192.168.1.185, dest 157.56.52.38
 Source MAC 18:a9:05:cc:8f:16
 dst MAC 00:24:a5:b5:2c:58

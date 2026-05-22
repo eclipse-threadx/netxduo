@@ -1,4 +1,4 @@
-/* This is a small demo of the NetX Secure TLS API running on a 
+/* This is a small demo of the NetX Secure TLS API running on a
    high-performance NetX TCP/IP stack.  */
 /* This demo works for IPv4 only */
 
@@ -354,8 +354,8 @@ static UCHAR remote_issuer_buffer[2000];
 /* Pointer to the TLS ciphersuite table that is included in the platform-specific
    cryptography subdirectory. The table maps the cryptographic routines for the
    platform to function pointers usable by the TLS library.
-   
-   For TLS Web servers, define NX_SECURE_ENABLE_AEAD_CIPHER in NetX Crypto to 
+
+   For TLS Web servers, define NX_SECURE_ENABLE_AEAD_CIPHER in NetX Crypto to
    allow web browsers to connect using AES_128_GCM cipher suites.
 */
 extern const NX_SECURE_TLS_CRYPTO nx_crypto_tls_ciphers_ecc;

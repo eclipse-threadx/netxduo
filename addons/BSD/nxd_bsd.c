@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -260,20 +260,6 @@ static struct NX_BSD_SERVICE_LIST  *_nx_bsd_serv_list_ptr;
 /*                                                                        */
 /*    Start-up code                                                       */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
-/*                                            added nx_link layer,        */
-/*                                            resulting in version 6.4.0  */
-/*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_initialize(NX_IP *default_ip, NX_PACKET_POOL *default_pool, CHAR *bsd_thread_stack_area,
                     ULONG bsd_thread_stack_size, UINT bsd_thread_priority)
@@ -509,14 +495,6 @@ ULONG       info;
 /*                                                                        */
 /*    ThreadX                                                             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID nx_bsd_timeout_process()
 {
@@ -669,14 +647,6 @@ NX_BSD_SOCKET  *bsd_socket_ptr;
 /*                                                                        */
 /*    ThreadX                                                             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NX_BSD_TIMEOUT_PROCESS_IN_TIMER
@@ -738,17 +708,6 @@ VOID nx_bsd_thread_entry(ULONG info)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_socket(INT protocolFamily, INT type, INT protocol)
@@ -1292,17 +1251,6 @@ UINT            index;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_connect(INT sockID, struct nx_bsd_sockaddr *remoteAddress, INT addressLength)
 {
@@ -1836,17 +1784,6 @@ ULONG               actual_status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_bind(INT sockID, const struct nx_bsd_sockaddr *localAddress, INT addressLength)
@@ -2439,17 +2376,6 @@ INT                 address_conflict;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_listen(INT sockID, INT backlog)
 {
@@ -2694,18 +2620,6 @@ INT                 ret;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_accept(INT sockID, struct nx_bsd_sockaddr *ClientAddress, INT *addressLength)
@@ -3175,17 +3089,6 @@ struct nx_bsd_sockaddr_in6
 /*    send                                                                */
 /*    sendto                                                              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            supported random IP id,     */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 static INT nx_bsd_send_internal(INT sockID, const CHAR *msg, INT msgLength, INT flags,
                                 NXD_ADDRESS *dst_address, USHORT dst_port, UINT local_interface_index)
@@ -3628,17 +3531,6 @@ ULONG               data_sent = (ULONG)msgLength;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_send(INT sockID, const CHAR *msg, INT msgLength, INT flags)
 {
@@ -3788,17 +3680,6 @@ NX_BSD_SOCKET *bsd_socket_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_sendto(INT sockID, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr *destAddr, INT destAddrLen)
@@ -4036,18 +3917,6 @@ USHORT               peer_port = 0;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags)
 {
@@ -4104,21 +3973,6 @@ struct nx_bsd_iovec iov;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
-/*                                            added nx_bsd_recv_internal, */
-/*                                            resulting in version 6.4.0  */
-/*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_recvfrom(INT sockID, CHAR *rcvBuffer, INT bufferLength, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen)
 {
@@ -4166,12 +4020,6 @@ struct nx_bsd_iovec iov;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yanwu Cai                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 INT nx_bsd_recvmsg(INT sockID, struct nx_bsd_msghdr *msg, INT flags)
@@ -4248,12 +4096,6 @@ INT fromAddrLen = 0;
 /*    recv                                                                */
 /*    recvmsg                                                             */
 /*    recvfrom                                                            */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yanwu Cai                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static INT nx_bsd_recv_internal(INT sockID, struct nx_bsd_iovec *iov, size_t iovlen, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen)
@@ -4935,17 +4777,6 @@ struct nx_bsd_sockaddr_in6
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_soc_close(INT sockID)
 {
@@ -5396,17 +5227,6 @@ UINT                 index;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 INT nx_bsd_fcntl(INT sockID, UINT flag_type, UINT f_options)
 {
@@ -5511,24 +5331,6 @@ NX_BSD_SOCKET   *bsd_socket_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  03-08-2023     Wenhui Xie               Modified comment(s), corrected*/
-/*                                            the result of FIONREAD,     */
-/*                                            resulting in version 6.2.1  */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
-/*                                            added SIOCGIFINDEX and      */
-/*                                            SIOCGIFHWADDR commands,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_ioctl(INT sockID,  INT command, INT *result)
@@ -5771,17 +5573,6 @@ NX_INTERFACE        *nx_interface;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 CHAR *nx_bsd_inet_ntoa(struct nx_bsd_in_addr address_to_convert)
 {
@@ -5837,14 +5628,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  bsd_number_convert(UINT number, CHAR *string, ULONG buffer_len, UINT base)
@@ -5941,17 +5724,6 @@ UINT    size;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT nx_bsd_inet_aton(const CHAR *address_buffer_ptr, struct nx_bsd_in_addr *addr)
@@ -6223,17 +5995,6 @@ UINT  dot_flag;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 nx_bsd_in_addr_t nx_bsd_inet_addr(const CHAR *buffer)
 {
@@ -6289,17 +6050,6 @@ UINT    status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_getsockopt(INT sockID, INT option_level, INT option_name, VOID *option_value, INT *option_length)
@@ -6626,21 +6376,6 @@ ULONG                                   ticks;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
-/*                                            added PACKET_ADD_MEMBERSHIP */
-/*                                            and PACKET_DROP_MEMBERSHIP, */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_setsockopt(INT sockID, INT option_level, INT option_name, const VOID *option_value, INT option_length)
@@ -7315,18 +7050,6 @@ ULONG           physical_addr_lsw;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_getsockname(INT sockID, struct nx_bsd_sockaddr *localAddress, INT *addressLength)
 {
@@ -7548,17 +7271,6 @@ NX_BSD_SOCKET       *bsd_socket_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_getpeername(INT sockID, struct nx_bsd_sockaddr *remoteAddress, INT *addressLength)
@@ -7883,17 +7595,6 @@ struct nx_bsd_sockaddr_in6 *soc6_struct_ptr = NX_NULL;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_select(INT nfds, nx_bsd_fd_set *readfds, nx_bsd_fd_set *writefds, nx_bsd_fd_set *exceptfds, struct nx_bsd_timeval *timeout)
@@ -8226,19 +7927,29 @@ INT                     ret;
     suspend_request.nx_bsd_socket_suspend_actual_flags =  0;
 
     if(readfds)
-        suspend_request.nx_bsd_socket_suspend_read_fd_set =  *readfds;
+        suspend_request.nx_bsd_socket_suspend_read_request_fd_set =  *readfds;
     else
-        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_read_fd_set);
+        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_read_request_fd_set);
 
     if(writefds)
-        suspend_request.nx_bsd_socket_suspend_write_fd_set = *writefds;
+        suspend_request.nx_bsd_socket_suspend_write_request_fd_set = *writefds;
     else
-        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_write_fd_set);
+        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_write_request_fd_set);
 
     if(exceptfds)
-        suspend_request.nx_bsd_socket_suspend_exception_fd_set = *exceptfds;
+        suspend_request.nx_bsd_socket_suspend_exception_request_fd_set = *exceptfds;
     else
-        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_exception_fd_set);
+        NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_exception_request_fd_set);
+
+    /* Clear the actual fd sets, which will be set in nx_bsd_select_wakeup().
+       Separating request filters from actual events prevents the spurious wakeup
+       issue where clearing one event set would leave others stale.
+       Note: All actual sets must be zeroed here as their fd_count contributes to
+       the return value of select(). The suspend_request is on the stack, so
+       users with high NX_BSD_MAX_SOCKETS should monitor stack usage. */
+    NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_read_fd_set);
+    NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_write_fd_set);
+    NX_BSD_FD_ZERO(&suspend_request.nx_bsd_socket_suspend_exception_fd_set);
 
     /* Temporarily disable preemption.  */
     tx_thread_preemption_change(current_thread_ptr, 0, &original_threshold);
@@ -8343,14 +8054,6 @@ INT                     ret;
 /*                                                                        */
 /*    NetX                                                                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  nx_bsd_tcp_receive_notify(NX_TCP_SOCKET *socket_ptr)
 {
@@ -8420,14 +8123,6 @@ UINT                    bsd_socket_index;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
@@ -8540,14 +8235,6 @@ UINT                    master_socket_index;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID  nx_bsd_tcp_socket_disconnect_notify(NX_TCP_SOCKET *socket_ptr)
@@ -8701,14 +8388,6 @@ UINT                    status;
 /*                                                                        */
 /*    NetX                                                                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  nx_bsd_udp_receive_notify(NX_UDP_SOCKET *socket_ptr)
 {
@@ -8769,17 +8448,6 @@ NX_UDP_SOCKET           *udp_socket_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  NX_BSD_FD_SET(INT fd, nx_bsd_fd_set *fdset)
@@ -8849,17 +8517,6 @@ UINT    index;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  NX_BSD_FD_CLR(INT fd, nx_bsd_fd_set *fdset)
@@ -8932,14 +8589,6 @@ UINT    index;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 INT  NX_BSD_FD_ISSET(INT fd, nx_bsd_fd_set *fdset)
 {
@@ -9009,17 +8658,6 @@ UINT    index;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 VOID  NX_BSD_FD_ZERO(nx_bsd_fd_set *fdset)
 {
@@ -9077,18 +8715,6 @@ INT     i;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Duo                                                            */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed NULL pointer access   */
-/*                                            for raw socket,             */
-/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 static UINT  nx_bsd_raw_packet_filter(NX_IP *ip_ptr, ULONG protocol, NX_PACKET *packet_ptr)
@@ -9233,14 +8859,6 @@ NX_BSD_SOCKET * bsd_socket_ptr;
 /*                                                                        */
 /*    NetX                                                                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  nx_bsd_raw_receive_notify(NX_IP *ip_ptr, UINT bsd_socket_index)
 {
@@ -9289,17 +8907,6 @@ VOID  nx_bsd_raw_receive_notify(NX_IP *ip_ptr, UINT bsd_socket_index)
 /*    select                              Checks for receive packets      */
 /*    recv                                Checks the specified socket for */
 /*                                           received packets             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_bsd_raw_packet_receive(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET **packet_ptr)
@@ -9394,14 +9001,6 @@ UINT nx_bsd_raw_packet_receive(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET **packet
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  nx_bsd_raw_packet_info_extract(NX_PACKET *packet_ptr, NXD_ADDRESS *address, UINT *interface_index)
@@ -9514,14 +9113,6 @@ NX_INTERFACE    *if_ptr = NX_NULL;
 /*                                                                        */
 /*    NetX                                                                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  nx_bsd_socket_timed_wait_callback(NX_TCP_SOCKET *tcp_socket_ptr)
 {
@@ -9571,15 +9162,6 @@ VOID  nx_bsd_socket_timed_wait_callback(NX_TCP_SOCKET *tcp_socket_ptr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_BSD_INCLUDE_DATA_EXTRACT_OFFSET
@@ -9736,14 +9318,6 @@ NX_PACKET   *working_packet_ptr;
 /*                                                                        */
 /*    ThreadX                                                             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 #ifdef NX_BSD_TIMEOUT_PROCESS_IN_TIMER
 VOID  nx_bsd_timer_entry(ULONG info)
@@ -9786,14 +9360,6 @@ VOID  nx_bsd_timer_entry(ULONG info)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    ThreadX                                                             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_bsd_socket_set_inherited_settings(UINT master_sock_id, UINT secondary_sock_id)
@@ -9862,14 +9428,6 @@ UINT nx_bsd_socket_set_inherited_settings(UINT master_sock_id, UINT secondary_so
 /*                                                                        */
 /*    ThreadX                                                             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT nx_bsd_isspace(UCHAR c)
 {
@@ -9922,14 +9480,6 @@ static UINT nx_bsd_isspace(UCHAR c)
 /*                                                                        */
 /*    ThreadX                                                             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT nx_bsd_islower(UCHAR c)
 {
@@ -9977,14 +9527,6 @@ static UINT nx_bsd_islower(UCHAR c)
 /*                                                                        */
 /*    ThreadX                                                             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT nx_bsd_isdigit(UCHAR c)
 {
@@ -10031,14 +9573,6 @@ static UINT nx_bsd_isdigit(UCHAR c)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    ThreadX                                                             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT nx_bsd_isxdigit(UCHAR c)
@@ -10097,17 +9631,6 @@ static UINT nx_bsd_isxdigit(UCHAR c)
 /*                                                                        */
 /*    ThreadX                                                             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 VOID nx_bsd_set_errno(INT tx_errno)
 {
@@ -10157,14 +9680,6 @@ TX_THREAD       *current_thread_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    ThreadX                                                             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 INT _nxd_get_errno()
@@ -10227,35 +9742,21 @@ TX_THREAD       *current_thread_ptr;
 /*    nx_bsd_raw_receive_notify                                           */
 /*    nx_bsd_udp_packet_received                                          */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 static VOID nx_bsd_select_wakeup(UINT sock_id, UINT fd_sets)
 {
 TX_INTERRUPT_SAVE_AREA
-nx_bsd_fd_set           local_fd;
 TX_THREAD               *suspended_thread;
 ULONG                   suspended_count;
 ULONG                   original_suspended_count;
 NX_BSD_SOCKET_SUSPEND   *suspend_info;
+INT                     bsd_sock_id;
 
 
     /* At this point the thread should NOT own the IP mutex, and it must own the
        BSD mutex. */
 
-
-    NX_BSD_FD_ZERO(&local_fd);
-    NX_BSD_FD_SET((INT)sock_id + NX_BSD_SOCKFD_START, &local_fd);
-
+    bsd_sock_id = (INT)sock_id + NX_BSD_SOCKFD_START;
     /* Disable interrupts temporarily.  */
     TX_DISABLE
 
@@ -10280,11 +9781,19 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
             suspend_info =  (NX_BSD_SOCKET_SUSPEND *) suspended_thread -> tx_thread_additional_suspend_info;
 
             /* Now determine if this thread was waiting for this socket.  */
-            if ((fd_sets & FDSET_READ) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set)))
+            if ((fd_sets & FDSET_READ) && (NX_BSD_FD_ISSET(bsd_sock_id, &suspend_info -> nx_bsd_socket_suspend_read_request_fd_set)))
             {
+                NX_BSD_FD_SET(bsd_sock_id, &suspend_info -> nx_bsd_socket_suspend_read_fd_set);
 
-                /* Copy the local fd over so that the return shows the receive socket.  */
-                suspend_info -> nx_bsd_socket_suspend_read_fd_set = local_fd;
+                /* Adjust the suspension type so that the event flag set below will wakeup the thread 
+                   selecting.  */
+                suspended_thread -> tx_thread_suspend_info =  NX_BSD_RECEIVE_EVENT;
+            }
+
+            /* Now determine if this thread was waiting for this socket.  */
+            if ((fd_sets & FDSET_WRITE) && (NX_BSD_FD_ISSET(bsd_sock_id, &suspend_info -> nx_bsd_socket_suspend_write_request_fd_set)))
+            {
+                NX_BSD_FD_SET(bsd_sock_id, &suspend_info -> nx_bsd_socket_suspend_write_fd_set);
 
                 /* Adjust the suspension type so that the event flag set below will wakeup the thread
                    selecting.  */
@@ -10292,52 +9801,13 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
             }
 
             /* Now determine if this thread was waiting for this socket.  */
-            if ((fd_sets & FDSET_WRITE) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set)))
+            if ((fd_sets & FDSET_EXCEPTION) && (NX_BSD_FD_ISSET(bsd_sock_id, &suspend_info -> nx_bsd_socket_suspend_exception_request_fd_set)))
             {
-
-                /* Copy the local fd over so that the return shows the receive socket.  */
-                suspend_info -> nx_bsd_socket_suspend_write_fd_set = local_fd;
+                NX_BSD_FD_SET(bsd_sock_id, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set);
 
                 /* Adjust the suspension type so that the event flag set below will wakeup the thread
                    selecting.  */
                 suspended_thread -> tx_thread_suspend_info =  NX_BSD_RECEIVE_EVENT;
-            }
-
-            /* Now determine if this thread was waiting for this socket.  */
-            if ((fd_sets & FDSET_EXCEPTION) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set)))
-            {
-
-                /* Copy the local fd over so that the return shows the receive socket.  */
-                suspend_info -> nx_bsd_socket_suspend_exception_fd_set = local_fd;
-
-                /* Adjust the suspension type so that the event flag set below will wakeup the thread
-                   selecting.  */
-                suspended_thread -> tx_thread_suspend_info =  NX_BSD_RECEIVE_EVENT;
-            }
-
-            /* Clear FD that is not set. */
-            if (suspended_thread -> tx_thread_suspend_info == NX_BSD_RECEIVE_EVENT)
-            {
-                if (!(fd_sets & FDSET_READ) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set)))
-                {
-
-                    /* Clear read FD. */
-                    NX_BSD_FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_read_fd_set);
-                }
-
-                if (!(fd_sets & FDSET_WRITE) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set)))
-                {
-
-                    /* Clear write FD. */
-                    NX_BSD_FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_write_fd_set);
-                }
-
-                if (!(fd_sets & FDSET_EXCEPTION) && (NX_BSD_FD_ISSET((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set)))
-                {
-
-                    /* Clear exception FD. */
-                    NX_BSD_FD_CLR((INT)sock_id + NX_BSD_SOCKFD_START, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set);
-                }
             }
         }
 
@@ -10407,17 +9877,6 @@ NX_BSD_SOCKET_SUSPEND   *suspend_info;
 /*                                                                        */
 /*    connect                                                             */
 /*    bind                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static VOID nx_bsd_set_error_code(NX_BSD_SOCKET *bsd_socket_ptr, UINT status_code)
@@ -10526,14 +9985,6 @@ static VOID nx_bsd_set_error_code(NX_BSD_SOCKET *bsd_socket_ptr, UINT status_cod
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_bsd_udp_receive_notify                                           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID nx_bsd_udp_packet_received(INT sockID, NX_PACKET *packet_ptr)
@@ -10751,14 +10202,6 @@ NX_INTERFACE   *interface_ptr;
 /*                                                                        */
 /*    NetX Duo                                                            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  nx_bsd_tcp_syn_received_notify(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr)
 {
@@ -10901,17 +10344,6 @@ NX_INTERFACE   *interface_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Duo                                                            */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static INT nx_bsd_tcp_create_listen_socket(INT master_sockid, INT backlog)
@@ -11140,14 +10572,6 @@ INT                 secondary_sockID = NX_BSD_MAX_SOCKETS;
 /*                                                                        */
 /*    NetX Duo                                                            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID nx_bsd_tcp_pending_connection(UINT local_port, NX_TCP_SOCKET *socket_ptr)
 {
@@ -11243,14 +10667,6 @@ UINT                         ret;
 /*                                                                        */
 /*    nx_bsd_send_internal                                                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static INT   nx_bsd_find_interface_by_source_addr(UINT addr_family, ULONG* ip_addr)
 {
@@ -11343,14 +10759,6 @@ ULONG ipv6_addr[4];
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_bsd_send_internal                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID  _nxd_bsd_ipv4_packet_send(NX_PACKET *packet_ptr)
@@ -12241,14 +11649,6 @@ ULONG                   destination_ip;
 /*                                                                        */
 /*    nx_bsd_send_internal                                                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nxd_bsd_ipv6_packet_send(NX_PACKET *packet_ptr, ULONG *src_addr, ULONG *dest_addr)
 {
@@ -12753,14 +12153,6 @@ NX_IP          *ip_ptr;
 /*                                                                        */
 /*    NetX Duo BSD Layer Source Code                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nxd_bsd_swap_ipv6_extension_headers(NX_PACKET *packet_ptr, UCHAR header_type)
 {
@@ -12858,17 +12250,6 @@ NX_IPV6_HEADER_OPTION           *option;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static INT nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
@@ -13067,14 +12448,6 @@ NX_PACKET          *packet_ptr = NX_NULL;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_bsd_pppoe_packet_received(NX_PACKET *packet_ptr, UINT frame_type, UINT interface_id)
 {
@@ -13181,17 +12554,6 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            added nx_link layer,        */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 static INT _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
@@ -13365,14 +12727,6 @@ NX_PACKET          *packet_ptr = NX_NULL;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_bsd_hardware_packet_received(NX_PACKET *packet_ptr, UCHAR *consumed)
 {
@@ -13481,12 +12835,6 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yanwu Cai                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_bsd_ethernet_receive_notify(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
@@ -13605,17 +12953,6 @@ NX_BSD_SOCKET *bsd_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_inet_pton(INT af, const CHAR *src, VOID *dst)
@@ -13876,17 +13213,6 @@ struct  nx_bsd_in_addr ipv4_addr;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 const CHAR *nx_bsd_inet_ntop(INT af, const VOID *src, CHAR *dst, nx_bsd_socklen_t size)
 {
@@ -14097,14 +13423,6 @@ UINT   rt_size;
 /*                                                                        */
 /*    NetX Duo BSD Layer Source Code                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 
 static INT inet_ntoa_internal(const VOID *src, CHAR *dst, ULONG dst_size)
@@ -14232,23 +13550,6 @@ UINT index = 0;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            fixed compiler errors,      */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_getaddrinfo(const CHAR *node, const CHAR *service, const struct nx_bsd_addrinfo *hints, struct nx_bsd_addrinfo **res)
@@ -14825,17 +14126,6 @@ static struct nx_bsd_addrinfo default_hints = {0, AF_UNSPEC, 0, 0, 0, NX_NULL, N
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 VOID nx_bsd_freeaddrinfo(struct nx_bsd_addrinfo *res)
 {
@@ -14911,14 +14201,6 @@ CHAR *ai_canonname_ptr = NX_NULL;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static INT bsd_string_to_number(const CHAR *string, UINT *number)
 {
@@ -14980,18 +14262,6 @@ static INT bsd_string_to_number(const CHAR *string, UINT *number)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            used new API/structs naming,*/
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_getnameinfo(const struct nx_bsd_sockaddr *sa, nx_bsd_socklen_t salen, char *host, size_t hostlen, char *serv, size_t servlen, int flags)
@@ -15212,14 +14482,6 @@ const CHAR  *rt_ptr;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID nx_bsd_set_service_list(struct NX_BSD_SERVICE_LIST *serv_list_ptr, ULONG serv_list_len)
 {
@@ -15257,14 +14519,6 @@ VOID nx_bsd_set_service_list(struct NX_BSD_SERVICE_LIST *serv_list_ptr, ULONG se
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Duo BSD Layer Source Code                                      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static ULONG _nx_bsd_string_length(CHAR * string)
@@ -15313,14 +14567,6 @@ int length = 0;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    None                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID  _nx_bsd_fast_periodic_timer_entry(ULONG id)
@@ -15389,12 +14635,6 @@ static VOID  _nx_bsd_fast_periodic_timer_entry(ULONG id)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Chaoqiong Xiao           Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 INT  nx_bsd_poll(struct nx_bsd_pollfd *fds, ULONG nfds, INT timeout)

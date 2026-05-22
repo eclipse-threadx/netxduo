@@ -184,7 +184,7 @@ ULONG        seq1, seq2;
         error_counter++;
 
     /* Fill in the packet with data.      */
-    /* Packet 1 contains bytes   0 - 37 
+    /* Packet 1 contains bytes   0 - 37
        Packet 2 contains bytes  38 - 75
        Packet 3 contains bytes  76 - 113
        Packet 4 contains bytes  76 - 85

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -33,16 +33,6 @@
 /*                                                                        */
 /*    This file defines the NetX Precision Time Protocol (PTP)            */
 /*    Client component, including all data types and external references. */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  12-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            supported gPTP profile,     */
-/*                                            supported master clock,     */
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -235,7 +225,7 @@ extern   "C" {
 /* Define the default clock class for local PTP clock running as master mode. */
 #define NX_PTP_CLIENT_MASTER_CLOCK_CLASS         248
 
-/* Define the default accuracy for local PTP clock running as master mode. 
+/* Define the default accuracy for local PTP clock running as master mode.
    The default value 0x22 means the time is accurate to within 250ns.  */
 #define NX_PTP_CLIENT_MASTER_ACCURACY            0x22
 

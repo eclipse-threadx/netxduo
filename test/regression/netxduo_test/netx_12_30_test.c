@@ -1,5 +1,5 @@
-/* 12.30 TCP MAY send MSS option in every SYN segment even when its receive 
-   MSS value is same as the default 1220 When using TCP over IPv6, the MSS 
+/* 12.30 TCP MAY send MSS option in every SYN segment even when its receive
+   MSS value is same as the default 1220 When using TCP over IPv6, the MSS
    must be computed as the maximum packet size minus 60 octets.             */
 
 /*  Update

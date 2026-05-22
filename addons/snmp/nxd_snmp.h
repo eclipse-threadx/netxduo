@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -38,18 +38,6 @@
 /*    It is assumed that nx_api.h and nx_port.h have already been         */ 
 /*    included.                                                           */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Bo Chen                  Modified comment(s), and      */
-/*                                            combined the functions of   */
-/*                                            processing snmp v1 and v2,  */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NXD_SNMP_H
@@ -75,24 +63,24 @@ extern   "C" {
 #endif
 
 
-/* Disable SNMP V1 message processing. 
+/* Disable SNMP V1 message processing.
 #define NX_SNMP_DISABLE_V1
 */
 
-/* Disable SNMP V2 message processing.   
+/* Disable SNMP V2 message processing.
 #define NX_SNMP_DISABLE_V2
 */
 
-/* Disable SNMP V3 message processing.   
+/* Disable SNMP V3 message processing.
 #define NX_SNMP_DISABLE_V3
 */
 
-/* Default support of SNMP V2 to only V2C.      
+/* Default support of SNMP V2 to only V2C.
 #define NX_SNMP_V2C_ONLY
 */
 
 /* By default support for security (authentication and encryption) is enabled. To disable
-   it define this option.    
+   it define this option.
 #define NX_SNMP_NO_SECURITY
 */
 
@@ -375,7 +363,7 @@ typedef struct NX_SNMP_OBJECT_DATA_STRUCT
 } NX_SNMP_OBJECT_DATA;
 
 
-/* Define the SNMP Agent object list type that defines application objects to be included in the 
+/* Define the SNMP Agent object list type that defines application objects to be included in the
    trap calls.  */
 
 typedef struct NX_SNMP_TRAP_OBJECT_STRUCT
@@ -488,9 +476,9 @@ typedef struct NX_SNMP_AGENT_STRUCT
 
 /* Application caller is present, perform API mapping.  */
 
-/* Determine if error checking is desired.  If so, map API functions 
+/* Determine if error checking is desired.  If so, map API functions
    to the appropriate error checking front-ends.  Otherwise, map API
-   functions to the core functions that actually perform the work. 
+   functions to the core functions that actually perform the work.
    Note: error checking is enabled by default.  */
 
 #ifdef NX_DISABLE_ERROR_CHECKING

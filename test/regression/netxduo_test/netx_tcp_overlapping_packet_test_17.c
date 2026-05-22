@@ -182,7 +182,7 @@ ULONG          seq1;
     }
 
     /* Fill in the packet with data.      */
-    /* The full message to send is: 0x0100000002000000......00010000 
+    /* The full message to send is: 0x0100000002000000......00010000
                     Packet 1 sends: 0x0100000002000000......40000000
                     Packet 2 sends: 0xC1000000C2000000......00010000
                     Packet 3 sends: 0x0100000002000000......C0000000 */

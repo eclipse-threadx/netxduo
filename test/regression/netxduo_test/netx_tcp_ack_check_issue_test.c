@@ -1,5 +1,5 @@
 /* This NetX test concentrates a bug in nx_tcp_socket_state_ack_check.c.  */
-/* When the packet is in TCP transmit queue but not sent by driver yet, 
+/* When the packet is in TCP transmit queue but not sent by driver yet,
  * an incoming ACK packet will trigger an ACK response. That is a bug. */
 
 #include   "tx_api.h"

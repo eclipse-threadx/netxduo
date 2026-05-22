@@ -1,4 +1,4 @@
-/* This case tests digest authentication. 
+/* This case tests digest authentication.
  HA1 = MD5("name:NetX Duo HTTP demo:password")
      = 01bb2595c9221423951ee86f3573b465
  HA2 = MD5("GET:/index.htm")
@@ -478,7 +478,7 @@ static UINT  authentication_check(NX_HTTP_SERVER *server_ptr, UINT request_type,
                                   CHAR *resource, CHAR **name, CHAR **password, CHAR **realm)
 {
 
-    /* Just use a simple name, password, and realm for all 
+    /* Just use a simple name, password, and realm for all
        requests and resources.  */
     *name =     "name";
     *password = "password";
@@ -492,7 +492,7 @@ static UINT  authentication_check_extended(NX_HTTP_SERVER *server_ptr, UINT requ
                                            CHAR **password, UINT *password_length, CHAR **realm, UINT *realm_length)
 {
 
-    /* Just use a simple name, password, and realm for all 
+    /* Just use a simple name, password, and realm for all
        requests and resources.  */
     *name =     "name";
     *password = "password";

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -119,13 +119,13 @@ extern   "C" {
 #define NX_AZURE_IOT_ADU_AGENT_HTTP_CONNECT_DONE_EVENT                  ((ULONG)0x00000010)
 #define NX_AZURE_IOT_ADU_AGENT_HTTP_RECEIVE_EVENT                       ((ULONG)0x00000020)
 
-/* Define the agent state values. Interaction between agent and server.  
+/* Define the agent state values. Interaction between agent and server.
    https://docs.microsoft.com/en-us/azure/iot-hub-device-update/device-update-plug-and-play#state  */
 #define NX_AZURE_IOT_ADU_AGENT_STATE_IDLE                               0
 #define NX_AZURE_IOT_ADU_AGENT_STATE_DEPLOYMENT_IN_PROGRESS             6
 #define NX_AZURE_IOT_ADU_AGENT_STATE_FAILED                             255
 
-/* Define the agent action values. Interaction between agent and server.  
+/* Define the agent action values. Interaction between agent and server.
    https://docs.microsoft.com/en-us/azure/iot-hub-device-update/device-update-plug-and-play#action  */
 #define NX_AZURE_IOT_ADU_AGENT_ACTION_APPLY_DEPLOYMENT                  3
 #define NX_AZURE_IOT_ADU_AGENT_ACTION_CANCEL                            255

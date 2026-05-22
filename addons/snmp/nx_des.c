@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -27,7 +27,7 @@
 /* Define macros for the DES transform function.  */
 
 
-/* Define the eight S-box data structures used in the permutation. Keep them static, since there is no 
+/* Define the eight S-box data structures used in the permutation. Keep them static, since there is no
    reason to have these symbols referenced outside this file. */
 
 static ULONG sb1[64] =
@@ -191,14 +191,6 @@ static ULONG right_half_bit_swap[16] =
 /*                                                                        */ 
 /*    NetX Applications                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_des_key_set(NX_DES *context, UCHAR key[8])
 {
@@ -342,14 +334,6 @@ UINT    round;
 /*                                                                        */ 
 /*    NetX Applications                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_des_encrypt(NX_DES *context, UCHAR source[8], UCHAR destination[8])
 {
@@ -400,14 +384,6 @@ UINT  _nx_des_encrypt(NX_DES *context, UCHAR source[8], UCHAR destination[8])
 /*                                                                        */ 
 /*    NetX Applications                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_des_decrypt(NX_DES *context, UCHAR source[8], UCHAR destination[8])
 {
@@ -459,14 +435,6 @@ UINT  _nx_des_decrypt(NX_DES *context, UCHAR source[8], UCHAR destination[8])
 /*                                                                        */ 
 /*    NetX Applications                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_des_process_block(UCHAR source[8], UCHAR destination[8], ULONG keys[32])
 {

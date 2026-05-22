@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -40,24 +40,6 @@
 /*    NX_SECURE_INCLUDE_USER_DEFINE_FILE defined.                         */
 /*    Note that all the defines in this file may also be made on the      */
 /*    command line when building NetX library and application objects.    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1.8  */
-/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            macro to disable client     */
-/*                                            initiated renegotiation for */
-/*                                            TLS server instances,       */
-/*                                            resulting in version 6.1.9  */
-/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
-/*                                            macro to custom secret size,*/
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -311,7 +293,7 @@
 */
 
 /* NX_SECURE_TLS_DISABLE_CLIENT_INITIATED_RENEGOTIATION disables client-initiated renegotiation for TLS
-   servers. In some instances, client-initiated renegotiation can become a possible denial-of-service 
+   servers. In some instances, client-initiated renegotiation can become a possible denial-of-service
    vulnerability. */
 /*
   #define NX_SECURE_TLS_DISABLE_CLIENT_INITIATED_RENEGOTIATION

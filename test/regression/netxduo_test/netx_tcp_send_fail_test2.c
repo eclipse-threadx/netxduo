@@ -1,4 +1,4 @@
-/* This NetX test concentrates on sending partial TCP data due to pool empty.  
+/* This NetX test concentrates on sending partial TCP data due to pool empty.
  * The payload size of packet pool is 512.
  * The window size is 800.
  * Size of transmitting data is 1800.

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -38,25 +38,6 @@
 /*    It is assumed that nx_api.h and nx_port.h have already been         */ 
 /*    included.                                                           */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved packet length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1.2  */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
-/*                                            necessary header file,      */
-/*                                            resulting in version 6.1.9  */
-/*  10-31-2023     Wenhui Xie               Modified comment(s), and      */
-/*                                            supported processing        */
-/*                                            compressed data,            */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NX_PPP_H
@@ -85,7 +66,7 @@ extern   "C" {
 #define NX_PPP_PPPOE_ENABLE
 */
 
-/* If defined, this removes logic for compiling PPP transmit and receive statistics. 
+/* If defined, this removes logic for compiling PPP transmit and receive statistics.
 #define NX_PPP_DISABLE_INFO
 */
 
@@ -93,19 +74,19 @@ extern   "C" {
 #define NX_PPP_DEBUG_LOG_ENABLE
 */
 
-/* If defined, this enables data saved to the PPP log to be printed out (printf).  
+/* If defined, this enables data saved to the PPP log to be printed out (printf).
 #define NX_PPP_DEBUG_LOG_PRINT_ENABLE
 */
 
-/* If defined, this disables CHAP authentication. 
+/* If defined, this disables CHAP authentication.
 #define NX_PPP_DISABLE_CHAP
 */
 
-/* If defined, this disables PAP authentication. 
+/* If defined, this disables PAP authentication.
 #define NX_PPP_DISABLE_PAP
 */
 
-/* If defined, the primary DNS address request option is not set in NAKed list. 
+/* If defined, the primary DNS address request option is not set in NAKed list.
 #define NX_PPP_DNS_OPTION_DISABLE
 */
 
@@ -202,19 +183,19 @@ extern   "C" {
 #define NX_PPP_OPTION_MESSAGE_LENGTH                        64              
 #endif
 
-/* Number of instances the PPP instance resends another LCP configure request message without a response. 
+/* Number of instances the PPP instance resends another LCP configure request message without a response.
    When this number is reached, the PPP instance aborts the PPP handshake, and the link status is down. */
 #ifndef NX_PPP_MAX_LCP_PROTOCOL_RETRIES
 #define NX_PPP_MAX_LCP_PROTOCOL_RETRIES                     20
 #endif
 
-/* Number of instances the PPP instance resends another PAP authentication request message without a response. 
+/* Number of instances the PPP instance resends another PAP authentication request message without a response.
    When this number is reached, the PPP instance aborts the PPP handshake, and the link status is down. */
 #ifndef NX_PPP_MAX_PAP_PROTOCOL_RETRIES
 #define NX_PPP_MAX_PAP_PROTOCOL_RETRIES                     20
 #endif
 
-/* Number of instances the PPP instance resends another CHAP challenge message without a response. 
+/* Number of instances the PPP instance resends another CHAP challenge message without a response.
    When this number is reached, the PPP instance aborts the PPP handshake, and the link status is down. */
 #ifndef NX_PPP_MAX_CHAP_PROTOCOL_RETRIES
 #define NX_PPP_MAX_CHAP_PROTOCOL_RETRIES                    20
@@ -619,9 +600,9 @@ typedef struct NX_PPP_STRUCT
 
 /* Application caller is present, perform API mapping.  */
 
-/* Determine if error checking is desired.  If so, map API functions 
+/* Determine if error checking is desired.  If so, map API functions
    to the appropriate error checking front-ends.  Otherwise, map API
-   functions to the core functions that actually perform the work. 
+   functions to the core functions that actually perform the work.
    Note: error checking is enabled by default.  */
 
 #ifdef NX_DISABLE_ERROR_CHECKING

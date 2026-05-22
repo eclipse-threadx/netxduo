@@ -1,4 +1,4 @@
-/* This NetX test concentrates on calling nx_tcp_server_socket_accept() for multiple times.   
+/* This NetX test concentrates on calling nx_tcp_server_socket_accept() for multiple times.
  * It verifies a bug that TCP server would send SYN+ACK on each accept() call. The ACK number in each packet is different.  */
 
 #include   "nx_api.h"

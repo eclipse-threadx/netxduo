@@ -1,11 +1,11 @@
 /* This NetX test concentrates on the wrapping of TX sequence numbers.  */
 /* Client sends three packets with sequences:
  *      0xFFFFFFDF ~ 0xFFFFFFEE, length is 16,
- *      0xFFFFFFEF ~ 0xFFFFFFFE, length is 16. 
- *      0xFFFFFFFF ~ 0x0000000E, length is 16. 
+ *      0xFFFFFFEF ~ 0xFFFFFFFE, length is 16.
+ *      0xFFFFFFFF ~ 0x0000000E, length is 16.
  * The seconds packet is dropped.
- * Server will ACK 0xFFFFFFF0. 
- * 
+ * Server will ACK 0xFFFFFFF0.
+ *
  * Packets like following.
  *
  *     |            |        |        |

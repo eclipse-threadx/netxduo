@@ -3,9 +3,9 @@
    the NX_NAT_NON_TCP_SESSION_TIMEOUT and NX_NAT_TCP_SESSION_TIMEOUT
    expirations. This test verifies the entries are removed when
    the table checks for expired entries.
- 
-   Note that NX_NAT_ENABLE_REPLACEMENT is not necessary for this test. 
- 
+
+   Note that NX_NAT_ENABLE_REPLACEMENT is not necessary for this test.
+
 */
 
 #include   "tx_api.h"
@@ -78,7 +78,7 @@ static UINT    found_entries = 0;
 static UINT    removed_entries = 0;
 static UINT    time_lapse = 0;
 
-/* This is based on the NAT Non TCP Session default timeout of 120 ticks 
+/* This is based on the NAT Non TCP Session default timeout of 120 ticks
    and TCP Session timeout of 300 ticks for regression testing. */
 #define TIME_SLICE 25
 
@@ -411,7 +411,7 @@ NX_NAT_TRANSLATION_ENTRY *entry_ptr;
             search_entry.peer_port = CONNECT_PEER_PORT+1;
         }
 
-        /* Check if the first UDP entry has expired. Ignore if it 
+        /* Check if the first UDP entry has expired. Ignore if it
            has already expired and been removed. */
         else if  ((time_lapse > NX_NAT_NON_TCP_SESSION_TIMEOUT) &&
                   (found_entries == 0))

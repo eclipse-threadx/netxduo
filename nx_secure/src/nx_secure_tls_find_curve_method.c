@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -75,21 +75,6 @@
 /*                                          Send CertificateVerify        */
 /*    _nx_secure_tls_send_server_key_exchange                             */
 /*                                          Send ServerKeyExchange        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), added    */
-/*                                            curve priority return value,*/
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            ECC curve table in X509,    */
-/*                                            resulting in version 6.1.6  */
-/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
-/*                                            updated parameters list,    */
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_find_curve_method(NX_SECURE_TLS_ECC *tls_ecc, USHORT named_curve,

@@ -4,7 +4,7 @@
    report (because it detects a new router.  The timeout in the multicast entry for that
    group address is reset to one so that an IGMP report is sent out on the next
    periodic.  For 5.9, this service is an internal function and only supports
-   sending join IGMP reports.  
+   sending join IGMP reports.
 */
 
 #include   "tx_api.h"

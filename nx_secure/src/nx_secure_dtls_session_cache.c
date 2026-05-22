@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -58,18 +58,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            IPv4 is disabled,           */
-/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 VOID nx_secure_dtls_session_cache_delete(NX_SECURE_DTLS_SERVER *dtls_server, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port)
@@ -172,15 +160,6 @@ UINT i;
 /*                                                                        */
 /*    _nx_secure_dtls_receive_callback      DTLS receive callback function*/
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_secure_dtls_session_cache_get_new(NX_SECURE_DTLS_SERVER *dtls_server, NX_SECURE_DTLS_SESSION **dtls_session, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port)
 {
@@ -265,18 +244,6 @@ UINT i;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_dtls_receive_callback      DTLS receive callback function*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            IPv4 is disabled,           */
-/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT  nx_secure_dtls_session_cache_find(NX_SECURE_DTLS_SERVER *dtls_server, NX_SECURE_DTLS_SESSION **dtls_session, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port)

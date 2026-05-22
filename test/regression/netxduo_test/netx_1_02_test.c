@@ -2,7 +2,7 @@
 
 /* Procedure
    1. Client sends a SYN packet.
-   2. Server receives the SYN packet and replies a SYN + ACK packet. 
+   2. Server receives the SYN packet and replies a SYN + ACK packet.
    3. Client receives the SYN + ACK packet and replies an ACK packet.
    4. Check the state of server is SYN_RCVD.
    5. Check the packet is a ACK one.

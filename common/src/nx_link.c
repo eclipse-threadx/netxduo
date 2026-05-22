@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -64,12 +64,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_vlan_set(NX_IP *ip_ptr, UINT interface_index, UINT vlan_tag)
@@ -134,12 +128,6 @@ UINT nx_link_vlan_set(NX_IP *ip_ptr, UINT interface_index, UINT vlan_tag)
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_link_vlan_get(NX_IP *ip_ptr, UINT interface_index, USHORT *vlan_tag)
 {
@@ -203,12 +191,6 @@ UINT nx_link_vlan_get(NX_IP *ip_ptr, UINT interface_index, USHORT *vlan_tag)
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_link_vlan_clear(NX_IP *ip_ptr, UINT interface_index)
 {
@@ -270,12 +252,6 @@ UINT nx_link_vlan_clear(NX_IP *ip_ptr, UINT interface_index)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_multicast_join(NX_IP *ip_ptr, UINT interface_index,
@@ -348,12 +324,6 @@ NX_IP_DRIVER driver_request;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_multicast_leave(NX_IP *ip_ptr, UINT interface_index,
@@ -432,12 +402,6 @@ NX_IP_DRIVER driver_request;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_link_ethernet_packet_send(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
                                   ULONG physical_address_msw, ULONG physical_address_lsw, UINT packet_type)
@@ -512,12 +476,6 @@ UINT          status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_raw_packet_send(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr)
@@ -596,12 +554,6 @@ NX_IP_DRIVER driver_request;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_packet_receive_callback_add(NX_IP *ip_ptr, UINT interface_index, NX_LINK_RECEIVE_QUEUE *queue_ptr,
@@ -685,12 +637,6 @@ NX_INTERFACE *interface_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_packet_receive_callback_remove(NX_IP *ip_ptr, UINT interface_index, NX_LINK_RECEIVE_QUEUE *queue_ptr)
@@ -776,12 +722,6 @@ NX_INTERFACE *interface_ptr;
 /*                                                                        */
 /*    Application Code                                                    */
 /*    nx_link_ethernet_packet_received      Process received packet       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_link_ethernet_header_parse(NX_PACKET *packet_ptr, ULONG *destination_msb, ULONG *destination_lsb,
@@ -897,12 +837,6 @@ UCHAR *data_ptr = packet_ptr -> nx_packet_prepend_ptr;
 /*                                                                        */
 /*    nx_link_ethernet_packet_send          Send Ethernet packet          */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_link_ethernet_header_add(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
                                  ULONG physical_address_msw, ULONG physical_address_lsw, UINT packet_type)
@@ -1011,12 +945,6 @@ USHORT        vlan_tag;
 /*                                                                        */
 /*    Network driver                                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 VOID nx_link_packet_transmitted(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr, NX_LINK_TIME *time_ptr)
 {
@@ -1099,12 +1027,6 @@ ULONG header_length;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Network driver                                                      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 VOID nx_link_ethernet_packet_received(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
@@ -1370,12 +1292,6 @@ NX_LINK_RECEIVE_QUEUE *queue_ptr;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_link_vlan_interface_create(NX_IP *ip_ptr, CHAR *interface_name, ULONG ip_address, ULONG network_mask,
                                    UINT vlan_tag, UINT parent_interface_index, UINT *interface_index_ptr)
@@ -1499,12 +1415,6 @@ NX_INTERFACE *interface_ptr = NX_NULL;
 /*                                                                        */
 /*    TCP/IP layer                                                        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_link_driver_request_preprocess(NX_IP_DRIVER *driver_request, NX_INTERFACE **actual_interface)
 {
@@ -1619,12 +1529,6 @@ UINT nx_link_driver_request_preprocess(NX_IP_DRIVER *driver_request, NX_INTERFAC
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ip_deferred_link_status_process   Process link status event     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Tiejun Zhou              Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_link_vlan_interface_status_change(NX_IP *ip_ptr, UINT interface_index)

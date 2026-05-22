@@ -1,5 +1,5 @@
-/* This test concentrates on fragmented TLS handshake message across multiple TLS records 
-(e.g. when a certificate message is splitted into multiple fragments). 
+/* This test concentrates on fragmented TLS handshake message across multiple TLS records
+(e.g. when a certificate message is splitted into multiple fragments).
 The Cipher Suite used was TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 (0xc024). */
 
 #include   "nx_api.h"
@@ -187,7 +187,7 @@ static UCHAR frame1[] = {
 };
 UINT frame1_len = 1514;
 
-/* Frame 2 consists of certificate(continuation), server_key_exchange, 
+/* Frame 2 consists of certificate(continuation), server_key_exchange,
    certificate_request, server_hello_done*/
 static UCHAR frame2[] = {
   0x00, 0x15, 0x5d, 0x64, 0x1a, 0x03, 0x00, 0x15, 0x5d, 0xb9, 0x20, 0x17,

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -71,29 +71,6 @@
 /*    _nx_secure_tls_client_handshake       TLS client state machine      */
 /*    _nx_secure_tls_server_handshake       TLS server state machine      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            fixed certificate buffer    */
-/*                                            allocation,                 */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            updated X.509 return value, */
-/*                                            resulting in version 6.1.6  */
-/*  04-25-2022     Timothy Stapko           Modified comment(s),          */
-/*                                            removed unnecessary code,   */
-/*                                            resulting in version 6.1.11 */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            x509 is disabled,           */
-/*                                            initialized metadata for    */
-/*                                            remote certificate,         */
-/*                                            resulting in version 6.2.1  */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_remote_certificate(NX_SECURE_TLS_SESSION *tls_session,
                                                UCHAR *packet_buffer, UINT message_length,
@@ -131,14 +108,14 @@ ULONG                cert_buf_size;
 
     /* At this point, the packet buffer is filled with a TLS record. We can use the remainder of
         the buffer to hold certificate structures for parsing. The remote certificates will
-        remain in the packet buffer and only the X.509 parsing structure (NX_SECURE_X509_CERT) 
+        remain in the packet buffer and only the X.509 parsing structure (NX_SECURE_X509_CERT)
         will be allocated. See _nx_secure_tls_process_remote_certificate for more info. */
     /* Typical layout of packet buffer and certificate buffer. Cert buffer allocates top-down, X.509 parsing structures
         are allocated and used only until the certificate chain verification step. After that, the remote certs are cleared
         and then the endpoint certificate is copied into the cert buffer (only the endpoint) for later use. The packet buffer
         following this function (on success) should have the following layout (assuming no user-allocated certs):
-        |                      Packet buffer                     |    Certificate buffer    | 
-        |<-----------data------------------>|-->  free space  <--| Endpoint Cert 1 | X.509  | 
+        |                      Packet buffer                     |    Certificate buffer    |
+        |<-----------data------------------>|-->  free space  <--| Endpoint Cert 1 | X.509  |
     */
 
     if (data_length > tls_session -> nx_secure_tls_packet_buffer_size)
@@ -203,7 +180,7 @@ ULONG                cert_buf_size;
         status = _nx_secure_x509_free_certificate_get(&tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store,
                                                       &certificate);
 
-        /* If there are no free certificates, attempt to allocate from the packet reassembly buffer 
+        /* If there are no free certificates, attempt to allocate from the packet reassembly buffer
            (the certificate buffer is carved from the packet buffer in nx_secure_tls_process_record). */
         if (status != NX_SUCCESS)
         {
@@ -219,7 +196,7 @@ ULONG                cert_buf_size;
             certificate = (NX_SECURE_X509_CERT*)(&cert_buffer[cert_buf_size]);
             NX_SECURE_MEMSET(certificate, 0, sizeof(NX_SECURE_X509_CERT));
 
-            /* Point structure to certificate being parsed. Note that the certificate 
+            /* Point structure to certificate being parsed. Note that the certificate
                structure points directly into the packet buffer where the certificate
                is located - this certificate structure must NOT be used outside this function. */
             certificate -> nx_secure_x509_certificate_raw_data_length = cert_length;
@@ -332,7 +309,7 @@ ULONG                cert_buf_size;
         make a copy and save it for later use. */
     if(!certificate -> nx_secure_x509_user_allocated_cert)
     { 
-        /* Free all certificates that we added to the packet buffer. Do this before the 
+        /* Free all certificates that we added to the packet buffer. Do this before the
            call to nx_secure_x509_free_certificate_get so that if there are user-allocated
            certificates the endpoint is put into one of them. */
         status = _nx_secure_tls_remote_certificate_free_all(tls_session);
@@ -350,7 +327,7 @@ ULONG                cert_buf_size;
         status = _nx_secure_x509_free_certificate_get(&tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store,
                                                     &certificate);
 
-        /* If there are no free certificates, attempt to allocate from the packet reassembly buffer 
+        /* If there are no free certificates, attempt to allocate from the packet reassembly buffer
             (the certificate buffer is carved from the packet buffer in nx_secure_tls_process_record). */
         if (status != NX_SUCCESS)
         {

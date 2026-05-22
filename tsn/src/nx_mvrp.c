@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -57,12 +57,6 @@ NX_MVRP_ATTRIBUTE mvrp_attribute_array[NX_MVRP_ATTRIBUTE_ARRAY_MAX_SIZE];
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Internal function                                                   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_indication_process(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR indication_type)
@@ -119,12 +113,6 @@ NX_MVRP *mvrp = (NX_MVRP *)participant;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Internal Function                                                   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_mrpdu_unpack(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_PACKET *packet_ptr)
@@ -313,12 +301,6 @@ UCHAR             three_packed_event, first_event, second_event, third_event;
 /*                                                                        */
 /*    Internal Function                                                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_mrpdu_pack(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_PACKET *packet_ptr)
 {
@@ -490,12 +472,6 @@ USHORT            i;
 /*                                                                        */
 /*    Internal Function                                                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_attribute_find(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE **attribute_ptr, USHORT vlan_id)
 {
@@ -556,12 +532,6 @@ NX_MVRP_ATTRIBUTE *mvrp_attribute;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_mvrp_attribute_get                 MVRP attribute get            */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mvrp_attribute_insert(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute)
@@ -655,12 +625,6 @@ USHORT            vlan_id = ((NX_MVRP_ATTRIBUTE *)attribute) -> vlan_id;
 /*    nx_mvrp_action_request                MVRP action request           */
 /*    nx_mvrp_mrpdu_unpack                  MVRP message unpack           */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_attribute_get(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE **attribute_ptr, USHORT vlan_id)
 {
@@ -732,12 +696,6 @@ UINT              status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_mvrp_indication_process            MVRP indication process       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_action_request(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, USHORT vlan_id, UCHAR action_type)
@@ -813,12 +771,6 @@ UCHAR             mrp_event;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_srp_init                           SRP init                      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mvrp_init(NX_MVRP *mvrp_ptr)

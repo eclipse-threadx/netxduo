@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -70,23 +70,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_dtls_session_receive       Receive DTLS data             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            adjusted logic for TLS      */
-/*                                            modifications,              */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            improved buffer length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1.3  */
-/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
-/*                                            fixed out-of-order handling,*/
-/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_record(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *packet_ptr,

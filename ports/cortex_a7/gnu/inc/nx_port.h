@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -38,15 +38,6 @@
 /*    real-time TCP/IP function identically on a variety of different     */ 
 /*    processor architectures.                                            */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  09-30-2020     Yuxin Zhou               Initial Version 6.1           */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            renamed temporary variable, */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NX_PORT_H
@@ -57,7 +48,7 @@
 #ifdef NX_INCLUDE_USER_DEFINE_FILE
 
 
-/* Yes, include the user defines in nx_user.h. The defines in this file may 
+/* Yes, include the user defines in nx_user.h. The defines in this file may
    alternately be defined on the command line.  */
 
 #include "nx_user.h"
@@ -77,9 +68,9 @@
 /* Define various constants for the port.  */ 
 
 #ifndef NX_IP_PERIODIC_RATE
-#define NX_IP_PERIODIC_RATE 100             /* Default IP periodic rate of 1 second for 
-                                               ports with 10ms timer interrupts.  This 
-                                               value may be defined instead at the 
+#define NX_IP_PERIODIC_RATE 100             /* Default IP periodic rate of 1 second for
+                                               ports with 10ms timer interrupts.  This
+                                               value may be defined instead at the
                                                command line and this value will not be
                                                used.  */
 #endif
@@ -204,7 +195,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) 2024 Microsoft Corporation.  *  NetX Duo Cortex-A7/GNU Version 6.4.1 *";
+                                    "(c) 2024 Microsoft Corp. (c) 2026-present Eclipse ThreadX Contributors.  *  NetX Duo Cortex-A7/GNU Version 6.5.0.202601 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

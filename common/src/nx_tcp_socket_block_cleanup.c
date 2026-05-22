@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -65,17 +65,6 @@
 /*    _nx_tcp_socket_disconnect             Close TCP conenction          */
 /*    _nx_tcp_socket_state_last_ack         Process data on LAST ACK state*/
 /*    _nx_tcp_client_socket_unbind          Ubind the TCP client socket   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2022     Wenhui Xie               Modified comment(s), and      */
-/*                                            supported HTTP Proxy,       */
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_tcp_socket_block_cleanup(NX_TCP_SOCKET *socket_ptr)

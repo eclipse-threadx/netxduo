@@ -1,5 +1,5 @@
 /* Length and bounds checking tests. Length fields are the most likely to be exploited by an attacker so we need to be sure all of our parsing is checking them correctly.
-One idea: generate a number of valid TLS handshake messages but use random lengths for each length field. 
+One idea: generate a number of valid TLS handshake messages but use random lengths for each length field.
 Focus particularly on ClientHello and ServerHello extensions. Bugs like Heartbleed in OpenSSL occur in those extensions. Pay close attention to any length fields in the extensions.
 
  */
@@ -97,7 +97,7 @@ static UCHAR client_hello_empty_key_share[] = {
 0x00, 0x02, 0x00, 0x01,
 0x01, /* compression method */
 0x00,
-0x00, 0x41, /* extensions */
+0x00, 0x45, /* extensions */
 0x00, 0x0a, /* ec groups */
 0x00, 0x08,
 0x00, 0x06, 0x00, 0x17, 0x00, 0x18, 0x00, 0x19,
@@ -116,7 +116,10 @@ static UCHAR client_hello_empty_key_share[] = {
 0x04, 0x03, 0x05, 0x03, 0x06, 0x03, 0x04, 0x01, 0x05, 0x01, 0x06, 0x01, 0x03, 0x03, 0x02, 0x03,
 0x02, 0x01, 0x01, 0x01,
 /* empty extension */
-0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00, // ID, length, 2 bytes each
+// List ID length, need at least 2 to make extension_NX_SECURE_TLS_EXTENSION_PRE_SHARED_KEY_LIST_LEN work
+// (needs to store 2-byte List ID Length)
+0x00, 0x00, 0x00, 0x00
 };
 
 static UCHAR client_hello_size[] = {0x00, 0x9e};
@@ -124,6 +127,7 @@ static UCHAR client_hello_size[] = {0x00, 0x9e};
 /* various extension types. */
 static UCHAR extension_NX_SECURE_TLS_EXTENSION_PRE_SHARED_KEY_ZERO[] = {0x00, 0x29, 0x00, 0x00};
 static UCHAR extension_NX_SECURE_TLS_EXTENSION_PRE_SHARED_KEY_MAX_INT[] = {0x00, 0x29, 0xff, 0xff};
+static UCHAR extension_NX_SECURE_TLS_EXTENSION_PRE_SHARED_KEY_LIST_LEN[] = {0x00, 0x29, 0x00, 0x04, 0x00, 0x03};
 static UCHAR extension_NX_SECURE_TLS_EXTENSION_SECURE_RENEGOTIATION_ZERO[] = {0xff, 0x01, 0x00, 0x00};
 static UCHAR extension_NX_SECURE_TLS_EXTENSION_SECURE_RENEGOTIATION_MAX_INT[] = {0xff, 0x01, 0xff, 0xff};
 static UCHAR extension_NX_SECURE_TLS_EXTENSION_SERVER_NAME_INDICATION_MAX_INT[] = {0x00, 0x00, 0xff, 0xff};
@@ -139,6 +143,14 @@ static UCHAR extension_NX_SECURE_TLS_EXTENSION_OID_FILTERS_MAX_INT[] = {0x00, 0x
 static UCHAR extension_NX_SECURE_TLS_EXTENSION_POST_HANDSHAKE_AUTH_MAX_INT[] = {0x00, 0x31, 0xff, 0xff};
 static UCHAR extension_NX_SECURE_TLS_EXTENSION_SIGNATURE_ALGORITHMS_CERT_MAX_INT[] = {0x00, 0x32, 0xff, 0xff};
 static UCHAR extension_NX_SECURE_TLS_EXTENSION_ECJPAKE_KEY_KP_PAIR_MAX_INT[] = {0x01, 0x00, 0xff, 0xff};
+static UCHAR extension_NX_SECURE_TLS_EXTENSION_SUPPORTED_VERSIONS_ODD_OVER[] = {
+    0x00, 0x08, //  Extension length, over the 0x07 bytes defined above
+        0x07,  // List length, modified to be an odd number
+};
+static UCHAR extension_NX_SECURE_TLS_EXTENSION_SUPPORTED_VERSIONS_ODD_UNDER[] = {
+    0x00, 0x06, //  Extension length, under the 0x07 bytes defined above
+        0x05,  // List length, modified to be an odd number
+};
 
 static UCHAR MAX_INT[] = {0xff, 0xff, 0xff, 0xff};
 static UCHAR MAX_CIPHERS[] = {0xff, 0xfe};
@@ -178,12 +190,15 @@ static TEST_POINT test_array[] =
     /* other extension length fields. */
 #ifdef NX_SECURE_ENABLE_PSK_CIPHERSUITES
     {NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, 154, extension_NX_SECURE_TLS_EXTENSION_PRE_SHARED_KEY_ZERO, 4},
+    {NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, 154, extension_NX_SECURE_TLS_EXTENSION_PRE_SHARED_KEY_LIST_LEN, 6},
 #endif
     {NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, 154, extension_NX_SECURE_TLS_EXTENSION_PRE_SHARED_KEY_MAX_INT, 4},
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
     {NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, 154, extension_NX_SECURE_TLS_EXTENSION_SECURE_RENEGOTIATION_ZERO, 4},
 #endif /* NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION */
     {NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, 154, extension_NX_SECURE_TLS_EXTENSION_SECURE_RENEGOTIATION_MAX_INT, 4},
+    {NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, 113, extension_NX_SECURE_TLS_EXTENSION_SUPPORTED_VERSIONS_ODD_OVER, 3},
+    {NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, 113, extension_NX_SECURE_TLS_EXTENSION_SUPPORTED_VERSIONS_ODD_UNDER, 3},
 #endif /* NX_SECURE_TLS_TLS_1_3_ENABLED */
     {NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, 154, extension_NX_SECURE_TLS_EXTENSION_SERVER_NAME_INDICATION_MAX_INT, 4},
     {NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, 154, extension_NX_SECURE_TLS_EXTENSION_MAX_FRAGMENT_LENGTH_MAX_INT, 4},

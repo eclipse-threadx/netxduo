@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -66,25 +66,6 @@ UCHAR _nx_secure_tls_record_block_buffer[NX_SECURE_TLS_MAX_CIPHER_BLOCK_SIZE];
 /*                                                                        */
 /*    _nx_secure_dtls_send_record           Send DTLS encrypted record    */
 /*    _nx_secure_tls_send_record            Send TLS encrypted record     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            fixed data copy in chained  */
-/*                                            packet,                     */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Timothy Stapko           Modified comment(s), called   */
-/*                                            NX_CRYPTO_ENCRYPT_CALCULATE */
-/*                                            to finalize the encryption  */
-/*                                            of this record, resulting   */
-/*                                            in version 6.1.8            */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            reorganized internal logic, */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_record_payload_encrypt(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,
@@ -411,18 +392,6 @@ UCHAR                                *icv_ptr = NX_NULL;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_record_payload_encrypt Encrypt payload               */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            reorganized internal logic, */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_tls_record_data_encrypt_init(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet,

@@ -1,5 +1,5 @@
 /* The test in this file references the test in netx_dhcp_basic_test.c
-   The introduced difference by this file is to test the special case when the 
+   The introduced difference by this file is to test the special case when the
    gateway ip addressed is cleared before calling nx_dhcp_interface_reinitialize,
    purposing to meet the 100% coverage for _nx_dhcp_interface_reinitialize
 */
@@ -30,10 +30,10 @@ extern void    test_control_return(UINT status);
 #define REQUEST_CLIENT_IP
 */
 
-/* If defined the client requests to jump to the boot state and skip the DISCOVER message. 
+/* If defined the client requests to jump to the boot state and skip the DISCOVER message.
    If REQUEST_CLIENT_IP is not defined, this has no effect. */
-/* 
-#define SKIP_DISCOVER_MESSAGE 
+/*
+#define SKIP_DISCOVER_MESSAGE
 */
 
 /* Define the ThreadX and NetX object control blocks...  */

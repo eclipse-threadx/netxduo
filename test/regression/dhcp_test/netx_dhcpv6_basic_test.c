@@ -1,4 +1,4 @@
-/* This is a small demo of the NetX Duo DHCPv6 Client and Server for the high-performance 
+/* This is a small demo of the NetX Duo DHCPv6 Client and Server for the high-performance
    NetX Duo stack.  */
 
 #include    <stdio.h>
@@ -216,7 +216,7 @@ NX_PACKET   *my_packet;
         test_control_return(1);
     }
 
-    /* Create a Link Layer Plus Time DUID for the DHCPv6 Client. Set time ID field 
+    /* Create a Link Layer Plus Time DUID for the DHCPv6 Client. Set time ID field
        to NULL; the DHCPv6 Client API will supply one. */
     status = nx_dhcpv6_create_client_duid(&dhcp_client, NX_DHCPV6_DUID_TYPE_LINK_TIME, 
                                           NX_DHCPV6_HW_TYPE_IEEE_802, 0);
@@ -228,11 +228,11 @@ NX_PACKET   *my_packet;
         test_control_return(1);
     }
 
-    /* Create the DHCPv6 client's Identity Association (IA-NA) now. 
+    /* Create the DHCPv6 client's Identity Association (IA-NA) now.
 
        Note that if this host had already been assigned in IPv6 lease, it
        would have to use the assigned T1 and T2 values in loading the DHCPv6
-       client with an IANA block. 
+       client with an IANA block.
     */
     status = nx_dhcpv6_create_client_iana(&dhcp_client, DHCPV6_IANA_ID, DHCPV6_T1,  DHCPV6_T2); 
 
@@ -336,7 +336,7 @@ NX_PACKET   *my_packet;
         test_control_return(1);
     }
 
-    /* Get IP address lease time. 
+    /* Get IP address lease time.
        Note, This API only applies to one IA. */
     status = nx_dhcpv6_get_lease_time_data(&dhcp_client, &T1, &T2, &preferred_lifetime, &valid_lifetime);
 
@@ -502,7 +502,7 @@ UINT        addresses_added;
         test_control_return(1);
     }
 
-     /* Note: For DUID types that do not require time, the 'duid_time' input can be left at zero. 
+     /* Note: For DUID types that do not require time, the 'duid_time' input can be left at zero.
         The DUID_TYPE and HW_TYPE are configurable options that are user defined in nx_dhcpv6_server.h.  */
 
     /* Set the DUID time as the start of the millenium. */

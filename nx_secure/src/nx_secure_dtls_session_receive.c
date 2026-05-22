@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -71,25 +71,6 @@
 /*    Application Code                                                    */
 /*    _nx_secure_dtls_session_start         Actual DTLS session start call*/
 /*    _nx_secure_dtls_session_end           End of a session              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            released packet securely,   */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
-/*                                            fixed out-of-order handling,*/
-/*                                            resulting in version 6.1.10 */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            IPv4 is disabled,           */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            released packet on failure, */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_session_receive(NX_SECURE_DTLS_SESSION *dtls_session,

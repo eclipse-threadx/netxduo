@@ -335,7 +335,7 @@ UINT i;
     nx_tcp_socket_delete(&client_socket_0);
 }
 
-/* Rewrite the session start function. 
+/* Rewrite the session start function.
    For the first loop, client will send ClientHello with two KeyShares.
    For the second loop, client will send ClientHello with empty KeyShare. */
 static UINT tls_session_start_test(NX_SECURE_TLS_SESSION *tls_session, NX_TCP_SOCKET *tcp_socket,

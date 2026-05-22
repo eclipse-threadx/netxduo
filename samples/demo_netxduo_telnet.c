@@ -1,4 +1,4 @@
-/* This is a small demo of TELNET on the high-performance NetX TCP/IP stack.  
+/* This is a small demo of TELNET on the high-performance NetX TCP/IP stack.
    This demo relies on ThreadX and NetX to show a simple TELNET connection,
    send, server echo, and then disconnection from the TELNET server.  */
 
@@ -22,7 +22,7 @@ NX_IP                   ip_client;
 
 /* If the Telnet connection requires IPv6 support, define USE_IPV6.  Note that
    the NetX Duo Telnet Client and Server can communicate over IPv4 regardless
-   if IPv6 is enabled in NetX Duo. However to use IPv6 addressing, the 
+   if IPv6 is enabled in NetX Duo. However to use IPv6 addressing, the
    FEATURE_NX_IPV6 must be defined in nx_user.h.  */
 #ifdef NX_DISABLE_IPV4
 #define USE_IPV6
@@ -214,7 +214,7 @@ UINT   iface_index, address_index;
         return;
      }
 
-    /* Set the host global IP address. We are assuming a 64 
+    /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&ip_server, iface_index, &server_ip_address, 64, &address_index);
 
@@ -307,7 +307,7 @@ UINT   iface_index, address_index;
         return;
      }
     
-     /* Set the host global IP address. We are assuming a 64 
+     /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&ip_client, iface_index, &client_ip_address, 64, &address_index);
 
@@ -422,7 +422,7 @@ UINT   iface_index, address_index;
 }
 
 
-/* This routine is called by the NetX Telnet Server whenever a new Telnet client 
+/* This routine is called by the NetX Telnet Server whenever a new Telnet client
    connection is established.  */
 void  telnet_new_connection(NX_TELNET_SERVER *server_ptr, UINT logical_connection)
 {
@@ -460,7 +460,7 @@ NX_PACKET   *packet_ptr;
 }
 
 
-/* This routine is called by the NetX Telnet Server whenever data is present on a Telnet client 
+/* This routine is called by the NetX Telnet Server whenever data is present on a Telnet client
    connection.  */          
 void  telnet_receive_data(NX_TELNET_SERVER *server_ptr, UINT logical_connection, NX_PACKET *packet_ptr)
 {
@@ -470,7 +470,7 @@ UCHAR   alpha;
 
 
     /* This demo just echoes the character back and on <cr,lf> sends a new prompt back to the
-       client.  A real system would most likely buffer the character(s) received in a buffer 
+       client.  A real system would most likely buffer the character(s) received in a buffer
        associated with the supplied logical connection and process according to it.  */
 
 

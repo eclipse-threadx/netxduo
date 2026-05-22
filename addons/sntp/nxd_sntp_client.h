@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -36,14 +36,6 @@
 /*    It is assumed that tx_api.h, tx_port.h, nx_api.h, and nx_port.h,    */
 /*    have already been included.                                         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NXD_SNTP_CLIENT_H
@@ -65,20 +57,20 @@ extern   "C" {
 #define NXD_SNTP_ID                              0x534E5460UL
 
 
-/* Conversion between seconds and timer ticks. This must equal the 
+/* Conversion between seconds and timer ticks. This must equal the
    NetX timer tick to seconds ratio.  */ 
 
 #define NX_SNTP_MILLISECONDS_PER_TICK           (1000 / NX_IP_PERIODIC_RATE)   
 
-/* Set minimum and maximum Client unicast poll period (in seconds) for requesting  
-   time data.  RFC 4330 polling range is from 16 - 131072 seconds.  
-   Note that the RFC 4330 strongly recommends polling intervals of at least 
+/* Set minimum and maximum Client unicast poll period (in seconds) for requesting
+   time data.  RFC 4330 polling range is from 16 - 131072 seconds.
+   Note that the RFC 4330 strongly recommends polling intervals of at least
    one minute to unnecessary reduce demand on public time servers.  */
 
 #define NX_SNTP_CLIENT_MIN_UNICAST_POLL_INTERVAL    64
 #define NX_SNTP_CLIENT_MAX_UNICAST_POLL_INTERVAL    131072
 
-/* Define Client request types. Note that this does not limit the 
+/* Define Client request types. Note that this does not limit the
    NetX SNTP Client from using MANYCAST or MULTICAST discovery options.  */
 
 #define     BROADCAST_MODE      1
@@ -86,7 +78,7 @@ extern   "C" {
 
 #define NX_SNTP_CLIENT_RECEIVE_EVENT                ((ULONG) 0x00000001)    /* Event flag to signal a receive packet event                          */ 
 
-/* Define the minimum size of the packet NTP/SNTP time message 
+/* Define the minimum size of the packet NTP/SNTP time message
    (e.g. without authentication data).  */
 
 #define NX_SNTP_TIME_MESSAGE_MIN_SIZE           48
@@ -118,7 +110,7 @@ extern   "C" {
 #define STRATUM_RESERVED        0xF0  /* 16 - 255*/
 
 
-/* Kiss of death strings (see Codes below). Applicable when stratum = 0    
+/* Kiss of death strings (see Codes below). Applicable when stratum = 0
 
                             Code    Meaning
       --------------------------------------------------------------  */
@@ -139,7 +131,7 @@ extern   "C" {
 #define       RMOT          "RMOT"    /* Somebody is tinkering with association from remote host running ntpdc.  OK unless they've stolen your keys.  */
 #define       STEP          "STEP"    /* A step change in system time has occurred, but association has not yet resynchronized.  */
 
-/* Define Kiss of Death error codes.  Note: there should be a 1 : 1 correspondence of 
+/* Define Kiss of Death error codes.  Note: there should be a 1 : 1 correspondence of
    KOD strings to KOD error codes! */
 
 #define       NX_SNTP_KISS_OF_DEATH_PACKET                  0xF00
@@ -225,7 +217,7 @@ extern   "C" {
 #endif
 
 /* Set Time to Live (TTL) value for transmitted UDP packets, including manycast and
-   multicast transmissions. The default TTL for windows operating system time 
+   multicast transmissions. The default TTL for windows operating system time
    server is used.  */
 
 #ifndef NX_SNTP_CLIENT_TIME_TO_LIVE    
@@ -262,7 +254,7 @@ extern   "C" {
 
 
 
-/* Define the minimum (numerically highest) stratum the Client will 
+/* Define the minimum (numerically highest) stratum the Client will
    accept for a time server. Valid range is 1 - 15.  */
 
 #ifndef NX_SNTP_CLIENT_MIN_SERVER_STRATUM
@@ -302,9 +294,9 @@ extern   "C" {
 #endif
 
 
-/* Set the maximum time lapse (in seconds) without a time update that can be tolerated by 
-   the Client (application). This should be determined by application time sensitivity. 
-   For unicast operation, the max lapse could be set to three successive poll requests 
+/* Set the maximum time lapse (in seconds) without a time update that can be tolerated by
+   the Client (application). This should be determined by application time sensitivity.
+   For unicast operation, the max lapse could be set to three successive poll requests
    without an update.  Here we set it to 2 hour based on the RFC recommendation to limit
    traffic congestion.  */
 
@@ -357,7 +349,7 @@ extern   "C" {
 #endif
 
 
-/* Set the limit on consecutive bad updates from server before Client 
+/* Set the limit on consecutive bad updates from server before Client
    switches to alternate server.  */
 
 #ifndef NX_SNTP_CLIENT_INVALID_UPDATE_LIMIT             
@@ -367,7 +359,7 @@ extern   "C" {
 /* Set size of SNTP data in bytes, not including IP and UDP header fields or authentication.  */
 #define NX_SNTP_CLIENT_PACKET_DATA_SIZE            48
 
-/* To display date in year/month/date format, set the current year (same year as in NTP time being evaluated) e.g 2015. 
+/* To display date in year/month/date format, set the current year (same year as in NTP time being evaluated) e.g 2015.
    Otherwise set to zero. */
 #ifndef NX_SNTP_CURRENT_YEAR
 #define NX_SNTP_CURRENT_YEAR                        2015
@@ -382,8 +374,8 @@ extern   "C" {
 #define UPDATE_STATUS_SUCCESS                       4
 
 
-/* Define the number of seconds from 01-01-1990 00:00:00 to 01-01-1999 00:00:00 (last occurrance 
-   of a leap second) to be able to define time in year, month, date. If zero, 
+/* Define the number of seconds from 01-01-1990 00:00:00 to 01-01-1999 00:00:00 (last occurrance
+   of a leap second) to be able to define time in year, month, date. If zero,
    no date time is displayed. */
 #ifndef NTP_SECONDS_AT_01011999
 #define NTP_SECONDS_AT_01011999                     0xBA368E80

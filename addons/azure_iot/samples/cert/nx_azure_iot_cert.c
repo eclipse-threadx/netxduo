@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -75,7 +75,7 @@ const unsigned char _nx_azure_iot_root_cert[] = {
 const unsigned int _nx_azure_iot_root_cert_size = sizeof(_nx_azure_iot_root_cert);
 
 /* Azure IoT Hub and DPS will migrate to the Digicert Global Root G2.
-   To continue without disruption due to this changes, Microsoft recommends that 
+   To continue without disruption due to this changes, Microsoft recommends that
    client applications or devices trust the Digicert Global Root G2.  */
 
 /* Digicert Global Root G2  */

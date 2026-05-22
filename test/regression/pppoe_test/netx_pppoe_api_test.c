@@ -52,11 +52,11 @@ extern void    _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr);
 /* Define the callback functions.  */ 
 static void    pppoe_server_packet_receive(UINT interfaceHandle, ULONG length, UCHAR *data, UINT packet_id);
 
-/* Define the porting layer function for PPP.  
+/* Define the porting layer function for PPP.
    Functions to be provided by PPP for calling by the PPPoE Stack.  */
 static void    ppp_server_packet_send(NX_PACKET *packet_ptr);
 
-/* Define the porting layer function for PPP.  
+/* Define the porting layer function for PPP.
    Functions to be provided by PPP for calling by the PPPoE Stack.  */
 static void    ppp_client_packet_send(NX_PACKET *packet_ptr);
 static void    pppoe_client_packet_receive(NX_PACKET *packet_ptr);

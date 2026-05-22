@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -62,30 +62,6 @@
 /*    _nx_secure_tls_session_create         Create the TLS session        */
 /*    _nx_secure_tls_session_delete         Delete the TLS session        */
 /*    _nx_secure_tls_session_end            End of a session              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            cleanup for session cipher, */
-/*                                            resulting in version 6.1.8  */
-/*  10-15-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            option to disable client    */
-/*                                            initiated renegotiation,    */
-/*                                            resulting in version 6.1.9  */
-/*  10-31-2022     Yanwu Cai                Modified comment(s), and      */
-/*                                            fixed renegotiation when    */
-/*                                            receiving in non-block mode,*/
-/*                                            resulting in version 6.2.0  */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            x509 is disabled,           */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_session_reset(NX_SECURE_TLS_SESSION *session_ptr)

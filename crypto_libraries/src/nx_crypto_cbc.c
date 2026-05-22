@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -55,12 +55,6 @@
 /*                                                                        */
 /*    _nx_crypto_cbc_encrypt                Perform CBC mode encryption   */
 /*    _nx_crypto_cbc_decrypt                Perform CBC mode decryption   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP static VOID _nx_crypto_cbc_xor(UCHAR *plaintext, UCHAR *key, UCHAR *ciphertext, UCHAR block_size)
@@ -113,16 +107,6 @@ UINT i;
 /*    _nx_crypto_method_aes_cbc_operation   Handle AES encrypt or decrypt */
 /*    _nx_crypto_method_des_operation       Handle DES encrypt or decrypt */
 /*    _nx_crypto_method_3des_operation      Handle 3DES encrypt or decrypt*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            and updated constants,      */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_cbc_encrypt(VOID *crypto_metadata, NX_CRYPTO_CBC *cbc_metadata,
@@ -215,16 +199,6 @@ UINT   i;
 /*    _nx_crypto_method_des_operation       Handle DES encrypt or decrypt */
 /*    _nx_crypto_method_3des_operation      Handle 3DES encrypt or decrypt*/
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            and updated constants,      */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_cbc_decrypt(VOID *crypto_metadata, NX_CRYPTO_CBC *cbc_metadata,
                                            UINT (*crypto_function)(VOID *, UCHAR *, UCHAR *, UINT),
@@ -309,15 +283,6 @@ UINT  i;
 /*    _nx_crypto_method_aes_cbc_operation   Handle AES encrypt or decrypt */
 /*    _nx_crypto_method_des_operation       Handle DES encrypt or decrypt */
 /*    _nx_crypto_method_3des_operation      Handle 3DES encrypt or decrypt*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_cbc_encrypt_init(NX_CRYPTO_CBC *cbc_metadata, UCHAR *iv, UINT iv_len)

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -69,12 +69,6 @@ static UCHAR _received_hash[NX_SECURE_TLS_MAX_HASH_SIZE];
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_verify_mac             Verify record MAC checksum    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2022     Yanwu Cai                Initial Version 6.2.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_verify_mac(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, UCHAR *mac_secret, ULONG sequence_num[NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE],

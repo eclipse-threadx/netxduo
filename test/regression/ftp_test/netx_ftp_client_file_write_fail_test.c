@@ -1,5 +1,5 @@
-/* This is a small demo of NetX FTP on the high-performance NetX TCP/IP stack.  This demo 
-   relies on ThreadX, NetX, and FileX to show a simple file transfer from the client 
+/* This is a small demo of NetX FTP on the high-performance NetX TCP/IP stack.  This demo
+   relies on ThreadX, NetX, and FileX to show a simple file transfer from the client
    to the server and a directory listing get using passive file transfer (PASV).  */
 
 
@@ -486,7 +486,7 @@ UINT        status;
         }
     } while ((status == NX_SUCCESS) && (packets_sent < 3));
     
-    /* This does not send a command. The data port is closed and the client state set to CONNECTED.  
+    /* This does not send a command. The data port is closed and the client state set to CONNECTED.
        The server initiates closing the data socket connection. */
     status =  nx_ftp_client_file_close(&ftp_client, NX_IP_PERIODIC_RATE);
 

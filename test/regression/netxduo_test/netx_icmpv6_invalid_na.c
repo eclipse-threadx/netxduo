@@ -23,7 +23,7 @@ static VOID    thread_0_entry(ULONG thread_input);
 extern VOID    test_control_return(UINT status);       
 extern VOID    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
 
-/* NA packet. 
+/* NA packet.
  * target Address: FE80::211:22FF:FE33:4456  */
 static char na_pkt[86] = {
 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x11, /* ........ */

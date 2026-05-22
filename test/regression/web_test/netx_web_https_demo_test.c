@@ -1,10 +1,10 @@
-/* This is a small demo of the NetX HTTP Client Server API running on a 
+/* This is a small demo of the NetX HTTP Client Server API running on a
    high-performance NetX TCP/IP stack.  */
 
 #include   "tx_api.h"
 #include   "nx_api.h"
 /* If not using FileX, define this option and define the file writing services
-   declared in filex_stub.h.    
+   declared in filex_stub.h.
 #define      NX_WEB_HTTP_NO_FILEX
 */
 #ifndef      NX_WEB_HTTP_NO_FILEX
@@ -26,7 +26,7 @@
 #include "test_utility.h"
 
 
-/* For NetX Duo applications, determine which IP version to use. For IPv6, 
+/* For NetX Duo applications, determine which IP version to use. For IPv6,
    set IP_TYPE to 6; for IPv4 set to 4. Note that for IPv6, you must enable
    USE_DUO so the application 'knows' to enabled IPv6 services on the IP task.  */
 
@@ -117,7 +117,7 @@ static UINT  authentication_check(NX_WEB_HTTP_SERVER *server_ptr, UINT request_t
     NX_PARAMETER_NOT_USED(request_type);
     NX_PARAMETER_NOT_USED(resource);
 
-    /* Just use a simple name, password, and realm for all 
+    /* Just use a simple name, password, and realm for all
        requests and resources.  */
     *name =     "name";
     *password = "password";
@@ -404,7 +404,7 @@ FX_FILE my_file;
                     512,                          // Sector size
                     8,                            // Sectors per cluster
                     1,                            // Heads
-                    1);                           // Sectors per track   
+                    1);                           // Sectors per track
     EXPECT_EQ(NX_SUCCESS, status);
     
     /* Open the RAM disk.  */

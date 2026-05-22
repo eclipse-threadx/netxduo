@@ -1,6 +1,6 @@
 /* 9.19.02 TCP, in FINWAIT-2 state, MUST return to CLOSED state on RST.  */
 
-/* RFC 793, Section 3.9, page 70, Event Processing. 
+/* RFC 793, Section 3.9, page 70, Event Processing.
    FIN-WAIT-2
    If the RST bit is set then, Users should receive an unsolicited general
    "connection reset" signal. Enter the CLOSED state, delete the TCB,

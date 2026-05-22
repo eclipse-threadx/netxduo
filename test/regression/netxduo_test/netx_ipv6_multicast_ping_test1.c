@@ -1,10 +1,10 @@
-/* This NetX test concentrates on the basic multicast ICMPv6 operation.  
- * Two nodes (A and B) with link local addresses. 
- * Let node A finish DAD first. 
- * Let node A ping all node multicast address. 
+/* This NetX test concentrates on the basic multicast ICMPv6 operation.
+ * Two nodes (A and B) with link local addresses.
+ * Let node A finish DAD first.
+ * Let node A ping all node multicast address.
  * Since the state of address for node B is still tentative, B would not respond A.
- * Let node B finish DAD. 
- * Let node A ping all node multicast address. 
+ * Let node B finish DAD.
+ * Let node A ping all node multicast address.
  * Check the return status of ping from A. */
 
 #include   "tx_api.h"

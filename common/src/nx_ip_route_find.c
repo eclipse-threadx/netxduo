@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -81,14 +81,6 @@
 /*                                                                        */
 /*    None                                                                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 ULONG  _nx_ip_route_find(NX_IP *ip_ptr, ULONG destination_address, NX_INTERFACE **ip_interface_ptr, ULONG *next_hop_address)
 {
@@ -106,7 +98,7 @@ ULONG         i;
 
         *next_hop_address = destination_address;
 
-        /* If the caller did not set the ip_interface value, find a link enabled 
+        /* If the caller did not set the ip_interface value, find a link enabled
            interface, starting with the primary interface, for transmission.  */
         if (*ip_interface_ptr == NX_NULL)
         {

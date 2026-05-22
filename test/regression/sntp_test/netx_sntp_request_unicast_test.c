@@ -1,11 +1,11 @@
-/* 
+/*
    netx_sntp_request_unicast_rest.c
 
    This test tests that the nx_sntp_client_request_unicast_time service sends an asynchronous unicast
    SNTP request independently of the SNTP CLient periodic polling of the SNTP server.  It also verifies
-   that the SNTP Client when it receives the server response correctly updates the local clock. 
+   that the SNTP Client when it receives the server response correctly updates the local clock.
 
-   Note that for this test to work correctly, the following configuration option must be defined in the 
+   Note that for this test to work correctly, the following configuration option must be defined in the
    preprocessor options:
 
    #define NX_SNTP_CLIENT_MIN_TIME_ADJUSTMENT          1000

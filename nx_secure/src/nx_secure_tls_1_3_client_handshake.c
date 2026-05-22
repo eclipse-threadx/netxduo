@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -97,32 +97,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_process_record         Process TLS record data       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            released packet securely,   */
-/*                                            fixed certificate buffer    */
-/*                                            allocation,                 */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            improved buffer length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1.3  */
-/*  02-02-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            support for fragmented TLS  */
-/*                                            Handshake messages,         */
-/*                                            resulting in version 6.1.4  */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated alert message for   */
-/*                                            downgrade protection,       */
-/*                                            resulting in version 6.1.12 */
-/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            corrected metadata cleanup, */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -274,7 +248,7 @@ const UCHAR    *server_random;
             status = _nx_secure_tls_process_serverhello(tls_session, packet_buffer, message_length);
 
             /* RFC 8446 4.1.3:
-               TLS 1.3 clients receiving a ServerHello indicating TLS 1.2 or below MUST check that 
+               TLS 1.3 clients receiving a ServerHello indicating TLS 1.2 or below MUST check that
                the last 8 bytes are not equal to either of these values. */
             if ((status == NX_SUCCESS) && (tls_session -> nx_secure_tls_1_3 == NX_FALSE))
             {

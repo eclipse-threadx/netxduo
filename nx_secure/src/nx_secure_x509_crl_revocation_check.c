@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -79,28 +79,6 @@ static UINT _nx_secure_x509_crl_parse_entry(const UCHAR *buffer, ULONG length, U
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            removed dependency on TLS,  */
-/*                                            resulting in version 6.1.6  */
-/*  08-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1.8  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            modified to improve code    */
-/*                                            coverage result,            */
-/*                                            resulting in version 6.1.11 */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            checked expiration for all  */
-/*                                            the certs in the chain,     */
-/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_crl_revocation_check(const UCHAR *crl_data, UINT crl_length,
@@ -264,14 +242,6 @@ UINT                 serial_number_length;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_x509_crl_revocation_check  Check revocation in crl       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_parse_entry(const UCHAR *buffer, ULONG length, UINT *bytes_processed,

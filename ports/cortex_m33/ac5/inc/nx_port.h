@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -37,18 +37,6 @@
 /*    This file contains data type definitions that make the NetX         */
 /*    real-time TCP/IP function identically on a variety of different     */
 /*    processor architectures.                                            */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            renamed temporary variable, */
-/*                                            resulting in version 6.1.11 */
-/*  03-08-2023     Scott Larson             Modified comment(s), and      */
-/*                                            fixed whitespace,           */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -207,7 +195,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] =
-                                    "Copyright (c) 2024 Microsoft Corporation.  *  NetX Duo Cortex-M33/AC5 Version 6.4.1 *";
+                                    "(c) 2024 Microsoft Corp. (c) 2026-present Eclipse ThreadX Contributors.  *  NetX Duo Cortex-M33/AC5 Version 6.5.0.202601 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

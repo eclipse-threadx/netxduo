@@ -1,4 +1,4 @@
-/* This NetX test concentrates on the DHCP operation to verify the DHCP server source port 
+/* This NetX test concentrates on the DHCP operation to verify the DHCP server source port
    is excluded from DHCP Client validation checks.  Further the NetX /NetX Duo packet processing
    should forward packets for the UDP socket bound to 68 without requiring the source port
    be 67.  */

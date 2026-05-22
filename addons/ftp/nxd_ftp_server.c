@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -30,7 +30,7 @@
 #endif
 
 /* If FileX is not used in this application, define this option and define the FileX services
-   declared in filex_stub.h elsewhere. 
+   declared in filex_stub.h elsewhere.
 #define      NX_FTP_NO_FILEX
 */
 
@@ -123,14 +123,6 @@ static VOID _nx_ftp_server_number_to_ascii(UCHAR *buffer_ptr, UINT buffer_size, 
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ftp_server_create(NX_FTP_SERVER *ftp_server_ptr, CHAR *ftp_server_name, NX_IP *ip_ptr, FX_MEDIA *media_ptr, VOID *stack_ptr, ULONG stack_size, NX_PACKET_POOL *pool_ptr,
             UINT (*ftp_login)(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, ULONG client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info),
@@ -207,14 +199,6 @@ UINT        status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_server_create(NX_FTP_SERVER *ftp_server_ptr, CHAR *ftp_server_name, NX_IP *ip_ptr, FX_MEDIA *media_ptr, VOID *stack_ptr, ULONG stack_size, NX_PACKET_POOL *pool_ptr,
@@ -293,14 +277,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_ftp_server_create(NX_FTP_SERVER *ftp_server_ptr, CHAR *ftp_server_name, NX_IP *ip_ptr, FX_MEDIA *media_ptr, VOID *stack_ptr, ULONG stack_size, NX_PACKET_POOL *pool_ptr,
             UINT (*ftp_login)(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, NXD_ADDRESS *client_ipduo_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info),
@@ -365,14 +341,6 @@ UINT        status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nxd_ftp_server_create(NX_FTP_SERVER *ftp_server_ptr, CHAR *ftp_server_name, NX_IP *ip_ptr, FX_MEDIA *media_ptr, VOID *stack_ptr, ULONG stack_size, NX_PACKET_POOL *pool_ptr,
@@ -441,14 +409,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_server_create_internal(NX_FTP_SERVER *ftp_server_ptr, CHAR *ftp_server_name, NX_IP *ip_ptr, FX_MEDIA *media_ptr, VOID *stack_ptr, ULONG stack_size, NX_PACKET_POOL *pool_ptr,
@@ -625,14 +585,6 @@ UINT            status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ftp_server_delete(NX_FTP_SERVER *ftp_server_ptr)
 {
@@ -697,18 +649,6 @@ UINT    status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the issue of clearing */
-/*                                            data socket,                */
-/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_server_delete(NX_FTP_SERVER *ftp_server_ptr)
@@ -806,14 +746,6 @@ NX_FTP_CLIENT_REQUEST      *client_request_ptr;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ftp_server_start(NX_FTP_SERVER *ftp_server_ptr)
 {
@@ -866,14 +798,6 @@ UINT    status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_server_start(NX_FTP_SERVER *ftp_server_ptr)
@@ -941,14 +865,6 @@ ULONG   events;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_ftp_server_stop(NX_FTP_SERVER *ftp_server_ptr)
 {
@@ -1003,18 +919,6 @@ UINT    status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            removed deletion of control */
-/*                                            socket,                     */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_server_stop(NX_FTP_SERVER *ftp_server_ptr)
@@ -1120,14 +1024,6 @@ NX_FTP_CLIENT_REQUEST      *client_request_ptr;
 /*                                                                        */
 /*    NetX FTP Routines                                                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_response(NX_TCP_SOCKET *socket, NX_PACKET *packet_ptr, CHAR *reply_code, CHAR *message)
 {
@@ -1228,14 +1124,6 @@ UINT    status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX FTP Routines                                                   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_directory_response(NX_TCP_SOCKET *socket, NX_PACKET *packet_ptr, CHAR *reply_code, CHAR *message, CHAR *directory)
@@ -1404,14 +1292,6 @@ UINT    status;
 /*                                                                        */
 /*    ThreadX                                                             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_thread_entry(ULONG ftp_server_address)
 {
@@ -1569,39 +1449,6 @@ ULONG                   events;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ftp_server_thread_entry           FTP server thread             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.3  */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            corrected the pad character,*/
-/*                                            resulting in version 6.1.8  */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the issue of clearing */
-/*                                            data socket and processing  */
-/*                                            disconnection event,        */
-/*                                            improved the PASV response, */
-/*                                            fixed the bug of processing */
-/*                                            STOR in passive mode,       */
-/*                                            reset the packet prepend    */
-/*                                            pointer for alignment,      */
-/*                                            resulting in version 6.1.9  */
-/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            fixed duplicate packet      */
-/*                                            release issue, avoided      */
-/*                                            duplicate creation for data */
-/*                                            socket, fixed data length   */
-/*                                            underflow,                  */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_command_process(NX_FTP_SERVER *ftp_server_ptr)
@@ -4420,14 +4267,6 @@ ULONG                   block_size;
 /*                                                                        */
 /*    _nx_ftp_server_thread_entry           FTP server thread             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_connect_process(NX_FTP_SERVER *ftp_server_ptr)
 {
@@ -4574,14 +4413,6 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 /*                                                                        */
 /*    NetX                                  NetX receive packet callback  */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_command_present(NX_TCP_SOCKET *control_socket_ptr)
 {
@@ -4629,14 +4460,6 @@ NX_FTP_SERVER   *server_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX                                  NetX connect callback         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_connection_present(NX_TCP_SOCKET *control_socket_ptr, UINT port)
@@ -4687,14 +4510,6 @@ NX_FTP_SERVER   *server_ptr;
 /*                                                                        */
 /*    NetX                                  NetX connect callback         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_data_disconnect(NX_TCP_SOCKET *data_socket_ptr)
 {
@@ -4743,18 +4558,6 @@ NX_FTP_SERVER   *server_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ftp_server_thread_entry           FTP server thread             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), fixed    */
-/*                                            the issue of processing     */
-/*                                            disconnection event,        */
-/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_data_disconnect_process(NX_FTP_SERVER *ftp_server_ptr)
@@ -4873,14 +4676,6 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 /*                                                                        */
 /*    NetX                                  NetX connect callback         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_data_present(NX_TCP_SOCKET *data_socket_ptr)
 {
@@ -4930,14 +4725,6 @@ NX_FTP_SERVER   *server_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ftp_server_thread_entry           FTP server thread             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_data_process(NX_FTP_SERVER *ftp_server_ptr)
@@ -5081,17 +4868,6 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ftp_server_command_process        FTP command process           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_server_parse_command(NX_PACKET *packet_ptr)
@@ -5308,14 +5084,6 @@ char    *buffer_ptr;
 /*                                                                        */
 /*    ThreadX                               ThreadX timer callback        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_timeout(ULONG ftp_server_address)
 {
@@ -5369,22 +5137,6 @@ NX_FTP_SERVER   *server_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ftp_server_thread_entry           FTP server thread             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the issue of clearing */
-/*                                            data socket,                */
-/*                                            resulting in version 6.1.9  */
-/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            fixed duplicate packet      */
-/*                                            release issue,              */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_timeout_processing(NX_FTP_SERVER *ftp_server_ptr)
@@ -5492,14 +5244,6 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 /*                                                                        */
 /*    NetX                                  NetX connect callback         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_control_disconnect(NX_TCP_SOCKET *control_socket_ptr)
 {
@@ -5552,22 +5296,6 @@ NX_FTP_SERVER   *server_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ftp_server_thread_entry           FTP server thread             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the issue of clearing */
-/*                                            data socket,                */
-/*                                            resulting in version 6.1.9  */
-/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            fixed duplicate packet      */
-/*                                            release issue,              */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_control_disconnect_processing(NX_FTP_SERVER *ftp_server_ptr)
@@ -5711,14 +5439,6 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 /*                                          Client disconnect handler     */
 /*    _nx_ftp_server_connect_process        Client Connect request handler*/
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 
 UINT _nx_ftp_packet_allocate(NX_PACKET_POOL *pool_ptr, NX_FTP_CLIENT_REQUEST *client_request_ptr, NX_PACKET **packet_ptr, UINT packet_type, UINT wait_option)
@@ -5792,17 +5512,6 @@ UINT status;
 /*                                                                        */
 /*    _nx_ftp_server_command_process        Parse a received FTP command  */
 /*                                                packet service          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            colons count verification,  */
-/*                                            resulting in version 6.1.3  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_ftp_utility_parse_IPv6_address(CHAR *buffer_ptr, UINT buffer_length, NXD_ADDRESS *ipduo_address)
@@ -6022,7 +5731,7 @@ ULONG  temp;
                 while (number_consecutive_zeros_to_add)
                 {
 
-                    /* Determine where to add the 16 bits depending 
+                    /* Determine where to add the 16 bits depending
                        on odd or even number colon we're on. */
 
                     /* Are we in the middle of the current v6 ULONG?*/
@@ -6086,7 +5795,7 @@ ULONG  temp;
         return  NX_FTP_INVALID_ADDRESS;
     }
     
-    /* Is there a parsed number to apply to the last ULONG e.g. no terminating '|' 
+    /* Is there a parsed number to apply to the last ULONG e.g. no terminating '|'
        in the buffer? */
     if (temp)
     {
@@ -6144,14 +5853,6 @@ ULONG  temp;
 /*                                                                        */
 /*    _nx_ftp_server_command_process        Parse a received FTP command  */
 /*                                                packet service          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -6296,14 +5997,6 @@ UINT digits = 0;
 /*    _nx_ftp_server_command_process Processes FTP commands               */
 /*                                                                        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_server_utility_fill_port_number(CHAR *buffer_ptr, UINT port_number)
 {
@@ -6392,14 +6085,6 @@ UINT    size;
 /*                                                                        */ 
 /*    _nx_ftp_server_command_process        Process command               */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_ftp_server_block_size_get(NX_FTP_SERVER *ftp_server_ptr, UINT ftp_command, CHAR *filename, ULONG *block_size)
 {
@@ -6501,14 +6186,6 @@ UINT        status;
 /*                                                                        */ 
 /*    _nx_ftp_server_command_process        Process command               */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_server_block_header_send(NX_PACKET_POOL *pool_ptr, NX_FTP_CLIENT_REQUEST *client_request_ptr, ULONG block_size)
 {
@@ -6609,14 +6286,6 @@ UCHAR       *buffer_ptr;
 /*                                                                        */ 
 /*   _nx_ftp_server_data_process            Process client write data     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_ftp_server_block_header_retrieve(NX_FTP_CLIENT_REQUEST *ftp_client_ptr, NX_PACKET *packet_ptr)
 {
@@ -6795,20 +6464,6 @@ NX_PACKET   *last_packet;
 /*    _nx_ftp_server_command_process                                      */ 
 /*                                   Process command                      */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the size check,   */
-/*                                            resulting in version 6.1.7  */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            corrected the pad character,*/
-/*                                            resulting in version 6.1.8  */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_ftp_server_number_to_ascii(UCHAR *buffer_ptr, UINT buffer_size, UINT number, UCHAR pad)
 {
@@ -6882,12 +6537,6 @@ UINT    size;
 /*    _nx_ftp_server_data_disconnect_process                              */
 /*                                          Disconnect data socket        */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-15-2021     Yuxin Zhou               Initial Version 6.1.9         */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_ftp_server_data_socket_cleanup(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_CLIENT_REQUEST *client_req_ptr)
 {

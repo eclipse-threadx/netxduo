@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -64,14 +64,6 @@
 /*                                          Process an incoming TLS 1.3   */
 /*                                            PSK extension               */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED) && defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES)
 UINT _nx_secure_tls_psk_identity_find(NX_SECURE_TLS_SESSION *tls_session, UCHAR **psk_data, UINT *psk_length,
@@ -89,12 +81,18 @@ UINT i;
     /* Loop through all PSKs, looking for a matching identity string. */
     for (i = 0; i < psk_list_size; ++i)
     {
-        /* Save off the PSK and its length. */
-        compare_val = (UINT)NX_SECURE_MEMCMP(tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_id, psk_identity, identity_length);
+        /* GHSA-8h38-qjhh-mf2h */
+        /* PSK length must be equal */
+    	  if (identity_length != tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_id_size) {
+    		    continue;
+    	  }
+      
+        /* compare the PSK using stored psk length */
+        compare_val = (UINT)NX_SECURE_MEMCMP(tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_id, psk_identity, 
+          tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_id_size);
 
-        /* See if the identity matched, and the length is the same (without the length, we could have a
-           matching prefix which could be a possible attack vector... */
-        if (compare_val == 0 && identity_length == tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_id_size)
+        /* See if the identity matched */
+        if (compare_val == 0)
         {
             /* Found a matching identity, return the associated PSK. */
             *psk_data = tls_session -> nx_secure_tls_credentials.nx_secure_tls_psk_store[i].nx_secure_tls_psk_data;

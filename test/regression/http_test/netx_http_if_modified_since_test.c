@@ -1,10 +1,10 @@
-/* This case tests filed If-Modified-field. 
- * if the requested variant has not been modified since the time specified in this field, 
- * an entity will not be returned from the server; instead, a 304 (not modified) response 
+/* This case tests filed If-Modified-field.
+ * if the requested variant has not been modified since the time specified in this field,
+ * an entity will not be returned from the server; instead, a 304 (not modified) response
  * will be returned without any message-body.
  *
- * In this case, client get the index.htm with If-Modified-Since = 20130101, and index.htm is 
- * modified on 2013...., So server should send 304. 
+ * In this case, client get the index.htm with If-Modified-Since = 20130101, and index.htm is
+ * modified on 2013...., So server should send 304.
  * */
 
 #include    "tx_api.h"
@@ -226,7 +226,7 @@ NX_PACKET       *recv_packet;
 NX_PACKET       *my_packet;
 CHAR            *buffer_ptr;
 
-    /* Format the RAM disk - the memory for the RAM disk was setup in 
+    /* Format the RAM disk - the memory for the RAM disk was setup in
       tx_application_define above.  This must be set up before the client(s) start
       sending requests. */
     status = fx_media_format(&ram_disk, 

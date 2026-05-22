@@ -212,7 +212,7 @@ CHAR    *pointer;
         error_counter++;
 
 
-    /* The demo client username and password is the authentication 
+    /* The demo client username and password is the authentication
    data used when the server attempts to authentication the client. */
 
 #if defined(__PRODUCT_NETXDUO__) 

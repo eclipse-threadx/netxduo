@@ -1,4 +1,4 @@
-/* This NetX test concentrates on the IPv6 process ICMPv6 Option for MTU 0.  
+/* This NetX test concentrates on the IPv6 process ICMPv6 Option for MTU 0.
    change last two bytes from 0x05, 0x00 to 0x00, 0x00  */
 
 #include   "tx_api.h"

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -86,17 +86,6 @@ static UINT _nx_secure_x509_crl_extensions_parse(const UCHAR *buffer, ULONG leng
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            removed dependency on TLS,  */
-/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_revocation_list_parse(const UCHAR *buffer, UINT length,
@@ -265,14 +254,6 @@ UINT         status;
 /*                                                                        */
 /*    _nx_secure_x509_certificate_revocation_list_parse                   */
 /*                                          Parse revocation list         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_tbscert_list_parse(const UCHAR *buffer, ULONG length,
@@ -451,14 +432,6 @@ UINT         status;
 /*    _nx_secure_x509_crl_tbscert_list_parse                              */
 /*                                          Parse TBSCertList in crl      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_signature_algorithm_parse(const UCHAR *buffer, ULONG length,
                                                           UINT *bytes_processed,
@@ -574,17 +547,6 @@ UCHAR        oid_found = NX_CRYPTO_FALSE;
 /*    _nx_secure_x509_certificate_revocation_list_parse                   */
 /*                                          Parse revocation list         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_signature_data_parse(const UCHAR *buffer, ULONG length,
                                                      UINT *bytes_processed, NX_SECURE_X509_CRL *crl)
@@ -659,14 +621,6 @@ UINT         status;
 /*                                                                        */
 /*    _nx_secure_x509_crl_tbscert_list_parse                              */
 /*                                          Parse TBSCertList in crl      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_version_parse(const UCHAR *buffer, ULONG length,
@@ -747,14 +701,6 @@ UINT         status;
 /*    _nx_secure_x509_crl_tbscert_list_parse                              */
 /*                                          Parse TBSCertList in crl      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_issuer_parse(const UCHAR *buffer, ULONG length,
                                              UINT *bytes_processed, NX_SECURE_X509_CRL *crl)
@@ -825,14 +771,6 @@ UINT         status;
 /*                                                                        */
 /*    _nx_secure_x509_crl_tbscert_list_parse                              */
 /*                                          Parse TBSCertList in crl      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_update_times_parse(const UCHAR *buffer, ULONG length,
@@ -936,14 +874,6 @@ const UCHAR *current_buffer;
 /*    _nx_secure_x509_crl_tbscert_list_parse                              */
 /*                                          Parse TBSCertList in crl      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_revoked_certs_list_parse(const UCHAR *buffer, ULONG length,
                                                          UINT *bytes_processed,
@@ -1018,14 +948,6 @@ const UCHAR *current_buffer;
 /*                                                                        */
 /*    _nx_secure_x509_crl_tbscert_list_parse                              */
 /*                                          Parse TBSCertList in crl      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_crl_extensions_parse(const UCHAR *buffer, ULONG length,

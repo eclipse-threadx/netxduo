@@ -93,8 +93,8 @@ UCHAR   *pointer;
     /* Initialize the NetX system.  */
     nx_system_initialize();
 
-    /* Note: The data portion of a packet is exactly 512 bytes, but the packet payload size must 
-       be at least 580 bytes. The remaining bytes are used for the UDP, IP, and Ethernet 
+    /* Note: The data portion of a packet is exactly 512 bytes, but the packet payload size must
+       be at least 580 bytes. The remaining bytes are used for the UDP, IP, and Ethernet
        headers and byte alignment requirements. */
 
     status =  nx_packet_pool_create(&server_pool, "TFTP Server Packet Pool", NX_TFTP_PACKET_SIZE, pointer, 8192);
@@ -153,8 +153,8 @@ UCHAR   *pointer;
 
     /* Create a packet pool for the TFTP client.  */
 
-    /* Note: The data portion of a packet is exactly 512 bytes, but the packet payload size must 
-       be at least 580 bytes. The remaining bytes are used for the UDP, IP, and Ethernet 
+    /* Note: The data portion of a packet is exactly 512 bytes, but the packet payload size must
+       be at least 580 bytes. The remaining bytes are used for the UDP, IP, and Ethernet
        headers and byte alignment requirements. */
 
     status =  nx_packet_pool_create(&client_pool, "TFTP Client Packet Pool", NX_TFTP_PACKET_SIZE, pointer, 8192);
@@ -271,9 +271,9 @@ NX_PACKET   *my_packet;
 UINT        status;
 
 
-    /* The TFTP services used below include the NetX equivalent service which will work with 
+    /* The TFTP services used below include the NetX equivalent service which will work with
        NetX Duo TFTP.  However, it is recommended for developers to port their applications
-       to the newer services that take the NXD_ADDRESS type and support both IPv4 and IPv6 
+       to the newer services that take the NXD_ADDRESS type and support both IPv4 and IPv6
        communication.
     */
 

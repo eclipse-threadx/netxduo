@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -86,7 +86,7 @@
                                         }
 
 
-/* Define the padding array.  This is used to pad the message such that its length is 
+/* Define the padding array.  This is used to pad the message such that its length is
    64 bits shy of being a multiple of 512 bits long.  */
 
 UCHAR   _nx_md5_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -123,14 +123,6 @@ UCHAR   _nx_md5_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 /*                                                                        */ 
 /*    NetX Applications                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_md5_initialize(NX_MD5 *context)
 {
@@ -188,15 +180,6 @@ UINT  _nx_md5_initialize(NX_MD5 *context)
 /*                                                                        */ 
 /*    NetX Applications                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_md5_update(NX_MD5 *context, UCHAR *input_ptr, UINT input_length)
 {
@@ -213,7 +196,7 @@ ULONG   needed_fill_bytes;
     if (input_length == 0)
         return(NX_SUCCESS);
 
-    /* Calculate the current byte count mod 64. Note the reason for the 
+    /* Calculate the current byte count mod 64. Note the reason for the
        shift by 3 is to account for the 8 bits per byte.  */
     current_bytes =  (context -> nx_md5_bit_count[0] >> 3) & 0x3F;
 
@@ -240,7 +223,7 @@ ULONG   needed_fill_bytes;
 
         /* Yes, we can complete the buffer and transform it.  */
 
-        /* Copy the appropriate portion of the input buffer into the internal 
+        /* Copy the appropriate portion of the input buffer into the internal
            buffer of the context.  */
         memcpy((void *) &(context -> nx_md5_buffer[current_bytes]), (void *) input_ptr, needed_fill_bytes); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
 
@@ -315,14 +298,6 @@ ULONG   needed_fill_bytes;
 /*                                                                        */ 
 /*    NetX Applications                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_md5_digest_calculate(NX_MD5 *context, UCHAR digest[16])
 {
@@ -410,14 +385,6 @@ ULONG   padding_bytes;
 /*                                                                        */ 
 /*    NetX Applications                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_md5_process_buffer(NX_MD5 *context, UCHAR buffer[64])
 {

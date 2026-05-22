@@ -1,4 +1,4 @@
-/* This demoonstrates sharing a port between an IPv4 and IPv6 TCP server socket to send 
+/* This demoonstrates sharing a port between an IPv4 and IPv6 TCP server socket to send
    and receive packets (e.g emulates a socket that can send/receive iPv4 and Ipv6 packets)
    using a simulated Ethernet driver.  */
 
@@ -316,7 +316,7 @@ CHAR        Server_Rcv_Buffer[100];
                     if (status == ERROR)
                     {
                         /* This is a blocking socket. If no data is received, but the connection is still good,
-                           the EAGAIN error is set. If it was a non blocking socket, the EWOULDBLOCK socket 
+                           the EAGAIN error is set. If it was a non blocking socket, the EWOULDBLOCK socket
                            error is set. */
                         if (errno == EAGAIN) 
                         {
@@ -463,7 +463,7 @@ CHAR        Server_Rcv_Buffer[100];
     ip_address.nxd_ip_address.v6[2] = 0;
     ip_address.nxd_ip_address.v6[3] = 0x101;
     
-    /* Set the host global IP address. We are assuming a 64 
+    /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&bsd_ip_server, 0, &ip_address, 64, &address_index);
 
@@ -576,7 +576,7 @@ CHAR        Server_Rcv_Buffer[100];
                     if ((status == ERROR) || (status == 0))
                     {
                         /* This is a blocking socket. If no data is received, but the connection is still good,
-                           the EAGAIN error is set. If it was a non blocking socket, the EWOULDBLOCK socket 
+                           the EAGAIN error is set. If it was a non blocking socket, the EWOULDBLOCK socket
                            error is set. */
                         if (errno == EAGAIN) 
                         {
@@ -707,7 +707,7 @@ UINT        address_index;
     ip_address.nxd_ip_address.v6[2] = 0;
     ip_address.nxd_ip_address.v6[3] = 0x1235;
     
-    /* Set the host global IP address. We are assuming a 64 
+    /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&bsd_ip_client, 0, &ip_address, 64, &address_index);
 

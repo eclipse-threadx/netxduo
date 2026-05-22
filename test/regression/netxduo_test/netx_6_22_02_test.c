@@ -1,4 +1,4 @@
-/* 6.22.02 If RECEIVE call arrives in FINWAIT-2 state, 
+/* 6.22.02 If RECEIVE call arrives in FINWAIT-2 state,
    TCP MUST reassemble queued incoming segments and return to the application.  */
 
 /* Procedure

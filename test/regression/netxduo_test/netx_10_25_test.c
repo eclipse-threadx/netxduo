@@ -1,4 +1,4 @@
-/* 10.25 TCP, in ESTABLISHED state, SHOULD piggyback acknowledgement with 
+/* 10.25 TCP, in ESTABLISHED state, SHOULD piggyback acknowledgement with
 a segment being transmitted (whenever possible) without incurring undue delay.  */
 
 /* Procedure

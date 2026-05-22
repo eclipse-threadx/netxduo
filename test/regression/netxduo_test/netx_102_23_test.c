@@ -4,7 +4,7 @@
    1. Connection.
    2. Client sends a data packet.
    3. Server receives the packet and replies an ACK packet.
-   4. Check cwnd += min(N, MSS). N is acked bytes. 
+   4. Check cwnd += min(N, MSS). N is acked bytes.
    5. Client sends a data packet again.
    6. Set ssthresh = cwnd - 10.
    7. Server starts congestion, after receives the packet, check cwnd = cwnd + MSS * MSS / cwnd.  */

@@ -1,8 +1,8 @@
 /* Test the process of NA packet. Section 7.2.5, RFC 4861
- * 1. Inject RA packet with TLLA. 
- * 2. Inject NA packet with different LLA. All flags are not set. 
+ * 1. Inject RA packet with TLLA.
+ * 2. Inject NA packet with different LLA. All flags are not set.
  * 3. Router should not be modified since overwrite bit is not set and TLLA is different.
- * 4. Inject NA packet with no TLLA. All flags are not set. 
+ * 4. Inject NA packet with no TLLA. All flags are not set.
  * 5. Router should be deleted since no TLLA. */
 
 #include    "nx_api.h"   

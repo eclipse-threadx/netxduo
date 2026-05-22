@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -68,12 +68,6 @@ const NX_CRYPTO_METHOD **_nx_secure_x509_ecc_curves;
 /*                                                                        */
 /*    _nx_secure_x509_certificate_verify    Verify a certificate          */
 /*    _nx_secure_x509_crl_verify            Verify revocation list        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-02-2021     Timothy Stapko           Initial Version 6.1.6         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_find_curve_method(USHORT named_curve, const NX_CRYPTO_METHOD **curve_method)

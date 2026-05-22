@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -74,37 +74,6 @@ static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 /*                                                                        */
 /*    _nx_secure_tls_session_receive_records                              */
 /*                                          Receive TLS records           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            supported chained packet,   */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1    */
-/* 02-02-2021      Timothy Stapko           Modified comment(s), added    */
-/*                                            support for fragmented TLS  */
-/*                                            Handshake messages,         */
-/*                                            resulting in version 6.1.4  */
-/* 08-02-2021      Timothy Stapko           Modified comment(s), checked  */
-/*                                            TLS state before processing,*/
-/*                                            resulting in version 6.1.8  */
-/* 10-15-2021      Timothy Stapko           Modified comment(s), fixed    */
-/*                                            TLS 1.3 compile issue,      */
-/*                                            resulting in version 6.1.9  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            removed unnecessary code,   */
-/*                                            resulting in version 6.1.11 */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            checked seq number overflow,*/
-/*                                            improved buffer length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1.12 */
-/*  03-08-2023     Tiejun Zhou              Modified comment(s), and      */
-/*                                            corrected data cleanup,     */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_record(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
@@ -631,12 +600,6 @@ NX_PACKET *decrypted_packet;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_process_record         Process TLS records           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  09-30-2020     Timothy Stapko           Initial Version 6.1           */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr)

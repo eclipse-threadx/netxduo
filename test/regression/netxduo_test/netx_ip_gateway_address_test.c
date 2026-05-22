@@ -203,7 +203,7 @@ NX_PACKET  *packet_ptr;
     }
 #endif /* NX_DISABLE_IP_INFO */
 
-    /* Send a packet out of network through the second interface. 
+    /* Send a packet out of network through the second interface.
      * But the default gateway is set at first interface. */
     nx_udp_socket_source_send(&socket_0, packet_ptr, IP_ADDRESS(1, 4, 3, 5), 12, 1);
 

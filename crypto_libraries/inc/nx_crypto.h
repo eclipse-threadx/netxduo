@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -35,27 +35,6 @@
 /*                                                                        */
 /*    This file defines the NetX Security Encryption component.           */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            disabled unaligned access   */
-/*                                            by default, and added       */
-/*                                            crypto standalone support,  */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            Renamed FIPS symbol and     */
-/*                                            fips memory functions,      */
-/*                                            resulting in version 6.1.7  */
-/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
-/*                                            added missing symbol,       */
-/*                                            resulting in version 6.1.10 */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            cleaned up memory functions,*/
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef _NX_CRYPTO_H_
@@ -70,7 +49,7 @@ extern   "C" {
 
 #endif
 
-/* Default to disabling standalone use of nx_crypto. To use nx_crypto in 
+/* Default to disabling standalone use of nx_crypto. To use nx_crypto in
    standalone define NX_CRYPTO_STANDALONE_ENABLE*/
 /*
 #define NX_CRYPTO_STANDALONE_ENABLE

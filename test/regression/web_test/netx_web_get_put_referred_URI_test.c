@@ -1,5 +1,5 @@
 /* This case tests the ability of the HTTP Client to accept a URI resource string that does not
-   designate a root directory based file location.  If the string begins with an HTTP: or HTTPS: (not 
+   designate a root directory based file location.  If the string begins with an HTTP: or HTTPS: (not
    case sensitive) the HTTP Client will send the string as is. (Note this does not guarantee the HTTP server
    will forward to the referred location.) Otherwise the URI is processed as if it is root directory based,
    and a leading forward slash '/' is appended if one is missing.
@@ -407,7 +407,7 @@ UINT            server_port = NX_WEB_HTTP_SERVER_PORT;
                     512,                          // Sector size
                     8,                            // Sectors per cluster
                     1,                            // Heads
-                    1);                           // Sectors per track   
+                    1);                           // Sectors per track
     
     /* Open the RAM disk.  */
     status = fx_media_open(&ram_disk, "RAM DISK", _fx_ram_driver, ram_disk_memory, media_memory, sizeof(media_memory)) ;

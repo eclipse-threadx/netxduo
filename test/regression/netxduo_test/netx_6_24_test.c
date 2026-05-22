@@ -2,7 +2,7 @@
 
 /* Procedure
    1. Connection.
-   2. Server calls disconnect command and sends a FIN packet.  
+   2. Server calls disconnect command and sends a FIN packet.
    3. Client replies the FIN packet and becomes CLOSE_WAIT state.
    4. Client calls receive command and checks the status is NX_NOT_CONNECTED.  */
 

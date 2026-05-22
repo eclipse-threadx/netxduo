@@ -1,5 +1,5 @@
 /* Send ARP packets using the deferred receive service. This test checks that duplicate ARP entries are
-   not created, that existing matching ARP entries will be updated regardless of message type, and ARP probe 
+   not created, that existing matching ARP entries will be updated regardless of message type, and ARP probe
    packets (zero sender IP address) are not entered into the ARP cache. */
 
 #include    "nx_api.h"   
@@ -47,9 +47,9 @@ static char arp_request_pkt[] = {
 };
 
 
-/* Second ARP request packet  
+/* Second ARP request packet
  * src MAC: 20:0b:c7:94:45:97  The test is to check if the 20:0b:c7:94:45:96 entry is updated to 20:0b:c7:94:45:97
-                               there should not be duplicate entries for 1.2.3.5. 
+                               there should not be duplicate entries for 1.2.3.5.
  * src IP: 1.2.3.5.
  * target MAC: 00:00:00:00:00:00
  * target IP: 1.2.3.4. */
@@ -101,8 +101,8 @@ static char arp_probe_pkt[] = {
 };
 
 
-/* Third ARP request packet -- The test is to check that NetX does not create a duplicate entry for 1.2.3.5. 
- * src MAC: 20:0b:c7:94:45:97  
+/* Third ARP request packet -- The test is to check that NetX does not create a duplicate entry for 1.2.3.5.
+ * src MAC: 20:0b:c7:94:45:97
  * src IP: 1.2.3.5.
  * target MAC: 00:00:00:00:00:00
  * target IP: 1.2.3.4. */

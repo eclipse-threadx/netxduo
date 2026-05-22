@@ -79,12 +79,12 @@ CHAR    *pointer;
         
 #ifdef NX_DNS_CLIENT_USER_CREATE_PACKET_POOL   
 
-    /* Create the packet pool for the DNS Client to send packets. 
+    /* Create the packet pool for the DNS Client to send packets.
 
-        If the DNS Client is configured for letting the host application create 
+        If the DNS Client is configured for letting the host application create
         the DNS packet pool, (see NX_DNS_CLIENT_USER_CREATE_PACKET_POOL option), see
-       nx_dns_create() for guidelines on packet payload size and pool size. 
-       packet traffic for NetX Duo processes. 
+       nx_dns_create() for guidelines on packet payload size and pool size.
+       packet traffic for NetX Duo processes.
     */
     status =  nx_packet_pool_create(&client_pool, "DNS Client Packet Pool", NX_DNS_PACKET_PAYLOAD, pointer, NX_DNS_PACKET_POOL_SIZE);
 

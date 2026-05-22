@@ -1,26 +1,26 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
-/* 
+/*
 
-   This is a small demonstration of the high-performance NetX TCP/IP stack 
+   This is a small demonstration of the high-performance NetX TCP/IP stack
    MQTT client.
 
    This demo program establishes a connection to the Mosquitto server at IP address
    10.0.10.1.  It subscribes to a topic, send a message to the same topic.
-   The application shall be able to receive the same message from the broker. 
+   The application shall be able to receive the same message from the broker.
 
    This demo assumes that the NetX Duo TCP/IP stack has been properly configured,
    with TCP module enabled.   The entry function is "thread_mqtt_entry".  Caller
-   needs to pass in the IP instance and an instance of a valid packet pool. 
+   needs to pass in the IP instance and an instance of a valid packet pool.
 */
 
 #include "nx_api.h"

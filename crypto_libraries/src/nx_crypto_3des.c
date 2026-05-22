@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -56,18 +56,6 @@
 /*                                                                        */
 /*    _nx_crypto_method_3des_init           Init the method for 3DES      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Timothy Stapko           Modified comments(s), added   */
-/*                                            warning supression for      */
-/*                                            obsolete DES/3DES,          */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_3des_key_set(NX_CRYPTO_3DES *context, UCHAR key[24])
 {
@@ -117,18 +105,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_key_set(NX_CRYPTO_3DES *context, UCHAR key[
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_3des_operation      Handle 3DES encrypt or decrypt*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Timothy Stapko           Modified comments(s), added   */
-/*                                            warning supression for      */
-/*                                            obsolete DES/3DES,          */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_3des_encrypt(NX_CRYPTO_3DES *context, UCHAR source[8],
@@ -183,18 +159,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_encrypt(NX_CRYPTO_3DES *context, UCHAR sour
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_3des_operation      Handle 3DES encrypt or decrypt*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Timothy Stapko           Modified comments(s), added   */
-/*                                            warning supression for      */
-/*                                            obsolete DES/3DES,          */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_3des_decrypt(NX_CRYPTO_3DES *context, UCHAR source[8],
@@ -253,20 +217,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_3des_decrypt(NX_CRYPTO_3DES *context, UCHAR sour
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Timothy Stapko           Modified comments(s), added   */
-/*                                            warning supression for      */
-/*                                            obsolete DES/3DES,          */
-/*                                            resulting in version 6.1.11 */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
@@ -343,14 +293,6 @@ NX_CRYPTO_3DES *triple_des_context_ptr;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_cleanup(VOID *crypto_metadata)
 {
@@ -415,20 +357,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_cleanup(VOID *crypto_metadata)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Timothy Stapko           Modified comments(s), added   */
-/*                                            warning supression for      */
-/*                                            obsolete DES/3DES,          */
-/*                                            resulting in version 6.1.11 */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_3des_operation(UINT op,       /* Encrypt, Decrypt, Authenticate */

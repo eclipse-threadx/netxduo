@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -87,14 +87,6 @@ NX_CALLER_CHECKING_EXTERNS
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_create(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_IP *ip_ptr, CHAR *name_ptr, 
                        NX_PACKET_POOL *packet_pool_ptr, VOID *stack_ptr, ULONG stack_size,
@@ -181,14 +173,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_create(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_IP *ip_ptr, CHAR *name_ptr, 
                        NX_PACKET_POOL *packet_pool_ptr, VOID *stack_ptr,  ULONG stack_size,
@@ -396,14 +380,6 @@ NX_DHCPV6_CLIENT    *dhcpv6_client_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_option_request_handler_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
                                                     VOID (*dhcpv6_option_request_handler_extended)(struct NX_DHCPV6_SERVER_STRUCT *dhcpv6_server_ptr, UINT option_request, 
@@ -460,14 +436,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_option_request_handler_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
                                                    VOID (*dhcpv6_option_request_handler_extended)(struct NX_DHCPV6_SERVER_STRUCT *dhcpv6_server_ptr, UINT option_request, 
@@ -530,14 +498,6 @@ UINT  _nx_dhcpv6_server_option_request_handler_set(NX_DHCPV6_SERVER *dhcpv6_serv
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcpv6_add_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, ULONG message_xid, NXD_ADDRESS *client_address, UINT client_state, 
                                   ULONG IP_lease_time_accrued, ULONG valid_lifetime, UINT duid_type, UINT duid_hardware, ULONG physical_address_msw, 
@@ -651,15 +611,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_add_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, ULONG message_xid, NXD_ADDRESS *client_address, UINT client_state, 
                                   ULONG IP_lease_time_accrued, ULONG valid_lifetime, UINT duid_type,  UINT duid_hardware, ULONG physical_address_msw, 
@@ -851,14 +802,6 @@ NX_DHCPV6_CLIENT *dhcpv6_client_ptr;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcpv6_retrieve_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, ULONG *message_xid, NXD_ADDRESS *client_address, UINT *client_state, 
                                   ULONG *IP_lease_time_accrued, ULONG *valid_lifetime, UINT *duid_type,  UINT *duid_hardware, ULONG *physical_address_msw, 
@@ -948,15 +891,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), corrected*/
-/*                                            the length of identifier,   */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_retrieve_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, ULONG *message_xid, NXD_ADDRESS *client_address, UINT *client_state, 
                                   ULONG *IP_lease_time_accrued, ULONG *valid_lifetime, UINT *duid_type,  UINT *duid_hardware, ULONG *physical_address_msw, 
@@ -1098,14 +1032,6 @@ INT              length;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcpv6_add_ip_address_lease(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, NXD_ADDRESS *lease_IP_address, 
                                       ULONG T1, ULONG T2, ULONG valid_lifetime, ULONG preferred_lifetime)
@@ -1191,14 +1117,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_add_ip_address_lease(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, NXD_ADDRESS *lease_IP_address, 
                                        ULONG T1, ULONG T2, ULONG valid_lifetime, ULONG preferred_lifetime)
@@ -1320,14 +1238,6 @@ UINT                    prefix_length;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcpv6_retrieve_ip_address_lease(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, NXD_ADDRESS *lease_IP_address, 
                                        ULONG *T1, ULONG *T2, ULONG *valid_lifetime, ULONG *preferred_lifetime)
@@ -1394,14 +1304,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_retrieve_ip_address_lease(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT table_index, NXD_ADDRESS *lease_IP_address, 
                                        ULONG *T1, ULONG *T2, ULONG *valid_lifetime, ULONG *preferred_lifetime)
@@ -1467,14 +1369,6 @@ NX_DHCPV6_ADDRESS_LEASE *lease_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_delete(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 {
@@ -1534,14 +1428,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_delete(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 {
@@ -1610,14 +1496,6 @@ UINT  _nx_dhcpv6_server_delete(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_create_ip_address_range(NX_DHCPV6_SERVER *dhcpv6_server_ptr,  
                                          NXD_ADDRESS *start_ipv6_address, NXD_ADDRESS *end_ipv6_address,
@@ -1696,14 +1574,6 @@ UINT     status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_create_ip_address_range(NX_DHCPV6_SERVER *dhcpv6_server_ptr,  
                                          NXD_ADDRESS *start_ipv6_address, NXD_ADDRESS *end_ipv6_address,
@@ -1826,14 +1696,6 @@ UINT                         ga_address_index;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_reserve_ip_address_range(NX_DHCPV6_SERVER *dhcpv6_server_ptr,  
                                          NXD_ADDRESS *start_ipv6_address, NXD_ADDRESS *end_ipv6_address,
@@ -1911,14 +1773,6 @@ UINT                        status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_reserve_ip_address_range(NX_DHCPV6_SERVER *dhcpv6_server_ptr,  
                                          NXD_ADDRESS *start_ipv6_address, NXD_ADDRESS *end_ipv6_address,
@@ -2057,14 +1911,6 @@ UINT                         ga_address_index;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_create_dns_address(NX_DHCPV6_SERVER *dhcpv6_server_ptr,  NXD_ADDRESS *dns_ipv6_address)
 {
@@ -2126,14 +1972,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_create_dns_address(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NXD_ADDRESS *dns_ipv6_address)
 {
@@ -2202,14 +2040,6 @@ UINT                         ga_address_index;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT    _nxe_dhcpv6_set_server_duid(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT duid_type, UINT hardware_type, 
                                       ULONG mac_address_msw, ULONG mac_address_lsw, ULONG time)
@@ -2285,15 +2115,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT    _nx_dhcpv6_set_server_duid(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT duid_type, UINT hardware_type, 
                                       ULONG mac_address_msw, ULONG mac_address_lsw, ULONG time)
@@ -2359,7 +2180,7 @@ NX_DHCPV6_SVR_DUID  *duid_ptr;
     else if (duid_ptr -> nx_duid_type == NX_DHCPV6_SERVER_DUID_TYPE_VENDOR_ASSIGNED)
     {
 
-        /* Set the length to include the duid type, hardware type, enterprise number and 
+        /* Set the length to include the duid type, hardware type, enterprise number and
            variable length private identifier. */
         duid_ptr -> nx_option_length = sizeof(USHORT) + sizeof(ULONG) + sizeof(NX_DHCPV6_SERVER_DUID_VENDOR_ASSIGNED_ID);
     }
@@ -2408,15 +2229,6 @@ NX_DHCPV6_SVR_DUID  *duid_ptr;
 /*                                                                        */ 
 /*    _nx_dhcpv6_send_response_to_client Send server response to client   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_status_ptr, UINT flag)
 {
@@ -2557,15 +2369,6 @@ UINT    _nx_dhcpv6_prepare_iana_status(NX_DHCPV6_SERVER_IANA_STATUS *dhcpv6_stat
 /*                                                                        */ 
 /*    _nx_dhcpv6_send_response_to_client Send server response to client   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT    _nx_dhcpv6_add_preference(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr, UCHAR *buffer_ptr, UINT *index)
 {
@@ -2651,15 +2454,6 @@ ULONG   message_word;
 /*    _nx_dhcpv6_send_request           Compiles and sends the server     */
 /*                                            DHCPv6 response             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_add_option_requests(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr, 
                                    UCHAR *buffer_ptr, UINT *index) 
@@ -2736,7 +2530,7 @@ NX_DHCPV6_SERVER_OPTIONREQUEST *dhcpv6_option_ptr;
         {
 
             /* Yes, so call it.  This handler shall fill the buffer with the requested
-               option data (if available).  
+               option data (if available).
 
                Note: The handler must update the index pointing to the end of data in the buffer
                after it inserts the data. This is done for the DNS server option above.  */
@@ -2760,7 +2554,7 @@ NX_DHCPV6_SERVER_OPTIONREQUEST *dhcpv6_option_ptr;
         {
 
             /* Yes, so call it.  This handler shall fill the buffer with the requested
-               option data (if available).  
+               option data (if available).
 
                Note: The handler must update the index pointing to the end of data in the buffer
                after it inserts the data. This is done for the DNS server option above.  */
@@ -2822,14 +2616,6 @@ NX_DHCPV6_SERVER_OPTIONREQUEST *dhcpv6_option_ptr;
 /*                                                                        */ 
 /*      Application Code                                                  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcpv6_server_interface_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT iface_index, UINT ga_address_index)
 {
@@ -2897,14 +2683,6 @@ UINT status;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_server_interface_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT iface_index, UINT ga_address_index)
 {
@@ -2946,14 +2724,6 @@ UINT _nx_dhcpv6_server_interface_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT i
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcpv6_server_lease_timeout_entry(ULONG dhcpv6_server_ptr_value)
 {
@@ -2964,7 +2734,7 @@ NX_DHCPV6_SERVER *dhcpv6_server_ptr;
     /* Setup DHCPv6 Server pointer.  */
     NX_TIMER_EXTENSION_PTR_GET(dhcpv6_server_ptr, NX_DHCPV6_SERVER, dhcpv6_server_ptr_value)
 
-    /* Signal the DHCPv6 Server it is time to do check the lease time remaining on 
+    /* Signal the DHCPv6 Server it is time to do check the lease time remaining on
        clients it has leased IP addresses to.  */
     tx_event_flags_set(&(dhcpv6_server_ptr -> nx_dhcpv6_server_timer_events), NX_DHCPV6_IP_LEASE_CHECK_PERIODIC_EVENT, TX_OR);
 
@@ -3006,14 +2776,6 @@ NX_DHCPV6_SERVER *dhcpv6_server_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_resume(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 {
@@ -3071,14 +2833,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_resume(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 {
@@ -3167,14 +2921,6 @@ UINT status;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcpv6_server_session_timeout_entry(ULONG dhcpv6_server_ptr_value)
 {
@@ -3225,14 +2971,6 @@ NX_DHCPV6_SERVER *dhcpv6_server_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_start(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 {
@@ -3295,14 +3033,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_start(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 {
@@ -3474,14 +3204,6 @@ UINT        if_index;
 /*                                                                        */ 
 /*    Threads                                                             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcpv6_server_socket_receive_notify(NX_UDP_SOCKET *socket_ptr)
 {
@@ -3531,14 +3253,6 @@ NX_DHCPV6_SERVER *dhcpv6_server_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcpv6_server_suspend(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 {
@@ -3596,14 +3310,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_suspend(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 {
@@ -3679,14 +3385,6 @@ UINT  _nx_dhcpv6_server_suspend(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 /*                                                                        */ 
 /*    ThreadX                                                             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcpv6_server_thread_entry(ULONG info)
 {
@@ -3853,20 +3551,6 @@ NXD_ADDRESS             client_address;
 /*                                                                        */ 
 /*    _nx_dhcpv6_listen_for_messages       Waits to receive client message*/
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), and      */
-/*                                            updated client record on    */
-/*                                            each message,               */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_extract_packet_information(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT **dhcpv6_client_ptr, NX_PACKET *packet_ptr, 
                                                    UINT iface_index, NXD_ADDRESS source_address, NXD_ADDRESS destination_address)
@@ -4154,13 +3838,13 @@ UINT                matching;
     if (temp_client_rec.nx_dhcpv6_response_back_from_server == NX_DHCPV6_MESSAGE_TYPE_DHCPSILENT) 
     {
 
-        /* Not responding to client. So do not assign an IP address or update 
+        /* Not responding to client. So do not assign an IP address or update
            the client record with invalid message. */
         return  NX_SUCCESS;
     }
 
-    /* Look up the client record in the server table. If not found, or this is 
-       a new request e.g. a SOLICIT message, create a new client entry in the table and 
+    /* Look up the client record in the server table. If not found, or this is
+       a new request e.g. a SOLICIT message, create a new client entry in the table and
        fill in the extracted information. */
     add_on = NX_FALSE;
 
@@ -4196,7 +3880,7 @@ UINT                matching;
     if (matching)
     {
 
-        /*  This is a different message from the Client. Before updating the record check the client global address 
+        /*  This is a different message from the Client. Before updating the record check the client global address
             to be the same as what the server assigned or is offering to assign. */
         if (!CHECK_IPV6_ADDRESSES_SAME(&temp_client_rec.nx_dhcpv6_ia.nx_global_address.nxd_ip_address.v6[0], 
                                        &(*dhcpv6_client_ptr )-> nx_dhcpv6_ia.nx_global_address.nxd_ip_address.v6[0]))
@@ -4252,14 +3936,6 @@ UINT                matching;
 /*    _nx_dhcpv6_listen_for_messages       Listen for, process and respond*/
 /*                                            to DHCPV6 Client messages   */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_validate_client_message(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr)
 {
@@ -4279,7 +3955,7 @@ UINT                prefix_length;
 
     ga_address_index = dhcpv6_server_ptr -> nx_dhcpv6_server_ga_address_index;
 
-    /* Initialize the response to the client. If the client request is invalid, ignore the request (no response 
+    /* Initialize the response to the client. If the client request is invalid, ignore the request (no response
        from server) or indicate the problem in the IANA status option. */
 
     /* Initialize the IANA status for the SOLICIT request as successfully granted.  */
@@ -4418,7 +4094,7 @@ UINT                prefix_length;
 
                 /* No matching client record found. */
 
-                /* For Release and Decline messages let the client know using the IANA status code that 
+                /* For Release and Decline messages let the client know using the IANA status code that
                    the server has no record of the assigned or requested address for this client.  */
                 if ((dhcpv6_client_ptr -> nx_dhcpv6_message_type == NX_DHCPV6_MESSAGE_TYPE_RELEASE) || 
                     (dhcpv6_client_ptr -> nx_dhcpv6_message_type == NX_DHCPV6_MESSAGE_TYPE_DECLINE))
@@ -4527,7 +4203,7 @@ UINT                prefix_length;
                     return(NX_SUCCESS); 
                 }
     
-                /* More checks will be done when the client rebind address is searched in the server 
+                /* More checks will be done when the client rebind address is searched in the server
                    address table. For now we are ok. */
     
                 break;
@@ -4666,14 +4342,6 @@ UINT                prefix_length;
 /*                                     Parses each option from server     */
 /*                                        reply and updates Client record */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_utility_get_block_option_length(UCHAR *buffer_ptr, ULONG *option, ULONG *length)
 {
@@ -4747,14 +4415,6 @@ UINT  _nx_dhcpv6_server_utility_get_block_option_length(UCHAR *buffer_ptr, ULONG
 /*                                     Parses each option from server     */
 /*                                        reply and updates Client record */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_server_utility_get_data(UCHAR *buffer, UINT size, ULONG *value)
 {
@@ -4813,14 +4473,6 @@ UINT  _nx_dhcpv6_server_utility_get_data(UCHAR *buffer, UINT size, ULONG *value)
 /*                                                                        */ 
 /*    _nx_dhcpv6_convert_delay_to_ticks     Convert seconds to ticks      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 INT  _nx_dhcpv6_server_utility_time_randomize(void)
 {
@@ -4884,14 +4536,6 @@ UINT sign;
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_thread_entry        DHCPv6 Server thread task     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_listen_for_messages(NX_DHCPV6_SERVER *dhcpv6_server_ptr)
 {
@@ -5057,7 +4701,7 @@ ULONG                   bytes_copied = 0;
     if (dhcpv6_client_ptr -> nx_dhcpv6_iana_status.nx_status_code == NX_DHCPV6_STATUS_SUCCESS) 
     {
 
-        /* Yes it will. Check if the client is requesting an IP address, or renewing or rebinding a 
+        /* Yes it will. Check if the client is requesting an IP address, or renewing or rebinding a
            previously assigned one. */
         if ((dhcpv6_client_ptr -> nx_dhcpv6_message_type == NX_DHCPV6_MESSAGE_TYPE_SOLICIT) ||
             (dhcpv6_client_ptr -> nx_dhcpv6_message_type == NX_DHCPV6_MESSAGE_TYPE_REQUEST) ||
@@ -5075,7 +4719,7 @@ ULONG                   bytes_copied = 0;
                 /* Release the mutex.  */
                 tx_mutex_put(&dhcpv6_server_ptr -> nx_dhcpv6_server_mutex);
     
-                /* Return all other errors as completion status. Do not send a message to the client. 
+                /* Return all other errors as completion status. Do not send a message to the client.
                    The server will otherwise wait for the client to try again. Do not clear client record. */
                 return(status);
             }
@@ -5178,7 +4822,7 @@ ULONG                   bytes_copied = 0;
         (dhcpv6_client_ptr -> nx_dhcpv6_message_type == NX_DHCPV6_MESSAGE_TYPE_DECLINE))
     {
 
-        /* This will clear the client record and in the case of 
+        /* This will clear the client record and in the case of
            a release message, return the IP address lease status to available. */
         status = _nx_dhcpv6_clear_client_record(dhcpv6_server_ptr, dhcpv6_client_ptr);
 
@@ -5226,19 +4870,6 @@ ULONG                   bytes_copied = 0;
 /*                                                                        */ 
 /*   _nx_dhcpv6_listen_for_messages         Process Client DHCPv6 messages*/
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1.5  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_send_response_to_client(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr)
 {
@@ -5405,7 +5036,7 @@ ULONG         message_word;
         (dhcpv6_client_ptr -> nx_dhcpv6_message_type == NX_DHCPV6_MESSAGE_TYPE_INFORM_REQUEST))
     {
     
-        /* It does. Did the Client ask for a requested option? Only provide information 
+        /* It does. Did the Client ask for a requested option? Only provide information
            if there are no status errors from the server. */
         if (dhcpv6_client_ptr -> nx_dhcpv6_iana_status.nx_status_code == NX_DHCPV6_STATUS_SUCCESS)
         {
@@ -5489,14 +5120,6 @@ ULONG         message_word;
 /*                                                                        */ 
 /*    _nx_dhcpv6_listen_for_messages        Process Client DHCPv6 messages*/
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_assign_ip_address(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr,
                                    NX_DHCPV6_ADDRESS_LEASE **interface_address_ptr)
@@ -5582,7 +5205,7 @@ UINT                            matching;
                    /* No; Reply back the client request can not be granted. */
                    dhcpv6_client_ptr -> nx_dhcpv6_iana_status.nx_status_code = NX_DHCPV6_STATUS_NO_BINDING;
 
-                   /* Because the server can not validate the IP address to assign, 
+                   /* Because the server can not validate the IP address to assign,
                      set the lifetimes to zero RFC 3315 Sect 18.2.3, 18.2.4. */
                    dhcpv6_client_ptr -> nx_dhcpv6_iana.nx_T1 = 0;
                    dhcpv6_client_ptr -> nx_dhcpv6_iana.nx_T2 = 0;
@@ -5701,14 +5324,6 @@ UINT                            matching;
 /*                                         Extract DHCPv6 info from       */ 
 /*                                             Client message             */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_find_client_record_by_duid(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_SVR_DUID *duid_ptr, 
                                             UINT *record_index, UINT add_on, ULONG message_xid, UINT *matching)
@@ -5726,7 +5341,7 @@ NX_DHCPV6_CLIENT    *client_record_ptr;
     /* Initialize an available slot in the table as outside the boundary (e.g. no slots available). */
     available_index = NX_DHCPV6_MAX_CLIENTS;
 
-    /* Records are not necessarily added and deleted sequentially, 
+    /* Records are not necessarily added and deleted sequentially,
        so search the whole table until a match is found. */
     i = 0;
     status = NX_SUCCESS;
@@ -5836,14 +5451,6 @@ NX_DHCPV6_CLIENT    *client_record_ptr;
 /*                                                                        */ 
 /*    CHECK_IPV6_ADDRESSES_SAME             Does IPv6 address comparison  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_find_ip_address(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr, 
                                 NX_DHCPV6_ADDRESS_LEASE **interface_address_ptr)
@@ -5914,14 +5521,6 @@ NXD_ADDRESS server_table_address;
 /*   _nx_dhcpv6_find_client_record_by_chaddr                              */ 
 /*                                          Find client in server table   */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_clear_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr)
 {
@@ -6027,15 +5626,6 @@ UINT   i;
 /*    _nx_dhcpv6_server_extract_packet_information                        */
 /*                                         Process DHCPv6 data in packet  */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr, 
                                       NX_DHCPV6_CLIENT *from_extracted_client_data_ptr, 
@@ -6088,9 +5678,9 @@ UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
     {
 
 
-        /* Ok to update the existing client record. 
+        /* Ok to update the existing client record.
 
-            Note: if this is a duplicate client request we update the client record just 
+            Note: if this is a duplicate client request we update the client record just
             the same. */
         to_client_data_on_record_ptr -> nx_dhcpv6_id = from_extracted_client_data_ptr -> nx_dhcpv6_id;                               
         to_client_data_on_record_ptr -> nx_dhcpv6_message_xid = from_extracted_client_data_ptr -> nx_dhcpv6_message_xid;             
@@ -6103,7 +5693,7 @@ UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
         memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_iana, &from_extracted_client_data_ptr -> nx_dhcpv6_iana, sizeof(NX_DHCPV6_SERVER_IA_NA)); /* Use case of memcpy is verified. */
         memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_ia, &from_extracted_client_data_ptr -> nx_dhcpv6_ia, sizeof(NX_DHCPV6_SERVER_IA_ADDRESS)); /* Use case of memcpy is verified. */
 
-        /* Update the IANA status option code, length and status message. The DHCPv6 server 
+        /* Update the IANA status option code, length and status message. The DHCPv6 server
             will figure out the actual lenght with the status message text added in later. */
         to_client_data_on_record_ptr -> nx_dhcpv6_iana_status.nx_status_code = from_extracted_client_data_ptr -> nx_dhcpv6_iana_status.nx_status_code;
         to_client_data_on_record_ptr -> nx_dhcpv6_iana_status.nx_option_length = sizeof(USHORT);
@@ -6120,7 +5710,7 @@ UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
 
         memcpy(&to_client_data_on_record_ptr -> nx_dhcpv6_option_request, &from_extracted_client_data_ptr -> nx_dhcpv6_option_request, sizeof(NX_DHCPV6_SERVER_OPTIONREQUEST)); /* Use case of memcpy is verified. */
 
-        /* Update fields based on the state of the client. At this point the client is bound to a 
+        /* Update fields based on the state of the client. At this point the client is bound to a
            valid IP address to the session is 'over'.  Set timeout fields to stop the session timer
            and begin the lease life timer. */
         to_client_data_on_record_ptr -> nx_dhcpv6_client_session_time = 0;
@@ -6183,15 +5773,6 @@ UINT  _nx_dhcpv6_update_client_record(NX_DHCPV6_SERVER *dhcpv6_server_ptr,
 /*    _nx_dhcpv6_server_extract_packet_information                        */
 /*                                      Extracts DHCPV6 data from packet  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_server_process_iana(NX_DHCPV6_CLIENT *dhcpv6_client_ptr, ULONG option_code, UINT option_length, UCHAR *option_data)
 {
@@ -6283,7 +5864,7 @@ UINT  process_ia_option;
         }
 
         /* Check if this is an IA address option request, and if we have already
-           processed an IA in this message (the DHCPv6 server is limited to 
+           processed an IA in this message (the DHCPv6 server is limited to
            one IA per client message). */
         if (iana_option_code == NX_DHCPV6_OP_IA_ADDRESS)
         {
@@ -6354,15 +5935,6 @@ UINT  process_ia_option;
 /*    _nx_dhcpv6_server_extract_packet_information                        */
 /*                                      Extracts DHCPv6 data from packet  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_process_option_request(NX_DHCPV6_CLIENT *dhcpv6_client_ptr, ULONG option_code, UINT option_length, UCHAR *option_data)
 {
@@ -6429,15 +6001,6 @@ UINT            index = 0;
 /*    _nx_dhcpv6_server_extract_packet_information                        */
 /*                                      Extracts DHCPv6 data from packet  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_process_elapsed_time(NX_DHCPV6_CLIENT *dhcpv6_client_ptr, ULONG option_code, UINT option_length, UCHAR *option_data)
 {
@@ -6501,20 +6064,6 @@ ULONG           data;
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_process_iana    Processes IANA in client request  */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), and      */
-/*                                            improved to ignore valid    */
-/*                                            lifetime and preferred life */
-/*                                            time in client message,     */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_server_process_ia(NX_DHCPV6_CLIENT *dhcpv6_client_ptr, ULONG option_code, UINT option_length, UCHAR *option_data, UINT process_ia)
 {
@@ -6594,17 +6143,6 @@ ULONG data;
 /*    _nx_dhcpv6_server_extract_packet_information                        */
 /*                                      Extracts DHCPv6 data from packet  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            corrected the logic of      */
-/*                                            processing DUID type,       */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_process_duid(NX_DHCPV6_SVR_DUID *duid_ptr, ULONG option_code, UINT option_length, UCHAR *option_data)
 {
@@ -6710,7 +6248,7 @@ UINT            index = 0;
         }
     }
 
-    /* Are we past the end of the buffer, subtracting for the toplevel opcode and 
+    /* Are we past the end of the buffer, subtracting for the toplevel opcode and
        length of the IANA option? */
     if (index != option_length)
     {
@@ -6760,14 +6298,6 @@ UINT            index = 0;
 /*   _nx_dhcpv6_find_client_record_by_chaddr                              */ 
 /*                                          Find client in server table   */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_check_duids_same(NX_DHCPV6_SVR_DUID *dhcpv6_duid1_ptr, NX_DHCPV6_SVR_DUID *dhcpv6_duid2_ptr, UINT *matching)
 {
@@ -6881,15 +6411,6 @@ UINT  _nx_dhcpv6_check_duids_same(NX_DHCPV6_SVR_DUID *dhcpv6_duid1_ptr, NX_DHCPV
 /*    _nx_dhcpv6_send_request           Compiles and sends the Server     */
 /*                                            DHCPv6 response             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcpv6_add_duid(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_SVR_DUID *dhcpv6_duid_ptr, UCHAR *buffer_ptr, UINT *index, UINT duid_type)
 {
@@ -7005,15 +6526,6 @@ UINT  available_payload;
 /*                                                                        */ 
 /*    _nx_dhcpv6_send_request           Sends server DHCPv6 response      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_server_add_iana(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_CLIENT *dhcpv6_client_ptr, UCHAR *buffer_ptr, UINT *index)
 {
@@ -7044,7 +6556,7 @@ NX_DHCPV6_SERVER_IA_NA *iana_ptr;
         return NX_DHCPV6_INSUFFICIENT_PACKET_PAYLOAD;
     }
 
-    /* For release or decline messages, or a server status indicating no IP address can be 
+    /* For release or decline messages, or a server status indicating no IP address can be
        assigned yet, set the IANA IP lease times to expired. */
     if ((dhcpv6_client_ptr -> nx_dhcpv6_message_type == NX_DHCPV6_MESSAGE_TYPE_RELEASE) ||
         (dhcpv6_client_ptr -> nx_dhcpv6_message_type == NX_DHCPV6_MESSAGE_TYPE_DECLINE) ||
@@ -7252,15 +6764,6 @@ NX_DHCPV6_SERVER_IA_NA *iana_ptr;
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_add_iana         Adds the IANA to server response */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_add_ia(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_SERVER_IA_ADDRESS *dhcpv6_ia_ptr, UCHAR *buffer_ptr, UINT *index)
 {
@@ -7373,15 +6876,6 @@ UINT    available_payload;
 /*                                                                        */ 
 /*    _nx_dhcpv6_server_add_iana        Add IANA status to server response*/
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcpv6_add_iana_status(NX_DHCPV6_SERVER *dhcpv6_server_ptr, NX_DHCPV6_SERVER_IANA_STATUS *iana_status_ptr, UCHAR *buffer_ptr, UINT *index)
 {

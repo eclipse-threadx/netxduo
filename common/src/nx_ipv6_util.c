@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -50,14 +50,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Source Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 INT CHECK_IP_ADDRESSES_BY_PREFIX(ULONG *ip_addr1, ULONG *ip_addr2,
@@ -147,14 +139,6 @@ ULONG mask;
 /*                                                                        */
 /*    NetX Source Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 INT CHECK_IPV6_ADDRESSES_SAME(ULONG *ip_addr1, ULONG *ip_addr2)
 {
@@ -206,14 +190,6 @@ INT CHECK_IPV6_ADDRESSES_SAME(ULONG *ip_addr1, ULONG *ip_addr2)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Source Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 INT CHECK_IPV6_ADDRESS_RANGE(ULONG *ip_addr_start, ULONG *ip_addr_end, ULONG *ip_addr)
@@ -336,14 +312,6 @@ INT ip_addr_cmp1 = 0, ip_addr_cmp2 = 0;
 /*                                                                        */
 /*    NetX Source Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 INT CHECK_UNSPECIFIED_ADDRESS(ULONG *ip_addr)
 {
@@ -386,14 +354,6 @@ INT CHECK_UNSPECIFIED_ADDRESS(ULONG *ip_addr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Source Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 void SET_UNSPECIFIED_ADDRESS(ULONG *ip_addr)
@@ -441,14 +401,6 @@ void SET_UNSPECIFIED_ADDRESS(ULONG *ip_addr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Source Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 void COPY_IPV6_ADDRESS(ULONG *copy_from, ULONG *copy_to)
@@ -501,14 +453,6 @@ void COPY_IPV6_ADDRESS(ULONG *copy_from, ULONG *copy_to)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Source Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -563,14 +507,6 @@ void COPY_NXD_ADDRESS(NXD_ADDRESS *copy_from, NXD_ADDRESS  *copy_to)
 /*                                                                        */
 /*    NetX Source Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 void SET_SOLICITED_NODE_MULTICAST_ADDRESS(ULONG *address,
                                           ULONG *unicast_address)
@@ -621,14 +557,6 @@ void SET_SOLICITED_NODE_MULTICAST_ADDRESS(ULONG *address,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Source Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 INT CHECK_ALL_ROUTER_MCAST_ADDRESS(ULONG *address)
@@ -688,14 +616,6 @@ INT CHECK_ALL_ROUTER_MCAST_ADDRESS(ULONG *address)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Source Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 INT CHECK_IPV6_SOLICITED_NODE_MCAST_ADDRESS(ULONG *dest_ip, ULONG *myip)
@@ -776,14 +696,6 @@ INT isMulticast = 0;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Source Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 ULONG IPv6_Address_Type(ULONG *ip_address)
@@ -917,14 +829,6 @@ ULONG tmp;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX Source Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID _nx_ipv6_address_change_endian(ULONG *address)

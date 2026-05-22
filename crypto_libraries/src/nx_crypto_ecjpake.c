@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -59,14 +59,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_ecjpake_operation   Initialize ECJPAKE crypto     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ecjpake_init(NX_CRYPTO_ECJPAKE *ecjpake,
@@ -152,14 +144,6 @@ UINT      buffer_size = curve -> nx_crypto_ec_n.nx_crypto_huge_buffer_size;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_ecjpake_operation   Initialize ECJPAKE crypto     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_hello_generate(NX_CRYPTO_ECJPAKE *ecjpake,
@@ -323,14 +307,6 @@ UINT                  status;
 /*                                                                        */
 /*    _nx_crypto_method_ecjpake_operation   Initialize ECJPAKE crypto     */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_hello_process(NX_CRYPTO_ECJPAKE *ecjpake,
                                                      CHAR *id, UINT id_len,
@@ -479,14 +455,6 @@ UINT                  total_length = 0;
 /*                                                                        */
 /*    _nx_crypto_method_ecjpake_operation   Initialize ECJPAKE crypto     */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_key_exchange_generate(NX_CRYPTO_ECJPAKE *ecjpake,
                                                              UCHAR *shared_secret,
@@ -616,14 +584,6 @@ UINT                  status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_ecjpake_operation   Initialize ECJPAKE crypto     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_key_exchange_process(NX_CRYPTO_ECJPAKE *ecjpake,
@@ -764,14 +724,6 @@ UINT                  total_length = 0;
 /*                                          Perform Schnorr ZKP generation*/
 /*    _nx_crypto_ecjpake_schnorr_zkp_verify Perform Schnorr ZKP           */
 /*                                            verification                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_schnorr_zkp_hash(NX_CRYPTO_METHOD *hash_method,
@@ -1094,14 +1046,6 @@ VOID *handler;
 /*    _nx_crypto_ecjpake_key_exchange_generate                            */
 /*                                          Generate key exchange message */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_schnorr_zkp_generate(NX_CRYPTO_METHOD *hash_method,
                                                             VOID *hash_metadata,
@@ -1196,14 +1140,6 @@ UINT status;
 /*    _nx_crypto_ecjpake_hello_process      Process hello message         */
 /*    _nx_crypto_ecjpake_key_exchange_process                             */
 /*                                          Process key exchange message  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_schnorr_zkp_verify(NX_CRYPTO_METHOD *hash_method,
@@ -1303,14 +1239,6 @@ NX_CRYPTO_EC_POINT    temp1, temp2;
 /*    _nx_crypto_ecjpake_key_exchange_generate                            */
 /*                                          Generate key exchange message */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID _nx_crypto_ecjpake_public_key_generate(NX_CRYPTO_EC *curve,
                                                            NX_CRYPTO_EC_POINT *x1,
@@ -1386,14 +1314,6 @@ NX_CRYPTO_HUGE_NUMBER temp1;
 /*                                                                        */
 /*    _nx_crypto_ecjpake_key_exchange_process                             */
 /*                                          Process key exchange message  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecjpake_pre_master_secret_generate(NX_CRYPTO_METHOD *hash_method,
@@ -1517,19 +1437,6 @@ UINT               status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed FIPS symbol to      */
-/*                                            self-test,                  */
-/*                                            resulting in version 6.1.7  */
-/*                                                                        */
 /**************************************************************************/
 #ifndef NX_CRYPTO_SELF_TEST
 UINT _nx_crypto_ecjpake_key_encryption_key_generate(NX_CRYPTO_METHOD *hash_method,
@@ -1624,16 +1531,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecjpake_init(struct NX_CRYPTO_METHOD_STRUCT *method,
                                                     UCHAR *key, NX_CRYPTO_KEY_SIZE key_size_in_bits,
@@ -1720,14 +1617,6 @@ UINT               i;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecjpake_cleanup(VOID *crypto_metadata)
 {
@@ -1796,16 +1685,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecjpake_cleanup(VOID *crypto_metadata)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ecjpake_operation(UINT op,

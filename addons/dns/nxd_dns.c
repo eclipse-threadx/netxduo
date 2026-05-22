@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -157,14 +157,6 @@ NX_DNS *_nx_dns_instance_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_create(NX_DNS *dns_ptr, NX_IP *ip_ptr, UCHAR *domain_name)
 {
@@ -223,20 +215,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            randomized the source port, */
-/*                                            resulting in version 6.1.4  */
-/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dns_create(NX_DNS *dns_ptr, NX_IP *ip_ptr, UCHAR *domain_name)
 {
@@ -356,14 +334,6 @@ UINT            status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_packet_pool_set(NX_DNS *dns_ptr, NX_PACKET_POOL *packet_pool_ptr)
 {
@@ -432,14 +402,6 @@ UINT  status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_packet_pool_set(NX_DNS *dns_ptr, NX_PACKET_POOL *packet_pool_ptr)
 {
@@ -494,14 +456,6 @@ UINT  _nx_dns_packet_pool_set(NX_DNS *dns_ptr, NX_PACKET_POOL *packet_pool_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_delete(NX_DNS *dns_ptr)
 {
@@ -555,21 +509,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            randomized the source port, */
-/*                                            resulting in version 6.1.4  */
-/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s),          */
-/*                                            removed error checking for  */
-/*                                            nx_packet_pool_delete,      */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_delete(NX_DNS *dns_ptr)
 {
@@ -643,14 +582,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_server_add(NX_DNS *dns_ptr, ULONG server_address)
 {
@@ -720,14 +651,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_server_add(NX_DNS *dns_ptr, ULONG server_address)
 {
@@ -785,17 +708,6 @@ NXD_ADDRESS dns_server_address;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s) and       */
-/*                                            simplified some branches,   */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_dns_server_add(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
 {
@@ -901,14 +813,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_dns_server_add(NX_DNS *dns_ptr, NXD_ADDRESS *dns_server_address)
 {
@@ -952,17 +856,6 @@ UINT _nxd_dns_server_add(NX_DNS *dns_ptr, NXD_ADDRESS *dns_server_address)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s) and       */
-/*                                            simplified branches,        */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dns_server_add_internal(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
 {
@@ -1128,14 +1021,6 @@ UINT        i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_server_remove(NX_DNS *dns_ptr, ULONG server_address)
 {
@@ -1203,14 +1088,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_server_remove(NX_DNS *dns_ptr, ULONG server_address)
 {
@@ -1266,18 +1143,6 @@ NXD_ADDRESS dns_server_address;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s) and       */
-/*                                            simplified check for        */ 
-/*                                            invalid address types,      */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_dns_server_remove(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
 {
@@ -1377,14 +1242,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_dns_server_remove(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
 {
@@ -1431,17 +1288,6 @@ UINT  _nxd_dns_server_remove(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Jidesh Veeramachaneni    Modified comment(s) and       */
-/*                                            removed null IP checks,     */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_server_remove_internal(NX_DNS *dns_ptr, NXD_ADDRESS *server_address)
 {
@@ -1601,14 +1447,6 @@ UINT            found_match;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_server_remove_all(NX_DNS *dns_ptr)
 {
@@ -1661,14 +1499,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_server_remove_all(NX_DNS *dns_ptr)
 {
@@ -1729,14 +1559,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_get_serverlist_size(NX_DNS *dns_ptr, UINT *size)
 {
@@ -1789,14 +1611,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_get_serverlist_size(NX_DNS *dns_ptr, UINT *size)
 {
@@ -1855,14 +1669,6 @@ UINT  _nx_dns_get_serverlist_size(NX_DNS *dns_ptr, UINT *size)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_server_get(NX_DNS *dns_ptr, UINT index, ULONG *dns_server_address)
 {
@@ -1918,14 +1724,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_server_get(NX_DNS *dns_ptr, UINT index, ULONG *dns_server_address)
 {
@@ -1999,14 +1797,6 @@ NXD_ADDRESS server_address;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_dns_server_get(NX_DNS *dns_ptr, UINT index, NXD_ADDRESS *dns_server_address)
 {
@@ -2066,14 +1856,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_dns_server_get(NX_DNS *dns_ptr, UINT index, NXD_ADDRESS *dns_server_address)
 {
@@ -2118,14 +1900,6 @@ UINT  _nxd_dns_server_get(NX_DNS *dns_ptr, UINT index, NXD_ADDRESS *dns_server_a
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_server_get_internal(NX_DNS *dns_ptr, UINT index, NXD_ADDRESS *server_address)
 {
@@ -2244,14 +2018,6 @@ UINT            status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_host_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, ULONG *host_address_ptr, ULONG wait_option)
 {
@@ -2316,14 +2082,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_host_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, ULONG *host_address_ptr, ULONG wait_option)
 {
@@ -2383,14 +2141,6 @@ UINT        record_count = 0;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_dns_host_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, NXD_ADDRESS *host_address_ptr, 
                                  ULONG wait_option, UINT lookup_type)
@@ -2456,14 +2206,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_dns_host_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, NXD_ADDRESS *host_address_ptr, 
                                 ULONG wait_option, UINT lookup_type)
@@ -2566,14 +2308,6 @@ UINT        record_count = 0;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_info_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, ULONG *host_address_ptr, USHORT *host_port_ptr, ULONG wait_option)
 {
@@ -2636,14 +2370,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_info_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, ULONG *host_address_ptr, 
                                        USHORT *host_port_ptr, ULONG wait_option)
@@ -2713,14 +2439,6 @@ UCHAR               temp_buffer[TEMP_SRV_BUFFER_SIZE];
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_ipv4_address_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name_ptr, VOID *record_buffer, 
                                         UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -2794,14 +2512,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_ipv4_address_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name_ptr, VOID *buffer, 
                                        UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -2855,14 +2565,6 @@ UINT        status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_dns_ipv6_address_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name_ptr, VOID *record_buffer, 
                                          UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -2937,14 +2639,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_dns_ipv6_address_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name_ptr, VOID *buffer, 
                                         UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -2998,14 +2692,6 @@ UINT        status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_cname_get(NX_DNS *dns_ptr, UCHAR *host_name,  UCHAR *record_buffer,
                          UINT buffer_size, ULONG wait_option)
@@ -3075,14 +2761,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_cname_get(NX_DNS *dns_ptr, UCHAR *host_name, UCHAR *record_buffer, 
                         UINT buffer_size, ULONG wait_option)
@@ -3142,14 +2820,6 @@ UINT        record_count = 0;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_domain_name_server_get(NX_DNS *dns_ptr, UCHAR *host_name,  VOID *record_buffer, 
                                       UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -3230,14 +2900,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_domain_name_server_get(NX_DNS *dns_ptr, UCHAR *host_name, VOID *record_buffer, 
                                      UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -3291,14 +2953,6 @@ UINT        status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_host_text_get(NX_DNS *dns_ptr, UCHAR *host_name,  UCHAR *record_buffer,
                              UINT buffer_size, ULONG wait_option)
@@ -3368,14 +3022,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_host_text_get(NX_DNS *dns_ptr, UCHAR *host_name, UCHAR *record_buffer, 
                             UINT buffer_size, ULONG wait_option)
@@ -3434,14 +3080,6 @@ UINT        record_count = 0;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_domain_mail_exchange_get(NX_DNS *dns_ptr, UCHAR *host_name,  VOID *record_buffer, 
                                         UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -3520,14 +3158,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_domain_mail_exchange_get(NX_DNS *dns_ptr, UCHAR *host_name, VOID *record_buffer, 
                                        UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -3587,14 +3217,6 @@ UINT        status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_domain_service_get(NX_DNS *dns_ptr, UCHAR *host_name,  VOID *record_buffer, 
                                   UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -3674,14 +3296,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_domain_service_get(NX_DNS *dns_ptr, UCHAR *host_name, VOID *record_buffer, 
                                  UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -3737,14 +3351,6 @@ UINT        status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_authority_zone_start_get(NX_DNS *dns_ptr, UCHAR *host_name,  UCHAR *record_buffer,
                                         UINT buffer_size, ULONG wait_option)
@@ -3821,14 +3427,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_authority_zone_start_get(NX_DNS *dns_ptr, UCHAR *host_name, UCHAR *record_buffer, 
                                        UINT buffer_size, ULONG wait_option)
@@ -3891,22 +3489,6 @@ UINT        record_count = 0;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), corrected*/
-/*                                            the timeout of first query, */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            randomized the source port, */
-/*                                            resulting in version 6.1.4  */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved the logic of       */
-/*                                            receiving dns response,     */
-/*                                            resulting in version 6.1.5  */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_host_resource_data_by_name_get(NX_DNS *dns_ptr, UCHAR *host_name, 
                                                     UCHAR *buffer, UINT buffer_size, 
@@ -3982,7 +3564,7 @@ UINT        i;
     for (retries = 0; retries < dns_ptr -> nx_dns_retries; retries++)
     {
 
-        /* The client should try other servers and server addresses before repeating a query to a specific address of a server.  
+        /* The client should try other servers and server addresses before repeating a query to a specific address of a server.
            RFC1035, Section4.2.1 UDP usage, Page32.  */
         /*  Attempt host name resolution from each DNS server till one if found. */        
         for (i = 0; (i < NX_DNS_MAX_SERVERS) && (dns_ptr -> nx_dns_server_ip_array[i].nxd_ip_version != 0); i ++)
@@ -4101,23 +3683,6 @@ UINT        i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), updated  */
-/*                                            resource get function and   */
-/*                                            status check to improve     */
-/*                                            buffer bound check,         */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            improved id generation,     */
-/*                                            improved the logic of       */
-/*                                            receiving dns response,     */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_send_query_by_address(NX_DNS *dns_ptr, NXD_ADDRESS *dns_server, UCHAR *ip_question, UCHAR *host_name_ptr, 
                                           UINT host_name_buffer_size, ULONG wait_option)
@@ -4246,7 +3811,7 @@ ULONG       rr_ttl;
            and is successful and has a response record.  */
         status =  _nx_dns_network_to_short_convert(receive_packet_ptr -> nx_packet_prepend_ptr + NX_DNS_FLAGS_OFFSET);
 
-        /* Check for indication of DNS server error (cannot authenticate answer or authority portion 
+        /* Check for indication of DNS server error (cannot authenticate answer or authority portion
            of the DNS data. */
         if ((status & NX_DNS_ERROR_MASK) == NX_DNS_ERROR_MASK)
         {
@@ -4503,23 +4068,6 @@ ULONG       rr_ttl;
 /*    _nx_dns_host_resource_data_by_name_get                              */ 
 /*                                          Get the resource data by name */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            improved the logic of       */
-/*                                            receiving dns response,     */
-/*                                            resulting in version 6.1.4  */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved the logic of       */
-/*                                            receiving dns response,     */
-/*                                            resulting in version 6.1.5  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_send_query_get_rdata_by_name(NX_DNS *dns_ptr, NXD_ADDRESS *dns_server_address, 
                                                  UCHAR *host_name, UCHAR *record_buffer, UINT buffer_size, 
@@ -4642,12 +4190,6 @@ NX_PACKET           *receive_packet_ptr;
 /*                                                                        */ 
 /*    _nx_dns_send_query_get_rdata_by_name  Get the resource data by name */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  03-02-2021     Yuxin Zhou               Initial Version 6.1.5         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dns_response_get(NX_DNS *dns_ptr, UCHAR *host_name, UCHAR *record_buffer, 
                           UINT buffer_size, UINT *record_count, ULONG wait_option)
@@ -4733,16 +4275,6 @@ NX_PACKET  *packet_ptr;
 /*                                                                        */ 
 /*    _nx_dns_send_query_get_rdata_by_name  Get the resource data by name */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  02-02-2021     Yuxin Zhou               Initial Version 6.1.4         */
-/*  10-31-2023     Bo Chen                  Modified comment(s), and      */
-/*                                            reset the status to avoid   */
-/*                                            processing null packet,     */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_response_receive(NX_DNS *dns_ptr, NX_PACKET **packet_ptr, ULONG wait_option)
 {
@@ -4877,20 +4409,6 @@ ULONG               time_remaining;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated resource get APIs to*/
-/*                                            improve buffer bound check, */
-/*                                            resulting in version 6.1    */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved the logic of       */
-/*                                            receiving dns response,     */
-/*                                            resulting in version 6.1.5  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_response_process(NX_DNS *dns_ptr, UCHAR *host_name, NX_PACKET *packet_ptr, 
                                      UCHAR *record_buffer, UINT buffer_size, UINT *record_count)
@@ -4941,7 +4459,7 @@ UINT                host_name_size;
     /* Check that the packet has a valid response record.  */
     status =  _nx_dns_network_to_short_convert(packet_ptr -> nx_packet_prepend_ptr + NX_DNS_FLAGS_OFFSET);
 
-    /* Check for indication of DNS server error (cannot authenticate answer or authority portion 
+    /* Check for indication of DNS server error (cannot authenticate answer or authority portion
        of the DNS data. */
     if ((status & NX_DNS_ERROR_MASK) == NX_DNS_ERROR_MASK)
     {
@@ -5223,20 +4741,6 @@ UINT                host_name_size;
 /*                                                                        */ 
 /*    _nx_dns_response_process                                            */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            updated resource get APIs to*/
-/*                                            improve buffer bound check, */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_a_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
                                    UCHAR **buffer_prepend_ptr, UCHAR **buffer_append_ptr, 
@@ -5304,7 +4808,7 @@ ULONG           rr_ttl;
         if (response_type != dns_ptr -> nx_dns_lookup_type)
         {
 
-            /* No, this was not what the Client requested. Return error status. 
+            /* No, this was not what the Client requested. Return error status.
             This should not happen so return error to the host application,
             might be a problem with the query or the server. */
             return NX_DNS_MISMATCHED_RESPONSE;
@@ -5717,19 +5221,6 @@ ULONG           rr_ttl;
 /*                                                                        */ 
 /*    _nx_dns_response_process                                            */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated resource get APIs to*/
-/*                                            improve buffer bound check, */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_aaaa_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, 
                                       UCHAR *data_ptr, UCHAR **buffer_prepend_ptr, 
@@ -5797,7 +5288,7 @@ ULONG                   rr_ttl;
         if (response_type != dns_ptr -> nx_dns_lookup_type)
         {
 
-            /* No, this was not what the Client requested. Return error status. 
+            /* No, this was not what the Client requested. Return error status.
             This should not happen so return error to the host application,
             might be a problem with the query or the server. */
             return NX_DNS_MISMATCHED_RESPONSE;
@@ -5946,16 +5437,6 @@ ULONG                   rr_ttl;
 /*                                                                        */ 
 /*    _nx_dns_response_process                                            */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated resource get APIs to*/
-/*                                            improve buffer bound check, */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_cname_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
                                        UCHAR *record_buffer, UINT buffer_size, UINT *record_count)
@@ -6077,8 +5558,8 @@ ULONG           rr_ttl;
     else if (dns_ptr -> nx_dns_lookup_type == NX_DNS_RR_TYPE_A)
     {
         
-        /* Only get the A type message, skip the CNAME answer process, 
-           and return success to process next A type answer. 
+        /* Only get the A type message, skip the CNAME answer process,
+           and return success to process next A type answer.
            The CNAME record to be implemented.  */        
         return(NX_SUCCESS);
     }
@@ -6133,20 +5614,6 @@ ULONG           rr_ttl;
 /*                                                                        */ 
 /*    _nx_dns_response_process                                            */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            updated resource get APIs to*/
-/*                                            improve buffer bound check, */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_txt_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
                                      UCHAR *record_buffer, UINT buffer_size, UINT *record_count)
@@ -6200,7 +5667,7 @@ ULONG           rr_ttl;
     if (response_type != dns_ptr -> nx_dns_lookup_type)
     {
 
-        /* No, this was not what the Client requested. Return error status. 
+        /* No, this was not what the Client requested. Return error status.
         This should not happen so return error to the host application,
         might be a problem with the query or the server. */
         return NX_DNS_MISMATCHED_RESPONSE;
@@ -6325,21 +5792,6 @@ ULONG           rr_ttl;
 /*                                                                        */ 
 /*    _nx_dns_response_process                                            */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated resource get APIs to*/
-/*                                            improve buffer bound check, */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), updated  */
-/*                                            input parameter of the API  */
-/*                                            to get the real size of     */
-/*                                            resource name,              */
-/*                                            resulting in version 6.1.3  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_ns_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
                                     UCHAR **buffer_prepend_ptr, UCHAR **buffer_append_ptr, 
@@ -6393,7 +5845,7 @@ ULONG               rr_ttl;
     if (response_type != dns_ptr -> nx_dns_lookup_type)
     {
 
-        /* No, this was not what the Client requested. Return error status. 
+        /* No, this was not what the Client requested. Return error status.
         This should not happen so return error to the host application,
         might be a problem with the query or the server. */
         return NX_DNS_MISMATCHED_RESPONSE;
@@ -6533,25 +5985,6 @@ ULONG               rr_ttl;
 /*                                                                        */ 
 /*    _nx_dns_response_process                                            */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            updated resource get APIs to*/
-/*                                            improve buffer bound check, */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), updated  */
-/*                                            input parameter of the API  */
-/*                                            to get the real size of     */
-/*                                            resource name,              */
-/*                                            resulting in version 6.1.3  */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_mx_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
                                     UCHAR **buffer_prepend_ptr, UCHAR **buffer_append_ptr, 
@@ -6607,7 +6040,7 @@ UINT                size;
     if (response_type != dns_ptr -> nx_dns_lookup_type)
     {
         
-        /* No, this was not what the Client requested. Return error status. 
+        /* No, this was not what the Client requested. Return error status.
         This should not happen so return error to the host application,
         might be a problem with the query or the server. */
         return NX_DNS_MISMATCHED_RESPONSE;
@@ -6772,25 +6205,6 @@ UINT                size;
 /*                                                                        */ 
 /*    _nx_dns_response_process                                            */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            updated resource get APIs to*/
-/*                                            improve buffer bound check, */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), updated  */
-/*                                            input parameter of the API  */
-/*                                            to get the real size of     */
-/*                                            resource name,              */
-/*                                            resulting in version 6.1.3  */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_srv_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, UCHAR **buffer_prepend_ptr, 
                                      UCHAR **buffer_append_ptr, UINT *record_count)
@@ -6847,7 +6261,7 @@ UINT                size;
     if (response_type != dns_ptr -> nx_dns_lookup_type)
     {
         
-        /* No, this was not what the Client requested. Return error status. 
+        /* No, this was not what the Client requested. Return error status.
         This should not happen so return error to the host application,
         might be a problem with the query or the server. */
         return NX_DNS_MISMATCHED_RESPONSE;
@@ -7028,21 +6442,6 @@ UINT                size;
 /*                                                                        */ 
 /*    _nx_dns_response_process                                            */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            and verified buffer size,   */
-/*                                            updated resource get APIs to*/
-/*                                            improve buffer bound check, */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_process_soa_type(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, 
                                      UCHAR *record_buffer, UINT buffer_size, UINT *record_count)
@@ -7098,7 +6497,7 @@ ULONG               rr_ttl;
     if (response_type != dns_ptr -> nx_dns_lookup_type)
     {
 
-        /* No, this was not what the Client requested. Return error status. 
+        /* No, this was not what the Client requested. Return error status.
         This should not happen so return error to the host application,
         might be a problem with the query or the server. */
         return NX_DNS_MISMATCHED_RESPONSE;
@@ -7327,14 +6726,6 @@ ULONG               rr_ttl;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dns_host_by_address_get(NX_DNS *dns_ptr, ULONG host_address, UCHAR *host_name, UINT host_name_buffer_size, ULONG wait_option)
 {
@@ -7397,14 +6788,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dns_host_by_address_get(NX_DNS *dns_ptr, ULONG dns_address, UCHAR *host_name, UINT host_name_buffer_size, ULONG wait_option)
 {
@@ -7473,14 +6856,6 @@ NXD_ADDRESS host_address;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_dns_host_by_address_get(NX_DNS *dns_ptr, NXD_ADDRESS *host_address, UCHAR *host_name_ptr, UINT host_name_buffer_size, ULONG wait_option)
 {
@@ -7548,14 +6923,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_dns_host_by_address_get(NX_DNS *dns_ptr, NXD_ADDRESS *host_address_ptr, UCHAR *host_name_ptr, 
                                    UINT host_name_buffer_size, ULONG wait_option)
@@ -7609,19 +6976,6 @@ UINT  _nxd_dns_host_by_address_get(NX_DNS *dns_ptr, NXD_ADDRESS *host_address_pt
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), corrected*/
-/*                                            the timeout of first query, */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            randomized the source port, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_host_by_address_get_internal(NX_DNS *dns_ptr, NXD_ADDRESS *host_address_ptr, UCHAR *host_name_ptr, 
                                                   UINT host_name_buffer_size, ULONG wait_option)
@@ -7793,7 +7147,7 @@ UINT        length, index;
     for (retries = 0; retries < dns_ptr -> nx_dns_retries; retries++)
     {
                                                                                       
-        /* The client should try other servers and server addresses before repeating a query to a specific address of a server.  
+        /* The client should try other servers and server addresses before repeating a query to a specific address of a server.
            RFC1035, Section4.2.1 UDP usage, Page32.  */
         /*  Attempt host name resolution from each DNS server till one if found. */      
         for (i = 0; (i < NX_DNS_MAX_SERVERS) && (dns_ptr -> nx_dns_server_ip_array[i].nxd_ip_version != 0); i ++)
@@ -7875,17 +7229,6 @@ UINT        length, index;
 /*    _nx_dns_host_by_name_get              Get IP address with name      */ 
 /*    _nx_host_by_address_get               Get name from IP address      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved id generation,     */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_new_packet_create(NX_DNS *dns_ptr, NX_PACKET *packet_ptr, UCHAR *name, USHORT type)
 {
@@ -7963,14 +7306,6 @@ UINT size;
 /*                                                                        */ 
 /*    _nx_dns_new_packet_create             Create new DNS packet         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_header_create(UCHAR *buffer_ptr, USHORT id, USHORT flags)
 {
@@ -8028,14 +7363,6 @@ static UINT  _nx_dns_header_create(UCHAR *buffer_ptr, USHORT id, USHORT flags)
 /*                                                                        */ 
 /*    _nx_dns_new_packet_create             Create new DNS packet         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_question_add(NX_PACKET *packet_ptr, UCHAR *name, USHORT type)
 {
@@ -8128,15 +7455,6 @@ USHORT  value;
 /*                                                                        */ 
 /*    _nxd_dns_host_by_address_get         Lookup host by address service */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nxd_dns_build_an_ipv6_question_string(NXD_ADDRESS *ip_address, UCHAR *buffer, UINT len)
 {
@@ -8205,14 +7523,6 @@ ULONG temp;
 /*                                                                        */ 
 /*    _nx_dns_question_add                  Add question to DNS packet    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_name_string_encode(UCHAR *ptr, UCHAR *name)
 {
@@ -8305,22 +7615,6 @@ UINT    count =  1;
 /*                                                                        */ 
 /*    _nx_dns_send_query_by_address         Send reverse lookup query     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            compression pointer check,  */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), prevented*/
-/*                                            infinite loop in name       */
-/*                                            compression, resulting in   */
-/*                                            version 6.1.3               */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_name_string_unencode(NX_PACKET *packet_ptr, UCHAR *data, UCHAR *buffer, UINT buffer_size)
 {
@@ -8337,7 +7631,7 @@ UINT    pointer_count = 0;
     message_start = packet_ptr -> nx_packet_prepend_ptr;
     length = 0;
 
-    /* As long as there is space in the buffer and we haven't 
+    /* As long as there is space in the buffer and we haven't
        found a zero terminating label */
     while (1)
     {
@@ -8493,15 +7787,6 @@ UINT    pointer_count = 0;
 /*    _nx_host_by_address_get               Get name from IP address      */ 
 /*    _nx_dns_resource_type_get             Get resource type             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer bound check,         */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_name_size_calculate(UCHAR *name, NX_PACKET *packet_ptr)
 {
@@ -8583,23 +7868,6 @@ UINT size =  0;
 /*                                                                        */ 
 /*    _nx_dns_send_query_by_name             Send reverse lookup query    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            compression pointer check,  */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            pointer check, prevented    */
-/*                                            infinite loop in name       */
-/*                                            compression, resulting in   */
-/*                                            version 6.1.3               */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT    _nx_dns_resource_name_real_size_calculate(UCHAR *data, UINT start, UINT data_length)
 {
@@ -8610,7 +7878,7 @@ UINT    offset;
 UINT    pointer_count = 0;
 UINT    labelSize;
   
-    /* As long as there is space in the buffer and we haven't 
+    /* As long as there is space in the buffer and we haven't
        found a zero terminating label */
     while (1)
     {
@@ -8750,15 +8018,6 @@ UINT    labelSize;
 /*    _nx_dns_name_size_calculate           Calculate name's size         */ 
 /*    _nx_dns_network_to_short_convert      Convert network to short      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer bound check,         */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_resource_type_get(UCHAR *resource, NX_PACKET *packet_ptr, UINT *resource_type)
 {
@@ -8817,15 +8076,6 @@ UINT    name_size;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer bound check,         */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_resource_time_to_live_get(UCHAR *resource, NX_PACKET *packet_ptr, ULONG *rr_ttl)
 {
@@ -8891,15 +8141,6 @@ UINT    name_size;
 /*    _nx_host_by_address_get               Get name from IP address      */ 
 /*    _nx_dns_resource_size_get             Get size of resource          */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer bound check,         */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_resource_data_length_get(UCHAR *resource, NX_PACKET *packet_ptr, UINT *length)
 {
@@ -8961,15 +8202,6 @@ UINT    name_size;
 /*    _nx_dns_host_by_name_get              Get IP address with name      */ 
 /*    _nx_host_by_address_get               Get name from IP address      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer bound check,         */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UCHAR  *_nx_dns_resource_data_address_get(UCHAR *resource, NX_PACKET *packet_ptr)
 {
@@ -9028,15 +8260,6 @@ UINT    name_size;
 /*                                                                        */ 
 /*    _nx_host_by_address_get               Get name from IP address      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer bound check,         */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_resource_size_get(UCHAR *resource, NX_PACKET *packet_ptr, UINT *resource_size)
 {
@@ -9052,7 +8275,7 @@ UINT name_size;
         return(status);
     }
 
-    /* Resource size is 
+    /* Resource size is
     name size + data size + 2 bytes for type, 2 for class, 4 for time to live and 2 for data length
     i.e. name size + data size + 10 bytes overhead
     */
@@ -9102,14 +8325,6 @@ UINT name_size;
 /*                                                                        */ 
 /*    DNS component                                                       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static void  _nx_dns_short_to_network_convert(UCHAR *ptr, USHORT value)
 {
@@ -9149,14 +8364,6 @@ static void  _nx_dns_short_to_network_convert(UCHAR *ptr, USHORT value)
 /*                                                                        */ 
 /*    DNS component                                                       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static USHORT _nx_dns_network_to_short_convert(UCHAR *ptr)
 {
@@ -9200,14 +8407,6 @@ USHORT value =  *ptr++;
 /*                                                                        */ 
 /*    DNS component                                                       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static ULONG  _nx_dns_network_to_long_convert(UCHAR *ptr)
 {
@@ -9255,14 +8454,6 @@ ULONG value =  *ptr++;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_dns_host_by_address_get           Send PTR query to DNS server  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_number_to_ascii_convert(UINT number, CHAR *buffstring)
@@ -9340,14 +8531,6 @@ UINT index = 0;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dns_cache_initialize(NX_DNS *dns_ptr, VOID *cache_ptr, UINT cache_size)
 {
@@ -9421,14 +8604,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dns_cache_initialize(NX_DNS *dns_ptr, VOID *cache_ptr, UINT cache_size)
 {
@@ -9501,14 +8676,6 @@ ALIGN_TYPE *tail;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dns_cache_notify_set(NX_DNS *dns_ptr, VOID (*cache_full_notify_cb)(NX_DNS *dns_ptr))
 {
@@ -9568,14 +8735,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dns_cache_notify_set(NX_DNS *dns_ptr, VOID (*cache_full_notify_cb)(NX_DNS *dns_ptr))
 {
@@ -9628,14 +8787,6 @@ UINT _nx_dns_cache_notify_set(NX_DNS *dns_ptr, VOID (*cache_full_notify_cb)(NX_D
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dns_cache_notify_clear(NX_DNS *dns_ptr)
 {
@@ -9694,14 +8845,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dns_cache_notify_clear(NX_DNS *dns_ptr)
 {
@@ -9749,15 +8892,6 @@ UINT _nx_dns_cache_notify_clear(NX_DNS *dns_ptr)
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_cache_add_rr(NX_DNS *dns_ptr, VOID *cache_ptr, UINT cache_size, NX_DNS_RR *record_ptr, NX_DNS_RR **insert_ptr)
 {
@@ -9916,15 +9050,6 @@ ULONG       max_elapsed_time;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_cache_find_answer(NX_DNS *dns_ptr, VOID *cache_ptr, UCHAR *query_name, USHORT query_type, UCHAR *buffer, UINT buffer_size, UINT *record_count)
 {
@@ -10303,14 +9428,6 @@ UINT                 mname_string_length;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_cache_delete_rr(NX_DNS *dns_ptr, VOID *cache_ptr, UINT cache_size, NX_DNS_RR *record_ptr)
 {
@@ -10380,17 +9497,6 @@ ALIGN_TYPE  *head;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1.9  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_cache_delete_rr_string(NX_DNS *dns_ptr, VOID *cache_ptr, UINT cache_size, NX_DNS_RR *record_ptr)
 {
@@ -10521,15 +9627,6 @@ UINT    size;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_cache_add_string(NX_DNS *dns_ptr, VOID *cache_ptr, UINT cache_size, VOID *string_ptr, UINT string_size, VOID **insert_ptr)
 {
@@ -10603,7 +9700,7 @@ UCHAR       *p, *available, *start;
     if(available == (UCHAR*)tail)
     {
 
-        /* Make sure the service cache still has room to add this string 
+        /* Make sure the service cache still has room to add this string
            (without overwriting the RR area.) */
         if(((UCHAR*)tail - string_len) < (UCHAR*)head)
         {
@@ -10690,14 +9787,6 @@ UCHAR       *p, *available, *start;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dns_cache_delete_string(NX_DNS *dns_ptr, VOID *cache_ptr, UINT cache_size, VOID *string_ptr, UINT string_len)
 {
@@ -10840,14 +9929,6 @@ USHORT      cnt;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dns_name_match(UCHAR *src, UCHAR *dst, UINT length)
 {

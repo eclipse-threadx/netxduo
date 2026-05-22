@@ -1,6 +1,6 @@
 /* This NetX test concentrates on the basic SNMPv2 operation.  The 'manager' sends
    a request for an unknown item ("oid"). The SNMP agent should not responds, but
-   set an internal error and be able to respond to the next request. 
+   set an internal error and be able to respond to the next request.
 
    The MIB database is defined in demo_snmp_helper.h */
  
@@ -398,7 +398,7 @@ static void  snmp_test_initialize()
     snmp_query[1].snmp_query_pkt_size = simple_get_query_size;  
 
    // snmp_query[2].snmp_query_pkt_data = &simple_get_bulk_query_pkt[0];
-   // snmp_query[2].snmp_query_pkt_size = simple_get_bulk_query_size;   
+   // snmp_query[2].snmp_query_pkt_size = simple_get_bulk_query_size;
 
 }
 
@@ -591,7 +591,7 @@ UINT    status;
 /* Create an error code if matching user not found. */
 #define USER_NOT_FOUND 1
 
-/* Define the username callback routine routine. Usernames should be 
+/* Define the username callback routine routine. Usernames should be
    associated with permissions (public or private string) and what version
    of SNMP the user is configured for. The username callback should verify
    the incoming username MIB access permissions.  */

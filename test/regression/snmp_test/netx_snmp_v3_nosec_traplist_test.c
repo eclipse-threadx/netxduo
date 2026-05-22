@@ -459,7 +459,7 @@ UCHAR       *work_ptr;
                 (*(work_ptr + 14) == 0x06) &&
                 (*(work_ptr + 15) == 0x03))
 
-                /* This OID's data is another OID, no need to check past the base of the OID 1.3.6.1.6.3, 
+                /* This OID's data is another OID, no need to check past the base of the OID 1.3.6.1.6.3,
                    common to all OIDs. The rest depends on the MIB. */
             {
                 oids_found++;
@@ -851,7 +851,7 @@ UINT    status;
 /* Create an error code if matching user not found. */
 #define USER_NOT_FOUND 1
 
-/* Define the username callback routine routine. Usernames should be 
+/* Define the username callback routine routine. Usernames should be
    associated with permissions (public or private string) and what version
    of SNMP the user is configured for. The username callback should verify
    the incoming username MIB access permissions.  */

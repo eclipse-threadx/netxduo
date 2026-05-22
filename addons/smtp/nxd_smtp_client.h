@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -35,17 +35,6 @@
 /*    Client component, including all data types and external references. */
 /*    It is assumed that tx_api.h, tx_port.h, nx_api.h, and nx_port.h,    */
 /*    have already been included.                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
-/*                                            necessary header file,      */
-/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NXD_SMTP_CLIENT_H
@@ -131,7 +120,7 @@ extern   "C" {
 
 
 
-/* Define size of the buffer to extract the server challenge for authentication.    
+/* Define size of the buffer to extract the server challenge for authentication.
    There is no specific size here so 200 bytes is sufficient to cover all digest string handling.  */
 #ifndef NX_SMTP_SERVER_CHALLENGE_MAX_STRING
 #define NX_SMTP_SERVER_CHALLENGE_MAX_STRING     200
@@ -139,8 +128,8 @@ extern   "C" {
 
 
 /* Define size for handling data for authentication (LOGIN, PLAIN):
-   PLAIN requires rooms for authorization-id\0authentication-id\0passwd'. 
-   The two bytes are for the NULL byte between the first two auth id and 
+   PLAIN requires rooms for authorization-id\0authentication-id\0passwd'.
+   The two bytes are for the NULL byte between the first two auth id and
    between auth id and password. */
 
 #define NX_SMTP_CLIENT_AUTH_CHALLENGE_SIZE    (NX_SMTP_CLIENT_MAX_USERNAME + NX_SMTP_CLIENT_MAX_USERNAME + NX_SMTP_CLIENT_MAX_PASSWORD + 2)
@@ -229,7 +218,7 @@ extern   "C" {
                                                     "\r\n"
 
 
-/* Enumerated states of the protocol state machine. These MUST be in the 
+/* Enumerated states of the protocol state machine. These MUST be in the
    same order as the list of protocol states in NX_SMTP_CLIENT_STATES.*/  
 
 typedef enum NX_SMTP_CLIENT_STATE_ENUM
@@ -364,7 +353,7 @@ typedef struct NX_SMTP_CLIENT_STATES_STRUCT
 
 #ifndef     NX_SMTP_SOURCE_CODE     
 
-/* Define the system API mappings based on the error checking 
+/* Define the system API mappings based on the error checking
    selected by the user.   */
 
 /* Determine if error checking is desired.  If so, map API functions

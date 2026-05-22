@@ -1,4 +1,4 @@
-/* This NetX test concentrates on delayed retransmission TCP packet.  
+/* This NetX test concentrates on delayed retransmission TCP packet.
  * 1. Send packet A.
  * 2. Drop packet A in driver.
  * 3. Send packet B, C and D.

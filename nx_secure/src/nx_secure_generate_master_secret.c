@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -71,12 +71,6 @@ static UCHAR _nx_secure_tls_gen_keys_random[NX_SECURE_TLS_RANDOM_SIZE << 1];
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_generate_keys          Generate session keys         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2022     Yanwu Cai                Initial Version 6.2.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_generate_master_secret(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version,

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -87,21 +87,6 @@ static UINT _nx_secure_tls_send_serverhello_psk_extension(NX_SECURE_TLS_SESSION 
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello       Send TLS ServerHello          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            removed unused code,        */
-/*                                            resulting in version 6.1.11 */
-/*  03-08-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_serverhello_extensions(NX_SECURE_TLS_SESSION *tls_session,
@@ -255,17 +240,6 @@ UINT   status = NX_SUCCESS;
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello_extensions                          */
 /*                                          Send TLS ServerHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
@@ -423,14 +397,6 @@ UINT   data_length;
 /*    _nx_secure_tls_send_clienthello_extensions                          */
 /*                                          Send TLS ClientHello extension*/
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
 static UINT _nx_secure_tls_send_serverhello_supported_versions_extension(NX_SECURE_TLS_SESSION *tls_session,
@@ -525,20 +491,6 @@ UINT   data_length;
 /*                                                                        */
 /*    _nx_secure_tls_send_clienthello_extensions                          */
 /*                                          Send TLS ClientHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
-/*                                            compilation issue with      */
-/*                                            TLS 1.3 and disabling TLS   */
-/*                                            server,                     */
-/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
@@ -769,14 +721,6 @@ USHORT named_curve;
 /*                                                                        */
 /*    _nx_secure_tls_send_serverhello_extensions                          */
 /*                                          Send TLS ServerHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 

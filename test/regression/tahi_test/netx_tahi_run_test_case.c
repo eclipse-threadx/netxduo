@@ -329,7 +329,7 @@ static void perform_decrypt_check(NX_IP *ip_ptr, char *pkt_data, int pkt_size, i
             if(current_pkt)
             {
 
-                /* A packet has been queued.  Examine the header of the packet. 
+                /* A packet has been queued.  Examine the header of the packet.
                    Include IPv6 header and ESP header in transport mode. */
                 if(((UINT)(pkt_size - 14) != current_pkt -> nx_packet_length) ||
                     (memcmp(pkt_data + 14, current_pkt -> nx_packet_prepend_ptr, 40) != 0))

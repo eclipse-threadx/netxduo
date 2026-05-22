@@ -1,5 +1,5 @@
 /* This NetX test concentrates on the odd window of TCP transmission.  */
-/* Window size is 800 bytes. Payload size of pool is 512. 
+/* Window size is 800 bytes. Payload size of pool is 512.
  * 1. Host A sends 1 byte. So the remaining window is 799.
  * 2. Host A sends 1499 bytes. */
 

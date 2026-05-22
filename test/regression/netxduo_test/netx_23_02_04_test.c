@@ -1,4 +1,4 @@
-/* 23.02.04 TCP in LISTEN state, MUST reject an incoming SYN with 
+/* 23.02.04 TCP in LISTEN state, MUST reject an incoming SYN with
     local subnet address (128.1.2.0) as source IP address.  */
 
 /* Update
@@ -6,7 +6,7 @@
 
 /* Procedure
    1. Client send a SYN to Server.
-   2. Use packet_process function to receive and deal with the SYN packet. 
+   2. Use packet_process function to receive and deal with the SYN packet.
    3. Use packet_process function to receive and deal with the SYN packet,Judge the packet.  */
 
 #include    "tx_api.h"

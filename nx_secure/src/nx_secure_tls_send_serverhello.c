@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -75,21 +75,6 @@ const UCHAR _nx_secure_tls_1_1_random[8] =
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_tls_server_handshake       TLS server state machine      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
-/*                                            compilation issue with      */
-/*                                            TLS 1.3 and disabling TLS   */
-/*                                            server,                     */
-/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_serverhello(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet)
@@ -162,7 +147,7 @@ UINT   status;
         }
 
         /* RFC 8446 4.1.3:
-           TLS 1.3 servers which negotiate TLS 1.2 or below in response to a ClientHello 
+           TLS 1.3 servers which negotiate TLS 1.2 or below in response to a ClientHello
            MUST set the last 8 bytes of their Random value specially in their ServerHello. */
         if (tls_session -> nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_2)
         {

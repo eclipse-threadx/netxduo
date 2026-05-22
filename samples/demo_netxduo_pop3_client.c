@@ -1,7 +1,7 @@
-/* 
-   This is a small demo of POP3 Client on the high-performance NetX TCP/IP stack.  
-   This demo relies on Thread, NetX and POP3 Client API to conduct 
-   a POP3 mail session.  
+/*
+   This is a small demo of POP3 Client on the high-performance NetX TCP/IP stack.
+   This demo relies on Thread, NetX and POP3 Client API to conduct
+   a POP3 mail session.
  */
 /* Note: This demo works for IPv4 only. */
 
@@ -68,7 +68,7 @@ UCHAR    *free_memory_pointer;
     /* Initialize the NetX system.  */
     nx_system_initialize();
 
-    /* The demo client username and password is the authentication 
+    /* The demo client username and password is the authentication
        data used when the server attempts to authentication the client. */
 
     /* Create Client packet pool. */
@@ -129,7 +129,7 @@ NX_PACKET   *packet_ptr;
     tx_thread_sleep(NX_IP_PERIODIC_RATE);
 
 
-    /* Create a NetX POP3 Client instance with no byte or block memory pools. 
+    /* Create a NetX POP3 Client instance with no byte or block memory pools.
        Note that it uses its password for its APOP shared secret. */
     status =  nx_pop3_client_create(&demo_client,
                                     NX_TRUE /* if true, enables Client to send APOP command to authenticate */,
@@ -220,7 +220,7 @@ NX_PACKET   *packet_ptr;
     /* Disconnect from the POP3 server. */
     status = nx_pop3_client_quit(&demo_client);
 
-    /* Delete the POP3 Client.  This will not delete the packet pool used by the POP3 Client to 
+    /* Delete the POP3 Client.  This will not delete the packet pool used by the POP3 Client to
        transmit messages. */
     status = nx_pop3_client_delete(&demo_client);
 

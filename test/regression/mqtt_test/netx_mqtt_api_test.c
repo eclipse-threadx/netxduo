@@ -171,7 +171,7 @@ UCHAR       message[4];
     if(status != NXD_MQTT_INVALID_PARAMETER)
         SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
 
-    /* MQTT 5.10sp4:  The following test was removed because MQTT shall 
+    /* MQTT 5.10sp4:  The following test was removed because MQTT shall
        allow user name being set and password not being set. */
 #if 0
     status = nxd_mqtt_client_login_set(&my_client, "username", 8, NX_NULL, 0);

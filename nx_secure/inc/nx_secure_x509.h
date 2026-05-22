@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -35,33 +35,6 @@
 /*                                                                        */
 /*    This file defines all service prototypes and data structure         */
 /*    definitions for X.509 implementation.                               */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            fixed key usage bit order,  */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            removed dependency on TLS,  */
-/*                                            resulting in version 6.1.6  */
-/*  06-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            supported hardware EC       */
-/*                                            private key,                */
-/*                                            resulting in version 6.1.7  */
-/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
-/*                                            ignored public key in EC    */
-/*                                            private key,                */
-/*                                            resulting in version 6.1.10 */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            checked expiration for all  */
-/*                                            the certs in the chain,     */
-/*                                            resulting in version 6.1.12 */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            included TLS port header,   */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 

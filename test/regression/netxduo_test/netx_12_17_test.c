@@ -4,7 +4,7 @@
 
    1. Client sends SYN to server and server returns SYN+ACK.
    2. When client receives SYN+ACK packet, modify the length of MSS in 'my_tcp_packet_receive_12_17'.
-   3. Pass the SYN+ACK packet to the default function .        
+   3. Pass the SYN+ACK packet to the default function .
    4. Check whether the connection is reset  */
 
 #include   "tx_api.h"

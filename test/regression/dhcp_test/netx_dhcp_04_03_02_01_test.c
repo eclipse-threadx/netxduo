@@ -1,4 +1,4 @@
-/* ciaddr' MUST be zero, 'requested IP address' MUST be filled in with the yiaddr value from the chosen DHCPOFFER 
+/* ciaddr' MUST be zero, 'requested IP address' MUST be filled in with the yiaddr value from the chosen DHCPOFFER
  * rfc 2131, page 31, 4.3.2 DHCPREQUEST message
  *
  */

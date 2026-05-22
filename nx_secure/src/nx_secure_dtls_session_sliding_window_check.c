@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -61,12 +61,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  01-31-2022     Timothy Stapko           Initial Version 6.1.10        */
-/*                                                                        */
 /**************************************************************************/
 
 UINT _nx_secure_dtls_session_sliding_window_check(NX_SECURE_DTLS_SESSION *dtls_session, ULONG *sequence_number)
@@ -93,7 +87,7 @@ NX_SECURE_TLS_SESSION *tls_session;
         (sequence_number[0] == tls_session -> nx_secure_tls_remote_sequence_number[0] &&
         sequence_number[1] > tls_session -> nx_secure_tls_remote_sequence_number[1]))
     {
-        /* Incoming sequence number is bigger than last seen. This is OK, new sequence number. 
+        /* Incoming sequence number is bigger than last seen. This is OK, new sequence number.
            Outside window to the "right" side. */
         return(NX_TRUE);
     }

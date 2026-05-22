@@ -164,7 +164,7 @@ ULONG current_seq;
     EXPECT_EQ(NX_FALSE, status);    
 
     /************************************************************************************/
-    /* Now check the window by setting bits - 0xFFFFFFFF is all packets seen - all 
+    /* Now check the window by setting bits - 0xFFFFFFFF is all packets seen - all
        incoming sequence numbers less than the expected should fail. */
     dtls_session.nx_secure_dtls_sliding_window = SLIDING_WINDOW_SET;
 
@@ -253,7 +253,7 @@ ULONG current_seq;
 
 
     /************************************************************************************/
-    /* Now check the window update by setting and checking sequence numbers. Clear the 
+    /* Now check the window update by setting and checking sequence numbers. Clear the
        window to start. */
     dtls_session.nx_secure_dtls_sliding_window = 0;
 

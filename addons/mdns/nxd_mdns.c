@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -199,14 +199,6 @@ static NXD_ADDRESS  NX_MDNS_IPV6_MULTICAST_ADDRESS;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_mdns_create(NX_MDNS *mdns_ptr, NX_IP *ip_ptr, NX_PACKET_POOL *packet_pool,
                        UINT priority, VOID *stack_ptr, ULONG stack_size, UCHAR *host_name,
@@ -353,20 +345,6 @@ UCHAR   *ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the random value, */
-/*                                            used internal ip address    */
-/*                                            change notification,        */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_mdns_create(NX_MDNS *mdns_ptr, NX_IP *ip_ptr, NX_PACKET_POOL *packet_pool,
                       UINT priority, VOID *stack_ptr, ULONG stack_size, UCHAR *host_name,
@@ -379,8 +357,8 @@ UINT    status;
 UINT    host_name_size;
 
 
-    /* Check the size of the host name string. The last four characters in the 
-       host_name are reserved so DNS-SD is able to append " (2)" during the conflict 
+    /* Check the size of the host name string. The last four characters in the
+       host_name are reserved so DNS-SD is able to append " (2)" during the conflict
        resolution process. */
 #if (NX_MDNS_HOST_NAME_MAX >= NX_MDNS_LABEL_MAX)
     if (_nx_utility_string_length_check((CHAR *)host_name, &host_name_size, (NX_MDNS_LABEL_MAX - 4)))
@@ -644,14 +622,6 @@ UINT    host_name_size;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_mdns_delete(NX_MDNS *mdns_ptr)
 {
@@ -716,14 +686,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_mdns_delete(NX_MDNS *mdns_ptr)
 {
@@ -800,14 +762,6 @@ UINT  _nx_mdns_delete(NX_MDNS *mdns_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_cache_notify_set(NX_MDNS *mdns_ptr, VOID (*cache_full_notify_cb)(NX_MDNS *mdns_ptr, UINT, UINT))
 {
@@ -866,14 +820,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_cache_notify_set(NX_MDNS *mdns_ptr, VOID (*cache_full_notify_cb)(NX_MDNS *mdns_ptr, UINT, UINT))
 {
@@ -925,14 +871,6 @@ UINT _nx_mdns_cache_notify_set(NX_MDNS *mdns_ptr, VOID (*cache_full_notify_cb)(N
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_cache_notify_clear(NX_MDNS *mdns_ptr)
 {
@@ -991,14 +929,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_cache_notify_clear(NX_MDNS *mdns_ptr)
 {
@@ -1050,14 +980,6 @@ UINT _nx_mdns_cache_notify_clear(NX_MDNS *mdns_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_service_ignore_set(NX_MDNS *mdns_ptr, ULONG service_mask)
 {
@@ -1117,14 +1039,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_ignore_set(NX_MDNS *mdns_ptr, ULONG service_mask)
 {
@@ -1177,14 +1091,6 @@ UINT _nx_mdns_service_ignore_set(NX_MDNS *mdns_ptr, ULONG service_mask)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_service_notify_set(NX_MDNS *mdns_ptr, ULONG service_mask,
                                   VOID (*service_change_notify)(NX_MDNS *mdns_ptr, NX_MDNS_SERVICE *service_ptr, UINT state))
@@ -1246,14 +1152,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_notify_set(NX_MDNS *mdns_ptr, ULONG service_mask,
                                  VOID (*service_change_notify)(NX_MDNS *mdns_ptr, NX_MDNS_SERVICE *service_ptr, UINT state))
@@ -1308,14 +1206,6 @@ UINT _nx_mdns_service_notify_set(NX_MDNS *mdns_ptr, ULONG service_mask,
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_service_notify_clear(NX_MDNS *mdns_ptr)
 {
@@ -1376,14 +1266,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_notify_clear(NX_MDNS *mdns_ptr)
 {
@@ -1447,14 +1329,6 @@ UINT _nx_mdns_service_notify_clear(NX_MDNS *mdns_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_service_announcement_timing_set(NX_MDNS *mdns_ptr, UINT t, UINT p, UINT k, UINT retrans_interval, ULONG period_interval, UINT max_time)
 {
@@ -1520,14 +1394,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_announcement_timing_set(NX_MDNS *mdns_ptr, UINT t, UINT p, UINT k, UINT retrans_interval, ULONG period_interval, UINT max_time)
 {
@@ -1593,14 +1459,6 @@ UINT _nx_mdns_service_announcement_timing_set(NX_MDNS *mdns_ptr, UINT t, UINT p,
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_enable(NX_MDNS *mdns_ptr, UINT interface_index)
 {
@@ -1665,14 +1523,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_enable(NX_MDNS *mdns_ptr, UINT interface_index)
 {
@@ -1893,14 +1743,6 @@ NXD_IPV6_ADDRESS    *ipv6_address;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_disable(NX_MDNS *mdns_ptr, UINT interface_index)
 {
@@ -1965,14 +1807,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_disable(NX_MDNS *mdns_ptr, UINT interface_index)
 {
@@ -1988,7 +1822,7 @@ NX_MDNS_RR  *p;
         return(NX_MDNS_PARAM_ERROR);
     }
 
-    /* Check to see if mDNS is not enabled on this interface. 
+    /* Check to see if mDNS is not enabled on this interface.
        Note: Only support one interface yet.  */
     if (mdns_ptr -> nx_mdns_interface_enabled[interface_index] == NX_FALSE)
     {
@@ -2136,14 +1970,6 @@ NX_MDNS_RR  *p;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_domain_name_set(NX_MDNS *mdns_ptr, UCHAR *domain_name)
 {
@@ -2203,15 +2029,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_domain_name_set(NX_MDNS *mdns_ptr, UCHAR *domain_name)
 {
@@ -2291,14 +2108,6 @@ UINT        domain_name_size;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_service_add(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, UCHAR *txt, ULONG ttl,
                            USHORT priority, USHORT weights, USHORT port, UCHAR is_unique, UINT interface_index)
@@ -2319,8 +2128,8 @@ UINT    status;
         return(NX_MDNS_PARAM_ERROR);
     }
 
-    /* Check the size of the service name string. The last four characters in the 
-       service name are reserved so DNS-SD is able to append " (2)" during the conflict 
+    /* Check the size of the service name string. The last four characters in the
+       service name are reserved so DNS-SD is able to append " (2)" during the conflict
        resolution process. */
 #if (NX_MDNS_SERVICE_NAME_MAX >= NX_MDNS_LABEL_MAX)
     if (_nx_utility_string_length_check((CHAR *)name, NX_NULL, (NX_MDNS_LABEL_MAX - 4)))
@@ -2417,14 +2226,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_add(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, UCHAR *txt, ULONG ttl,
                           USHORT priority, USHORT weights, USHORT port, UCHAR is_unique, UINT interface_index)
@@ -2687,14 +2488,6 @@ UINT         string_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_service_delete(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type)
 {
@@ -2760,14 +2553,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_delete(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type)
 {
@@ -2837,14 +2622,6 @@ UINT    service_delete_success = NX_FALSE;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_interface_delete(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, UINT interface_index)
 {
@@ -3031,14 +2808,6 @@ UINT        rr_ptr_name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_service_one_shot_query(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, NX_MDNS_SERVICE *service, UINT timeout)
 {
@@ -3135,18 +2904,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_one_shot_query(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, NX_MDNS_SERVICE *service, UINT timeout)
 {
@@ -3322,18 +3079,6 @@ UINT        name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the random value, */
-/*                                            fixed the issue of timer,   */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_one_shot_query(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, NX_MDNS_RR **out_rr, ULONG wait_option, UINT interface_index)
 {
@@ -3414,7 +3159,7 @@ UINT        name_length;
             return(status);
         }
 
-        /* A multicast DNS querier should also delay the first query of the series by 
+        /* A multicast DNS querier should also delay the first query of the series by
            a randomly chosen amount in the range 20-120ms.  */
         insert_rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_QUERY_DELAY_RANGE));
         insert_rr -> nx_mdns_rr_retransmit_lifetime = NX_MDNS_TIMER_COUNT_RANGE;
@@ -3485,14 +3230,6 @@ UINT        name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_service_continuous_query(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type)
 {
@@ -3616,14 +3353,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_continuous_query(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type)
 {
@@ -3758,18 +3487,6 @@ UINT        i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the random value, */
-/*                                            fixed the issue of timer,   */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_continuous_query(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, UINT interface_index)
 {
@@ -3839,7 +3556,7 @@ UINT        name_length;
         return(status);
     }
 
-    /* A multicast DNS querier should also delay the first query of the series by 
+    /* A multicast DNS querier should also delay the first query of the series by
         a randomly chosen amount in the range 20-120ms.  */
     insert_rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_QUERY_DELAY_RANGE));
     insert_rr -> nx_mdns_rr_retransmit_lifetime = NX_MDNS_TIMER_COUNT_RANGE;
@@ -3886,14 +3603,6 @@ UINT        name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_service_query_stop(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type)
 {
@@ -3969,14 +3678,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_query_stop(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type)
 {
@@ -4150,14 +3851,6 @@ UINT         rr_name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_service_lookup(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, UINT service_index, NX_MDNS_SERVICE *service)
 {
@@ -4237,18 +3930,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_service_lookup(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR *type, UCHAR *sub_type, UINT service_index, NX_MDNS_SERVICE *service)
 {
@@ -4582,14 +4263,6 @@ UINT        target_string_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_peer_cache_clear(NX_MDNS *mdns_ptr)
 {
@@ -4649,14 +4322,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_peer_cache_clear(NX_MDNS *mdns_ptr)
 {
@@ -4714,15 +4379,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_host_address_get(NX_MDNS *mdns_ptr, UCHAR *host_name, ULONG *ipv4_address, ULONG *ipv6_address,  UINT timeout)
 {
@@ -4792,15 +4448,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_host_address_get(NX_MDNS *mdns_ptr, UCHAR *host_name, ULONG *ipv4_address, ULONG *ipv6_address, UINT timeout)
 {
@@ -4999,14 +4646,6 @@ UINT                domain_name_length;
 /*                                                                        */ 
 /*    _nx_mdns_host_name_register           Register the host name        */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_rr_a_aaaa_add(NX_MDNS *mdns_ptr, UCHAR *name, ULONG *address, UINT addr_length, UCHAR type, UINT interface_index)
 {
@@ -5107,14 +4746,6 @@ NX_MDNS_RR  temp_resource_record;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_rr_ptr_add(NX_MDNS *mdns_ptr, UCHAR *name, ULONG ttl, UCHAR set, UCHAR *ptr_name, UCHAR is_valid, NX_MDNS_RR **insert_rr, UINT interface_index)
 {
@@ -5241,14 +4872,6 @@ UINT        ptr_name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_rr_srv_add(NX_MDNS *mdns_ptr, UCHAR *name, ULONG ttl, UCHAR set, USHORT priority, 
                                 USHORT weights, USHORT port, UCHAR *target, NX_MDNS_RR **insert_rr, UINT interface_index)
@@ -5377,14 +5000,6 @@ UINT        target_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_rr_txt_add(NX_MDNS *mdns_ptr, UCHAR *name, ULONG ttl, UCHAR set, UCHAR *txt, NX_MDNS_RR **insert_rr, UINT interface_index)
 {
@@ -5527,14 +5142,6 @@ UINT        txt_length;
 /*                                                                        */ 
 /*    _nx_mdns_host_name_register           Register the host name        */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_rr_nsec_add(NX_MDNS *mdns_ptr, UCHAR *name, UCHAR add_a, UCHAR add_aaaa, UCHAR type, UINT interface_index)
 {
@@ -5701,17 +5308,6 @@ UINT        name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the issue of timer,   */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_rr_parameter_set(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, ULONG ttl, UINT rdata_length,
                                       UCHAR set, UCHAR is_register, UCHAR is_valid, NX_MDNS_RR *rr_record, UINT interface_index)
@@ -5841,14 +5437,6 @@ UINT        name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_rr_delete(NX_MDNS *mdns_ptr, NX_MDNS_RR *record_rr)
 {
@@ -6024,14 +5612,6 @@ NX_MDNS_RR  *p;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_mdns_local_cache_clear(NX_MDNS *mdns_ptr)
 {
@@ -6091,14 +5671,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_local_cache_clear(NX_MDNS *mdns_ptr)
 {
@@ -6168,14 +5740,6 @@ NX_MDNS_RR      *p;
 /*                                                                        */ 
 /*    mDNS component                                                      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_service_name_resolve(UCHAR *srv_name, UCHAR **name, UCHAR **type, UCHAR **domain)
 {
@@ -6201,9 +5765,9 @@ UINT     protocol_length;
     pointer = srv_name;
 
     /* Service Instance name,  */
-    /* <Instance>.<sn>._tcp.<domain> : 
+    /* <Instance>.<sn>._tcp.<domain> :
        name: <Instance>
-       type: <sn>._tcp 
+       type: <sn>._tcp
        domain: <domain>.  */
     while (*srv_name != '\0')
     {
@@ -6232,7 +5796,7 @@ UINT     protocol_length;
 
                     /* Get the <domain> pointer.  */
                     /* EL-PC.Test._http._tcp.local
-                       type index pointer to the _http._tcp, 
+                       type index pointer to the _http._tcp,
                        domain_index pointer to the local.  */
                     domain_index = append_index;
 
@@ -6318,16 +5882,6 @@ UINT     protocol_length;
 /*                                                                        */ 
 /*    mDNS component                                                      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_service_name_assemble(UCHAR *name, UCHAR *type, UCHAR *sub_type, UCHAR *domain, UCHAR *record_buffer, UINT buffer_size, UINT *type_index)
 {
@@ -6489,15 +6043,6 @@ UINT        length;
 /*    _nx_mdns_enable                       Enable mDNS                   */
 /*    _nx_mdns_address_change_process       Process address change        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_host_name_register(NX_MDNS *mdns_ptr, UCHAR type, UINT interface_index)
 {
@@ -6644,14 +6189,6 @@ NXD_IPV6_ADDRESS *ipv6_address_ptr;
 /*                                                                        */ 
 /*    ThreadX system timer thread                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_mdns_timer_entry(ULONG mdns_value)
 {
@@ -6714,14 +6251,6 @@ NX_MDNS     *mdns_ptr;
 /*    _nx_mdns_packet_process               Process mDNS packet           */
 /*    _nx_mdns_conflict_process             Process the conflict          */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_mdns_timer_set(NX_MDNS *mdns_ptr, NX_MDNS_RR  *record_rr, ULONG timer_count)
 {
@@ -6816,19 +6345,6 @@ UINT        active;
 /*                                                                        */ 
 /*    _nx_mdns_thread_entry                 Processing thread for mDNS    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the random value, */
-/*                                            fixed the issue of timer,   */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_mdns_timer_event_process(NX_MDNS *mdns_ptr)
 {
@@ -7456,14 +6972,6 @@ UINT        rr_name_length;
 /*                                                                        */ 
 /*    UDP receive callback                                                */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_mdns_udp_receive_notify(NX_UDP_SOCKET *socket_ptr)
 {
@@ -7514,14 +7022,6 @@ static VOID _nx_mdns_udp_receive_notify(NX_UDP_SOCKET *socket_ptr)
 /*                                                                        */ 
 /*    UDP receive callback                                                */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_mdns_ip_address_change_notify(NX_IP *ip_ptr, VOID *additional_info)
 {
@@ -7573,14 +7073,6 @@ static VOID _nx_mdns_ip_address_change_notify(NX_IP *ip_ptr, VOID *additional_in
 /*                                                                        */ 
 /*    UDP receive callback                                                */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 #ifdef NX_MDNS_ENABLE_IPV6
 static VOID _nx_mdns_ipv6_address_change_notify(NX_IP *ip_ptr, UINT method, UINT interface_index, UINT index, ULONG *ipv6_address)
@@ -7648,14 +7140,6 @@ static VOID _nx_mdns_ipv6_address_change_notify(NX_IP *ip_ptr, UINT method, UINT
 /*                                                                        */ 
 /*    ThreadX Scheduler                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_mdns_thread_entry(ULONG mdns_value)
 {
@@ -7742,7 +7226,7 @@ UINT             interface_index;
         for (interface_index = 0; interface_index < NX_MAX_PHYSICAL_INTERFACES; interface_index++)
         {
 
-            /* Check if this interface is enabled. 
+            /* Check if this interface is enabled.
                Exception: Goodbye message can be sent out after disable.  */
             if ((!mdns_ptr -> nx_mdns_interface_enabled[interface_index]) &&
                 (!(mdns_events & NX_MDNS_ANNOUNCING_SEND_EVENT)))
@@ -7852,21 +7336,6 @@ UINT             interface_index;
 /*                                                                        */ 
 /*    _nx_mdns_thread_entry                 Processing thread for mDNS    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the random value, */
-/*                                            fixed the issue of timer,   */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_process(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UINT interface_index)
 {
@@ -7939,7 +7408,7 @@ NX_MDNS_RR         *nsec_rr;
         if ((mdns_flags & NX_MDNS_RESPONSE_FLAG) == NX_MDNS_RESPONSE_FLAG)
         {
 
-            /* Multicast DNS responses MUST NOT contain any question in the Question Section, 
+            /* Multicast DNS responses MUST NOT contain any question in the Question Section,
                Any questions in the Question Section of a received Multicast DNS response MUST be silently ignored. RFC6762, Section6, Page14.  */
             data_ptr += (_nx_mdns_name_size_calculate(data_ptr, packet_ptr) + 4);
         }
@@ -8026,7 +7495,7 @@ NX_MDNS_RR         *nsec_rr;
 
                     /* Check whether the same record it is. RFC6762, Section6, Page13. */
                     /* The rules: rrname must match the question name.
-                    rrtype must match the question qtype unless the qtype is "ANY" or the rrtype is "CNAME". 
+                    rrtype must match the question qtype unless the qtype is "ANY" or the rrtype is "CNAME".
                     rrclass must match the question qclass unless the qclass is "ANY". */
                     if (p -> nx_mdns_rr_name != temp_resource_record.nx_mdns_rr_name)
                         continue;
@@ -8063,9 +7532,9 @@ NX_MDNS_RR         *nsec_rr;
                         if (p -> nx_mdns_rr_send_flag)
                         {
 
-                            /* Set the flag to send this Resource records via multicast. 
-                            Store the old flag into the top bits. 
-                            Store the new flag into the low bits.  
+                            /* Set the flag to send this Resource records via multicast.
+                            Store the old flag into the top bits.
+                            Store the new flag into the low bits.
                             Format: 0001 0001 */
                             p -> nx_mdns_rr_send_flag = ((NX_MDNS_RR_SEND_MULTICAST << 4) | NX_MDNS_RR_SEND_MULTICAST);
                         }
@@ -8085,7 +7554,7 @@ NX_MDNS_RR         *nsec_rr;
                         else
                         {
 
-                            /* A mDNS responder is only required to delay its transmission as necessary to ensure an interval of at least 250ms 
+                            /* A mDNS responder is only required to delay its transmission as necessary to ensure an interval of at least 250ms
                             since the last time the record was multicast on that interface.  RFC6762, Section6, Page16 */    
                             if (authority_count)
                             {
@@ -8190,7 +7659,7 @@ NX_MDNS_RR         *nsec_rr;
                         _nx_mdns_timer_set(mdns_ptr, rr_search, rr_search -> nx_mdns_rr_timer_count);
                     }
 
-                    /* Duplicate Answer Suppression, RFC6762, Section7.4,Page24. 
+                    /* Duplicate Answer Suppression, RFC6762, Section7.4,Page24.
                        The TTL in that record is not less than the TTL this host would have given. Host should not send this response again.  */
                     if (temp_resource_record.nx_mdns_rr_ttl >= rr_search -> nx_mdns_rr_ttl)
                     {
@@ -8298,7 +7767,7 @@ NX_MDNS_RR         *nsec_rr;
                         ((temp_resource_record.nx_mdns_rr_ttl << 1) >= rr_search -> nx_mdns_rr_ttl))
                     {
 
-                        /* Top four bit is zero and this resource reocrd is Known answer. 
+                        /* Top four bit is zero and this resource reocrd is Known answer.
                         Clear the send flag. */
                         rr_search -> nx_mdns_rr_send_flag = NX_MDNS_RR_SEND_FLAG_CLEAR;
                     }
@@ -8344,14 +7813,6 @@ NX_MDNS_RR         *nsec_rr;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID    _nx_mdns_probing_send(NX_MDNS *mdns_ptr, UINT interface_index)
 {
@@ -8581,14 +8042,6 @@ UINT                rr_name_length;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID    _nx_mdns_announcing_send(NX_MDNS *mdns_ptr, UINT interface_index)
 {
@@ -8734,14 +8187,6 @@ UCHAR               resend_flag = NX_FALSE;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID    _nx_mdns_response_send(NX_MDNS *mdns_ptr, UINT interface_index)
 {
@@ -8904,14 +8349,6 @@ UCHAR               resend_flag = NX_FALSE;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID    _nx_mdns_query_send(NX_MDNS *mdns_ptr, UINT interface_index)
 {
@@ -9107,14 +8544,6 @@ UINT                i;
 /*    _nx_mdns_query_send                   Send query message            */ 
 /*    _nx_mdns_response_send                Send response message         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT    _nx_mdns_packet_create(NX_MDNS *mdns_ptr, NX_PACKET **packet_ptr, UCHAR is_query)
 {
@@ -9217,14 +8646,6 @@ USHORT      flags;
 /*    _nx_mdns_query_send                   Send query message            */ 
 /*    _nx_mdns_response_send                Send response message         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID    _nx_mdns_packet_send(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UINT interface_index)
 {
@@ -9336,15 +8757,6 @@ UINT                address_index = mdns_ptr -> nx_mdns_ipv6_address_index[inter
 /*    _nx_mdns_query_send                   Send query message            */ 
 /*    _nx_mdns_response_send                Send response message         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT    _nx_mdns_packet_rr_add(NX_PACKET *packet_ptr, NX_MDNS_RR *rr, UINT op, UINT packet_type)
 {
@@ -9693,23 +9105,6 @@ UINT        rr_name_length;
 /*                                                                        */ 
 /*    _nx_mdns_packet_process               Process mDNS packet           */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.1.3  */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), improved */
-/*                                            fixed the issue of timer,   */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_rr_set(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, NX_MDNS_RR *rr_ptr, UINT op, UINT interface_index)
 {
@@ -9856,25 +9251,6 @@ UINT            temp_string_length;
 /*                                                                        */ 
 /*    _nx_mdns_packet_process               Process mDNS packet           */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.1.3  */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the random value, */
-/*                                            fixed the issue of timer,   */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_rr_process(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, UINT interface_index)
 {
@@ -10093,8 +9469,8 @@ UINT            rr_name_length;
             else
             {
 
-                /* There is no need for the querier to continue issuing a stream of queries when a mDNS response 
-                    is received containing a unique answer.  mDNS querier should send the next query at 80%-82% of the 
+                /* There is no need for the querier to continue issuing a stream of queries when a mDNS response
+                    is received containing a unique answer.  mDNS querier should send the next query at 80%-82% of the
                     record's TTL. RFC6762, Section5.2,Page11.  */
                 if ((insert_ptr -> nx_mdns_rr_word & NX_MDNS_RR_FLAG_UNIQUE) && (insert_ptr -> nx_mdns_rr_ttl))
                 {
@@ -10178,20 +9554,6 @@ UINT            rr_name_length;
 /*                                                                        */ 
 /*    _nx_mdns_packet_process               Process mDNS packet           */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.1.3  */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_rr_data_set(NX_MDNS *mdns_ptr, NX_PACKET *packet_ptr, UCHAR *data_ptr, NX_MDNS_RR *rr_ptr, UINT op)
 {
@@ -10455,17 +9817,6 @@ UINT            temp_string_length;
 /*                                                                        */ 
 /*    _nx_mdns_packet_process               Process mDNS packet           */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_packet_address_check(NX_PACKET *packet_ptr)
 {
@@ -10681,14 +10032,6 @@ NX_IPV6_HEADER     *ipv6_header;
 /*                                                                        */ 
 /*    _nx_mdns_thread_entry                 Processing thread for mDNS    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID    _nx_mdns_address_change_process(NX_MDNS *mdns_ptr)
 {
@@ -10795,16 +10138,6 @@ UINT        i;
 /*                                                                        */ 
 /*    _nx_mdns_packet_process               Process mDNS packet           */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_conflict_process(NX_MDNS *mdns_ptr, NX_MDNS_RR *record_rr)
 {
@@ -11035,15 +10368,6 @@ UINT        rr_name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_mdns_service_change_notify_process(NX_MDNS *mdns_ptr, NX_MDNS_RR *new_rr, UCHAR is_present)
 {
@@ -11203,15 +10527,6 @@ UINT            rr_name_length;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_service_addition_info_get(NX_MDNS *mdns_ptr, UCHAR *srv_name, NX_MDNS_SERVICE *service, UINT interface_index)
 {
@@ -11410,14 +10725,6 @@ UINT        temp_length;
 /*    _nx_mdns_disable                      Disable the mDNS function     */
 /*    _nx_mdns_peer_cache_clear             Clear the peer cache          */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_cache_initialize(NX_MDNS *mdns_ptr, VOID *local_cache_ptr, UINT local_cache_size, 
                                VOID *peer_cache_ptr, UINT peer_cache_size)
@@ -11532,15 +10839,6 @@ ULONG *tail;
 /*    _nx_mdns_cache_delete_rr_string       Delete the rr string          */
 /*    _nx_mdns_packet_rr_process            Process resource record       */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_cache_add_resource_record(NX_MDNS *mdns_ptr, UINT cache_type, NX_MDNS_RR *record_ptr, NX_MDNS_RR **insert_ptr, UCHAR *is_present)
 {
@@ -11775,14 +11073,6 @@ ULONG       min_elapsed_time;
 /*    _nx_mdns_packet_process               Process mDNS packet           */
 /*    _nx_mdns_cache_delete_rr_string       Delete the rr string          */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_cache_delete_resource_record(NX_MDNS *mdns_ptr, UINT cache_type, NX_MDNS_RR *record_ptr)
 {
@@ -11877,14 +11167,6 @@ ULONG       *head;
 /*    _nx_mdns_packet_process               Process mDNS packet           */
 /*    _nx_mdns_cache_add_resource_record    Add the resource record       */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_cache_find_resource_record(NX_MDNS *mdns_ptr, UINT cache_type, NX_MDNS_RR *record_ptr, UINT match_type, NX_MDNS_RR **search_rr)
 {
@@ -11923,7 +11205,7 @@ UINT        same_rdata;
 
         /* Check whether the same record it is. RFC6762, Section6, Page13. */
         /* The rules: rrname must match the question name.
-                      rrtype must match the question qtype unless the qtype is "ANY" or the rrtype is "CNAME". 
+                      rrtype must match the question qtype unless the qtype is "ANY" or the rrtype is "CNAME".
                       rrclass must match the question qclass unless the qclass is "ANY". */
         if (p -> nx_mdns_rr_name != record_ptr -> nx_mdns_rr_name)
             continue;
@@ -12105,15 +11387,6 @@ UINT        same_rdata;
 /*    _nx_mdns_conflict_process             Process the conflict          */
 /*    _nx_mdns_packet_rr_process            Process resource record       */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_cache_add_string(NX_MDNS *mdns_ptr, UINT cache_type, VOID *memory_ptr, UINT memory_size, VOID **insert_ptr, UCHAR find_string, UCHAR add_name)
 {
@@ -12214,7 +11487,7 @@ UCHAR   *p, *available, *start;
     if(available == (UCHAR*)tail)
     {
 
-        /* Make sure the service cache still has room to add this string 
+        /* Make sure the service cache still has room to add this string
            (without overwriting the RR area.) */
         if(((UCHAR*)tail - memory_len) < (UCHAR*)head )
         {
@@ -12338,14 +11611,6 @@ UCHAR   *p, *available, *start;
 /*    _nx_mdns_cache_delete_resource_record Delete the resource record    */
 /*    _nx_mdns_packet_rr_process            Process resource record       */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_cache_delete_string(NX_MDNS *mdns_ptr, UINT cache_type, VOID *string_ptr, UINT string_len)
 {
@@ -12525,14 +11790,6 @@ USHORT  cnt;
 /*    _nx_mdns_cache_add_resource_record    Add the resource record       */
 /*    _nx_mdns_cache_delete_resource_record Delete the resource record    */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_mdns_cache_delete_rr_string(NX_MDNS *mdns_ptr, UINT cache_type, NX_MDNS_RR *record_rr)
 {
@@ -12600,14 +11857,6 @@ VOID _nx_mdns_cache_delete_rr_string(NX_MDNS *mdns_ptr, UINT cache_type, NX_MDNS
 /*                                                                        */ 
 /*    _nx_mdns_response_send                Send response message         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_mdns_additional_resource_record_find(NX_MDNS *mdns_ptr, NX_MDNS_RR *record_ptr)
 {
@@ -12753,14 +12002,6 @@ NX_MDNS_RR      *p;
 /*    _nx_mdns_additional_resource_record_find                            */ 
 /*                                          Find additional record        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_mdns_additional_a_aaaa_find(NX_MDNS *mdns_ptr, UCHAR *name, UINT interface_index)
 {
@@ -12832,14 +12073,6 @@ NX_MDNS_RR      *p;
 /*    _nx_mdns_query_send                   Send query message            */ 
 /*    _nx_mdns_packet_process               Process mDNS packet           */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_known_answer_find(NX_MDNS *mdns_ptr, NX_MDNS_RR *record_ptr)
 {
@@ -12950,17 +12183,6 @@ UINT            cache_count = 1;
 /*                                                                        */ 
 /*    _nx_mdns_query                        Send the query                */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the random value, */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_query_check(NX_MDNS *mdns_ptr, UCHAR *name, USHORT type, UINT one_shot, NX_MDNS_RR **search_rr, UINT interface_index)
 {
@@ -13041,7 +12263,7 @@ UINT        name_length;
     if (same_query == NX_TRUE)
     {
 
-        /* A multicast DNS querier should also delay the first query of the series by 
+        /* A multicast DNS querier should also delay the first query of the series by
            a randomly chosen amount in the range 20-120ms.  */
         rr -> nx_mdns_rr_timer_count = (ULONG)(NX_MDNS_QUERY_DELAY_MIN + (((ULONG)NX_RAND()) % NX_MDNS_QUERY_DELAY_RANGE));
         rr -> nx_mdns_rr_retransmit_lifetime = NX_MDNS_TIMER_COUNT_RANGE;
@@ -13091,14 +12313,6 @@ UINT        name_length;
 /*    _tx_thread_timeout                    Thread timeout processing     */ 
 /*    _tx_thread_terminate                  Thread terminate processing   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_mdns_query_cleanup(TX_THREAD *thread_ptr NX_CLEANUP_PARAMETER)
 {
@@ -13170,8 +12384,8 @@ NX_MDNS     *mdns_ptr;
             /* Restore interrupts.  */
             TX_RESTORE
 
-            /* Resume the thread!  Check for preemption even though we are executing 
-               from the system timer thread right now which normally executes at the 
+            /* Resume the thread!  Check for preemption even though we are executing
+               from the system timer thread right now which normally executes at the
                highest priority.  */
             _tx_thread_system_resume(thread_ptr);
 
@@ -13217,14 +12431,6 @@ NX_MDNS     *mdns_ptr;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_mdns_query_thread_suspend(TX_THREAD **suspension_list_head, VOID (*suspend_cleanup)(TX_THREAD * NX_CLEANUP_PARAMETER),
@@ -13330,14 +12536,6 @@ TX_THREAD *thread_ptr;
 /*    _tx_thread_timeout                    Thread timeout processing     */ 
 /*    _tx_thread_terminate                  Thread terminate processing   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_mdns_query_thread_resume(TX_THREAD **suspension_list_head, NX_MDNS *mdns_ptr, NX_MDNS_RR *rr)
 {
@@ -13448,14 +12646,6 @@ TX_THREAD *thread_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_service_mask_match(NX_MDNS *mdns_ptr, UCHAR *service_type, ULONG service_mask)
 {
@@ -13541,14 +12731,6 @@ UINT        type_length;
 /*                                                                        */ 
 /*    _nx_mdns_packet_rr_add                Add the RR into packet        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_mdns_name_match(UCHAR *src, UCHAR *dst, UINT length)
 {
@@ -13621,14 +12803,6 @@ UINT    index = 0;
 /*                                                                        */ 
 /*    _nx_mdns_packet_rr_add                Add the RR into packet        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_mdns_txt_string_encode(UCHAR *ptr, UCHAR *txt)
 {
@@ -13717,17 +12891,6 @@ UINT    count =  1;
 /*    _nx_mdns_packet_process               Process mDNS packet           */
 /*    _nx_mdns_packet_rr_process            Process resource record       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.1.3  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_txt_string_decode(UCHAR *data, UINT data_length, UCHAR *buffer, UINT size)
 {
@@ -13813,17 +12976,6 @@ static UINT _nx_mdns_txt_string_decode(UCHAR *data, UINT data_length, UCHAR *buf
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_mdns_name_size_calculate(UCHAR *name, NX_PACKET *packet_ptr)
 {
@@ -13905,14 +13057,6 @@ UINT size =  0;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_mdns_name_string_encode(UCHAR *ptr, UCHAR *name)
 {
@@ -14005,22 +13149,6 @@ UINT    count =  1;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            prevented infinite loop in  */
-/*                                            name compression,           */
-/*                                            resulting in version 6.1.3  */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_mdns_name_string_decode(UCHAR *data, UINT start, UINT data_length, UCHAR *buffer, UINT size)
 {
@@ -14032,7 +13160,7 @@ UINT    pointer_count = 0;
 UINT    labelSize;
 
   
-    /* As long as there is space in the buffer and we haven't 
+    /* As long as there is space in the buffer and we haven't
        found a zero terminating label */
     while (1)
     {
@@ -14155,17 +13283,6 @@ UINT    labelSize;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_mdns_rr_size_get(UCHAR *resource, NX_PACKET *packet_ptr)
 {
@@ -14173,7 +13290,7 @@ static UINT  _nx_mdns_rr_size_get(UCHAR *resource, NX_PACKET *packet_ptr)
 UINT    name_size;
 UINT    data_size;
 
-    /* Resource size is 
+    /* Resource size is
         name size + data size + 2 bytes for type, 2 for class, 4 for time to live and 2 for data length
         i.e. name size + data size + 10 bytes overhead.
     */
@@ -14222,14 +13339,6 @@ UINT    data_size;
 /*                                                                        */ 
 /*    DNS component                                                       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static void  _nx_mdns_short_to_network_convert(UCHAR *ptr, USHORT value)
 {
@@ -14271,14 +13380,6 @@ static void  _nx_mdns_short_to_network_convert(UCHAR *ptr, USHORT value)
 /*                                                                        */ 
 /*    DNS component                                                       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static void _nx_mdns_long_to_network_convert(UCHAR *ptr, ULONG value)
 {

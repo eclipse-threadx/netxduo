@@ -1,7 +1,7 @@
 /* 13.01 A full-sized segment MUST be acknowledged within a time of 0.5 sec.  */
 
-/* RFC 1122, Section 4.2.3.2, page 96, When to Send an ACK Segment. 
-   A TCP SHOULD implement a delayed ACK, but an ACK should not be excessively delayed; 
+/* RFC 1122, Section 4.2.3.2, page 96, When to Send an ACK Segment.
+   A TCP SHOULD implement a delayed ACK, but an ACK should not be excessively delayed;
    in particular, the delay MUST be less than 0.5 seconds, and in a stream of full-sized
    segments there SHOULD be an ACK for at least every second segment.  */
 

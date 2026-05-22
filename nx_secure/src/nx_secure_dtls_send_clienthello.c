@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -72,18 +72,6 @@ static UINT _nx_secure_dtls_send_clienthello_sec_spf_extensions(NX_SECURE_TLS_SE
 /*                                                                        */
 /*    nx_secure_dtls_session_start                                        */
 /*    nx_secure_dtls_client_handshake                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            updated cookie handling,    */
-/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_send_clienthello(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *send_packet)
@@ -506,14 +494,6 @@ USHORT                      protocol_version;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_dtls_send_clienthello      Send TLS ClientHello extension*/
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE

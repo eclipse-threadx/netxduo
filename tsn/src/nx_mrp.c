@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -85,12 +85,6 @@ UCHAR *action_str[] =
 /*    nx_mrp_attribute_new                  MRP attribute new             */
 /*    nx_mrp_periodic_timeout_process       MRP periodic timeout process  */
 /*    nx_mrp_join_timeout_process           MRP join timeout process      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_applicant_event_process(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR mrp_event)
@@ -487,12 +481,6 @@ UCHAR origin_state = attribute -> applicant.state;
 /*    nx_mrp_join_timeout_process           MRP join timeout process      */
 /*    nx_mrp_leave_timeout_process          MRP leave timeout process     */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_registrar_event_process(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR mrp_event)
 {
@@ -624,12 +612,6 @@ UCHAR origin_state = attribute -> registrar.state;
 /*    nx_mrp_join_timeout_process           MRP join timeout process      */
 /*    nx_mrp_leaveall_timeout_process       MRP leave all timeout process */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_leaveall_event_process(NX_MRP_PARTICIPANT *participant, UCHAR mrp_event)
 {
@@ -715,12 +697,6 @@ UCHAR origin_state = participant -> leaveall.state;
 /*                                                                        */
 /*    nx_srp_init                           SRP init                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_participant_add(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant)
 {
@@ -793,12 +769,6 @@ NX_MRP_PARTICIPANT *tmp_participant = mrp -> list_head;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Internal function                                                   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 NX_MRP_ATTRIBUTE *nx_mrp_attribute_new(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant,
@@ -874,12 +844,6 @@ UINT              i;
 /*                                                                        */
 /*    Internal function                                                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_attribute_evict(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *target)
 {
@@ -943,12 +907,6 @@ NX_MRP_ATTRIBUTE *attribute = target;
 /*                                                                        */
 /*    nx_mrp_init                           Initialize MRP Module         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 void nx_mrp_timer_handle(ULONG mrp_instance)
 {
@@ -995,12 +953,6 @@ NX_MRP *mrp = (NX_MRP *)mrp_instance;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_mrp_init                           Initialize MRP Module         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_ethernet_receive_notify(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
@@ -1096,12 +1048,6 @@ NX_MRP *mrp = (NX_MRP *)context;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_srp_init                           Initialize SRP Module         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_init(NX_MRP *mrp, NX_IP *ip_ptr, UINT interface_index, NX_PACKET_POOL *pkt_pool_ptr,
@@ -1215,12 +1161,6 @@ UINT status;
 /*                                                                        */
 /*    nx_mrp_rcv_pkt_process                Process received packet       */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 NX_MRP_PARTICIPANT *nx_mrp_participant_search(NX_MRP *mrp, UINT participant_type)
 {
@@ -1272,12 +1212,6 @@ NX_MRP_PARTICIPANT *participant = NX_NULL;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_mrp_thread_entry                   MRP thread entry              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_rcv_pkt_process(NX_MRP *mrp)
@@ -1374,12 +1308,6 @@ NX_MRP_PARTICIPANT *participant;
 /*                                                                        */
 /*    Internal function                                                   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_event_process(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *attribute, UCHAR mrp_event)
 {
@@ -1450,12 +1378,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Internal function                                                   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT nx_mrp_attribute_event_get(NX_MRP_ATTRIBUTE *attribute, UCHAR *event_ptr)
@@ -1542,12 +1464,6 @@ UINT nx_mrp_attribute_event_get(NX_MRP_ATTRIBUTE *attribute, UCHAR *event_ptr)
 /*                                                                        */
 /*    nx_mrp_timeout_process                MRP timeout process           */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 void nx_mrp_periodic_timeout_process(NX_MRP *mrp)
 {
@@ -1612,12 +1528,6 @@ NX_MRP_ATTRIBUTE   *attribute;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_mrp_timeout_process                MRP timeout process           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_join_timeout_process(NX_MRP *mrp)
@@ -1765,12 +1675,6 @@ UINT                eth_type;
 /*                                                                        */
 /*    nx_mrp_timeout_process                MRP timeout process           */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 void nx_mrp_leaveall_timeout_process(NX_MRP *mrp)
 {
@@ -1824,12 +1728,6 @@ NX_MRP_PARTICIPANT *participant;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    nx_mrp_timeout_process                MRP timeout process           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_leave_timeout_process(NX_MRP *mrp)
@@ -1892,12 +1790,6 @@ NX_MRP_ATTRIBUTE   *attribute;
 /*                                                                        */
 /*    nx_mrp_thread_entry                   MRP thread entry              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 void nx_mrp_timeout_process(NX_MRP *mrp)
 {
@@ -1944,12 +1836,6 @@ void nx_mrp_timeout_process(NX_MRP *mrp)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Internal function                                                   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023     Yajun Xia                Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 void nx_mrp_thread_entry(ULONG mrp_instance)

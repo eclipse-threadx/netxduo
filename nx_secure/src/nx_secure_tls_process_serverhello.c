@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -67,23 +67,6 @@ extern const UCHAR _nx_secure_tls_hello_retry_request_random[32];
 /*                                                                        */
 /*    _nx_secure_dtls_client_handshake      DTLS client state machine     */
 /*    _nx_secure_tls_client_handshake       TLS client state machine      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), added    */
-/*                                            priority ciphersuite logic, */
-/*                                            verified memcpy use cases,  */
-/*                                            fixed renegotiation bug,    */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Timothy Stapko           Modified comment(s), fixed    */
-/*                                            TLS 1.3 compilation issue,  */
-/*                                            resulting in version 6.1.9  */
-/*  10-31-2022     Yanwu Cai                Modified comment(s), fixed    */
-/*                                            TLS 1.3 version negotiation,*/
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_serverhello(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,

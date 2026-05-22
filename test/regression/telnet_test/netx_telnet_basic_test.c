@@ -314,7 +314,7 @@ UINT        i;
 }
 
 
-/* This routine is called by the NetX Telnet Server whenever a new Telnet client 
+/* This routine is called by the NetX Telnet Server whenever a new Telnet client
    connection is established.  */
 void  telnet_new_connection(NX_TELNET_SERVER *server_ptr, UINT logical_connection)
 {
@@ -344,7 +344,7 @@ NX_PACKET   *packet_ptr;
 }
 
 
-/* This routine is called by the NetX Telnet Server whenever data is present on a Telnet client 
+/* This routine is called by the NetX Telnet Server whenever data is present on a Telnet client
    connection.  */          
 void  telnet_receive_data(NX_TELNET_SERVER *server_ptr, UINT logical_connection, NX_PACKET *packet_ptr)
 {
@@ -355,7 +355,7 @@ ULONG   bytes_copied;
 
 
     /* This demo just echoes the character back and on <cr,lf> sends a new prompt back to the
-       client.  A real system would most likely buffer the character(s) received in a buffer 
+       client.  A real system would most likely buffer the character(s) received in a buffer
        associated with the supplied logical connection and process according to it.  */
 
 

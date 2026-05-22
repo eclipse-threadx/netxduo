@@ -2,9 +2,9 @@
 
 /* This test checks that the DHCP Client can run on the secondary interface,
    only using the nx_dhcp_set_interface_index for backward compatibility.
- 
+
    Set MAX PHYSICAL INTERFACES to 2, NX_DHCP_CLIENT_MAX_INTERFACES to 1
-   and run the demo. 
+   and run the demo.
  */
 
 

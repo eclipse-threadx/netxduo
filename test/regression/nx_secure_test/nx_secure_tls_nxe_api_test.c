@@ -1,7 +1,7 @@
 /* 14.19 TCP MUST include an SWS avoidance algorithm in the receiver when effective send MSS < (1/ 2)*RCV_BUFF.  */
 
 /*  Procedure
-    1.Connection successfully  
+    1.Connection successfully
     2.First Client sends 40 data to Server, then check if the last_sent changed
     3.Then Client sends more 20 data to Server, also check if the last_sent changed
     4.If the last_sent changed, the SWS avoidance algorithm has not been used.  */

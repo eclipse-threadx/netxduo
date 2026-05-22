@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -86,7 +86,7 @@ static VOID        _nx_dhcp_server_socket_receive_notify(NX_UDP_SOCKET *socket_p
 
 static int  add_client = 0; 
 
-/* Define how often to print the server table of current clients. 
+/* Define how often to print the server table of current clients.
    For no output set to zero.  For low volume, set to 1;
    for very high volume, set higher so as not to overwelm the processor. */
 
@@ -130,14 +130,6 @@ static int  add_client = 0;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 
 UINT  _nxe_dhcp_server_create(NX_DHCP_SERVER *dhcp_ptr, NX_IP *ip_ptr, VOID *stack_ptr, ULONG stack_size, 
@@ -216,15 +208,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_server_create(NX_DHCP_SERVER *dhcp_ptr, NX_IP *ip_ptr, VOID *stack_ptr, ULONG stack_size, 
                              CHAR *name_ptr, NX_PACKET_POOL *packet_pool_ptr)
@@ -370,7 +353,7 @@ UINT  i, j;
     /* Convert seconds to timer ticks. */
     timer_ticks = NX_DHCP_SLOW_PERIODIC_TIME_INTERVAL * NX_IP_PERIODIC_RATE;
 
-    /* Create the timer for Client DHCP session. This will keep track of when leases expire 
+    /* Create the timer for Client DHCP session. This will keep track of when leases expire
        and when a client session has timed out. */
     status = tx_timer_create(&(dhcp_ptr -> nx_dhcp_slow_periodic_timer), "DHCP Server IP Lease Timer", 
                              _nx_dhcp_slow_periodic_timer_entry, (ULONG)(ALIGN_TYPE)dhcp_ptr, 
@@ -381,7 +364,7 @@ UINT  i, j;
     /* Convert seconds to timer ticks. */
     timer_ticks = NX_DHCP_FAST_PERIODIC_TIME_INTERVAL * NX_IP_PERIODIC_RATE;
 
-    /* Create the timer for Client DHCP session. This will keep track of when leases expire 
+    /* Create the timer for Client DHCP session. This will keep track of when leases expire
        and when a client session has timed out. */
     status += tx_timer_create(&(dhcp_ptr -> nx_dhcp_fast_periodic_timer), "DHCP Server Session Timer", 
                               _nx_dhcp_fast_periodic_timer_entry, (ULONG)(ALIGN_TYPE)dhcp_ptr, 
@@ -473,14 +456,6 @@ UINT  i, j;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_dhcp_fast_periodic_timer_entry(ULONG info)
 {
@@ -530,14 +505,6 @@ NX_DHCP_SERVER   *dhcp_ptr;
 /*                                                                        */ 
 /*    ThreadX system timer thread                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_dhcp_slow_periodic_timer_entry(ULONG info)
 {
@@ -587,14 +554,6 @@ NX_DHCP_SERVER                  *dhcp_ptr;
 /*                                                                        */ 
 /*    Threads                                                             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcp_server_socket_receive_notify(NX_UDP_SOCKET *socket_ptr)
 {
@@ -642,14 +601,6 @@ NX_DHCP_SERVER  *dhcp_server_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_server_delete(NX_DHCP_SERVER *dhcp_ptr)
 {
@@ -713,14 +664,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_server_delete(NX_DHCP_SERVER *dhcp_ptr)
 {
@@ -804,14 +747,6 @@ UINT  _nx_dhcp_server_delete(NX_DHCP_SERVER *dhcp_ptr)
 /*                                                                        */ 
 /*     Application code                                                   */ 
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcp_create_server_ip_address_list(NX_DHCP_SERVER *dhcp_ptr, UINT iface_index, 
                                              ULONG start_ip_address, ULONG end_ip_address, UINT *addresses_added)
@@ -893,14 +828,6 @@ UINT            status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_create_server_ip_address_list(NX_DHCP_SERVER *dhcp_ptr, UINT iface_index, 
                                             ULONG start_ip_address, ULONG end_ip_address,
@@ -989,7 +916,7 @@ NX_DHCP_INTERFACE_TABLE      *dhcp_interface_table_ptr;
         /* Set local pointer to the next entry for convenience. */
         ip_address_entry_ptr = &dhcp_interface_table_ptr -> nx_dhcp_ip_address_list[i];
 
-        /* Clear existing entry; client identifier and available status 
+        /* Clear existing entry; client identifier and available status
            must be initialized to NULL and not assigned respectively.  */
         memset(ip_address_entry_ptr, 0, sizeof(NX_DHCP_INTERFACE_IP_ADDRESS));
 
@@ -1054,14 +981,6 @@ NX_DHCP_INTERFACE_TABLE      *dhcp_interface_table_ptr;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_set_interface_network_parameters(NX_DHCP_SERVER *dhcp_ptr, UINT iface_index, 
                                             ULONG subnet_mask, ULONG default_gateway_address,
@@ -1128,14 +1047,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_set_interface_network_parameters(NX_DHCP_SERVER *dhcp_ptr, UINT iface_index, 
                                             ULONG subnet_mask, ULONG default_gateway_address,
@@ -1205,14 +1116,6 @@ UINT  _nx_dhcp_set_interface_network_parameters(NX_DHCP_SERVER *dhcp_ptr, UINT i
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_server_start(NX_DHCP_SERVER *dhcp_ptr)
 {
@@ -1274,14 +1177,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_server_start(NX_DHCP_SERVER *dhcp_ptr)
 {
@@ -1360,14 +1255,6 @@ UINT  status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_server_stop(NX_DHCP_SERVER *dhcp_ptr)
 {
@@ -1429,14 +1316,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_server_stop(NX_DHCP_SERVER *dhcp_ptr)
 {
@@ -1522,14 +1401,6 @@ UINT    current_preemption;
 /*                                                                        */ 
 /*    ThreadX                                                             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_dhcp_server_thread_entry(ULONG info)
 {
@@ -1604,7 +1475,7 @@ NX_PACKET                       *packet_ptr;
                 if ((dhcp_client_ptr -> nx_dhcp_client_mac_lsw == 0) && (dhcp_client_ptr -> nx_dhcp_client_mac_msw == 0))
                     continue;
 
-                /* Skip clients not in active session with the Server, static members, 
+                /* Skip clients not in active session with the Server, static members,
                 or client in the bound state. */
                 if (dhcp_client_ptr -> nx_dhcp_session_timeout == TX_WAIT_FOREVER)
                     continue;
@@ -1635,7 +1506,7 @@ NX_PACKET                       *packet_ptr;
                 if (dhcp_client_ptr -> nx_dhcp_session_timeout == 0)
                 {
 
-                    /* Yes, the client has bailed on the session, intentionally or otherwise. If it wants to 
+                    /* Yes, the client has bailed on the session, intentionally or otherwise. If it wants to
                        get an IP address it must start again. Reset status to 'INIT'. */
                     dhcp_client_ptr -> nx_dhcp_client_state = NX_DHCP_STATE_INIT;
 
@@ -1726,7 +1597,7 @@ NX_PACKET                       *packet_ptr;
                             /* Clear all session data if there is any for this client. */
                             _nx_dhcp_clear_client_session(dhcp_ptr, dhcp_client_ptr);
 
-                            /* No, we should have this client in the server client records table but we don't. 
+                            /* No, we should have this client in the server client records table but we don't.
                             That's all we can do right now. */
                         }
                     }
@@ -1782,14 +1653,6 @@ NX_PACKET                       *packet_ptr;
 /*                                                                        */ 
 /*   _nx_dhcp_listen_for_messages           Service Client DHCP messages  */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_respond_to_client_message(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT *dhcp_client_ptr)
 {
@@ -1902,7 +1765,7 @@ UINT                     index = 0;
     
             case NX_DHCP_TYPE_DHCPINFORM:
     
-                /* At this time the server sends just standard network parameters to INFORM requests.  
+                /* At this time the server sends just standard network parameters to INFORM requests.
                    so no additional options to add. */
     
                 /* Increment the number of Inform messages received.  */
@@ -1935,7 +1798,7 @@ UINT                     index = 0;
         packet_ptr -> nx_packet_append_ptr = packet_ptr -> nx_packet_prepend_ptr + NX_DHCP_OFFSET_END;
     }
 
-    /* DHCP Server set the correct destination address and port to send resposne. RFC2131, Section4.1, Page23.  
+    /* DHCP Server set the correct destination address and port to send resposne. RFC2131, Section4.1, Page23.
        1. If the 'giaddr' field in a DHCP message from a client is non-zero, the server sends any return messages to the 'DHCP server' port on the
           BOOTP relay agent whose address appears in 'giaddr'.
        2. If the 'giaddr'field is zero and the 'ciaddr' field is nonzero, then the server unicasts DHCPOFFER and DHCPACK messages to the address in 'ciaddr'.
@@ -2092,14 +1955,6 @@ UINT                     index = 0;
 /*   _nx_dhcp_listen_for_messages           Handle Client DHCP messages   */
 /*   _nx_dhcp_fast_periodic_timer_entry     Session timer entry function  */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_clear_client_session(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT *dhcp_client_ptr)
 {
@@ -2165,14 +2020,6 @@ UINT i;
 /*                                                                        */ 
 /*   Host Application                                                     */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_clear_client_record(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT *dhcp_client_ptr)
 {
@@ -2235,14 +2082,6 @@ UINT status;
 /*                                                                        */ 
 /*   Host Application                                                     */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_clear_client_record(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT *dhcp_client_ptr)
 {
@@ -2351,14 +2190,6 @@ NX_DHCP_INTERFACE_TABLE  *iface_table_ptr;
 /*    _nx_dhcp_respond_to_dhcp_message      Create and send response back */ 
 /*                                               DHCP Client              */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_load_server_options(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT *dhcp_client_ptr, UCHAR *buffer, UINT option_type, UINT *index)
 {
@@ -2425,7 +2256,7 @@ UINT lease_time;
     else if (option_type == NX_DHCP_OPTIONS_FOR_REPLY_TO_INFORM)
     {
 
-        /* The NetX DHCP Server reply to Inform messages includes the standard server option 
+        /* The NetX DHCP Server reply to Inform messages includes the standard server option
            list which is automatically included. */        
     }
     else if (option_type == NX_DHCP_OPTIONS_FOR_GENERIC_ACK)
@@ -2496,14 +2327,6 @@ UINT lease_time;
 /*                                                                        */ 
 /*    _nx_dhcp_server_create               Create the DHCP Server instance*/
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_set_server_options(NX_DHCP_SERVER *dhcp_ptr, CHAR *buffer, UINT buffer_size)
 {
@@ -2587,17 +2410,6 @@ CHAR *work_ptr;
 /*                                                                        */ 
 /*    _nx_dhcp_set_default_server_options  Creates the server option list */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), fixed    */
-/*                                            obsolescent functions,      */
-/*                                            resulting in version 6.1.3  */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_parse_next_option(CHAR **option_list, UINT *option, UINT length)
 {
@@ -2707,18 +2519,6 @@ CHAR *buffer;
 /*                                                                        */ 
 /*    _nx_dhcp_server_thread_entry          DHCP Server thread task       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Bo Chen                  Modified comment(s), corrected*/
-/*                                            the logic of verifying the  */
-/*                                            incoming packet length,     */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_server_packet_process(NX_DHCP_SERVER *dhcp_ptr, NX_PACKET *packet_ptr)
 {
@@ -2817,7 +2617,7 @@ ULONG           offset;
         return(status);
     }       
 
-    /* Update the new packet with the bytes copied, and removed.  
+    /* Update the new packet with the bytes copied, and removed.
        For chained packets, this will reflect the total 'datagram' length. */
     new_packet_ptr -> nx_packet_prepend_ptr += 28;
     new_packet_ptr -> nx_packet_length = bytes_copied - 28;
@@ -2934,7 +2734,7 @@ ULONG           offset;
            this will verify they sent the correct IP address and reset the lease time. */ 
         status = _nx_dhcp_server_assign_ip_address(dhcp_ptr, dhcp_client_ptr);
 
-        /* Has the server run out of available addresses? Handle this 'error' 
+        /* Has the server run out of available addresses? Handle this 'error'
           condition separately.  */
         if (status == NX_DHCP_NO_AVAILABLE_IP_ADDRESSES)
         {
@@ -2943,10 +2743,10 @@ ULONG           offset;
             EL_PRINTF("DHCPserv: Unable to assign IP address; none available\n");
 #endif
 
-            /* Actually as yet, there is no callback to the host application 
-               for handling this situation. 
+            /* Actually as yet, there is no callback to the host application
+               for handling this situation.
 
-               The server should still send a NACK to the Client that it cannot 
+               The server should still send a NACK to the Client that it cannot
                provide what it requests. */
         }
         /* Check for errors other than running out of available IP addresses. */
@@ -3009,13 +2809,13 @@ ULONG           offset;
         }
     }
 
-    /* 
-       If the Client is BOUND, the session is over. Clear the session including 
-       the sesison timeout. 
+    /*
+       If the Client is BOUND, the session is over. Clear the session including
+       the sesison timeout.
 
-       If the Client is still in the BOOT or INIT state something was wrong with their 
+       If the Client is still in the BOOT or INIT state something was wrong with their
        message or else the server had a problem.  Clear the record and they
-       can start a new session with a retransmission of their request. 
+       can start a new session with a retransmission of their request.
     */
 
     /* Do we need to clear the session data depending? */
@@ -3039,11 +2839,11 @@ ULONG           offset;
         EL_PRINTF("DHCPserv: Waiting for DHCP client response...\n");
 #endif
 
-       /* No; assume the Client is Renewing, rebinding, or selecting, 
+       /* No; assume the Client is Renewing, rebinding, or selecting,
           to set the session timeout to await the next Client response;
           (not finished with this DHCP session yet). */
 
-        /* Assume we have received at least one message from the Client, so 
+        /* Assume we have received at least one message from the Client, so
            reset the timer on the client session timeout. */
         dhcp_client_ptr -> nx_dhcp_session_timeout = NX_DHCP_CLIENT_SESSION_TIMEOUT;
     }
@@ -3154,14 +2954,6 @@ ULONG           offset;
 /*                                                                        */ 
 /*    _nx_dhcp_slow_periodic_timer_entry    Update IP lease time outs     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_find_client_record_by_ip_address(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT **dhcp_client_ptr, 
                                                UINT iface_index, ULONG assigned_ip_address)
@@ -3176,7 +2968,7 @@ NX_DHCP_CLIENT  *client_record_ptr;
 
     i = 0;
 
-    /* Records are not necessarily added and deleted sequentially, 
+    /* Records are not necessarily added and deleted sequentially,
        so search the whole table until a match is found. */
     while (i < NX_DHCP_CLIENT_RECORD_TABLE_SIZE) 
     {
@@ -3198,7 +2990,7 @@ NX_DHCP_CLIENT  *client_record_ptr;
             else
             {
 
-                /* It appears the client has changed its subnet location but not hardware type e.g. 
+                /* It appears the client has changed its subnet location but not hardware type e.g.
                    same mac address/hardware type but not interface. Clear the old record. */
 
                 /* This will remove the client record both in the
@@ -3257,14 +3049,6 @@ NX_DHCP_CLIENT  *client_record_ptr;
 /*    _nx_dhcp_server_extract_information    Extract DHCP info from Client */ 
 /*                                             message                    */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_find_client_record_by_chaddr(NX_DHCP_SERVER *dhcp_ptr, UINT iface_index, ULONG client_mac_msw, 
                                  ULONG client_mac_lsw, NX_DHCP_CLIENT **dhcp_client_ptr, UINT add_on)
@@ -3281,7 +3065,7 @@ NX_DHCP_CLIENT  *client_record_ptr;
     /* Initialize an available slot in the table as outside the boundary (e.g. no slots available). */
     available_index = NX_DHCP_CLIENT_RECORD_TABLE_SIZE;
 
-    /* Records are not necessarily added and deleted sequentially, 
+    /* Records are not necessarily added and deleted sequentially,
        so search the whole table until a match is found. */
     i = 0;
     while (i < NX_DHCP_CLIENT_RECORD_TABLE_SIZE) 
@@ -3318,7 +3102,7 @@ NX_DHCP_CLIENT  *client_record_ptr;
             else
             {
 
-                /* It appears the client has changed its location (subnet) but not hardware type e.g. same mac 
+                /* It appears the client has changed its location (subnet) but not hardware type e.g. same mac
                    address/hware type but not interface. Remove the client record entirely and
                    free up any assigned IP address in the server database. */
                 _nx_dhcp_clear_client_record(dhcp_ptr, client_record_ptr);
@@ -3411,14 +3195,6 @@ NX_DHCP_CLIENT  *client_record_ptr;
 /*    _nx_dhcp_server_extract_information   Extract DHCP info from Client */ 
 /*                                             message                    */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_find_interface_table_ip_address(NX_DHCP_SERVER *dhcp_ptr, UINT iface_index, ULONG ip_address, 
                                               NX_DHCP_INTERFACE_IP_ADDRESS **return_interface_address)
@@ -3503,14 +3279,6 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
 /*    _nx_dhcp_slow_periodic_timer_entry       Timer on IP address leases */
 /*                                             message                    */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_update_assignable_ip_address(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT *dhcp_client_ptr, 
                                            ULONG ip_address, UINT assign_status) 
@@ -3646,14 +3414,6 @@ NX_DHCP_INTERFACE_IP_ADDRESS    *interface_address_ptr;
 /*    _nx_dhcp_server_assign_ip_address     Assign an IP address to the   */
 /*                                            current client              */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_find_ip_address_owner(NX_DHCP_INTERFACE_IP_ADDRESS *iface_owner, NX_DHCP_CLIENT *client_record_ptr, UINT *assigned_to_client)
 {
@@ -3712,14 +3472,6 @@ static UINT  _nx_dhcp_find_ip_address_owner(NX_DHCP_INTERFACE_IP_ADDRESS *iface_
 /*    _nx_dhcp_server_assign_ip_address     Assign an IP address to the   */
 /*                                            current client              */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_record_ip_address_owner(NX_DHCP_INTERFACE_IP_ADDRESS *iface_owner, NX_DHCP_CLIENT *client_record_ptr, UINT lease_time)
 {
@@ -3788,14 +3540,6 @@ static UINT  _nx_dhcp_record_ip_address_owner(NX_DHCP_INTERFACE_IP_ADDRESS *ifac
 /*    _nx_dhcp_server_assign_ip_address     Assign an IP address to the   */
 /*                                                  current client        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_clear_ip_address_owner(NX_DHCP_INTERFACE_IP_ADDRESS *iface_owner)
 {
@@ -3852,14 +3596,6 @@ static UINT  _nx_dhcp_clear_ip_address_owner(NX_DHCP_INTERFACE_IP_ADDRESS *iface
 /*    _nx_dhcp_listen_for_messages         Listen for, process and respond*/
 /*                                            to DHCP Client messages     */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_validate_client_message(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT *dhcp_client_ptr)
 {
@@ -3928,8 +3664,8 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                 EL_PRINTF("DHCPserv: Received DISCOVER message\n");
 #endif
     
-                /* Determine if server needs to assign an IP address based on assigned IP address.  
-                   e.g. If this appears to be a retransmission of a previous IP address DISOVERY request, 
+                /* Determine if server needs to assign an IP address based on assigned IP address.
+                   e.g. If this appears to be a retransmission of a previous IP address DISOVERY request,
                    only assign another IP address if the client appears not to have been assigned one already.*/
                 /* Initialize response back to be an offer pending validation check. */
                 dhcp_client_ptr -> nx_dhcp_response_type_to_client = NX_DHCP_TYPE_DHCPOFFER;  
@@ -3959,9 +3695,9 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
             {
     
     
-               /* This is a more complex message since a client request can be generated from 
-                  4 different states: boot, selecting, renew, rebind. This requires that 
-                  we determine the Client state based on what's previously known about 
+               /* This is a more complex message since a client request can be generated from
+                  4 different states: boot, selecting, renew, rebind. This requires that
+                  we determine the Client state based on what's previously known about
                   the client and which fields are filled in the Request message. */
     
                 /* Get the DHCP server IP address for the client package interface. */
@@ -3995,7 +3731,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                         break;
                     }
     
-                    /* Server SHOULD send a DHCPNAK message to the client if the 'requested IP address' is incorrect, or is on the wrong network. 
+                    /* Server SHOULD send a DHCPNAK message to the client if the 'requested IP address' is incorrect, or is on the wrong network.
                        RFC 2131, Section 4.3.2, Page31.  */
                     if ((dhcp_client_ptr -> nx_dhcp_assigned_ip_address != 0) &&
                         (dhcp_client_ptr -> nx_dhcp_assigned_ip_address != dhcp_client_ptr -> nx_dhcp_requested_ip_address))
@@ -4007,7 +3743,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                         EL_PRINTF("DHCPserv: NACK! REQUEST message contains incorrect requested IP address. \n");
 #endif
     
-                        /* No; invalid request. Return the IP address tentatively assigned to 
+                        /* No; invalid request. Return the IP address tentatively assigned to
                           the client back to the available IP address pool. */
     
                         _nx_dhcp_update_assignable_ip_address(dhcp_ptr, dhcp_client_ptr, ip_address_assigned,
@@ -4040,7 +3776,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                     EL_PRINTF("DHCPserv: Received REQUEST (SELECT state) message\n");
 #endif
     
-                    /* ...Then the client is in the SELECT state as per RFC 2131 4.3.2 (sent a 
+                    /* ...Then the client is in the SELECT state as per RFC 2131 4.3.2 (sent a
                       DISCOVERY message and is responding to a server OFFER message). */
     
                     /* Client may NOT specify a Client IP address. */ 
@@ -4092,7 +3828,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                         EL_PRINTF("DHCPserv: SILENCE! REQUEST message indicates Client accepting another server IP.\n");
 #endif
     
-                        /* If this client wants an IP address from this server it must start 
+                        /* If this client wants an IP address from this server it must start
                            over at the init state. */
                         dhcp_client_ptr -> nx_dhcp_client_state = NX_DHCP_STATE_INIT;
     
@@ -4102,7 +3838,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                         return(NX_SUCCESS);
                     }
     
-                    /* Make sure the Client did in fact receive an OFFER from this server (e.g. has 
+                    /* Make sure the Client did in fact receive an OFFER from this server (e.g. has
                        been tentatively assigned an IP address from us). */
                     if (dhcp_client_ptr -> nx_dhcp_assigned_ip_address == NX_DHCP_NO_ADDRESS)
                     {
@@ -4121,7 +3857,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                         break;
                     }
     
-                    /* Does the Client's requested IP address match the "Your IP" field in the server OFFER 
+                    /* Does the Client's requested IP address match the "Your IP" field in the server OFFER
                        previously sent to this client (e.g. Client's assigned IP address)? */
                     else if (dhcp_client_ptr -> nx_dhcp_assigned_ip_address != dhcp_client_ptr -> nx_dhcp_requested_ip_address)
                     {
@@ -4132,7 +3868,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                         EL_PRINTF("DHCPserv: NACK! REQUEST message contains requested IP address. \n");
 #endif
     
-                        /* No; invalid request. Return the IP address tentatively assigned to 
+                        /* No; invalid request. Return the IP address tentatively assigned to
                           the client back to the available IP address pool. */
     
                         _nx_dhcp_update_assignable_ip_address(dhcp_ptr, dhcp_client_ptr, ip_address_assigned,
@@ -4153,7 +3889,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                     dhcp_client_ptr -> nx_dhcp_client_state = NX_DHCP_STATE_REQUESTING; 
                 }
     
-               /* Is this a RENEW or REBIND request? If so the server ID and requested IP options must 
+               /* Is this a RENEW or REBIND request? If so the server ID and requested IP options must
                   NOT be filled in as per RFC 2131 4.3.2. */
                else if ((dhcp_client_ptr -> nx_dhcp_server_id == NX_DHCP_NO_ADDRESS) &&
                        (dhcp_client_ptr -> nx_dhcp_requested_ip_address == NX_DHCP_NO_ADDRESS))
@@ -4208,7 +3944,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                        EL_PRINTF("DHCPserv: NACK! REQUEST message; server has no record of assigned IP address.\n");
 #endif
     
-                       /* No; possibly assigned by another DHCP server or outside of DHCP protocol. 
+                       /* No; possibly assigned by another DHCP server or outside of DHCP protocol.
                           Reject the renewal request. */
                        dhcp_client_ptr -> nx_dhcp_response_type_to_client = NX_DHCP_TYPE_DHCPNACK;
     
@@ -4267,8 +4003,8 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
     
                 /* The Client is releasing it's IP address back to the server. A client is not
                    required to do this; usually it indicates the client may have moved on the
-                   network. 
-    
+                   network.
+
                    Clear the client record and mark the IP address as available. If the request proves
                    invalid, this server will ignore it and let the Client's assigned IP lease expire.  */
     
@@ -4323,7 +4059,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                      }
                 }
     
-                /* Legitimate release request: return the IP address to the available pool, 
+                /* Legitimate release request: return the IP address to the available pool,
                    and clear the client session. */
     
                 /* Release the client's assigned IP address (in the "CI-ADDR" field). */
@@ -4334,7 +4070,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                 /* Clear the Client's assigned IP address. */
                 dhcp_client_ptr -> nx_dhcp_assigned_ip_address = NX_DHCP_NO_ADDRESS;
     
-                /* If this client wants to configure its network parameters with us it 
+                /* If this client wants to configure its network parameters with us it
                    must start at the INIT state. */
                 dhcp_client_ptr -> nx_dhcp_client_state = NX_DHCP_STATE_INIT;
     
@@ -4414,10 +4150,10 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
 #endif
     
     
-                /* A DHCP client sends an INFORM message when it has been assigned an IP address 
-                   with another server or outside DHCP but still needs local configuration data. 
-                   The DHCP server must update its database with their address (specified in the "CI-ADDR" field) 
-                   as no longer available. When the server forms a reply ACK, it must leave the 
+                /* A DHCP client sends an INFORM message when it has been assigned an IP address
+                   with another server or outside DHCP but still needs local configuration data.
+                   The DHCP server must update its database with their address (specified in the "CI-ADDR" field)
+                   as no longer available. When the server forms a reply ACK, it must leave the
                    'Your IP' and lease time fields blank as per RFC 2131 3.4. */
     
                  
@@ -4452,7 +4188,7 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
                 if (dhcp_client_ptr -> nx_dhcp_client_state != NX_DHCP_STATE_BOUND)
                 {
                 
-                    /* No, so if this client needs to configure an IP address assigned 
+                    /* No, so if this client needs to configure an IP address assigned
                        with this server it must start at the INIT state. */
                     dhcp_client_ptr -> nx_dhcp_client_state = NX_DHCP_STATE_INIT;
                 }
@@ -4499,8 +4235,8 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
     }
 
     /* Check if the Client has requested a valid IP address. This is only permitted
-       with a DISCO or REQUEST messages while the Client is in either the BOOT/INIT 
-       or SELECT states. 
+       with a DISCO or REQUEST messages while the Client is in either the BOOT/INIT
+       or SELECT states.
 
         As per RFC 2131 4.3.1, the DHCP server should assign an IP address in order of preference as follows:
         1) the client currently is bound to
@@ -4586,14 +4322,6 @@ NX_DHCP_INTERFACE_TABLE *dhcp_interface_table_ptr;
 /*                                              proper data and determine */
 /*                                              server response           */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_server_assign_ip_address(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT *dhcp_client_ptr)
 {
@@ -4608,7 +4336,7 @@ UINT                            lease_time;
     /* Set a flag on the outcome of finding an available address. */
     assigned_ip = NX_FALSE;
 
-    /* Compute the client lease time based on client's requested 
+    /* Compute the client lease time based on client's requested
        lease time and server default lease time. */
     lease_time = dhcp_client_ptr -> nx_dhcp_requested_lease_time;
 
@@ -4694,7 +4422,7 @@ UINT                            lease_time;
                 EL_PRINTF("DHCPserv: NACK! Cannot assign requested IP address (not owned by server)\n");
 #endif
 
-                /* Apparently the client has asked for an IP address either not 
+                /* Apparently the client has asked for an IP address either not
                    in the server database or on another network.  We cannot provide this
                    so return a NACK. */
                 dhcp_client_ptr -> nx_dhcp_response_type_to_client = NX_DHCP_TYPE_DHCPNACK;
@@ -4710,12 +4438,12 @@ UINT                            lease_time;
                 return(NX_SUCCESS);
             }
 
-            /* For a Discovery request, the server will go ahead and find an 
+            /* For a Discovery request, the server will go ahead and find an
                available IP address to offer the client. */
         }
     }
 
-    /* If the client doesn't have an address assigned yet, find one in the server table not 
+    /* If the client doesn't have an address assigned yet, find one in the server table not
        yet assigned. */
     if (interface_address_ptr == 0x0)
     {
@@ -4859,20 +4587,6 @@ UINT                            lease_time;
 /*                                                                        */ 
 /*    _nx_dhcp_listen_for_messages          Process DHCP Client messages  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed the issue of read     */
-/*                                            and write overflow,         */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), and      */
-/*                                            improved internal logic,  */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_server_extract_information(NX_DHCP_SERVER *dhcp_ptr, NX_DHCP_CLIENT **dhcp_client_ptr, 
                                           NX_PACKET *packet_ptr, UINT iface_index)
@@ -4940,7 +4654,7 @@ NX_DHCP_CLIENT  *temp_client_rec_ptr;
         return(status);
     }
 
-    /* Check this is a 'request' DHCP Client message (not to be confused with the REQUEST  
+    /* Check this is a 'request' DHCP Client message (not to be confused with the REQUEST
        message type. */
     if (value != NX_DHCP_OP_REQUEST)
     {
@@ -5013,7 +4727,7 @@ NX_DHCP_CLIENT  *temp_client_rec_ptr;
         return(status);
     }
 
-    /* This is the "Your IP address" which only the server should fill in. Should be zero in 
+    /* This is the "Your IP address" which only the server should fill in. Should be zero in
        client messages. */
     temp_client_rec_ptr -> nx_dhcp_your_ip_address =  value;
 
@@ -5058,7 +4772,7 @@ NX_DHCP_CLIENT  *temp_client_rec_ptr;
             if (work_ptr + 2 > packet_ptr -> nx_packet_append_ptr)
             {
 
-                /* Yes, Client must have sent a DHCP message with improperly terminated option 
+                /* Yes, Client must have sent a DHCP message with improperly terminated option
                    data (or Client is using a super large DHCP packet). */
                 return(NX_DHCP_IMPROPERLY_TERMINATED_OPTION);
             }
@@ -5147,17 +4861,6 @@ NX_DHCP_CLIENT  *temp_client_rec_ptr;
 /*                                                                        */ 
 /*    _nx_dhcp_server_extract_information   Extract DHCP data from packet */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            fixed the issue of infinite */
-/*                                            recursion,                  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_process_option_data(NX_DHCP_CLIENT *dhcp_client_ptr, CHAR *buffer, UCHAR option, UINT get_option_data, UINT size)
 {
@@ -5259,7 +4962,7 @@ ULONG option_value = 0;
             break;
 
         case 54:    
-            /* Server ID by which server identifies itself to client(usually server IP address). 
+            /* Server ID by which server identifies itself to client(usually server IP address).
                The Client includes this option in a REQUEST message to identify which server
                it wants to lease an IP address from. */
             dhcp_client_ptr -> nx_dhcp_user_options[dhcp_client_ptr -> nx_dhcp_client_option_count] = option;
@@ -5344,21 +5047,13 @@ ULONG option_value = 0;
 /*    _nx_dhcp_respond_to_dhcp_message     Prepare and send out DHCP      */
 /*                                                 response to client     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_add_requested_option(NX_DHCP_SERVER *dhcp_ptr, UINT iface_index, UCHAR *buffer, UINT option, UINT *index)
 {
 
 UINT status = NX_SUCCESS;
 
-    /* The NetX DHCP server provides a limited list of DHCP options for ACK responses. These do NOT 
+    /* The NetX DHCP server provides a limited list of DHCP options for ACK responses. These do NOT
        include the server's 'required' options. */
     switch (option)
     {
@@ -5423,14 +5118,6 @@ UINT status = NX_SUCCESS;
 /*                                                                        */ 
 /*    _nx_dhcp_process                      Process the DHCP state machine*/ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_add_option(UCHAR *dhcp_message, UINT option, UINT size, ULONG value, UINT *index)
 {
@@ -5491,14 +5178,6 @@ static UINT  _nx_dhcp_add_option(UCHAR *dhcp_message, UINT option, UINT size, UL
 /*    _nx_dhcp_server_extract_information   Extract server information    */ 
 /*    _nx_dhcp_update_address_list          Update address list           */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_server_get_data(UCHAR *data, UINT size, ULONG *value)
 {
@@ -5563,14 +5242,6 @@ static UINT  _nx_dhcp_server_get_data(UCHAR *data, UINT size, ULONG *value)
 /*    _nx_dhcp_send_request                 Send DHCP request             */ 
 /*    _nx_dhcp_add_option                   Add a DHCP option             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_dhcp_server_store_data(UCHAR *data, UINT size, ULONG value)
 {

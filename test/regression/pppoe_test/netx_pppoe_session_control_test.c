@@ -12,11 +12,11 @@ extern void test_control_return(UINT);
 
 /* Defined NX_PPP_PPPOE_ENABLE if use PPP, since PPP module has been modified to match PPPoE moduler under this definition.  */
                 
-/* If the driver is not initialized in other module, define NX_PPPOE_SERVER_INITIALIZE_DRIVER_ENABLE to initialize the driver in PPPoE module .  
+/* If the driver is not initialized in other module, define NX_PPPOE_SERVER_INITIALIZE_DRIVER_ENABLE to initialize the driver in PPPoE module .
    In this demo, the driver has been initialized in IP module.  */
 
-/* NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE: 
-   If defined, enables the feature that controls the PPPoE session. 
+/* NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE:
+   If defined, enables the feature that controls the PPPoE session.
    PPPoE server does not automatically response to the request until application call specific API.  */
 
 /* Define the block size.  */
@@ -58,11 +58,11 @@ extern void    _nx_ppp_driver(NX_IP_DRIVER *driver_req_ptr);
 /***** Substitute your Ethernet driver entry function here *********/ 
 extern void    _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr);
 
-/* Define the porting layer function for PPP.  
+/* Define the porting layer function for PPP.
    Functions to be provided by PPP for calling by the PPPoE Stack.  */
 static void    ppp_server_packet_send(NX_PACKET *packet_ptr);
 
-/* Define the porting layer function for PPP.  
+/* Define the porting layer function for PPP.
    Functions to be provided by PPP for calling by the PPPoE Stack.  */
 static void    ppp_client_packet_send(NX_PACKET *packet_ptr);
 static void    pppoe_client_packet_receive(NX_PACKET *packet_ptr);

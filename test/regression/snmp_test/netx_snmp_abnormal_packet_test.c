@@ -26,7 +26,7 @@ static VOID    v3_mib2_variable_update(NX_IP *ip_ptr, NX_SNMP_AGENT *agent_ptr);
 static UINT    query_response_complete = NX_FALSE; /* to synchronize when the agent sends the SNMP trap */
 #define        QUERY_COUNT             4
 
-/* To show byte by byte comparison of pre-recorded response with SNMP agent, define this option.  
+/* To show byte by byte comparison of pre-recorded response with SNMP agent, define this option.
 #define VERBOSE
 */
 
@@ -450,7 +450,7 @@ UINT    v3_mib2_set_processing(NX_SNMP_AGENT *agent_ptr, UCHAR *object_requested
     return(NX_SUCCESS);
 }
 
-/* Define the username callback routine routine. Usernames should be 
+/* Define the username callback routine routine. Usernames should be
    associated with permissions (public or private string) and what version
    of SNMP the user is configured for. The username callback should verify
    the incoming username MIB access permissions.  */

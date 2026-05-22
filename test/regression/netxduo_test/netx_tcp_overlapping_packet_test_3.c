@@ -182,7 +182,7 @@ static void    thread_0_entry(ULONG thread_input)
         error_counter++;
 
     /* Fill in the packet with data.     */
-    /* Packet 1 contains bytes   0 - 37 
+    /* Packet 1 contains bytes   0 - 37
        Packet 2 contains bytes  38 - 75
        Packet 3 contains bytes  76 - 113
        packet 23 contains bytes 37 - 113 */

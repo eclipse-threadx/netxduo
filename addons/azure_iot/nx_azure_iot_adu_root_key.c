@@ -1,23 +1,23 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
 #include "nx_azure_iot_adu_agent.h"
 
 /* Update manifest is meant for ADU devices to know what files are needed to be downloaded and installed.
-   The update manifest is signed by ADU so devices can trust that the content wasnot altered during the 
+   The update manifest is signed by ADU so devices can trust that the content wasnot altered during the
    transmission.
 
-   ADU will leverage two types of keys - Root Key(s) and Signing Key(s). Signing keys will be used to 
+   ADU will leverage two types of keys - Root Key(s) and Signing Key(s). Signing keys will be used to
    digest sign the update manifest and root keys will be used to sign the signing keys.
-   
+
    *Root key - used to sign signing public key; root public key is hardcoded in ADU devices.
    *Signing key - used to sign update manifest; signing public key signed with the master key is included in digest signature header.
 */

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -39,17 +39,6 @@
 /*    It is assumed that nx_api.h and nx_port.h have already been         */ 
 /*    included, along with fx_api.h and fx_port.h.                        */   
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
-/*                                            necessary header file,      */
-/*                                            resulting in version 6.1.9  */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NXD_TFTP_SERVER_H
@@ -119,15 +108,15 @@ extern   "C" {
 
 
 /* To enable a retransmission on client requests (e.g. resend
-   ACK and data packets, as well apply a timeout on a Client request), 
-   define this option. 
+   ACK and data packets, as well apply a timeout on a Client request),
+   define this option.
 #define NX_TFTP_SERVER_RETRANSMIT_ENABLE
 */
 
 
 #ifdef  NX_TFTP_SERVER_RETRANSMIT_ENABLE
 
-/* Define the timer expiration for updating time remaining on a TFTP Client 
+/* Define the timer expiration for updating time remaining on a TFTP Client
    request activity timeout (in timer ticks). */
 #ifndef NX_TFTP_SERVER_TIMEOUT_PERIOD
 #define NX_TFTP_SERVER_TIMEOUT_PERIOD      20
@@ -162,7 +151,7 @@ extern   "C" {
 #define NX_TFTP_FILE_TRANSFER_MAX           512         /* 512 byte maximum file transfer                     */
 
 
-/* Derive the maximum TFTP packet size, including Ethernet, IP and UDP headers, and  
+/* Derive the maximum TFTP packet size, including Ethernet, IP and UDP headers, and
    accounting for potential physical driver needs at the end of the packet.  */
 
 #define NX_TFTP_PACKET_SIZE                (NX_UDP_PACKET + NX_TFTP_FILE_TRANSFER_MAX + NX_PHYSICAL_TRAILER) 
@@ -303,9 +292,9 @@ typedef struct NX_TFTP_SERVER_STRUCT
 
 /* Application caller is present, perform API mapping.  */
 
-/* Determine if error checking is desired.  If so, map API functions 
+/* Determine if error checking is desired.  If so, map API functions
    to the appropriate error checking front-ends.  Otherwise, map API
-   functions to the core functions that actually perform the work. 
+   functions to the core functions that actually perform the work.
    Note: error checking is enabled by default.  */
 
 #ifdef NX_DISABLE_ERROR_CHECKING

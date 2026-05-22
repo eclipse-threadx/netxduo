@@ -1,7 +1,7 @@
 /* This NetX test concentrates on the basic SNMPv2 operation.  The 'manager' sends
    three requests, Get, Get Next, and Get Bulk, and the SNMP agent responds.  A successful
-   result means the Agent received and sent the expected number of messages, and no 
-   internal SNMP errors were encountered. 
+   result means the Agent received and sent the expected number of messages, and no
+   internal SNMP errors were encountered.
 
    The MIB database is defined in demo_snmp_helper.h */
 
@@ -204,7 +204,7 @@ UINT status;
     if ((v2_my_agent.nx_snmp_agent_get_requests != 1) ||
         (v2_my_agent.nx_snmp_agent_getnext_requests != 1) ||
         (v2_my_agent.nx_snmp_agent_getbulk_requests != 1) ||
-        //(v2_my_agent.nx_snmp_agent_total_get_variables != 8) || 
+        //(v2_my_agent.nx_snmp_agent_total_get_variables != 8) ||
         (v2_my_agent.nx_snmp_agent_packets_received != 3) ||
         (v2_my_agent.nx_snmp_agent_packets_sent != 3) ||
         (v2_my_agent.nx_snmp_agent_getresponse_sent != 3))
@@ -625,7 +625,7 @@ UINT    status;
 /* Create an error code if matching user not found. */
 #define USER_NOT_FOUND 1
 
-/* Define the username callback routine routine. Usernames should be 
+/* Define the username callback routine routine. Usernames should be
    associated with permissions (public or private string) and what version
    of SNMP the user is configured for. The username callback should verify
    the incoming username MIB access permissions.  */

@@ -3,7 +3,7 @@
 /* Procedure
    1. Connection.
    2. Server sends a data packet.
-   3. Server calls disconnect command and sends a FIN packet.  
+   3. Server calls disconnect command and sends a FIN packet.
    4. Client replies the FIN packet and becomes CLOSE_WAIT state.
    5. Client calls receive command and checks the status is SUCCESS.  */
 

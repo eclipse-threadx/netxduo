@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -189,7 +189,7 @@ UINT nx_azure_iot_hub_client_properties_version_get(NX_AZURE_IOT_HUB_CLIENT *hub
 
 /**
  * @brief Iteratively read the Azure IoT Plug and Play component properties.
- * 
+ *
  * Note that between calls, the UCHAR* pointed to by \p component_name_pptr shall not be modified,
  * only checked and compared. Internally, the pointer is only changed if the component name changes
  * in the JSON document and is not necessarily set every invocation of the function.
@@ -211,14 +211,14 @@ UINT nx_azure_iot_hub_client_properties_version_get(NX_AZURE_IOT_HUB_CLIENT *hub
  *                                                                                 NX_AZURE_IOT_HUB_CLIENT_PROPERTY_WRITABLE,
  *                                                                                 &component_name_ptr, &component_length)) == NX_AZURE_IOT_SUCCESS)
  * {
- * 
+ *
  *     // Check if property is of interest (substitute user_property for your own property name)
  *     if (nx_azure_iot_json_reader_token_is_text_equal(&json_reader, user_property, user_property_length))
  *     {
  *         nx_azure_iot_json_reader_next_token(&json_reader);
  *
  *         // Get the property value here
- *         // Example: nx_azure_iot_json_reader_token_int32_get(&json_reader, &user_int); 
+ *         // Example: nx_azure_iot_json_reader_token_int32_get(&json_reader, &user_int);
  *
  *         // Skip to next property value
  *         nx_azure_iot_json_reader_next_token(&json_reader);
@@ -236,13 +236,13 @@ UINT nx_azure_iot_hub_client_properties_version_get(NX_AZURE_IOT_HUB_CLIENT *hub
  * }
  *
  * @endcode
- * 
+ *
  * @warning If you need to retrieve more than one \p property_type, you should first complete the
  * scan of all components for the first property type (until the API returns
  * NX_AZURE_IOT_NOT_FOUND). Then you must call nx_azure_iot_json_reader_init() again after this call
  * and before the next call to `nx_azure_iot_hub_client_properties_component_property_next_get` with the
  * different \p property_type.
- * 
+ *
  * @param[in] hub_client_ptr A pointer to a #NX_AZURE_IOT_HUB_CLIENT.
  * @param[in] reader_ptr A pointer to a #NX_AZURE_IOT_JSON_READER containing properties document
  * @param[in] message_type Type of message repsonse, only valid value are NX_AZURE_IOT_HUB_PROPERTIES or NX_AZURE_IOT_HUB_WRITABLE_PROPERTIES

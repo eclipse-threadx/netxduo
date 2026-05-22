@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -77,17 +77,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_rsa_operation       Handle RSA operation          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  03-08-2023     Yanwu Cai                Modified comment(s), aligned  */
-/*                                            buffer size of huge number, */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_rsa_operation(const UCHAR *exponent, UINT exponent_length, const UCHAR *modulus, UINT modulus_length,
@@ -195,16 +184,6 @@ NX_CRYPTO_HUGE_NUMBER modulus_hn, exponent_hn, input_hn, output_hn, p_hn, q_hn;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_rsa_init(struct NX_CRYPTO_METHOD_STRUCT *method,
                                                 UCHAR *key, NX_CRYPTO_KEY_SIZE key_size_in_bits,
@@ -280,14 +259,6 @@ NX_CRYPTO_RSA *ctx;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_rsa_cleanup(VOID *crypto_metadata)
 {
@@ -351,16 +322,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_rsa_cleanup(VOID *crypto_metadata)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_rsa_operation(UINT op,      /* Encrypt, Decrypt, Authenticate */
@@ -444,5 +405,350 @@ UINT           return_value = NX_CRYPTO_SUCCESS;
     }
 
     return(return_value);
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_rsa_pss_mgf1                             PORTABLE C      */
+/*                                                           6.4.3        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    Mask Generation Function 1 (MGF1) as defined in RFC 8017 §B.2.1.  */
+/*    Generates a pseudo-random octet string of length mask_length from  */
+/*    a seed, using the supplied hash function.                           */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    hash_method         Hash function (e.g. SHA-256/384/512)           */
+/*    hash_metadata       Scratch memory for hash operations             */
+/*    hash_metadata_size  Size of hash_metadata in bytes                 */
+/*    seed                MGF seed (typically the PSS H value)           */
+/*    seed_length         Length of seed in bytes                        */
+/*    mask                Output buffer for generated mask               */
+/*    mask_length         Desired mask length in bytes                   */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status              NX_CRYPTO_SUCCESS or error code                */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_crypto_rsa_pss_mgf1(const NX_CRYPTO_METHOD *hash_method,
+                                     VOID *hash_metadata, ULONG hash_metadata_size,
+                                     const UCHAR *seed, UINT seed_length,
+                                     UCHAR *mask, UINT mask_length)
+{
+UINT   counter;
+UINT   offset;
+UINT   copy_len;
+UINT   hash_len;
+UINT   status;
+UCHAR  counter_bytes[4];
+UCHAR  hash_buf[64]; /* large enough for SHA-512 */
+VOID  *handler = NX_CRYPTO_NULL;
+
+    hash_len = (UINT)(hash_method -> nx_crypto_ICV_size_in_bits >> 3);
+
+    /* Sanity check: hash_buf must be large enough to hold one hash output. */
+    if (hash_len == 0u || hash_len > sizeof(hash_buf))
+    {
+        return(NX_CRYPTO_INVALID_BUFFER_SIZE);
+    }
+
+    offset   = 0;
+
+    for (counter = 0; offset < mask_length; counter++)
+    {
+        counter_bytes[0] = (UCHAR)((counter >> 24) & 0xFFu);
+        counter_bytes[1] = (UCHAR)((counter >> 16) & 0xFFu);
+        counter_bytes[2] = (UCHAR)((counter >>  8) & 0xFFu);
+        counter_bytes[3] = (UCHAR)( counter        & 0xFFu);
+
+        if (hash_method -> nx_crypto_init)
+        {
+            status = hash_method -> nx_crypto_init((NX_CRYPTO_METHOD *)hash_method,
+                                                    NX_CRYPTO_NULL, 0,
+                                                    &handler,
+                                                    hash_metadata, hash_metadata_size);
+            if (status != NX_CRYPTO_SUCCESS)
+            {
+                return(status);
+            }
+        }
+
+        status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_INITIALIZE,
+                                                     handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                     NX_CRYPTO_NULL, 0,
+                                                     NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL,
+                                                     NX_CRYPTO_NULL, 0,
+                                                     hash_metadata, hash_metadata_size,
+                                                     NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+        if (status != NX_CRYPTO_SUCCESS)
+        {
+            return(status);
+        }
+
+        status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_UPDATE,
+                                                     handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                     NX_CRYPTO_NULL, 0,
+                                                     (UCHAR *)seed, (ULONG)seed_length,
+                                                     NX_CRYPTO_NULL,
+                                                     NX_CRYPTO_NULL, 0,
+                                                     hash_metadata, hash_metadata_size,
+                                                     NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+        if (status != NX_CRYPTO_SUCCESS)
+        {
+            return(status);
+        }
+
+        status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_UPDATE,
+                                                     handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                     NX_CRYPTO_NULL, 0,
+                                                     counter_bytes, 4,
+                                                     NX_CRYPTO_NULL,
+                                                     NX_CRYPTO_NULL, 0,
+                                                     hash_metadata, hash_metadata_size,
+                                                     NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+        if (status != NX_CRYPTO_SUCCESS)
+        {
+            return(status);
+        }
+
+        status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_CALCULATE,
+                                                     handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                     NX_CRYPTO_NULL, 0,
+                                                     NX_CRYPTO_NULL, 0,
+                                                     NX_CRYPTO_NULL,
+                                                     hash_buf, (ULONG)sizeof(hash_buf),
+                                                     hash_metadata, hash_metadata_size,
+                                                     NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+        if (status != NX_CRYPTO_SUCCESS)
+        {
+            return(status);
+        }
+
+        copy_len = mask_length - offset;
+        if (copy_len > hash_len)
+        {
+            copy_len = hash_len;
+        }
+        NX_CRYPTO_MEMCPY(&mask[offset], hash_buf, copy_len); /* Use case of memcpy is verified. */
+        offset += copy_len;
+    }
+
+    return(NX_CRYPTO_SUCCESS);
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_rsa_pss_verify                           PORTABLE C      */
+/*                                                           6.4.3        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    Verifies an RSA-PSS signature encoding (RFC 8017 §9.1.2).          */
+/*    Used by TLS 1.3 CertificateVerify processing.                      */
+/*    Assumes salt length == hash length (required by RFC 8446 §4.2.3). */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    message_hash        Pre-computed mHash over the signed content     */
+/*    hash_length         hLen = byte length of mHash                    */
+/*    em                  Encoded message from RSA public-key operation  */
+/*    em_bits             emBits = modulus_bits - 1                      */
+/*    hash_method         Same hash used to build the PSS encoding       */
+/*    hash_metadata       Scratch memory for hash operations             */
+/*    hash_metadata_size  Size of hash_metadata in bytes                 */
+/*    scratch             Work buffer; must be >= ceil(emBits/8) bytes   */
+/*    scratch_length      Size of scratch in bytes                       */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_CRYPTO_SUCCESS                Signature is valid                */
+/*    NX_CRYPTO_NOT_SUCCESSFUL         Signature is invalid              */
+/*    NX_CRYPTO_INVALID_BUFFER_SIZE    Buffers too small                 */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_crypto_rsa_pss_verify(const UCHAR *message_hash, UINT hash_length,
+                                const UCHAR *em, UINT em_bits,
+                                const NX_CRYPTO_METHOD *hash_method,
+                                VOID *hash_metadata, ULONG hash_metadata_size,
+                                UCHAR *scratch, UINT scratch_length)
+{
+UINT         em_len;
+UINT         db_len;
+UINT         s_len;
+UINT         i;
+UINT         status;
+UCHAR        zero_bits;
+UCHAR       *db;
+UCHAR       *h_prime;
+const UCHAR *h;
+const UCHAR *masked_db;
+VOID        *handler = NX_CRYPTO_NULL;
+static const UCHAR _pss_zero8[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+    /* emLen = ceil(emBits / 8). */
+    em_len = (em_bits + 7u) >> 3;
+
+    /* TLS 1.3 mandates salt length == hash length (RFC 8446 §4.2.3). */
+    s_len = hash_length;
+
+    if (em_len < (hash_length + s_len + 2u))
+    {
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    db_len = em_len - hash_length - 1u;
+
+    /* scratch layout: db[db_len] | h_prime[hash_length]. */
+    if (scratch_length < (db_len + hash_length))
+    {
+        return(NX_CRYPTO_INVALID_BUFFER_SIZE);
+    }
+
+    db      = scratch;
+    h_prime = scratch + db_len;
+
+    /* Step 4 – last byte must be 0xBC. */
+    if (em[em_len - 1u] != 0xBCu)
+    {
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    /* maskedDB = em[0..db_len-1],  H = em[db_len..em_len-2]. */
+    masked_db = em;
+    h         = em + db_len;
+
+    /* Step 6 – top (8*emLen - emBits) bits of em[0] must be zero. */
+    zero_bits = (UCHAR)(8u * em_len - em_bits);
+    if (zero_bits && (em[0] & (UCHAR)(0xFFu << (8u - zero_bits))))
+    {
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    /* Step 7 – dbMask = MGF1(H, db_len). */
+    status = _nx_crypto_rsa_pss_mgf1(hash_method, hash_metadata, hash_metadata_size,
+                                      h, hash_length, db, db_len);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    /* Step 8 – DB = maskedDB XOR dbMask. */
+    for (i = 0u; i < db_len; i++)
+    {
+        db[i] ^= masked_db[i];
+    }
+
+    /* Step 9 – zero the top bits of DB[0]. */
+    if (zero_bits)
+    {
+        db[0] &= (UCHAR)(0xFFu >> zero_bits);
+    }
+
+    /* Steps 10-11 – PS (all zeros) then 0x01 separator. */
+    for (i = 0u; i < db_len - s_len - 1u; i++)
+    {
+        if (db[i] != 0x00u)
+        {
+            return(NX_CRYPTO_NOT_SUCCESSFUL);
+        }
+    }
+    if (db[db_len - s_len - 1u] != 0x01u)
+    {
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    /* Steps 13-14 – H' = Hash(0x00^8 || mHash || salt). */
+    if (hash_method -> nx_crypto_init)
+    {
+        status = hash_method -> nx_crypto_init((NX_CRYPTO_METHOD *)hash_method,
+                                                NX_CRYPTO_NULL, 0,
+                                                &handler,
+                                                hash_metadata, hash_metadata_size);
+        if (status != NX_CRYPTO_SUCCESS)
+        {
+            return(status);
+        }
+    }
+
+    status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_INITIALIZE,
+                                                 handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 hash_metadata, hash_metadata_size,
+                                                 NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    /* Hash 8 zero bytes. */
+    status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_UPDATE,
+                                                 handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 (UCHAR *)_pss_zero8, 8,
+                                                 NX_CRYPTO_NULL,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 hash_metadata, hash_metadata_size,
+                                                 NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    /* Hash mHash. */
+    status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_UPDATE,
+                                                 handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 (UCHAR *)message_hash, (ULONG)hash_length,
+                                                 NX_CRYPTO_NULL,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 hash_metadata, hash_metadata_size,
+                                                 NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    /* Hash salt = DB[db_len - s_len .. db_len - 1]. */
+    status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_UPDATE,
+                                                 handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 &db[db_len - s_len], (ULONG)s_len,
+                                                 NX_CRYPTO_NULL,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 hash_metadata, hash_metadata_size,
+                                                 NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_CALCULATE,
+                                                 handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL,
+                                                 h_prime, (ULONG)hash_length,
+                                                 hash_metadata, hash_metadata_size,
+                                                 NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    /* Step 15 – compare H == H'. */
+    if (NX_CRYPTO_MEMCMP(h, h_prime, hash_length) != 0)
+    {
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    return(NX_CRYPTO_SUCCESS);
 }
 

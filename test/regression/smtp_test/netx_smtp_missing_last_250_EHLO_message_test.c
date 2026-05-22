@@ -1,5 +1,5 @@
 /* This NetX tests the SMTP client for handling a server 250 reply to EHLO which has multiple
-   250 parameters but none of them have the 'final' 250 code e.g. 250 followed by space. 
+   250 parameters but none of them have the 'final' 250 code e.g. 250 followed by space.
    Therefore the SMTP client should abort the connection.  The simulated server should not
    count a failed nx_tcp_socket_receive() if it is sending the 'last' EHLO packet because
    the Client is 'mute' waiting for the 250 packet with the last 250 marker. */
@@ -255,7 +255,7 @@ CHAR    *pointer;
 
 #endif /* FEATURE_NX_IPV6 */
 
-    /* The demo client username and password is the authentication 
+    /* The demo client username and password is the authentication
    data used when the server attempts to authentication the client. */
 
 #if defined(__PRODUCT_NETXDUO__) 

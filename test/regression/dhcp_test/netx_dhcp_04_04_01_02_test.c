@@ -1,5 +1,5 @@
-/* If the 'xid' of an arriving DHCPOFFER message does not match the 'xid' of the most recent DHCPDISCOVER message, 
- * the DHCPOFFER message must be silently discarded. 
+/* If the 'xid' of an arriving DHCPOFFER message does not match the 'xid' of the most recent DHCPDISCOVER message,
+ * the DHCPOFFER message must be silently discarded.
  * rfc 2131, page 36, 4.4.1 Initialization and allocation of network address
  */
 #include   "tx_api.h"

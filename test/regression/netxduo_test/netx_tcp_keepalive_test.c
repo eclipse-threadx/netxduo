@@ -1,5 +1,5 @@
-/* This NetX test concentrates on the basic TCP Keepalive operation.  
-   keepalive expiration time is 60s, 
+/* This NetX test concentrates on the basic TCP Keepalive operation.
+   keepalive expiration time is 60s,
    After initial expiration, retry every 10s,
    Retry a maximum of 10 tims.  */
 

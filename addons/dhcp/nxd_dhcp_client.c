@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -119,14 +119,6 @@ NX_CALLER_CHECKING_EXTERNS
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_create(NX_DHCP *dhcp_ptr, NX_IP *ip_ptr, CHAR *name_ptr)
 {
@@ -197,24 +189,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved the code,          */
-/*                                            resulting in version 6.1.8  */
-/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
-/*                                            multiple client instances,  */
-/*                                            resulting in version 6.1.10 */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), cleaned  */
-/*                                            up error check logic, and   */
-/*                                            properly terminated thread, */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_create(NX_DHCP *dhcp_ptr, NX_IP *ip_ptr, CHAR *name_ptr)
 {
@@ -242,7 +216,7 @@ UINT    label_length = 0;
     /* The labels must follow the rules for ARPANET host names.  They must
        start with a letter, end with a letter or digit, and have as interior
        characters only letters, digits, and hyphen.  There are also some
-       restrictions on the length. Labels must be 63 characters or less. 
+       restrictions on the length. Labels must be 63 characters or less.
        RFC 1035, Section 2.3.1, Page8.  */
     while (*temp_ptr)
     {
@@ -321,7 +295,7 @@ UINT    label_length = 0;
     /* If the host does not intend to supply their own packet pool, create one here. */
 #ifndef NX_DHCP_CLIENT_USER_CREATE_PACKET_POOL
 
-    /* Check the packet payload size, DHCP Client must be prepared to receive a message of up to 576 octets.   
+    /* Check the packet payload size, DHCP Client must be prepared to receive a message of up to 576 octets.
        RFC 2131, Section 2, Page10.  */
     if (NX_DHCP_PACKET_PAYLOAD < (NX_PHYSICAL_HEADER + NX_DHCP_MINIMUM_IP_DATAGRAM)) 
     {
@@ -517,14 +491,6 @@ UINT    label_length = 0;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_clear_broadcast_flag(NX_DHCP *dhcp_ptr, UINT clear_flag)
 {
@@ -594,14 +560,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_clear_broadcast_flag(NX_DHCP *dhcp_ptr, UINT clear_flag)
 {
@@ -667,14 +625,6 @@ UINT    i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_interface_clear_broadcast_flag(NX_DHCP *dhcp_ptr, UINT iface_index, UINT clear_flag)
 {
@@ -750,14 +700,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_interface_clear_broadcast_flag(NX_DHCP *dhcp_ptr, UINT iface_index, UINT clear_flag)
 {
@@ -825,14 +767,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_packet_pool_set(NX_DHCP *dhcp_ptr, NX_PACKET_POOL *packet_pool_ptr)
 {
@@ -855,7 +789,7 @@ UINT  status;
         return NX_PTR_ERROR;
     }
                         
-    /* Check the packet payload size, DHCP Client must be prepared to receive a message of up to 576 octets.   
+    /* Check the packet payload size, DHCP Client must be prepared to receive a message of up to 576 octets.
        RFC2131, Section2, Page10.  */
     if (packet_pool_ptr -> nx_packet_pool_payload_size < (NX_PHYSICAL_HEADER + NX_DHCP_MINIMUM_IP_DATAGRAM)) 
     {
@@ -905,14 +839,6 @@ UINT  status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_packet_pool_set(NX_DHCP *dhcp_ptr, NX_PACKET_POOL *packet_pool_ptr)
 {
@@ -973,14 +899,6 @@ UINT  _nx_dhcp_packet_pool_set(NX_DHCP *dhcp_ptr, NX_PACKET_POOL *packet_pool_pt
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcp_reinitialize(NX_DHCP *dhcp_ptr)
 {
@@ -1038,14 +956,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcp_reinitialize(NX_DHCP *dhcp_ptr)
 {
@@ -1105,14 +1015,6 @@ UINT    i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcp_interface_reinitialize(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -1183,17 +1085,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcp_interface_reinitialize(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -1324,14 +1215,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_request_client_ip(NX_DHCP *dhcp_ptr, ULONG client_request_address, UINT skip_discover_message)
 {
@@ -1405,14 +1288,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_request_client_ip(NX_DHCP *dhcp_ptr, ULONG client_request_address, UINT skip_discover_message)
 {
@@ -1482,14 +1357,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_interface_request_client_ip(NX_DHCP *dhcp_ptr, UINT iface_index, ULONG client_request_address, UINT skip_discover_message)
 {
@@ -1551,14 +1418,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_interface_request_client_ip(NX_DHCP *dhcp_ptr, UINT iface_index, ULONG client_request_address, UINT skip_discover_message)
 {
@@ -1626,14 +1485,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_delete(NX_DHCP *dhcp_ptr)
 {
@@ -1698,17 +1549,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
-/*                                            multiple client instances,  */
-/*                                            resulting in version 6.1.10 */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_delete(NX_DHCP *dhcp_ptr)
 {
@@ -1831,14 +1671,6 @@ NX_DHCP *dhcp_previous;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_force_renew(NX_DHCP *dhcp_ptr)
 {
@@ -1896,14 +1728,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_force_renew(NX_DHCP *dhcp_ptr)
 {
@@ -1968,14 +1792,6 @@ UINT    i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_interface_force_renew(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -2036,14 +1852,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_interface_force_renew(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -2147,14 +1955,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_decline(NX_DHCP *dhcp_ptr)
 {
@@ -2215,14 +2015,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_decline(NX_DHCP *dhcp_ptr)
 {
@@ -2286,14 +2078,6 @@ UINT    i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 
 UINT _nxe_dhcp_interface_decline(NX_DHCP *dhcp_ptr, UINT iface_index)
@@ -2359,17 +2143,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcp_interface_decline(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -2472,14 +2245,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_release(NX_DHCP *dhcp_ptr)
 {
@@ -2537,14 +2302,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcp_release(NX_DHCP *dhcp_ptr)
 {
@@ -2608,14 +2365,6 @@ UINT    i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcp_interface_release(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -2682,17 +2431,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_interface_release(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -2817,14 +2555,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_start(NX_DHCP *dhcp_ptr)
 {
@@ -2887,14 +2617,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_start(NX_DHCP *dhcp_ptr)
 {
@@ -2983,14 +2705,6 @@ UINT    i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_interface_start(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -3061,14 +2775,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_interface_start(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -3169,7 +2875,7 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
     interface_record -> nx_dhcp_state = NX_DHCP_STATE_INIT;
 
     /* The client begins in INIT state and forms a DHCPDISCOVER message.
-       The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.  
+       The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.
        RFC2131, Section4.4.1, Page36.  */
 
     /* Use the minimum value, Wait one second to begain in INIT state and forms a DHCP Discovery message.  */
@@ -3233,14 +2939,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_interface_enable(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -3307,14 +3005,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_interface_enable(NX_DHCP *dhcp_ptr, UINT iface_index)   
 {
@@ -3428,14 +3118,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcp_interface_disable(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -3504,14 +3186,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcp_interface_disable(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -3579,17 +3253,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), and      */
-/*                                            corrected caller checking,  */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_state_change_notify(NX_DHCP *dhcp_ptr, VOID (*dhcp_state_change_notify)(NX_DHCP *dhcp_ptr, UCHAR new_state))
 {
@@ -3647,14 +3310,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_state_change_notify(NX_DHCP *dhcp_ptr, VOID (*dhcp_state_change_notify)(NX_DHCP *dhcp_ptr, UCHAR new_state))
 {
@@ -3707,14 +3362,6 @@ UINT  _nx_dhcp_state_change_notify(NX_DHCP *dhcp_ptr, VOID (*dhcp_state_change_n
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_interface_state_change_notify(NX_DHCP *dhcp_ptr, VOID (*dhcp_state_interface_change_notify)(NX_DHCP *dhcp_ptr, UINT iface_index, UCHAR new_state))
 {
@@ -3772,14 +3419,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_interface_state_change_notify(NX_DHCP *dhcp_ptr, VOID (*dhcp_interface_state_change_notify)(NX_DHCP *dhcp_ptr, UINT iface_index, UCHAR new_state))
 {
@@ -3830,14 +3469,6 @@ UINT  _nx_dhcp_interface_state_change_notify(NX_DHCP *dhcp_ptr, VOID (*dhcp_inte
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_stop(NX_DHCP *dhcp_ptr)
 {
@@ -3903,14 +3534,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_stop(NX_DHCP *dhcp_ptr)
 {
@@ -3984,14 +3607,6 @@ UINT i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_interface_stop(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -4061,17 +3676,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcp_interface_stop(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -4199,14 +3803,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_user_option_retrieve(NX_DHCP *dhcp_ptr, UINT option_request, UCHAR *destination_ptr, UINT *destination_size)
 {
@@ -4272,14 +3868,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_user_option_retrieve(NX_DHCP *dhcp_ptr, UINT option_request, UCHAR *destination_ptr, UINT *destination_size)
 {
@@ -4349,12 +3937,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_user_option_request(NX_DHCP *dhcp_ptr, UINT option_code)
 {
@@ -4409,12 +3991,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_user_option_request(NX_DHCP *dhcp_ptr, UINT option_code)
 {
@@ -4503,14 +4079,6 @@ UINT i;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_interface_user_option_retrieve(NX_DHCP *dhcp_ptr, UINT iface_index, UINT option_request, UCHAR *destination_ptr, UINT *destination_size)
 {
@@ -4584,16 +4152,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_interface_user_option_retrieve(NX_DHCP *dhcp_ptr, UINT iface_index, UINT option_request, UCHAR *destination_ptr, UINT *destination_size)
 {
@@ -4747,14 +4305,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 ULONG  _nxe_dhcp_user_option_convert(UCHAR *source_ptr)
 {
@@ -4806,14 +4356,6 @@ ULONG   temp;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 ULONG  _nx_dhcp_user_option_convert(UCHAR *source_ptr)
 {
@@ -4866,14 +4408,6 @@ ULONG   temp;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_user_option_add_callback_set(NX_DHCP *dhcp_ptr, UINT (*dhcp_user_option_add)(NX_DHCP *dhcp_ptr, UINT iface_index, UINT message_type,
                                                                                              UCHAR *user_option_ptr, UINT *user_option_length))
@@ -4927,14 +4461,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_user_option_add_callback_set(NX_DHCP *dhcp_ptr, UINT (*dhcp_user_option_add)(NX_DHCP *dhcp_ptr, UINT iface_index, UINT message_type,
                                                                                              UCHAR *user_option_ptr, UINT *user_option_length))
@@ -4986,17 +4512,6 @@ UINT  _nx_dhcp_user_option_add_callback_set(NX_DHCP *dhcp_ptr, UINT (*dhcp_user_
 /*                                                                        */ 
 /*    IP thread task                                                      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
-/*                                            multiple client instances,  */
-/*                                            resulting in version 6.1.10 */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_dhcp_udp_receive_notify(NX_UDP_SOCKET *socket_ptr)
 {
@@ -5043,14 +4558,6 @@ NX_DHCP *dhcp_ptr;
 /*                                                                        */ 
 /*    ThreadX timer                                                       */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_dhcp_timeout_entry(ULONG dhcp)
 {
@@ -5107,14 +4614,6 @@ NX_DHCP     *dhcp_ptr;
 /*                                                                        */ 
 /*    ThreadX                                                             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_dhcp_thread_entry(ULONG dhcp_instance)
 {
@@ -5283,17 +4782,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    nx_dhcp_thread_entry                  DHCP Client thread entry fcn  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcp_packet_process(NX_DHCP *dhcp_ptr, NX_DHCP_INTERFACE_RECORD *interface_record, NX_PACKET *packet_ptr)
 {
@@ -5487,7 +4975,7 @@ ULONG       probing_delay;
                     if (_nx_dhcp_extract_information(dhcp_ptr, interface_record, buffer, new_packet_ptr -> nx_packet_length))
                         break;
 
-                    /* If the host is configured to send an ARP probe to verify Client address is 
+                    /* If the host is configured to send an ARP probe to verify Client address is
                        not in use, do so now. */
 
 #ifdef NX_DHCP_CLIENT_SEND_ARP_PROBE
@@ -5554,7 +5042,7 @@ ULONG       probing_delay;
                     interface_record -> nx_dhcp_state = NX_DHCP_STATE_INIT;
 
                     /* The client begins in INIT state and forms a DHCPDISCOVER message.
-                       The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.  
+                       The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.
                        RFC2131, Section4.4.1, Page36.  */
 
                     /* Use the minimum value, Wait one second to begain in INIT state and forms a DHCP Discovery message.  */
@@ -5610,7 +5098,7 @@ ULONG       probing_delay;
                         nx_ip_gateway_address_set(dhcp_ptr -> nx_dhcp_ip_ptr, interface_record -> nx_dhcp_gateway_address);
                     }
 
-                    /* Lease has been renewed, set the countdown timer back to the renewal time and go back 
+                    /* Lease has been renewed, set the countdown timer back to the renewal time and go back
                        to the Bound state*/
                     interface_record -> nx_dhcp_timeout = interface_record -> nx_dhcp_renewal_time;
 
@@ -5633,7 +5121,7 @@ ULONG       probing_delay;
                     interface_record -> nx_dhcp_state = NX_DHCP_STATE_INIT;
 
                     /* The client begins in INIT state and forms a DHCPDISCOVER message.
-                       The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.  
+                       The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.
                        RFC2131, Section4.4.1, Page36.  */
 
                     /* Use the minimum value, Wait one second to begain in INIT state and forms a DHCP Discovery message.  */
@@ -5681,7 +5169,7 @@ ULONG       probing_delay;
                         nx_ip_gateway_address_set(dhcp_ptr -> nx_dhcp_ip_ptr, interface_record -> nx_dhcp_gateway_address);
                     }
 
-                    /* Lease has been renewed, set the countdown timer back to the renewal time and go back 
+                    /* Lease has been renewed, set the countdown timer back to the renewal time and go back
                        to the Bound state.  */
                     interface_record -> nx_dhcp_timeout = interface_record -> nx_dhcp_renewal_time;
 
@@ -5703,7 +5191,7 @@ ULONG       probing_delay;
                     interface_record -> nx_dhcp_state = NX_DHCP_STATE_INIT;
 
                     /* The client begins in INIT state and forms a DHCPDISCOVER message.
-                       The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.  
+                       The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.
                        RFC2131, Section4.4.1, Page36.  */
 
                     /* Use the minimum value, Wait one second to begain in INIT state and forms a DHCP Discovery message.  */
@@ -5789,17 +5277,6 @@ ULONG       probing_delay;
 /*                                                                        */ 
 /*    _nx_dhcp_thread_entry                                               */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_dhcp_timeout_process(NX_DHCP *dhcp_ptr)
 {
@@ -6105,8 +5582,8 @@ NX_IP           *ip_ptr;
                     case NX_DHCP_STATE_REBINDING:
                     {
 
-                        /* No response yet, the response must have timed out, 
-                            update the timeout and check if we have reached the 
+                        /* No response yet, the response must have timed out,
+                            update the timeout and check if we have reached the
                             end of the rebinding time.  */
                         if (interface_record -> nx_dhcp_rebind_remain_time >= interface_record -> nx_dhcp_rtr_interval)
                         {
@@ -6133,7 +5610,7 @@ NX_IP           *ip_ptr;
                             interface_record -> nx_dhcp_state = NX_DHCP_STATE_INIT;
 
                             /* The client begins in INIT state and forms a DHCPDISCOVER message.
-                               The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.  
+                               The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.
                                RFC2131, Section4.4.1, Page36.  */
 
                             /* Use the minimum value, Wait one second to begain in INIT state and forms a DHCP Discovery message.  */
@@ -6219,14 +5696,6 @@ NX_IP           *ip_ptr;
 /*                                                                        */ 
 /*    Application thread                                                  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_send_request(NX_DHCP *dhcp_ptr, UINT dhcp_message_type)
 {
@@ -6294,14 +5763,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_send_request(NX_DHCP *dhcp_ptr, UINT dhcp_message_type)
 {
@@ -6372,14 +5833,6 @@ UINT  i;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_interface_send_request(NX_DHCP *dhcp_ptr, UINT iface_index, UINT dhcp_message_type)
 {
@@ -6455,14 +5908,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_interface_send_request(NX_DHCP *dhcp_ptr, UINT iface_index, UINT dhcp_message_type)
 {
@@ -6576,22 +6021,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*    _nx_dhcp_resume                       Resume the DHCP Client thread */ 
 #endif
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s), supported*/
-/*                                            adding additional request   */
-/*                                            option in parameter request,*/
-/*                                            resulting in version 6.1.8  */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), corrected*/
-/*                                            the logic of adding server  */
-/*                                            identifier option,          */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_send_request_internal(NX_DHCP *dhcp_ptr, NX_DHCP_INTERFACE_RECORD *interface_record, UINT dhcp_message_type)
 {
@@ -6760,7 +6189,7 @@ UINT            name_length;
                              
 #ifdef NX_DHCP_CLIENT_SEND_MAX_DHCP_MESSAGE_OPTION
 
-            /* Add an option to specify the maximum length DHCP message that DHCP Client is willing to accept.  
+            /* Add an option to specify the maximum length DHCP message that DHCP Client is willing to accept.
                RFC2132, Section9.10, Page28.  */    
             _nx_dhcp_add_option_value(buffer, NX_DHCP_OPTION_MAX_DHCP_MESSAGE, 2, dhcp_ptr -> nx_dhcp_max_dhcp_message_size, &index);
 #endif
@@ -6832,7 +6261,7 @@ UINT            name_length;
 
 #ifdef NX_DHCP_CLIENT_SEND_MAX_DHCP_MESSAGE_OPTION
 
-            /* Add an option to specify the maximum length DHCP message that DHCP Client is willing to accept.  
+            /* Add an option to specify the maximum length DHCP message that DHCP Client is willing to accept.
                RFC2132, Section9.10, Page28.  */    
             _nx_dhcp_add_option_value(buffer, NX_DHCP_OPTION_MAX_DHCP_MESSAGE, 2, dhcp_ptr -> nx_dhcp_max_dhcp_message_size, &index);
 #endif
@@ -6944,7 +6373,7 @@ UINT            name_length;
     }
 #endif
 
-    /* Set the target address according to RFC2131, Section4.3.6, Page33, Table4 and Section4.4.4, Page40.  
+    /* Set the target address according to RFC2131, Section4.3.6, Page33, Table4 and Section4.4.4, Page40.
        DHCP Request for renewing and DHCP Release message must be unicast.  */
     if (((dhcp_message_type == NX_DHCP_TYPE_DHCPREQUEST) && (interface_record -> nx_dhcp_state == NX_DHCP_STATE_RENEWING)) ||
         (dhcp_message_type == NX_DHCP_TYPE_DHCPRELEASE))
@@ -7023,29 +6452,6 @@ UINT            name_length;
 /*                                                                        */ 
 /*    _nx_dhcp_send_request_internal        Send DHCP Request             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            supported new ip filter,    */
-/*                                            resulting in version 6.1.8  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            set the IP header pointer,  */
-/*                                            resulting in version 6.1.11 */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            and solve inconformity with */
-/*                                            udp socket send and ip      */
-/*                                            header add,                 */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            supported random IP id,     */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_client_send_with_zero_source_address(NX_DHCP *dhcp_ptr, UINT iface_index, NX_PACKET *packet_ptr)
 {
@@ -7378,15 +6784,6 @@ NX_IP_DRIVER    driver_request;
 /*                                                                        */ 
 /*    _nx_dhcp_packet_process               Data received handler         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_extract_information(NX_DHCP *dhcp_ptr, NX_DHCP_INTERFACE_RECORD *interface_record, UCHAR *dhcp_message, UINT length)
 {
@@ -7665,17 +7062,6 @@ ULONG       value;
 /*    _nx_dhcp_packet_process               Data received handler         */ 
 /*    _nx_dhcp_extract_information          Extract info from server      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_get_option_value(UCHAR *bootp_message, UINT option, ULONG *value, UINT length)
 {
@@ -7768,14 +7154,6 @@ UINT   option_length;
 /*                                                                        */ 
 /*    _nx_dhcp_send_request_internal        Send DHCP request             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_add_option_value(UCHAR *bootp_message, UINT option, UINT size, ULONG value, UINT *index)
 {
@@ -7833,14 +7211,6 @@ UINT  _nx_dhcp_add_option_value(UCHAR *bootp_message, UINT option, UINT size, UL
 /*                                                                        */ 
 /*    _nx_dhcp_send_request_internal       Internal DHCP message send     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_add_option_string(UCHAR *bootp_message, UINT option, UINT size, UCHAR *value, UINT *index)
 {                                              
@@ -7896,12 +7266,6 @@ static UINT  _nx_dhcp_add_option_string(UCHAR *bootp_message, UINT option, UINT 
 /*                                                                        */ 
 /*    _nx_dhcp_send_request_internal       Internal DHCP message send     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_dhcp_add_option_parameter_request(NX_DHCP *dhcp_ptr, UCHAR *bootp_message, UINT *index)
 {                                              
@@ -7962,17 +7326,6 @@ static UINT  _nx_dhcp_add_option_parameter_request(NX_DHCP *dhcp_ptr, UCHAR *boo
 /*    nx_dhcp_process                       Process the current state of  */
 /*                                           the DHCP Client state machine*/ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 static ULONG _nx_dhcp_add_randomize(ULONG timeout)
 {
@@ -8039,14 +7392,6 @@ ULONG adjustment;
 /*                                                                        */ 
 /*    _nx_dhcp_timeout_process               Timer expiration handler     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static ULONG _nx_dhcp_update_timeout(ULONG timeout)
 {
@@ -8104,14 +7449,6 @@ static ULONG _nx_dhcp_update_timeout(ULONG timeout)
 /*                                            the DHCP Client record      */
 /*    _nx_dhcp_timeout_process              Timer expiration handler      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static ULONG _nx_dhcp_update_renewal_timeout(ULONG timeout)
 {
@@ -8185,17 +7522,6 @@ static ULONG _nx_dhcp_update_renewal_timeout(ULONG timeout)
 /*    _nx_dhcp_get_option_value             Get the value of an option    */ 
 /*    _nx_dhcp_get_option_data              Get the string of an option   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 static UCHAR  *_nx_dhcp_search_buffer(UCHAR *option_message, UINT option, UINT length)
 {
@@ -8293,14 +7619,6 @@ UINT    size;
 /*    _nx_dhcp_get_option_value             Retrieve option value         */ 
 /*    _nx_dhcp_update_address_list          Update address list           */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static ULONG  _nx_dhcp_get_data(UCHAR *data, UINT size)
 {
@@ -8357,17 +7675,6 @@ ULONG   value = 0;
 /*    _nx_dhcp_send_request_internal        Send DHCP request             */ 
 /*    _nx_dhcp_add_option_value             Add a DHCP option             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_dhcp_store_data(UCHAR *data, UINT size, ULONG value)
 {
@@ -8412,14 +7719,6 @@ static VOID  _nx_dhcp_store_data(UCHAR *data, UINT size, ULONG value)
 /*                                                                        */ 
 /*    _nx_dhcp_add_option_string            Add option string             */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_dhcp_move_string(UCHAR *dest, UCHAR *source, UINT size)
 {
@@ -8468,14 +7767,6 @@ static VOID  _nx_dhcp_move_string(UCHAR *dest, UCHAR *source, UINT size)
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcp_server_address_get(NX_DHCP *dhcp_ptr, ULONG *server_address)
 {
@@ -8541,14 +7832,6 @@ UINT status ;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcp_server_address_get(NX_DHCP *dhcp_ptr, ULONG *server_address)
 {
@@ -8617,14 +7900,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 
 UINT _nxe_dhcp_interface_server_address_get(NX_DHCP *dhcp_ptr, UINT iface_index, ULONG *server_address)
@@ -8692,14 +7967,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcp_interface_server_address_get(NX_DHCP *dhcp_ptr, UINT iface_index, ULONG *server_address)
 {
@@ -8777,17 +8044,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    NetX                                                                */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
-/*                                            multiple client instances,  */
-/*                                            resulting in version 6.1.10 */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_dhcp_ip_conflict(NX_IP *ip_ptr, UINT iface_index, ULONG ip_address, ULONG physical_msw, ULONG physical_lsw)
 {
@@ -8860,14 +8116,6 @@ NX_DHCP *dhcp_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_dhcp_set_interface_index(NX_DHCP *dhcp_ptr, UINT interface_index)
 {
@@ -8933,14 +8181,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcp_set_interface_index(NX_DHCP *dhcp_ptr, UINT iface_index)
 {
@@ -9008,14 +8248,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_dhcp_interface_record_find(NX_DHCP *dhcp_ptr, UINT iface_index, NX_DHCP_INTERFACE_RECORD **interface_record)
 {
@@ -9083,14 +8315,6 @@ UINT i;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_client_get_record(NX_DHCP *dhcp_ptr, NX_DHCP_CLIENT_RECORD *client_record_ptr)
 {
@@ -9147,14 +8371,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_client_get_record(NX_DHCP *dhcp_ptr, NX_DHCP_CLIENT_RECORD *client_record_ptr)
 {
@@ -9226,14 +8442,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_client_interface_get_record(NX_DHCP *dhcp_ptr, UINT iface_index, NX_DHCP_CLIENT_RECORD *client_record_ptr)
 {
@@ -9300,14 +8508,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_client_interface_get_record(NX_DHCP *dhcp_ptr, UINT iface_index, NX_DHCP_CLIENT_RECORD *client_record_ptr)
 {
@@ -9335,7 +8535,7 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
     if (interface_record -> nx_dhcp_state < NX_DHCP_STATE_BOUND)
     {
 
-        /* The DHCP Client is not bound to an IP address. Cannot create a record for restoring Client 
+        /* The DHCP Client is not bound to an IP address. Cannot create a record for restoring Client
            state if the Client not bound to an IP address. */
 
         /* Release the DHCP mutex.  */
@@ -9401,14 +8601,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_client_restore_record(NX_DHCP *dhcp_ptr, NX_DHCP_CLIENT_RECORD *client_record_ptr, ULONG time_elapsed)
 {
@@ -9483,14 +8675,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_client_restore_record(NX_DHCP *dhcp_ptr, NX_DHCP_CLIENT_RECORD *client_record_ptr, ULONG time_elapsed)
 {
@@ -9561,14 +8745,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_client_interface_restore_record(NX_DHCP *dhcp_ptr, UINT iface_index, NX_DHCP_CLIENT_RECORD *client_record_ptr, ULONG time_elapsed)
 {
@@ -9648,16 +8824,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            restored the gateway        */
-/*                                            address,                    */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_client_interface_restore_record(NX_DHCP *dhcp_ptr, UINT iface_index, NX_DHCP_CLIENT_RECORD *client_record_ptr, ULONG time_elapsed)
 {
@@ -9767,14 +8933,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_client_update_time_remaining(NX_DHCP *dhcp_ptr, ULONG time_elapsed)
 {
@@ -9834,14 +8992,6 @@ UINT status;
 /*                                                                        */ 
 /*    _nx_dhcp_client_restore_record                                      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_client_update_time_remaining(NX_DHCP *dhcp_ptr, ULONG time_elapsed)
 {
@@ -9911,14 +9061,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_client_interface_update_time_remaining(NX_DHCP *dhcp_ptr, UINT iface_index, ULONG time_elapsed)
 {
@@ -9992,14 +9134,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_client_interface_update_time_remaining(NX_DHCP *dhcp_ptr, UINT iface_index, ULONG time_elapsed)
 {
@@ -10034,7 +9168,7 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
     {
         if (interface_record -> nx_dhcp_renewal_time >= interface_record -> nx_dhcp_timeout)
         {
-            /* Since the Client is in a BOUND state, we know the timeout is less than T2 
+            /* Since the Client is in a BOUND state, we know the timeout is less than T2
                or nx_dhcp_renew_time. */
             time_accrued = interface_record -> nx_dhcp_renewal_time - interface_record -> nx_dhcp_timeout;
         }
@@ -10213,7 +9347,7 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
         interface_record -> nx_dhcp_state = NX_DHCP_STATE_INIT;
 
         /* The client begins in INIT state and forms a DHCPDISCOVER message.
-           The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.  
+           The client should wait a random time between one and ten seconds to desynchronize the use of DHCP at startup.
            RFC2131, Section4.4.1, Page36.  */
 
         /* Use the minimum value, Wait one second to begain in INIT state and forms a DHCP Discovery message.  */
@@ -10280,14 +9414,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_resume(NX_DHCP *dhcp_ptr)
 {
@@ -10352,15 +9478,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_dhcp_resume(NX_DHCP *dhcp_ptr)
 {
@@ -10483,14 +9600,6 @@ UINT    iface_index;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_dhcp_suspend(NX_DHCP *dhcp_ptr)
 {
@@ -10553,14 +9662,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_dhcp_suspend(NX_DHCP *dhcp_ptr)
 {

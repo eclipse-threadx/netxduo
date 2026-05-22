@@ -294,7 +294,7 @@ char mac_ip1[6];
 #endif
     test_raw_server_ipv4();
 
-    /* Now open another socket and attempt to connect to the correct remote 
+    /* Now open another socket and attempt to connect to the correct remote
        host but an unexpected port so we expect an unsuccessful connections. */
 #if 0
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);

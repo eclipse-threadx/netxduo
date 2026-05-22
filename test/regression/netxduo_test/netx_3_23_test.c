@@ -1,9 +1,9 @@
-/* 3.23:TCP,  in CLOSE-WAIT state, 
-        MUST return an ACK with proper SEQ and ACK numbers after recv a seg with OTW SEQ or unacc ACK number, 
-        and remain in same state If the connection is in a synchronized state, 
-        any unacceptable segment (out of window sequence number or unacceptible acknowledgment number) 
-        must elicit only an empty acknowledgment segment containing the current send-sequence number 
-        and an acknowledgment indicating the next sequence number expected to be received, 
+/* 3.23:TCP,  in CLOSE-WAIT state,
+        MUST return an ACK with proper SEQ and ACK numbers after recv a seg with OTW SEQ or unacc ACK number,
+        and remain in same state If the connection is in a synchronized state,
+        any unacceptable segment (out of window sequence number or unacceptible acknowledgment number)
+        must elicit only an empty acknowledgment segment containing the current send-sequence number
+        and an acknowledgment indicating the next sequence number expected to be received,
         and the connection remains in the same state. */
 
 /*  Procedure

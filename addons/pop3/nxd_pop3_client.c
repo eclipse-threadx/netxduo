@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -35,14 +35,6 @@
 /*    Client component, including all data types and external references. */
 /*    It is assumed that tx_api.h, tx_port.h, nx_api.h, and nx_port.h,    */
 /*    have already been included.                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -106,14 +98,6 @@
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pop3_client_create(NX_POP3_CLIENT *client_ptr, UINT APOP_authentication, NX_IP *ip_ptr, 
                               NX_PACKET_POOL *packet_pool_ptr, ULONG server_ip_address, ULONG server_port, CHAR *client_name, 
@@ -203,14 +187,6 @@ UINT status;
 /*                                                                        */ 
 /*    _nxd_pop3_client_create           Duo Client POP3 create service    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pop3_client_create(NX_POP3_CLIENT *client_ptr, UINT APOP_authentication, NX_IP *ip_ptr, 
                               NX_PACKET_POOL *packet_pool_ptr, ULONG server_ip_address, ULONG server_port, CHAR *client_name, 
@@ -288,14 +264,6 @@ NXD_ADDRESS server_address;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxde_pop3_client_create(NX_POP3_CLIENT *client_ptr, UINT APOP_authentication, NX_IP *ip_ptr, 
                               NX_PACKET_POOL *packet_pool_ptr, NXD_ADDRESS *server_ip_address, ULONG server_port, CHAR *client_name, 
@@ -375,15 +343,6 @@ UINT status;
 /*    nx_tcp_socket_create              NetX TCP socket create service    */ 
 /*    _nxd_pop3_client_connect          Connect POP3 Client to Server     */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxd_pop3_client_create(NX_POP3_CLIENT *client_ptr, UINT APOP_authentication, NX_IP *ip_ptr, 
                               NX_PACKET_POOL *packet_pool_ptr, NXD_ADDRESS *server_ip_address, ULONG server_port, CHAR *client_name, 
@@ -474,14 +433,6 @@ UINT client_password_length;
 /*                                                                        */ 
 /*    _nx_pop3_client_delete            Actual Client delete service      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pop3_client_delete(NX_POP3_CLIENT *client_ptr)
 {
@@ -538,14 +489,6 @@ UINT status;
 /*    nx_tcp_client_socket_unbind       Releases (unbinds) the TCP port   */
 /*    nx_tcp_socket_delete              Deletes unbound TCP socket        */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pop3_client_delete(NX_POP3_CLIENT *client_ptr)
 {
@@ -606,14 +549,6 @@ UINT  _nx_pop3_client_delete(NX_POP3_CLIENT *client_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_mail_items_get(NX_POP3_CLIENT *client_ptr, UINT *number_mail_items, ULONG *maildrop_total_size)
 {
@@ -674,15 +609,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_mail_items_get(NX_POP3_CLIENT *client_ptr, UINT *number_mail_items, ULONG *maildrop_total_size)
 {
@@ -862,14 +788,6 @@ UINT         packet_type;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_mail_item_size_get(NX_POP3_CLIENT *client_ptr, UINT mail_item, ULONG *size)
 {
@@ -941,15 +859,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_mail_item_size_get(NX_POP3_CLIENT *client_ptr, UINT mail_item, ULONG *size)
 {
@@ -1144,14 +1053,6 @@ UINT      packet_type;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_mail_item_get(NX_POP3_CLIENT *client_ptr, UINT mail_item, ULONG *item_size)
 {
@@ -1219,15 +1120,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_mail_item_get(NX_POP3_CLIENT *client_ptr, UINT mail_item, ULONG *item_size)
 {
@@ -1443,14 +1335,6 @@ UINT         packet_type;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_mail_item_message_get(NX_POP3_CLIENT *client_ptr, NX_PACKET **recv_packet_ptr, ULONG *bytes_retrieved, UINT *final_packet)
 {
@@ -1515,14 +1399,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_mail_item_message_get(NX_POP3_CLIENT *client_ptr, NX_PACKET **recv_packet_ptr, ULONG *bytes_retrieved, UINT *final_packet)
 {
@@ -1637,14 +1513,6 @@ CHAR    *buffer_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_mail_item_delete(NX_POP3_CLIENT *client_ptr, UINT mail_index)
 {
@@ -1714,15 +1582,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_mail_item_delete(NX_POP3_CLIENT *client_ptr, UINT mail_index)
 {
@@ -1880,14 +1739,6 @@ UINT         packet_type;
 /*                                                                        */ 
 /*    _nx_pop3_client_quit             Actual send QUIT command service   */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_pop3_client_quit(NX_POP3_CLIENT *client_ptr)
 {
@@ -1939,15 +1790,6 @@ UINT status;
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
 /*    None                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_pop3_client_quit(NX_POP3_CLIENT *client_ptr)
@@ -2098,14 +1940,6 @@ UINT         packet_type;
 /*                                                                        */
 /*    _nx_pop3_client_apop                  Send APOP cmd to Server       */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pop3_digest_authenticate(NX_POP3_CLIENT *client_ptr, CHAR *process_ID_ptr, UINT process_ID_length, CHAR *result)
 {
@@ -2163,14 +1997,6 @@ CHAR    md5_binary[NX_POP3_MAX_BINARY_MD5];
 /*                                                                        */ 
 /*    None                                                                */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID _nx_pop3_parse_process_id(NX_POP3_CLIENT *client_ptr, CHAR *buffer, UINT buffer_length)
 {
@@ -2268,17 +2094,6 @@ UINT pid_index;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  02-02-2021     Yuxin Zhou               Modified comment(s), improved */
-/*                                            buffer length verification, */
-/*                                            resulting in version 6.1.4  */
-/*                                                                        */
 /**************************************************************************/
 void  _nx_pop3_parse_response(CHAR *buffer, UINT argument_index, UINT buffer_length, CHAR *argument, UINT argument_length, 
                               UINT convert_to_uppercase, UINT crlf_are_word_breaks)
@@ -2457,14 +2272,6 @@ UINT argument_char_count;
 /*    _nx_pop3_utility_digest_authenticate  Create digest for             */
 /*                                              authentication            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_pop3_hex_ascii_convert(CHAR *source, UINT source_length, CHAR *destination)
 {
@@ -2538,14 +2345,6 @@ CHAR    digit;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_pop3_server_number_convert(UINT number, CHAR *string_to_convert)
@@ -2651,17 +2450,6 @@ UINT    size;
 /*    _nx_pop3_client_apop               Send Authenticated user/pass     */
 /*    _nx_pop3_client_user_pass          Send User Pass in clear text     */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the client port,  */
-/*                                            resulting in version 6.1.6  */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_pop3_client_connect(NX_POP3_CLIENT *client_ptr, NXD_ADDRESS *server_ip_address, ULONG server_port)
 {
@@ -2812,15 +2600,6 @@ CHAR      argument[10];
 /*                                                                        */ 
 /*    nxd_pop3_client_connect           Connect with POP3 server          */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_apop(NX_POP3_CLIENT *client_ptr)
 {
@@ -3039,15 +2818,6 @@ UINT         md5_digest_buffer_length;
 /*                                                                        */ 
 /*    nxd_pop3_client_connect           Connect with POP3 server          */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_pop3_client_user_pass(NX_POP3_CLIENT *client_ptr)
 {

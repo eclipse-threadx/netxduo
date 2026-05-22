@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -73,15 +73,6 @@ static VOID _nx_tcpserver_thread_entry(ULONG tcpserver_address);
 /*    _nx_tcpserver_relisten                                              */
 /*    _nx_tcpserver_start                                                 */
 /*    _nx_tcpserver_connect_process                                       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed packet leak issue,    */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_tcpserver_session_allocate(NX_TCPSERVER *server_ptr, NX_TCP_SESSION **session_pptr)
@@ -156,17 +147,6 @@ NX_TCP_SOCKET  *socket_ptr;
 /*    _nx_tcpserver_connect_process                                       */
 /*   _nx_tcpserver_disconnect_process                                     */
 /*   _nx_tcpserver_timeout_process                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            removed debug output,       */
-/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_tcpserver_relisten(NX_TCPSERVER *server_ptr)
@@ -277,14 +257,6 @@ NX_TCP_SESSION *session_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_tcpserver_create(NX_IP *ip_ptr, NX_TCPSERVER *server_ptr, CHAR *name, 
@@ -428,18 +400,6 @@ UINT            status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the index of the  */
-/*                                            remote certificate list,    */
-/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 
@@ -588,12 +548,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_tcpserver_tls_ecc_setup(NX_TCPSERVER *server_ptr,
                                  const USHORT *supported_groups, USHORT supported_group_count,
@@ -657,14 +611,6 @@ NX_SECURE_TLS_SESSION* tls_session;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*   Application code                                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_tcpserver_start(NX_TCPSERVER *server_ptr, UINT port, UINT listen_queue_size)
@@ -732,14 +678,6 @@ NX_TCP_SESSION *session_ptr;
 /*                                                                        */
 /*   TCP stack                                                            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_connect_present(NX_TCP_SOCKET *socket_ptr, UINT port)
 {
@@ -784,14 +722,6 @@ NX_TCPSERVER *server_ptr = socket_ptr -> nx_tcp_socket_reserved_ptr;
 /*                                                                        */
 /*   TCP stack                                                            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_data_present(NX_TCP_SOCKET *socket_ptr)
 {
@@ -833,14 +763,6 @@ NX_TCPSERVER *server_ptr = socket_ptr -> nx_tcp_socket_reserved_ptr;
 /*                                                                        */
 /*   TCP stack                                                            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_disconnect_present(NX_TCP_SOCKET *socket_ptr)
 {
@@ -880,14 +802,6 @@ NX_TCPSERVER *server_ptr = socket_ptr -> nx_tcp_socket_reserved_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    ThreadX                                                             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_timeout(ULONG tcpserver_address)
@@ -934,23 +848,6 @@ NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_tcpserver_thread_entry                                          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed packet leak issue,    */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed TLS connection        */
-/*                                            deadlock issue,             */
-/*                                            resulting in version 6.1.9  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the wait option   */
-/*                                            of TLS connection,          */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_connect_process(NX_TCPSERVER *server_ptr)
@@ -1087,14 +984,6 @@ NX_TCP_SESSION *session_ptr = NX_NULL;
 /*                                                                        */
 /*    _nx_tcpserver_thread_entry                                          */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_data_process(NX_TCPSERVER *server_ptr)
 {
@@ -1159,15 +1048,6 @@ NX_TCP_SOCKET  *socket_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_tcpserver_thread_entry                                          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed packet leak issue,    */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_disconnect_process(NX_TCPSERVER *server_ptr)
@@ -1239,15 +1119,6 @@ NX_TCP_SOCKET  *socket_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_tcpserver_thread_entry                                          */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed packet leak issue,    */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_timeout_process(NX_TCPSERVER *server_ptr)
@@ -1332,14 +1203,6 @@ NX_TCP_SESSION *session_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    ThreadX                                                             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_tcpserver_thread_entry(ULONG tcpserver_address)
@@ -1437,14 +1300,6 @@ NX_TCPSERVER   *server_ptr = (NX_TCPSERVER *)tcpserver_address;
 /*                                                                        */
 /*   Application code                                                     */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_tcpserver_stop(NX_TCPSERVER *server_ptr)
 {
@@ -1512,14 +1367,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*   Application code                                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_tcpserver_delete(NX_TCPSERVER *server_ptr)

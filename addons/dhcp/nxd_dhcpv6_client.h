@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -38,21 +38,6 @@
 /*    references. It is assumed that nx_api.h and nx_port.h have already  */ 
 /*    been included.                                                      */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
-/*                                            necessary header file,      */
-/*                                            resulting in version 6.1.9  */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), supported*/
-/*                                            adding user options,        */
-/*                                            resulting in version 6.1.12 */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NXD_DHCPV6_CLIENT_H
@@ -72,7 +57,7 @@ extern   "C" {
 
 /*  Enable support for DHCPv6 client state preserved between reboots  */ 
 /*
-#define NX_DHCPV6_CLIENT_RESTORE_STATE  
+#define NX_DHCPV6_CLIENT_RESTORE_STATE
 */
 
 
@@ -81,7 +66,7 @@ extern   "C" {
 #define NX_DHCPV6_ID                                    0x44484336UL
 
 
-/* Set the Client lease time. An infinate lease time is not recommended by the RFC 
+/* Set the Client lease time. An infinate lease time is not recommended by the RFC
    unless the Client requires a permanent IP address.  Most servers will likely not
    grant an infinite IP address lease. */
 
@@ -109,7 +94,7 @@ typedef enum
 #define NX_DHCPV6_HW_TYPE_IEEE_802                      1
 
 
-/* Define approximate time since Jan 1, 2000 for computing DUID time. This will form the 
+/* Define approximate time since Jan 1, 2000 for computing DUID time. This will form the
    basis for the DUID time ID field.  */
 
 #define SECONDS_SINCE_JAN_1_2000_MOD_32                 2563729999UL
@@ -338,7 +323,7 @@ typedef enum
 #endif
 
 
-/* Define the time out option to obtain a DHCPv6 Client mutex lock. If the 
+/* Define the time out option to obtain a DHCPv6 Client mutex lock. If the
    the Client appears to be locking up, this can be set to a finite value
    for debugging as well as restore responsiveness to the Client */
 
@@ -432,12 +417,12 @@ typedef enum
 #endif
 
 
-/* Define the initial retransmission timeout in timer ticks for DHCPv6 messages. 
+/* Define the initial retransmission timeout in timer ticks for DHCPv6 messages.
    For no limit on the retransmission timeout set to 0, for no limit
-   on the retries, set to 0. 
+   on the retries, set to 0.
 
-   Note that regardless of length of timeout or number of retries, when the IP address 
-   valid lifetime expires, the Client can no longer use its global IP address 
+   Note that regardless of length of timeout or number of retries, when the IP address
+   valid lifetime expires, the Client can no longer use its global IP address
    assigned by the DHCPv6 Server. */
 
 #ifndef NX_DHCPV6_FIRST_SOL_MAX_DELAY                 
@@ -660,7 +645,7 @@ typedef struct NX_DHCPV6_MESSAGE_HDR_STRUCT
     ULONG              nx_message_xid;            /* Message transaction ID (3 bytes)*/
 } NX_DHCPV6_MESSAGE_HDR;
 
-/* Define the option request structure. This is how the Client requests information other than global IP address.  
+/* Define the option request structure. This is how the Client requests information other than global IP address.
    It can ask for domain name, DNS server, time zone, time server and other options. */
 
 typedef struct NX_DHCPV6_OPTIONREQUEST_STRUCT
@@ -795,9 +780,9 @@ typedef struct NX_DHCPV6_CLIENT_RECORD_STRUCT
 
 /* Application caller is present, perform API mapping.  */
 
-/* Determine if error checking is desired.  If so, map DHCP API functions 
+/* Determine if error checking is desired.  If so, map DHCP API functions
    to the appropriate error checking front-ends.  Otherwise, map API
-   functions to the core functions that actually perform the work. 
+   functions to the core functions that actually perform the work.
    Note: error checking is enabled by default.  */
 
 

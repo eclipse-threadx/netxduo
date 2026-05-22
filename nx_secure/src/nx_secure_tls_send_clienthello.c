@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -72,21 +72,6 @@ UINT _nx_secure_tls_send_clienthello_psk_extension(NX_SECURE_TLS_SESSION *tls_se
 /*    _nx_secure_tls_client_handshake       TLS client state machine      */
 /*    _nx_secure_tls_session_renegotiate    Renegotiate TLS session       */
 /*    _nx_secure_tls_session_start          Start TLS session             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Zhen Kong                Modified comment(s), removed  */
-/*                                            the code to copy session id,*/
-/*                                            resulting in version 6.1.11 */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            fixed compile errors,       */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_send_clienthello(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet)

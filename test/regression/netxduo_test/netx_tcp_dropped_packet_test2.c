@@ -1,4 +1,4 @@
-/* This NetX test concentrates on TCP packet drop.  
+/* This NetX test concentrates on TCP packet drop.
  * Client sends 5 packet to server. Each packet size is MSS.
  * The first and the third packets are dropped. */
 

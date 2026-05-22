@@ -1,4 +1,4 @@
-/* 8.2 :TCP in LISTEN state, 
+/* 8.2 :TCP in LISTEN state,
         TCP MUST send RST in response to incoming segment with ACK and remain in the same state,
         SEQ number of RST is taken from SEG.ACK.   */
 

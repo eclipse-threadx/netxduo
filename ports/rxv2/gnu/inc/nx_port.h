@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -38,15 +38,6 @@
 /*    real-time TCP/IP function identically on a variety of different     */ 
 /*    processor architectures.                                            */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            renamed temporary variable, */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NX_PORT_H
@@ -57,16 +48,18 @@
 #ifdef NX_INCLUDE_USER_DEFINE_FILE
 
 
-/* Yes, include the user defines in nx_user.h. The defines in this file may 
+/* Yes, include the user defines in nx_user.h. The defines in this file may
    alternately be defined on the command line.  */
 
 #include "nx_user.h"
 #endif
 
 
-/* Default to little endian, since this is what most ARM targets are.  */
+/* Use compilers define to determine endianness.  */
 
+#ifdef __RX_LITTLE_ENDIAN__
 #define NX_LITTLE_ENDIAN    1
+#endif
 
 
 #include <stdio.h>
@@ -77,9 +70,9 @@
 /* Define various constants for the port.  */ 
 
 #ifndef NX_IP_PERIODIC_RATE
-#define NX_IP_PERIODIC_RATE 100             /* Default IP periodic rate of 1 second for 
-                                               ports with 10ms timer interrupts.  This 
-                                               value may be defined instead at the 
+#define NX_IP_PERIODIC_RATE 100             /* Default IP periodic rate of 1 second for
+                                               ports with 10ms timer interrupts.  This
+                                               value may be defined instead at the
                                                command line and this value will not be
                                                used.  */
 #endif
@@ -88,44 +81,23 @@
 /* Define macros that swap the endian for little endian ports.  */
 
 #ifdef NX_LITTLE_ENDIAN
-#define NX_CHANGE_ULONG_ENDIAN(arg)                         \
-    {                                                       \
-        ULONG _i;                                           \
-        ULONG _tmp;                                         \
-        _i = (UINT)arg;                                     \
-        /* _i = A, B, C, D */                               \
-        _tmp = _i ^ (((_i) >> 16) | (_i << 16));            \
-        /* _tmp = _i ^ (_i ROR 16) = A^C, B^D, C^A, D^B */  \
-        _tmp &= 0xff00ffff;                                 \
-        /* _tmp = A^C, 0, C^A, D^B */                       \
-        _i = ((_i) >> 8) | (_i<<24);                        \
-        /* _i = D, A, B, C */                               \
-        _i = _i ^ ((_tmp) >> 8);                            \
-        /* _i = D, C, B, A */                               \
-        arg = _i;                                           \
-    }
-#define NX_CHANGE_USHORT_ENDIAN(a)      a = (((a >> 8) | (a << 8)) & 0xFFFF)
-
-
-#define __SWAP32__(val) ((((val) & 0xFF000000) >> 24 ) | (((val) & 0x00FF0000) >> 8) \
-             | (((val) & 0x0000FF00) << 8) | (((val) & 0x000000FF) << 24))
-
-#define __SWAP16__(val) ((((val) & 0xFF00) >> 8) | (((val) & 0x00FF) << 8))
+#define NX_CHANGE_ULONG_ENDIAN(arg)     (arg) = __builtin_bswap32(arg)
+#define NX_CHANGE_USHORT_ENDIAN(arg)    (arg) = __builtin_bswap16(arg)
 
 
 #ifndef htonl
-#define htonl(val)  __SWAP32__(val)
+#define htonl(val)  __builtin_bswap32(val)
 #endif /* htonl */
 #ifndef ntohl
-#define ntohl(val)  __SWAP32__(val)
+#define ntohl(val)  __builtin_bswap32(val)
 #endif /* htonl */
 
 #ifndef htons
-#define htons(val)  __SWAP16__(val)
+#define htons(val)  __builtin_bswap16(val)
 #endif /*htons */
 
 #ifndef ntohs
-#define ntohs(val)  __SWAP16__(val)
+#define ntohs(val)  __builtin_bswap16(val)
 #endif /*htons */
 
 #else
@@ -204,7 +176,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) 2024 Microsoft Corporation.  *  NetX Duo RXv2/GNU Version 6.4.1 *";
+                                    "(c) 2024 Microsoft Corp. (c) 2026-present Eclipse ThreadX Contributors.  *  NetX Duo RXv2/GNU Version 6.5.0.202601 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

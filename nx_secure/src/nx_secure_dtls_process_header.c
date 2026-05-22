@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -63,18 +63,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_dtls_process_record        Process DTLS record data      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  01-31-2022     Timothy Stapko           Modified comment(s),          */
-/*                                            fixed out-of-order handling,*/
-/*                                            resulting in version 6.1.10 */   
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_dtls_process_header(NX_SECURE_DTLS_SESSION *dtls_session, NX_PACKET *packet_ptr,
@@ -155,7 +143,7 @@ NX_SECURE_TLS_SESSION *tls_session;
      *        - If the earlier message was NOT seen, check the sliding window to accept/ignore
      *  2) The incoming sequence is greater than the local count + 1
      *        - A message was dropped. We need to handle the out-of-order
-     *          message. 
+     *          message.
      *        - During the handshake, accept this record as the next valid message
      *        - During the session, accept and update the sliding window.
      */
@@ -230,7 +218,7 @@ NX_SECURE_TLS_SESSION *tls_session;
         tls_session -> nx_secure_tls_remote_sequence_number[0] = remote_sequence_number[0];
         tls_session -> nx_secure_tls_remote_sequence_number[1] = remote_sequence_number[1];
 
-        /* The sequence number is larger than our current. This is a valid handshake record or 
+        /* The sequence number is larger than our current. This is a valid handshake record or
            out-of-order newer application data record. Update the current sequence number after the MAC check. */
         /* Swap back now that comparisons are done. */
         NX_CHANGE_ULONG_ENDIAN(tls_session -> nx_secure_tls_remote_sequence_number[0]);

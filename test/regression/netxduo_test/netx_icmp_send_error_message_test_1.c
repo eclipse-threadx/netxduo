@@ -1,4 +1,4 @@
-/* This NetX test concentrates on sending the ICMP error message. 
+/* This NetX test concentrates on sending the ICMP error message.
  * The destination of incoming packet is link-layer broadcast address.  */
 
 #include   "tx_api.h"

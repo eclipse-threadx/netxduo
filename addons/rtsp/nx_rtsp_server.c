@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -165,12 +165,6 @@ const NX_RTSP_RESPONSE nx_rtsp_server_response_description_table[] =
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_create(NX_RTSP_SERVER *rtsp_server_ptr, CHAR *server_name, UINT server_name_length,
                              NX_IP *ip_ptr, NX_PACKET_POOL *rtsp_packet_pool,
@@ -239,12 +233,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_create(NX_RTSP_SERVER *rtsp_server_ptr, CHAR *server_name, UINT server_name_length,
@@ -349,12 +337,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_delete(NX_RTSP_SERVER *rtsp_server_ptr)
 {
@@ -408,12 +390,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_delete(NX_RTSP_SERVER *rtsp_server_ptr)
@@ -474,12 +450,6 @@ UINT _nx_rtsp_server_delete(NX_RTSP_SERVER *rtsp_server_ptr)
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_start(NX_RTSP_SERVER *rtsp_server_ptr)
 {
@@ -533,12 +503,6 @@ UINT   status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_start(NX_RTSP_SERVER *rtsp_server_ptr)
@@ -656,12 +620,6 @@ int    i, j;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_stop(NX_RTSP_SERVER *rtsp_server_ptr)
 {
@@ -715,12 +673,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_stop(NX_RTSP_SERVER *rtsp_server_ptr)
@@ -814,12 +766,6 @@ UINT client_index;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_sdp_set(NX_RTSP_CLIENT *rtsp_client_ptr, UCHAR *sdp_string, UINT sdp_length)
 {
@@ -874,12 +820,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_sdp_set(NX_RTSP_CLIENT *rtsp_client_ptr, UCHAR *sdp_string, UINT sdp_length)
@@ -961,12 +901,6 @@ NX_PACKET *response_packet_ptr = rtsp_client_ptr -> nx_rtsp_client_response_pack
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_rtp_info_set(NX_RTSP_CLIENT *rtsp_client_ptr, UCHAR *track_id, UINT track_id_len, UINT rtp_seq, UINT rtp_time)
 {
@@ -1023,12 +957,6 @@ UINT       status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_rtp_info_set(NX_RTSP_CLIENT *rtsp_client_ptr, UCHAR *track_id, UINT track_id_len, UINT rtp_seq, UINT rtp_time)
@@ -1111,12 +1039,6 @@ NX_PACKET *response_packet_ptr = rtsp_client_ptr -> nx_rtsp_client_response_pack
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_range_npt_set(NX_RTSP_CLIENT *rtsp_client_ptr, UINT npt_start, UINT npt_end)
 {
@@ -1171,12 +1093,6 @@ UINT       status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_range_npt_set(NX_RTSP_CLIENT *rtsp_client_ptr, UINT npt_start, UINT npt_end)
@@ -1233,12 +1149,6 @@ UINT _nx_rtsp_server_range_npt_set(NX_RTSP_CLIENT *rtsp_client_ptr, UINT npt_sta
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_error_response_send(NX_RTSP_CLIENT *rtsp_client_ptr, UINT status_code)
 {
@@ -1293,12 +1203,6 @@ UINT       status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_error_response_send(NX_RTSP_CLIENT *rtsp_client_ptr, UINT status_code)
@@ -1423,12 +1327,6 @@ NX_PACKET_POOL *pool_ptr = rtsp_client_ptr -> nx_rtsp_client_server_ptr -> nx_rt
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_keepalive_update(NX_RTSP_CLIENT *rtsp_client_ptr)
 {
@@ -1480,12 +1378,6 @@ UINT       status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_keepalive_update(NX_RTSP_CLIENT *rtsp_client_ptr)
 {
@@ -1529,12 +1421,6 @@ UINT _nx_rtsp_server_keepalive_update(NX_RTSP_CLIENT *rtsp_client_ptr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_describe_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
@@ -1588,12 +1474,6 @@ UINT       status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_describe_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
                                            UINT (*callback)(NX_RTSP_CLIENT *rtsp_client_ptr, UCHAR *uri, UINT uri_length))
@@ -1635,12 +1515,6 @@ UINT _nx_rtsp_server_describe_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_setup_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
@@ -1694,12 +1568,6 @@ UINT       status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_setup_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
                                         UINT (*callback)(NX_RTSP_CLIENT *rtsp_client_ptr, UCHAR *uri, UINT uri_length, NX_RTSP_TRANSPORT *transport_ptr))
@@ -1741,12 +1609,6 @@ UINT _nx_rtsp_server_setup_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_play_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
@@ -1800,12 +1662,6 @@ UINT       status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_play_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
                                        UINT (*callback)(NX_RTSP_CLIENT *rtsp_client_ptr, UCHAR *uri, UINT uri_length, UCHAR *range_ptr, UINT range_length))
@@ -1847,12 +1703,6 @@ UINT _nx_rtsp_server_play_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_teardown_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
@@ -1906,12 +1756,6 @@ UINT       status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_teardown_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
                                            UINT (*callback)(NX_RTSP_CLIENT *rtsp_client_ptr, UCHAR *uri, UINT uri_length))
@@ -1953,12 +1797,6 @@ UINT _nx_rtsp_server_teardown_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_pause_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
@@ -2012,12 +1850,6 @@ UINT       status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_pause_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
                                         UINT (*callback)(NX_RTSP_CLIENT *rtsp_client_ptr, UCHAR *uri, UINT uri_length, UCHAR *range_ptr, UINT range_length))
@@ -2061,12 +1893,6 @@ UINT _nx_rtsp_server_pause_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxe_rtsp_server_set_parameter_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
@@ -2121,12 +1947,6 @@ UINT       status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_rtsp_server_set_parameter_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
                                                 UINT (*callback)(NX_RTSP_CLIENT *rtsp_client_ptr, UCHAR *uri, UINT uri_length, UCHAR *parameter_ptr, ULONG parameter_length))
@@ -2171,12 +1991,6 @@ UINT _nx_rtsp_server_set_parameter_callback_set(NX_RTSP_SERVER *rtsp_server_ptr,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    ThreadX                                                             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_rtsp_server_thread_entry(ULONG rtsp_server_address)
@@ -2274,12 +2088,6 @@ ULONG           events;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtsp_server_request_process                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_rtsp_server_request_receive(NX_RTSP_SERVER *rtsp_server_ptr, NX_RTSP_CLIENT *rtsp_client_ptr)
@@ -2534,12 +2342,6 @@ UINT       status = NX_SUCCESS;
 /*                                                                        */
 /*    _nx_rtsp_server_request_process                                     */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_rtsp_server_request_parse(NX_RTSP_CLIENT *rtsp_client_ptr, NX_RTSP_CLIENT_REQUEST *rtsp_client_request_ptr)
 {
@@ -2640,12 +2442,6 @@ NX_PACKET *rtsp_client_request_packet = rtsp_client_ptr -> nx_rtsp_client_reques
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtsp_server_request_parse                                       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_rtsp_server_request_line_parse(NX_RTSP_CLIENT_REQUEST *rtsp_client_request_ptr, UCHAR **request_buffer, UCHAR *request_buffer_end)
@@ -2858,12 +2654,6 @@ UINT   temp_length = 0;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtsp_server_request_parse                                       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_rtsp_server_request_header_parse(NX_RTSP_CLIENT *rtsp_client_ptr, NX_RTSP_CLIENT_REQUEST *rtsp_client_request_ptr, UCHAR **request_buffer, UCHAR *request_buffer_end)
@@ -3182,12 +2972,6 @@ NXD_ADDRESS *receiver_ip_address;
 /*    _nx_rtsp_server_request_receive                                     */
 /*    _nx_rtsp_server_strstr                                              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_rtsp_server_memicmp(UCHAR *src, ULONG src_length, UCHAR *dest, ULONG dest_length)
 {
@@ -3257,12 +3041,6 @@ UCHAR ch;
 /*                                                                        */
 /*    _nx_rtsp_server_request_header_parse                                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 static UCHAR *_nx_rtsp_server_strstr(UCHAR *src, ULONG src_length, UCHAR *dest, ULONG dest_length)
 {
@@ -3327,12 +3105,6 @@ UINT index = 0;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtsp_server_request_process                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_rtsp_server_response_create(NX_RTSP_SERVER *rtsp_server_ptr, NX_RTSP_CLIENT *rtsp_client_ptr, NX_RTSP_CLIENT_REQUEST *rtsp_client_request_ptr)
@@ -3428,12 +3200,6 @@ UINT  temp_length;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtsp_server_response_send                                       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Haiqing Zhao             Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_rtsp_server_ipv6_address_to_string(ULONG *ipv6_addr, CHAR *buffer, UINT buffer_length, UINT *size)
@@ -3539,12 +3305,6 @@ CHAR   *cur_pos = buffer;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtsp_server_request_process                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_rtsp_server_response_send(NX_RTSP_SERVER *rtsp_server_ptr, NX_RTSP_CLIENT *rtsp_client_ptr, NX_RTSP_CLIENT_REQUEST *rtsp_client_request_ptr)
@@ -3859,12 +3619,6 @@ NXD_ADDRESS *source_ip_address;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtsp_server_thread_entry                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_rtsp_server_request_process(NX_RTSP_SERVER *rtsp_server_ptr)
@@ -4316,12 +4070,6 @@ NX_RTSP_SERVER_METHOD_CALLBACKS method_callbacks = rtsp_server_ptr -> nx_rtsp_se
 /*                                                                        */
 /*    _nx_rtsp_server_thread_entry                                        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_rtsp_server_connect_process(NX_RTSP_SERVER *rtsp_server_ptr)
 {
@@ -4439,12 +4187,6 @@ NX_RTSP_CLIENT *client_ptr;
 /*                                                                        */
 /*    _nx_rtsp_server_thread_entry                                        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_rtsp_server_disconnect_process(NX_RTSP_SERVER *rtsp_server_ptr)
 {
@@ -4503,12 +4245,6 @@ NX_RTSP_CLIENT *rtsp_client_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_rtsp_server_thread_entry                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_rtsp_server_timeout_process(NX_RTSP_SERVER *rtsp_server_ptr)
@@ -4581,12 +4317,6 @@ NX_RTSP_CLIENT *rtsp_client_ptr;
 /*                                                                        */
 /*    NetX                                  NetX receive packet callback  */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_rtsp_server_request_present(NX_TCP_SOCKET *request_socket_ptr)
 {
@@ -4633,12 +4363,6 @@ NX_RTSP_SERVER *server_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX                                  NetX connect callback         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID  _nx_rtsp_server_connect_present(NX_TCP_SOCKET *request_socket_ptr, UINT port)
@@ -4687,12 +4411,6 @@ NX_RTSP_SERVER *server_ptr;
 /*                                                                        */
 /*    NetX                                  NetX connect callback         */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_rtsp_server_disconnect_present(NX_TCP_SOCKET *request_socket_ptr)
 {
@@ -4737,12 +4455,6 @@ NX_RTSP_SERVER *server_ptr;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    ThreadX                                                             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_rtsp_server_timeout(ULONG rtsp_server_address)
@@ -4789,12 +4501,6 @@ NX_RTSP_SERVER *rtsp_server_ptr = (NX_RTSP_SERVER *)rtsp_server_address;
 /*                                                                        */
 /*    _nx_rtsp_server_disconnect_process                                  */
 /*    _nx_rtsp_server_timeout_process                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2023     Wenhui Xie               Initial Version 6.3.0         */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nx_rtsp_server_disconnect(NX_RTSP_SERVER *rtsp_server_ptr, NX_RTSP_CLIENT *rtsp_client_ptr)

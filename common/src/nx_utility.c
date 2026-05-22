@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -65,14 +65,6 @@ static CHAR _nx_utility_base64_array[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_utility_string_length_check(CHAR *input_string, UINT *string_length, UINT max_string_length)
 {
@@ -98,7 +90,7 @@ UINT    i;
     }
 
     /* Return the string length if string_length is not NULL.
-       String_length being NULL indicates the caller needs to check for string 
+       String_length being NULL indicates the caller needs to check for string
        length within the max_string_length. */
     if (string_length)
     {
@@ -140,12 +132,6 @@ UINT    i;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2020     Yuxin Zhou               Initial Version 6.1.3         */
 /*                                                                        */
 /**************************************************************************/
 UINT  _nx_utility_string_to_uint(CHAR *input_string, UINT string_length, UINT *number)
@@ -235,15 +221,6 @@ UINT i;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  08-02-2021     Yuxin Zhou               Initial Version 6.1.8         */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            checked invalid input value,*/
-/*                                            resulting in version 6.1.9  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_utility_uint_to_string(UINT number, UINT base, CHAR *string_buffer, UINT string_buffer_size)
@@ -347,15 +324,6 @@ UINT size;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-02-2021     Yuxin Zhou               Initial Version 6.1.6         */
-/*  10-31-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved the internal logic,*/
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_utility_base64_encode(UCHAR *name, UINT name_size, UCHAR *base64name, UINT base64name_size, UINT *bytes_copied)
@@ -515,19 +483,6 @@ UINT    input_name_size = name_size;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-02-2021     Yuxin Zhou               Initial Version 6.1.6         */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            removed useless condition,  */
-/*                                            resulting in version 6.1.9  */
-/*  01-31-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the issue of reading  */
-/*                                            overflow,                   */
-/*                                            resulting in version 6.1.10 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_utility_base64_decode(UCHAR *base64name, UINT base64name_size, UCHAR *name, UINT name_size, UINT *bytes_copied)

@@ -23,7 +23,7 @@ static VOID    thread_0_entry(ULONG thread_input);
 extern VOID    test_control_return(UINT status);       
 extern VOID    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
 
-/* NS packet. 
+/* NS packet.
  * ICMPv6 type: 135.
  * ICMPv6 code: 0.
  * The length of ICMPv6 payload is 8. */

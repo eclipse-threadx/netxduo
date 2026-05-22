@@ -2,9 +2,9 @@
    a set request for an OID that specifies an IPv4 address. Then it sends a GET request
    for the same OID and compares it to what it just set it to.  It sends another SET
    and GET request for an IPv6 address and compares the IPv6 retrieved from the MIB
-   to be correct if NETX Duo is in use only.  
+   to be correct if NETX Duo is in use only.
 
-   The MIB database is defined in snmp_demo_helper.h. The SNMP browser queries are 
+   The MIB database is defined in snmp_demo_helper.h. The SNMP browser queries are
    provided in GetSetIPv4v6Address.c. */
 
 
@@ -50,7 +50,7 @@ static NX_UDP_SOCKET           snmp_manager_socket;
 #define SNMP_AGENT_ADDRESS     IP_ADDRESS(10,0,0,10)  
 
                          /* counter32, counter64 msb counter 64 lsb, timertic */
-//ULONG      test_data[] = {30541989, 30541989}; 
+//ULONG      test_data[] = {30541989, 30541989};
 #define    COUNTER32_VAL 30541989
 #define    COUNTER64_VAL 3054198999
 #define    COUNTER64_VAL0 0xD2           // part of number stored in msw
@@ -689,7 +689,7 @@ UINT    status;
 }
 
 
-/* Define the username callback routine routine. Usernames should be 
+/* Define the username callback routine routine. Usernames should be
    associated with permissions (public or private string) and what version
    of SNMP the user is configured for. The username callback should verify
    the incoming username MIB access permissions.  */

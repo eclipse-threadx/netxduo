@@ -576,7 +576,7 @@ UINT public_key_size = 2;
                                               session.nx_secure_public_cipher_metadata_size,
                                               session.nx_secure_public_auth_metadata_area,
                                               session.nx_secure_public_auth_metadata_size);
-  //  EXPECT_EQ(NX_CRYPTO_NOT_SUCCESSFUL, status);    
+  //  EXPECT_EQ(NX_CRYPTO_NOT_SUCCESSFUL, status);
 
     /* Cover line 279 */
     fake_crypto_method.nx_crypto_cleanup = fake_cleanup;

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -45,9 +45,9 @@
 #define NX_MAX_PACKET_SIZE  1536
 
 /* Define Ethernet address format.  This is prepended to the incoming IP
-   and ARP/RARP messages.  The frame beginning is 14 bytes, but for speed 
+   and ARP/RARP messages.  The frame beginning is 14 bytes, but for speed
    purposes, we are going to assume there are 16 bytes free in front of the
-   prepend pointer and that the prepend pointer is 32-bit aligned.  
+   prepend pointer and that the prepend pointer is 32-bit aligned.
 
    Byte Offset     Size            Meaning
 
@@ -357,7 +357,7 @@ UINT        old_threshold = 0;
 
     _nx_pcap_send_packet(packet_ptr);
 
-    /* Remove the Ethernet header.  In real hardware environments, this is typically 
+    /* Remove the Ethernet header.  In real hardware environments, this is typically
        done after a transmit complete interrupt.  */
     packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + NX_ETHERNET_SIZE;
 
@@ -396,7 +396,7 @@ UINT            interface_index;
     interface_index = interface_ptr -> nx_interface_index;
 #endif  
 
-    /* Process according to the driver request type in the IP control 
+    /* Process according to the driver request type in the IP control
        block.  */
     switch (driver_req_ptr -> nx_ip_driver_command)
     {
@@ -412,7 +412,7 @@ UINT            interface_index;
 
                 /* Device driver shall initialize the Ethernet Controller here. */
 
-                /* Once the Ethernet controller is initialized, the driver needs to 
+                /* Once the Ethernet controller is initialized, the driver needs to
                    configure the NetX Interface Control block, as outlined below. */
                    
 #ifdef __PRODUCT_NETXDUO__
@@ -421,7 +421,7 @@ UINT            interface_index;
                 nx_ip_interface_mtu_set(ip_ptr, interface_index, (NX_LINK_MTU - NX_ETHERNET_SIZE));
 
                 /* Set the physical address (MAC address) of this IP instance.  */
-                /* For this pcap driver, the MAC address is constructed by 
+                /* For this pcap driver, the MAC address is constructed by
                    incrementing a base lsw value, to simulate multiple nodes hanging on the
                    ethernet.  */
                 nx_ip_interface_physical_address_set(ip_ptr, interface_index, 
@@ -450,8 +450,8 @@ UINT            interface_index;
         case NX_LINK_ENABLE:
             {
 
-                /* Process driver link enable.  An Ethernet driver shall enable the 
-                   transmit and reception logic.  Once the IP stack issues the 
+                /* Process driver link enable.  An Ethernet driver shall enable the
+                   transmit and reception logic.  Once the IP stack issues the
                    LINK_ENABLE command, the stack may start transmitting IP packets. */
 
 
@@ -487,13 +487,13 @@ UINT            interface_index;
 #endif
             {
 
-                /* 
-                   The IP stack sends down a data packet for transmission. 
-                   The device driver needs to prepend a MAC header, and fill in the 
+                /*
+                   The IP stack sends down a data packet for transmission.
+                   The device driver needs to prepend a MAC header, and fill in the
                    Ethernet frame type (assuming Ethernet protocol for network transmission)
                    based on the type of packet being transmitted.
 
-                   The following sequence illustrates this process. 
+                   The following sequence illustrates this process.
                    */
 
                 /* Place the ethernet frame at the front of the packet.  */
@@ -552,7 +552,7 @@ UINT            interface_index;
 
                 /* At this point, the packet is a complete Ethernet frame, ready to be transmitted.
                    The driver shall call the actual Ethernet transmit routine and put the packet
-                   on the wire.   
+                   on the wire.
 
                    In this example, the pcap network transmit routine is called. */ 
                 _nx_pcap_network_driver_output(packet_ptr);
@@ -562,11 +562,11 @@ UINT            interface_index;
         case NX_LINK_MULTICAST_JOIN:
             {
 
-                /* The IP layer issues this command to join a multicast group.  Note that 
-                   multicast operation is required for IPv6.  
+                /* The IP layer issues this command to join a multicast group.  Note that
+                   multicast operation is required for IPv6.
 
                    On a typically Ethernet controller, the driver computes a hash value based
-                   on MAC address, and programs the hash table. 
+                   on MAC address, and programs the hash table.
 
                    It is likely the driver also needs to maintain an internal MAC address table.
                    Later if a multicast address is removed, the driver needs
@@ -601,20 +601,20 @@ UINT            interface_index;
         case NX_LINK_DEFERRED_PROCESSING:
             {
 
-                /* Driver defined deferred processing. This is typically used to defer interrupt 
-                   processing to the thread level.   
+                /* Driver defined deferred processing. This is typically used to defer interrupt
+                   processing to the thread level.
 
                    A typical use case of this command is:
                    On receiving an Ethernet frame, the RX ISR does not process the received frame,
                    but instead records such an event in its internal data structure, and issues
-                   a notification to the IP stack (the driver sends the notification to the IP 
-                   helping thread by calling "_nx_ip_driver_deferred_processing()".  When the IP stack 
-                   gets a notification of a pending driver deferred process, it calls the 
-                   driver with the NX_LINK_DEFERRED_PROCESSING command.  The driver shall complete 
-                   the pending receive process. 
+                   a notification to the IP stack (the driver sends the notification to the IP
+                   helping thread by calling "_nx_ip_driver_deferred_processing()".  When the IP stack
+                   gets a notification of a pending driver deferred process, it calls the
+                   driver with the NX_LINK_DEFERRED_PROCESSING command.  The driver shall complete
+                   the pending receive process.
                    */
 
-                /* The pcap driver doesn't require a deferred process so it breaks out of 
+                /* The pcap driver doesn't require a deferred process so it breaks out of
                    the switch case. */
 
 

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -38,19 +38,6 @@
 /*    It is assumed that nx_api.h and nx_port.h have already been         */ 
 /*    included, along with fx_api.h and fx_port.h.                        */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            fixed the issue of clearing */
-/*                                            data socket, included       */
-/*                                            necessary header file,      */
-/*                                            resulting in version 6.1.9  */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NXD_FTP_SERVER_H
@@ -166,7 +153,7 @@ extern   "C" {
 #define NX_FTP_SERVER_RETRY_SHIFT           1           /* Every retry is twice as long                        */
 #endif
 
-/* The minimum FTP Server packet size must accomodate the largest expected packet sent e.g. the LIST command: 
+/* The minimum FTP Server packet size must accomodate the largest expected packet sent e.g. the LIST command:
    The filename can be up to 256 bytes, plus file info (which has a fixed size of 52 bytes).
    Note the 256 value is the assumed max size of a filename, defined by FX_MAX_LONG_NAME_LEN.
                                                                                             .
@@ -243,7 +230,7 @@ extern   "C" {
 /* Define the size for buffer to store an IPv6 address represented in ASCII. */
 #define NX_FTP_IPV6_ADDRESS_BUFSIZE         60
 
-/* Define the FTP basic commands.  The ASCII command will be parsed and converted to the numerical 
+/* Define the FTP basic commands.  The ASCII command will be parsed and converted to the numerical
    representation shown below.  */
 
 #define NX_FTP_NOOP                         0
@@ -342,9 +329,9 @@ typedef struct NX_FTP_SERVER_STRUCT
 
 /* Application caller is present, perform API mapping.  */
 
-/* Determine if error checking is desired.  If so, map API functions 
+/* Determine if error checking is desired.  If so, map API functions
    to the appropriate error checking front-ends.  Otherwise, map API
-   functions to the core functions that actually perform the work. 
+   functions to the core functions that actually perform the work.
    Note: error checking is enabled by default.  */
 
 #ifdef NX_DISABLE_ERROR_CHECKING

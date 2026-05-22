@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -64,17 +64,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed function,           */
-/*                                            resulting in version 6.1.7  */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID *_nx_crypto_self_test_memcpy(void *dest, const void *src, size_t size)
 {
@@ -126,17 +115,6 @@ NX_CRYPTO_KEEP VOID *_nx_crypto_self_test_memcpy(void *dest, const void *src, si
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed function,           */
-/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP VOID *_nx_crypto_self_test_memset(void *dest, int value, size_t size)
@@ -192,17 +170,6 @@ NX_CRYPTO_KEEP VOID *_nx_crypto_self_test_memset(void *dest, int value, size_t s
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed function,           */
-/*                                            resulting in version 6.1.7  */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP int _nx_crypto_self_test_memcmp(const void *str1, const void *str2, size_t size)
 {
@@ -254,17 +221,6 @@ NX_CRYPTO_KEEP int _nx_crypto_self_test_memcmp(const void *str1, const void *str
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  06-02-2021     Bhupendra Naphade        Modified comment(s),          */
-/*                                            renamed function,           */
-/*                                            resulting in version 6.1.7  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP void* _nx_crypto_self_test_memmove(void *dest, const void *src, size_t size)
@@ -326,14 +282,6 @@ NX_CRYPTO_KEEP void* _nx_crypto_self_test_memmove(void *dest, const void *src, s
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_module_state_get(VOID)
 {
@@ -372,14 +320,6 @@ NX_CRYPTO_KEEP UINT _nx_crypto_module_state_get(VOID)
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_initialize(VOID)

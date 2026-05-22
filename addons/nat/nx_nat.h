@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -36,14 +36,6 @@
 /*    (NAT) component, including all data types and external references.  */
 /*    It is assumed that tx_api.h, tx_port.h, nx_api.h, and nx_port.h,    */
 /*    have already been included.                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 
@@ -133,8 +125,8 @@ extern   "C" {
 
 
 /* Set the ICMP query identifier/port for assigning to outbound ICMP/UDP/TCP packets
-   on NAT devices configured for port overloading (sharing a single global IP 
-   address). Note this number must be high enough not to exceed with the local host 
+   on NAT devices configured for port overloading (sharing a single global IP
+   address). Note this number must be high enough not to exceed with the local host
    ICMP, UDP, TCP packet query IDs/port. */            
                      
 /* Set the minimum TCP port for assigning to outbound TCP packets. */
@@ -183,7 +175,7 @@ typedef struct NX_NAT_TRANSLATION_ENTRY_STRUCT
     /*
       Local Network                                 External Network
                       |----------------|
-  <local IP,          |                |<external IP,                        <peer IP, 
+  <local IP,          |                |<external IP,                        <peer IP,
        ---------------|                |-----------------------------------------
    local port>        |                | external port>                       peer port>
                       |                |
@@ -228,7 +220,7 @@ typedef struct NX_NAT_DEVICE_STRUCT
 #ifndef     NX_NAT_SOURCE_CODE     
 
 
-/* Define the system API mappings based on the error checking 
+/* Define the system API mappings based on the error checking
    selected by the user.   */
 
 /* Determine if error checking is desired.  If so, map API functions

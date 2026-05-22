@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -1199,7 +1199,7 @@ UCHAR  *sha256_decoded_hash_64_ptr;
 UCHAR  *sha256_decoded_hash_ptr;
 
     /* The updateManifestSignature is used to ensure that the information contained within the updateManifest
-       hasn't been tampered with. 
+       hasn't been tampered with.
        https://docs.microsoft.com/en-us/azure/iot-hub-device-update/device-update-security#json-web-signature-jws  */
 
     /* JWS value format: BASE64URL(UTF8(header)) + "." + BASE64URL(UTF8(payload) + "." + BASE64URL(signature)).  */
@@ -1322,7 +1322,7 @@ UCHAR  *sha256_decoded_hash_ptr;
            "alg": "RS256",
            "kid": "ADU.200702.R"
        }
-       
+
        Payload:
        {
            "kty": "RSA",
@@ -2368,7 +2368,7 @@ NX_AZURE_IOT_ADU_AGENT_WORKFLOW *workflow = &(adu_agent_ptr -> nx_azure_iot_adu_
                 }
             }
 
-            /* File URLs. 
+            /* File URLs.
                 Note: 1. file urls property can exist or not.
                         2. file urls property value can be object.  */
             else if (nx_azure_iot_json_reader_token_is_text_equal(json_reader_ptr,
@@ -3619,7 +3619,7 @@ UINT update_id_length;
 
 /**
  * @brief Send service reported properties.
- * 
+ *
  * @param updateState state to report.
  * @param result Result to report (optional, can be NULL).
  */

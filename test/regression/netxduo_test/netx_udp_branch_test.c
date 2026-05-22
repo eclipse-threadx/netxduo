@@ -332,7 +332,7 @@ NX_IPV6_HEADER *ipv6_header_ptr;
 
     /* Test _nx_udp_socket_receive()  */
     /* Hit condition:
-    [ +  - ][ +  + ]:     if ((!socket_ptr -> nx_udp_socket_disable_checksum && (*(temp_ptr + 1) & NX_LOWER_16_MASK)) || 
+    [ +  - ][ +  + ]:     if ((!socket_ptr -> nx_udp_socket_disable_checksum && (*(temp_ptr + 1) & NX_LOWER_16_MASK)) ||
             [ +  + ]          ((*packet_ptr) -> nx_packet_ip_version == NX_IP_VERSION_V6))  */ 
     nx_udp_socket_bind(&socket_0, 1234, NX_NO_WAIT);
     /* Allocate the packet. queue one packet on receive list.  */

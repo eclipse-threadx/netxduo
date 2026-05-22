@@ -68,14 +68,14 @@ UCHAR   ifSpecific[] =              "1.3.6.1.2.1.1";                /* ifSpecifi
 #endif
 /* Define the MIB-2 "address translation" group, assuming one address translation.  */
 
-//ULONG   atIfIndex =                 1;                              /* atIfIndex:Integer                    RW */ 
+//ULONG   atIfIndex =                 1;                              /* atIfIndex:Integer                    RW */
 UCHAR   atPhysAddress[] =           {0x00,0x04,0xac,0xe3,0x1d,0xc5};/* atPhysAddress:OctetString            RW */ 
 ULONG   atNetworkAddress =          0;                              /* atNetworkAddress:NetworkAddr         RW */ 
 UCHAR   atIPv6NetworkAddress[16];                                   /* atNetworkAddress:NetworkAddr IPv6    RW */ 
 
 
 /* Define the MIB-2 "ip" group.  */
-//ULONG   ipForwarding =              0;                              /* ipForwarding:Integer                 RW */ 
+//ULONG   ipForwarding =              0;                              /* ipForwarding:Integer                 RW */
 ULONG   oid_var = 1234U;
 
 

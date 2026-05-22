@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -101,14 +101,6 @@ static UINT _nxd_mqtt_client_connect_packet_send(NXD_MQTT_CLIENT *client_ptr, UL
 /*    _nxd_mqtt_client_connect                                            */
 /*    _nxd_mqtt_client_publish                                            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_set_fixed_header(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, UCHAR control_header, UINT length, UINT wait_option)
 {
@@ -182,14 +174,6 @@ UINT   ret;
 /*    _nxd_mqtt_process_publish                                           */
 /*    _nxd_mqtt_client_message_get                                        */
 /*    _nxd_mqtt_process_sub_unsub_ack                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_read_remaining_length(NX_PACKET *packet_ptr, UINT *remaining_length, ULONG *offset_ptr)
@@ -291,26 +275,6 @@ ULONG  bytes_copied;
 /*                                                                        */
 /*    _nxd_mqtt_client_subscribe                                          */
 /*    _nxd_mqtt_client_unsubscribe                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added packet id parameter,  */
-/*                                            resulting in version 6.1.2  */
-/*  07-29-2022     Spencer McDonough        Modified comment(s),          */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2022     Bo Chen                  Modified comment(s), improved */
-/*                                            the logic of sending packet,*/
-/*                                            resulting in version 6.2.0  */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
-/*                                            internal logic,             */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_sub_unsub(NXD_MQTT_CLIENT *client_ptr, UINT op,
@@ -529,23 +493,6 @@ UCHAR               temp_data[2];
 /*    _nxd_mqtt_client_unsubscribe                                        */
 /*    _nxd_mqtt_client_send_simple_message                                */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Spencer McDonough        Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
-/*                                            mqtt over websocket,        */
-/*                                            resulting in version 6.2.0  */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
-/*                                            internal logic,             */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_packet_allocate(NXD_MQTT_CLIENT *client_ptr, NX_PACKET **packet_ptr, ULONG wait_option)
 {
@@ -563,7 +510,7 @@ UINT status = NXD_MQTT_SUCCESS;
 #ifdef NX_SECURE_ENABLE
     if (client_ptr -> nxd_mqtt_client_use_tls)
     {
-        /* Use TLS packet allocate.  The TLS packet allocate is able to count for 
+        /* Use TLS packet allocate.  The TLS packet allocate is able to count for
            TLS-related header space including crypto initial vector area. */
         status = nx_secure_tls_packet_allocate(&client_ptr -> nxd_mqtt_tls_session, client_ptr -> nxd_mqtt_client_packet_pool_ptr,
                                                packet_ptr, wait_option);
@@ -628,12 +575,6 @@ UINT status = NXD_MQTT_SUCCESS;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2022     Bo Chen                  Initial Version 6.2.0         */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_packet_send(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, UINT wait_option)
 {
@@ -694,12 +635,6 @@ UINT status = NXD_MQTT_SUCCESS;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2022     Bo Chen                  Initial Version 6.2.0         */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_packet_receive(NXD_MQTT_CLIENT *client_ptr, NX_PACKET **packet_ptr, UINT wait_option)
@@ -768,14 +703,6 @@ UINT op_code = 0;
 /*    _nxd_mqtt_thread_entry                                              */
 /*    _nxd_mqtt_client_event_process                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_tcp_establish_notify(NX_TCP_SOCKET *socket_ptr)
 {
@@ -830,14 +757,6 @@ NXD_MQTT_CLIENT *client_ptr;
 /*                                                                        */
 /*    _nxd_mqtt_thread_entry                                              */
 /*    _nxd_mqtt_client_event_process                                      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_receive_callback(NX_TCP_SOCKET *socket_ptr)
@@ -898,18 +817,6 @@ NXD_MQTT_CLIENT *client_ptr;
 /*                                                                        */
 /*    _nxd_mqtt_client_sub_unsub                                          */
 /*    _nxd_mqtt_process_publish                                           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            supported maximum transmit  */
-/*                                            queue depth,                */
-/*                                            resulting in version 6.1.8  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_copy_transmit_packet(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PACKET **new_packet_ptr,
@@ -992,18 +899,6 @@ UINT status;
 /*    _nxd_mqtt_thread_entry                                              */
 /*    _nxd_mqtt_client_event_process                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            supported maximum transmit  */
-/*                                            queue depth,                */
-/*                                            resulting in version 6.1.8  */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_release_transmit_packet(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PACKET *previous_packet_ptr)
 {
@@ -1067,14 +962,6 @@ static VOID _nxd_mqtt_release_transmit_packet(NXD_MQTT_CLIENT *client_ptr, NX_PA
 /*    _nxd_mqtt_thread_entry                                              */
 /*    _nxd_mqtt_client_event_process                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_release_receive_packet(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PACKET *previous_packet_ptr)
 {
@@ -1134,14 +1021,6 @@ static VOID _nxd_mqtt_release_receive_packet(NXD_MQTT_CLIENT *client_ptr, NX_PAC
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nxd_mqtt_packet_receive_process                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_process_connack(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, ULONG wait_option)
@@ -1275,14 +1154,6 @@ MQTT_PACKET_CONNACK *connack_packet_ptr = (MQTT_PACKET_CONNACK *)(packet_ptr -> 
 /*                                                                        */
 /*    _nxd_mqtt_process_publish                                           */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_process_publish_packet(NX_PACKET *packet_ptr, ULONG *topic_offset_ptr, USHORT *topic_length_ptr,
                                       ULONG *message_offset_ptr, ULONG *message_length_ptr)
@@ -1386,20 +1257,6 @@ ULONG  bytes_copied;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nxd_mqtt_packet_receive_process                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2022     Bo Chen                  Modified comment(s), improved */
-/*                                            the logic of sending packet,*/
-/*                                            resulting in version 6.2.0  */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
-/*                                            internal logic,             */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_process_publish(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr)
@@ -1643,21 +1500,6 @@ ULONG                         bytes_copied;
 /*                                                                        */
 /*    _nxd_mqtt_packet_receive_process                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added ack receive notify,   */
-/*                                            resulting in version 6.1    */
-/*  10-31-2022     Bo Chen                  Modified comment(s), improved */
-/*                                            the logic of sending packet,*/
-/*                                            resulting in version 6.2.0  */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
-/*                                            internal logic,             */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_process_publish_response(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr)
 {
@@ -1835,15 +1677,6 @@ USHORT                        transmit_packet_id;
 /*                                                                        */
 /*    _nxd_mqtt_packet_receive_process                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added ack receive notify,   */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_process_sub_unsub_ack(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr)
 {
@@ -1978,14 +1811,6 @@ ULONG      bytes_copied;
 /*                                                                        */
 /*    _nxd_mqtt_packet_receive_process                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_process_pingresp(NXD_MQTT_CLIENT *client_ptr)
 {
@@ -2038,14 +1863,6 @@ static VOID _nxd_mqtt_process_pingresp(NXD_MQTT_CLIENT *client_ptr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*   _nxd_mqtt_packet_receive_process                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_process_disconnect(NXD_MQTT_CLIENT *client_ptr)
@@ -2190,17 +2007,6 @@ UCHAR       fixed_header;
 /*                                                                        */
 /*    _nxd_mqtt_client_event_process                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
-/*                                            mqtt over websocket,        */
-/*                                            resulting in version 6.2.0  */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_packet_receive_process(NXD_MQTT_CLIENT *client_ptr)
 {
@@ -2289,7 +2095,7 @@ ULONG      packet_length;
             if (status == NXD_MQTT_PARTIAL_PACKET)
             {
 
-                /* We only have partial MQTT message. 
+                /* We only have partial MQTT message.
                  * Put it to waiting list for more packets. */
                 client_ptr -> nxd_mqtt_client_processing_packet = packet_ptr;
                 packet_consumed = NX_TRUE;
@@ -2453,17 +2259,6 @@ ULONG      packet_length;
 /*                                                                        */
 /*    _nxd_mqtt_client_event_process                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
-/*                                            mqtt over websocket,        */
-/*                                            resulting in version 6.2.0  */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_tcp_establish_process(NXD_MQTT_CLIENT *client_ptr)
 {
@@ -2509,6 +2304,7 @@ UINT       status;
                                              client_ptr -> nxd_mqtt_client_websocket_host, client_ptr -> nxd_mqtt_client_websocket_host_length,
                                              client_ptr -> nxd_mqtt_client_websocket_uri_path, client_ptr -> nxd_mqtt_client_websocket_uri_path_length,
                                              (UCHAR *)NXD_MQTT_OVER_WEBSOCKET_PROTOCOL, sizeof(NXD_MQTT_OVER_WEBSOCKET_PROTOCOL) - 1,
+                                             client_ptr -> nxd_mqtt_client_websocket_bearer, client_ptr -> nxd_mqtt_client_websocket_bearer_length,
                                              NX_NO_WAIT);
 
         if (status != NX_IN_PROGRESS)
@@ -2582,17 +2378,6 @@ UINT       status;
 /*                                                                        */
 /*    _nxd_mqtt_client_event_process                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
-/*                                            mqtt over websocket,        */
-/*                                            resulting in version 6.2.0  */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_tls_establish_process(NXD_MQTT_CLIENT *client_ptr)
 {
@@ -2616,6 +2401,7 @@ UINT       status;
                                                         client_ptr -> nxd_mqtt_client_websocket_host, client_ptr -> nxd_mqtt_client_websocket_host_length,
                                                         client_ptr -> nxd_mqtt_client_websocket_uri_path, client_ptr -> nxd_mqtt_client_websocket_uri_path_length,
                                                         (UCHAR *)NXD_MQTT_OVER_WEBSOCKET_PROTOCOL, sizeof(NXD_MQTT_OVER_WEBSOCKET_PROTOCOL) - 1,
+                                                        client_ptr -> nxd_mqtt_client_websocket_bearer, client_ptr -> nxd_mqtt_client_websocket_bearer_length,
                                                         NX_NO_WAIT);
 
             if (status == NX_IN_PROGRESS)
@@ -2691,14 +2477,6 @@ UINT       status;
 /*    _nxd_mqtt_client_connect                                            */
 /*    _nxd_mqtt_client_publish                                            */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_append_message(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, CHAR *message, UINT length, ULONG wait_option)
 {
@@ -2762,17 +2540,6 @@ UCHAR len[2];
 /*                                                                        */
 /*    _nxd_mqtt_client_connect                                            */
 /*    _nxd_mqtt_process_disconnect                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
-/*                                            mqtt over websocket,        */
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 VOID _nxd_mqtt_client_connection_end(NXD_MQTT_CLIENT *client_ptr, ULONG wait_option)
@@ -2850,14 +2617,6 @@ static UINT _nxd_mqtt_send_simple_message(NXD_MQTT_CLIENT *client_ptr, UCHAR hea
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    TCP socket disconnect callback                                      */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_periodic_timer_entry(ULONG client)
@@ -2939,15 +2698,6 @@ NXD_MQTT_CLIENT *client_ptr = (NXD_MQTT_CLIENT *)client;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*   _nxd_mqtt_client_create                                              */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected mqtt client state,*/
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_client_event_process(VOID *mqtt_client, ULONG common_events, ULONG module_own_events)
@@ -3085,14 +2835,6 @@ NXD_MQTT_CLIENT *client_ptr = (NXD_MQTT_CLIENT *)mqtt_client;
 /*                                                                        */
 /*   _nxd_mqtt_client_create                                              */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nxd_mqtt_thread_entry(ULONG mqtt_client)
 {
@@ -3153,14 +2895,6 @@ ULONG            events;
 /*                                                                        */
 /*    TCP socket disconnect callback                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _mqtt_client_disconnect_callback(NX_TCP_SOCKET *socket_ptr)
 {
@@ -3219,15 +2953,6 @@ NXD_MQTT_CLIENT *client_ptr = (NXD_MQTT_CLIENT *)(socket_ptr -> nx_tcp_socket_re
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected mqtt client state,*/
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_create(NXD_MQTT_CLIENT *client_ptr, CHAR *client_name,
@@ -3348,18 +3073,6 @@ UINT    status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected mqtt client state,*/
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Spencer McDonough        Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_client_create_internal(NXD_MQTT_CLIENT *client_ptr, CHAR *client_name,
@@ -3489,14 +3202,6 @@ UINT                status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_login_set(NXD_MQTT_CLIENT *client_ptr,
                                 CHAR *username, UINT username_length, CHAR *password, UINT password_length)
@@ -3565,14 +3270,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_will_message_set(NXD_MQTT_CLIENT *client_ptr,
@@ -3655,14 +3352,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_will_message_set(NXD_MQTT_CLIENT *client_ptr,
                                         const UCHAR *will_topic, UINT will_topic_length, const UCHAR *will_message,
@@ -3733,14 +3422,6 @@ UINT _nxde_mqtt_client_will_message_set(NXD_MQTT_CLIENT *client_ptr,
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_login_set(NXD_MQTT_CLIENT *client_ptr,
                                  CHAR *username, UINT username_length, CHAR *password, UINT password_length)
@@ -3799,17 +3480,6 @@ UINT _nxde_mqtt_client_login_set(NXD_MQTT_CLIENT *client_ptr,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2022     Bo Chen                  Modified comment(s), improved */
-/*                                            the logic of sending packet,*/
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_client_retransmit_message(NXD_MQTT_CLIENT *client_ptr, ULONG wait_option)
@@ -3928,29 +3598,6 @@ UCHAR               fixed_header;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed return value when it  */
-/*                                            is set in CONNACK, corrected*/
-/*                                            mqtt client state,          */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected the logic for     */
-/*                                            non-blocking mode,          */
-/*                                            resulting in version 6.1.8  */
-/*  07-29-2022     Spencer McDonough        Modified comment(s), and      */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
-/*                                            mqtt over websocket,        */
-/*                                            resulting in version 6.2.0  */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_connect(NXD_MQTT_CLIENT *client_ptr, NXD_ADDRESS *server_ip, UINT server_port,
@@ -4156,6 +3803,7 @@ UINT                 old_priority;
                                                         client_ptr -> nxd_mqtt_client_websocket_host, client_ptr -> nxd_mqtt_client_websocket_host_length,
                                                         client_ptr -> nxd_mqtt_client_websocket_uri_path, client_ptr -> nxd_mqtt_client_websocket_uri_path_length,
                                                         (UCHAR *)NXD_MQTT_OVER_WEBSOCKET_PROTOCOL, sizeof(NXD_MQTT_OVER_WEBSOCKET_PROTOCOL) - 1,
+                                                        client_ptr -> nxd_mqtt_client_websocket_bearer, client_ptr -> nxd_mqtt_client_websocket_bearer_length,
                                                         wait_option);
         }
         else
@@ -4165,6 +3813,7 @@ UINT                 old_priority;
                                                  client_ptr -> nxd_mqtt_client_websocket_host, client_ptr -> nxd_mqtt_client_websocket_host_length,
                                                  client_ptr -> nxd_mqtt_client_websocket_uri_path, client_ptr -> nxd_mqtt_client_websocket_uri_path_length,
                                                  (UCHAR *)NXD_MQTT_OVER_WEBSOCKET_PROTOCOL, sizeof(NXD_MQTT_OVER_WEBSOCKET_PROTOCOL) - 1,
+                                                 client_ptr -> nxd_mqtt_client_websocket_bearer, client_ptr -> nxd_mqtt_client_websocket_bearer_length,
                                                  wait_option);
         }
 
@@ -4271,23 +3920,6 @@ UINT                 old_priority;
 /*    _nxd_mqtt_client_connect                                            */
 /*    _nxd_mqtt_tcp_establish_process                                     */
 /*    _nxd_mqtt_tls_establish_process                                     */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Spencer McDonough        Modified comment(s),          */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2022     Bo Chen                  Modified comment(s), improved */
-/*                                            the logic of sending packet,*/
-/*                                            resulting in version 6.2.0  */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
-/*                                            internal logic,             */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_connect_packet_send(NXD_MQTT_CLIENT *client_ptr, ULONG wait_option)
@@ -4523,14 +4155,6 @@ UINT                 keepalive = (client_ptr -> nxd_mqtt_keepalive/NX_IP_PERIODI
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE
 UINT _nxd_mqtt_client_secure_connect(NXD_MQTT_CLIENT *client_ptr, NXD_ADDRESS *server_ip, UINT server_port,
@@ -4595,17 +4219,6 @@ UINT ret;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2022     Bo Chen                  Modified comment(s), supported*/
-/*                                            mqtt over websocket,        */
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_delete(NXD_MQTT_CLIENT *client_ptr)
@@ -4687,21 +4300,6 @@ UINT _nxd_mqtt_client_delete(NXD_MQTT_CLIENT *client_ptr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nxd_mqtt_client_publish                                            */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s),          */
-/*                                            supported maximum transmit  */
-/*                                            queue depth,                */
-/*                                            resulting in version 6.1.8  */
-/*  10-31-2022     Bo Chen                  Modified comment(s), improved */
-/*                                            the logic of sending packet,*/
-/*                                            resulting in version 6.2.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_publish_packet_send(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr,
@@ -4823,20 +4421,6 @@ UINT       ret = NXD_MQTT_SUCCESS;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Spencer McDonough        Modified comment(s),          */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
-/*                                            internal logic,             */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_publish(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UINT topic_name_length,
@@ -4965,7 +4549,7 @@ UINT       ret = NXD_MQTT_SUCCESS;
     {
         
         /* Use nx_packet_data_append to move user-supplied message data into the packet.
-           nx_packet_data_append uses chained packet if the additional storage space is 
+           nx_packet_data_append uses chained packet if the additional storage space is
            needed. */
         ret = nx_packet_data_append(packet_ptr, message, message_length, 
                                        client_ptr -> nxd_mqtt_client_packet_pool_ptr, wait_option);
@@ -5030,17 +4614,6 @@ UINT       ret = NXD_MQTT_SUCCESS;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added packet id parameter,  */
-/*                                            resulting in version 6.1.2  */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_subscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UINT topic_name_length, UINT QoS)
 {
@@ -5092,17 +4665,6 @@ UINT _nxd_mqtt_client_subscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, U
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  11-09-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            added packet id parameter,  */
-/*                                            resulting in version 6.1.2  */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_unsubscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UINT topic_name_length)
 {
@@ -5148,23 +4710,6 @@ UINT _nxd_mqtt_client_unsubscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name,
 /*                                                                        */
 /*    _nxd_mqtt_client_ping                                               */
 /*    _nxd_mqtt_client_disconnect                                         */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  07-29-2022     Spencer McDonough        Modified comment(s),          */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2022     Bo Chen                  Modified comment(s), improved */
-/*                                            the logic of sending packet,*/
-/*                                            resulting in version 6.2.0  */
-/*  10-31-2023     Haiqing Zhao             Modified comment(s), improved */
-/*                                            internal logic,             */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nxd_mqtt_send_simple_message(NXD_MQTT_CLIENT *client_ptr, UCHAR header_value)
@@ -5268,14 +4813,6 @@ UCHAR     *byte;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_disconnect(NXD_MQTT_CLIENT *client_ptr)
 {
@@ -5345,14 +4882,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_receive_notify_set(NXD_MQTT_CLIENT *client_ptr,
                                          VOID (*receive_notify)(NXD_MQTT_CLIENT *client_ptr, UINT message_count))
@@ -5412,15 +4941,6 @@ UINT _nxd_mqtt_client_receive_notify_set(NXD_MQTT_CLIENT *client_ptr,
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed uninitialized value,  */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_message_get(NXD_MQTT_CLIENT *client_ptr, UCHAR *topic_buffer, UINT topic_buffer_size, UINT *actual_topic_length,
@@ -5519,14 +5039,6 @@ ULONG               message_length;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_create(NXD_MQTT_CLIENT *client_ptr, CHAR *client_name, CHAR *client_id, UINT client_id_length,
                               NX_IP *ip_ptr, NX_PACKET_POOL *pool_ptr,
@@ -5586,15 +5098,6 @@ UINT _nxde_mqtt_client_create(NXD_MQTT_CLIENT *client_ptr, CHAR *client_name, CH
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected mqtt client state,*/
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_connect(NXD_MQTT_CLIENT *client_ptr, NXD_ADDRESS *server_ip, UINT server_port,
@@ -5670,15 +5173,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected mqtt client state,*/
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 #ifdef NX_SECURE_ENABLE
 
@@ -5745,14 +5239,6 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_delete(NXD_MQTT_CLIENT *client_ptr)
 {
@@ -5810,14 +5296,6 @@ UINT status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_publish(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UINT topic_name_length,
@@ -5891,14 +5369,6 @@ UINT _nxde_mqtt_client_publish(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UI
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_subscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UINT topic_name_length, UINT QoS)
 {
@@ -5962,14 +5432,6 @@ UINT _nxde_mqtt_client_subscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, 
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_unsubscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UINT topic_name_length)
 {
@@ -6020,14 +5482,6 @@ UINT _nxde_mqtt_client_unsubscribe(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_disconnect(NXD_MQTT_CLIENT *client_ptr)
@@ -6083,14 +5537,6 @@ UINT _nxde_mqtt_client_disconnect(NXD_MQTT_CLIENT *client_ptr)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_message_get(NXD_MQTT_CLIENT *client_ptr, UCHAR *topic_buffer, UINT topic_buffer_size, UINT *actual_topic_length,
@@ -6153,14 +5599,6 @@ UINT _nxde_mqtt_client_message_get(NXD_MQTT_CLIENT *client_ptr, UCHAR *topic_buf
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_receive_notify_set(NXD_MQTT_CLIENT *client_ptr,
                                           VOID (*receive_notify)(NXD_MQTT_CLIENT *client_ptr, UINT message_count))
@@ -6215,14 +5653,6 @@ UINT _nxde_mqtt_client_receive_notify_set(NXD_MQTT_CLIENT *client_ptr,
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_disconnect_notify_set(NXD_MQTT_CLIENT *client_ptr, VOID (*disconnect_notify)(NXD_MQTT_CLIENT *))
 {
@@ -6266,14 +5696,6 @@ UINT _nxd_mqtt_client_disconnect_notify_set(NXD_MQTT_CLIENT *client_ptr, VOID (*
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxde_mqtt_client_disconnect_notify_set(NXD_MQTT_CLIENT *client_ptr, VOID (*disconnect_notify)(NXD_MQTT_CLIENT *))
@@ -6326,15 +5748,6 @@ UINT _nxde_mqtt_client_disconnect_notify_set(NXD_MQTT_CLIENT *client_ptr, VOID (
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            corrected mqtt client state,*/
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nxd_mqtt_client_cloud_create(NXD_MQTT_CLIENT *client_ptr, CHAR *client_name, CHAR *client_id, UINT client_id_length,
@@ -6425,12 +5838,6 @@ UINT    status;
 /*                                                                        */
 /*    _nxd_mqtt_client_event_process                                      */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2022     Yuxin Zhou               Initial Version 6.2.0         */
-/*                                                                        */
 /**************************************************************************/
 VOID _nxd_mqtt_client_websocket_connection_status_callback(NX_WEBSOCKET_CLIENT *websocket_client_ptr, VOID *context, UINT status)
 {
@@ -6495,14 +5902,8 @@ NXD_MQTT_CLIENT *client_ptr = (NXD_MQTT_CLIENT *)context;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2022     Yuxin Zhou               Initial Version 6.2.0         */
-/*                                                                        */
 /**************************************************************************/
-UINT _nxd_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length)
+UINT _nxd_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length, UCHAR *bearer, UINT bearer_length)
 {
 UINT status;
 
@@ -6519,6 +5920,8 @@ UINT status;
     client_ptr -> nxd_mqtt_client_websocket_host_length = host_length;
     client_ptr -> nxd_mqtt_client_websocket_uri_path = uri_path;
     client_ptr -> nxd_mqtt_client_websocket_uri_path_length = uri_path_length;
+    client_ptr -> nxd_mqtt_client_websocket_bearer = bearer;
+    client_ptr -> nxd_mqtt_client_websocket_bearer_length = bearer_length;
 
     /* Create WebSocket.  */
     status = nx_websocket_client_create(&client_ptr -> nxd_mqtt_client_websocket, (UCHAR *)"",
@@ -6573,14 +5976,8 @@ UINT status;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2022     Yuxin Zhou               Initial Version 6.2.0         */
-/*                                                                        */
 /**************************************************************************/
-UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length)
+UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length, UCHAR *bearer, UINT bearer_length)
 {
 
     /* Validate the parameters.  */
@@ -6590,6 +5987,6 @@ UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, U
         return(NX_PTR_ERROR);
     }
 
-    return(_nxd_mqtt_client_websocket_set(client_ptr, host, host_length, uri_path, uri_path_length));
+    return(_nxd_mqtt_client_websocket_set(client_ptr, host, host_length, uri_path, uri_path_length, bearer, bearer_length));
 }
 #endif /* NXD_MQTT_OVER_WEBSOCKET */

@@ -50,7 +50,7 @@ static void    thread_server_entry(ULONG thread_input);
 static UINT    send_data(CHAR *data);
 
 
-/* Define server login/logout functions.  These are stubs for functions that would 
+/* Define server login/logout functions.  These are stubs for functions that would
    validate a client login request.   */
 static UINT    server_login(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, ULONG client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info);
 static UINT    server_logout(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, ULONG client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info);

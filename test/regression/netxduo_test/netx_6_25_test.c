@@ -2,7 +2,7 @@
 
 /* Procedure
    1. Connection.
-   2. Server calls disconnect command and sends a FIN packet.  
+   2. Server calls disconnect command and sends a FIN packet.
    3. Client replies an ACK packet and calls disconnect command.
    4. Client calls receive command.
    5. Check the state of client is LAST_ACK and TCP return NX_NOT_CONNECTED.  */

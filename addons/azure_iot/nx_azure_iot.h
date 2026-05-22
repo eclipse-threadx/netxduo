@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -69,7 +69,7 @@ extern   "C" {
 * message, at-most one format specifier can be specifed at the end of message.
 * Currently only two format specifier are supported:
 *   - %d for integer
-*   - %s for string, where first argument is length and second is pointer to string    
+*   - %s for string, where first argument is length and second is pointer to string
 */
 UINT nx_azure_iot_log(UCHAR *type_ptr, UINT type_len, UCHAR *msg_ptr, UINT msg_len, ...);
 
@@ -231,7 +231,7 @@ typedef struct NX_AZURE_IOT_THREAD_STRUCT
  *          manage activities related to Azure IoT services. Only one NX_AZURE_IOT instance
  *          is needed to manage instances for Azure IoT hub, IoT Central, and Device Provisioning
  *          Services (DPS).
- * 
+ *
  * @param[in] nx_azure_iot_ptr A pointer to a #NX_AZURE_IOT
  * @param[in] name_ptr A pointer to a NULL-terminated string indicating the name of the Azure IoT instance.
  * @param[in] ip_ptr A pointer to a `NX_IP`, which is the IP stack used to connect to Azure IoT Services.

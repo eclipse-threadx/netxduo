@@ -3,15 +3,15 @@
  *
  *       Filename:  main.c
  *
- *    Description:  
+ *    Description:
  *
  *        Version:  1.0
  *        Created:  04/29/2020 04:45:06 PM
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  YOUR NAME (), 
- *        Company:  
+ *         Author:  YOUR NAME (),
+ *        Company:
  *
  * =====================================================================================
  */
@@ -62,7 +62,7 @@ int main()
    printf(" sizeof(NX_CRYPTO_MD5),                             %d\n",      sizeof(NX_CRYPTO_MD5));      
    printf(" sizeof(NX_CRYPTO_SHA1),                            %d\n",      sizeof(NX_CRYPTO_SHA1));          
    printf(" sizeof(NX_CRYPTO_SHA256),                          %d\n",      sizeof(NX_CRYPTO_SHA256));        
- //  printf(" sizeof(NX_CRYPTO_SHA384),                          %d\n",      sizeof(NX_CRYPTO_SHA384));       
+ //  printf(" sizeof(NX_CRYPTO_SHA384),                          %d\n",      sizeof(NX_CRYPTO_SHA384));
    printf(" sizeof(NX_CRYPTO_SHA512),                          %d\n",      sizeof(NX_CRYPTO_SHA512));       
    printf(" sizeof(NX_CRYPTO_TLS_PRF_1),                       %d\n",      sizeof(NX_CRYPTO_TLS_PRF_1));
    printf(" sizeof(NX_CRYPTO_TLS_PRF_SHA256),                  %d\n",      sizeof(NX_CRYPTO_TLS_PRF_SHA256));

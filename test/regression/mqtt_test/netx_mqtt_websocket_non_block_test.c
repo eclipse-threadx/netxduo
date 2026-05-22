@@ -384,7 +384,7 @@ UCHAR   digest[TEST_CONNECT_DIGEST_SIZE];
     while (((buffer_ptr + 1) < packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != 0))
     {
 
-        /* Check for the <cr,lf,cr,lf> token.  This signals a blank line, which also 
+        /* Check for the <cr,lf,cr,lf> token.  This signals a blank line, which also
            specifies the start of the content.  */
         if ((*buffer_ptr == '\r') &&
             (*(buffer_ptr + 1) ==  '\n'))

@@ -1,6 +1,6 @@
-/* This NetX test is a simple contact between agent and browser with no security.  Note that 
-   NX_SNMP_FUNCTION_TESTING must be defined in nxd_snmp.c or else timer tick data (boot time, SysTimerTick, will not match the 
-   'pre-recorded' data that the NetX SNMP Agent responses re compared with, and the test will fail. 
+/* This NetX test is a simple contact between agent and browser with no security.  Note that
+   NX_SNMP_FUNCTION_TESTING must be defined in nxd_snmp.c or else timer tick data (boot time, SysTimerTick, will not match the
+   'pre-recorded' data that the NetX SNMP Agent responses re compared with, and the test will fail.
    */
 
 #include   "tx_api.h"
@@ -69,7 +69,7 @@ static NOSEC_MIB_ENTRY   mib2_mib[] = {
     {NX_NULL, NX_NULL, NX_NULL, NX_NULL}
 };
 
-/* To show byte by byte comparison of pre-recorded response with SNMP agent, define this option.  
+/* To show byte by byte comparison of pre-recorded response with SNMP agent, define this option.
 #define VERBOSE
 */
 
@@ -449,7 +449,7 @@ UINT   j;
         printf("%d. 0%x  0%x ", j, *(agent_packet -> nx_packet_prepend_ptr + j), work_ptr[j]);
 #endif
 
-        /* It is unlikely this logic is needed as long as NX_SNMP_FUNCTION_TESTING is defined, 
+        /* It is unlikely this logic is needed as long as NX_SNMP_FUNCTION_TESTING is defined,
            and the sysUpTime is always updated to 1. */
 
         if (*(agent_packet -> nx_packet_prepend_ptr + j) != work_ptr[j])
@@ -780,7 +780,7 @@ UINT    status;
 /* Create an error code if matching user not found. */
 #define USER_NOT_FOUND 1
 
-/* Define the username callback routine routine. Usernames should be 
+/* Define the username callback routine routine. Usernames should be
    associated with permissions (public or private string) and what version
    of SNMP the user is configured for. The username callback should verify
    the incoming username MIB access permissions.  */

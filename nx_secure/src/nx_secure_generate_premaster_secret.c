@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -68,16 +68,6 @@
 /*    _nx_secure_tls_generate_premaster_secret                            */
 /*                                          Generate pre-master secret    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-31-2022     Yanwu Cai                Initial Version 6.2.0         */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            x509 is disabled,           */
-/*                                            resulting in version 6.2.1  */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_generate_premaster_secret(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite, USHORT protocol_version, NX_SECURE_TLS_KEY_MATERIAL *tls_key_material,
                                           NX_SECURE_TLS_CREDENTIALS *tls_credentials, UINT session_type, USHORT *received_remote_credentials,
@@ -98,6 +88,10 @@ const NX_CRYPTO_METHOD    *ecdh_method;
 NX_SECURE_EC_PUBLIC_KEY   *ec_pubkey;
 VOID                      *handler = NX_NULL;
 NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
+#ifdef NX_SECURE_ENABLE_PSK_CIPHERSUITES
+UCHAR					   pre_master_secret_cpy[NX_SECURE_TLS_PREMASTER_SIZE];
+UINT					   pre_master_secret_size;
+#endif
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 #if !defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) || defined(NX_SECURE_DISABLE_X509)
@@ -120,7 +114,59 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 #if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
     if (ciphersuite -> nx_secure_tls_public_cipher -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_ECDHE)
     {
+    #ifdef NX_SECURE_ENABLE_PSK_CIPHERSUITES    
+    	if(ciphersuite->nx_secure_tls_public_auth->nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_PSK)
+    	{
+    		/* From RFC 5489:
+				The premaster secret is formed as follows.  First, perform the ECDH
+			    computation as described in Section 5.10 of [RFC4492].  Let Z be the
+			    octet string produced by this computation.  Next, concatenate a
+			    uint16 containing the length of Z (in octets), Z itself, a uint16
+			    containing the length of the PSK (in octets), and the PSK itself.
+    		*/
 
+    		/*  Client has to search for the PSK based on the identity hint. */
+    		status = _nx_secure_tls_psk_find(tls_credentials, &psk_data, &psk_length, tls_credentials -> nx_secure_tls_remote_psk_id,
+    				tls_credentials -> nx_secure_tls_remote_psk_id_size, NX_NULL);
+
+    		if (status != NX_SUCCESS)
+    		{
+    			return(status);
+    		}
+
+    		pre_master_secret_size = tls_key_material->nx_secure_tls_pre_master_secret_size;
+
+    		if ((2 + pre_master_secret_size + 2 + psk_length) > sizeof(tls_key_material -> nx_secure_tls_pre_master_secret))
+    		{
+
+    			/* No more PSK space. */
+    			return(NX_SECURE_TLS_NO_MORE_PSK_SPACE);
+    		}
+
+    		index = 0;
+
+    		NX_SECURE_MEMCPY(pre_master_secret_cpy, tls_key_material->nx_secure_tls_pre_master_secret, pre_master_secret_size);
+
+    		tls_key_material->nx_secure_tls_pre_master_secret[index++] = (pre_master_secret_size >> 8) & 0xFF;
+    		tls_key_material->nx_secure_tls_pre_master_secret[index++] = pre_master_secret_size & 0xFF;
+    		NX_SECURE_MEMCPY(tls_key_material->nx_secure_tls_pre_master_secret + index, pre_master_secret_cpy, pre_master_secret_size);
+
+    		index += pre_master_secret_size;
+
+    		tls_key_material->nx_secure_tls_pre_master_secret[index++] = (psk_length >> 8) & 0xFF;
+    		tls_key_material->nx_secure_tls_pre_master_secret[index++] = psk_length & 0xFF;
+    		NX_SECURE_MEMCPY(tls_key_material->nx_secure_tls_pre_master_secret + index, psk_data, psk_length);
+
+    		tls_key_material->nx_secure_tls_pre_master_secret_size += (4 + psk_length);
+
+    		*received_remote_credentials = NX_TRUE;
+
+    		/* Clear out the Pre-Master Secret (we don't need it anymore and keeping it in memory is dangerous). */
+#ifdef NX_SECURE_KEY_CLEAR
+    		NX_SECURE_MEMSET(pre_master_secret_cpy, 0x0, sizeof(pre_master_secret_cpy));
+#endif /* NX_SECURE_KEY_CLEAR  */
+    	}
+    #endif
         return(NX_SECURE_TLS_SUCCESS);
     }
     else if (ciphersuite -> nx_secure_tls_public_cipher -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_ECDH)

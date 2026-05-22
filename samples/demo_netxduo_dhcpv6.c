@@ -1,4 +1,4 @@
-/* This is a small demo of the NetX Duo DHCPv6 Client and Server for the high-performance 
+/* This is a small demo of the NetX Duo DHCPv6 Client and Server for the high-performance
    NetX Duo stack.  */
 
 #include    <stdio.h>
@@ -194,7 +194,7 @@ NX_PACKET   *my_packet;
     if (status)
         return;
 
-    /* Create a Link Layer Plus Time DUID for the DHCPv6 Client. Set time ID field 
+    /* Create a Link Layer Plus Time DUID for the DHCPv6 Client. Set time ID field
        to NULL; the DHCPv6 Client API will supply one. */
     status = nx_dhcpv6_create_client_duid(&dhcp_client, NX_DHCPV6_DUID_TYPE_LINK_TIME, 
                                           NX_DHCPV6_CLIENT_HARDWARE_TYPE_ETHERNET, 0);
@@ -203,11 +203,11 @@ NX_PACKET   *my_packet;
     if (status)
         return;
 
-    /* Create the DHCPv6 client's Identity Association (IA-NA) now. 
+    /* Create the DHCPv6 client's Identity Association (IA-NA) now.
 
        Note that if this host had already been assigned in IPv6 lease, it
        would have to use the assigned T1 and T2 values in loading the DHCPv6
-       client with an IANA block. 
+       client with an IANA block.
     */
     status = nx_dhcpv6_create_client_iana(&dhcp_client, DHCPV6_IANA_ID, DHCPV6_T1,  DHCPV6_T2); 
 
@@ -227,8 +227,8 @@ NX_PACKET   *my_packet;
     
 #ifdef  GET_ONE_SPECIFIC_ADDRESS
 
-    /* Create an IA address option. 
-       The client includs IA options for any IAs to which it wants the server to assign addresses. 
+    /* Create an IA address option.
+       The client includs IA options for any IAs to which it wants the server to assign addresses.
     */
     ia_ipv6_address.nxd_ip_version = NX_IP_VERSION_V6 ;
     ia_ipv6_address.nxd_ip_address.v6[0] = 0x20010db8;
@@ -258,7 +258,7 @@ NX_PACKET   *my_packet;
 
     /* Waiting for get the IPv6 address and do the duplicate address detection. */
     /*
-        Note, if the host detect another host withe the same address, the DHCPv6 Client can automatically 
+        Note, if the host detect another host withe the same address, the DHCPv6 Client can automatically
         declient the address. At time T1 for an IPv6 address, the DHCPv6 Client can automatically renew the address.
         At time T2 for an IPv6 address, the DHCPv6 Client can automatically rebind the address.
         At time valid lifetime for an IPv6 address, the DHCPv6 Client can automatically delete the IPv6 address.
@@ -287,7 +287,7 @@ NX_PACKET   *my_packet;
     if (status)
         return;
 
-    /* Get the IPv6 address.        
+    /* Get the IPv6 address.
        Note, This API only applies to one IA. */
     status = nx_dhcpv6_get_IP_address(&dhcp_client, &ipv6_address);
 
@@ -295,7 +295,7 @@ NX_PACKET   *my_packet;
     if (status)
         return;
 
-    /* Get IP address lease time. 
+    /* Get IP address lease time.
        Note, This API only applies to one IA. */
     status = nx_dhcpv6_get_lease_time_data(&dhcp_client, &T1, &T2, &preferred_lifetime, &valid_lifetime);
 
@@ -322,7 +322,7 @@ NX_PACKET   *my_packet;
     if (status)
         return;
 
-    /* If we want to release the address, we can send release message to 
+    /* If we want to release the address, we can send release message to
        the server we are releasing the assigned address.  */
     status = nx_dhcpv6_request_release(&dhcp_client);
 
@@ -387,7 +387,7 @@ UINT        addresses_added;
         return;
 
     /* Note this example assumes a single global IP address on the primary interface.  If otherwise
-       the host should call the service to set the network interface and global IP address index. 
+       the host should call the service to set the network interface and global IP address index.
 
         UINT _nx_dhcpv6_server_interface_set(NX_DHCPV6_SERVER *dhcpv6_server_ptr, UINT interface_index, UINT address_index)
     */
@@ -408,7 +408,7 @@ UINT        addresses_added;
     if (status)
         return;
 
-     /* Note: For DUID types that do not require time, the 'duid_time' input can be left at zero. 
+     /* Note: For DUID types that do not require time, the 'duid_time' input can be left at zero.
         The DUID_TYPE and HW_TYPE are configurable options that are user defined in nx_dhcpv6_server.h.  */
 
     /* Set the DUID time as the start of the millenium. */

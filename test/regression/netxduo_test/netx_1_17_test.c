@@ -2,7 +2,7 @@
 
 /* Procedure
    1. Create a client socket.
-   2. Check the state of client is CLOSED and call connect command.  
+   2. Check the state of client is CLOSED and call connect command.
    3. Check the packet is a SYN one.  */
 
 #include   "tx_api.h"

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -79,17 +79,6 @@ static INT _nx_secure_x509_distinguished_name_field_compare(const UCHAR *field1,
 /*    _nx_secure_x509_crl_revocation_check  Check revocation in crl       */
 /*    _nx_secure_x509_remote_endpoint_certificate_get                     */
 /*                                          Get remote host certificate   */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            removed dependency on TLS,  */
-/*                                            resulting in version 6.1.6  */
 /*                                                                        */
 /**************************************************************************/
 INT _nx_secure_x509_distinguished_name_compare(NX_SECURE_X509_DISTINGUISHED_NAME *name,
@@ -264,14 +253,6 @@ INT status = 0;
 /*                                                                        */
 /*    _nx_secure_x509_distinguished_name_compare                          */
 /*                                          Compare distinguished name    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static INT _nx_secure_x509_distinguished_name_field_compare(const UCHAR *field1, const UINT length1,

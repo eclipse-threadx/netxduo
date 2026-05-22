@@ -1,10 +1,10 @@
 /* 10.24 TCP, in CLOSE-WAIT, CLOSING or LAST-ACK state, MUST not change state after receiving a FIN.  */
 /*This is 10.24_01 in CLOSE-WAIT state*/
 /*  Procedure
-    1.Connection successfully  
+    1.Connection successfully
     2.Disconnect the Server socket.
     3.Drop the ACK packet sent form the Client to the Sever.
-    4.The Server will retransmit the FIN packet. 
+    4.The Server will retransmit the FIN packet.
     5.Check whether the state of the client socket has been changed. */
 
 #include   "tx_api.h"

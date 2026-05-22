@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -68,16 +68,16 @@ CHAR       driver_data_buffer[3014];
 ULONG      driver_data_length;
 
 /* Define Ethernet address format.  This is prepended to the incoming IP
-   and ARP/RARP messages.  The frame beginning is 14 bytes, but for speed 
+   and ARP/RARP messages.  The frame beginning is 14 bytes, but for speed
    purposes, we are going to assume there are 16 bytes free in front of the
-   prepend pointer and that the prepend pointer is 32-bit aligned.  
+   prepend pointer and that the prepend pointer is 32-bit aligned.
 
     Byte Offset     Size            Meaning
 
         0           6           Destination Ethernet Address
         6           6           Source Ethernet Address
         12          2           Ethernet Frame Type, where:
-                                    
+
                                         0x0800 -> IP Datagram
                                         0x0806 -> ARP Request/Reply
                                         0x0835 -> RARP request reply
@@ -114,10 +114,10 @@ typedef struct MAC_ADDRESS_STRUCT
 
 
 /* Define an application-specific data structure that holds internal
-   data (such as the state information) of a device driver.  
+   data (such as the state information) of a device driver.
 
-   The example below applies to the simulated RAM driver.  
-   User shall replace its content with information related to 
+   The example below applies to the simulated RAM driver.
+   User shall replace its content with information related to
    the actual driver being used. */
 typedef struct _nx_ram_network_driver_instance_type
 {
@@ -131,7 +131,7 @@ typedef struct _nx_ram_network_driver_instance_type
 } _nx_ram_network_driver_instance_type;
 
 /* In this example, there are four instances of the simulated RAM driver.
-   Therefore an array of four driver instances are created to keep track of 
+   Therefore an array of four driver instances are created to keep track of
    the interface information of each driver. */
 static _nx_ram_network_driver_instance_type nx_ram_driver[NX_MAX_RAM_INTERFACES];
 
@@ -215,12 +215,6 @@ UINT write_pcap_file(NX_PACKET *packet_ptr);
 /*                                                                        */ 
 /*    Application                                                         */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */ 
-/*                                                                        */ 
-/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */
-/*                                                                        */ 
 /**************************************************************************/ 
 UINT _nx_ram_network_driver_set_pool(NX_PACKET_POOL *pool_ptr)
 {
@@ -258,12 +252,6 @@ UINT _nx_ram_network_driver_set_pool(NX_PACKET_POOL *pool_ptr)
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*    Application                                                         */
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */ 
-/*                                                                        */ 
-/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */
 /*                                                                        */ 
 /**************************************************************************/ 
 void _nx_ram_network_driver_reset(void)
@@ -315,12 +303,6 @@ void _nx_ram_network_driver_reset(void)
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */ 
-/*                                                                        */ 
-/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_delay_entry(ULONG timer_input)
@@ -376,12 +358,6 @@ NX_IP_DRIVER *driver_req;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */ 
-/*                                                                        */ 
-/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */ 
-/*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_timer_clean(VOID)
 {    
@@ -431,12 +407,6 @@ VOID _nx_ram_network_driver_timer_clean(VOID)
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*    NetX IP processing                                                  */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */ 
-/*                                                                        */ 
-/*  12-31-2023       Wenhui Xie             Initial Version 6.4.0         */
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID  _nx_ram_network_driver_internal(NX_IP_DRIVER *driver_req_ptr, UINT mtu_size)
@@ -582,7 +552,7 @@ USHORT          ether_type;
             advanced_packet_process_callback = NX_NULL;
 
 #ifdef __PRODUCT_NETXDUO__
-            /* Once the Ethernet controller is initialized, the driver needs to 
+            /* Once the Ethernet controller is initialized, the driver needs to
                configure the NetX Interface Control block, as outlined below. */
 
             /* The nx_interface_ip_mtu_size should be the MTU for the IP payload.
@@ -590,7 +560,7 @@ USHORT          ether_type;
             nx_ip_interface_mtu_set(ip_ptr, interface_index, mtu_size);
 
             /* Set the physical address (MAC address) of this IP instance. */
-            /* For this simulated RAM driver, the MAC address is constructed by 
+            /* For this simulated RAM driver, the MAC address is constructed by
                incrementing a base lsw value, to simulate multiple nodes hanging on the
                ethernet. */
             nx_ip_interface_physical_address_set(ip_ptr, interface_index, 
@@ -604,7 +574,7 @@ USHORT          ether_type;
             interface_ptr -> nx_interface_ip_mtu_size = mtu_size;
 
             /* Set the physical address (MAC address) of this IP instance. */
-            /* For this simulated RAM driver, the MAC address is constructed by 
+            /* For this simulated RAM driver, the MAC address is constructed by
                incrementing a base lsw value, to simulate multiple nodes hanging on the
                ethernet. */
 
@@ -621,8 +591,8 @@ USHORT          ether_type;
         case NX_LINK_ENABLE:
         {
 
-            /* Process driver link enable.  An Ethernet driver shall enable the 
-               transmit and reception logic.  Once the IP stack issues the 
+            /* Process driver link enable.  An Ethernet driver shall enable the
+               transmit and reception logic.  Once the IP stack issues the
                LINK_ENABLE command, the stack may start transmitting IP packets. */
                
             /* In the RAM driver, just set the enabled flag. */
@@ -850,7 +820,7 @@ USHORT          ether_type;
                                 
             /* At this point, the packet is a complete Ethernet frame, ready to be transmitted.
                The driver shall call the actual Ethernet transmit routine and put the packet
-               on the wire.   
+               on the wire.
 
                In this example, the simulated RAM network transmit routine is called. */ 
 
@@ -881,11 +851,11 @@ USHORT          ether_type;
         {
             UINT          mcast_index;
 
-            /* The IP layer issues this command to join a multicast group.  Note that 
-               multicast operation is required for IPv6.  
-               
+            /* The IP layer issues this command to join a multicast group.  Note that
+               multicast operation is required for IPv6.
+
                On a typically Ethernet controller, the driver computes a hash value based
-               on MAC address, and programs the hash table. 
+               on MAC address, and programs the hash table.
 
                It is likely the driver also needs to maintain an internal MAC address table.
                Later if a multicast address is removed, the driver needs
@@ -950,20 +920,20 @@ USHORT          ether_type;
         case NX_LINK_DEFERRED_PROCESSING:
         {
         
-            /* Driver defined deferred processing. This is typically used to defer interrupt 
-               processing to the thread level.   
+            /* Driver defined deferred processing. This is typically used to defer interrupt
+               processing to the thread level.
 
                A typical use case of this command is:
                On receiving an Ethernet frame, the RX ISR does not process the received frame,
                but instead records such an event in its internal data structure, and issues
-               a notification to the IP stack (the driver sends the notification to the IP 
-               helping thread by calling "_nx_ip_driver_deferred_processing()".  When the IP stack 
-               gets a notification of a pending driver deferred process, it calls the 
-               driver with the NX_LINK_DEFERRED_PROCESSING command.  The driver shall complete 
-               the pending receive process. 
+               a notification to the IP stack (the driver sends the notification to the IP
+               helping thread by calling "_nx_ip_driver_deferred_processing()".  When the IP stack
+               gets a notification of a pending driver deferred process, it calls the
+               driver with the NX_LINK_DEFERRED_PROCESSING command.  The driver shall complete
+               the pending receive process.
             */
 
-            /* The simulated RAM driver doesn't require a deferred process so it breaks out of 
+            /* The simulated RAM driver doesn't require a deferred process so it breaks out of
                the switch case. */
 
                
@@ -1062,12 +1032,6 @@ USHORT          ether_type;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    NetX IP processing                                                  */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023       Wenhui Xie             Initial Version 6.4.0         */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr)
@@ -1216,7 +1180,7 @@ USHORT         ether_type;
             interface_ptr -> nx_interface_ip_mtu_size = mtu_size;
 
             /* Set the physical address (MAC address) of this IP instance. */
-            /* For this simulated RAM driver, the MAC address is constructed by 
+            /* For this simulated RAM driver, the MAC address is constructed by
                incrementing a base lsw value, to simulate multiple nodes hanging on the
                ethernet. */
 
@@ -1380,7 +1344,7 @@ USHORT         ether_type;
             /* At this point, the packet is a complete Ethernet frame, ready to be transmitted.
                The driver shall call the actual Ethernet transmit routine and put the packet
                on the wire.
-                 
+
                In this example, the simulated RAM network transmit routine is called. */
 
             _nx_ram_network_driver_output(ip_ptr, packet_ptr, i );
@@ -1405,10 +1369,10 @@ USHORT         ether_type;
 
             /* The IP layer issues this command to join a multicast group.  Note that
                multicast operation is required for IPv6.
-                 
+
                On a typically Ethernet controller, the driver computes a hash value based
                on MAC address, and programs the hash table.
-                 
+
                It is likely the driver also needs to maintain an internal MAC address table.
                Later if a multicast address is removed, the driver needs
                to reprogram the hash table based on the remaining multicast MAC addresses. */
@@ -1474,7 +1438,7 @@ USHORT         ether_type;
 
             /* Driver defined deferred processing. This is typically used to defer interrupt
                processing to the thread level.
-                 
+
                A typical use case of this command is:
                On receiving an Ethernet frame, the RX ISR does not process the received frame,
                but instead records such an event in its internal data structure, and issues
@@ -1577,12 +1541,6 @@ USHORT         ether_type;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*    NetX IP processing                                                  */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */ 
-/*                                                                        */ 
-/*  12-31-2023       Wenhui Xie             Initial Version 6.4.0         */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID  _nx_ram_network_driver_output(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -1799,7 +1757,7 @@ UINT        j;
                                 nx_ram_driver[interface_instance_id].nx_ram_driver_interface_ptr -> nx_interface_index,
                                 packet_ptr, NX_NULL);
 #else
-    /* Remove the Ethernet header.  In real hardware environments, this is typically 
+    /* Remove the Ethernet header.  In real hardware environments, this is typically
        done after a transmit complete interrupt.  */
     packet_ptr -> nx_packet_prepend_ptr =  packet_ptr -> nx_packet_prepend_ptr + NX_ETHERNET_SIZE;
 
@@ -1853,12 +1811,6 @@ UINT        j;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*    NetX IP processing                                                  */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */ 
-/*                                                                        */ 
-/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 VOID _nx_ram_network_driver_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT interface_instance_id)
@@ -2014,12 +1966,6 @@ UINT    packet_type;
 /*                                                                        */ 
 /*    _nx_ram_network_driver_internal                                     */ 
 /*    _nx_ram_network_driver                                              */ 
-/*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */ 
-/*                                                                        */ 
-/*  12-31-2023     Wenhui Xie               Initial Version 6.4.0         */ 
 /*                                                                        */ 
 /**************************************************************************/ 
 UINT  _nx_ram_network_driver_calculate_checksum(NX_INTERFACE *interface_ptr, NX_PACKET *packet_ptr, UCHAR is_check)
@@ -2550,12 +2496,6 @@ NX_IPV6_HEADER         *ipv6_header_ptr;
 /*                                                                        */
 /*    write_pcap_file                                                     */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023       Wenhui Xie             Initial Version 6.4.0         */
-/*                                                                        */
 /**************************************************************************/
 VOID get_time_of_day(NX_TIME_VALUE *time_value) 
 {
@@ -2615,12 +2555,6 @@ ULONG64     time;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023       Wenhui Xie               Initial Version 6.4.0       */
-/*                                                                        */
 /**************************************************************************/
 UINT create_pcap_file(CHAR *file_name) 
 {
@@ -2679,12 +2613,6 @@ NX_PCAP_FILE_HEADER     pcap_file_header;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_ram_network_driver_output                                       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023       Wenhui Xie            Initial Version 6.4.0          */
 /*                                                                        */
 /**************************************************************************/
 UINT write_pcap_file(NX_PACKET *packet_ptr)
@@ -2750,12 +2678,6 @@ ULONG                   data_length;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  12-31-2023       Wenhui Xie            Initial Version 6.4.0          */
 /*                                                                        */
 /**************************************************************************/
 VOID close_pcap_file()

@@ -1,29 +1,29 @@
-/* This is a small demo of DHCP Client for multiple interfaces for the high-performance NetX IP stack.  
+/* This is a small demo of DHCP Client for multiple interfaces for the high-performance NetX IP stack.
 
    It is suggested that applications call interface specific API to do specific action on the specified
-   interface if DHCP is enabled on multiple interfaces at the same time. 
-   Example of a device possibly with a secondary interfaces attached, and DHCP Client having only the secondary 
+   interface if DHCP is enabled on multiple interfaces at the same time.
+   Example of a device possibly with a secondary interfaces attached, and DHCP Client having only the secondary
    interface enabled for DHCP:
- 
-#if (NX_MAX_PHYSICAL_INTERFACES >= 2) && (NX_DHCP_CLIENT_MAX_RECORDS >= 2) 
- 
+
+#if (NX_MAX_PHYSICAL_INTERFACES >= 2) && (NX_DHCP_CLIENT_MAX_RECORDS >= 2)
+
        Client configured for DHCP enabled on more than one interface. Use the interface specific service to
        request Client IP on the secondary interface.
-    
+
        status = nx_dhcp_interface_request_client_ip(&dhcp_client, 1, NX_DHCP_CLIENT_IP_ADDRESS_1, SKIP_DISCOVER_MESSAGE);
-#else 
+#else
         Client is configured for one interface to be enabled for DHCP. Use the non-interface specific service
         to perform the request Client IP action on the interface index that the Client has set for DHCP.
-      
+
         Note: the application must first call nx_dhcp_set_interface_index() to set the secondary interface as the interface
         to run DHCP on. Otherwise DHCP runs on the primary interface, by default.
-      
+
         status = nx_dhcp_request_client_ip(&dhcp_client, NX_DHCP_CLIENT_IP_ADDRESS_1, SKIP_DISCOVER_MESSAGE);
-#endif 
- 
+#endif
+
         if (status)
             error_counter++;
- 
+
 */
 
 #include   "tx_api.h"
@@ -198,7 +198,7 @@ ULONG       server_address;
 #endif /* REQUEST_CLIENT_IP  */
 
     /* Clear the broadcast flag.  */
-    /* nx_dhcp_clear_broadcast_flag(&dhcp_client) clears the broadcast flag on all DHCP enabled interfaces.  
+    /* nx_dhcp_clear_broadcast_flag(&dhcp_client) clears the broadcast flag on all DHCP enabled interfaces.
        Suggest using nx_dhcp_interface_clear_broadcast_flag() to clear the flag on one interface if DHCP is enabled on multiple interfaces
        status = nx_dhcp_interface_clear_broadcast_flag(&dhcp_client, 1) clears the broadcast flag on the specified interface(1:second interface)
     */
@@ -213,7 +213,7 @@ ULONG       server_address;
         error_counter++;
 
     /* Start the DHCP Client.  */
-    /* nx_dhcp_start(&dhcp_client) start DHCP for all DHCP enabled interfaces.  
+    /* nx_dhcp_start(&dhcp_client) start DHCP for all DHCP enabled interfaces.
        Suggest using nx_dhcp_interface_start() to start DHCP on one interface if DHCP is enabled on multiple interfaces
        status = nx_dhcp_interface_start(&dhcp_client, 1) starts DHCP on the specified interface (1:second interface)
     */
@@ -240,12 +240,12 @@ ULONG       server_address;
 
 
         /* Release the IP address the Client is bound to.
-         
+
            Use the nx_dhcp_release() API to release an IP address if the host is switching networks or running the host through DHCP cycles.
            Note that it is not necessary to call nx_dhcp_reinitialize() or nx_dhcp_interface_reinitialize() after calling this
            function. DHCP on this interface (or interfaces) is ready to be restarted. */
 
-        /* nx_dhcp_release(&dhcp_client) releases the DHCP generated IP address for all DHCP enabled interfaces.          
+        /* nx_dhcp_release(&dhcp_client) releases the DHCP generated IP address for all DHCP enabled interfaces.
            Suggest using nx_dhcp_interface_release() to release the IP address on a specific interface if DHCP is enabled on multiple interfaces
            status = nx_dhcp_interface_release(&dhcp_client, 1) releases the IP address for the specified interface(1:second interface)
         */
@@ -254,14 +254,14 @@ ULONG       server_address;
             error_counter++;
 
         /* Stopping the DHCP client.
-         
+
            Use this API if the Client has not reached the BOUND state. This simply stops the DHCP
            Client.  It does not clear any network parameters or reset the Client state to NOT STARTED.  To do clear network parameters,
            and reset the state (e.g. before calling nx_dhcp_start() on the stopped interface(s), call nx_dhcp_reinitialize() or
-           nx_dhcp_interface_reinitialize() depending which interface(s) need to be reinitialized.         
+           nx_dhcp_interface_reinitialize() depending which interface(s) need to be reinitialized.
         */
 
-        /* nx_dhcp_stop(&dhcp_client) stops DHCP on all DHCP enabled interfaces.  
+        /* nx_dhcp_stop(&dhcp_client) stops DHCP on all DHCP enabled interfaces.
            Suggest using nx_dhcp_interface_stop() to stop DHCP on a specific interface if DHCP is enabled on multiple interfaces
            status = nx_dhcp_interface_stop(&dhcp_client, 1) stop DHCP on the specified interface(1:second interface)
            */
@@ -273,10 +273,10 @@ ULONG       server_address;
         tx_thread_sleep(NX_IP_PERIODIC_RATE);
 
         /* Reinitialize the Client for restarting DHCP.
-         
+
            Use this API to clear the network parameters and restart the client in the not started state. */
 
-        /* nx_dhcp_reinitialize(&dhcp_client) clears the network parameters on all DHCP enabled interfaces.  
+        /* nx_dhcp_reinitialize(&dhcp_client) clears the network parameters on all DHCP enabled interfaces.
            Suggest using nx_dhcp_interface_reinitialize() to reinitialize DHCP on a specific interface if DHCP is enabled on multiple interfaces
            status = nx_dhcp_interface_reinitialize(&dhcp_client, 1) reinitializes DHCP on the specified interface(1:second interface)
            */
@@ -285,7 +285,7 @@ ULONG       server_address;
             error_counter++;
 
         /* Resume the DHCP client thread. */
-        /* nx_dhcp_start(&dhcp_client) start DHCP for all DHCP enabled interfaces.  
+        /* nx_dhcp_start(&dhcp_client) start DHCP for all DHCP enabled interfaces.
            or nx_dhcp_interface_start(&dhcp_client, 1) to start DHCP for specified interface(1:second interface) */
         status = nx_dhcp_start(&dhcp_client); 
         if (status)

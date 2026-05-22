@@ -54,12 +54,12 @@
 /* Defined NX_PPP_PPPOE_ENABLE if using PPP, since PPP module has been modified to match PPPoE module under this definition.  */
 #ifdef NX_PPP_PPPOE_ENABLE
                 
-/* If the driver is not initialized in other module, define NX_PPPOE_SERVER_INITIALIZE_DRIVER_ENABLE to initialize the driver in PPPoE module .  
+/* If the driver is not initialized in other module, define NX_PPPOE_SERVER_INITIALIZE_DRIVER_ENABLE to initialize the driver in PPPoE module .
    In this demo, the driver has been initialized in IP module.  */
 #ifndef NX_PPPOE_SERVER_INITIALIZE_DRIVER_ENABLE
 
-/* NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE: 
-   If defined, enables the feature that controls the PPPoE session. 
+/* NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE:
+   If defined, enables the feature that controls the PPPoE session.
    PPPoE server does not automatically response to the request until application call specific API.  */
 
 /* Define the block size.  */
@@ -264,7 +264,7 @@ ULONG   ip_status;
                            
 #ifdef NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE 
     /* Call function function to set the default service Name.  */
-    /* 
+    /*
     PppInitInd(length, aData);
     */
 #endif /* NX_PPPOE_SERVER_SESSION_CONTROL_ENABLE */
@@ -279,7 +279,7 @@ ULONG   ip_status;
     
     /* Get the PPPoE Client physical address and Session ID after establish PPPoE Session.  */
     /*
-    status = nx_pppoe_server_session_get(&pppoe_server, interfaceHandle, &client_mac_msw, &client_mac_lsw, &session_id);  
+    status = nx_pppoe_server_session_get(&pppoe_server, interfaceHandle, &client_mac_msw, &client_mac_lsw, &session_id);
     if (status)
         error_counter++;
     */

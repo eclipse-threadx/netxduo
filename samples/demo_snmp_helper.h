@@ -1,4 +1,4 @@
-/* This is an include file for the NetX SNMP demo programs for setting up the MIB for 
+/* This is an include file for the NetX SNMP demo programs for setting up the MIB for
    user callback functions. It is not part of the official release of NetX SNMP Agent. */
  
 #ifndef SNMP_HELPER_H

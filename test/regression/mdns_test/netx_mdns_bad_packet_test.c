@@ -81,7 +81,7 @@ static unsigned char bad_packet2[] = {
 0x00                                            /* . */
 };
 
-/* Bad packet 3: pointer points to another pointer that 
+/* Bad packet 3: pointer points to another pointer that
      points back to the first pointer. */
 static unsigned char bad_packet3[] = {
 0x01, 0x00, 0x5e, 0x00, 0x00, 0xfb, 0x00, 0x1e, /* ..^..... */

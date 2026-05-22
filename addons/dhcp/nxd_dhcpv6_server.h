@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -38,18 +38,6 @@
 /*    references. It is assumed that nx_api.h and nx_port.h have already  */ 
 /*    been included.                                                      */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
-/*                                            necessary header file,      */
-/*                                            resulting in version 6.1.9  */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NXD_DHCPV6_SERVER_H
@@ -84,7 +72,7 @@ extern   "C" {
 #define GLOBAL_IP_INTERFACE                                 1 
 
 
-/* Set the Client lease time. An infinate lease time is not recommended by the RFC 
+/* Set the Client lease time. An infinate lease time is not recommended by the RFC
    unless the Client requires a permanent IP address.  Most servers will likely not
    grant an infinite IP address lease. */
 
@@ -115,7 +103,7 @@ NX_DHCPV6_SERVER_DUID_TYPE_LINK_ONLY
 #define NX_DHCPV6_SERVER_DUID_TYPE                          1
 #define NX_DHCPV6_CLIENT_DUID_TYPE                          2
 
-/* Define approximate time since Jan 1, 2000 for computing DUID time. This will form the 
+/* Define approximate time since Jan 1, 2000 for computing DUID time. This will form the
    basis for the DUID time ID field.  */
 
 #define SECONDS_SINCE_JAN_1_2000_MOD_32                     2563729999UL 
@@ -237,7 +225,7 @@ NX_DHCPV6_SERVER_DUID_TYPE_LINK_ONLY
 
 /* Define the server messages for IANA status codes.  Note that these
    messages must be shorter than the NX_DHCPV6_STATUS_MESSAGE_MAX
-   option defined for the client IANA status option. 
+   option defined for the client IANA status option.
 */
 #ifndef NX_DHCPV6_STATUS_MESSAGE_SUCCESS
 #define NX_DHCPV6_STATUS_MESSAGE_SUCCESS                "IA OPTION GRANTED"
@@ -307,7 +295,7 @@ NX_DHCPV6_SERVER_DUID_TYPE_LINK_ONLY
 #endif
 
 
-/* Define the session time out in seconds. This is the timer for how long the server has not 
+/* Define the session time out in seconds. This is the timer for how long the server has not
    received a client response. */
 
 #ifndef NX_DHCPV6_SESSION_TIMEOUT
@@ -338,7 +326,7 @@ NX_DHCPV6_SERVER_DUID_TYPE_LINK_ONLY
 
 /* Define parameters for the server DUID */
 
-/* Define the server DUID type.  The most common are link layer, based on mac address, 
+/* Define the server DUID type.  The most common are link layer, based on mac address,
    and link layer-time which is based on mac address and current time.  */
 
 #ifndef NX_DHCPV6_SERVER_DUID_TYPE
@@ -383,8 +371,8 @@ NX_DHCPV6_SERVER_DUID_TYPE_LINK_ONLY
 #endif
 
 
-/* Set the default T2 time, which is when the Client should begin renewing its IP address, 
-   assuming renewal attempts failed, for leased IP addresses in seconds. 
+/* Set the default T2 time, which is when the Client should begin renewing its IP address,
+   assuming renewal attempts failed, for leased IP addresses in seconds.
    T2 must be greater than T2 and less than the value of the preferred lifetime. */
 
 #ifndef  NX_DHCPV6_DEFAULT_T2_TIME
@@ -392,9 +380,9 @@ NX_DHCPV6_SERVER_DUID_TYPE_LINK_ONLY
 #endif
 
 
-/* Set the default preferred lifetime for leased IP addresses in seconds, which is 
-    when the Client IP address becomes deprecated. A value of zero in 
-    this field indicates that the server leaves it to the 
+/* Set the default preferred lifetime for leased IP addresses in seconds, which is
+    when the Client IP address becomes deprecated. A value of zero in
+    this field indicates that the server leaves it to the
    client discretion to renew its IP address lease. */
 
 #ifndef  NX_DHCPV6_DEFAULT_PREFERRED_TIME
@@ -402,9 +390,9 @@ NX_DHCPV6_SERVER_DUID_TYPE_LINK_ONLY
 #endif
 
 
-/* Set the default valid lifetime in seconds for leased IP addresses in secs, which is when 
-   the Client IP address becomes obsolete. A value of zero in this field indicates 
-   that the server leaves it to the client discretion to renew its IP address lease. 
+/* Set the default valid lifetime in seconds for leased IP addresses in secs, which is when
+   the Client IP address becomes obsolete. A value of zero in this field indicates
+   that the server leaves it to the client discretion to renew its IP address lease.
    The valid time must be greater than the preferred time. */
 
 #ifndef  NX_DHCPV6_DEFAULT_VALID_TIME
@@ -427,8 +415,8 @@ NX_DHCPV6_SERVER_DUID_TYPE_LINK_ONLY
 #endif
 
 
-/* Define the max number of clients the server can assign leases to at any given time. 
-   These are clients either already leasing an IPv6 address or currently requesting one. 
+/* Define the max number of clients the server can assign leases to at any given time.
+   These are clients either already leasing an IPv6 address or currently requesting one.
    Note: there are more addresses than clients in the event the client declines an address
    or one assigned is already in use. The NetX DHCPv6 server currently only supports
    one IP address leased to each client. */
@@ -452,7 +440,7 @@ NX_DHCPV6_SERVER_DUID_TYPE_LINK_ONLY
 #endif
 
 
-/* Define the DHCPv6 packet memory area. Packet pool size depends on client traffic and 
+/* Define the DHCPv6 packet memory area. Packet pool size depends on client traffic and
    available network bandwidth. */
 
 #ifndef NX_DHCPV6_PACKET_POOL_SIZE 
@@ -565,7 +553,7 @@ typedef struct NX_DHCPV6_SERVER_ELAPSED_TIME_STRUCT
 } NX_DHCPV6_SERVER_ELAPSED_TIME;
 
 
-/* Define the option request structure. This is how the Client requests information other than global IP address.  
+/* Define the option request structure. This is how the Client requests information other than global IP address.
    It can ask for domain name, DNS server, time zone, time server and other options. */
 
 typedef struct NX_DHCPV6_SERVER_OPTIONREQUEST_STRUCT
@@ -661,9 +649,9 @@ typedef struct NX_DHCPV6_SERVER_STRUCT
 
 /* Application caller is present, perform API mapping.  */
 
-/* Determine if error checking is desired.  If so, map DHCP API functions 
+/* Determine if error checking is desired.  If so, map DHCP API functions
    to the appropriate error checking front-ends.  Otherwise, map API
-   functions to the core functions that actually perform the work. 
+   functions to the core functions that actually perform the work.
    Note: error checking is enabled by default.  */
 
 

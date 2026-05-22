@@ -1,7 +1,7 @@
 /* 11.24 Local user initiates the close, TCP enters the FIN-WAIT-1 state. RECEIVEs are allowed in this state.  */
 
 /*  Procedure
-    1.Connection successfully  
+    1.Connection successfully
     2.Let Server's state to FIN_WAIT_1
     3.Client sends some data to Server
     4.Check if Server receives data successfully.  */

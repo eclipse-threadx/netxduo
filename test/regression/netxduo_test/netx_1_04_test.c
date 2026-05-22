@@ -1,4 +1,4 @@
-/* 1.04 TCP, in CLOSED state, must send a RST segment with zero SEQ number 
+/* 1.04 TCP, in CLOSED state, must send a RST segment with zero SEQ number
 in response to an incoming segment not containing RST and ACK flags.  */
 
 /* Procedure

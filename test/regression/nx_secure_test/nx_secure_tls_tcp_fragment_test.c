@@ -459,7 +459,7 @@ UINT       status;
 /* Timestamp function - should return Unix time formatted 32-bit integer. */
 static ULONG tls_timestamp_function(void)
 {
-    // Return a fixed epoch - 1500939067 seconds = 07/24/2017 @ 11:31pm (UTC) 
+    // Return a fixed epoch - 1500939067 seconds = 07/24/2017 @ 11:31pm (UTC)
     return(0x5976833BL); 
 }
 

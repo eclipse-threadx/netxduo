@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -35,29 +35,6 @@
 /*    This file defines the constants, structures, etc... needed to       */
 /*    implement the BSD 4.3 Socket API Compatible Interface to NetX Duo.  */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  03-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            fixed compiler warnings,    */
-/*                                            resulting in version 6.1.5  */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            defined IP protocols for    */
-/*                                            ICMP, IGMP and ICMPv6,      */
-/*                                            resulting in version 6.1.9  */
-/*  10-31-2023     Chaoqiong Xiao           Modified comment(s), and      */
-/*                                            added option to enable      */
-/*                                            native APIs with prefix,    */
-/*                                            resulting in version 6.3.0  */
-/*  12-31-2023     Yanwu Cai                Modified comment(s), and      */
-/*                                            added support of recvmsg,   */
-/*                                            added nx_link to raw socket,*/
-/*                                            resulting in version 6.4.0  */
 /*                                                                        */
 /**************************************************************************/
 
@@ -708,6 +685,9 @@ typedef struct FD_SET_STRUCT                /* The select socket array manager. 
 typedef struct NX_BSD_SOCKET_SUSPEND_STRUCT
 {
     ULONG               nx_bsd_socket_suspend_actual_flags;
+    nx_bsd_fd_set       nx_bsd_socket_suspend_read_request_fd_set;
+    nx_bsd_fd_set       nx_bsd_socket_suspend_write_request_fd_set;
+    nx_bsd_fd_set       nx_bsd_socket_suspend_exception_request_fd_set;
     nx_bsd_fd_set       nx_bsd_socket_suspend_read_fd_set;
     nx_bsd_fd_set       nx_bsd_socket_suspend_write_fd_set;
     nx_bsd_fd_set       nx_bsd_socket_suspend_exception_fd_set;

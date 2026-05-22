@@ -63,7 +63,7 @@ NX_UDP_SOCKET                       external_socket;
 #define NX_NAT_EXTERNAL_GATEWAY         (IP_ADDRESS(192, 168, 0, 1))    
 #define NX_NAT_EXTERNAL_NETMASK         (IP_ADDRESS(255, 255, 255, 0))  
 
-/* Create NAT structures for preloading NAT tables with static 
+/* Create NAT structures for preloading NAT tables with static
    entries for local server hosts. */
 NX_NAT_TRANSLATION_ENTRY            server_inbound_entry_udp;
 

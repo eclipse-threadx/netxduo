@@ -31,7 +31,7 @@ static UINT    packet_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT *operat
 
 /* ICMPv6 echo request packet with hop by hop option.
  * src: 0xFE80::1
- * dst: 0xFE80::2 
+ * dst: 0xFE80::2
  * length of ping data: 1400. */
 static char icmp_pkt[] = {
 0xa4, 0x1f, 0x72, 0x53, 0xa0, 0xf7, 0x18, 0x03, /* ..rS.... */

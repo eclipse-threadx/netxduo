@@ -1,4 +1,4 @@
-/* PTP IPv6 test.  This test case validates PTP client synchronize over IPv6. 
+/* PTP IPv6 test.  This test case validates PTP client synchronize over IPv6.
    To run this test case, NetXDuo must be built with NX_ENABLE_IPV6_MULTICAST and FEATURE_NX_IPV6.
 */
 

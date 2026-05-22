@@ -29,9 +29,9 @@ static char pkt_data[90] = {
 
     /* SNTP data  */
     0x1c,                   // flags was 28 which= server mode 4 and version 3
-    0x2,                    // stratum 
+    0x2,                    // stratum
     0x3,                    // poll interval
-    0xf9,                   // clock precision 
+    0xf9,                   // clock precision
     0x0, 0x0,0x4,0x23,      // root delay
     0x0, 0x0,0x8,0xf3,      // root dispersion
     0x82,0x95,0x11,0x8,     // ref ID

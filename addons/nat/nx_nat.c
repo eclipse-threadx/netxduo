@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -114,14 +114,6 @@ static VOID    _nx_nat_checksum_adjust(UCHAR *checksum, UCHAR *old_data, INT old
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_create(NX_NAT_DEVICE *nat_ptr, NX_IP *ip_ptr, UINT global_interface_index, VOID *dynamic_cache_memory, UINT dynamic_cache_size)                        
 {
@@ -216,14 +208,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_create(NX_NAT_DEVICE *nat_ptr, NX_IP *ip_ptr, UINT global_interface_index, VOID *dynamic_cache_memory, UINT dynamic_cache_size)  
 {
@@ -309,14 +293,6 @@ NX_NAT_TRANSLATION_ENTRY      *entry_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_delete(NX_NAT_DEVICE *nat_ptr) 
 {
@@ -369,14 +345,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_delete(NX_NAT_DEVICE *nat_ptr) 
 {                             
@@ -420,14 +388,6 @@ UINT  _nx_nat_delete(NX_NAT_DEVICE *nat_ptr)
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_enable(NX_NAT_DEVICE *nat_ptr)
 {
@@ -477,14 +437,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_enable(NX_NAT_DEVICE *nat_ptr)
 {                     
@@ -537,14 +489,6 @@ UINT  _nx_nat_enable(NX_NAT_DEVICE *nat_ptr)
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_disable(NX_NAT_DEVICE *nat_ptr)
 {
@@ -595,14 +539,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_disable(NX_NAT_DEVICE *nat_ptr)
 {                                              
@@ -653,14 +589,6 @@ UINT  _nx_nat_disable(NX_NAT_DEVICE *nat_ptr)
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nxe_nat_cache_notify_set(NX_NAT_DEVICE *nat_ptr, VOID (*cache_full_notify_cb)(NX_NAT_DEVICE *nat_ptr))
 {
@@ -720,14 +648,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT _nx_nat_cache_notify_set(NX_NAT_DEVICE *nat_ptr, VOID (*cache_full_notify_cb)(NX_NAT_DEVICE *nat_ptr))
 {
@@ -783,14 +703,6 @@ UINT _nx_nat_cache_notify_set(NX_NAT_DEVICE *nat_ptr, VOID (*cache_full_notify_c
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_inbound_entry_create(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr,   
                                     ULONG local_ip_address, USHORT external_port, USHORT local_port, UCHAR protocol)
@@ -864,14 +776,6 @@ UINT  status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_inbound_entry_create(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr,   
                                    ULONG local_ip_address, USHORT external_port, USHORT local_port, UCHAR protocol)
@@ -966,14 +870,6 @@ UINT                     bound;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_nat_inbound_entry_delete( NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *delete_entry_ptr)
 {
@@ -1036,14 +932,6 @@ UINT status;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_nat_inbound_entry_delete(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *delete_entry_ptr)
 {
@@ -1157,17 +1045,6 @@ NX_NAT_TRANSLATION_ENTRY *next_entry_ptr;
 /*    _nx_ipv4_packet_receive          NetX forwards packet to NAT first  */ 
 /*                                        if forwarding is enabled.       */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Tiejun Zhou              Modified comment(s),          */
-/*                                            fixed packet double release,*/
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_packet(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT packet_process)
 {
@@ -1396,14 +1273,6 @@ NX_INTERFACE                    *interface_ptr;
 /*                                                                        */ 
 /*    _nx_nat_process_packet          Process packet from external host   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_inbound_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr)
 {
@@ -1490,14 +1359,6 @@ NX_NAT_TRANSLATION_ENTRY    translation_entry;
 /*                                                                        */ 
 /*    _nx_nat_process_inbound_packet     Process inbound packets          */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_inbound_TCP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
 {
@@ -1693,14 +1554,6 @@ NX_NAT_TRANSLATION_ENTRY        *record_entry;
 /*                                                                        */ 
 /*    _nx_nat_process_inbound_packet     Process inbound packets          */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_inbound_UDP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
 {
@@ -1768,7 +1621,7 @@ NX_NAT_TRANSLATION_ENTRY        *record_entry;
         if (record_entry -> external_port != record_entry -> local_port)
         {
 
-            /* Translate the destination UDP port to the private host port.  If translation 
+            /* Translate the destination UDP port to the private host port.  If translation
                does not involve port number this will essentially be the original port number. */
             udp_header_ptr -> nx_udp_header_word_0 =  ((ULONG) (udp_header_ptr -> nx_udp_header_word_0 & ~NX_LOWER_16_MASK)) |
                                                        ((ULONG) record_entry -> local_port);
@@ -1897,14 +1750,6 @@ NX_NAT_TRANSLATION_ENTRY        *record_entry;
 /*                                                                        */ 
 /*    _nx_nat_process_inbound_packet     Process inbound packets          */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_inbound_ICMP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
 {
@@ -1985,7 +1830,7 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
             return NX_SUCCESS;
         }                            
 
-        /* Now we have to translate the packet destination for private host address and 
+        /* Now we have to translate the packet destination for private host address and
            update packet header checksum. */  
         if ((type == NX_ICMP_ECHO_REPLY_TYPE) && (record_entry -> external_port != record_entry -> local_port))
         {                       
@@ -2035,7 +1880,7 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
         }                  
     }                    
 
-    /* If NX_LITTLE_ENDIAN is defined, the headers need to be swapped to match 
+    /* If NX_LITTLE_ENDIAN is defined, the headers need to be swapped to match
        that of the data area.  */
     NX_CHANGE_ULONG_ENDIAN(icmp_header_ptr -> nx_icmp_header_word_0);
     NX_CHANGE_ULONG_ENDIAN(icmp_header_ptr -> nx_icmp_header_word_1);                                       
@@ -2104,14 +1949,6 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*   _nx_nat_packet_process            Process packets forwarded to NAT by*/ 
 /*                                         Netx                           */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_outbound_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr)
 {
@@ -2210,14 +2047,6 @@ NX_NAT_TRANSLATION_ENTRY translation_entry;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_outbound_TCP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
 {                      
@@ -2380,14 +2209,6 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_outbound_UDP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
 {
@@ -2501,7 +2322,7 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
     }
 #endif /* NX_ENABLE_INTERFACE_CAPABILITY */
 
-    /* If NX_LITTLE_ENDIAN is defined, the headers need to be swapped to match 
+    /* If NX_LITTLE_ENDIAN is defined, the headers need to be swapped to match
        that of the data area.  */
     NX_CHANGE_ULONG_ENDIAN(udp_header_ptr -> nx_udp_header_word_0);
     NX_CHANGE_ULONG_ENDIAN(udp_header_ptr -> nx_udp_header_word_1);   
@@ -2554,14 +2375,6 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*                                                                        */ 
 /*    Application code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_process_outbound_ICMP_packet(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
 {
@@ -2632,8 +2445,8 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
         return status;
     }                 
 
-    /* Update the ICMP Query ID ("port") if the NAT device mapped it to another Query ID 
-       but not if this is a local host responding to a REQUEST ICMP packet, in which case 
+    /* Update the ICMP Query ID ("port") if the NAT device mapped it to another Query ID
+       but not if this is a local host responding to a REQUEST ICMP packet, in which case
        it must keep the same Query ID. */
     if ((type != NX_ICMP_ECHO_REPLY_TYPE) && (record_entry -> external_port != record_entry -> local_port))
     {
@@ -2682,7 +2495,7 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 #endif /* NX_ENABLE_INTERFACE_CAPABILITY */
     }
                    
-    /* If NX_LITTLE_ENDIAN is defined, the headers need to be swapped to match 
+    /* If NX_LITTLE_ENDIAN is defined, the headers need to be swapped to match
        that of the data area.  */
     NX_CHANGE_ULONG_ENDIAN(icmp_header_ptr -> nx_icmp_header_word_0);
     NX_CHANGE_ULONG_ENDIAN(icmp_header_ptr -> nx_icmp_header_word_1);                             
@@ -2744,14 +2557,6 @@ NX_NAT_TRANSLATION_ENTRY    *record_entry;
 /*   _nx_nat_process_inbound_UDP_packet   Process outbound UDP packet     */ 
 /*   _nx_nat_process_inbound_ICMP_packet  Process outbound ICMP packet    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_nat_ip_packet_send(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr, UCHAR packet_type, ULONG next_hop_address) 
 {
@@ -2933,14 +2738,6 @@ NX_IPV4_HEADER      *ip_header_ptr;
 /*   _nx_nat_process_inbound_UDP_packet   Process outbound UDP packet     */ 
 /*   _nx_nat_process_inbound_ICMP_packet  Process outbound ICMP packet    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_inbound_entry_find(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr, 
                                         NX_NAT_TRANSLATION_ENTRY **matched_entry_ptr, ULONG *next_hop_address)
@@ -2981,7 +2778,7 @@ NX_NAT_TRANSLATION_ENTRY       *record_entry;
         if (record_entry)
         {
 
-            /* We found a matching server entry in the table. Now create an 
+            /* We found a matching server entry in the table. Now create an
                entry specifically for this packet. */
     
             /* Get the private IP address from the entry we just found, and apply to the new entry we're creating. */
@@ -3106,14 +2903,6 @@ NX_NAT_TRANSLATION_ENTRY       *record_entry;
 /*   _nx_nat_process_outbound_UDP_packet  Process outbound UDP packet     */ 
 /*   _nx_nat_process_outbound_ICMP_packet Process outbound ICMP packet    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_outbound_entry_find(NX_NAT_DEVICE *nat_ptr, NX_PACKET *packet_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr, 
                                          NX_NAT_TRANSLATION_ENTRY **matched_entry_ptr, ULONG *next_hop_address)
@@ -3253,14 +3042,6 @@ NX_NAT_TRANSLATION_ENTRY   *record_entry;
 /*    _nx_nat_inbound_entry_find        Find inbound entry in entry list  */ 
 /*    _nx_nat_outbound_entry_find       Find outbound entry in entry list */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_entry_create(NX_NAT_DEVICE *nat_ptr, UCHAR protocol, 
                                   ULONG local_ip_address, ULONG peer_ip_address, 
@@ -3456,14 +3237,6 @@ NX_NAT_TRANSLATION_ENTRY *previous_ptr = NX_NULL;
 /*    _nx_nat_entry_create             Create and add entry to NAT table  */ 
 /*                                         after starting the NAT server  */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_entry_add(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *entry_ptr)
 {
@@ -3530,14 +3303,6 @@ static UINT  _nx_nat_entry_add(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY 
 /*    _nx_nat_inbound_entry_find       Find inbound entry in entry list   */ 
 /*    _nx_nat_outbound_entry_find      Find outbound entry in entry list  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_nat_entry_find(NX_NAT_DEVICE *nat_ptr, NX_NAT_TRANSLATION_ENTRY *entry_to_match, NX_NAT_TRANSLATION_ENTRY **match_entry_ptr, 
                                 UCHAR direction, UINT skip_static_entries)
@@ -3684,7 +3449,7 @@ NX_NAT_TRANSLATION_ENTRY    *previous_ptr;
             }
         }      
                      
-        /* If we got this far, all criteria matched up. Set a pointer to 
+        /* If we got this far, all criteria matched up. Set a pointer to
            this entry in the table. */
         *match_entry_ptr = entry_ptr;
 
@@ -3738,14 +3503,6 @@ NX_NAT_TRANSLATION_ENTRY    *previous_ptr;
 /*    _nx_nat_inbound_entry_find       Find inbound entry in entry list   */ 
 /*    _nx_nat_outbound_entry_find      Find outbound entry in entry list  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_nat_entry_timeout_check(NX_NAT_DEVICE *nat_ptr)
 {
@@ -3867,14 +3624,6 @@ NX_NAT_TRANSLATION_ENTRY    *next_entry_ptr;
 /*    _nx_nat_inbound_entry_find       Find inbound entry in entry list   */ 
 /*    _nx_nat_outbound_entry_find      Find outbound entry in entry list  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_utility_get_destination_port(NX_PACKET *packet_ptr, UCHAR protocol, USHORT *peer_port)
 {
@@ -3977,14 +3726,6 @@ UINT                    is_icmp_error_msg;
 /*    _nx_nat_inbound_entry_find       Find inbound entry in entry list   */ 
 /*    _nx_nat_outbound_entry_find      Find outbound entry in entry list  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_utility_get_source_port(NX_PACKET *packet_ptr, UCHAR protocol, USHORT *source_port)
 {
@@ -4080,14 +3821,6 @@ UINT                    is_icmp_error_msg;
 /*                                                                        */ 
 /*    _nx_nat_outbound_entry_find      Find outbound entry in entry list  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_find_available_port(NX_NAT_DEVICE *nat_ptr, UCHAR protocol, USHORT *port)
 {
@@ -4214,14 +3947,6 @@ NX_NAT_TRANSLATION_ENTRY *entry_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_entry_port_verify(NX_IP *ip_ptr, UINT protocol, UINT port)
 {
@@ -4300,14 +4025,6 @@ NX_NAT_TRANSLATION_ENTRY *entry_ptr;
 /*                                                                        */ 
 /*    Application Code                                                    */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_socket_port_verify(NX_IP *ip_ptr, UINT protocol, UINT port)
 {
@@ -4432,14 +4149,6 @@ NX_UDP_SOCKET       *udp_end_ptr;
 /*   _nx_nat_utility_get_destination_port  Extract destination port from  */
 /*                                             header                     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_nat_packet_is_icmp_error_message(NX_PACKET *packet_ptr, UINT *is_icmp_error_msg)
 {
@@ -4527,14 +4236,6 @@ NX_ICMP_HEADER  *icmp_header_ptr;
 /*  _nx_nat_process_outbound_UDP_packet  Send UDP packet to external host */ 
 /*  _nx_nat_process_outbound_ICMP_packet Send ICMP packet to external host*/
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_nat_checksum_adjust(UCHAR *checksum, UCHAR *old_data, INT old_data_length, UCHAR *new_data, INT new_data_length)
 {

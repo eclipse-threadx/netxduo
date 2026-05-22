@@ -178,7 +178,7 @@ char        *msg = MSG;
         error_counter++;
 
     /* Fill in the packet with data.      */
-    /* Packet 1 contains bytes   0 - 37 
+    /* Packet 1 contains bytes   0 - 37
        Packet 2 contains bytes  38 - 75   */
     
     memcpy(my_packet1 -> nx_packet_prepend_ptr, &msg[0], 38);
@@ -189,7 +189,7 @@ char        *msg = MSG;
     my_packet2 -> nx_packet_length = 38;
     my_packet2 -> nx_packet_append_ptr = my_packet2 -> nx_packet_prepend_ptr + 38;
 
-    /* Set a fixed sequence number to make sure 
+    /* Set a fixed sequence number to make sure
        "nx_tcp_socket_state_ack_check.c: ((INT)tcp_header_ptr -> nx_tcp_sequence_number - (INT)ending_rx_sequence > 0)"
        will not be hit.  */
     client_socket.nx_tcp_socket_tx_sequence = 0x00221122;

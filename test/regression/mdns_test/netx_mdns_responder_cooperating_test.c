@@ -28,7 +28,7 @@ static UCHAR                   mdns_query;
 static UCHAR                   mdns_response;
 static UCHAR                   mdns_stack[DEMO_STACK_SIZE];
 
-/* A DNS-SD response 
+/* A DNS-SD response
    rdata: "_http._tcp.local"
    TTL: 4500 */
 /* Frame (112 bytes) */

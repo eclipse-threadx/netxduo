@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -37,26 +37,6 @@
 /*    component, including all data types and external references.        */
 /*    It is assumed that nx_api.h and nx_port.h have already been         */
 /*    included, along with fx_api.h and fx_port.h.                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved the logic of       */
-/*                                            parsing base64,             */
-/*                                            resulting in version 6.1.6  */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s), and      */
-/*                                            improved the logic of       */
-/*                                            converting number to string,*/
-/*                                            resulting in version 6.1.8  */
-/*  10-31-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            supported random nonce,     */
-/*                                            resulting in version 6.2.0  */
-/*                                                                        */
 /*                                                                        */
 /**************************************************************************/
 
@@ -92,7 +72,7 @@ extern   "C" {
 /* Define the HTTP version.  */
 #define NX_HTTP_VERSION                     "HTTP/1.0"
     
-/* Enable Digest authentication. 
+/* Enable Digest authentication.
 #define NX_HTTP_DIGEST_ENABLE
 */
 

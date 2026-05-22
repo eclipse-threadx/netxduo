@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -63,14 +63,6 @@
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_key_pair_import(NX_CRYPTO_ECDH  *ecdh_ptr,
@@ -144,14 +136,6 @@ NX_CRYPTO_HUGE_NUMBER private_key;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_ecdh_private_key_export(NX_CRYPTO_ECDH  *ecdh_ptr,
@@ -241,14 +225,6 @@ NX_CRYPTO_HUGE_NUMBER private_key;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_setup(NX_CRYPTO_ECDH  *ecdh_ptr,
@@ -349,15 +325,6 @@ NX_CRYPTO_EC_POINT    public_key;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), and      */
-/*                                            added public key validation,*/
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_compute_secret(NX_CRYPTO_ECDH  *ecdh_ptr,
@@ -478,16 +445,6 @@ NX_CRYPTO_EC_POINT    public_key, shared_secret;
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecdh_init(struct  NX_CRYPTO_METHOD_STRUCT *method,
                                                  UCHAR *key, NX_CRYPTO_KEY_SIZE key_size_in_bits,
@@ -552,14 +509,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecdh_init(struct  NX_CRYPTO_METHOD_STRUCT
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecdh_cleanup(VOID *crypto_metadata)
 {
@@ -623,16 +572,6 @@ NX_CRYPTO_KEEP UINT  _nx_crypto_method_ecdh_cleanup(VOID *crypto_metadata)
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    Application Code                                                    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            resulting in version 6.3.0  */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_method_ecdh_operation(UINT op,
@@ -855,12 +794,6 @@ NX_CRYPTO_EXTENDED_OUTPUT
 /*                                                                        */
 /*    _nx_crypto_method_ecdh_operation      Perform ECDH operation        */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
-/*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_key_pair_import_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
                                                                NX_CRYPTO_EC *curve,
@@ -928,12 +861,6 @@ UINT key_len;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_ecdh_operation      Perform ECDH operation        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_private_key_export_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
@@ -1010,15 +937,6 @@ NX_CRYPTO_EC *curve;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_ecdh_operation      Perform ECDH operation        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            added x448 curve,           */
-/*                                            resulting in version 6.1.12 */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_setup_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,
@@ -1117,12 +1035,6 @@ NX_CRYPTO_EC_POINT    public_key;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_crypto_method_ecdh_operation      Perform ECDH operation        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  04-25-2022     Yuxin Zhou               Initial Version 6.1.11        */
 /*                                                                        */
 /**************************************************************************/
 NX_CRYPTO_KEEP UINT _nx_crypto_ecdh_compute_secret_x25519_448(NX_CRYPTO_ECDH *ecdh_ptr,

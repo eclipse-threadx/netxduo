@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -64,17 +64,6 @@ NX_SECURE_CALLER_CHECKING_EXTERNS
 /*                                                                        */
 /*    Application Code                                                    */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  10-31-2023     Yanwu Cai                Modified comment(s), added    */
-/*                                            record length checking,     */
-/*                                            resulting in version 6.3.0  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_secure_tls_session_send(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *packet_ptr,
                                    ULONG wait_option)
@@ -89,16 +78,6 @@ UINT status;
     if (packet_ptr == NX_NULL)
     {
         return(NX_PTR_ERROR);
-    }
-
-    if (packet_ptr -> nx_packet_length == 0)
-    {
-        /* Must check for empty packets here, as TLS data will make a packet's contents
-        non-empty. _nx_tcp_socket_send_internal has a check for an empty packet
-        that correctly works in an HTTP session but will result in a false negative if
-        the session is HTTPS. Thus, this check is performed before the TLS session
-        operations that modify the packet.  */
-        return(NX_INVALID_PACKET);
     }
 
     if (tls_session -> nx_secure_tls_tcp_socket == NX_NULL)
@@ -120,6 +99,16 @@ UINT status;
 
     /* Check for appropriate caller.  */
     NX_THREADS_ONLY_CALLER_CHECKING
+
+    if (packet_ptr -> nx_packet_length == 0)
+    {
+        /* Must check for empty packets here, as TLS data will make a packet's contents
+        non-empty. _nx_tcp_socket_send_internal has a check for an empty packet
+        that correctly works in an HTTP session but will result in a false negative if
+        the session is HTTPS. Thus, this check is performed before the TLS session
+        operations that modify the packet.  */
+        return(NX_INVALID_PACKET);
+    }
 
     status =  _nx_secure_tls_session_send(tls_session, packet_ptr, wait_option);
 

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -113,14 +113,6 @@ static VOID    _nx_pppoe_client_session_thread_suspend(TX_THREAD **suspension_li
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_client_create(NX_PPPOE_CLIENT *pppoe_client_ptr, UCHAR *name, NX_IP *ip_ptr, UINT interface_index,
                                NX_PACKET_POOL *pool_ptr, VOID *stack_ptr, ULONG stack_size, UINT priority,
@@ -210,14 +202,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_client_create(NX_PPPOE_CLIENT *pppoe_client_ptr, UCHAR *name, NX_IP *ip_ptr, UINT interface_index,
                               NX_PACKET_POOL *pool_ptr, VOID *stack_ptr, ULONG stack_size, UINT priority,
@@ -311,14 +295,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_client_delete(NX_PPPOE_CLIENT *pppoe_client_ptr)              
 {
@@ -370,14 +346,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_client_delete(NX_PPPOE_CLIENT *pppoe_client_ptr)
 {
@@ -455,14 +423,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_client_service_name_set(NX_PPPOE_CLIENT *pppoe_client_ptr, UCHAR *service_name)
 {
@@ -516,14 +476,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_client_service_name_set(NX_PPPOE_CLIENT *pppoe_client_ptr, UCHAR *service_name)
 {
@@ -581,14 +533,6 @@ UINT service_name_length = 0;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_client_service_name_set_extended(NX_PPPOE_CLIENT *pppoe_client_ptr, UCHAR *service_name, UINT service_name_length)
 {
@@ -646,17 +590,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            string length verification, */
-/*                                            resulting in version 6.1.3  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_client_service_name_set_extended(NX_PPPOE_CLIENT *pppoe_client_ptr, UCHAR *service_name, UINT service_name_length)
 { 
@@ -723,14 +656,6 @@ UINT temp_service_name_length = 0;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_client_host_uniq_set(NX_PPPOE_CLIENT *pppoe_client_ptr, UCHAR *host_uniq)
 {
@@ -784,14 +709,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_client_host_uniq_set(NX_PPPOE_CLIENT *pppoe_client_ptr, UCHAR *host_uniq)
 {
@@ -847,14 +764,6 @@ UINT host_uniq_length = 0;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_client_host_uniq_set_extended(NX_PPPOE_CLIENT *pppoe_client_ptr, UCHAR *host_uniq, UINT host_uniq_length)
 {
@@ -912,17 +821,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            string length verification, */
-/*                                            resulting in version 6.1.3  */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_client_host_uniq_set_extended(NX_PPPOE_CLIENT *pppoe_client_ptr, UCHAR *host_uniq, UINT host_uniq_length)
 {
@@ -985,14 +883,6 @@ UINT temp_host_uniq_length = 0;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_client_session_connect(NX_PPPOE_CLIENT *pppoe_client_ptr, ULONG wait_option)
 {
@@ -1042,14 +932,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_client_session_connect(NX_PPPOE_CLIENT *pppoe_client_ptr, ULONG wait_option)
 {
@@ -1143,14 +1025,6 @@ UINT  _nx_pppoe_client_session_connect(NX_PPPOE_CLIENT *pppoe_client_ptr, ULONG 
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_client_session_packet_send(NX_PPPOE_CLIENT *pppoe_client_ptr, NX_PACKET *packet_ptr)
 {
@@ -1234,14 +1108,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_client_session_packet_send(NX_PPPOE_CLIENT *pppoe_client_ptr, NX_PACKET *packet_ptr)
 {               
@@ -1297,11 +1163,11 @@ UCHAR                      *work_ptr;
 
     /* Added the PPPoE header.  */
     /*
-     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      * |  VER | TYPE  |      CODE       |         SESSION_ID           |
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * |           LENGTH               |          payload             
+     * |           LENGTH               |          payload
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     */
 
@@ -1364,14 +1230,6 @@ UCHAR                      *work_ptr;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_client_session_terminate(NX_PPPOE_CLIENT *pppoe_client_ptr)
 {
@@ -1424,14 +1282,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_client_session_terminate(NX_PPPOE_CLIENT *pppoe_client_ptr)
 {  
@@ -1506,14 +1356,6 @@ UINT        status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nxe_pppoe_client_session_get(NX_PPPOE_CLIENT *pppoe_client_ptr, ULONG *client_mac_msw, ULONG *client_mac_lsw, ULONG *session_id)
 {
@@ -1568,14 +1410,6 @@ UINT    status;
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 UINT  _nx_pppoe_client_session_get(NX_PPPOE_CLIENT *pppoe_client_ptr, ULONG *server_mac_msw, ULONG *server_mac_lsw, ULONG *session_id)
 {  
@@ -1647,14 +1481,6 @@ UINT  _nx_pppoe_client_session_get(NX_PPPOE_CLIENT *pppoe_client_ptr, ULONG *ser
 /*                                                                        */ 
 /*    Application                                                         */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_pppoe_client_packet_deferred_receive(NX_PACKET *packet_ptr)
 {
@@ -1758,14 +1584,6 @@ TX_INTERRUPT_SAVE_AREA
 /*                                                                        */
 /*    ThreadX Scheduler                                                   */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID _nx_pppoe_client_thread_entry(ULONG pppoe_client_ptr_value)
 {
@@ -2021,14 +1839,6 @@ ULONG               timeout = 0;
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_pppoe_client_timer_entry(ULONG pppoe_client_address)
 {
@@ -2081,14 +1891,6 @@ NX_PPPOE_CLIENT *pppoe_client_ptr;
 /*                                                                        */ 
 /*    _nx_pppoe_client_thread_entry                                       */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_pppoe_client_packet_receive(NX_PPPOE_CLIENT *pppoe_client_ptr, NX_PACKET *packet_ptr)
 {
@@ -2119,7 +1921,7 @@ UINT                        ethernet_type;
         return;
     }
 
-    /* Check if it is a broadcast message. 
+    /* Check if it is a broadcast message.
        Only PADI packet with the destination address set to the broadcast address, and PADI only can be sent from PPPoE Client.   */
     if ((dest_mac_msw == 0xFFFF) && (dest_mac_lsw == 0xFFFFFFFF))
     {
@@ -2209,19 +2011,6 @@ UINT                        ethernet_type;
 /*                                                                        */ 
 /*    _nx_pppoe_client_packet_receive       Receive the PPPoE packet      */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            packet length verification, */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            string length verification, */
-/*                                            resulting in version 6.1.3  */
-/*                                                                        */
 /**************************************************************************/
 VOID  _nx_pppoe_client_discovery_packet_process(NX_PPPOE_CLIENT *pppoe_client_ptr, NX_PACKET *packet_ptr, ULONG server_mac_msw, ULONG server_mac_lsw)
 {
@@ -2284,7 +2073,7 @@ UINT                        tag_host_uniq_valid = NX_FALSE;
     /* Pickup the session id.  */   
     session_id = _nx_pppoe_client_data_get(pppoe_header_ptr + NX_PPPOE_CLIENT_OFFSET_SESSION_ID, 2);
 
-    /* Check the session id. 
+    /* Check the session id.
        Session ID must be zero for PADO,
        Session ID must be not zero for PADS and PADT.
        Session ID must be same value for PADT.  */
@@ -2644,14 +2433,6 @@ UINT                        tag_host_uniq_valid = NX_FALSE;
 /*                                                                        */ 
 /*    _nx_pppoe_client_packet_receive       Receive the PPPoE packet      */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_pppoe_client_session_packet_process(NX_PPPOE_CLIENT *pppoe_client_ptr, NX_PACKET *packet_ptr, ULONG server_mac_msw, ULONG server_mac_lsw)
 {
@@ -2754,7 +2535,7 @@ NX_PPPOE_SERVER_SESSION    *server_session_ptr;
     if (pppoe_client_ptr -> nx_pppoe_packet_receive)
     {
 
-        /* Call the function to receive the data frame.  
+        /* Call the function to receive the data frame.
            Notice: the receive function must release this packet.  */
         pppoe_client_ptr -> nx_pppoe_packet_receive(packet_ptr);
     }
@@ -2809,17 +2590,6 @@ NX_PPPOE_SERVER_SESSION    *server_session_ptr;
 /*    _nx_pppoe_client_discovery_packet_process                           */ 
 /*                                          Process PPPoE Discovery packet*/ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  12-31-2020     Yuxin Zhou               Modified comment(s), improved */
-/*                                            string length verification, */
-/*                                            resulting in version 6.1.3  */
-/*                                                                        */
 /**************************************************************************/
 static UINT    _nx_pppoe_client_discovery_send(NX_PPPOE_CLIENT *pppoe_client_ptr, UINT code)
 {
@@ -2851,11 +2621,11 @@ UINT            index = 0;
     /* The PPPoE payload contains zero or more TAGs.  A TAG is a TLV (type-length-value) construct and is defined as follows.  */
 
     /*                      1                   2                   3
-     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      * |          TAG_TYPE              |         TAG_LENGTH           |
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * |          TAG_VALUE  ...                                        
+     * |          TAG_VALUE  ...
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     */
 
@@ -2990,11 +2760,11 @@ UINT            index = 0;
 
     /* Add the PPPoE header.  */     
     /*
-     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+     *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      * |  VER | TYPE  |      CODE       |         SESSION_ID           |
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * |           LENGTH               |          payload             
+     * |           LENGTH               |          payload
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     */
 
@@ -3067,14 +2837,6 @@ UINT            index = 0;
 /*    _nx_pppoe_client_discovery_send       Send PPPoE Discovery packet   */ 
 /*    _nx_pppoe_client_session_send         Send PPPoE Session packet     */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID    _nx_pppoe_client_packet_send(NX_PPPOE_CLIENT *pppoe_client_ptr, NX_PACKET *packet_ptr, UINT command)
 {
@@ -3146,14 +2908,6 @@ NX_IP_DRIVER                driver_request;
 /*                                          Process PPPoE Session packet  */  
 /*    _nx_pppoe_client_tag_process          Process PPPoE TAGs            */  
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static ULONG  _nx_pppoe_client_data_get(UCHAR *data, UINT size)
 {
@@ -3208,14 +2962,6 @@ ULONG   value = 0;
 /*    _nx_pppoe_client_session_send         Send PPPoE Session packet     */  
 /*    _nx_pppoe_client_tag_string_add       Add PPPoE string TAG          */  
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_pppoe_client_data_add(UCHAR *data, UINT size, ULONG value)
 {
@@ -3286,14 +3032,6 @@ static VOID  _nx_pppoe_client_data_add(UCHAR *data, UINT size, ULONG value)
 /*                                                                        */  
 /*    _nx_pppoe_client_tag_string_add       Add PPPoE string TAG          */  
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static VOID  _nx_pppoe_client_string_add(UCHAR *dest, UCHAR *source, UINT size)
 {
@@ -3344,14 +3082,6 @@ static VOID  _nx_pppoe_client_string_add(UCHAR *dest, UCHAR *source, UINT size)
 /*                                                                        */ 
 /*    _nx_pppoe_client_discovery_send       Send PPPoE Discovery packet   */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_pppoe_client_tag_string_add(UCHAR *data_ptr, UINT tag_type, UINT tag_length, UCHAR *tag_value_string, UINT *index)
 {
@@ -3405,14 +3135,6 @@ static UINT  _nx_pppoe_client_tag_string_add(UCHAR *data_ptr, UINT tag_type, UIN
 /*    _nx_pppoe_client_session_packet_process                             */ 
 /*                                          Process PPPoE Session packet  */ 
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT  _nx_pppoe_client_session_cleanup(NX_PPPOE_CLIENT *client_ptr)
 {
@@ -3467,14 +3189,6 @@ static UINT  _nx_pppoe_client_session_cleanup(NX_PPPOE_CLIENT *client_ptr)
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID  _nx_pppoe_client_session_thread_suspend(TX_THREAD **suspension_list_head, VOID (*suspend_cleanup)(TX_THREAD * NX_CLEANUP_PARAMETER), 
@@ -3572,14 +3286,6 @@ TX_THREAD *thread_ptr;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 VOID  _nx_pppoe_client_session_thread_resume(TX_THREAD **suspension_list_head, UINT status)
@@ -3681,14 +3387,6 @@ TX_THREAD *thread_ptr;
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static VOID  _nx_pppoe_client_session_connect_cleanup(TX_THREAD *thread_ptr NX_CLEANUP_PARAMETER)

@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -176,7 +176,7 @@ UINT nx_azure_iot_json_writer_append_string(NX_AZURE_IOT_JSON_WRITER *json_write
  * is, without any formatting or spacing changes. No modifications are made to this text, including
  * escaping.
  * @param[in] json_len Length of json
- * 
+ *
  * @remarks A single, possibly nested, JSON value is one that starts and ends with {} or [] or is a
  * single primitive token. The JSON cannot start with an end object or array, or a property name, or
  * be incomplete.

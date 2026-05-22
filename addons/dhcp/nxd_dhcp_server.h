@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -38,21 +38,6 @@
 /*    references. It is assumed that nx_api.h and nx_port.h have already  */ 
 /*    been   included.                                                    */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s), and      */
-/*                                            modified the type of        */
-/*                                            nx_dhcp_user_options,       */
-/*                                            improved buffer length      */
-/*                                            verification,               */
-/*                                            resulting in version 6.1    */
-/*  10-15-2021     Yuxin Zhou               Modified comment(s), included */
-/*                                            necessary header file,      */
-/*                                            resulting in version 6.1.9  */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef  NXD_DHCP_SERVER_H
@@ -141,7 +126,7 @@ extern   "C" {
 
 
 
-/* Define an interval in seconds for the session timer to check the time remaining on 
+/* Define an interval in seconds for the session timer to check the time remaining on
    all the active clients in the server database. */
 
 #ifndef NX_DHCP_FAST_PERIODIC_TIME_INTERVAL
@@ -159,7 +144,7 @@ extern   "C" {
 #endif
 
 
-/* Define an interval in seconds for the IP lease timer to check the time remaining on 
+/* Define an interval in seconds for the IP lease timer to check the time remaining on
    all the assigned IP addresses in the server database. */
 
 #ifndef NX_DHCP_SLOW_PERIODIC_TIME_INTERVAL
@@ -167,7 +152,7 @@ extern   "C" {
 #endif
 
 
-/* Set the default lease time in seconds on the IP address the server 
+/* Set the default lease time in seconds on the IP address the server
    will assign to the Client. */
 
 #ifndef  NX_DHCP_DEFAULT_LEASE_TIME
@@ -178,7 +163,7 @@ extern   "C" {
 
 /* Set a size of the Server option list requested by the Client. Since the NetX DHCP Server
    does not as yet support the complete set of options in DHCP, this number can be optimized
-   down to a smaller size that the largest possible number of options a Client could request. 
+   down to a smaller size that the largest possible number of options a Client could request.
 */
 
 #ifndef NX_DHCP_CLIENT_OPTIONS_MAX
@@ -187,12 +172,12 @@ extern   "C" {
 
 
 /* There are optional and required elements of the server option list.
-   Use the required plus the user configurable option list for the 
-   server list to respond back to the client. 
+   Use the required plus the user configurable option list for the
+   server list to respond back to the client.
 */
 
-/* At the very least, a DHCP server should supply the 
-   Client's subnet mask, router (default gateway) address and dns server. This list must be 
+/* At the very least, a DHCP server should supply the
+   Client's subnet mask, router (default gateway) address and dns server. This list must be
    space separated. The combined required and optional server options
    should be less than NX_DHCP_CLIENT_OPTIONS_MAX.
 */
@@ -252,10 +237,10 @@ extern   "C" {
 #endif
 
 
-/* 
+/*
    Define the packet payload size, keeping in mind the DHCP Server must support
-   at least a 548 byte DHCP Client message as per RFC 2131 and allow room for Ethernet, UDP and 
-   IP headers and 4 byte alignment. 
+   at least a 548 byte DHCP Client message as per RFC 2131 and allow room for Ethernet, UDP and
+   IP headers and 4 byte alignment.
 */
 #ifndef NX_DHCP_MINIMUM_PACKET_PAYLOAD
 #define NX_DHCP_MINIMUM_PACKET_PAYLOAD          (NX_BOOT_BUFFER_SIZE + NX_PHYSICAL_HEADER +  sizeof(NX_IPV4_HEADER) + sizeof(NX_UDP_HEADER))
@@ -491,7 +476,7 @@ typedef struct NX_DHCP_INTERFACE_TABLE_STRUCT
 
 /* Define the Interface address list. */
 
-/* Define the DHCP structure that contains all the server information necessary for this DHCP 
+/* Define the DHCP structure that contains all the server information necessary for this DHCP
    instance.  */
 
 typedef struct NX_DHCP_SERVER_STRUCT 
@@ -529,9 +514,9 @@ typedef struct NX_DHCP_SERVER_STRUCT
 
 /* Application caller is present, perform API mapping.  */
 
-/* Determine if error checking is desired.  If so, map DHCP API functions 
+/* Determine if error checking is desired.  If so, map DHCP API functions
    to the appropriate error checking front-ends.  Otherwise, map API
-   functions to the core functions that actually perform the work. 
+   functions to the core functions that actually perform the work.
    Note: error checking is enabled by default.  */
 
 #ifdef NX_DISABLE_ERROR_CHECKING

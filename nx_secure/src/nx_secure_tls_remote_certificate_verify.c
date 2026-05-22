@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -64,32 +64,6 @@
 /*                                                                        */
 /*    _nx_secure_tls_process_remote_certificate                           */
 /*                                          Process server certificate    */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            updated X.509 return value, */
-/*                                            resulting in version 6.1.6  */
-/*  01-31-2022     Timothy Stapko           Modified comment(s), and      */
-/*                                            improved code coverage      */
-/*                                            results,                    */
-/*                                            resulting in version 6.1.10 */
-/*  07-29-2022     Yuxin Zhou               Modified comment(s), and      */
-/*                                            checked expiration for all  */
-/*                                            the certs in the chain,     */
-/*                                            resulting in version 6.1.12 */
-/*  10-31-2022     Yanwu Cai                Modified comment(s), added    */
-/*                                            custom secret generation,   */
-/*                                            resulting in version 6.2.0  */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            x509 is disabled,           */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_remote_certificate_verify(NX_SECURE_TLS_SESSION *tls_session)

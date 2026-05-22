@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -38,21 +38,6 @@
 /*    It is assumed that nx_api.h and nx_port.h have already been         */ 
 /*    included.                                                           */
 /*                                                                        */ 
-/*  RELEASE HISTORY                                                       */ 
-/*                                                                        */ 
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Yuxin Zhou               Initial Version 6.0           */
-/*  09-30-2020     Yuxin Zhou               Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  08-02-2021     Yuxin Zhou               Modified comment(s), supported*/
-/*                                            adding additional request   */
-/*                                            option in parameter request,*/
-/*                                            resulting in version 6.1.8  */
-/*  01-31-2022     Yuxin Zhou               Modified comment(s), supported*/
-/*                                            multiple client instances,  */
-/*                                            resulting in version 6.1.10 */
-/*                                                                        */
 /**************************************************************************/
 
 #ifndef NXD_DHCP_CLIENT_H
@@ -73,16 +58,16 @@ extern   "C" {
 #include "nx_ip.h"
 
 
-/* Enable BOOTP protocol instead of DHCP, define this option.    
-#define NX_DHCP_ENABLE_BOOTP      
+/* Enable BOOTP protocol instead of DHCP, define this option.
+#define NX_DHCP_ENABLE_BOOTP
 */
 
-/*  Enable support for client state preserved between reboots   
-#define NX_DHCP_CLIENT_RESTORE_STATE  
+/*  Enable support for client state preserved between reboots
+#define NX_DHCP_CLIENT_RESTORE_STATE
 */
 
-/* Enable the DHCP Client to accept a pointer to the DHCP packet pool.  
-#define NX_DHCP_CLIENT_USER_CREATE_PACKET_POOL 
+/* Enable the DHCP Client to accept a pointer to the DHCP packet pool.
+#define NX_DHCP_CLIENT_USER_CREATE_PACKET_POOL
 */
 
 /* Enables an ARP probe for verifying the assigned DHCP address is
@@ -121,7 +106,7 @@ extern   "C" {
 #endif
 
 
-/* Define the DHCP stack priority. This priority must be high enough to insure the 
+/* Define the DHCP stack priority. This priority must be high enough to insure the
    DHCP client gets scheduled promptly, and thus assigned an IP address.  Assigning
    it a higher priority increases the risk of 'starving' out the IP thread task which
    needs to initialize the network driver (which is required to be able to transmit packets). */
@@ -144,7 +129,7 @@ extern   "C" {
 
 
 /* Define the size of DHCP options buffer.  */
-/* A DHCP client must be prepared to receive DHCP messages with an 'options' field of 
+/* A DHCP client must be prepared to receive DHCP messages with an 'options' field of
    at least length 312 octets. RFC 2131; Section 2. Protocol Summary.  */
 #ifndef NX_DHCP_OPTIONS_BUFFER_SIZE
 #define NX_DHCP_OPTIONS_BUFFER_SIZE     312
@@ -157,15 +142,15 @@ extern   "C" {
 #define NX_BOOT_CLIENT_BUFFER_SIZE      548
 
 
-/* Define the minimum IP datafram size as per RFC 2131; Section 2. Protocol Summary.  
+/* Define the minimum IP datafram size as per RFC 2131; Section 2. Protocol Summary.
    A DHCP Client must be prepared to receive a message of up to 576 bytes:
-   IP header(20 bytes), UDP header (8 bytes), required DHCP header fields (236 bytes) 
+   IP header(20 bytes), UDP header (8 bytes), required DHCP header fields (236 bytes)
    and the minimum requirement of option data(312 bytes).  */
 #define NX_DHCP_MINIMUM_IP_DATAGRAM     576
 
 
-/* Define the packet payload size, keeping in mind the DHCP Client must be prepared to 
-   receive a message of up to 576 octets and allow room for physical network header, 
+/* Define the packet payload size, keeping in mind the DHCP Client must be prepared to
+   receive a message of up to 576 octets and allow room for physical network header,
    as per RFC 2131; Section 2. Protocol Summary.  */
 #ifndef NX_DHCP_PACKET_PAYLOAD
 #define NX_DHCP_PACKET_PAYLOAD          (NX_DHCP_MINIMUM_IP_DATAGRAM + NX_PHYSICAL_HEADER)
@@ -179,21 +164,21 @@ extern   "C" {
 
 
 /* Define time out options for retransmission in seconds.  */
-/* Define the minimum amount of time to retransmit a DHCP IP address request. The 
+/* Define the minimum amount of time to retransmit a DHCP IP address request. The
    recommended wait time is 4 seconds in RFC 2131. */ 
 #ifndef NX_DHCP_MIN_RETRANS_TIMEOUT 
 #define NX_DHCP_MIN_RETRANS_TIMEOUT     (4 * NX_IP_PERIODIC_RATE)
 #endif
 
 
-/* Define the maximum amount of time to retransmit a DHCP IP address request. The 
+/* Define the maximum amount of time to retransmit a DHCP IP address request. The
    recommended wait time is 64 seconds in RFC 2131. */  
 #ifndef NX_DHCP_MAX_RETRANS_TIMEOUT 
 #define NX_DHCP_MAX_RETRANS_TIMEOUT     (64 * NX_IP_PERIODIC_RATE)
 #endif
 
 
-/* Define the minimum amount of time to retransmit a DHCP renew/rebind request. The 
+/* Define the minimum amount of time to retransmit a DHCP renew/rebind request. The
    recommended wait time is 60 seconds in RFC 2131. */ 
 #ifndef NX_DHCP_MIN_RENEW_TIMEOUT 
 #define NX_DHCP_MIN_RENEW_TIMEOUT      (60 * NX_IP_PERIODIC_RATE)
@@ -243,7 +228,7 @@ extern   "C" {
 
 /*  Define the wait time before restarting the configuration process when DHCP detects that the address is
     already in use.
- 
+
     The client SHOULD wait a minimum of ten seconds before restarting the configuration process
     to avoid excessive network traffic in case of looping. RFC2131, Section 3.1, Page 17.  */
 #ifndef NX_DHCP_RESTART_WAIT
@@ -411,7 +396,7 @@ typedef struct NX_DHCP_CLIENT_RECORD_STRUCT
 } NX_DHCP_CLIENT_RECORD;
 #endif /* NX_DHCP_CLIENT_RESTORE_STATE */
 
-/* Define the DHCP interface record that contains all the information necessary for a DHCP 
+/* Define the DHCP interface record that contains all the information necessary for a DHCP
    instance on each interface.  */
 typedef struct NX_DHCP_INTERFACE_RECORD_STRUCT
 {
@@ -503,8 +488,8 @@ typedef struct NX_DHCP_STRUCT
        the DHCP associated with this IP instance.  */
     VOID (*nx_dhcp_state_change_callback)(struct NX_DHCP_STRUCT *dhcp_ptr, UCHAR new_state);
      
-    /* Define the callback function for DHCP interface state change notification. 
-       this function is similar as nx_dhcp_state_change_callback, 
+    /* Define the callback function for DHCP interface state change notification.
+       this function is similar as nx_dhcp_state_change_callback,
 
        Note: Suggest using state change notification, and use nx_dhcp_interface_state_change_callback
              if DHCP is running on multiple interfaces.  */
@@ -526,9 +511,9 @@ typedef struct NX_DHCP_STRUCT
 
 /* Application caller is present, perform API mapping.  */
 
-/* Determine if error checking is desired.  If so, map DHCP API functions 
+/* Determine if error checking is desired.  If so, map DHCP API functions
    to the appropriate error checking front-ends.  Otherwise, map API
-   functions to the core functions that actually perform the work. 
+   functions to the core functions that actually perform the work.
    Note: error checking is enabled by default.  */
 
 #ifdef NX_DISABLE_ERROR_CHECKING

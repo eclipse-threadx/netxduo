@@ -2,7 +2,7 @@
 /* Requirement: __PRODUCT_NETXDUO__ is defined, NX_DISABLE_FRAGMENTATION is not defined. */
 /* Test sequence:
  * 1. Client send 1500 bytes to Server.
- * 2. Driver drop the first fragment packet. 
+ * 2. Driver drop the first fragment packet.
  * 3. Check if Server receive the 1500 bytes.
  */
 
@@ -164,7 +164,7 @@ UINT        packet_length;
         test_control_return(1);
     }
 
-    /* Let Socket 0 send all packet and fragment timeout.  
+    /* Let Socket 0 send all packet and fragment timeout.
        Cover the branch [ +  - ]: if ((ipv4_header -> nx_ip_header_word_1 & NX_IP_OFFSET_MASK) == 0) in _nx_ip_fragment_cleanup()  */
     tx_thread_sleep(70 * NX_IP_PERIODIC_RATE);
 

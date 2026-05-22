@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -94,20 +94,6 @@ static UINT _nx_secure_x509_extract_oid_data(const UCHAR *buffer, UINT oid, UINT
 /*                                          Process server certificate    */
 /*    _nx_secure_x509_certificate_initialize                              */
 /*                                          Initialize certificate        */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            removed dependency on TLS,  */
-/*                                            resulting in version 6.1.6  */
-/*  04-25-2022     Timothy Stapko           Modified comment(s),          */
-/*                                            added parameter checking,   */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_x509_certificate_parse(const UCHAR *buffer, UINT length, UINT *bytes_processed,
@@ -282,18 +268,6 @@ UINT         status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_x509_parse_public_key      Parse public key in           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Timothy Stapko           Modified comment(s),          */
-/*                                            removed parameter checking, */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_extract_oid_data(const UCHAR *buffer, UINT oid, UINT oid_param, ULONG length,
@@ -479,14 +453,6 @@ NX_SECURE_EC_PUBLIC_KEY *ec_pubkey;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_parse     Extract public key data       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_cert_data(const UCHAR *buffer, ULONG length,
@@ -686,14 +652,6 @@ UINT         status;
 /*                                                                        */
 /*    _nx_secure_x509_parse_cert_data       Parse certificate             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_version(const UCHAR *buffer, ULONG length, UINT *bytes_processed,
                                           NX_SECURE_X509_CERT *cert)
@@ -776,14 +734,6 @@ UINT         status;
 /*                                                                        */
 /*    _nx_secure_x509_parse_cert_data       Parse certificate             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_serial_num(const UCHAR *buffer, ULONG length,
                                              UINT *bytes_processed, NX_SECURE_X509_CERT *cert)
@@ -862,14 +812,6 @@ UINT         status;
 /*                                                                        */
 /*    _nx_secure_x509_parse_cert_data       Parse certificate             */
 /*    _nx_secure_x509_certificate_parse     Extract public key data       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_signature_algorithm(const UCHAR *buffer, ULONG length,
@@ -988,14 +930,6 @@ UCHAR        oid_found = NX_CRYPTO_FALSE;
 /*                                                                        */
 /*    _nx_secure_x509_parse_cert_data       Parse certificate             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_issuer(const UCHAR *buffer, ULONG length, UINT *bytes_processed,
                                          NX_SECURE_X509_CERT *cert)
@@ -1070,14 +1004,6 @@ UINT         status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_x509_parse_cert_data       Parse certificate             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_validity(const UCHAR *buffer, ULONG length, UINT *bytes_processed,
@@ -1195,14 +1121,6 @@ const UCHAR *current_buffer;
 /*                                                                        */
 /*    _nx_secure_x509_parse_cert_data       Parse certificate             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_subject(const UCHAR *buffer, ULONG length, UINT *bytes_processed,
                                           NX_SECURE_X509_CERT *cert)
@@ -1279,14 +1197,6 @@ UINT         status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_x509_parse_cert_data       Parse certificate             */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_public_key(const UCHAR *buffer, ULONG length,
@@ -1464,17 +1374,6 @@ UINT         status;
 /*                                                                        */
 /*    _nx_secure_x509_parse_cert_data       Parse certificate             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.11 */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_unique_ids(const UCHAR *buffer, ULONG length,
                                              UINT *bytes_processed, NX_SECURE_X509_CERT *cert)
@@ -1613,14 +1512,6 @@ UINT         processed_id;
 /*                                                                        */
 /*    _nx_secure_x509_parse_cert_data       Parse certificate             */
 /*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_extensions(const UCHAR *buffer, ULONG length,
                                              UINT *bytes_processed, NX_SECURE_X509_CERT *cert)
@@ -1733,17 +1624,6 @@ UINT         status;
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nx_secure_x509_certificate_parse     Extract public key data       */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s),          */
-/*                                            resulting in version 6.1    */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            improved internal logic,    */
-/*                                            resulting in version 6.1.11 */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_secure_x509_parse_signature_data(const UCHAR *buffer, ULONG length,

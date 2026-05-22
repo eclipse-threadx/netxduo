@@ -1,5 +1,5 @@
 /* This NetX test concentrates on the SNMPv3 operation with MD5 security.  The test examines the response packet length
-   and internal statistics of processing a v3 response to pass the test. 
+   and internal statistics of processing a v3 response to pass the test.
    */
 
 #include   "tx_api.h"
@@ -29,7 +29,7 @@ static VOID    v3_mib2_variable_update(NX_IP *ip_ptr, NX_SNMP_AGENT *agent_ptr);
 static UINT    query_response_complete = NX_FALSE; /* to synchronize when the agent sends the SNMP trap */
 #define        QUERY_COUNT             2
 
-/* To show byte by byte comparison of pre-recorded response with SNMP agent, define this option.  
+/* To show byte by byte comparison of pre-recorded response with SNMP agent, define this option.
 #define VERBOSE
 */
 
@@ -597,7 +597,7 @@ UINT    status;
 /* Create an error code if matching user not found. */
 #define USER_NOT_FOUND 1
 
-/* Define the username callback routine routine. Usernames should be 
+/* Define the username callback routine routine. Usernames should be
    associated with permissions (public or private string) and what version
    of SNMP the user is configured for. The username callback should verify
    the incoming username MIB access permissions.  */

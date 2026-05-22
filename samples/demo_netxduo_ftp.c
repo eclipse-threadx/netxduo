@@ -1,5 +1,5 @@
-/* This is a small demo of NetX FTP on the high-performance NetX TCP/IP stack.  This demo 
-   relies on ThreadX, NetX, and FileX to show a simple file transfer from the client 
+/* This is a small demo of NetX FTP on the high-performance NetX TCP/IP stack.  This demo
+   relies on ThreadX, NetX, and FileX to show a simple file transfer from the client
    and then back to the server.  */
 
 
@@ -82,7 +82,7 @@ NXD_ADDRESS     client_ip_address;
 #endif
 
 
-/* Define server login/logout functions.  These are stubs for functions that would 
+/* Define server login/logout functions.  These are stubs for functions that would
    validate a client login request.   */
            
 #ifdef USE_IPV6
@@ -314,7 +314,7 @@ UINT        iface_index, address_index;
         return;
      }
     
-     /* Set the host global IP address. We are assuming a 64 
+     /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&client_ip, iface_index, &client_ip_address, 64, &address_index);
 
@@ -616,7 +616,7 @@ UINT            iface_index, address_index;
         return;
      }
 
-    /* Set the host global IP address. We are assuming a 64 
+    /* Set the host global IP address. We are assuming a 64
        bit prefix here but this can be any value (< 128). */
     status = nxd_ipv6_address_set(&server_ip, iface_index, &server_ip_address, 64, &address_index);
 

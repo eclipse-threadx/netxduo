@@ -5,8 +5,8 @@
    There are two DHCP Client threads that independently activate the DHCP Client on
    the primary or secondary interface. When they reach the bound state, each interface Client
    deactivates the DHCP Client process and the DHCP Client goes back to the NOT STARTED state.
- 
-   There is one server thread handling DHCP Client messages on both interfaces. 
+
+   There is one server thread handling DHCP Client messages on both interfaces.
 */
 
 
@@ -217,7 +217,7 @@ static int offer_response1_size = 300;
 /* Frame (342 bytes) */
 static char ack_response1[300] = {
 
-//0x02, 0x01, 0x06, 0x00, 0x2a, 0x3e, 0xF0, 0x1D, 
+//0x02, 0x01, 0x06, 0x00, 0x2a, 0x3e, 0xF0, 0x1D,
 #ifdef __PRODUCT_NETXDUO__
 0x02, 0x01, 0x06, 0x00, 0x2a, 0x3e, 0xF0, 0x1D, 
 #else

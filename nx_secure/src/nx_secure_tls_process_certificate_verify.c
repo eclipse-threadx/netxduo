@@ -1,11 +1,11 @@
 /***************************************************************************
- * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
- * 
+ *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -26,10 +26,14 @@
 #ifdef NX_SECURE_ENABLE_DTLS
 #include "nx_secure_dtls.h"
 #endif /* NX_SECURE_ENABLE_DTLS */
+#include "nx_crypto_rsa.h"
 
 #ifndef NX_SECURE_DISABLE_X509
-static UCHAR handshake_hash[64 + 34 + 32]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256. */
+static UCHAR handshake_hash[64 + 34 + 64]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256/384/512. */
 static UCHAR _nx_secure_decrypted_signature[600];
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+static UCHAR _nx_secure_pss_scratch[600]; /* PSS verify: db[<=511 B] + h_prime[<=64 B] for RSA-4096+SHA-512 */
+#endif
 
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
 static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
@@ -77,32 +81,6 @@ static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    None                                                                */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  05-19-2020     Timothy Stapko           Initial Version 6.0           */
-/*  09-30-2020     Timothy Stapko           Modified comment(s), update   */
-/*                                            ECC find curve method,      */
-/*                                            verified memcpy use cases,  */
-/*                                            resulting in version 6.1    */
-/*  04-02-2021     Timothy Stapko           Modified comment(s),          */
-/*                                            updated X.509 return value, */
-/*                                            resulting in version 6.1.6  */
-/*  08-02-2021     Timothy Stapko           Modified comment(s), added    */
-/*                                            hash clone and cleanup,     */
-/*                                            resulting in version 6.1.8  */
-/*  04-25-2022     Yuxin Zhou               Modified comment(s),          */
-/*                                            removed unnecessary code,   */
-/*                                            resulting in version 6.1.11 */
-/*  10-31-2022     Yanwu Cai                Modified comment(s),          */
-/*                                            updated parameters list,    */
-/*                                            resulting in version 6.2.0  */
-/*  03-08-2023     Yanwu Cai                Modified comment(s),          */
-/*                                            fixed compiler errors when  */
-/*                                            x509 is disabled,           */
-/*                                            resulting in version 6.2.1  */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_secure_tls_process_certificate_verify(NX_SECURE_TLS_SESSION *tls_session,
@@ -184,7 +162,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
     if (tls_session -> nx_secure_tls_1_3)
     {
-        /* TLS1.3 uses RSASSA-PSS instead of RSASSA-PKCS. RSASSA-PSS is not supported now. */
+        /* Select crypto methods based on the wire signature algorithm code. */
         switch ((UINT)((packet_buffer[0] << 8) + packet_buffer[1]))
         {
         case NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256:
@@ -195,6 +173,15 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
             break;
         case NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512:
             signature_algorithm = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512;
+            break;
+        case 0x0804u: /* rsa_pss_rsae_sha256 */
+            signature_algorithm = NX_SECURE_TLS_X509_TYPE_RSA_SHA_256;
+            break;
+        case 0x0805u: /* rsa_pss_rsae_sha384 */
+            signature_algorithm = NX_SECURE_TLS_X509_TYPE_RSA_SHA_384;
+            break;
+        case 0x0806u: /* rsa_pss_rsae_sha512 */
+            signature_algorithm = NX_SECURE_TLS_X509_TYPE_RSA_SHA_512;
             break;
         default:
             return(NX_SECURE_TLS_UNSUPPORTED_CERT_SIGN_ALG);
@@ -248,18 +235,21 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
              NX_SECURE_MEMCPY(&handshake_hash[64], client_context, 34); /* Use case of memcpy is verified. */
          }
 
-         /* Copy in transcript hash. */
-         NX_SECURE_MEMCPY(&handshake_hash[64 + 34], transcript_hash, 32); /* Use case of memcpy is verified. */
-
-         handshake_hash_length = 130;
-
-
-         /* Generate a hash of the data we just produced. */
-         /* Use SHA-256 for now... */
+         /* Determine hash method and transcript hash length before copying.
+            hash_method drives the transcript hash size: 32 (SHA-256), 48 (SHA-384), 64 (SHA-512). */
          hash_method = crypto_methods -> nx_secure_x509_hash_method;
 
          metadata = tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch;
          metadata_size = tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch_size;
+
+         {
+         UINT transcript_hash_len = (UINT)(hash_method -> nx_crypto_ICV_size_in_bits >> 3);
+
+         /* Copy in transcript hash — length depends on negotiated hash algorithm. */
+         NX_SECURE_MEMCPY(&handshake_hash[64 + 34], transcript_hash, transcript_hash_len); /* Use case of memcpy is verified. */
+
+         handshake_hash_length = 64u + 34u + transcript_hash_len;
+         }
 
 
          /* Hash the data using the chosen hash method. */
@@ -523,11 +513,16 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
         if (tls_session -> nx_secure_tls_protocol_version == NX_SECURE_TLS_VERSION_TLS_1_2)
 #endif /* NX_SECURE_ENABLE_DTLS */
         {
-            /* Check the signature method. */
-            if (packet_buffer[0] != NX_SECURE_TLS_HASH_ALGORITHM_SHA256 ||
-                packet_buffer[1] != NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA)
+            /* Check the signature method (skipped for TLS 1.3: already validated above). */
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+            if (!tls_session -> nx_secure_tls_1_3)
+#endif
             {
-                return(NX_SECURE_TLS_UNKNOWN_CERT_SIG_ALGORITHM);
+                if (packet_buffer[0] != NX_SECURE_TLS_HASH_ALGORITHM_SHA256 ||
+                    packet_buffer[1] != NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA)
+                {
+                    return(NX_SECURE_TLS_UNKNOWN_CERT_SIG_ALGORITHM);
+                }
             }
 
             /* Get the length of the encrypted signature data. */
@@ -637,6 +632,30 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
                 return(status);
             }
         }
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+        if (tls_session -> nx_secure_tls_1_3)
+        {
+            /* RSA-PSS verification for TLS 1.3 (RFC 8017 §9.1.2, RFC 8446 §4.4.3). */
+            UINT hash_len = (UINT)(hash_method -> nx_crypto_ICV_size_in_bits >> 3);
+            UINT em_bits  = (data_size << 3) - 1u; /* emBits = modBits - 1 */
+
+            status = _nx_crypto_rsa_pss_verify(
+                handshake_hash, hash_len,
+                _nx_secure_decrypted_signature, em_bits,
+                hash_method,
+                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch_size,
+                _nx_secure_pss_scratch, sizeof(_nx_secure_pss_scratch));
+
+#ifdef NX_SECURE_KEY_CLEAR
+            NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
+            NX_SECURE_MEMSET(_nx_secure_decrypted_signature, 0, sizeof(_nx_secure_decrypted_signature));
+            NX_SECURE_MEMSET(_nx_secure_pss_scratch, 0, sizeof(_nx_secure_pss_scratch));
+#endif /* NX_SECURE_KEY_CLEAR */
+            return((status == NX_CRYPTO_SUCCESS) ? NX_SUCCESS : (UINT)NX_SECURE_TLS_CERTIFICATE_VERIFY_FAILURE);
+        }
+#endif /* NX_SECURE_TLS_TLS_1_3_ENABLED */
 
         /* Check PKCS-1 Signature padding. The scheme is to start with the block type (0x00, 0x01 for signing)
            then pad with 0xFF bytes (for signing) followed with a single 0 byte right before the payload,

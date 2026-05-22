@@ -52,7 +52,7 @@ static ULONG                   dest_unreachable_count;
 static ULONG                   parameter_problem_count;
 static NX_PACKET              *test_packet[10];
 
-/* Packet to trigger parameter problem message. 
+/* Packet to trigger parameter problem message.
  * src: 2001::1000:1
  * dst: ff02::1 */
 static const unsigned char pkt1[] = {
@@ -70,7 +70,7 @@ static const unsigned char pkt1[] = {
 0x03, 0x04, 0x05                                /* ... */
 };
 
-/* Packet to trigger parameter problem message. 
+/* Packet to trigger parameter problem message.
  * src: fe80::1000:1
  * dst: ff02::1 */
 static const unsigned char pkt2[] = {
@@ -444,7 +444,7 @@ UINT        i;
     my_packet -> nx_packet_length = sizeof(pkt2) - 14;
     my_packet -> nx_packet_append_ptr = my_packet -> nx_packet_prepend_ptr + my_packet -> nx_packet_length;
 
-    /* Directly receive the packet to let IP 1 send parameter problem packet. 
+    /* Directly receive the packet to let IP 1 send parameter problem packet.
      * Since lla_2 is not ready, no ICMPV6 message could be sent from link local address. */
     _nx_ip_packet_deferred_receive(&ip_1, my_packet);     
 

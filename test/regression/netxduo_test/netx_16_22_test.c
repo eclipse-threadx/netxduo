@@ -4,7 +4,7 @@
    1. Set 'nx_ip_tcp_packet_receive' pointer of client ip instance to 'my_tcp_packet_receive_16_21' to deal with ACK packet.
    2. Client sends data whose length equals window size of server to server.
    3. Server sends back ACK with window size 0.
-   4. Client sends probe to server.  
+   4. Client sends probe to server.
    5. Server sends back ACK with window size 0.
    6. Server receives data and window size is back to original.  */
 

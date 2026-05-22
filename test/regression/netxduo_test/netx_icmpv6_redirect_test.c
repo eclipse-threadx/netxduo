@@ -69,7 +69,7 @@ static const unsigned char pkt2[102] = {
 };
 
 
-/* ICMPv6 redirect to 3ffe:501:ffff::200:ff:fe00:100. 
+/* ICMPv6 redirect to 3ffe:501:ffff::200:ff:fe00:100.
  * MTU in MTU option is 1484 */
 static const unsigned char pkt3[110] = {
 0x00, 0x11, 0x22, 0x33, 0x44, 0x56, 0x00, 0x00, /* .."3DV.. */
@@ -89,7 +89,7 @@ static const unsigned char pkt3[110] = {
 };
 
 
-/* ICMPv6 redirect to 3ffe:501:ffff::200:ff:fe00:100. 
+/* ICMPv6 redirect to 3ffe:501:ffff::200:ff:fe00:100.
  * MTU in MTU option is 1244 */
 static const unsigned char pkt4[110] = {
 0x00, 0x11, 0x22, 0x33, 0x44, 0x56, 0x00, 0x00, /* .."3DV.. */
@@ -108,7 +108,7 @@ static const unsigned char pkt4[110] = {
 0x00, 0x00, 0x00, 0x00, 0xa1, 0xa1              /* ...... */
 };
 
-/* ICMPv6 redirect to 3ffe:501:ffff::200:ff:fe00:100. 
+/* ICMPv6 redirect to 3ffe:501:ffff::200:ff:fe00:100.
  * MTU in MTU option is 1200, less than NX_MINIMUM_IPV6_PATH_MTU */
 static const unsigned char pkt5[110] = {
 0x00, 0x11, 0x22, 0x33, 0x44, 0x56, 0x00, 0x00, /* .."3DV.. */

@@ -2,8 +2,8 @@
 
 /* Procedure
 1. Client socket connects to server socket.
-2. Client sends five packets to server. The size of each packet is 1/5 of window size. Then the send window should be zero. 
-3. Drop the second packet from client to server. 
+2. Client sends five packets to server. The size of each packet is 1/5 of window size. Then the send window should be zero.
+3. Drop the second packet from client to server.
 4. Try to send 1/5 of window size from client to server without wait. It should fail since send window is zero. */
 
 #include   "tx_api.h"

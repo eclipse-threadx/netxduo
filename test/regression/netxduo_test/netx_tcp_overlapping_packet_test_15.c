@@ -183,12 +183,12 @@ ULONG          seq1;
         error_counter++;
 
     /* Fill in the packet with data.      */
-    /* The full message to send is: 11122222333333344444444555 
+    /* The full message to send is: 11122222333333344444444555
                     Packet 1 sends: 111
                     Packet 2 sends:                        555
-                    Packet 3 sends: 111222223333333 
+                    Packet 3 sends: 111222223333333
                     Packet 4 sends:                    4444
-                    Packet 5 sends:              33444444       
+                    Packet 5 sends:              33444444
     */
     
     status = nx_packet_data_append(my_packet1, &msg[0], 3, &pool_0, TX_WAIT_FOREVER);

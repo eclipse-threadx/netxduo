@@ -1,11 +1,11 @@
 /* 9.17 TCP, in SYN-RCVD state, reached through active OPEN, MUST inform "connection refused" to application on recv a RST.
    and socket state MUST go to CLOSED state on RST.*/
 
-/* RFC 793, Section 3.9, page 70, Event Processing. 
-The user need not be informed.  If this connection was 
-initiated with an active OPEN (i.e., came from SYN-SENT state) 
-then the connection was refused, signalthe user "connection refused".  
-In either case, all segmentson the retransmission queue should be removed. 
+/* RFC 793, Section 3.9, page 70, Event Processing.
+The user need not be informed.  If this connection was
+initiated with an active OPEN (i.e., came from SYN-SENT state)
+then the connection was refused, signalthe user "connection refused".
+In either case, all segmentson the retransmission queue should be removed.
 And in the active OPEN case, enter the CLOSED state and delete the TCB,and return.  */
 
 /* Procedure
