@@ -42,6 +42,7 @@ static VOID thread_0_entry(ULONG thread_input)
 UINT i;
 NX_CRYPTO_METHOD *method_hkdf;
 NX_CRYPTO_METHOD *method_hash;
+NX_CRYPTO_HKDF *hkdf;
 
     /* Print out test information banner.  */
     printf("NetX Secure Test:   HKDF Test..........................................");
@@ -71,6 +72,10 @@ NX_CRYPTO_METHOD *method_hash;
         /* Initialize the IKM. */
         method_hkdf->nx_crypto_init(method_hkdf, (UCHAR*)(hkdf_test_data[i].ikm), hkdf_test_data[i].ikm_len << 3,
                                     NX_NULL, hkdf_metadata, sizeof(hkdf_metadata));
+
+        hkdf = (NX_CRYPTO_HKDF *)hkdf_metadata;
+        EXPECT_EQ((UCHAR *)hkdf_test_data[i].ikm, hkdf->nx_crypto_hkdf_ikm);
+        EXPECT_EQ(hkdf_test_data[i].ikm_len, hkdf->nx_crypto_hkdf_ikm_length);
 
         method_hkdf->nx_crypto_operation(NX_CRYPTO_HKDF_SET_HMAC, NX_NULL, &crypto_method_hmac,
                 					     NX_NULL, 0,NX_NULL, 0, NX_NULL, NX_NULL, 0, &hkdf_metadata,
