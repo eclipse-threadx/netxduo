@@ -1054,7 +1054,7 @@ const UCHAR *current_buffer;
         return(NX_SECURE_X509_UNEXPECTED_ASN1_TAG);
     }
 
-    cert -> nx_secure_x509_validity_format = tlv_type;
+    cert -> nx_secure_x509_not_before_validity_format = tlv_type;
     cert -> nx_secure_x509_not_before = tlv_data;
     cert -> nx_secure_x509_not_before_length = (USHORT)tlv_length;
 
@@ -1075,6 +1075,7 @@ const UCHAR *current_buffer;
         return(NX_SECURE_X509_UNEXPECTED_ASN1_TAG);
     }
 
+    cert -> nx_secure_x509_not_after_validity_format = tlv_type;
     cert -> nx_secure_x509_not_after = tlv_data;
     cert -> nx_secure_x509_not_after_length = (USHORT)tlv_length;
 
