@@ -963,6 +963,8 @@ typedef struct NX_BSD_SOCKET_STRUCT
     INT                 nx_bsd_option_linger_time;
     UINT                nx_bsd_option_linger_time_closed;
     UINT                nx_bsd_option_linger_start_close;
+    struct nx_bsd_linger
+                        nx_bsd_option_linger;
     UINT                nx_bsd_socket_time_wait_remaining;
     ULONG               nx_bsd_option_receive_timeout;
     ULONG               nx_bsd_option_send_timeout;
