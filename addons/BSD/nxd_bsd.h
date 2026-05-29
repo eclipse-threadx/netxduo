@@ -1015,6 +1015,7 @@ VOID nx_bsd_raw_receive_notify(NX_IP *ip_ptr, UINT bsd_socket_index);
 #endif
 UINT nx_bsd_socket_set_inherited_settings(UINT master_sock_id, UINT secondary_sock_id);
 INT  nx_bsd_recvfrom(INT sockID, CHAR *buffer, INT buffersize, INT flags,struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen);
+INT  nx_bsd_recvfromto(INT sockID, CHAR *rcvBuffer, INT bufferLength, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen, struct nx_bsd_sockaddr *toAddr, INT *toAddrLen);
 INT  nx_bsd_recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags);
 INT  nx_bsd_recvmsg(INT sockID, struct nx_bsd_msghdr *msg, INT flags);
 INT  nx_bsd_sendto(INT sockID, CHAR *msg, INT msgLength, INT flags, struct nx_bsd_sockaddr *destAddr, INT destAddrLen);

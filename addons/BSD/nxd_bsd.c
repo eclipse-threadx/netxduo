@@ -4408,17 +4408,17 @@ struct nx_bsd_sockaddr_in6
 
         if(toAddr && (*toAddrLen != 0))
         {
+#ifndef NX_DISABLE_IPV4
             if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET)
             {
                 ULONG nx_ip_header_destination_ip = ((NX_IPV4_HEADER *)packet_ptr -> nx_packet_ip_header) -> nx_ip_header_destination_ip;
-
-                ULONG *prepend_ptr =  (ULONG *)packet_ptr -> nx_packet_prepend_ptr;
-                USHORT port =  (USHORT)(*(prepend_ptr - 2U) & 0xFFFFU);
-
+                ULONG *prepend_ptr = (ULONG *)packet_ptr -> nx_packet_prepend_ptr;
+                USHORT dst_port = (USHORT)(*(prepend_ptr - 2U) & 0xFFFFU);
                 struct nx_bsd_sockaddr_in destination_address;
-                destination_address.sin_addr.s_addr = ntohl(nx_ip_header_destination_ip);
-                destination_address.sin_port = ntohs(port);
+
                 destination_address.sin_family = AF_INET;
+                destination_address.sin_addr.s_addr = ntohl(nx_ip_header_destination_ip);
+                destination_address.sin_port = ntohs(dst_port);
 
                 if(*toAddrLen > (INT)sizeof(struct nx_bsd_sockaddr_in))
                 {
@@ -4426,6 +4426,29 @@ struct nx_bsd_sockaddr_in6
                 }
                 memcpy(toAddr, &destination_address, (UINT)(*toAddrLen));
             }
+#endif /* NX_DISABLE_IPV4 */
+#ifdef FEATURE_NX_IPV6
+            if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET6)
+            {
+                NX_IPV6_HEADER *ipv6_header = (NX_IPV6_HEADER *)packet_ptr -> nx_packet_ip_header;
+                ULONG *prepend_ptr = (ULONG *)packet_ptr -> nx_packet_prepend_ptr;
+                USHORT dst_port = (USHORT)(*(prepend_ptr - 2U) & 0xFFFFU);
+                struct nx_bsd_sockaddr_in6 destination_address6;
+
+                destination_address6.sin6_family = AF_INET6;
+                destination_address6.sin6_addr._S6_un._S6_u32[0] = ntohl(ipv6_header -> nx_ip_header_destination_ip[0]);
+                destination_address6.sin6_addr._S6_un._S6_u32[1] = ntohl(ipv6_header -> nx_ip_header_destination_ip[1]);
+                destination_address6.sin6_addr._S6_un._S6_u32[2] = ntohl(ipv6_header -> nx_ip_header_destination_ip[2]);
+                destination_address6.sin6_addr._S6_un._S6_u32[3] = ntohl(ipv6_header -> nx_ip_header_destination_ip[3]);
+                destination_address6.sin6_port = ntohs(dst_port);
+
+                if(*toAddrLen > (INT)sizeof(struct nx_bsd_sockaddr_in6))
+                {
+                    *toAddrLen = (INT)sizeof(struct nx_bsd_sockaddr_in6);
+                }
+                memcpy(toAddr, &destination_address6, (UINT)(*toAddrLen));
+            }
+#endif /* FEATURE_NX_IPV6 */
         }
     }
 
@@ -5979,10 +6002,39 @@ UINT  dot_flag;
            value |= ip_address_number[i] << (24 - (i*8));
        }
     }
-    else
+    /* Most common input... */
+    else if (ip_address_index == 1)
     {
-        return 0;
+
+        /* We are done, this address contained one 32 bit word (no separators).  */
     }
+    /* Less common input... */
+    else if (ip_address_index ==  2)
+    {
+        /* One separator, so the format is a.b where b is 24 bits */
+
+        /* Check for a computed sum greater than can be contained in 24 bits. */
+        if (value > 0xffffff)
+            return (0);
+
+        /* 'Add' the last extracted number by prepending the most significant byte onto the total value. */
+        value |= (ip_address_number[0] << 24);
+     }
+     else if (ip_address_index ==  3)
+     {
+        /* Two separators parsed, so the format is a.b.c where c is 16 bits */
+         INT i;
+
+         /* Check for a computed sum greater than can be contained in 16 bits. */
+        if (value > 0xffff)
+            return (0);
+
+        /* 'Add' the last extracted number by prepending the two most significant bytes onto the total value. */
+        for (i = 0; i<=1; i++)
+        {
+            value |= ip_address_number[i] << (24 - (i*8));
+        }
+     }
 
     /* Check if a return pointer for the address data is supplied. */
     if (addr)
