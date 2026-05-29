@@ -3016,6 +3016,14 @@ struct nx_bsd_sockaddr_in6
     /* Reset the master_socket_id */
     ret = nx_bsd_tcp_create_listen_socket(sockID, 0);
 
+    if (ret < 0)
+    {
+        /* Could not create the next listen socket (e.g. all BSD socket slots are in use).
+           Mark the secondary slot invalid so it is not reused, but still return the
+           already-accepted socket descriptor to the caller. */
+        (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id = NX_BSD_MAX_SOCKETS;
+    }
+
     /* Make sure this thread is still the owner.  */
     if (bsd_socket_ptr -> nx_bsd_socket_busy == tx_thread_identify())
     {
@@ -3026,11 +3034,6 @@ struct nx_bsd_sockaddr_in6
 
     /* Release the protection mutex.  */
     tx_mutex_put(nx_bsd_protection_ptr);
-
-    if(ret < 0)
-    {
-        return ret;
-    }
 
     return(secondary_socket_id + NX_BSD_SOCKFD_START);
 
@@ -8162,6 +8165,21 @@ INT                     ret;
                         nx_bsd_socket_array[i].nx_bsd_socket_received_byte_count += packet_ptr -> nx_packet_length;
                         nx_bsd_socket_array[i].nx_bsd_socket_received_packet_count++;
 
+                        /* Check for urgent data (URG bit) now, while the packet is still
+                           accessible.  The exceptfds scan runs after readfds and would miss
+                           this packet because nx_tcp_socket_receive() has already removed it
+                           from the TCP receive queue. */
+                        if (exceptfds && NX_BSD_FD_ISSET(i + NX_BSD_SOCKFD_START, exceptfds))
+                        {
+                        NX_TCP_HEADER *tcp_header_ptr;
+
+                            tcp_header_ptr = (NX_TCP_HEADER *)packet_ptr -> nx_packet_prepend_ptr;
+                            if (tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_URG_BIT)
+                            {
+                                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
+                            }
+                        }
+
                         /* Add this socket to the read ready list.  */
                         NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
                     }
@@ -8210,19 +8228,21 @@ INT                     ret;
             /* Yes, decrement the number of read selectors left to search for.  */
             writefds_left--;
 
-            /* Check to see if there is a connection request pending.  */
-            if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTION_REQUEST)
+            /* Is this BSD socket not in use?  */
+            if (!(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
             {
 
-                if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET)
-                {
-                    // empty
-                }
-                else
-                {
-                    /* Yes, add this socket to the write ready list.  */
-                    NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
-                }
+                /* Closed/unallocated descriptor: report as writable. */
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+            }
+
+            /* Check to see if there is a connection request pending on a client socket.  */
+            else if ((nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTION_REQUEST) &&
+                     !(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET))
+            {
+
+                /* Yes, add this socket to the write ready list.  */
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
 
             /* Check to see if there is an error.*/
@@ -8231,17 +8251,16 @@ INT                     ret;
 
                 NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
-            /* Is this a TCP socket? */
-            else if (nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket)
+            /* Is this a TCP socket that is connected? */
+            else if ((nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket) &&
+                     (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED))
             {
-                if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED)
-                {
-                    /* Yes, add this socket to the write ready list.  */
-                    NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
-                }
+
+                /* Yes, add this socket to the write ready list.  */
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
             /* Is this BSD socket bound?  */
-            else if ((nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_BOUND))
+            else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_BOUND)
             {
 
                 /* Yes, add this socket to the write ready list.  */
@@ -8276,25 +8295,6 @@ INT                     ret;
             {
 
                 NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
-            }
-
-            /* Is this a TCP socket? */
-            else if (nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket)
-            {
-                if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED)
-                {
-                    packet_ptr = nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket->nx_tcp_socket_receive_queue_head;
-
-                    if (packet_ptr != NX_NULL)
-                    {
-                        NX_TCP_HEADER *tcp_header_ptr = (NX_TCP_HEADER *)packet_ptr->nx_packet_prepend_ptr;
-
-                        if (tcp_header_ptr->nx_tcp_header_word_3 & NX_TCP_URG_BIT)
-                        {
-                            NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
-                        }
-                    }
-                }
             }
         }
     }
