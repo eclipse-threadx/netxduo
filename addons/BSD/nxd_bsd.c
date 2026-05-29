@@ -164,7 +164,8 @@ static VOID  _nxd_bsd_ipv4_packet_send(NX_PACKET *packet_ptr);
 static INT   nx_bsd_send_internal(INT sockID, const CHAR *msg, INT msgLength, INT flags,
                                   NXD_ADDRESS *dst_address, USHORT dst_port, UINT local_interface_index);
 static INT   nx_bsd_recv_internal(INT sockID, struct nx_bsd_iovec *iov, size_t iovlen, INT flags,
-                                  struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen);
+                                  struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen,
+                                  struct nx_bsd_sockaddr *toAddr, INT *toAddrLen);
 #ifdef FEATURE_NX_IPV6
 static VOID  _nxd_bsd_ipv6_packet_send(NX_PACKET *packet_ptr, ULONG *src_addr, ULONG *dest_addr);
 #endif /* FEATURE_NX_IPV6 */
@@ -3931,7 +3932,7 @@ struct nx_bsd_iovec iov;
     iov.iov_len = (size_t)bufferLength;
 
     /* Call the recv_internal() function. */
-    return nx_bsd_recv_internal(sockID, &iov, 1, flags, NX_NULL, NX_NULL);
+    return nx_bsd_recv_internal(sockID, &iov, 1, flags, NX_NULL, NX_NULL, NX_NULL, NX_NULL);
 }
 
 
@@ -3986,7 +3987,21 @@ struct nx_bsd_iovec iov;
     iov.iov_len = (size_t)bufferLength;
 
     /* Call the recv_internal() function. */
-    return nx_bsd_recv_internal(sockID, &iov, 1, flags, fromAddr, fromAddrLen);
+    return nx_bsd_recv_internal(sockID, &iov, 1, flags, fromAddr, fromAddrLen, NX_NULL, NX_NULL);
+}
+
+
+INT  nx_bsd_recvfromto(INT sockID, CHAR *rcvBuffer, INT bufferLength, INT flags,
+                       struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen,
+                       struct nx_bsd_sockaddr *toAddr, INT *toAddrLen)
+{
+struct nx_bsd_iovec iov;
+
+    iov.iov_base = rcvBuffer;
+    iov.iov_len = (size_t)bufferLength;
+
+    /* Call the recv_internal() function. */
+    return nx_bsd_recv_internal(sockID, &iov, 1, flags, fromAddr, fromAddrLen, toAddr, toAddrLen);
 }
 
 /**************************************************************************/
@@ -4035,7 +4050,7 @@ INT fromAddrLen = 0;
         fromAddrLen = (INT)(msg -> msg_namelen);
     }
 
-    return(nx_bsd_recv_internal(sockID, msg -> msg_iov, msg -> msg_iovlen, flags, (struct nx_bsd_sockaddr *)(msg -> msg_name), &fromAddrLen));
+    return(nx_bsd_recv_internal(sockID, msg -> msg_iov, msg -> msg_iovlen, flags, (struct nx_bsd_sockaddr *)(msg -> msg_name), &fromAddrLen, NX_NULL, NX_NULL));
 }
 
 /**************************************************************************/
@@ -4102,7 +4117,9 @@ INT fromAddrLen = 0;
 /*    recvfrom                                                            */
 /*                                                                        */
 /**************************************************************************/
-static INT nx_bsd_recv_internal(INT sockID, struct nx_bsd_iovec *iov, size_t iovlen, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen)
+static INT nx_bsd_recv_internal(INT sockID, struct nx_bsd_iovec *iov, size_t iovlen, INT flags,
+                                struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen,
+                                struct nx_bsd_sockaddr *toAddr, INT *toAddrLen)
 {
 UINT                 status;
 NX_PACKET           *packet_ptr;
@@ -4388,6 +4405,51 @@ struct nx_bsd_sockaddr_in6
 
         /* Get the sender and port from the UDP packet.  */
         nxd_udp_source_extract(packet_ptr, &bsd_socket_ptr -> nx_bsd_socket_source_ip_address, (UINT *)&bsd_socket_ptr -> nx_bsd_socket_source_port);
+
+        if(toAddr && (*toAddrLen != 0))
+        {
+#ifndef NX_DISABLE_IPV4
+            if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET)
+            {
+                ULONG nx_ip_header_destination_ip = ((NX_IPV4_HEADER *)packet_ptr -> nx_packet_ip_header) -> nx_ip_header_destination_ip;
+                ULONG *prepend_ptr = (ULONG *)packet_ptr -> nx_packet_prepend_ptr;
+                USHORT dst_port = (USHORT)(*(prepend_ptr - 2U) & 0xFFFFU);
+                struct nx_bsd_sockaddr_in destination_address;
+
+                destination_address.sin_family = AF_INET;
+                destination_address.sin_addr.s_addr = ntohl(nx_ip_header_destination_ip);
+                destination_address.sin_port = ntohs(dst_port);
+
+                if(*toAddrLen > (INT)sizeof(struct nx_bsd_sockaddr_in))
+                {
+                    *toAddrLen = (INT)sizeof(struct nx_bsd_sockaddr_in);
+                }
+                memcpy(toAddr, &destination_address, (UINT)(*toAddrLen));
+            }
+#endif /* NX_DISABLE_IPV4 */
+#ifdef FEATURE_NX_IPV6
+            if(bsd_socket_ptr -> nx_bsd_socket_family == AF_INET6)
+            {
+                NX_IPV6_HEADER *ipv6_header = (NX_IPV6_HEADER *)packet_ptr -> nx_packet_ip_header;
+                ULONG *prepend_ptr = (ULONG *)packet_ptr -> nx_packet_prepend_ptr;
+                USHORT dst_port = (USHORT)(*(prepend_ptr - 2U) & 0xFFFFU);
+                struct nx_bsd_sockaddr_in6 destination_address6;
+
+                destination_address6.sin6_family = AF_INET6;
+                destination_address6.sin6_addr._S6_un._S6_u32[0] = ntohl(ipv6_header -> nx_ip_header_destination_ip[0]);
+                destination_address6.sin6_addr._S6_un._S6_u32[1] = ntohl(ipv6_header -> nx_ip_header_destination_ip[1]);
+                destination_address6.sin6_addr._S6_un._S6_u32[2] = ntohl(ipv6_header -> nx_ip_header_destination_ip[2]);
+                destination_address6.sin6_addr._S6_un._S6_u32[3] = ntohl(ipv6_header -> nx_ip_header_destination_ip[3]);
+                destination_address6.sin6_port = ntohs(dst_port);
+
+                if(*toAddrLen > (INT)sizeof(struct nx_bsd_sockaddr_in6))
+                {
+                    *toAddrLen = (INT)sizeof(struct nx_bsd_sockaddr_in6);
+                }
+                memcpy(toAddr, &destination_address6, (UINT)(*toAddrLen));
+            }
+#endif /* FEATURE_NX_IPV6 */
+        }
     }
 
 #if defined(NX_BSD_RAW_SUPPORT) || defined(NX_BSD_RAW_PPPOE_SUPPORT)

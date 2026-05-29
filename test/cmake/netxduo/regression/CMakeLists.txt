@@ -55,7 +55,8 @@ if("-DNX_BSD_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
       ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_fionread_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_select_spurious_event_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_socket_options_test.c
-      ${SOURCE_DIR}/bsd_test/netx_bsd_select_improvements_test.c)
+      ${SOURCE_DIR}/bsd_test/netx_bsd_select_improvements_test.c
+      ${SOURCE_DIR}/bsd_test/netx_bsd_recvfromto_test.c)
   if("-DNX_BSD_RAW_SUPPORT" IN_LIST ${CMAKE_BUILD_TYPE})
     list(
       APPEND
