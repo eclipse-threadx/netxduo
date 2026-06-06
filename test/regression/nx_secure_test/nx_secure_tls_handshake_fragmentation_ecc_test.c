@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This test concentrates on fragmented TLS handshake message across multiple TLS records
 (e.g. when a certificate message is splitted into multiple fragments).
 The Cipher Suite used was TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 (0xc024). */

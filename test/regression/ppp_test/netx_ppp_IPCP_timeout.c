@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This demo tests the nx_ppp_restart() function.  To simulate a link down in the middle of the IPCP
    negotiation, the thread_0/PPP_0 promotes the PPP 1 instance to LCP complete, and its IPCP state to STARTED.
    Then the PPP0 instance is suspended as part of simulating link down.

@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This test checks for the Telnet Server limiting itself to the NX_TELNET_MAX_CLIENTS. The test verifies
    that the Telnet Server supports at most NX_TELNET_MAX_CLIENTS simultaneous connections, and that each Client receives
    responses to their Telnet packets.

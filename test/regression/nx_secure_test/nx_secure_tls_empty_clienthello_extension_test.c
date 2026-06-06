@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* Length and bounds checking tests. Length fields are the most likely to be exploited by an attacker so we need to be sure all of our parsing is checking them correctly.
 One idea: generate a number of valid TLS handshake messages but use random lengths for each length field.
 Focus particularly on ClientHello and ServerHello extensions. Bugs like Heartbleed in OpenSSL occur in those extensions. Pay close attention to any length fields in the extensions.

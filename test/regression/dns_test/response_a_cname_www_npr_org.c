@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /*
 No.     Time        Source          Destination           Protocol    Length      Info
 8       1.404839       192.2.2.1        192.2.2.66              DNS          119        Yes    Standard query response 0x261c CNAME www.npr.cotcdb.net A 216.35.221.76

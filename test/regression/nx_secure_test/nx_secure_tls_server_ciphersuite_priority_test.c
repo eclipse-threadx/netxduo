@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This test verifies that a TLS server will select the top-priority ciphersuite in the local ciphersuite table from the selection provided
    by the remote client. The priority is determined by the order in the ciphersuite table, thus the highest priority ciphersuite has
    the lowest-value index in the table. */

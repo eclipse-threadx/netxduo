@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This NetX test is a simple contact between agent and browser with no security.  Note that
    NX_SNMP_FUNCTION_TESTING must be defined in nxd_snmp.c or else timer tick data (boot time, SysTimerTick, will not match the
    'pre-recorded' data that the NetX SNMP Agent responses re compared with, and the test will fail.
