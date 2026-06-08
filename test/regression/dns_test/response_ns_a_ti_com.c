@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /*
 No.     Time        Source                Destination           Protocol Length Info
      30 51.227025   192.2.2.1             192.2.2.240           DNS      349    Standard query response NS ns-d.pnap.net NS ns-b.pnap.net NS ns3.ti.com NS ns4.ti.com NS ns.ti.com NS ns2.ti.com NS ns-a.pnap.net NS ns-c.pnap.net

@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* TLS test - check appropriate behavior of TLS Client if no local certificate is assigned and the server requests a
  * Client Certificate message. The Client should send a Certificate message with an empty data field (0 bytes length)
  * and the Server then chooses what to do with the connection. Default for NetX Secure TLS Server is to reject

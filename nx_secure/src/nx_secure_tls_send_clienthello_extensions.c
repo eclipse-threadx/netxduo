@@ -451,6 +451,28 @@ UCHAR sig_algo = 0;
         }
     }
 
+    /* TLS 1.3 requires RSA-PSS instead of PKCS#1 v1.5 (RFC 8446 §4.2.3).
+       Map RSA + SHA-256/384/512 to rsa_pss_rsae_sha256/384/512 (0x0804/0805/0806). */
+    if (tls_session -> nx_secure_tls_1_3 &&
+        sig_algo == NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA)
+    {
+        switch (hash_algo)
+        {
+        case NX_SECURE_TLS_HASH_ALGORITHM_SHA256:
+            *signature_algorithm = 0x0804u; /* rsa_pss_rsae_sha256 */
+            break;
+        case NX_SECURE_TLS_HASH_ALGORITHM_SHA384:
+            *signature_algorithm = 0x0805u; /* rsa_pss_rsae_sha384 */
+            break;
+        case NX_SECURE_TLS_HASH_ALGORITHM_SHA512:
+            *signature_algorithm = 0x0806u; /* rsa_pss_rsae_sha512 */
+            break;
+        default:
+            *signature_algorithm = 0;
+        }
+        return;
+    }
+
     /* In TLS 1.3, the signing curve is constrained.  */
     if (tls_session -> nx_secure_tls_1_3 &&
         (named_curve != 0) &&

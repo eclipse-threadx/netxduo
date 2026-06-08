@@ -3838,7 +3838,7 @@ UINT        temp_realm_length = 0;
                                       "NetX HTTP File Open Failed", sizeof("NetX HTTP File Open Failed") - 1, NX_NULL, 0);
 
         /* Error, return to caller. */
-        goto put_process_end;
+        return;
     }
 
 

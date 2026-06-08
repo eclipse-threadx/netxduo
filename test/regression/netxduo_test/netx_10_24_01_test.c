@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* 10.24 TCP, in CLOSE-WAIT, CLOSING or LAST-ACK state, MUST not change state after receiving a FIN.  */
 /*This is 10.24_01 in CLOSE-WAIT state*/
 /*  Procedure

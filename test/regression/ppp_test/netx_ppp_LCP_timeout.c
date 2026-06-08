@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This demo tests the nx_ppp_restart() function.  The PPP_1 instance is never started.
    So PPP_0 fails to complete the LCP protocol. After so many attempts at the LCP
    protocol, the PPP_0 should go into a FAILED state and call the link down callback.

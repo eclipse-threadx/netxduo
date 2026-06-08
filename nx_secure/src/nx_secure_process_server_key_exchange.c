@@ -27,12 +27,14 @@
 #ifdef NX_SECURE_ENABLE_DTLS
 #include "nx_secure_dtls.h"
 #endif /* NX_SECURE_ENABLE_DTLS */
+#include "nx_crypto_rsa.h"
 
 #ifndef NX_SECURE_TLS_CLIENT_DISABLED
 
 #if defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && !defined(NX_SECURE_DISABLE_X509)
 static UCHAR hash[64]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256, SHA-384, SHA512. */
 static UCHAR decrypted_signature[512];
+static UCHAR _nx_secure_ske_pss_scratch[600]; /* PSS verify scratch: db[<=511 B] + h_prime[<=64 B] for RSA-4096+SHA-512 */
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE && !NX_SECURE_DISABLE_X509 */
 
 /**************************************************************************/
@@ -129,6 +131,7 @@ UCHAR                                *current_buffer;
 UCHAR                                 hash_algorithm;
 UCHAR                                 signature_algorithm;
 USHORT                                signature_algorithm_id;
+UINT                                  is_pss = NX_FALSE;
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
 UINT                                  i;
 #endif /* NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED */
@@ -330,6 +333,32 @@ UINT                                  i;
             	hash_algorithm = current_buffer[0];
             	signature_algorithm = current_buffer[1];
             	current_buffer += 2;
+
+            	/* Detect RSASSA-PSS signature schemes (RFC 8446 §4.2.3). The wire
+            	   tuple (0x08, 0x04/05/06) is not a valid TLS 1.2 (hash, sig) pair;
+            	   it encodes the 16-bit SignatureScheme code. Normalize it back to
+            	   (RSA, SHA-x) so the existing hash computation and RSA decrypt
+            	   path is reused; PSS-specific verify is selected via is_pss. */
+            	switch (((UINT)hash_algorithm << 8) + (UINT)signature_algorithm)
+            	{
+            	case 0x0804u: /* rsa_pss_rsae_sha256 */
+            	    hash_algorithm      = NX_SECURE_TLS_HASH_ALGORITHM_SHA256;
+            	    signature_algorithm = NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA;
+            	    is_pss              = NX_TRUE;
+            	    break;
+            	case 0x0805u: /* rsa_pss_rsae_sha384 */
+            	    hash_algorithm      = NX_SECURE_TLS_HASH_ALGORITHM_SHA384;
+            	    signature_algorithm = NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA;
+            	    is_pss              = NX_TRUE;
+            	    break;
+            	case 0x0806u: /* rsa_pss_rsae_sha512 */
+            	    hash_algorithm      = NX_SECURE_TLS_HASH_ALGORITHM_SHA512;
+            	    signature_algorithm = NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA;
+            	    is_pss              = NX_TRUE;
+            	    break;
+            	default:
+            	    break;
+            	}
             }
         }
 
@@ -740,6 +769,36 @@ UINT                                  i;
         		}
         		handler = NX_NULL;
 
+        		if (is_pss)
+        		{
+        			/* RSASSA-PSS verification (RFC 8017 §9.1.2). The RSA "decrypt"
+        			   above gave us the encoded message EM; the hash to verify is
+        			   the SKE handshake hash already computed in hash[]. */
+        			UINT hash_len = (UINT)(hash_method -> nx_crypto_ICV_size_in_bits >> 3);
+        			UINT em_bits  = ((UINT)signature_length << 3) - 1u; /* emBits = modBits - 1 */
+
+        			status = _nx_crypto_rsa_pss_verify(
+        			    hash, hash_len,
+        			    decrypted_signature, em_bits,
+        			    hash_method,
+        			    tls_handshake_hash -> nx_secure_tls_handshake_hash_scratch,
+        			    tls_handshake_hash -> nx_secure_tls_handshake_hash_scratch_size,
+        			    _nx_secure_ske_pss_scratch, sizeof(_nx_secure_ske_pss_scratch));
+
+#ifdef NX_SECURE_KEY_CLEAR
+        			NX_SECURE_MEMSET(hash, 0, sizeof(hash));
+        			NX_SECURE_MEMSET(decrypted_signature, 0, sizeof(decrypted_signature));
+        			NX_SECURE_MEMSET(_nx_secure_ske_pss_scratch, 0, sizeof(_nx_secure_ske_pss_scratch));
+#endif /* NX_SECURE_KEY_CLEAR */
+
+        			if (status != NX_CRYPTO_SUCCESS)
+        			{
+        				return(NX_SECURE_TLS_SIGNATURE_VERIFICATION_ERROR);
+        			}
+        		}
+        		else
+        		{
+
 #if (NX_SECURE_TLS_TLS_1_0_ENABLED || NX_SECURE_TLS_TLS_1_1_ENABLED)
 #ifdef NX_SECURE_ENABLE_DTLS
         		if (protocol_version == NX_SECURE_TLS_VERSION_TLS_1_0 ||
@@ -810,6 +869,7 @@ UINT                                  i;
         		{
         			return(NX_SECURE_TLS_SIGNATURE_VERIFICATION_ERROR);
         		}
+        		} /* end of !is_pss PKCS#1 v1.5 path */
         	}
         	else if (signature_algorithm == NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA &&
         			 auth_method -> nx_crypto_algorithm == NX_CRYPTO_DIGITAL_SIGNATURE_ECDSA)

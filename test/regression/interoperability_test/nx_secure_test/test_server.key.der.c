@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 unsigned char test_server_key_der[] = {
   0x30, 0x82, 0x04, 0xa4, 0x02, 0x01, 0x00, 0x02, 0x82, 0x01, 0x01, 0x00, 0xd0, 0x6a, 0x52, 0x6e,
   0xe6, 0x36, 0x44, 0x08, 0x62, 0x8c, 0xbb, 0xfe, 0xa2, 0xcf, 0xa6, 0xd2, 0x80, 0xd7, 0x56, 0x88,

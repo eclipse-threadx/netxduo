@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This test checks for the Telnet Server to handle invalid telnet client option replies and unsupported client telnet options
    in response to the server offering ECHO, Suppress Go Ahead and asks the peer not to ECHO (Don't Echo).
    The Telnet Client is programmed to respond with a WILL ECHO (to the server WILL ECHO), a WILL [0x99 unknown option] and Won't Echo.

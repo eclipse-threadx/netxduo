@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This NetX test concentrates on the basic SNMPv2 operation.  The 'manager' sends
    a request for an unknown item ("oid"). The SNMP agent should not responds, but
    set an internal error and be able to respond to the next request.
@@ -18,7 +29,8 @@ extern void    test_control_return(UINT);
 #define     DEMO_STACK_SIZE         4096
 
 extern MIB_ENTRY   mib2_mib[];
-//NX_SNMP_SECURITY_KEY my_authentication_key;
+
+//NX_SNMP_SECURITY_KEY my_authentication_key;
 
 NX_SNMP_SECURITY_KEY my_privacy_key;
 

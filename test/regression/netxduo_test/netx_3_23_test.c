@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* 3.23:TCP,  in CLOSE-WAIT state,
         MUST return an ACK with proper SEQ and ACK numbers after recv a seg with OTW SEQ or unacc ACK number,
         and remain in same state If the connection is in a synchronized state,

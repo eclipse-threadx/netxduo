@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* A client that can't receive unicast IP datagrams until its protocol software has been configured with an IP address SHOULD set the BROADCAST
  * bit in the 'flags' field to 1 in any DHCPDISCOVER or DHCPREQUEST messages that client sends.
  * rfc 2131, page 25, 4.1 Constructing and sending DHCP messages

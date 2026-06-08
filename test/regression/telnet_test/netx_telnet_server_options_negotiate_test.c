@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This test checks for the Telnet Server to negotiate with a Telnet Client for three common
    Telnet options.  It offers to ECHO, Suppress Go Ahead and asks the peer not to ECHO (Don't Echo).
    The Telnet Client is programmed to acknowledge the ECHO and SGA, and Won't Echo.

@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This case tests the ability of the HTTP Client to change ports it connects to the server on at
    runtime. It initially makes a PUT request and based on server information it receives, it                                                                                                                                                                                                                                                                                                                 .
    changes the connect port from the default 80 to 85.                                                                                                                                                                                                                                                                                                               .

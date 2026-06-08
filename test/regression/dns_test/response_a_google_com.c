@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /*
 No.     Time        Source                Destination           Protocol Length Info
      54 82.002033   192.2.2.1             192.2.2.240           DNS      246    Standard query response 0x0002  A 74.125.224.194 A 74.125.224.195 A 74.125.224.196 A 74.125.224.197 A 74.125.224.198 A 74.125.224.199 A 74.125.224.200 A 74.125.224.201 A 74.125.224.206 A 74.125.224.192 A 74.125.224.193

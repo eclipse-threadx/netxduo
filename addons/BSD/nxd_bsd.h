@@ -238,6 +238,7 @@ extern   "C" {
 #define nx_bsd_inet_ntop        inet_ntop
 #define nx_bsd_listen           listen
 #define nx_bsd_recvfrom         recvfrom
+#define nx_bsd_recvfromto       recvfromto
 #define nx_bsd_recv             recv
 #define nx_bsd_recvmsg          recvmsg
 #define nx_bsd_sendto           sendto
@@ -300,6 +301,7 @@ extern   "C" {
 #define     AF_INET                         2                       /* IPv4 socket (UDP, TCP, etc)                                          */
 #define     AF_INET6                        3                       /* IPv6 socket (UDP, TCP, etc)                                          */
 #define     AF_PACKET                       4                       /* Raw Packet type (Link Layer packets)                                 */
+#define     AF_MAX                          AF_PACKET
 
 /* Protocol families, same as address families.  */
 #define     PF_INET                         AF_INET
@@ -570,6 +572,8 @@ extern   "C" {
 
 /*  This second set of socket options take the socket level (category) IPPROTO_IP. */
 
+#define IP_TOS              25 /* Type Of Service */
+#define IP_TTL              26 /* Specify the TTL value. */
 #define IP_MULTICAST_IF     27 /* Specify outgoing multicast interface */
 #define IP_MULTICAST_TTL    28 /* Specify the TTL value to use for outgoing multicast packet. */
 #define IP_MULTICAST_LOOP   29 /* Whether or not receive the outgoing multicast packet, loopbacloopbackk mode. */
@@ -960,6 +964,8 @@ typedef struct NX_BSD_SOCKET_STRUCT
     INT                 nx_bsd_option_linger_time;
     UINT                nx_bsd_option_linger_time_closed;
     UINT                nx_bsd_option_linger_start_close;
+    struct nx_bsd_linger
+                        nx_bsd_option_linger;
     UINT                nx_bsd_socket_time_wait_remaining;
     ULONG               nx_bsd_option_receive_timeout;
     ULONG               nx_bsd_option_send_timeout;
@@ -1009,6 +1015,7 @@ VOID nx_bsd_raw_receive_notify(NX_IP *ip_ptr, UINT bsd_socket_index);
 #endif
 UINT nx_bsd_socket_set_inherited_settings(UINT master_sock_id, UINT secondary_sock_id);
 INT  nx_bsd_recvfrom(INT sockID, CHAR *buffer, INT buffersize, INT flags,struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen);
+INT  nx_bsd_recvfromto(INT sockID, CHAR *rcvBuffer, INT bufferLength, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen, struct nx_bsd_sockaddr *toAddr, INT *toAddrLen);
 INT  nx_bsd_recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags);
 INT  nx_bsd_recvmsg(INT sockID, struct nx_bsd_msghdr *msg, INT flags);
 INT  nx_bsd_sendto(INT sockID, CHAR *msg, INT msgLength, INT flags, struct nx_bsd_sockaddr *destAddr, INT destAddrLen);

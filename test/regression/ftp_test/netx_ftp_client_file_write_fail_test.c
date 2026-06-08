@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* This is a small demo of NetX FTP on the high-performance NetX TCP/IP stack.  This demo
    relies on ThreadX, NetX, and FileX to show a simple file transfer from the client
    to the server and a directory listing get using passive file transfer (PASV).  */

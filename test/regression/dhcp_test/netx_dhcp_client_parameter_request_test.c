@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 /* The DHCPREQUEST message MUST use the same value in the DHCP message header's 'secs' field and be sent to the same IP
  * broadcast address as the original DHCPDISCOVER message.
  * rfc 2131, page 16, 3.1 Client-server interaction - allocating a network address
