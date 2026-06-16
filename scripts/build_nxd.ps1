@@ -49,6 +49,12 @@ if (-not $FilexDir) {
     $FilexDir = Join-Path (Split-Path -Parent $repoRoot) 'filex-fd'
 }
 
+# CMake add_subdirectory requires absolute paths. Resolve here so that
+# relative paths supplied by the caller (e.g. ..\threadx-fd) work correctly.
+$BuildDir   = [System.IO.Path]::GetFullPath($BuildDir)
+$ThreadXDir = [System.IO.Path]::GetFullPath($ThreadXDir)
+$FilexDir   = [System.IO.Path]::GetFullPath($FilexDir)
+
 $selectedConfigurations = Resolve-RegressionConfigurations -RequestedConfigurations $Configuration
 Write-Host "Selected configurations: $($selectedConfigurations -join ', ')"
 
