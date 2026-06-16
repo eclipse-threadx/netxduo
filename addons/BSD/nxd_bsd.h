@@ -233,7 +233,7 @@ extern   "C" {
 #define nx_bsd_ioctl            ioctl
 #define nx_bsd_inet_addr        inet_addr
 #define nx_bsd_inet_ntoa        inet_ntoa
-#define nx_bsd_inet_aton        inet_aton
+#define inet_aton(address_buffer_ptr, addr) nx_bsd_inet_aton_impl(address_buffer_ptr, addr, NX_TRUE)
 #define nx_bsd_inet_pton        inet_pton
 #define nx_bsd_inet_ntop        inet_ntop
 #define nx_bsd_listen           listen
@@ -1004,7 +1004,7 @@ INT  nx_bsd_getsockname(INT sockID, struct nx_bsd_sockaddr *localAddress, INT *a
 INT  nx_bsd_ioctl(INT sockID, INT command, INT *result);
 nx_bsd_in_addr_t nx_bsd_inet_addr(const CHAR *buffer);
 CHAR *nx_bsd_inet_ntoa(struct nx_bsd_in_addr address_to_convert);
-INT  nx_bsd_inet_aton(const CHAR *cp_arg, struct nx_bsd_in_addr *addr);
+INT  nx_bsd_inet_aton_impl(const CHAR *address_buffer_ptr, struct nx_bsd_in_addr *addr, INT use_strict_parsing);
 INT  nx_bsd_inet_pton(INT af, const CHAR *src, VOID *dst);
 const CHAR *nx_bsd_inet_ntop(INT af, const VOID *src, CHAR *dst, nx_bsd_socklen_t size);
 INT  nx_bsd_listen(INT sockID, INT backlog);
@@ -1018,7 +1018,7 @@ INT  nx_bsd_recvfrom(INT sockID, CHAR *buffer, INT buffersize, INT flags,struct 
 INT  nx_bsd_recvfromto(INT sockID, CHAR *rcvBuffer, INT bufferLength, INT flags, struct nx_bsd_sockaddr *fromAddr, INT *fromAddrLen, struct nx_bsd_sockaddr *toAddr, INT *toAddrLen);
 INT  nx_bsd_recv(INT sockID, VOID *rcvBuffer, INT bufferLength, INT flags);
 INT  nx_bsd_recvmsg(INT sockID, struct nx_bsd_msghdr *msg, INT flags);
-INT  nx_bsd_sendto(INT sockID, CHAR *msg, INT msgLength, INT flags, struct nx_bsd_sockaddr *destAddr, INT destAddrLen);
+INT  nx_bsd_sendto(INT sockID, CHAR *msg, INT msgLength, INT flags, const struct nx_bsd_sockaddr *destAddr, INT destAddrLen);
 INT  nx_bsd_send(INT sockID, const CHAR *msg, INT msgLength, INT flags);
 INT  nx_bsd_select(INT nfds, nx_bsd_fd_set *readfds, nx_bsd_fd_set *writefds, nx_bsd_fd_set *exceptfds, struct nx_bsd_timeval *timeout);
 INT  nx_bsd_soc_close( INT sockID);

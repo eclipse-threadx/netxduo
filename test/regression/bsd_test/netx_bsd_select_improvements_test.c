@@ -23,6 +23,14 @@
  *
  *  3. A socket that is not in use must be reported in writefds (regression for
  *     the writefds "not in use" restore).
+ *
+ *  4. A TCP socket that is bound but NOT connected must NOT be reported in
+ *     writefds (a non-connected TCP socket is not writable regardless of its
+ *     bind state).
+ *
+ *  5. A listening (master) socket with a pending connection must be reported
+ *     readable (ready to accept) but MUST NOT be reported writable, even though
+ *     the master is internally marked CONNECTED once a client connects.
  */
 
 #include "tx_api.h"
@@ -162,6 +170,43 @@ char                buf[64];
     /* Signal client thread to connect. */
     tx_semaphore_put(&sema_1);
 
+    /* ================================================================
+     * Test 5: a listening (master) socket with a pending connection
+     *         must be reported readable (a connection is ready to be
+     *         accepted) but MUST NOT be reported writable. A listening
+     *         socket is never a valid write target, even though the
+     *         master is internally marked CONNECTED once a client
+     *         connects. This runs before accept() so the pending
+     *         connection still exists on the listening socket.
+     * ================================================================ */
+    nfd = server_sock + 1;
+
+    /* Step 1: block until the listening socket has a pending connection.
+       This guarantees the master is CONNECTED + CONNECTION_REQUEST. */
+    FD_ZERO(&readfds);
+    FD_SET(server_sock, &readfds);
+    tv.tv_sec  = 5;
+    tv.tv_usec = 0;
+
+    n = select(nfd, &readfds, NX_NULL, NX_NULL, &tv);
+
+    if (n <= 0)
+        error_counter++;
+    if (!FD_ISSET(server_sock, &readfds))
+        error_counter++;
+
+    /* Step 2: a zero-timeout writefds scan must NOT report the listening
+       socket as writable. */
+    FD_ZERO(&writefds);
+    FD_SET(server_sock, &writefds);
+    tv.tv_sec  = 0;
+    tv.tv_usec = 0;
+
+    n = select(nfd, NX_NULL, &writefds, NX_NULL, &tv);
+
+    if (FD_ISSET(server_sock, &writefds))
+        error_counter++;
+
     /* Accept the connection. */
     client_addr_len = sizeof(client_addr);
     conn_sock = accept(server_sock, (struct sockaddr *)&client_addr, &client_addr_len);
@@ -252,6 +297,44 @@ char                buf[64];
             error_counter++;
 
         soc_close(open_sock);
+    }
+
+    /* ================================================================
+     * Test 4: a TCP socket that is bound but NOT connected must NOT
+     *         appear in writefds. A non-connected TCP socket is not
+     *         writable regardless of its bind state.
+     * ================================================================ */
+    {
+    INT                 bound_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    struct sockaddr_in  bind_addr;
+    INT                 max_fd;
+
+        if (bound_sock < 0)
+            error_counter++;
+
+        memset(&bind_addr, 0, sizeof(bind_addr));
+        bind_addr.sin_family      = AF_INET;
+        bind_addr.sin_port        = htons(5556);
+        bind_addr.sin_addr.s_addr = INADDR_ANY;
+
+        /* Bind (but do not connect) the TCP socket. */
+        if (bind(bound_sock, (struct sockaddr *)&bind_addr, sizeof(bind_addr)) < 0)
+            error_counter++;
+
+        FD_ZERO(&writefds);
+        FD_SET(bound_sock, &writefds);
+
+        max_fd = bound_sock + 1;
+        tv.tv_sec  = 0;
+        tv.tv_usec = 0;
+
+        n = select(max_fd, NX_NULL, &writefds, NX_NULL, &tv);
+
+        /* Bound-but-not-connected TCP socket must NOT be reported writable. */
+        if (FD_ISSET(bound_sock, &writefds))
+            error_counter++;
+
+        soc_close(bound_sock);
     }
 
     soc_close(conn_sock);

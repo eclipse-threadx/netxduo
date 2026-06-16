@@ -237,19 +237,19 @@ UINT                        actual_status;
 
     soc_close(sock);
 
-    /* --- Test 3: inet_aton() still accepts abbreviated IPv4 forms --- */
+    /* --- Test 3: inet_aton() now rejects abbreviated IPv4 forms (strict parsing) --- */
     {
     struct in_addr  in_val;
     INT             rc;
 
-        /* a.b format: 11.657930 == 11.0x0a0a0a == 11.10.10.10 */
+        /* a.b format (11.657930) must be rejected under strict parsing. */
         rc = inet_aton("11.657930", &in_val);
-        if (rc == 0)
+        if (rc != 0)
             error_counter++;
 
-        /* a.b.c format: 11.10.2570 == 11.10.0x0a0a == 11.10.10.10 */
+        /* a.b.c format (11.10.2570) must be rejected under strict parsing. */
         rc = inet_aton("11.10.2570", &in_val);
-        if (rc == 0)
+        if (rc != 0)
             error_counter++;
 
         /* standard dotted-decimal must still work */

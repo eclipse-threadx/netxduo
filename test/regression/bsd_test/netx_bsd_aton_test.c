@@ -59,12 +59,15 @@ int    status;
     if((status !=  1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
         error_counter++;
 
+    /* Abbreviated forms (fewer than four dotted numbers) are now rejected by
+       inet_aton(), which performs strict parsing. The a.b.c form must fail. */
     status = inet_aton("11.10.2570", &in_val); /* 2570 == 0x0a0a */
-    if((status !=  1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
+    if(status != 0)
         error_counter++;
-    
+
+    /* The a.b form must also fail under strict parsing. */
     status = inet_aton("11.657930", &in_val); /* 657930 == 0x0a0a0a */
-    if((status !=  1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
+    if(status != 0)
         error_counter++;
 
     /* octal */

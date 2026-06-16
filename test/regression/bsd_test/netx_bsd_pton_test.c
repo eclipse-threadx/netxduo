@@ -120,8 +120,9 @@ UCHAR ipv4_addr[4]; /* 4*8 == 32 */
     if(status != 0)
         error_counter++;
 
+    /* inet_pton shall not accept abbreviated IPv4 addresses */
     status = inet_pton(AF_INET,  ipv4_addr_str3, ipv4_addr);
-    if((status != 1) || (memcmp(ipv4_addr, ipv4_addr_num3, 4) != 0 ))
+    if((status == 1) || (memcmp(ipv4_addr, ipv4_addr_num3, 4) == 0 ))
         error_counter++;
 
     if(error_counter)
