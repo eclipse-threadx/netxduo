@@ -1,9 +1,16 @@
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
-# Set up the project
-project(netxduo
-    LANGUAGES C ASM
-)    
+# Win64 MSVC simulation: no assembly sources; compiler probe must not use
+# executables (cross-like environment under the VS developer shell).
+if(THREADX_ARCH STREQUAL "win64")
+    set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+    project(netxduo LANGUAGES C)
+else()
+    # Set up the project
+    project(netxduo
+        LANGUAGES C ASM
+    )
+endif()
 
 option(NXD_ENABLE_FILE_SERVERS "Includes a dependency on FileX to support 'server' protocol handlers" ON)
 option(NXD_ENABLE_AZURE_IOT "Enable Azure IoT" OFF)

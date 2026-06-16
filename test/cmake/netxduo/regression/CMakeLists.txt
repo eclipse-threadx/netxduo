@@ -1285,16 +1285,18 @@ if(PRODUCT STREQUAL netxduo)
       # PTP utilities
       ${SOURCE_DIR}/ptp_test/netx_ptp_utility.c)
   endif()
-  list(APPEND test_utility_files
-       # TAHI utilities
-       ${SOURCE_DIR}/tahi_test/netx_tahi_run_test_case.c)
+  if(NOT MSVC)
+    list(APPEND test_utility_files
+         # TAHI utilities (require tahi.so — Linux only)
+         ${SOURCE_DIR}/tahi_test/netx_tahi_run_test_case.c)
+  endif()
 endif()
 add_library(test_utility ${test_utility_files})
 target_link_libraries(test_utility PUBLIC azrtos::${PRODUCT})
 target_include_directories(test_utility PUBLIC ${SOURCE_DIR}/test
                                                ${SOURCE_DIR}/tahi_test)
 target_compile_definitions(test_utility PUBLIC BATCH_TEST CTEST)
-if("-DNX_TAHI_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
+if("-DNX_TAHI_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE} AND NOT MSVC)
   add_library(tahi SHARED IMPORTED)
   if($ENV{ENABLE_64})
     set_target_properties(tahi PROPERTIES IMPORTED_LOCATION
@@ -1306,7 +1308,11 @@ if("-DNX_TAHI_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
   target_link_libraries(test_utility PUBLIC tahi)
 endif()
 
-if($ENV{ENABLE_64})
+if(MSVC)
+  # Win64 simulation: mirror the ENABLE_64 subset; TAHI/MDNS/PTP/SMTP/SNMP
+  # test cases are excluded because they depend on Linux-only shared libraries.
+  set(test_cases ${netxduo_test_cases} ${dhcp_test_cases} ${dns_test_cases})
+elseif($ENV{ENABLE_64})
   set(test_cases ${netxduo_test_cases} ${dhcp_test_cases} ${dns_test_cases})
 elseif($ENV{DHCP_ONLY})
   set(test_cases ${dhcp_test_cases})

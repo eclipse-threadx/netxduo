@@ -3,6 +3,12 @@ cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0057 NEW)
 cmake_policy(SET CMP0077 NEW)
 
+# Suppress try_compile link step when MSVC cannot produce a runnable executable
+# (e.g. when the VS environment is not fully initialised for a given target arch).
+if((DEFINED THREADX_ARCH) AND (THREADX_ARCH STREQUAL "win64"))
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+endif()
+
 project(netxduo_test LANGUAGES C)
 
 # Set build configurations
@@ -331,79 +337,112 @@ set(dhcp_default_build_coverage ${default_build_coverage} -DNX_DHCP_CLIENT_USER_
 set(dns_default_build_coverage ${default_build_coverage}  -DNX_DNS_CLIENT_USER_CREATE_PACKET_POOL -DNX_DNS_CLIENT_CLEAR_QUEUE)
 set(tsn_build_coverage ${default_build_coverage} ${PHY_HEADER} -DNX_ENABLE_VLAN)
 
-if($ENV{ENABLE_64})
-  message(STATUS "Building for 64bit")
-  set(NXD_ENABLE_FILE_SERVERS OFF)
-else()
-  add_compile_options(-m32)
-  add_link_options(-m32)
-  message(STATUS "Building for 32bit")
+if(MSVC)
+  # Win64 MSVC simulation path -------------------------------------------
+  # FileX is available on Windows; keep file-server protocol handlers.
   set(NXD_ENABLE_FILE_SERVERS ON)
+  message(STATUS "Building for Win64 (MSVC)")
+  add_compile_options(/W3 /Zi -DTX_INCLUDE_USER_DEFINE_FILE
+                      ${${CMAKE_BUILD_TYPE}})
+  add_link_options(/DEBUG /INCREMENTAL:NO)
+else()
+  if($ENV{ENABLE_64})
+    message(STATUS "Building for 64bit")
+    set(NXD_ENABLE_FILE_SERVERS OFF)
+  else()
+    add_compile_options(-m32)
+    add_link_options(-m32)
+    message(STATUS "Building for 32bit")
+    set(NXD_ENABLE_FILE_SERVERS ON)
+  endif()
+  add_compile_options(
+    -std=c99
+    -ggdb
+    -g3
+    -gdwarf-2
+    -fdiagnostics-color
+    # -Werror
+    -DTX_INCLUDE_USER_DEFINE_FILE
+    ${${CMAKE_BUILD_TYPE}})
 endif()
-add_compile_options(
-  -std=c99
-  -ggdb
-  -g3
-  -gdwarf-2
-  -fdiagnostics-color
-  # -Werror
-  -DTX_INCLUDE_USER_DEFINE_FILE
-  ${${CMAKE_BUILD_TYPE}})
 
 enable_testing()
 
 if("-DNX_BSD_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
   set(NXD_ENABLE_BSD ON)
 endif()
+
+# On Windows, build ThreadX and FileX from source; on Linux use run.sh.
+if(MSVC)
+  if(NOT DEFINED THREADX_SOURCE_DIR)
+    message(FATAL_ERROR
+      "THREADX_SOURCE_DIR must point to a ThreadX source tree. "
+      "Pass -DTHREADX_SOURCE_DIR=<path> or use build_nxd.ps1.")
+  endif()
+  if(NOT DEFINED FILEX_SOURCE_DIR)
+    message(FATAL_ERROR
+      "FILEX_SOURCE_DIR must point to a FileX source tree. "
+      "Pass -DFILEX_SOURCE_DIR=<path> or use build_nxd.ps1.")
+  endif()
+  add_subdirectory(${THREADX_SOURCE_DIR} threadx_build)
+  add_subdirectory(${FILEX_SOURCE_DIR} filex_build)
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. ${PRODUCT})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/regression regression)
-if(NOT "$ENV{ENABLE_64}")
+if(NOT MSVC AND NOT "$ENV{ENABLE_64}")
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/samples samples)
   if(PRODUCT STREQUAL netxduo)
     include(additionals.cmake)
   endif()
 endif()
 
-# Coverage
-if(CMAKE_BUILD_TYPE MATCHES ".*_coverage")
+# Coverage instrumentation (GCC/Clang only — not supported by MSVC)
+if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES ".*_coverage")
   target_compile_options(${PRODUCT} PRIVATE -fprofile-arcs -ftest-coverage)
   target_link_options(${PRODUCT} PRIVATE -fprofile-arcs -ftest-coverage)
 endif()
 
-# Build ThreadX library once
-execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh build_libs)
-add_custom_target(build_libs ALL COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh
-                                         build_libs)
-add_dependencies(${PRODUCT} build_libs)
-target_include_directories(${PRODUCT} PUBLIC ${CMAKE_BINARY_DIR}/../libs/inc)
-add_library(threadx SHARED IMPORTED GLOBAL)
-add_library("azrtos::threadx" ALIAS threadx)
-set_target_properties(
-  threadx PROPERTIES IMPORTED_LOCATION
-                     ${CMAKE_BINARY_DIR}/../libs/threadx/libthreadx.so)
-add_library(filex SHARED IMPORTED GLOBAL)
-add_library("azrtos::filex" ALIAS filex)
-set_target_properties(
-  filex PROPERTIES IMPORTED_LOCATION
-                    ${CMAKE_BINARY_DIR}/../libs/filex/libfilex.so)
-target_link_libraries(${PRODUCT} PUBLIC filex)
+# Build ThreadX and FileX shared libraries (Linux only)
+if(NOT MSVC)
+  execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh build_libs)
+  add_custom_target(build_libs ALL COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh
+                                           build_libs)
+  add_dependencies(${PRODUCT} build_libs)
+  target_include_directories(${PRODUCT} PUBLIC ${CMAKE_BINARY_DIR}/../libs/inc)
+  add_library(threadx SHARED IMPORTED GLOBAL)
+  add_library("azrtos::threadx" ALIAS threadx)
+  set_target_properties(
+    threadx PROPERTIES IMPORTED_LOCATION
+                       ${CMAKE_BINARY_DIR}/../libs/threadx/libthreadx.so)
+  add_library(filex SHARED IMPORTED GLOBAL)
+  add_library("azrtos::filex" ALIAS filex)
+  set_target_properties(
+    filex PROPERTIES IMPORTED_LOCATION
+                      ${CMAKE_BINARY_DIR}/../libs/filex/libfilex.so)
+  target_link_libraries(${PRODUCT} PUBLIC filex)
+endif()
 
-target_compile_options(
-  ${PRODUCT}
-  PRIVATE -Werror
-          -Wall
-          -Wextra
-          -pedantic
-          -fmessage-length=0
-          -fsigned-char
-          -ffunction-sections
-          -fdata-sections
-          -Wunused
-          -Wuninitialized
-          -Wmissing-declarations
-          -Wconversion
-          -Wpointer-arith
-          -Wshadow
-          -Wlogical-op
-          -Waggregate-return
-          -Wfloat-equal)
+if(MSVC)
+  target_compile_options(${PRODUCT} PRIVATE /W3)
+else()
+  target_compile_options(
+    ${PRODUCT}
+    PRIVATE -Werror
+            -Wall
+            -Wextra
+            -pedantic
+            -fmessage-length=0
+            -fsigned-char
+            -ffunction-sections
+            -fdata-sections
+            -Wunused
+            -Wuninitialized
+            -Wmissing-declarations
+            -Wconversion
+            -Wpointer-arith
+            -Wshadow
+            -Wlogical-op
+            -Waggregate-return
+            -Wfloat-equal)
+endif()
