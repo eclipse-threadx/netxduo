@@ -1309,6 +1309,22 @@ if("-DNX_TAHI_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE} AND NOT MSVC)
 endif()
 
 if(MSVC)
+  # These test files use void* pointer arithmetic ((void*)&x - 1) to construct
+  # intentionally misaligned pointers for NXE alignment checks. GCC treats
+  # sizeof(void) as 1 as an extension; MSVC rejects it with error C2036.
+  # netx_ipv6_pmtu_test references netx_tahi_run_test_case which is excluded
+  # from test_utility on MSVC (tahi.so is Linux-only).
+  # Exclude these files from win64 builds rather than modifying test sources.
+  list(REMOVE_ITEM dhcp_test_cases
+       ${SOURCE_DIR}/dhcp_test/netx_dhcp_server_second_interface_test.c)
+  list(REMOVE_ITEM dns_test_cases
+       ${SOURCE_DIR}/dns_test/netx_dns_nxe_api_test.c)
+  list(REMOVE_ITEM netxduo_test_cases
+       ${SOURCE_DIR}/netxduo_test/netx_udp_fragmentation_processing_test.c
+       ${SOURCE_DIR}/netxduo_test/netx_ipv6_pmtu_test.c)
+endif()
+
+if(MSVC)
   # Win64 simulation: mirror the ENABLE_64 subset; TAHI/MDNS/PTP/SMTP/SNMP
   # test cases are excluded because they depend on Linux-only shared libraries.
   set(test_cases ${netxduo_test_cases} ${dhcp_test_cases} ${dns_test_cases})
