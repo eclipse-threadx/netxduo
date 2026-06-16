@@ -37,6 +37,12 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $settings = Get-PortSettings -SelectedArch $Arch
 
+# CMake add_subdirectory requires absolute paths. Use PowerShell's path
+# resolution (not .NET's, which ignores the PS working directory).
+function Resolve-AbsolutePath([string]$Path) {
+    $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+}
+
 if (-not $BuildDir) {
     $BuildDir = Join-Path $repoRoot "build\tests\$Arch"
 }
@@ -49,11 +55,9 @@ if (-not $FilexDir) {
     $FilexDir = Join-Path (Split-Path -Parent $repoRoot) 'filex-fd'
 }
 
-# CMake add_subdirectory requires absolute paths. Resolve here so that
-# relative paths supplied by the caller (e.g. ..\threadx-fd) work correctly.
-$BuildDir   = [System.IO.Path]::GetFullPath($BuildDir)
-$ThreadXDir = [System.IO.Path]::GetFullPath($ThreadXDir)
-$FilexDir   = [System.IO.Path]::GetFullPath($FilexDir)
+$BuildDir   = Resolve-AbsolutePath $BuildDir
+$ThreadXDir = Resolve-AbsolutePath $ThreadXDir
+$FilexDir   = Resolve-AbsolutePath $FilexDir
 
 $selectedConfigurations = Resolve-RegressionConfigurations -RequestedConfigurations $Configuration
 Write-Host "Selected configurations: $($selectedConfigurations -join ', ')"
