@@ -68,15 +68,72 @@ function Get-RegressionConfigurations {
     )
 }
 
-function Resolve-RegressionConfigurations {
+# Maps a CMake build-type name to a short filesystem-safe directory name.
+# Covers all suites; falls back to the sanitized config name for unknowns.
+function Get-ShortConfigName {
     param(
+        [Parameter(Mandatory = $true)]
+        [string]$ConfigurationName
+    )
+
+    $knownNames = @{
+        'default_build_coverage'        = 'dbc'
+        'v4_build'                      = 'v4'
+        'v6_build'                      = 'v6'
+        'v6_full_build'                 = 'vf'
+        'psk_build_coverage'            = 'psk'
+        'tls_1_0_enable_build'          = 't10'
+        'tls_1_1_enable_build'          = 't11'
+        'tls_1_3_enable_build_coverage' = 't13'
+        'client_disable_build'          = 'cld'
+        'server_disable_build'          = 'svd'
+        'tls_1_3_client_disable_build'  = 't3cd'
+        'tls_1_3_server_disable_build'  = 't3sd'
+        'ecjpake_build'                 = 'ejp'
+        'dtls_build_coverage'           = 'dtls'
+        'eal4_build_coverage'           = 'eal4'
+        'sesip_build_coverage'          = 'ses'
+        'no_ecc_build_coverage'         = 'necc'
+        'no_renegotiation_build'        = 'nrn'
+        'no_client_renegotiation_build' = 'ncr'
+        'no_x509_build'                 = 'nx5'
+        'hash_clone_build'              = 'hcl'
+        'curve25519_448_build'          = 'c25'
+        'secure_build_coverage'         = 'sec'
+        'require_secure_build'          = 'req'
+        'queue_depth_build'             = 'qd'
+        'cloud_default_build_coverage'  = 'cldbc'
+        'cloud_secure_build_coverage'   = 'clsec'
+        'cloud_require_secure_build'    = 'clreq'
+        'cloud_queue_depth_build'       = 'clqd'
+        'websocket_secure_build'        = 'wssec'
+        'gptp_slave_build'              = 'gpts'
+        'gptp_master_build'             = 'gptm'
+        'no_tls_build_coverage'         = 'ntls'
+        'digest_authenticate_build'     = 'dauth'
+        'fips_build_coverage'           = 'fips'
+        'standalone_build'              = 'sa'
+    }
+
+    if ($knownNames.ContainsKey($ConfigurationName)) {
+        return $knownNames[$ConfigurationName]
+    }
+
+    return $ConfigurationName -replace '[^a-zA-Z0-9_-]', '_'
+}
+
+# Generic configuration resolver. $ValidConfigurations is the full list for the suite.
+function Resolve-Configurations {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$ValidConfigurations,
+
         [Parameter(Mandatory = $false)]
         [AllowNull()]
         [AllowEmptyCollection()]
         [object]$RequestedConfigurations = 'all'
     )
 
-    $allConfigurations = Get-RegressionConfigurations
     $resolvedConfigurations = @()
 
     if ($null -eq $RequestedConfigurations) {
@@ -104,16 +161,28 @@ function Resolve-RegressionConfigurations {
     }
 
     if (($normalizedConfigurations.Count -eq 0) -or ($normalizedConfigurations -contains 'all')) {
-        return $allConfigurations
+        return $ValidConfigurations
     }
 
     foreach ($normalizedConfiguration in $normalizedConfigurations) {
-        if ($allConfigurations -notcontains $normalizedConfiguration) {
+        if ($ValidConfigurations -notcontains $normalizedConfiguration) {
             throw "Unsupported configuration: $normalizedConfiguration"
         }
     }
 
     return $normalizedConfigurations
+}
+
+function Resolve-RegressionConfigurations {
+    param(
+        [Parameter(Mandatory = $false)]
+        [AllowNull()]
+        [AllowEmptyCollection()]
+        [object]$RequestedConfigurations = 'all'
+    )
+
+    return Resolve-Configurations -ValidConfigurations (Get-RegressionConfigurations) `
+                                  -RequestedConfigurations $RequestedConfigurations
 }
 
 function Get-RegressionBuildDirectoryName {
@@ -122,14 +191,7 @@ function Get-RegressionBuildDirectoryName {
         [string]$ConfigurationName
     )
 
-    switch ($ConfigurationName) {
-        'default_build_coverage' { return 'dbc' }
-        'v4_build'               { return 'v4'  }
-        'v6_build'               { return 'v6'  }
-        default {
-            throw "Unsupported configuration: $ConfigurationName"
-        }
-    }
+    return Get-ShortConfigName -ConfigurationName $ConfigurationName
 }
 
 function Enter-VisualStudioDevShell {

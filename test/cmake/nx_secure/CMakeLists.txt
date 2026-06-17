@@ -3,6 +3,10 @@ cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0057 NEW)
 cmake_policy(SET CMP0077 NEW)
 
+if((DEFINED THREADX_ARCH) AND (THREADX_ARCH STREQUAL "win64"))
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+endif()
+
 project(nx_secure_test LANGUAGES C)
 
 # Set build configurations
@@ -91,24 +95,35 @@ set(curve25519_448_build
     -DNX_SECURE_ENABLE_CLIENT_CERTIFICATE_VERIFY
     -DNX_SECURE_ENABLE_PSK_CIPHERSUITES)
 
-add_compile_options(
-  -ggdb
-  -g3
-  -gdwarf-2
-  -fdiagnostics-color
-  -Werror
-  -DTX_INCLUDE_USER_DEFINE_FILE
-  -DNX_SECURE_X509_STRICT_NAME_COMPARE
-  -DNX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES
-  -DNX_ENABLE_EXTENDED_NOTIFY_SUPPORT
-  ${${CMAKE_BUILD_TYPE}})
-
-if($ENV{ENABLE_64})
-  message(STATUS "Building for 64bit")
+if(MSVC)
+  add_compile_options(/W3 /Zi
+                      -DTX_INCLUDE_USER_DEFINE_FILE
+                      -DNX_SECURE_X509_STRICT_NAME_COMPARE
+                      -DNX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES
+                      -DNX_ENABLE_EXTENDED_NOTIFY_SUPPORT
+                      ${${CMAKE_BUILD_TYPE}})
+  add_link_options(/DEBUG /INCREMENTAL:NO)
+  message(STATUS "Building for Win64 (MSVC)")
 else()
-  add_compile_options(-m32)
-  add_link_options(-m32)
-  message(STATUS "Building for 32bit")
+  add_compile_options(
+    -ggdb
+    -g3
+    -gdwarf-2
+    -fdiagnostics-color
+    -Werror
+    -DTX_INCLUDE_USER_DEFINE_FILE
+    -DNX_SECURE_X509_STRICT_NAME_COMPARE
+    -DNX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES
+    -DNX_ENABLE_EXTENDED_NOTIFY_SUPPORT
+    ${${CMAKE_BUILD_TYPE}})
+
+  if($ENV{ENABLE_64})
+    message(STATUS "Building for 64bit")
+  else()
+    add_compile_options(-m32)
+    add_link_options(-m32)
+    message(STATUS "Building for 32bit")
+  endif()
 endif()
 
 enable_testing()
@@ -119,46 +134,63 @@ if("s${CMAKE_BUILD_TYPE}" STREQUAL "shash_clone_build")
 endif()
 
 set(NXD_ENABLE_FILE_SERVERS OFF CACHE BOOL "Includes a dependency on FileX to support 'server' protocol handlers" FORCE)
+
+# On Windows, build ThreadX from source before netxduo is configured.
+if(MSVC)
+  if(NOT DEFINED THREADX_SOURCE_DIR)
+    message(FATAL_ERROR
+      "THREADX_SOURCE_DIR must point to a ThreadX source tree. "
+      "Pass -DTHREADX_SOURCE_DIR=<path> or use build_secure.ps1.")
+  endif()
+  add_subdirectory(${THREADX_SOURCE_DIR} threadx_build)
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. netxduo)
 add_subdirectory(${PROJECT_SOURCE_DIR}/regression regression)
 
-# Coverage
-if(CMAKE_BUILD_TYPE MATCHES ".*_coverage")
+# Coverage instrumentation (GCC/Clang only — not supported by MSVC)
+if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES ".*_coverage")
   target_compile_options(netxduo PRIVATE -fprofile-arcs -ftest-coverage)
   target_link_options(netxduo PRIVATE -fprofile-arcs -ftest-coverage)
 endif()
 
-# Build ThreadX library once
-execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh build_libs)
-add_custom_target(build_libs ALL COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh
-                                         build_libs)
-add_dependencies(netxduo build_libs)
-target_include_directories(netxduo PUBLIC ${CMAKE_BINARY_DIR}/../libs/inc)
-add_library(threadx SHARED IMPORTED GLOBAL)
-add_library("azrtos::threadx" ALIAS threadx)
-set_target_properties(
-  threadx PROPERTIES IMPORTED_LOCATION
-                     ${CMAKE_BINARY_DIR}/../libs/threadx/libthreadx.so)
+# Build ThreadX shared library (Linux only)
+if(NOT MSVC)
+  execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh build_libs)
+  add_custom_target(build_libs ALL COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh
+                                           build_libs)
+  add_dependencies(netxduo build_libs)
+  target_include_directories(netxduo PUBLIC ${CMAKE_BINARY_DIR}/../libs/inc)
+  add_library(threadx SHARED IMPORTED GLOBAL)
+  add_library("azrtos::threadx" ALIAS threadx)
+  set_target_properties(
+    threadx PROPERTIES IMPORTED_LOCATION
+                       ${CMAKE_BINARY_DIR}/../libs/threadx/libthreadx.so)
+endif()
 
-target_compile_options(
-  netxduo
-  PRIVATE -Wall
-          -Wextra
-          -pedantic
-          -fmessage-length=0
-          -fsigned-char
-          -ffunction-sections
-          -fdata-sections
-          -Wunused
-          -Wuninitialized
-          -Wmissing-declarations
-          -Wconversion
-          -Wpointer-arith
-          -Wshadow
-          -Wlogical-op
-          -Waggregate-return
-          -Wfloat-equal
-          -std=c99)
+if(MSVC)
+  target_compile_options(netxduo PRIVATE /W3)
+else()
+  target_compile_options(
+    netxduo
+    PRIVATE -Wall
+            -Wextra
+            -pedantic
+            -fmessage-length=0
+            -fsigned-char
+            -ffunction-sections
+            -fdata-sections
+            -Wunused
+            -Wuninitialized
+            -Wmissing-declarations
+            -Wconversion
+            -Wpointer-arith
+            -Wshadow
+            -Wlogical-op
+            -Waggregate-return
+            -Wfloat-equal
+            -std=c99)
+endif()
 
 # Remove addons
 get_target_property(SOURCES_LIST netxduo SOURCES)

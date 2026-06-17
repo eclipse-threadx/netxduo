@@ -3,6 +3,10 @@ cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0057 NEW)
 cmake_policy(SET CMP0077 NEW)
 
+if((DEFINED THREADX_ARCH) AND (THREADX_ARCH STREQUAL "win64"))
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+endif()
+
 project(crypto_test LANGUAGES C)
 
 set(CPU_ARCH "linux")
@@ -32,21 +36,32 @@ set(fips_build_coverage -DNX_CRYPTO_SELF_TEST)
 set(standalone_build -DNX_CRYPTO_STANDALONE_ENABLE -DNX_CRYPTO_SELF_TEST)
 set(curve25519_448_build -DNX_CRYPTO_ENABLE_CURVE25519_448)
 
-add_compile_options(
-  -std=c99
-  -ggdb
-  -g3
-  -gdwarf-2
-  -fdiagnostics-color
-  -Werror
-  ${${CMAKE_BUILD_TYPE}})
-
-if($ENV{ENABLE_64})
-  message(STATUS "Building for 64bit")
+if(MSVC)
+  if("${CMAKE_BUILD_TYPE}" STREQUAL "standalone_build")
+    message(FATAL_ERROR
+      "standalone_build requires a Linux-specific crypto port path and is not "
+      "supported on MSVC. Use build_crypto.ps1 which excludes this configuration.")
+  endif()
+  add_compile_options(/W3 /Zi ${${CMAKE_BUILD_TYPE}})
+  add_link_options(/DEBUG /INCREMENTAL:NO)
+  message(STATUS "Building for Win64 (MSVC)")
 else()
-  add_compile_options(-m32)
-  add_link_options(-m32)
-  message(STATUS "Building for 32bit")
+  add_compile_options(
+    -std=c99
+    -ggdb
+    -g3
+    -gdwarf-2
+    -fdiagnostics-color
+    -Werror
+    ${${CMAKE_BUILD_TYPE}})
+
+  if($ENV{ENABLE_64})
+    message(STATUS "Building for 64bit")
+  else()
+    add_compile_options(-m32)
+    add_link_options(-m32)
+    message(STATUS "Building for 32bit")
+  endif()
 endif()
 
 enable_testing()
@@ -56,18 +71,29 @@ set(NXD_ENABLE_FILE_SERVERS
     CACHE BOOL
           "Includes a dependency on FileX to support 'server' protocol handlers"
           FORCE)
+
+# On Windows, build ThreadX from source before netxduo is configured.
+# standalone_build does not use ThreadX, so skip it in that case.
+if(MSVC AND NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "standalone_build"))
+  if(NOT DEFINED THREADX_SOURCE_DIR)
+    message(FATAL_ERROR
+      "THREADX_SOURCE_DIR must point to a ThreadX source tree. "
+      "Pass -DTHREADX_SOURCE_DIR=<path> or use build_crypto.ps1.")
+  endif()
+  add_subdirectory(${THREADX_SOURCE_DIR} threadx_build)
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. netxduo)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/regression regression)
 
-
-# Coverage
-if(CMAKE_BUILD_TYPE MATCHES ".*_coverage")
+# Coverage instrumentation (GCC/Clang only — not supported by MSVC)
+if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES ".*_coverage")
   target_compile_options(netxduo PRIVATE -fprofile-arcs -ftest-coverage)
   target_link_options(netxduo PRIVATE -fprofile-arcs -ftest-coverage)
 endif()
 
-# Build ThreadX library once
-if(NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "standalone_build"))
+# Build ThreadX shared library (Linux only; not used for standalone_build)
+if(NOT MSVC AND NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "standalone_build"))
   execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh build_libs)
   add_custom_target(build_libs ALL COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh
                                            build_libs)
@@ -80,25 +106,29 @@ if(NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "standalone_build"))
                        ${CMAKE_BINARY_DIR}/../libs/threadx/libthreadx.so)
 endif()
 
-target_compile_options(
-  netxduo
-  PRIVATE -Werror
-          -Wall
-          -Wextra
-          -pedantic
-          -fmessage-length=0
-          -fsigned-char
-          -ffunction-sections
-          -fdata-sections
-          -Wunused
-          -Wuninitialized
-          -Wmissing-declarations
-          -Wconversion
-          -Wpointer-arith
-          -Wshadow
-          -Wlogical-op
-          -Waggregate-return
-          -Wfloat-equal)
+if(MSVC)
+  target_compile_options(netxduo PRIVATE /W3)
+else()
+  target_compile_options(
+    netxduo
+    PRIVATE -Werror
+            -Wall
+            -Wextra
+            -pedantic
+            -fmessage-length=0
+            -fsigned-char
+            -ffunction-sections
+            -fdata-sections
+            -Wunused
+            -Wuninitialized
+            -Wmissing-declarations
+            -Wconversion
+            -Wpointer-arith
+            -Wshadow
+            -Wlogical-op
+            -Waggregate-return
+            -Wfloat-equal)
+endif()
 
 # Leave files from crypto_libraries only
 get_target_property(SOURCES_LIST netxduo SOURCES)
