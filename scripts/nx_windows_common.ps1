@@ -47,6 +47,13 @@ function Get-PortSettings {
     )
 
     switch ($SelectedArch) {
+        'win32' {
+            return @{
+                NetXArch      = 'win32'
+                NetXToolchain = 'vs_2019'
+                VsArch        = 'x86'
+            }
+        }
         'win64' {
             return @{
                 NetXArch      = 'win64'

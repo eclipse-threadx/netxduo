@@ -14,7 +14,7 @@
 
 [CmdletBinding()]
 param(
-    [ValidateSet('win64')]
+    [ValidateSet('win64', 'win32')]
     [string]$Arch = 'win64',
 
     [AllowNull()]
