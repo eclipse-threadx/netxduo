@@ -49,14 +49,13 @@ $selectedConfigurations = Resolve-RegressionConfigurations -RequestedConfigurati
 Write-Host "Selected configurations: $($selectedConfigurations -join ', ')"
 
 Enter-VisualStudioDevShell -VsArch $settings.VsArch
-
-# The NetX Duo Win64 simulation uses Win32 threads and shared memory to emulate
-# the RTOS scheduler. Concurrent test execution causes timing races; force serial.
 if ($Parallel -ne 1) {
-    Write-Warning "Windows simulator regression tests are timing-sensitive under concurrent ctest execution. Forcing -Parallel 1."
+    Write-Warning "The Win64 ThreadX simulator pins all threads to a single core for deterministic scheduling. Running multiple test processes in parallel causes timer starvation. Forcing -Parallel 1."
     $Parallel = 1
 }
 
+# The NetX Duo Win64 simulation uses Win32 threads and shared memory to emulate
+# the RTOS scheduler. Concurrent test execution causes timing races; force serial.
 $failedConfigurations = @()
 
 foreach ($currentConfiguration in $selectedConfigurations) {

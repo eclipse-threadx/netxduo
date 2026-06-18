@@ -55,9 +55,8 @@ $selectedConfigurations = Resolve-Configurations -ValidConfigurations $validConf
 Write-Host "Selected configurations: $($selectedConfigurations -join ', ')"
 
 Enter-VisualStudioDevShell -VsArch $settings.VsArch
-
 if ($Parallel -ne 1) {
-    Write-Warning "Windows simulator regression tests are timing-sensitive under concurrent ctest execution. Forcing -Parallel 1."
+    Write-Warning "The Win64 ThreadX simulator pins all threads to a single core for deterministic scheduling. Running multiple test processes in parallel causes timer starvation. Forcing -Parallel 1."
     $Parallel = 1
 }
 
