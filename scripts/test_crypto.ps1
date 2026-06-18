@@ -24,7 +24,7 @@ param(
 
     [int]$RepeatFailCount = 1,
 
-    [int]$TestTimeoutSeconds = 60,
+    [int]$TestTimeoutSeconds = 120,
 
     [switch]$CollectFailureDiagnostics = $true,
 

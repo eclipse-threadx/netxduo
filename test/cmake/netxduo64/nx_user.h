@@ -45,6 +45,15 @@
 #ifndef NX_USER_H
 #define NX_USER_H
 
+/* On the Win64 simulation port the timer fires at 1ms per tick, making the
+   simulation run 10x faster than wall clock.  NX_PATH_MTU_INCREASE_WAIT_INTERVAL
+   defaults to 600 seconds (60 000 ticks), which at 1ms/tick would equal 60 real
+   seconds and breach the ctest timeout.  Reduce it by 10x so the test still
+   exercises the same logic but completes in ~6 real seconds.  */
+#ifndef NX_PATH_MTU_INCREASE_WAIT_INTERVAL
+#define NX_PATH_MTU_INCREASE_WAIT_INTERVAL   60
+#endif
+
 /* Define the extension to hold the control block for 64-bit mode.  */
 #define NX_THREAD_EXTENSION_PTR_SET(a, b)                   { \
                                                                 TX_THREAD *thread_ptr; \
