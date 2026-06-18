@@ -752,3 +752,208 @@ static const UCHAR _pss_zero8[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     return(NX_CRYPTO_SUCCESS);
 }
 
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_crypto_rsa_pss_sign                             PORTABLE C      */
+/*                                                           6.4.3        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    Builds an EMSA-PSS-ENCODE octet string (RFC 8017 §9.1.1).          */
+/*    Caller is expected to run the RSA private-key operation on the     */
+/*    returned EM to produce the wire signature.                          */
+/*    Assumes salt length == hash length (required by RFC 8446 §4.2.3). */
+/*    Salt bytes are produced internally via NX_CRYPTO_RAND().            */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    message_hash        Pre-computed mHash over the signed content     */
+/*    hash_length         hLen = byte length of mHash                    */
+/*    em                  Output buffer; receives the encoded message    */
+/*    em_bits             emBits = modulus_bits - 1                      */
+/*    hash_method         Same hash used to build the PSS encoding       */
+/*    hash_metadata       Scratch memory for hash operations             */
+/*    hash_metadata_size  Size of hash_metadata in bytes                 */
+/*    scratch             Work buffer; must be >= db_len bytes           */
+/*    scratch_length      Size of scratch in bytes                       */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_CRYPTO_SUCCESS                EM built successfully             */
+/*    NX_CRYPTO_NOT_SUCCESSFUL         em_len smaller than minimum       */
+/*    NX_CRYPTO_INVALID_BUFFER_SIZE    Scratch too small                 */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_crypto_rsa_pss_sign(const UCHAR *message_hash, UINT hash_length,
+                              UCHAR *em, UINT em_bits,
+                              const NX_CRYPTO_METHOD *hash_method,
+                              VOID *hash_metadata, ULONG hash_metadata_size,
+                              UCHAR *scratch, UINT scratch_length)
+{
+UINT   em_len;
+UINT   db_len;
+UINT   s_len;
+UINT   i;
+UINT   status;
+UCHAR  zero_bits;
+UCHAR *db;
+UCHAR *salt;
+UCHAR *h;
+VOID  *handler = NX_CRYPTO_NULL;
+static const UCHAR _pss_zero8[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+    /* emLen = ceil(emBits / 8). */
+    em_len = (em_bits + 7u) >> 3;
+
+    /* TLS 1.3 mandates salt length == hash length (RFC 8446 §4.2.3). */
+    s_len = hash_length;
+
+    if (em_len < (hash_length + s_len + 2u))
+    {
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    db_len = em_len - hash_length - 1u;
+
+    /* scratch layout: db[db_len] | salt[s_len]. The salt is also copied
+     * into DB at offset (db_len - s_len), so keeping a separate copy lets
+     * us hash it BEFORE building maskedDB. */
+    if (scratch_length < (db_len + s_len))
+    {
+        return(NX_CRYPTO_INVALID_BUFFER_SIZE);
+    }
+
+    db   = scratch;
+    salt = scratch + db_len;
+    h    = em + db_len; /* H sits at em[db_len..em_len-2]. */
+
+    /* Step 4 – generate the random salt. NX_CRYPTO_RAND() is the same
+     * source ECDSA uses for its nonce, so the entropy is at least as good
+     * as the existing signature paths on this device. */
+    for (i = 0u; i < s_len; i++)
+    {
+        salt[i] = (UCHAR)((UINT)NX_CRYPTO_RAND() & 0xFFu);
+    }
+
+    /* Steps 5-6 – H = Hash(0x00^8 || mHash || salt). Write directly into
+     * em[db_len..] so we don't have to copy H around later. */
+    if (hash_method -> nx_crypto_init)
+    {
+        status = hash_method -> nx_crypto_init((NX_CRYPTO_METHOD *)hash_method,
+                                                NX_CRYPTO_NULL, 0,
+                                                &handler,
+                                                hash_metadata, hash_metadata_size);
+        if (status != NX_CRYPTO_SUCCESS)
+        {
+            return(status);
+        }
+    }
+
+    status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_INITIALIZE,
+                                                 handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 hash_metadata, hash_metadata_size,
+                                                 NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    /* Hash 8 zero bytes. */
+    status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_UPDATE,
+                                                 handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 (UCHAR *)_pss_zero8, 8,
+                                                 NX_CRYPTO_NULL,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 hash_metadata, hash_metadata_size,
+                                                 NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    /* Hash mHash. */
+    status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_UPDATE,
+                                                 handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 (UCHAR *)message_hash, (ULONG)hash_length,
+                                                 NX_CRYPTO_NULL,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 hash_metadata, hash_metadata_size,
+                                                 NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    /* Hash salt. */
+    status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_UPDATE,
+                                                 handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 salt, (ULONG)s_len,
+                                                 NX_CRYPTO_NULL,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 hash_metadata, hash_metadata_size,
+                                                 NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    status = hash_method -> nx_crypto_operation(NX_CRYPTO_HASH_CALCULATE,
+                                                 handler, (NX_CRYPTO_METHOD *)hash_method,
+                                                 NX_CRYPTO_NULL, 0,
+                                                 NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL,
+                                                 h, (ULONG)hash_length,
+                                                 hash_metadata, hash_metadata_size,
+                                                 NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    /* Steps 7-8 – DB = PS (zeros) || 0x01 || salt. */
+    for (i = 0u; i < db_len - s_len - 1u; i++)
+    {
+        db[i] = 0x00u;
+    }
+    db[db_len - s_len - 1u] = 0x01u;
+    NX_CRYPTO_MEMCPY(&db[db_len - s_len], salt, s_len); /* Use case of memcpy is verified. */
+
+    /* Step 9 – dbMask = MGF1(H, db_len). Write directly into em[0..db_len-1]. */
+    status = _nx_crypto_rsa_pss_mgf1(hash_method, hash_metadata, hash_metadata_size,
+                                      h, hash_length, em, db_len);
+    if (status != NX_CRYPTO_SUCCESS)
+    {
+        return(status);
+    }
+
+    /* Step 10 – maskedDB = DB XOR dbMask (em[0..db_len-1] currently holds dbMask). */
+    for (i = 0u; i < db_len; i++)
+    {
+        em[i] ^= db[i];
+    }
+
+    /* Step 11 – zero the top (8*emLen - emBits) bits of maskedDB[0]. */
+    zero_bits = (UCHAR)(8u * em_len - em_bits);
+    if (zero_bits)
+    {
+        em[0] &= (UCHAR)(0xFFu >> zero_bits);
+    }
+
+    /* Step 12 – EM = maskedDB || H || 0xBC. H is already in place; trailer last. */
+    em[em_len - 1u] = 0xBCu;
+
+#ifdef NX_SECURE_KEY_CLEAR
+    NX_CRYPTO_MEMSET(db, 0, db_len);
+    NX_CRYPTO_MEMSET(salt, 0, s_len);
+#endif
+
+    return(NX_CRYPTO_SUCCESS);
+}
+

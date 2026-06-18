@@ -23,6 +23,7 @@
 #define NX_SECURE_SOURCE_CODE
 
 #include "nx_secure_tls.h"
+#include "nx_crypto_rsa.h"
 #ifdef NX_SECURE_ENABLE_DTLS
 #include "nx_secure_dtls.h"
 #endif /* NX_SECURE_ENABLE_DTLS */
@@ -30,6 +31,9 @@
 #ifndef NX_SECURE_DISABLE_X509
 static UCHAR handshake_hash[64 + 34 + 64]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256/384/512. */
 static UCHAR _nx_secure_padded_signature[600];
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+static UCHAR _nx_secure_pss_scratch[600]; /* PSS encode: db[<=511 B] + salt[<=64 B] for RSA-4096+SHA-512 */
+#endif
 
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
 static const UCHAR _NX_SECURE_OID_SHA256[] = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
@@ -174,7 +178,10 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
     if (tls_session -> nx_secure_tls_1_3)
     {
-        /* Signature algorithm is set when processing CertificateRequest or SignatureAlgorithm extension. */
+        /* Signature algorithm is set when processing CertificateRequest or SignatureAlgorithm extension.
+         * For RSA in TLS 1.3 the wire codes are rsa_pss_rsae_sha256/384/512 (0x0804/0805/0806). We reuse
+         * the existing RSA_SHA_* x509 cert types because the cipher/hash table lookup is shared with
+         * PKCS#1 — only the EMSA encoding step downstream switches to PSS. */
         switch (tls_session -> nx_secure_tls_signature_algorithm)
         {
         case NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256:
@@ -185,6 +192,15 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
             break;
         case NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512:
             signature_algorithm = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512;
+            break;
+        case 0x0804u: /* rsa_pss_rsae_sha256 */
+            signature_algorithm = NX_SECURE_TLS_X509_TYPE_RSA_SHA_256;
+            break;
+        case 0x0805u: /* rsa_pss_rsae_sha384 */
+            signature_algorithm = NX_SECURE_TLS_X509_TYPE_RSA_SHA_384;
+            break;
+        case 0x0806u: /* rsa_pss_rsae_sha512 */
+            signature_algorithm = NX_SECURE_TLS_X509_TYPE_RSA_SHA_512;
             break;
         default:
             return(NX_SECURE_TLS_UNSUPPORTED_CERT_SIGN_ALG);
@@ -534,6 +550,43 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 
 #endif /* NX_SECURE_ENABLE_DTLS */
         {
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+            if (tls_session -> nx_secure_tls_1_3)
+            {
+                /* TLS 1.3 CertificateVerify wire format: SignatureScheme (2 bytes, big-endian) || length (2 bytes) || signature.
+                 * nx_secure_tls_signature_algorithm carries the wire code (rsa_pss_rsae_sha256/384/512 = 0x0804/0805/0806)
+                 * stored by process_certificate_request. The PSS-encoded EM is built directly into _nx_secure_padded_signature
+                 * at full size — the PKCS#1 v1.5 padding loop further down is gated to skip when nx_secure_tls_1_3 is set. */
+                current_buffer[length]     = (UCHAR)((tls_session -> nx_secure_tls_signature_algorithm) >> 8);
+                current_buffer[length + 1] = (UCHAR)((tls_session -> nx_secure_tls_signature_algorithm) & 0xFFu);
+                current_buffer[length + 2] = (UCHAR)(data_size >> 8);
+                current_buffer[length + 3] = (UCHAR)(data_size);
+                length += 4;
+
+                /* Sentinel: signature_length == data_size makes the PKCS#1 loop body below run zero iterations
+                 * (i < data_size - data_size - 1 underflows; we explicitly skip it via the nx_secure_tls_1_3 guard). */
+                signature_length = data_size;
+
+                status = _nx_crypto_rsa_pss_sign(handshake_hash, handshake_hash_length,
+                                                  _nx_secure_padded_signature,
+                                                  (data_size << 3) - 1u,
+                                                  hash_method,
+                                                  tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
+                                                  tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch_size,
+                                                  _nx_secure_pss_scratch, sizeof(_nx_secure_pss_scratch));
+                if (status != NX_CRYPTO_SUCCESS)
+                {
+#ifdef NX_SECURE_KEY_CLEAR
+                    NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
+                    NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+                    NX_SECURE_MEMSET(_nx_secure_pss_scratch, 0, sizeof(_nx_secure_pss_scratch));
+#endif /* NX_SECURE_KEY_CLEAR */
+                    return(status);
+                }
+            }
+            else
+#endif /* NX_SECURE_TLS_TLS_1_3_ENABLED */
+            {
             /* Signature algorithm used. */
             current_buffer[length]     = NX_SECURE_TLS_HASH_ALGORITHM_SHA256;   /* We only support SHA-256 right now. */
             current_buffer[length + 1] = NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA; /* RSA */
@@ -566,6 +619,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 
             /* Now put the data into the padded buffer - must be at the end. */
             NX_SECURE_MEMCPY(&working_ptr[19], handshake_hash, 32); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
+            }
         }
 #endif
 
@@ -615,10 +669,16 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
            then pad with 0xFF bytes (for signing) followed with a single 0 byte right before the payload,
            which comes at the end of the RSA block. */
 
-        _nx_secure_padded_signature[1] = 0x1; /* Block type is 0x00, 0x01 for signatures */
-        for (i = 2; i < (data_size - signature_length - 1); ++i)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+        /* TLS 1.3 uses RSA-PSS, which already wrote the full EM into _nx_secure_padded_signature above. */
+        if (!tls_session -> nx_secure_tls_1_3)
+#endif
         {
-            _nx_secure_padded_signature[i] = (UCHAR)0xFF;
+            _nx_secure_padded_signature[1] = 0x1; /* Block type is 0x00, 0x01 for signatures */
+            for (i = 2; i < (data_size - signature_length - 1); ++i)
+            {
+                _nx_secure_padded_signature[i] = (UCHAR)0xFF;
+            }
         }
 
         /* Check for user-defined keys. */
