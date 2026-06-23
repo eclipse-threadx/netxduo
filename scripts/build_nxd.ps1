@@ -90,7 +90,8 @@ foreach ($currentConfiguration in $selectedConfigurations) {
         "-DTHREADX_ARCH=$($settings.NetXArch)",
         "-DTHREADX_TOOLCHAIN=$($settings.NetXToolchain)",
         "-DTHREADX_SOURCE_DIR=$ThreadXDir",
-        "-DFILEX_SOURCE_DIR=$FilexDir"
+        "-DFILEX_SOURCE_DIR=$FilexDir",
+        "-DNX_USER_FILE=$(Join-Path $repoRoot 'ports\win64\vs_2022\inc\nx_user_win.h')"
     )
 
     Write-Host "Building $Arch / $currentConfiguration"
