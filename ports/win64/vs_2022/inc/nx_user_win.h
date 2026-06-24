@@ -61,4 +61,49 @@
 #endif
 
 
+/* On 64-bit Windows the ABI is LLP64: ULONG is 32 bits while pointers are
+   64 bits.  NetX Duo thread/timer entry functions receive the IP/timer
+   control-block pointer through a ULONG parameter, which silently truncates
+   the upper 32 bits.  The NX_THREAD_EXTENSION_PTR_SET/GET and
+   NX_TIMER_EXTENSION_PTR_SET/GET hooks steer around this by storing the
+   full 64-bit pointer in the TX_THREAD / TX_TIMER_INTERNAL extension field
+   (a VOID *) and recovering it with tx_thread_identify() / the expired-
+   timer pointer.  This is identical to what the netxduo64 test build
+   already does in its own nx_user.h.  The guard keeps win32 builds
+   unaffected: on ILP32/LLP32 ULONG and pointers are both 32 bits so the
+   default no-op macros in nx_api.h are correct.  */
+#ifdef _WIN64
+#define NX_THREAD_EXTENSION_PTR_SET(a, b)                   { \
+                                                                TX_THREAD *thread_ptr; \
+                                                                thread_ptr = (TX_THREAD *)(a); \
+                                                                (thread_ptr -> tx_thread_extension_ptr) = (VOID *)(b); \
+                                                            }
+#define NX_THREAD_EXTENSION_PTR_GET(a, b, c)                { \
+                                                                NX_PARAMETER_NOT_USED(c); \
+                                                                TX_THREAD *thread_ptr; \
+                                                                thread_ptr = tx_thread_identify(); \
+                                                                while (1) \
+                                                                { \
+                                                                    if (thread_ptr -> tx_thread_extension_ptr) \
+                                                                    { \
+                                                                        (a) = (b *)(thread_ptr -> tx_thread_extension_ptr); \
+                                                                        break; \
+                                                                    } \
+                                                                    tx_thread_sleep(1); \
+                                                                } \
+                                                            }
+#define NX_TIMER_EXTENSION_PTR_SET(a, b)                    { \
+                                                                TX_TIMER *timer_ptr; \
+                                                                timer_ptr = (TX_TIMER *)(a); \
+                                                                (timer_ptr -> tx_timer_internal.tx_timer_internal_extension_ptr) = (VOID *)(b); \
+                                                            }
+#define NX_TIMER_EXTENSION_PTR_GET(a, b, c)                 { \
+                                                                NX_PARAMETER_NOT_USED(c); \
+                                                                if (!_tx_timer_expired_timer_ptr -> tx_timer_internal_extension_ptr) \
+                                                                    return; \
+                                                                (a) = (b *)(_tx_timer_expired_timer_ptr -> tx_timer_internal_extension_ptr); \
+                                                            }
+#endif /* _WIN64 */
+
+
 #endif /* NX_USER_WIN_H */
