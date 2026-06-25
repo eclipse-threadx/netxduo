@@ -276,22 +276,43 @@ NX_PACKET *decrypted_packet;
                 if (status == NX_SECURE_TLS_SUCCESS)
                 {
 
-                    /* In TLS 1.3, encrypted records have a single byte at the
-                    record that contains the message type (e.g. application data,
-                    ect.), which is now the ACTUAL message type. */
-                    status = nx_packet_data_extract_offset(decrypted_packet,
-                                                           decrypted_packet -> nx_packet_length - 1,
-                                                           &message_type, 1, &bytes_copied);
-                    if (status || (bytes_copied != 1))
+                    /* RFC 8446 §5.4: the inner content type is the last
+                     * NON-ZERO byte of the plaintext; everything after it is
+                     * record padding. Reading the literal last byte broke any
+                     * padded record (Java JDK HttpClient pads by default) —
+                     * scan back, skip the zeros.
+                     */
                     {
-                        error_status = NX_SECURE_TLS_INVALID_PACKET;
+                        ULONG scan_offset = decrypted_packet -> nx_packet_length;
+                        message_type = 0;
+                        while (scan_offset > 0)
+                        {
+                            scan_offset--;
+                            status = nx_packet_data_extract_offset(decrypted_packet,
+                                                                   scan_offset,
+                                                                   &message_type, 1, &bytes_copied);
+                            if (status || (bytes_copied != 1))
+                            {
+                                error_status = NX_SECURE_TLS_INVALID_PACKET;
+                                message_type = 0;
+                                break;
+                            }
+                            if (message_type != 0)
+                            {
+                                break;
+                            }
+                        }
+                        if (message_type == 0)
+                        {
+                            error_status = NX_SECURE_TLS_INVALID_PACKET;
+                            message_length = 0;
+                        }
+                        else
+                        {
+                            message_length = scan_offset;
+                        }
+                        decrypted_packet -> nx_packet_length = message_length;
                     }
-
-                    /* Remove the content type byte from the data length to process. */
-                    message_length = message_length - 1;
-
-                    /* Adjust packet length. */
-                    decrypted_packet -> nx_packet_length = message_length;
 
                     /* Increment the sequence number. This is done in the MAC verify
                     step for 1.2 and earlier, but AEAD includes the MAC so we don't
