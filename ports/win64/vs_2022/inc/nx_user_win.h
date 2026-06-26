@@ -61,6 +61,35 @@
 #endif
 
 
+/* NX_IP_TIME_TO_LIVE defaults to 128 (0x80).  NetX Duo initialises the IP
+   fragment reassembly timer to MAX(NX_IPV4_MAX_REASSEMBLY_TIME, TTL).  With
+   a TTL of 128 the reassembly timeout is 128 IP-periodic intervals = 12 800
+   ticks = 12.8 s.  The fragmentation regression tests use NX_IP_TIME_TO_LIVE
+   as their delay multiplier so the test duration scales with this value.
+   Set it to 20 (> NX_IPV4_MAX_REASSEMBLY_TIME = 15) so the same relative
+   timing is preserved while capping the test at ~2.4 s.  Value 20 is still
+   large enough for all local simulation routing (TTL is never decremented in
+   the RAM driver).  */
+#ifndef NX_IP_TIME_TO_LIVE
+#define NX_IP_TIME_TO_LIVE                   ((ULONG)20)
+#endif
+
+
+/* NX_ARP_UPDATE_RATE defaults to 10 (IP-periodic intervals between ARP
+   retries).  netx_arp_dynamic_entry_fail_test sleeps for
+   (NX_ARP_MAXIMUM_RETRIES + 1) * NX_ARP_UPDATE_RATE * NX_IP_PERIODIC_RATE =
+   19 * 10 * 100 = 19 000 ticks.  On win32 (x86 under WOW64) the effective
+   tick period is higher than on win64 due to context-switch overhead; at
+   ~6 ms/tick the sleep takes ~114 s, which barely exceeds the 120 s CTest
+   timeout.  Setting NX_ARP_UPDATE_RATE to 1 reduces the sleep to 1 900 ticks
+   (~11 s at 6 ms/tick), well within the timeout.  The ARP retry logic is
+   unaffected: NX_ARP_MAXIMUM_RETRIES retries still occur, just 10× faster
+   in wall-clock time.  */
+#ifndef NX_ARP_UPDATE_RATE
+#define NX_ARP_UPDATE_RATE                   1
+#endif
+
+
 /* On 64-bit Windows the ABI is LLP64: ULONG is 32 bits while pointers are
    64 bits.  NetX Duo thread/timer entry functions receive the IP/timer
    control-block pointer through a ULONG parameter, which silently truncates
