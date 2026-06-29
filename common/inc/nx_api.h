@@ -1,6 +1,7 @@
 /***************************************************************************
  * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * Copyright (C) 2026 Eclipse ThreadX contributors
  *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
@@ -859,7 +860,9 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 
 /* Define the IPv4 default time to live.  */
 
+#ifndef NX_IP_TIME_TO_LIVE
 #define NX_IP_TIME_TO_LIVE                     ((ULONG)0x00000080) /* Default packet time to live            */
+#endif /* NX_IP_TIME_TO_LIVE */
 #define NX_IP_TIME_TO_LIVE_MASK                ((ULONG)0xFF000000) /* Mask for isolating the time to live    */
 #define NX_IP_TIME_TO_LIVE_SHIFT               24                  /* Number of bits to shift left           */
 
