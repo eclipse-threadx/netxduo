@@ -35,14 +35,17 @@
 /*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    This file overrides selected NetX Duo configuration constants for   */
-/*    the Windows simulation port.  Both win32 and win64 flavours of the  */
-/*    port run the simulation 10x faster than wall clock (TX_TIMER_PERIOD */
-/*    = 1 ms at the default 100 ticks/second).  Protocol-stack constants  */
-/*    that are expressed in tick counts and have a large default value    */
-/*    may still need to be scaled down to keep CTest within its timeout.  */
+/*    the Windows simulation port.  TX_TIMER_PERIOD = 1 ms and            */
+/*    NX_IP_PERIODIC_RATE = 100, so 100 ticks = 100 ms real time = 1 NX  */
+/*    "second" — the simulation runs 10x faster than wall clock.          */
+/*    Protocol-stack constants expressed in NX-seconds accumulate as      */
+/*    (value × 100) ticks; at the win32 effective tick rate of ~1.5 ms   */
+/*    even modest defaults become multi-second CTest delays.  Each        */
+/*    override below reduces the constant to the smallest value that      */
+/*    still lets the regression test exercise the intended behaviour.     */
 /*                                                                        */
 /*    This file is intended for test builds only; it is not part of any  */
-/*    production configuration.                                            */
+/*    production configuration.                                           */
 /*                                                                        */
 /**************************************************************************/
 
@@ -50,14 +53,15 @@
 #define NX_USER_WIN_H
 
 
-/* NX_PATH_MTU_INCREASE_WAIT_INTERVAL defaults to 600 (ticks).  At 100
-   ticks/second that is 6 real seconds — acceptable in isolation, but the
-   win64 test suite runs the related test while other tests are serialised
-   on a single core, which can inflate the effective wait.  Reduce to 60
-   ticks (0.6 s) so the test exercises the same logic in a fraction of the
-   CTest timeout.  */
+/* NX_PATH_MTU_INCREASE_WAIT_INTERVAL defaults to 600 (NX-seconds).
+   At 100 ticks/NX-second and 1 ms/tick that is 60,000 ms = 60 s of
+   real time — far too long for a CTest run.  Reduce to 10 NX-seconds
+   (1,000 ticks = ~1.5 s at the win32 effective tick rate of 1.5 ms).
+   The test sleeps for NX_PATH_MTU_INCREASE_WAIT_INTERVAL_TICKS and
+   then checks that the timer has expired, so it adapts automatically
+   to any value.  */
 #ifndef NX_PATH_MTU_INCREASE_WAIT_INTERVAL
-#define NX_PATH_MTU_INCREASE_WAIT_INTERVAL   60
+#define NX_PATH_MTU_INCREASE_WAIT_INTERVAL   10
 #endif
 
 
@@ -87,6 +91,29 @@
    in wall-clock time.  */
 #ifndef NX_ARP_UPDATE_RATE
 #define NX_ARP_UPDATE_RATE                   1
+#endif
+
+
+/* NX_TCP_MAXIMUM_SEGMENT_LIFETIME defaults to 120 NX-seconds.  The 2MSL
+   timer rate is 2 * NX_IP_PERIODIC_RATE * NX_TCP_MAXIMUM_SEGMENT_LIFETIME
+   = 24 000 ticks = ~36 s at the win32 effective tick rate.  Reduce to 15
+   NX-seconds so 2MSL = 3 000 ticks = ~4.5 s.  Tests that wait for the
+   TIME_WAIT state to expire use _nx_tcp_2MSL_timer_rate (derived from this
+   constant), so they adapt automatically to the reduced value.  */
+#ifndef NX_TCP_MAXIMUM_SEGMENT_LIFETIME
+#define NX_TCP_MAXIMUM_SEGMENT_LIFETIME      15
+#endif
+
+
+/* NX_TCP_MAXIMUM_RETRIES defaults to 10.  netx_tcp_zero_window_test loops
+   4 times; each iteration blocks for (max_retries + 2) * NX_IP_PERIODIC_RATE
+   ticks twice (send timeout + explicit sleep) = 2 * 12 * 100 = 2 400 ticks
+   per iteration = 9 600 ticks total = ~14.5 s at 1.5 ms/tick.  Reducing to
+   5 cuts per-iteration wait to 2 * 7 * 100 = 1 400 ticks = ~2.1 s and
+   total to ~8.5 s.  All tests read nx_tcp_socket_timeout_max_retries at
+   runtime (set from this constant) and adapt accordingly.  */
+#ifndef NX_TCP_MAXIMUM_RETRIES
+#define NX_TCP_MAXIMUM_RETRIES               5
 #endif
 
 
