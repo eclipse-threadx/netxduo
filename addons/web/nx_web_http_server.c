@@ -4223,7 +4223,6 @@ UINT        temp_realm_length = 0;
     next_packet_ptr =  packet_ptr -> nx_packet_next;
     while ((length) && (next_packet_ptr))
     {
-    
         /* Write the content of the next packet.  */
         status =  fx_file_write(&(server_ptr -> nx_web_http_server_file), next_packet_ptr -> nx_packet_prepend_ptr,
                                 (ULONG)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr));
