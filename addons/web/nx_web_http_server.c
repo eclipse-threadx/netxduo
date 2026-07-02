@@ -4208,9 +4208,6 @@ UINT        temp_realm_length = 0;
                                                 "NetX HTTP Content Length",
                                                 sizeof("NetX HTTP Content Length") - 1, NX_NULL, 0);
 
-            /* Release the previous data packet.  */
-            nx_packet_release(data_packet_ptr);
-
             status = NX_UNDERFLOW;
             goto put_process_end;
         }
@@ -4226,7 +4223,7 @@ UINT        temp_realm_length = 0;
     next_packet_ptr =  packet_ptr -> nx_packet_next;
     while ((length) && (next_packet_ptr))
     {
-
+    
         /* Write the content of the next packet.  */
         status =  fx_file_write(&(server_ptr -> nx_web_http_server_file), next_packet_ptr -> nx_packet_prepend_ptr,
                                 (ULONG)(next_packet_ptr -> nx_packet_append_ptr - next_packet_ptr -> nx_packet_prepend_ptr));
@@ -4261,9 +4258,6 @@ UINT        temp_realm_length = 0;
                                                 sizeof(NX_WEB_HTTP_STATUS_BAD_REQUEST) - 1,
                                                 "NetX HTTP Content Length",
                                                 sizeof("NetX HTTP Content Length") - 1, NX_NULL, 0);
-
-            /* Release the previous data packet.  */
-            nx_packet_release(data_packet_ptr);
 
             status = NX_UNDERFLOW;
             goto put_process_end;
