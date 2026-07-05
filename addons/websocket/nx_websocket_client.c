@@ -512,6 +512,9 @@ NX_PACKET *packet_ptr;
         client_ptr -> nx_websocket_client_guid[i] = (UCHAR)(NX_RAND());
     }
 
+    /* Set the last extra byte of the buffer to be zero, since the function _nx_utility_base64_encode will use this extra-byte for calculation */
+    client_ptr -> nx_websocket_client_guid[NX_WEBSOCKET_CLIENT_GUID_SIZE] = 0;
+
     /* Encode the GUID as key.  */
     _nx_utility_base64_encode(client_ptr -> nx_websocket_client_guid, NX_WEBSOCKET_CLIENT_GUID_SIZE, 
                               client_ptr -> nx_websocket_client_key, NX_WEBSOCKET_CLIENT_KEY_SIZE,
@@ -963,7 +966,7 @@ UCHAR  *field_name;
 UINT    field_name_length;
 UCHAR  *field_value;
 UINT    field_value_length;
-UCHAR   digest[NX_WEBSOCKET_ACCEPT_DIGEST_SIZE];
+UCHAR   digest[NX_WEBSOCKET_ACCEPT_DIGEST_SIZE + 1];
 UCHAR   key[NX_WEBSOCKET_ACCEPT_KEY_SIZE + 1];
 UINT    key_size = 0;
 UCHAR   upgrade_flag = NX_FALSE;
@@ -1103,6 +1106,9 @@ UCHAR   accept_cnt = 0;
             _nx_sha1_update(&(client_ptr -> nx_websocket_client_sha1), client_ptr->nx_websocket_client_key, client_ptr->nx_websocket_client_key_size);
             _nx_sha1_update(&(client_ptr -> nx_websocket_client_sha1), (UCHAR*)NX_WEBSOCKET_ACCEPT_PREDEFINED_GUID, NX_WEBSOCKET_ACCEPT_PREDEFINED_GUID_SIZE);
             _nx_sha1_digest_calculate(&(client_ptr -> nx_websocket_client_sha1), digest);
+
+            /* Set the last extra byte of the digest to be zero, since the function _nx_utility_base64_encode will use this byte for calculation */
+            digest[NX_WEBSOCKET_ACCEPT_DIGEST_SIZE] = 0;
 
             /* Encode the hash and compare it with the field value from the server.  */
             _nx_utility_base64_encode(digest, NX_WEBSOCKET_ACCEPT_DIGEST_SIZE, key, (NX_WEBSOCKET_ACCEPT_KEY_SIZE + 1), &key_size);

@@ -173,7 +173,7 @@ typedef struct NX_WEBSOCKET_CLIENT_STRUCT
     NX_PACKET                  *nx_websocket_client_processing_packet;
 
     /* Globally Unique Identifier.  */
-    UCHAR                       nx_websocket_client_guid[NX_WEBSOCKET_CLIENT_GUID_SIZE];
+    UCHAR                       nx_websocket_client_guid[NX_WEBSOCKET_CLIENT_GUID_SIZE + 1];
 
     /* Protocol Name and length */
     UCHAR                      *nx_websocket_client_subprotocol;
