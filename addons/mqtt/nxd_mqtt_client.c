@@ -1950,13 +1950,6 @@ UCHAR       fixed_header;
         client_ptr -> nxd_mqtt_ping_sent_time = 0;
     }
 
-    /* Clean up the information when disconnecting. */
-    client_ptr -> nxd_mqtt_client_username = NX_NULL;
-    client_ptr -> nxd_mqtt_client_password = NX_NULL;
-    client_ptr -> nxd_mqtt_client_will_topic = NX_NULL;
-    client_ptr -> nxd_mqtt_client_will_message = NX_NULL;
-    client_ptr -> nxd_mqtt_client_will_qos_retain = 0;
-
     /* Release current processing packet. */
     if (client_ptr -> nxd_mqtt_client_processing_packet)
     {
@@ -2570,6 +2563,14 @@ VOID _nxd_mqtt_client_connection_end(NXD_MQTT_CLIENT *client_ptr, ULONG wait_opt
 #endif
     nx_tcp_socket_disconnect(&(client_ptr -> nxd_mqtt_client_socket), wait_option);
     nx_tcp_client_socket_unbind(&(client_ptr -> nxd_mqtt_client_socket));
+
+    /* Clean up per-connection information so a failed or ended connection
+       never leaks credentials or will settings into the next CONNECT. */
+    client_ptr -> nxd_mqtt_client_username = NX_NULL;
+    client_ptr -> nxd_mqtt_client_password = NX_NULL;
+    client_ptr -> nxd_mqtt_client_will_topic = NX_NULL;
+    client_ptr -> nxd_mqtt_client_will_message = NX_NULL;
+    client_ptr -> nxd_mqtt_client_will_qos_retain = 0;
 
     /* Disable timer if timer has been started. */
     if (client_ptr -> nxd_mqtt_keepalive)
@@ -3750,9 +3751,19 @@ UINT                 old_priority;
         {
             nx_secure_tls_session_delete(&(client_ptr -> nxd_mqtt_tls_session));
         }
+        client_ptr -> nxd_mqtt_client_use_tls = 0;
 #endif /* NX_SECURE_ENABLE */
         nx_tcp_client_socket_unbind(&(client_ptr -> nxd_mqtt_client_socket));
         tx_timer_delete(&(client_ptr -> nxd_mqtt_timer));
+
+        /* Same per-connection cleanup as _nxd_mqtt_client_connection_end —
+           this early-failure path is the only teardown that does not go
+           through it. */
+        client_ptr -> nxd_mqtt_client_username = NX_NULL;
+        client_ptr -> nxd_mqtt_client_password = NX_NULL;
+        client_ptr -> nxd_mqtt_client_will_topic = NX_NULL;
+        client_ptr -> nxd_mqtt_client_will_message = NX_NULL;
+        client_ptr -> nxd_mqtt_client_will_qos_retain = 0;
         return(NXD_MQTT_CONNECT_FAILURE);
     }
 
