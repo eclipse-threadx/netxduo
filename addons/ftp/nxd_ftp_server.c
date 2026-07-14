@@ -2012,7 +2012,7 @@ ULONG                   block_size;
                             /* The read command was successful!  */
                             /* Now send a successful response to the client.  */
                             _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
-                                        NX_FTP_CODE_COMPLETED, "File Sent");
+                                        NX_FTP_CODE_LOGOFF, "File Sent");
                         }
                         else
                         {
@@ -2965,7 +2965,7 @@ ULONG                   block_size;
 
                             /* Now send a successful response to the client.  */
                             _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
-                                        NX_FTP_CODE_COMPLETED, "List End");
+                                        NX_FTP_CODE_LOGOFF, "List End");
                         }
                         else
                         {
@@ -3436,7 +3436,7 @@ ULONG                   block_size;
 
                             /* Now send a successful response to the client.  */
                             _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
-                                        NX_FTP_CODE_COMPLETED, "List End");
+                                        NX_FTP_CODE_LOGOFF, "List End");
                         }
                         else
                         {
@@ -4596,7 +4596,7 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 
                     /* Now send "250" message to indicate successful file write.  */
                     _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
-                                NX_FTP_CODE_COMPLETED, "File Written");
+                                NX_FTP_CODE_LOGOFF, "File Written");
                 }
                 else
                 {
