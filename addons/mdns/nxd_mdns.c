@@ -8486,7 +8486,8 @@ UINT                i;
     if (more_known_answer)
     {                  
         tc_bit = NX_MDNS_TC_FLAG;
-         *(USHORT *)(packet_ptr -> nx_packet_prepend_ptr + NX_MDNS_FLAGS_OFFSET) |= NX_CHANGE_USHORT_ENDIAN(tc_bit);
+        NX_CHANGE_USHORT_ENDIAN(tc_bit);
+        *(USHORT *)(packet_ptr -> nx_packet_prepend_ptr + NX_MDNS_FLAGS_OFFSET) |= tc_bit;
     }
 
     /* Update the question count in header.  */
