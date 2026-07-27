@@ -80,9 +80,18 @@ NX_IP *ip_ptr;
     /* If trace is enabled, insert this event into the trace buffer.  */
     NX_TRACE_IN_LINE_INSERT(NX_TRACE_TCP_SERVER_SOCKET_ACCEPT, ip_ptr, socket_ptr, wait_option, socket_ptr -> nx_tcp_socket_state, NX_TRACE_TCP_EVENTS, 0, 0);
 
+    /* Obtain the IP mutex so we can initiate accept processing for this socket.  The
+       socket state is examined below with this mutex held, because the IP thread
+       changes it from the receive path: a state sampled before the mutex is acquired
+       can be stale by the time this thread acts on it.  */
+    tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
+
     /* Check if the socket has already made a connection, return successful outcome to accept(). */
     if (socket_ptr -> nx_tcp_socket_state == NX_TCP_ESTABLISHED)
     {
+
+        /* Release the IP protection.  */
+        tx_mutex_put(&(ip_ptr -> nx_ip_protection));
         return(NX_SUCCESS);
     }
 
@@ -92,12 +101,12 @@ NX_IP *ip_ptr;
     {
 
         /* Socket has either been closed or in the process of closing*/
+
+        /* Release the IP protection.  */
+        tx_mutex_put(&(ip_ptr -> nx_ip_protection));
         return(NX_NOT_LISTEN_STATE);
     }
 
-
-    /* Obtain the IP mutex so we can initiate accept processing for this socket.  */
-    tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
 
     if (socket_ptr -> nx_tcp_socket_state == NX_TCP_LISTEN_STATE)
     {
