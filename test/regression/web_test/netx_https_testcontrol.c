@@ -66,6 +66,7 @@ void netx_https_api_test(void*);
 void netx_web_basic_test_application_define(void *);
 void netx_web_basic_ecc_test_application_define(void *);
 void netx_web_put_basic_test_application_define(void *);
+void netx_web_put_content_length_underflow_test_application_define(void *);
 void netx_web_post_basic_test_application_define(void *);
 void netx_web_delete_basic_test_application_define(void *);
 void netx_web_head_basic_test_application_define(void *);
@@ -142,6 +143,7 @@ TEST_ENTRY  test_control_tests[] =
     {netx_web_response_in_multiple_packets_test_application_define, TEST_TIMEOUT_LOW},
     {netx_web_connect_three_times_test_application_define, TEST_TIMEOUT_LOW},
     {netx_web_put_basic_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_web_put_content_length_underflow_test_application_define, TEST_TIMEOUT_LOW},
     {netx_web_post_basic_test_application_define, TEST_TIMEOUT_LOW},
     {netx_web_head_basic_test_application_define, TEST_TIMEOUT_LOW},
     {netx_web_delete_basic_test_application_define, TEST_TIMEOUT_LOW},
