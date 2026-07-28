@@ -1017,7 +1017,16 @@ UINT            compute_checksum = 1;
             /* Increment the suspended thread count.  */
             socket_ptr -> nx_tcp_socket_transmit_suspended_count++;
 
-            if (socket_ptr -> nx_tcp_socket_zero_window_probe_has_data == NX_FALSE)
+            /* Only a receiver that advertised a zero window is probed.  This
+               data cannot be sent for one of three reasons -- the receiver's
+               window, the congestion window, or the transmit queue depth --
+               and only the first of them is a zero window.  Setting the flag
+               for the other two describes the socket as being in the persist
+               state when it is not, which moves the retransmission retry
+               limit onto the probe failure count (see
+               nx_tcp_fast_periodic_processing.c) and stops it being reached.  */
+            if ((socket_ptr -> nx_tcp_socket_tx_window_advertised == 0) &&
+                (socket_ptr -> nx_tcp_socket_zero_window_probe_has_data == NX_FALSE))
             {
 
                 /* Set data for zero window probe. */
@@ -1061,8 +1070,13 @@ UINT            compute_checksum = 1;
         else
         {
 
-            /* Check advertised window. */
-            if (socket_ptr -> nx_tcp_socket_zero_window_probe_has_data == NX_FALSE)
+            /* Check advertised window.  As above, a probe belongs to a zero
+               window and to nothing else: the caller is about to be told
+               NX_WINDOW_OVERFLOW or NX_TX_QUEUE_DEPTH and will try again, and
+               each of those attempts would otherwise re-declare a persist
+               state that hides the retransmission retry limit.  */
+            if ((socket_ptr -> nx_tcp_socket_tx_window_advertised == 0) &&
+                (socket_ptr -> nx_tcp_socket_zero_window_probe_has_data == NX_FALSE))
             {
 
                 /* Set data for zero window probe. */

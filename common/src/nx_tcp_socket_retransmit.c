@@ -110,9 +110,21 @@ ULONG      window_size;
             socket_ptr -> nx_tcp_socket_zero_window_probe_data = *(packet_ptr -> nx_packet_prepend_ptr + ((header_ptr -> nx_tcp_header_word_3 >> 28) << 2));
 
             /* Now set zero window probe started. */
-            socket_ptr -> nx_tcp_socket_zero_window_probe_has_data = NX_TRUE;
             socket_ptr -> nx_tcp_socket_zero_window_probe_sequence = header_ptr -> nx_tcp_sequence_number;
-            socket_ptr -> nx_tcp_socket_zero_window_probe_failure = 0;
+
+            /* The failure count belongs to the probe, not to each attempt at
+               it: clear it only when a new probe starts, as the two places in
+               nx_tcp_socket_send_internal.c that arm one do.  Clearing it
+               here on every attempt pinned it at one, so the retry limit that
+               _nx_tcp_fast_periodic_processing() tests against it during a
+               zero window could never be reached and a peer that stopped
+               answering its probes was never given up on.  A peer that does
+               answer still clears it (nx_tcp_socket_state_ack_check.c).  */
+            if (socket_ptr -> nx_tcp_socket_zero_window_probe_has_data == NX_FALSE)
+            {
+                socket_ptr -> nx_tcp_socket_zero_window_probe_has_data = NX_TRUE;
+                socket_ptr -> nx_tcp_socket_zero_window_probe_failure = 0;
+            }
 
             NX_CHANGE_ULONG_ENDIAN(header_ptr -> nx_tcp_sequence_number);
             NX_CHANGE_ULONG_ENDIAN(header_ptr -> nx_tcp_header_word_3);
