@@ -41,15 +41,16 @@
 
 NX_CALLER_CHECKING_EXTERNS
 
-#define NX_WEBSOCKET_CRLF                           "\r\n"
-#define NX_WEBSOCKET_CRLF_SIZE                      2
+#define NX_WEBSOCKET_CRLF                                   "\r\n"
+#define NX_WEBSOCKET_CRLF_SIZE                              2
 
-#define NX_WEBSOCKET_HEADER_MINIMUM_LENGTH          2
+#define NX_WEBSOCKET_HEADER_MINIMUM_LENGTH                  2
+#define NX_WEBSOCKET_CONTROL_FRAME_PAYLOAD_MAXIMUM_LENGTH   125 /* RFC 6455 Section 5.5 */
 
-#define NX_WEBSOCKET_ACCEPT_PREDEFINED_GUID         "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
-#define NX_WEBSOCKET_ACCEPT_PREDEFINED_GUID_SIZE    (sizeof(NX_WEBSOCKET_ACCEPT_PREDEFINED_GUID) - 1)
-#define NX_WEBSOCKET_ACCEPT_DIGEST_SIZE             20 /* The length of SHA-1 hash is 20 bytes */
-#define NX_WEBSOCKET_ACCEPT_KEY_SIZE                28 /* The base64 encode key for 20 bytes digest requires (27 bytes name size + 1 byte pad) = 28 bytes */
+#define NX_WEBSOCKET_ACCEPT_PREDEFINED_GUID                 "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+#define NX_WEBSOCKET_ACCEPT_PREDEFINED_GUID_SIZE            (sizeof(NX_WEBSOCKET_ACCEPT_PREDEFINED_GUID) - 1)
+#define NX_WEBSOCKET_ACCEPT_DIGEST_SIZE                     20 /* The length of SHA-1 hash is 20 bytes */
+#define NX_WEBSOCKET_ACCEPT_KEY_SIZE                        28 /* The base64 encode key for 20 bytes digest requires (27 bytes name size + 1 byte pad) = 28 bytes */
 
 /**************************************************************************/
 /*                                                                        */
@@ -1727,6 +1728,8 @@ ULONG bytes_copied;
 ULONG packet_length;
 NX_PACKET *data_packet;
 UCHAR *data_ptr;
+UCHAR ping_payload[NX_WEBSOCKET_CONTROL_FRAME_PAYLOAD_MAXIMUM_LENGTH];
+NX_PACKET *pong_packet;
 
 
     /* Is there a packet waiting for processing? */
@@ -1910,74 +1913,81 @@ UCHAR *data_ptr;
         {
             if (status == NX_NO_PACKET)
             {
-
-                /* Try to receive more payload data from TCP/TLS if the packet holds the WebSocket header only */
-                return(NX_CONTINUE);
+                if (client_ptr -> nx_websocket_client_frame_data_length > 0)
+                {
+                    /* Try to receive more payload data from TCP/TLS if the packet holds the WebSocket header only */
+                    return(NX_CONTINUE);
+                }
             }
-
-            /* Return error status */
-            return(status);
+            else
+            {
+                /* Return error status */
+                return(status);
+            }
         }
     }
 
     /* Reset payload length and use the variable to count the data length processed by the function call this time */
     payload_length = 0;
 
-    /* Unmask payload data if there is masking key. */
-    if (client_ptr -> nx_websocket_client_frame_masked == NX_TRUE)
+    if (*packet_ptr)
     {
-        data_packet = (*packet_ptr);
-#ifndef NX_DISABLE_PACKET_CHAIN
-        while (data_packet && client_ptr -> nx_websocket_client_frame_header_found)
+        /* Unmask payload data if there is masking key. */
+        if (client_ptr -> nx_websocket_client_frame_masked == NX_TRUE)
         {
+            data_packet = (*packet_ptr);
+#ifndef NX_DISABLE_PACKET_CHAIN
+            while (data_packet && client_ptr -> nx_websocket_client_frame_header_found)
+            {
 #endif /* NX_DISABLE_PACKET_CHAIN  */
 
-            data_ptr = (*packet_ptr) -> nx_packet_prepend_ptr;
-            while (data_ptr < data_packet -> nx_packet_append_ptr)
-            {
-
-                /* Unmask payload data byte by byte */
-                *data_ptr ^= client_ptr -> nx_websocket_client_frame_masking_key[client_ptr -> nx_websocket_client_frame_data_received % 4];
-                data_ptr++;
-
-                /* Increase the payload length for the usage in frame process */
-                payload_length++;
-
-                /* Check and jump out if all data payload in the frame have been processed. */
-                client_ptr -> nx_websocket_client_frame_data_received++;
-                if (client_ptr -> nx_websocket_client_frame_data_received >= client_ptr -> nx_websocket_client_frame_data_length)
+                data_ptr = (*packet_ptr) -> nx_packet_prepend_ptr;
+                while (data_ptr < data_packet -> nx_packet_append_ptr)
                 {
 
-                    /* Reset the frame header flag as not found and break. */
-                    client_ptr -> nx_websocket_client_frame_header_found = NX_FALSE;
-                    break;
+                    /* Unmask payload data byte by byte */
+                    *data_ptr ^= client_ptr -> nx_websocket_client_frame_masking_key[client_ptr -> nx_websocket_client_frame_data_received % 4];
+                    data_ptr++;
+
+                    /* Increase the payload length for the usage in frame process */
+                    payload_length++;
+
+                    /* Check and jump out if all data payload in the frame have been processed. */
+                    client_ptr -> nx_websocket_client_frame_data_received++;
+                    if (client_ptr -> nx_websocket_client_frame_data_received >= client_ptr -> nx_websocket_client_frame_data_length)
+                    {
+
+                        /* Reset the frame header flag as not found and break. */
+                        client_ptr -> nx_websocket_client_frame_header_found = NX_FALSE;
+                        break;
+                    }
                 }
-            }
 
 #ifndef NX_DISABLE_PACKET_CHAIN
-            data_packet = data_packet -> nx_packet_next;
-        }
+                data_packet = data_packet -> nx_packet_next;
+            }
 #endif /* NX_DISABLE_PACKET_CHAIN  */
-    }
+        }
 
-    /* Add the payload length if no masking key */
-    else
-    {
-
-        /* Check and adjust received data length for processing */
-        payload_length = (*packet_ptr) -> nx_packet_length;
-        if (payload_length >= (client_ptr -> nx_websocket_client_frame_data_length - client_ptr -> nx_websocket_client_frame_data_received))
+        /* Add the payload length if no masking key */
+        else
         {
 
-            /* The maximum the payload length for each frame process shall not exceed the remaining frame data to be received */
-            payload_length = (client_ptr -> nx_websocket_client_frame_data_length - client_ptr -> nx_websocket_client_frame_data_received);
+            /* Check and adjust received data length for processing */
+            payload_length = (*packet_ptr) -> nx_packet_length;
+            if (payload_length >= (client_ptr -> nx_websocket_client_frame_data_length - client_ptr -> nx_websocket_client_frame_data_received))
+            {
 
-            /* Reset the frame header flag as not found. */
-            client_ptr -> nx_websocket_client_frame_header_found = NX_FALSE;
+                /* The maximum the payload length for each frame process shall not exceed the remaining frame data to be received */
+                payload_length = (client_ptr -> nx_websocket_client_frame_data_length - client_ptr -> nx_websocket_client_frame_data_received);
+
+                /* Reset the frame header flag as not found. */
+                client_ptr -> nx_websocket_client_frame_header_found = NX_FALSE;
+            }
+
+            /* Add the length to the total count */
+            client_ptr -> nx_websocket_client_frame_data_received += payload_length;
         }
-
-        /* Add the length to the total count */
-        client_ptr -> nx_websocket_client_frame_data_received += payload_length;
     }
 
     /* Check the opcode for the received frame, and return corresponding status. */
@@ -2115,7 +2125,6 @@ UCHAR *data_ptr;
         }
 
         case NX_WEBSOCKET_OPCODE_PING:
-        case NX_WEBSOCKET_OPCODE_PONG:
         {
 
             /* Make sure the complete control frame is received */
@@ -2124,8 +2133,24 @@ UCHAR *data_ptr;
                 return(NX_CONTINUE);
             }
 
-            /* Trim payload data in the frame. */
-            status = _nx_websocket_client_packet_trim(client_ptr, packet_ptr, client_ptr -> nx_websocket_client_frame_data_received);
+            /* Because we have found a full frame, reset the flag for frame header found (necessary especially if the payload was empty) */
+            client_ptr -> nx_websocket_client_frame_header_found = NX_FALSE;
+
+            /* A control frame cannot have a payload longer than 125 bytes */
+            if (client_ptr -> nx_websocket_client_frame_data_length > NX_WEBSOCKET_CONTROL_FRAME_PAYLOAD_MAXIMUM_LENGTH)
+            {
+            	return(NX_INVALID_PACKET);
+            }
+
+            /* Get the payload, because it must be returned in the PONG frame. */
+            status = _nx_packet_data_extract_offset(*packet_ptr, 0, ping_payload, client_ptr -> nx_websocket_client_frame_data_length, &bytes_copied);
+            if (status != NX_SUCCESS)
+            {
+            	return(NX_INVALID_PACKET);
+            }
+
+            /* Trim the PING payload */
+            status = _nx_websocket_client_packet_trim(client_ptr, packet_ptr, client_ptr -> nx_websocket_client_frame_data_length);
 
             /* Update the waiting list */
             client_ptr -> nx_websocket_client_processing_packet = *packet_ptr;
@@ -2136,7 +2161,63 @@ UCHAR *data_ptr;
                 return(status);
             }
 
-            /* A PING/PONG frame is parsed and found, continue to check any more data or frame received */
+            /* Send the PONG frame */
+            status = _nx_websocket_client_packet_allocate(client_ptr, &pong_packet, NX_WAIT_FOREVER);
+            if (status != NX_SUCCESS)
+            {
+                return(status);
+            }
+
+            status = _nx_packet_data_append(pong_packet, ping_payload, client_ptr -> nx_websocket_client_frame_data_length, client_ptr -> nx_websocket_client_packet_pool_ptr, NX_WAIT_FOREVER);
+            if (status != NX_SUCCESS)
+            {
+            	_nx_packet_release(pong_packet);
+                return(status);
+            }
+
+            /* Release the mutex */
+            tx_mutex_put(&(client_ptr -> nx_websocket_client_mutex));
+
+            status = _nx_websocket_client_send(client_ptr, pong_packet, NX_WEBSOCKET_OPCODE_PONG, NX_TRUE, NX_WAIT_FOREVER);
+
+            /* Obtain the mutex. */
+            tx_mutex_get(&(client_ptr -> nx_websocket_client_mutex), NX_WAIT_FOREVER);
+
+            if (status != NX_SUCCESS)
+            {
+            	_nx_packet_release(pong_packet);
+                return(status);
+            }
+
+            /* A PING frame is parsed and found, continue to check any more data or frame received */
+            return(NX_CONTINUE);
+        }
+
+        case NX_WEBSOCKET_OPCODE_PONG:
+        {
+
+            /* Make sure the complete control frame is received */
+            if (client_ptr -> nx_websocket_client_frame_data_received < client_ptr -> nx_websocket_client_frame_data_length)
+            {
+                return(NX_CONTINUE);
+            }
+
+            /* Because we have found a full frame, reset the flag for frame header found (necessary especially if the payload was empty) */
+            client_ptr -> nx_websocket_client_frame_header_found = NX_FALSE;
+
+            /* Trim payload data in the frame. */
+            status = _nx_websocket_client_packet_trim(client_ptr, packet_ptr, client_ptr -> nx_websocket_client_frame_data_length);
+
+            /* Update the waiting list */
+            client_ptr -> nx_websocket_client_processing_packet = *packet_ptr;
+
+            /* Check if error status happens */
+            if ((status != NX_WEBSOCKET_SUCCESS) && (status != NX_NO_PACKET))
+            {
+                return(status);
+            }
+
+            /* A PONG frame is parsed and found, continue to check any more data or frame received */
             return(NX_CONTINUE);
         }
 
