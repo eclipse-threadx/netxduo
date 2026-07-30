@@ -2139,6 +2139,7 @@ NX_PACKET *pong_packet;
             /* A control frame cannot have a payload longer than 125 bytes */
             if (client_ptr -> nx_websocket_client_frame_data_length > NX_WEBSOCKET_CONTROL_FRAME_PAYLOAD_MAXIMUM_LENGTH)
             {
+                _nx_websocket_client_cleanup(client_ptr);
             	return(NX_INVALID_PACKET);
             }
 
@@ -2146,25 +2147,24 @@ NX_PACKET *pong_packet;
             status = _nx_packet_data_extract_offset(*packet_ptr, 0, ping_payload, client_ptr -> nx_websocket_client_frame_data_length, &bytes_copied);
             if (status != NX_SUCCESS)
             {
+                _nx_websocket_client_cleanup(client_ptr);
             	return(NX_INVALID_PACKET);
             }
 
             /* Trim the PING payload */
             status = _nx_websocket_client_packet_trim(client_ptr, packet_ptr, client_ptr -> nx_websocket_client_frame_data_length);
 
+            /* When the trim is called, all size verifications have already been performed */
+            NX_ASSERT(status == NX_WEBSOCKET_SUCCESS || status == NX_NO_PACKET);
+
             /* Update the waiting list */
             client_ptr -> nx_websocket_client_processing_packet = *packet_ptr;
-
-            /* Check if error status happens */
-            if ((status != NX_WEBSOCKET_SUCCESS) && (status != NX_NO_PACKET))
-            {
-                return(status);
-            }
 
             /* Send the PONG frame */
             status = _nx_websocket_client_packet_allocate(client_ptr, &pong_packet, NX_WAIT_FOREVER);
             if (status != NX_SUCCESS)
             {
+                _nx_websocket_client_cleanup(client_ptr);
                 return(status);
             }
 
@@ -2172,6 +2172,7 @@ NX_PACKET *pong_packet;
             if (status != NX_SUCCESS)
             {
             	_nx_packet_release(pong_packet);
+                _nx_websocket_client_cleanup(client_ptr);
                 return(status);
             }
 
@@ -2186,6 +2187,7 @@ NX_PACKET *pong_packet;
             if (status != NX_SUCCESS)
             {
             	_nx_packet_release(pong_packet);
+                _nx_websocket_client_cleanup(client_ptr);
                 return(status);
             }
 
