@@ -414,6 +414,10 @@ UINT           return_value = NX_CRYPTO_SUCCESS;
 /*                                                                        */
 /*    _nx_crypto_rsa_pss_mgf1                             PORTABLE C      */
 /*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Edouard MALOT                                                       */
+/*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    Mask Generation Function 1 (MGF1) as defined in RFC 8017 §B.2.1.  */
@@ -433,6 +437,16 @@ UINT           return_value = NX_CRYPTO_SUCCESS;
 /*  OUTPUT                                                                */
 /*                                                                        */
 /*    status              NX_CRYPTO_SUCCESS or error code                */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    [nx_crypto_init]                    Initialize the hash method      */
+/*    [nx_crypto_operation]               Hash operation                  */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_crypto_rsa_pss_verify           Verify a PSS encoding           */
+/*    _nx_crypto_rsa_pss_sign             Build a PSS encoding            */
 /*                                                                        */
 /**************************************************************************/
 static UINT _nx_crypto_rsa_pss_mgf1(const NX_CRYPTO_METHOD *hash_method,
@@ -548,6 +562,10 @@ VOID  *handler = NX_CRYPTO_NULL;
 /*                                                                        */
 /*    _nx_crypto_rsa_pss_verify                           PORTABLE C      */
 /*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Edouard MALOT                                                       */
+/*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    Verifies an RSA-PSS signature encoding (RFC 8017 §9.1.2).          */
@@ -571,6 +589,20 @@ VOID  *handler = NX_CRYPTO_NULL;
 /*    NX_CRYPTO_SUCCESS                Signature is valid                */
 /*    NX_CRYPTO_NOT_SUCCESSFUL         Signature is invalid              */
 /*    NX_CRYPTO_INVALID_BUFFER_SIZE    Buffers too small                 */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_crypto_rsa_pss_mgf1             Generate the DB mask            */
+/*    [nx_crypto_init]                    Initialize the hash method      */
+/*    [nx_crypto_operation]               Hash operation                  */
+/*    NX_CRYPTO_MEMCMP                    Compare the memory              */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_secure_tls_process_certificate_verify                           */
+/*                                        Process CertificateVerify       */
+/*    _nx_secure_process_server_key_exchange                              */
+/*                                        Process ServerKeyExchange       */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_rsa_pss_verify(const UCHAR *message_hash, UINT hash_length,
@@ -759,6 +791,10 @@ static const UCHAR _pss_zero8[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 /*                                                                        */
 /*    _nx_crypto_rsa_pss_sign                             PORTABLE C      */
 /*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Edouard MALOT                                                       */
+/*                                                                        */
 /*  DESCRIPTION                                                           */
 /*                                                                        */
 /*    Builds an EMSA-PSS-ENCODE octet string (RFC 8017 §9.1.1).          */
@@ -785,6 +821,20 @@ static const UCHAR _pss_zero8[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 /*    NX_CRYPTO_SUCCESS                EM built successfully             */
 /*    NX_CRYPTO_NOT_SUCCESSFUL         em_len smaller than minimum       */
 /*    NX_CRYPTO_INVALID_BUFFER_SIZE    em or scratch too small           */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    _nx_crypto_rsa_pss_mgf1             Generate the DB mask            */
+/*    NX_CRYPTO_RBG                       Generate the random salt        */
+/*    [nx_crypto_init]                    Initialize the hash method      */
+/*    [nx_crypto_operation]               Hash operation                  */
+/*    NX_CRYPTO_MEMCPY                    Copy the memory                 */
+/*    NX_CRYPTO_MEMSET                    Set the memory                  */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_secure_tls_send_certificate_verify                              */
+/*                                        Send CertificateVerify          */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_rsa_pss_sign(const UCHAR *message_hash, UINT hash_length,
