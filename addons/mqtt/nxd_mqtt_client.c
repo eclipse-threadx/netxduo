@@ -3756,6 +3756,10 @@ UINT                 old_priority;
         }
 #endif /* NX_SECURE_ENABLE */
         nx_tcp_client_socket_unbind(&(client_ptr -> nxd_mqtt_client_socket));
+
+#ifdef NX_SECURE_ENABLE
+        client_ptr -> nxd_mqtt_client_use_tls = 0;
+#endif /* NX_SECURE_ENABLE */
         tx_timer_delete(&(client_ptr -> nxd_mqtt_timer));
         return(NXD_MQTT_CONNECT_FAILURE);
     }
