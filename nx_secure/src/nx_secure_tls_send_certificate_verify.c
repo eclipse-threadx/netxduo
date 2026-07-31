@@ -520,6 +520,18 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         /* If using RSA, the length is equal to the key size. */
         data_size = local_certificate -> nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus_length;
 
+        /* Every signature path below builds data_size bytes into _nx_secure_padded_signature,
+           so a certificate with a bigger modulus cannot be used. */
+        if (data_size > sizeof(_nx_secure_padded_signature))
+        {
+#ifdef NX_SECURE_KEY_CLEAR
+            NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
+#endif /* NX_SECURE_KEY_CLEAR  */
+
+            /* Invalid certificate. */
+            return(NX_SECURE_TLS_INVALID_CERTIFICATE);
+        }
+
         if (((ULONG)(send_packet -> nx_packet_data_end) - (ULONG)(send_packet -> nx_packet_append_ptr)) < (4u + data_size))
         {
 #ifdef NX_SECURE_KEY_CLEAR
@@ -569,6 +581,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 
                 status = _nx_crypto_rsa_pss_sign(handshake_hash, handshake_hash_length,
                                                   _nx_secure_padded_signature,
+                                                  (UINT)sizeof(_nx_secure_padded_signature),
                                                   (data_size << 3) - 1u,
                                                   hash_method,
                                                   tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,

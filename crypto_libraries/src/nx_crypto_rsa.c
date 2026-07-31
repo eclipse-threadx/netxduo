@@ -772,22 +772,23 @@ static const UCHAR _pss_zero8[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 /*    message_hash        Pre-computed mHash over the signed content     */
 /*    hash_length         hLen = byte length of mHash                    */
 /*    em                  Output buffer; receives the encoded message    */
+/*    em_length           Size of em in bytes                            */
 /*    em_bits             emBits = modulus_bits - 1                      */
 /*    hash_method         Same hash used to build the PSS encoding       */
 /*    hash_metadata       Scratch memory for hash operations             */
 /*    hash_metadata_size  Size of hash_metadata in bytes                 */
-/*    scratch             Work buffer; must be >= db_len bytes           */
+/*    scratch             Work buffer; must be >= db_len + s_len bytes   */
 /*    scratch_length      Size of scratch in bytes                       */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
 /*    NX_CRYPTO_SUCCESS                EM built successfully             */
 /*    NX_CRYPTO_NOT_SUCCESSFUL         em_len smaller than minimum       */
-/*    NX_CRYPTO_INVALID_BUFFER_SIZE    Scratch too small                 */
+/*    NX_CRYPTO_INVALID_BUFFER_SIZE    em or scratch too small           */
 /*                                                                        */
 /**************************************************************************/
 UINT _nx_crypto_rsa_pss_sign(const UCHAR *message_hash, UINT hash_length,
-                              UCHAR *em, UINT em_bits,
+                              UCHAR *em, UINT em_length, UINT em_bits,
                               const NX_CRYPTO_METHOD *hash_method,
                               VOID *hash_metadata, ULONG hash_metadata_size,
                               UCHAR *scratch, UINT scratch_length)
@@ -806,6 +807,12 @@ static const UCHAR _pss_zero8[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
     /* emLen = ceil(emBits / 8). */
     em_len = (em_bits + 7u) >> 3;
+
+    /* The whole EM goes into em, so the caller's buffer has to hold em_len bytes. */
+    if (em_len > em_length)
+    {
+        return(NX_CRYPTO_INVALID_BUFFER_SIZE);
+    }
 
     /* TLS 1.3 mandates salt length == hash length (RFC 8446 §4.2.3). */
     s_len = hash_length;
