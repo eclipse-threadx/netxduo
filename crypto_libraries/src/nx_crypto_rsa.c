@@ -765,7 +765,7 @@ static const UCHAR _pss_zero8[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 /*    Caller is expected to run the RSA private-key operation on the     */
 /*    returned EM to produce the wire signature.                          */
 /*    Assumes salt length == hash length (required by RFC 8446 §4.2.3). */
-/*    Salt bytes are produced internally via NX_CRYPTO_RAND().            */
+/*    Salt bytes are produced internally via NX_CRYPTO_RBG().             */
 /*                                                                        */
 /*  INPUT                                                                 */
 /*                                                                        */
@@ -836,12 +836,14 @@ static const UCHAR _pss_zero8[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     salt = scratch + db_len;
     h    = em + db_len; /* H sits at em[db_len..em_len-2]. */
 
-    /* Step 4 – generate the random salt. NX_CRYPTO_RAND() is the same
-     * source ECDSA uses for its nonce, so the entropy is at least as good
-     * as the existing signature paths on this device. */
-    for (i = 0u; i < s_len; i++)
+    /* Step 4 – generate the random salt. NX_CRYPTO_RBG is what the rest of
+     * the library uses for random material (ECDSA nonce, EC key generation):
+     * _nx_crypto_drbg in NX_CRYPTO_SELF_TEST builds, _nx_crypto_huge_number_rbg
+     * otherwise. It writes exactly (bits + 7) / 8 bytes. */
+    status = NX_CRYPTO_RBG(s_len << 3, salt);
+    if (status != NX_CRYPTO_SUCCESS)
     {
-        salt[i] = (UCHAR)((UINT)NX_CRYPTO_RAND() & 0xFFu);
+        return(status);
     }
 
     /* Steps 5-6 – H = Hash(0x00^8 || mHash || salt). Write directly into
