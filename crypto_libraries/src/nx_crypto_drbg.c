@@ -1174,12 +1174,13 @@ UINT status;
     }
 
     status = _nx_crypto_drbg_generate(&_nx_crypto_drbg_ctx, result, bytes, NX_CRYPTO_NULL, 0);
+
+    NX_CRYPTO_DRBG_MUTEX_PUT;
+
     if (status)
     {
         return(status);
     }
-
-    NX_CRYPTO_DRBG_MUTEX_PUT;
 
     /* Zero out extra bits generated. */
     bits = bits & 7;
