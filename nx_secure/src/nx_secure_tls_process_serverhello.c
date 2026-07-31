@@ -170,6 +170,13 @@ NX_SECURE_TLS_SERVER_STATE            old_client_state = tls_session -> nx_secur
         length += tls_session -> nx_secure_tls_session_id_length;
     }
 
+    /* The ciphersuite is two bytes and the compression method one more. The
+       check above bounded the session ID, not what follows it. */
+    if ((length + 3) > message_length)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
+
     /* Finally, the chosen ciphersuite - this is selected by the server from the list we provided in the ClientHello. */
     ciphersuite = (USHORT)((packet_buffer[length] << 8) + packet_buffer[length + 1]);
     length += 2;
