@@ -218,6 +218,13 @@ UINT extension_type;
 #endif
     {
 
+        /* The count is one byte, and nothing above guarantees there is one:
+           the length test in the TLS 1.3 arm does not run for TLS 1.2. */
+        if (message_length < 1)
+        {
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+        }
+
         /* Extract the count of certificate types from the incoming data. */
         cert_types_length = packet_buffer[length];
         length += 1;
