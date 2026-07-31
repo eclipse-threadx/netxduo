@@ -575,9 +575,8 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                 current_buffer[length + 3] = (UCHAR)(data_size);
                 length += 4;
 
-                /* Sentinel: signature_length == data_size makes the PKCS#1 loop body below run zero iterations
-                 * (i < data_size - data_size - 1 underflows; we explicitly skip it via the nx_secure_tls_1_3 guard). */
-                signature_length = data_size;
+                /* signature_length is left alone here. It only feeds the PKCS#1 v1.5 padding loop
+                   further down, which must not run for TLS 1.3. */
 
                 status = _nx_crypto_rsa_pss_sign(handshake_hash, handshake_hash_length,
                                                   _nx_secure_padded_signature,
@@ -683,7 +682,9 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
            which comes at the end of the RSA block. */
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-        /* TLS 1.3 uses RSA-PSS, which already wrote the full EM into _nx_secure_padded_signature above. */
+        /* TLS 1.3 uses RSA-PSS, which already wrote the full EM into _nx_secure_padded_signature above.
+           Do not remove this guard: signature_length is still 0 on the TLS 1.3 path, so the loop below
+           would overwrite the EM with 0xFF from offset 2 up to data_size - 2. */
         if (!tls_session -> nx_secure_tls_1_3)
 #endif
         {
