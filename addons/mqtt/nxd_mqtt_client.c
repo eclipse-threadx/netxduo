@@ -2539,7 +2539,11 @@ UCHAR len[2];
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nxd_mqtt_client_connect                                            */
+/*    _nxd_mqtt_client_websocket_connection_status_callback               */
+/*    _nxd_mqtt_process_connack                                           */
 /*    _nxd_mqtt_process_disconnect                                        */
+/*    _nxd_mqtt_tcp_establish_process                                     */
+/*    _nxd_mqtt_tls_establish_process                                     */
 /*                                                                        */
 /**************************************************************************/
 VOID _nxd_mqtt_client_connection_end(NXD_MQTT_CLIENT *client_ptr, ULONG wait_option)
