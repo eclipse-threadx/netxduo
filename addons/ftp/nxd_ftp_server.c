@@ -4594,7 +4594,7 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 
                     /* Successful client file write.  */
 
-                    /* Now send "250" message to indicate successful file write.  */
+                    /* Send 226 (Closing data connection) response code. */
                     _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
                                 NX_FTP_CODE_CLOSING_DATA, "File Written");
                 }
