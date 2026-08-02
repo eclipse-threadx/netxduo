@@ -64,7 +64,7 @@ NX_CALLER_CHECKING_EXTERNS
 #define NX_FTP_CODE_CMD_OK           "200"  /* Command okay.  */
 #define NX_FTP_CODE_CONNECTION_OK    "220"  /* Connection okay.  */
 #define NX_FTP_CODE_CLOSE            "221"  /* Service closing control connection.  */
-#define NX_FTP_CODE_LOGOFF           "226"  /* Closing data connection.  */
+#define NX_FTP_CODE_CLOSING_DATA     "226"  /* Closing data connection.  */
 #define NX_FTP_CODE_LOGIN            "230"  /* User logged in, proceed.  */
 #define NX_FTP_CODE_COMPLETED        "250"  /* Requested file action okay, completed.  */
 #define NX_FTP_CODE_MADE_DIR         "257"  /* PATHNAME created.  */
@@ -2012,7 +2012,7 @@ ULONG                   block_size;
                             /* The read command was successful!  */
                             /* Now send a successful response to the client.  */
                             _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
-                                        NX_FTP_CODE_LOGOFF, "File Sent");
+                                        NX_FTP_CODE_CLOSING_DATA, "File Sent");
                         }
                         else
                         {
@@ -2965,7 +2965,7 @@ ULONG                   block_size;
 
                             /* Now send a successful response to the client.  */
                             _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
-                                        NX_FTP_CODE_LOGOFF, "List End");
+                                        NX_FTP_CODE_CLOSING_DATA, "List End");
                         }
                         else
                         {
@@ -3436,7 +3436,7 @@ ULONG                   block_size;
 
                             /* Now send a successful response to the client.  */
                             _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
-                                        NX_FTP_CODE_LOGOFF, "List End");
+                                        NX_FTP_CODE_CLOSING_DATA, "List End");
                         }
                         else
                         {
@@ -4596,7 +4596,7 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
 
                     /* Now send "250" message to indicate successful file write.  */
                     _nx_ftp_server_response(&(client_req_ptr -> nx_ftp_client_request_control_socket), packet_ptr,
-                                NX_FTP_CODE_LOGOFF, "File Written");
+                                NX_FTP_CODE_CLOSING_DATA, "File Written");
                 }
                 else
                 {
