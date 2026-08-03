@@ -389,6 +389,14 @@ if(MSVC)
   # regression suite is CPU-bound rather than wall-clock-bound (mirrors the
   # Linux port's TX_LINUX_NO_IDLE_ENABLE).  Applied only to the ThreadX port.
   target_compile_options(threadx PRIVATE -DTX_WIN32_NO_IDLE_ENABLE)
+  # Disable simulated-tick batching for NetXDuo.  The port fires several ticks
+  # per wall-clock interrupt by default to amortize scheduling overhead, but
+  # that coarse cadence adds enough jitter to the IP/timer threads to make many
+  # timing-sensitive TCP tests (fast-retransmit windows, packet-leak teardown
+  # races, etc.) intermittently fail or hang.  The fast-forward above already
+  # provides the suite's speedup, so single-tick interrupts cost no measurable
+  # time here while restoring deterministic timing.
+  target_compile_options(threadx PRIVATE -DTX_WIN32_TICKS_PER_INTERRUPT=1)
   add_subdirectory(${FILEX_SOURCE_DIR} filex_build)
 endif()
 
