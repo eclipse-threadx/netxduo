@@ -7970,11 +7970,11 @@ UINT    content_offset;
     if(ch >= packet_ptr -> nx_packet_append_ptr)
         return NX_WEB_HTTP_NOT_FOUND;
 
-    /* Skip white spaces. */
-    while(*ch == ' ')
+    /* Skip white spaces.  The bound is tested before the character is read, so a
+       value made up entirely of spaces cannot read past the end of the packet
+       data.  Running off the end is caught by the CRLF bound check below.  */
+    while((ch < packet_ptr -> nx_packet_append_ptr) && (*ch == ' '))
     {
-        if(ch >= packet_ptr -> nx_packet_append_ptr)
-            return NX_WEB_HTTP_NOT_FOUND;
 
         /* Get next character. */
         ch++;
