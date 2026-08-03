@@ -91,6 +91,7 @@ void netx_web_concurrent_sessions_test_application_define(void *);
 void netx_web_post_basic_test_application_define(void *first_unused_memory);
 void netx_web_post_large_packet_test_application_define(void *first_unused_memory);
 void netx_web_host_field_test_application_define(void *);
+void netx_web_header_boundary_test_application_define(void *);
 void netx_web_chunked_request_test_application_define(void *);
 void netx_web_chunked_request_additional_test_application_define(void *);
 void netx_web_chunked_response_test_application_define(void *);
@@ -152,6 +153,7 @@ TEST_ENTRY  test_control_tests[] =
     {netx_web_concurrent_sessions_test_application_define, TEST_TIMEOUT_MID},
     {netx_web_post_large_packet_test_application_define, TEST_TIMEOUT_LOW},
     {netx_web_host_field_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_web_header_boundary_test_application_define, TEST_TIMEOUT_LOW},
     {netx_web_chunked_response_test_application_define, TEST_TIMEOUT_LOW},
     {netx_web_chunked_request_test_application_define, TEST_TIMEOUT_LOW},
     {netx_web_chunked_request_additional_test_application_define, TEST_TIMEOUT_LOW},
