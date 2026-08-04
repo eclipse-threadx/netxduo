@@ -559,15 +559,11 @@ NX_SECURE_TLS_SERVER_STATE            old_server_state;
 
             /* Post-Auth server messages (if any) are sent here. */
 
-            /* Do NOT send a NewSessionTicket. The PSK extension handler in
-             * _nx_secure_tls_process_clienthello_psk_extension explicitly
-             * rejects any age != 0 (i.e. every real resumption attempt) with
-             * NX_SECURE_TLS_BAD_CLIENTHELLO_PSK_EXTENSION — the server only
-             * supports external PSKs, not resumption. Sending a ticket
-             * anyway tells the client we DO resume; clients that act on
-             * that (e.g. Java JSSE) replay the ticket on the next handshake
-             * and the server then aborts with an Alert(internal_error),
-             * breaking every other connection from those clients. */
+            /* No NewSessionTicket is sent: session resumption is not
+             * implemented on this server, and the message is optional per
+             * RFC 8446 Section 4.6.1. The corresponding rejection path
+             * lives in _nx_secure_tls_process_clienthello_psk_extension,
+             * which is where resumption support would also need to land. */
 
             /* If we get here, the Client Finished was processed without errors and the handshake is complete. */
             tls_session -> nx_secure_tls_server_state = NX_SECURE_TLS_SERVER_STATE_HANDSHAKE_FINISHED;
