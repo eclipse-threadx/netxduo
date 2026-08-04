@@ -26,6 +26,12 @@
 
 static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+UINT _nx_secure_tls_1_3_strip_padding(NX_PACKET *decrypted_packet,
+                                      USHORT *message_type_ptr,
+                                      UINT *message_length_ptr);
+#endif
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
@@ -86,11 +92,6 @@ UCHAR      header_data[NX_SECURE_TLS_RECORD_HEADER_SIZE] = {0}; /* DTLS record h
 USHORT     message_type;
 UINT       message_length;
 ULONG      bytes_copied;
-NX_PACKET *scan_fragment;
-UCHAR     *scan_ptr;
-ULONG      running_offset;
-ULONG      last_nonzero_offset;
-UCHAR      last_nonzero_byte;
 UCHAR     *packet_data = NX_NULL;
 ULONG      record_offset = 0;
 ULONG      record_offset_next = 0;
@@ -281,47 +282,9 @@ NX_PACKET *decrypted_packet;
                 if (status == NX_SECURE_TLS_SUCCESS)
                 {
 
-                    /* RFC 8446 §5.4: the inner content type is the last
-                       non-zero byte of the plaintext; any bytes after it are
-                       record padding to be stripped. Walk the packet chain
-                       directly and always visit every byte, so the cost does
-                       not depend on how much padding the peer added — the
-                       neighbouring TLS 1.2 path takes the same stance for
-                       exactly this reason (see the MAC-check comment below). */
-                    last_nonzero_offset = 0;
-                    last_nonzero_byte   = 0;
-                    running_offset      = 0;
-                    scan_fragment       = decrypted_packet;
-                    while (scan_fragment != NX_NULL)
-                    {
-                        for (scan_ptr = scan_fragment -> nx_packet_prepend_ptr;
-                             scan_ptr < scan_fragment -> nx_packet_append_ptr;
-                             scan_ptr++)
-                        {
-                            if (*scan_ptr != 0)
-                            {
-                                last_nonzero_byte   = *scan_ptr;
-                                last_nonzero_offset = running_offset;
-                            }
-                            running_offset++;
-                        }
-                        scan_fragment = scan_fragment -> nx_packet_next;
-                    }
-                    if (last_nonzero_byte == 0)
-                    {
-                        /* No non-zero byte in the plaintext: the peer sent a
-                           record with no inner content type. RFC 8446 §5.4
-                           requires an "unexpected_message" alert. */
-                        error_status   = NX_SECURE_TLS_UNEXPECTED_MESSAGE;
-                        message_type   = 0;
-                        message_length = 0;
-                    }
-                    else
-                    {
-                        message_type   = last_nonzero_byte;
-                        message_length = last_nonzero_offset;
-                    }
-                    decrypted_packet -> nx_packet_length = message_length;
+                    error_status = _nx_secure_tls_1_3_strip_padding(decrypted_packet,
+                                                                    &message_type,
+                                                                    &message_length);
 
                     /* Increment the sequence number. This is done in the MAC verify
                     step for 1.2 and earlier, but AEAD includes the MAC so we don't
@@ -676,3 +639,78 @@ NX_PACKET *current_ptr;
         message_length -= (ULONG)(current_ptr -> nx_packet_append_ptr - current_ptr -> nx_packet_prepend_ptr);
     }
 }
+
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_secure_tls_1_3_strip_padding                    PORTABLE C      */
+/*                                                                        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Edouard MALOT                                                       */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    Recover the inner content type from a decrypted TLS 1.3 record and  */
+/*    strip the trailing zero-byte padding. Per RFC 8446 §5.4, the inner  */
+/*    content type is the last non-zero byte of the plaintext; all bytes  */
+/*    after it are padding. The scan visits every plaintext byte, so its  */
+/*    cost is independent of how much padding the peer added.             */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    decrypted_packet                      Decrypted record (possibly    */
+/*                                            spanning chained fragments) */
+/*    message_type_ptr                      Set to the inner content type */
+/*    message_length_ptr                    Set to the length excluding   */
+/*                                            the type byte and padding   */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_SECURE_TLS_SUCCESS                 Inner type recovered          */
+/*    NX_SECURE_TLS_UNEXPECTED_MESSAGE      Plaintext had no non-zero     */
+/*                                            byte (§5.4 violation)       */
+/*                                                                        */
+/**************************************************************************/
+UINT _nx_secure_tls_1_3_strip_padding(NX_PACKET *decrypted_packet,
+                                      USHORT *message_type_ptr,
+                                      UINT *message_length_ptr)
+{
+NX_PACKET *scan_fragment;
+UCHAR     *scan_ptr;
+ULONG      running_offset      = 0;
+ULONG      last_nonzero_offset = 0;
+UCHAR      last_nonzero_byte   = 0;
+
+    for (scan_fragment = decrypted_packet; scan_fragment != NX_NULL; scan_fragment = scan_fragment -> nx_packet_next)
+    {
+        for (scan_ptr = scan_fragment -> nx_packet_prepend_ptr;
+             scan_ptr < scan_fragment -> nx_packet_append_ptr;
+             scan_ptr++)
+        {
+            if (*scan_ptr != 0)
+            {
+                last_nonzero_byte   = *scan_ptr;
+                last_nonzero_offset = running_offset;
+            }
+            running_offset++;
+        }
+    }
+
+    if (last_nonzero_byte == 0)
+    {
+        *message_type_ptr   = 0;
+        *message_length_ptr = 0;
+        decrypted_packet -> nx_packet_length = 0;
+        return(NX_SECURE_TLS_UNEXPECTED_MESSAGE);
+    }
+
+    *message_type_ptr   = (USHORT)last_nonzero_byte;
+    *message_length_ptr = last_nonzero_offset;
+    decrypted_packet -> nx_packet_length = last_nonzero_offset;
+    return(NX_SECURE_TLS_SUCCESS);
+}
+#endif /* NX_SECURE_TLS_TLS_1_3_ENABLED */
