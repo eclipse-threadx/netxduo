@@ -142,6 +142,7 @@ set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_client_ca_select_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_receive_invalid_server_handshake_message_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_invalid_client_state_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_no_newsessionticket_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_serverhello_length_checking_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_session_create_ext_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_before_key_generation_test.c

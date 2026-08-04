@@ -237,6 +237,7 @@ void nx_secure_tls_1_3_clienthello_length_checking_test_application_define(void 
 void nx_secure_tls_1_3_handshake_fail_test_application_define(void *);
 void nx_secure_tls_1_3_hello_retry_cookie_test_application_define(void *);
 void nx_secure_tls_1_3_invalid_client_state_test_application_define(void *first_unused_memory);
+void nx_secure_tls_1_3_no_newsessionticket_test_application_define(void *first_unused_memory);
 void nx_secure_tls_1_3_key_share_test_application_define(void *);
 void nx_secure_tls_1_3_provisioned_psk_test_application_define(void *);
 void nx_secure_tls_1_3_receive_invalid_server_handshake_message_test_application_define(void *);
@@ -361,6 +362,7 @@ TEST_ENTRY  test_control_tests[] =
     {nx_secure_tls_1_3_handshake_fail_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_hello_retry_cookie_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_invalid_client_state_test_application_define, TEST_TIMEOUT_LOW},
+    {nx_secure_tls_1_3_no_newsessionticket_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_key_share_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_serverhello_length_checking_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_session_create_ext_test_application_define, TEST_TIMEOUT_LOW},
