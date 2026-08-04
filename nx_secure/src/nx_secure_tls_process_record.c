@@ -301,7 +301,7 @@ NX_PACKET *decrypted_packet;
                     }
                     if (message_type == 0)
                     {
-                        error_status = NX_SECURE_TLS_INVALID_PACKET;
+                        error_status = NX_SECURE_TLS_UNEXPECTED_MESSAGE;
                         message_length = 0;
                     }
                     else
