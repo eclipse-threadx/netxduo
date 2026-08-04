@@ -86,7 +86,11 @@ UCHAR      header_data[NX_SECURE_TLS_RECORD_HEADER_SIZE] = {0}; /* DTLS record h
 USHORT     message_type;
 UINT       message_length;
 ULONG      bytes_copied;
-ULONG      scan_offset;
+NX_PACKET *scan_fragment;
+UCHAR     *scan_ptr;
+ULONG      running_offset;
+ULONG      last_nonzero_offset;
+UCHAR      last_nonzero_byte;
 UCHAR     *packet_data = NX_NULL;
 ULONG      record_offset = 0;
 ULONG      record_offset_next = 0;
@@ -279,34 +283,43 @@ NX_PACKET *decrypted_packet;
 
                     /* RFC 8446 §5.4: the inner content type is the last
                        non-zero byte of the plaintext; any bytes after it are
-                       record padding to be stripped. */
-                    scan_offset = decrypted_packet -> nx_packet_length;
-                    message_type = 0;
-                    while (scan_offset > 0)
+                       record padding to be stripped. Walk the packet chain
+                       directly and always visit every byte, so the cost does
+                       not depend on how much padding the peer added — the
+                       neighbouring TLS 1.2 path takes the same stance for
+                       exactly this reason (see the MAC-check comment below). */
+                    last_nonzero_offset = 0;
+                    last_nonzero_byte   = 0;
+                    running_offset      = 0;
+                    scan_fragment       = decrypted_packet;
+                    while (scan_fragment != NX_NULL)
                     {
-                        scan_offset--;
-                        status = nx_packet_data_extract_offset(decrypted_packet,
-                                                               scan_offset,
-                                                               &message_type, 1, &bytes_copied);
-                        if (status || (bytes_copied != 1))
+                        for (scan_ptr = scan_fragment -> nx_packet_prepend_ptr;
+                             scan_ptr < scan_fragment -> nx_packet_append_ptr;
+                             scan_ptr++)
                         {
-                            error_status = NX_SECURE_TLS_INVALID_PACKET;
-                            message_type = 0;
-                            break;
+                            if (*scan_ptr != 0)
+                            {
+                                last_nonzero_byte   = *scan_ptr;
+                                last_nonzero_offset = running_offset;
+                            }
+                            running_offset++;
                         }
-                        if (message_type != 0)
-                        {
-                            break;
-                        }
+                        scan_fragment = scan_fragment -> nx_packet_next;
                     }
-                    if (message_type == 0)
+                    if (last_nonzero_byte == 0)
                     {
-                        error_status = NX_SECURE_TLS_UNEXPECTED_MESSAGE;
+                        /* No non-zero byte in the plaintext: the peer sent a
+                           record with no inner content type. RFC 8446 §5.4
+                           requires an "unexpected_message" alert. */
+                        error_status   = NX_SECURE_TLS_UNEXPECTED_MESSAGE;
+                        message_type   = 0;
                         message_length = 0;
                     }
                     else
                     {
-                        message_length = scan_offset;
+                        message_type   = last_nonzero_byte;
+                        message_length = last_nonzero_offset;
                     }
                     decrypted_packet -> nx_packet_length = message_length;
 
