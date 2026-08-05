@@ -73,6 +73,12 @@ if(MSVC)
       "Pass -DFILEX_SOURCE_DIR=<path> or use build_web.ps1.")
   endif()
   add_subdirectory(${THREADX_SOURCE_DIR} threadx_build)
+  # Mirror the ThreadX simulator timing options used by the main netxduo build
+  # (test/cmake/netxduo/CMakeLists.txt): fast-forward the simulated clock through
+  # idle periods and fire a single simulated tick per wall-clock interrupt, so the
+  # timing-sensitive tests behave deterministically on the win64 simulator.
+  target_compile_options(threadx PRIVATE -DTX_WIN32_NO_IDLE_ENABLE)
+  target_compile_options(threadx PRIVATE -DTX_WIN32_TICKS_PER_INTERRUPT=1)
   add_subdirectory(${FILEX_SOURCE_DIR} filex_build)
 endif()
 

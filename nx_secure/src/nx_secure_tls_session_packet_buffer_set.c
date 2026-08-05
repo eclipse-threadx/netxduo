@@ -66,10 +66,10 @@ UINT  _nx_secure_tls_session_packet_buffer_set(NX_SECURE_TLS_SESSION *session_pt
 {
 
     /* For machines that don't auto-align, check and adjust for four byte alignment. */
-    if (((ULONG)buffer_ptr) & 0x3)
+    if (((ALIGN_TYPE)buffer_ptr) & 0x3)
     {
-        buffer_ptr = (UCHAR *)(((((ULONG)buffer_ptr) & 0xFFFFFFFC) + 4) & 0xFFFFFFFF);
-        buffer_size -= (((ULONG)buffer_ptr) & 0x3);
+        buffer_ptr = (UCHAR *)((((ALIGN_TYPE)buffer_ptr) & ~((ALIGN_TYPE)0x3)) + 4);
+        buffer_size -= (((ALIGN_TYPE)buffer_ptr) & 0x3);
     }
 
     /* Check size of buffer for alignment after above adjustment. */

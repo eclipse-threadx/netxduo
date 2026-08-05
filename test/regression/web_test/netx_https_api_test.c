@@ -1351,7 +1351,7 @@ UINT error_counter = 0;
                                        server_auth_check, server_req_notify);
     EXPECT_EQ(NX_SUCCESS, status);
 
-    EXPECT_EQ((ULONG)(&http_server), http_server.nx_web_http_server_tcpserver.nx_tcpserver_reserved);
+    EXPECT_EQ((ALIGN_TYPE)(&http_server), http_server.nx_web_http_server_tcpserver.nx_tcpserver_reserved);
     EXPECT_EQ(&ip_0, http_server.nx_web_http_server_ip_ptr);
     EXPECT_EQ(&pool_0, http_server.nx_web_http_server_packet_pool_ptr);
     EXPECT_EQ(server_auth_check, http_server.nx_web_http_server_authentication_check);

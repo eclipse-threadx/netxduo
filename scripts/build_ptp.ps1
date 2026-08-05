@@ -92,7 +92,13 @@ foreach ($currentConfiguration in $selectedConfigurations) {
         "-DTHREADX_ARCH=$($settings.NetXArch)",
         "-DTHREADX_TOOLCHAIN=$($settings.NetXToolchain)",
         "-DTHREADX_SOURCE_DIR=$ThreadXDir",
-        "-DFILEX_SOURCE_DIR=$FilexDir"
+        "-DFILEX_SOURCE_DIR=$FilexDir",
+        # The ptp suite's regression symlink resolves to the general NetX Duo
+        # regression set (610 tests) on MSVC.  Use the same minimal Windows
+        # nx_user.h as build_nxd.ps1 so the memory layout matches what those
+        # timing-sensitive tests expect; the full nx_user_sample.h config
+        # (NX_MAX_PHYSICAL_INTERFACES 1, IPSEC/NAT/VLAN) crashes them on win64.
+        "-DNX_USER_FILE=$(Join-Path $repoRoot "ports\$($settings.NetXArch)\$($settings.NetXToolchain)\inc\nx_user_win.h")"
     )
 
     Write-Host "Building $Arch / ptp / $currentConfiguration"

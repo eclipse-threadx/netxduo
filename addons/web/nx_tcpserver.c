@@ -39,6 +39,14 @@ static VOID _nx_tcpserver_disconnect_process(NX_TCPSERVER *server_ptr);
 static VOID _nx_tcpserver_timeout_process(NX_TCPSERVER *server_ptr);
 static VOID _nx_tcpserver_thread_entry(ULONG tcpserver_address);
 
+/* On the win64 LLP64 simulator a ThreadX ULONG thread/timer input is 32-bit and
+   truncates a 64-bit control-block pointer.  Cache the high address bits of the
+   server control block so the timer expiration handler - which runs in the timer
+   thread and therefore cannot use tx_thread_identify() - can rebuild the full
+   pointer from the (correct) low 32 bits it receives.  On LP64/ILP32 platforms
+   the base is zero and the reconstruction is an identity, so this is harmless. */
+static ALIGN_TYPE _nx_tcpserver_control_block_base = 0;
+
 
 /**************************************************************************/
 /*                                                                        */
@@ -285,8 +293,9 @@ UINT            status;
     server_ptr -> nx_tcpserver_accept_wait_option = accept_wait_option;
 
     /* Create the tcpserver thread. */
+    _nx_tcpserver_control_block_base = (ALIGN_TYPE)server_ptr & ~(ALIGN_TYPE)0xFFFFFFFFUL;
     status = tx_thread_create(&server_ptr -> nx_tcpserver_thread, "TCPSERVER Thread",
-                              _nx_tcpserver_thread_entry, (ULONG)server_ptr, stack_ptr,
+                              _nx_tcpserver_thread_entry, (ULONG)(ALIGN_TYPE)server_ptr, stack_ptr,
                               stack_size, thread_priority, thread_priority, 
                               TX_NO_TIME_SLICE, TX_DONT_START);
 
@@ -295,7 +304,7 @@ UINT            status;
 
     /* Create the timeout timer. */
     status += tx_timer_create(&server_ptr -> nx_tcpserver_timer, "TCPSERVER Timer",
-                              _nx_tcpserver_timeout, (ULONG)server_ptr,
+                              _nx_tcpserver_timeout, (ULONG)(ALIGN_TYPE)server_ptr,
                               (NX_IP_PERIODIC_RATE * NX_TCPSERVER_TIMEOUT_PERIOD),
                               (NX_IP_PERIODIC_RATE * NX_TCPSERVER_TIMEOUT_PERIOD), TX_NO_ACTIVATE);
 
@@ -806,7 +815,7 @@ NX_TCPSERVER *server_ptr = socket_ptr -> nx_tcp_socket_reserved_ptr;
 /**************************************************************************/
 static VOID _nx_tcpserver_timeout(ULONG tcpserver_address)
 {
-NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)tcpserver_address;
+NX_TCPSERVER *server_ptr = (NX_TCPSERVER *)(_nx_tcpserver_control_block_base | (ALIGN_TYPE)tcpserver_address);
 
     /* Set the timeout event flag. */
     tx_event_flags_set(&server_ptr -> nx_tcpserver_event_flags, NX_TCPSERVER_TIMEOUT, TX_OR);
@@ -1209,7 +1218,15 @@ static VOID _nx_tcpserver_thread_entry(ULONG tcpserver_address)
 {
 ULONG           events;
 UINT            status;
-NX_TCPSERVER   *server_ptr = (NX_TCPSERVER *)tcpserver_address;
+NX_TCPSERVER   *server_ptr;
+
+    /* The ThreadX thread entry input is a ULONG (32-bit on the win64 LLP64
+       simulator), which truncates a 64-bit control-block pointer.  Recover the
+       server control block from the currently executing thread instead, which
+       is width-independent and behaves identically on every platform. */
+    NX_PARAMETER_NOT_USED(tcpserver_address);
+    server_ptr = (NX_TCPSERVER *)((UCHAR *)tx_thread_identify() -
+                 (ALIGN_TYPE)&(((NX_TCPSERVER *)0) -> nx_tcpserver_thread));
 
 
     /* Loop to process events. */

@@ -42,10 +42,20 @@ set(VLAN -DNX_ENABLE_VLAN)
 set(gptp_slave_build ${GPTP} ${VLAN})
 set(gptp_master_build ${GPTP} ${VLAN} -DNX_PTP_ENABLE_MASTER)
 
+# On the Win64 simulator the ptp suite reuses the general netxduo regression: the
+# MSVC branch of regression/CMakeLists.txt always selects the general test set
+# (the PTP-only tests depend on Linux-only shared libraries). Those tests need the
+# same base configuration the netxduo suite compiles with — in particular
+# NX_MAX_PHYSICAL_INTERFACES>=2, without which the multi-interface tests index
+# nx_ip_interface[] out of bounds and crash. Scoped to MSVC so the Linux ptp build
+# (which sets PTP_ONLY=ON and builds only the ptp tests) is unaffected.
+set(MSVC_REGRESSION_BASE -DNX_TAHI_ENABLE -DNX_MAX_PHYSICAL_INTERFACES=4 -DNX_ENABLE_IPV6_PATH_MTU_DISCOVERY)
+
 if(MSVC)
   add_compile_options(/W3 /Zi
                       -std=c99
                       -DTX_INCLUDE_USER_DEFINE_FILE
+                      ${MSVC_REGRESSION_BASE}
                       ${${CMAKE_BUILD_TYPE}})
   add_link_options(/DEBUG /INCREMENTAL:NO)
   message(STATUS "Building for Win64 (MSVC)")
@@ -79,11 +89,26 @@ if(MSVC)
       "Pass -DFILEX_SOURCE_DIR=<path> or use build_ptp.ps1.")
   endif()
   add_subdirectory(${THREADX_SOURCE_DIR} threadx_build)
+  # Mirror the ThreadX simulator timing options used by the main netxduo build
+  # (test/cmake/netxduo/CMakeLists.txt): fast-forward the simulated clock through
+  # idle periods and fire a single simulated tick per wall-clock interrupt.
+  # Without these, the win64 ThreadX port default (5 ticks/interrupt, wall-clock
+  # idle) makes the general regression suite unstable on this simulator.
+  target_compile_options(threadx PRIVATE -DTX_WIN32_NO_IDLE_ENABLE)
+  target_compile_options(threadx PRIVATE -DTX_WIN32_TICKS_PER_INTERRUPT=1)
   add_subdirectory(${FILEX_SOURCE_DIR} filex_build)
 endif()
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. netxduo)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/regression regression)
+
+# "regression" is a git symlink to ../netxduo/regression. On Windows checkouts
+# with core.symlinks=false it is materialized as a plain text file rather than a
+# directory, so fall back to the symlink's real target in that case.
+set(PTP_REGRESSION_DIR ${CMAKE_CURRENT_LIST_DIR}/regression)
+if(NOT IS_DIRECTORY ${PTP_REGRESSION_DIR})
+  set(PTP_REGRESSION_DIR ${CMAKE_CURRENT_LIST_DIR}/../netxduo/regression)
+endif()
+add_subdirectory(${PTP_REGRESSION_DIR} regression)
 
 # Coverage instrumentation (GCC/Clang only — not supported by MSVC)
 if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES ".*_coverage")
