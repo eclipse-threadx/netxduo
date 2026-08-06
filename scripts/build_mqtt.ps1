@@ -98,7 +98,11 @@ foreach ($currentConfiguration in $selectedConfigurations) {
         "-DTHREADX_ARCH=$($settings.NetXArch)",
         "-DTHREADX_TOOLCHAIN=$($settings.NetXToolchain)",
         "-DTHREADX_SOURCE_DIR=$ThreadXDir",
-        "-DFILEX_SOURCE_DIR=$FilexDir"
+        "-DFILEX_SOURCE_DIR=$FilexDir",
+        # Use the minimal Windows nx_user.h (same as build_nxd.ps1).  The full
+        # stock nx_user_sample.h config changes NetX Duo/crypto structure layout
+        # and crashes the tests (access violation) on the win64 simulator.
+        "-DNX_USER_FILE=$(Join-Path $repoRoot "ports\$($settings.NetXArch)\$($settings.NetXToolchain)\inc\nx_user_win.h")"
     )
 
     Write-Host "Building $Arch / mqtt / $currentConfiguration"
