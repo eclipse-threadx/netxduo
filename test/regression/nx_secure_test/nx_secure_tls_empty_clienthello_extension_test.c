@@ -138,6 +138,13 @@ typedef struct
 } TEST_POINT;
 
 #define TOTAL_EXTENSION_LENGTH_OFFSET 91
+/* On MSVC (c2) a zero-length array raises internal compiler error C1001.  When
+   secure renegotiation is disabled and TLS 1.3 is off every entry below is
+   compiled out, so add an unused sentinel and keep the effective count at 0
+   (see TEST_POINT_COUNT) so both loops iterate zero times exactly as before. */
+#if defined(NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION) && !(NX_SECURE_TLS_TLS_1_3_ENABLED)
+#define TEST_ARRAY_EMPTY
+#endif
 static TEST_POINT test_array[] =
 {
 #ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
@@ -149,7 +156,16 @@ static TEST_POINT test_array[] =
     {NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, corrutped_psk_extension, sizeof(corrutped_psk_extension)}, /* total extensions length field */
 #endif
 #endif
+#ifdef TEST_ARRAY_EMPTY
+    {0, NX_NULL, 0}  /* unused sentinel; TEST_POINT_COUNT stays 0 */
+#endif
 };
+
+#ifdef TEST_ARRAY_EMPTY
+#define TEST_POINT_COUNT 0
+#else
+#define TEST_POINT_COUNT (sizeof(test_array)/sizeof(TEST_POINT))
+#endif
 
 #ifdef CTEST
 void test_application_define(void *first_unused_memory);
@@ -291,7 +307,7 @@ NX_PACKET *packet_ptr;
     /* Make sure client thread is ready. */
     tx_thread_suspend(&thread_0);
 
-    for (j = 0; j < sizeof(test_array)/sizeof(TEST_POINT); j++)
+    for (j = 0; j < TEST_POINT_COUNT; j++)
     {
 
         server_tls_setup(&tls_server_session_0);
@@ -346,7 +362,7 @@ USHORT total_extension_length, message_length;
     /* Let server thread run first. */
     tx_thread_resume(&thread_0);
 
-    for (j = 0; j < sizeof(test_array)/sizeof(TEST_POINT); j++)
+    for (j = 0; j < TEST_POINT_COUNT; j++)
     {
 
         client_tls_setup(&tls_client_session_0);

@@ -102,7 +102,13 @@ if(MSVC)
                       -DNX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES
                       -DNX_ENABLE_EXTENDED_NOTIFY_SUPPORT
                       ${${CMAKE_BUILD_TYPE}})
-  add_link_options(/DEBUG /INCREMENTAL:NO)
+  # Several nx_secure tests define their own _nx_crypto_ciphersuite_lookup_table /
+  # _nx_crypto_x509_cipher_lookup_table to override the shared copies in
+  # test_utility (nx_crypto_ciphersuites_regression.c).  GNU ld links the
+  # command-line object (the test's own table) ahead of the archive member and
+  # discards the duplicate; MSVC instead errors with LNK2005.  /FORCE:MULTIPLE
+  # restores the GNU behaviour: the first definition (the test's own) wins.
+  add_link_options(/DEBUG /INCREMENTAL:NO /FORCE:MULTIPLE)
   message(STATUS "Building for Win64 (MSVC)")
 else()
   add_compile_options(
@@ -143,6 +149,12 @@ if(MSVC)
       "Pass -DTHREADX_SOURCE_DIR=<path> or use build_secure.ps1.")
   endif()
   add_subdirectory(${THREADX_SOURCE_DIR} threadx_build)
+  # Mirror the ThreadX simulator timing options used by the main netxduo build
+  # (test/cmake/netxduo/CMakeLists.txt): fast-forward the simulated clock through
+  # idle periods and fire a single simulated tick per wall-clock interrupt, so the
+  # timing-sensitive tests behave deterministically on the win64 simulator.
+  target_compile_options(threadx PRIVATE -DTX_WIN32_NO_IDLE_ENABLE)
+  target_compile_options(threadx PRIVATE -DTX_WIN32_TICKS_PER_INTERRUPT=1)
 endif()
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. netxduo)

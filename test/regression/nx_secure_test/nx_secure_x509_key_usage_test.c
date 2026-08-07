@@ -101,7 +101,7 @@ NX_SECURE_X509_CERT **remote_certs;
 
     memset(&session, 0, sizeof(NX_SECURE_TLS_SESSION));
 
-    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((int)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
+    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((ALIGN_TYPE)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
     EXPECT_EQ(NX_SUCCESS, status);
 
     status = _nx_secure_tls_session_reset(&session);

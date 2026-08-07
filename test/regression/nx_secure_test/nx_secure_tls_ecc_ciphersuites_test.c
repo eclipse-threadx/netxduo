@@ -32,6 +32,11 @@ extern VOID    test_control_return(UINT status);
 #define CERT_BUFFER_SIZE            2048
 #define SERVER_PORT                 4433
 #define CIPHERSUITE_INIT(p, s, c)   {p, sizeof(p) / sizeof(UINT), s, c}
+/* MSVC (c2) raises internal compiler error C1001 on a zero-length array
+   referenced in a static aggregate initializer.  Give the empty ciphersuite
+   list one unused element and force its paired count to 0 so behaviour is
+   unchanged. */
+#define CIPHERSUITE_INIT_EMPTY(p, s, c) {p, 0, s, c}
 #define CERTIFICATE_INIT(s, k, c, t) {s, sizeof(s), k, sizeof(k), c, sizeof(c), t}
 
 typedef struct
@@ -102,7 +107,7 @@ static CERTIFICATE test_certs[] =
     CERTIFICATE_INIT(ECTestServer10_der, ECTestServer10_key_der, ECCA2_der, NX_SECURE_X509_KEY_TYPE_EC_DER),
 };
 
-static UINT ciphersuite_list_0[] = {};
+static UINT ciphersuite_list_0[1] = {0};
 static UINT ciphersuite_list_1[] = {TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256};
 static UINT ciphersuite_list_2[] = {TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256};
 static UINT ciphersuite_list_3[] = {TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256};
@@ -122,12 +127,12 @@ static UINT ciphersuite_list_9[] = {TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256};
 static CIPHERSUITE ciphersuites_client[] =
 {
     /* Select ciphersuite according to certificate. */
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[0]),
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[0]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
 #if !(NX_SECURE_TLS_TLS_1_3_ENABLED)
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[2]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[2]),
 #endif
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[3]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[3]),
 
     /* Select ciphersuite according to certificate.
      * The order of client ciphersuites are reversed of server. */
@@ -156,10 +161,10 @@ static CIPHERSUITE ciphersuites_client[] =
 
     /* Let the server pickup supported ciphersuite. */
 #if !(NX_SECURE_TLS_TLS_1_3_ENABLED)
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[0]),
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[2]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[0]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[2]),
 #endif
 
 #if defined(NX_SECURE_TLS_ENABLE_TLS_1_1) && !defined(NX_SECURE_TLS_DISABLE_TLS_1_0) && defined(NX_SECURE_ENABLE_AEAD_CIPHER)
@@ -172,18 +177,18 @@ static CIPHERSUITE ciphersuites_server[] =
 {
 
     /* Select ciphersuite according to certificate. */
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[0]),
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[0]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
 #if !(NX_SECURE_TLS_TLS_1_3_ENABLED)
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[2]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[2]),
 #endif
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[3]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[3]),
 
     /* Select ciphersuite according to certificate.
      * The order of client ciphersuites are reversed of server. */
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[0]),
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[2]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[0]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[2]),
 
     /* Specified ciphersuites. */
     CIPHERSUITE_INIT(ciphersuite_list_1, NX_TRUE, &test_certs[1]),
@@ -199,10 +204,10 @@ static CIPHERSUITE ciphersuites_server[] =
 #endif
 
     /* The Server cert supports ECDH_ECDSA and ECDHE_ECDSA. */
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_FALSE, &test_certs[1]),
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
-    CIPHERSUITE_INIT(ciphersuite_list_0, NX_FALSE, &test_certs[1]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_FALSE, &test_certs[1]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_TRUE, &test_certs[1]),
+    CIPHERSUITE_INIT_EMPTY(ciphersuite_list_0, NX_FALSE, &test_certs[1]),
 
     /* Let the server pickup supported ciphersuite. */
 #if !(NX_SECURE_TLS_TLS_1_3_ENABLED)

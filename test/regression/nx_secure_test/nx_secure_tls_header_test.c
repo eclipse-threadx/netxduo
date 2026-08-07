@@ -78,7 +78,7 @@ USHORT message_type;
 
     nx_system_initialize();
 
-    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((int)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
+    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((ALIGN_TYPE)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
 
     nx_secure_tls_session_create(&session, &nx_crypto_tls_ciphers, crypto_metadata, sizeof(crypto_metadata));
     nx_secure_tls_session_reset(&session);

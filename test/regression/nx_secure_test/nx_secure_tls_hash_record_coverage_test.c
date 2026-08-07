@@ -111,7 +111,7 @@ ULONG sequence_num[NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE];
 
     nx_system_initialize();
 
-    status = nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 32,  (ULONG*)(((int)packet_pool_area + 4) & ~4) , NX_PACKET_POOL_SIZE);
+    status = nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 32,  (ULONG*)(((ALIGN_TYPE)packet_pool_area + 4) & ~4) , NX_PACKET_POOL_SIZE);
     status = nx_packet_allocate(&pool_0, &packet1_ptr, 0, NX_NO_WAIT);
     status = nx_packet_allocate(&pool_0, &packet2_ptr, 0, NX_NO_WAIT);
 

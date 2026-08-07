@@ -20,6 +20,12 @@
 #define MAXIMUM_PLAIN_BYTES 256
 #endif /* MAXIMUM_PLAIN_BYTES */
 
+/* NOTE: The MSVC backend (c2) raises an internal compiler error (C1001)
+   when a zero-length array is referenced in a static aggregate initializer.
+   The empty test vectors below are therefore declared with a single unused
+   byte and their paired length is fixed at 0, so the hashed input is still
+   empty and every expected digest is unchanged. */
+
 typedef struct
 {
     UCHAR *key;
@@ -31,12 +37,10 @@ typedef struct
 
 #if MAXIMUM_PLAIN_BYTES >= 0
 /*  */
-static UCHAR key_0_0[] = {
-};
+static UCHAR key_0_0[1] = { 0 };
 
 /*  */
-static UCHAR plain_0_0[] = {
-};
+static UCHAR plain_0_0[1] = { 0 };
 
 /* B936CEE86C9F87AA5D3C6F2E84CB5A4239A5FE50480A6EC66B70AB5B1F4AC6730C6C515421B327EC1D69402E53DFB49AD7381EB067B338FD7B0CB22247225D47 */
 static UCHAR secret_0_0[] = {
@@ -50,8 +54,7 @@ static UCHAR secret_0_0[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 1
 /*  */
-static UCHAR key_1_0[] = {
-};
+static UCHAR key_1_0[1] = { 0 };
 
 /* 94 */
 static UCHAR plain_1_0[] = {
@@ -2597,8 +2600,7 @@ static UCHAR secret_1_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 2
 /*  */
-static UCHAR key_2_0[] = {
-};
+static UCHAR key_2_0[1] = { 0 };
 
 /* 4A65 */
 static UCHAR plain_2_0[] = {
@@ -5144,8 +5146,7 @@ static UCHAR secret_2_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 3
 /*  */
-static UCHAR key_3_0[] = {
-};
+static UCHAR key_3_0[1] = { 0 };
 
 /* DF01D6 */
 static UCHAR plain_3_0[] = {
@@ -7691,8 +7692,7 @@ static UCHAR secret_3_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 4
 /*  */
-static UCHAR key_4_0[] = {
-};
+static UCHAR key_4_0[1] = { 0 };
 
 /* 3DA5B279 */
 static UCHAR plain_4_0[] = {
@@ -10238,8 +10238,7 @@ static UCHAR secret_4_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 5
 /*  */
-static UCHAR key_5_0[] = {
-};
+static UCHAR key_5_0[1] = { 0 };
 
 /* 7614226F5D */
 static UCHAR plain_5_0[] = {
@@ -12785,8 +12784,7 @@ static UCHAR secret_5_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 6
 /*  */
-static UCHAR key_6_0[] = {
-};
+static UCHAR key_6_0[1] = { 0 };
 
 /* 81617B1AA92D */
 static UCHAR plain_6_0[] = {
@@ -15332,8 +15330,7 @@ static UCHAR secret_6_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 7
 /*  */
-static UCHAR key_7_0[] = {
-};
+static UCHAR key_7_0[1] = { 0 };
 
 /* 48DA553421AFAC */
 static UCHAR plain_7_0[] = {
@@ -17879,8 +17876,7 @@ static UCHAR secret_7_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 8
 /*  */
-static UCHAR key_8_0[] = {
-};
+static UCHAR key_8_0[1] = { 0 };
 
 /* D1FAAA5D58993D2E */
 static UCHAR plain_8_0[] = {
@@ -20426,8 +20422,7 @@ static UCHAR secret_8_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 9
 /*  */
-static UCHAR key_9_0[] = {
-};
+static UCHAR key_9_0[1] = { 0 };
 
 /* F0A70324EECB3D5426 */
 static UCHAR plain_9_0[] = {
@@ -22973,8 +22968,7 @@ static UCHAR secret_9_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 10
 /*  */
-static UCHAR key_10_0[] = {
-};
+static UCHAR key_10_0[1] = { 0 };
 
 /* 2CC864067825B2215EDA */
 static UCHAR plain_10_0[] = {
@@ -25520,8 +25514,7 @@ static UCHAR secret_10_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 11
 /*  */
-static UCHAR key_11_0[] = {
-};
+static UCHAR key_11_0[1] = { 0 };
 
 /* 5867526B9903DA45578F77 */
 static UCHAR plain_11_0[] = {
@@ -28067,8 +28060,7 @@ static UCHAR secret_11_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 12
 /*  */
-static UCHAR key_12_0[] = {
-};
+static UCHAR key_12_0[1] = { 0 };
 
 /* 3DFE4658E964ED54E2B2CD60 */
 static UCHAR plain_12_0[] = {
@@ -30614,8 +30606,7 @@ static UCHAR secret_12_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 13
 /*  */
-static UCHAR key_13_0[] = {
-};
+static UCHAR key_13_0[1] = { 0 };
 
 /* 6A035F73BF52B71E4CD2D20C49 */
 static UCHAR plain_13_0[] = {
@@ -33161,8 +33152,7 @@ static UCHAR secret_13_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 14
 /*  */
-static UCHAR key_14_0[] = {
-};
+static UCHAR key_14_0[1] = { 0 };
 
 /* 7D036E53B394887511F15F646BB4 */
 static UCHAR plain_14_0[] = {
@@ -35708,8 +35698,7 @@ static UCHAR secret_14_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 15
 /*  */
-static UCHAR key_15_0[] = {
-};
+static UCHAR key_15_0[1] = { 0 };
 
 /* 61284E10056E075D39091E232DD863 */
 static UCHAR plain_15_0[] = {
@@ -38255,8 +38244,7 @@ static UCHAR secret_15_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 16
 /*  */
-static UCHAR key_16_0[] = {
-};
+static UCHAR key_16_0[1] = { 0 };
 
 /* B80B6F76E270BA0726D8284F2DBF720B */
 static UCHAR plain_16_0[] = {
@@ -40932,8 +40920,7 @@ static UCHAR secret_16_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 17
 /*  */
-static UCHAR key_17_0[] = {
-};
+static UCHAR key_17_0[1] = { 0 };
 
 /* 7FE5503DF7078556DB12D464FBF6D368BE */
 static UCHAR plain_17_0[] = {
@@ -43609,8 +43596,7 @@ static UCHAR secret_17_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 18
 /*  */
-static UCHAR key_18_0[] = {
-};
+static UCHAR key_18_0[1] = { 0 };
 
 /* 17D7092304B8C34E8CD8BA20937B1D015871 */
 static UCHAR plain_18_0[] = {
@@ -46286,8 +46272,7 @@ static UCHAR secret_18_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 19
 /*  */
-static UCHAR key_19_0[] = {
-};
+static UCHAR key_19_0[1] = { 0 };
 
 /* 0044D921B6CF8129275BEA7DA1AC732E9E2103 */
 static UCHAR plain_19_0[] = {
@@ -48963,8 +48948,7 @@ static UCHAR secret_19_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 20
 /*  */
-static UCHAR key_20_0[] = {
-};
+static UCHAR key_20_0[1] = { 0 };
 
 /* 809F2740CC4B947B145E1F39786A9378CFD69266 */
 static UCHAR plain_20_0[] = {
@@ -51640,8 +51624,7 @@ static UCHAR secret_20_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 21
 /*  */
-static UCHAR key_21_0[] = {
-};
+static UCHAR key_21_0[1] = { 0 };
 
 /* 326CD130F1F38D72778B246FF2E68C32B534770F0C */
 static UCHAR plain_21_0[] = {
@@ -54317,8 +54300,7 @@ static UCHAR secret_21_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 22
 /*  */
-static UCHAR key_22_0[] = {
-};
+static UCHAR key_22_0[1] = { 0 };
 
 /* 607B080F4BEE113B6A9D63136CEB9E51A45DDF40C910 */
 static UCHAR plain_22_0[] = {
@@ -56994,8 +56976,7 @@ static UCHAR secret_22_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 23
 /*  */
-static UCHAR key_23_0[] = {
-};
+static UCHAR key_23_0[1] = { 0 };
 
 /* 542400405886A87C5E952A5DC06B8C735165C222832B24 */
 static UCHAR plain_23_0[] = {
@@ -59671,8 +59652,7 @@ static UCHAR secret_23_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 24
 /*  */
-static UCHAR key_24_0[] = {
-};
+static UCHAR key_24_0[1] = { 0 };
 
 /* E1774F78119E761FAD1A1D7AD82405491CA36431CD1F1217 */
 static UCHAR plain_24_0[] = {
@@ -62348,8 +62328,7 @@ static UCHAR secret_24_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 25
 /*  */
-static UCHAR key_25_0[] = {
-};
+static UCHAR key_25_0[1] = { 0 };
 
 /* 8F01B2417851C6194B4A7B31AB97841B2D4F0126A605664951 */
 static UCHAR plain_25_0[] = {
@@ -65025,8 +65004,7 @@ static UCHAR secret_25_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 26
 /*  */
-static UCHAR key_26_0[] = {
-};
+static UCHAR key_26_0[1] = { 0 };
 
 /* AB48BA638EC2D722DB06460566300F3875AB250F71B2614C470B */
 static UCHAR plain_26_0[] = {
@@ -67702,8 +67680,7 @@ static UCHAR secret_26_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 27
 /*  */
-static UCHAR key_27_0[] = {
-};
+static UCHAR key_27_0[1] = { 0 };
 
 /* 2566A435B943C76987E8BA6D1F995A28879F1A01E7CC8532D9FA01 */
 static UCHAR plain_27_0[] = {
@@ -70379,8 +70356,7 @@ static UCHAR secret_27_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 28
 /*  */
-static UCHAR key_28_0[] = {
-};
+static UCHAR key_28_0[1] = { 0 };
 
 /* 2B13017FC854995F65AE176EE4E19934AFFD83784E66530F41B6BA02 */
 static UCHAR plain_28_0[] = {
@@ -73056,8 +73032,7 @@ static UCHAR secret_28_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 29
 /*  */
-static UCHAR key_29_0[] = {
-};
+static UCHAR key_29_0[1] = { 0 };
 
 /* 07D8182113D64878A0818A223766734BCE08831919E3BC6257CFD2203C */
 static UCHAR plain_29_0[] = {
@@ -75733,8 +75708,7 @@ static UCHAR secret_29_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 30
 /*  */
-static UCHAR key_30_0[] = {
-};
+static UCHAR key_30_0[1] = { 0 };
 
 /* F8948614492AE6652A3A677BD8F0932E36C4FC63D6FEEE095FE31B13F2C7 */
 static UCHAR plain_30_0[] = {
@@ -78410,8 +78384,7 @@ static UCHAR secret_30_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 31
 /*  */
-static UCHAR key_31_0[] = {
-};
+static UCHAR key_31_0[1] = { 0 };
 
 /* 280A745D0DA8460AE2B903335D476C23543E9534068D4036E6C4A1152D7A1E */
 static UCHAR plain_31_0[] = {
@@ -81087,8 +81060,7 @@ static UCHAR secret_31_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 32
 /*  */
-static UCHAR key_32_0[] = {
-};
+static UCHAR key_32_0[1] = { 0 };
 
 /* 25308D6BEEEF37672F969D396FA9273E9E786F00B7A62A377E1CFB3C9F94E272 */
 static UCHAR plain_32_0[] = {
@@ -83894,8 +83866,7 @@ static UCHAR secret_32_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 33
 /*  */
-static UCHAR key_33_0[] = {
-};
+static UCHAR key_33_0[1] = { 0 };
 
 /* E5A0897874C59538B7FD2760DBBB5A7044C4976BBCE3037D4998295B00296177BE */
 static UCHAR plain_33_0[] = {
@@ -86701,8 +86672,7 @@ static UCHAR secret_33_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 34
 /*  */
-static UCHAR key_34_0[] = {
-};
+static UCHAR key_34_0[1] = { 0 };
 
 /* C7EA3B49B8814616EE3CC80F2AA0F9287E834908F313FB19A3BFBE638B1507343926 */
 static UCHAR plain_34_0[] = {
@@ -89508,8 +89478,7 @@ static UCHAR secret_34_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 35
 /*  */
-static UCHAR key_35_0[] = {
-};
+static UCHAR key_35_0[1] = { 0 };
 
 /* 6B30980E13E586487EC8AE5F27F3357716256A79772E6B25250F1833EE0E2B38F187AD */
 static UCHAR plain_35_0[] = {
@@ -92315,8 +92284,7 @@ static UCHAR secret_35_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 36
 /*  */
-static UCHAR key_36_0[] = {
-};
+static UCHAR key_36_0[1] = { 0 };
 
 /* 228EAF0CE7D1F8526156C6625679F348F472614E985F534D8223542DEA2EAF4DA5715A7A */
 static UCHAR plain_36_0[] = {
@@ -95122,8 +95090,7 @@ static UCHAR secret_36_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 37
 /*  */
-static UCHAR key_37_0[] = {
-};
+static UCHAR key_37_0[1] = { 0 };
 
 /* 079AA022D7632B5CFD635F52E8DE9B4A44AD9A028FD13473BAC10442321105620A06CB0896 */
 static UCHAR plain_37_0[] = {
@@ -97929,8 +97896,7 @@ static UCHAR secret_37_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 38
 /*  */
-static UCHAR key_38_0[] = {
-};
+static UCHAR key_38_0[1] = { 0 };
 
 /* 01B267201591BC56CEC5863F275229763EFB2704DF8EF24CCCB21112024D5F6DF6CF993A93C1 */
 static UCHAR plain_38_0[] = {
@@ -100736,8 +100702,7 @@ static UCHAR secret_38_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 39
 /*  */
-static UCHAR key_39_0[] = {
-};
+static UCHAR key_39_0[1] = { 0 };
 
 /* 4100BF0AE8832230B28B9F7BAE786F60BEC7D025EECB3826B2BFD837F8C748616A4FAE77FD3C38 */
 static UCHAR plain_39_0[] = {
@@ -103543,8 +103508,7 @@ static UCHAR secret_39_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 40
 /*  */
-static UCHAR key_40_0[] = {
-};
+static UCHAR key_40_0[1] = { 0 };
 
 /* 0B5D07028419E63CE02D07054EB2711680E46415288C69413D34182C3D025363C3D4302FF977E066 */
 static UCHAR plain_40_0[] = {
@@ -106350,8 +106314,7 @@ static UCHAR secret_40_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 41
 /*  */
-static UCHAR key_41_0[] = {
-};
+static UCHAR key_41_0[1] = { 0 };
 
 /* E9A73E17CEF8C65220E69437F8B2135715303B64E40BDE43B93B7F4DC29E19618212F25CA63B6A2FD4 */
 static UCHAR plain_41_0[] = {
@@ -109157,8 +109120,7 @@ static UCHAR secret_41_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 42
 /*  */
-static UCHAR key_42_0[] = {
-};
+static UCHAR key_42_0[1] = { 0 };
 
 /* 033C6F1626C3F612FC714C30DFB62A118048A80A78C9FE5E46F42D1BB43382564BCD7E70B52D637D8C14 */
 static UCHAR plain_42_0[] = {
@@ -111964,8 +111926,7 @@ static UCHAR secret_42_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 43
 /*  */
-static UCHAR key_43_0[] = {
-};
+static UCHAR key_43_0[1] = { 0 };
 
 /* B7F71F101C921A3001F965391DF498412D29EF0C60649576AA98534828AEE92B7C8109471F0A1A3D37DAB8 */
 static UCHAR plain_43_0[] = {
@@ -114771,8 +114732,7 @@ static UCHAR secret_43_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 44
 /*  */
-static UCHAR key_44_0[] = {
-};
+static UCHAR key_44_0[1] = { 0 };
 
 /* BFE6A368538D980682C95C6074F7560AE40F4555C05BB041D56ABC3AB322627521C53179AC85A6693546D922 */
 static UCHAR plain_44_0[] = {
@@ -117578,8 +117538,7 @@ static UCHAR secret_44_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 45
 /*  */
-static UCHAR key_45_0[] = {
-};
+static UCHAR key_45_0[1] = { 0 };
 
 /* 1E76D207C456DF234D79D827E85FFD555276C265EB207B1ECE3F86494F9BED2F1EBA3D033118035E2DB3A07E7A */
 static UCHAR plain_45_0[] = {
@@ -120385,8 +120344,7 @@ static UCHAR secret_45_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 46
 /*  */
-static UCHAR key_46_0[] = {
-};
+static UCHAR key_46_0[1] = { 0 };
 
 /* 03463C56DD73A4538A03E60ED5E790764AFA2829516EB4015367061BC441A770381ED77D334B8A0034486F7B5FE4 */
 static UCHAR plain_46_0[] = {
@@ -123192,8 +123150,7 @@ static UCHAR secret_46_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 47
 /*  */
-static UCHAR key_47_0[] = {
-};
+static UCHAR key_47_0[1] = { 0 };
 
 /* 8B66F3444B21633360CE9C1981FA7B6E24C63C1A1572C0280924FC253ECB8E5E5E849731722527771BCDCA0F04D8AD */
 static UCHAR plain_47_0[] = {
@@ -125999,8 +125956,7 @@ static UCHAR secret_47_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 48
 /*  */
-static UCHAR key_48_0[] = {
-};
+static UCHAR key_48_0[1] = { 0 };
 
 /* 99E0B30BE8485F0B4C1FC8771C379023A6295927B90FF926A74BF70523A8E81EFB7C5B4634C25D326BC2801E856EE770 */
 static UCHAR plain_48_0[] = {
@@ -128936,8 +128892,7 @@ static UCHAR secret_48_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 49
 /*  */
-static UCHAR key_49_0[] = {
-};
+static UCHAR key_49_0[1] = { 0 };
 
 /* 3E59343B2FC7721FD3C9244CDF28176D951617739AC6182A7AC24E7602EE0C4C25B0DB65867AB060DCBA6655C654F75493 */
 static UCHAR plain_49_0[] = {
@@ -131873,8 +131828,7 @@ static UCHAR secret_49_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 50
 /*  */
-static UCHAR key_50_0[] = {
-};
+static UCHAR key_50_0[1] = { 0 };
 
 /* EFDB7B5514EFAE09A753680D6145AA487CE786711603580BBA39341D3DB6FC48A5172E3FC7BB7F075412B62952F3EF45FD1D */
 static UCHAR plain_50_0[] = {
@@ -134810,8 +134764,7 @@ static UCHAR secret_50_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 51
 /*  */
-static UCHAR key_51_0[] = {
-};
+static UCHAR key_51_0[1] = { 0 };
 
 /* C166FB45B7F7CC213AFE0A53FD625730CB8FB8617A40CE035316BF18067B985B27F9AD2CB1A1C22BED428B5D9A33E0742E712E */
 static UCHAR plain_51_0[] = {
@@ -137747,8 +137700,7 @@ static UCHAR secret_51_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 52
 /*  */
-static UCHAR key_52_0[] = {
-};
+static UCHAR key_52_0[1] = { 0 };
 
 /* F2DB7C4A7FE2A541EE47B40808CA4D0B9988F50F0A8ADE5DDA6BE8217AB38676C47A8661C3216A329B13E1125FAAB36F79CCA705 */
 static UCHAR plain_52_0[] = {
@@ -140684,8 +140636,7 @@ static UCHAR secret_52_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 53
 /*  */
-static UCHAR key_53_0[] = {
-};
+static UCHAR key_53_0[1] = { 0 };
 
 /* 7187734021717050D537AB5853411B7958DCDF246D24973648BCE05EF32EC05C4A2C2324E764702AD94CB203BDE42812F74C09088F */
 static UCHAR plain_53_0[] = {
@@ -143621,8 +143572,7 @@ static UCHAR secret_53_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 54
 /*  */
-static UCHAR key_54_0[] = {
-};
+static UCHAR key_54_0[1] = { 0 };
 
 /* B4DC00034171AE664DEDC711B63BEA7A1D05985294D01A152CD98F7C256D2C48A0BD686371ECC51DD2B2CB794183B849CCBE452BCC9A */
 static UCHAR plain_54_0[] = {
@@ -146558,8 +146508,7 @@ static UCHAR secret_54_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 55
 /*  */
-static UCHAR key_55_0[] = {
-};
+static UCHAR key_55_0[1] = { 0 };
 
 /* E0C81B72D7343C4AD82D3E078126825EE9918919528EF37E2C079603DE1B87143D73B3197794490218F7311074D95B6395BA500F4933F1 */
 static UCHAR plain_55_0[] = {
@@ -149495,8 +149444,7 @@ static UCHAR secret_55_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 56
 /*  */
-static UCHAR key_56_0[] = {
-};
+static UCHAR key_56_0[1] = { 0 };
 
 /* 0A8FCE775629B240E3F879027F779A2BCF5F31128B379233E91A9B5DDCE07B2F814FD719542A744F2BD3DA593082BC731AC9E519A4351153 */
 static UCHAR plain_56_0[] = {
@@ -152432,8 +152380,7 @@ static UCHAR secret_56_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 57
 /*  */
-static UCHAR key_57_0[] = {
-};
+static UCHAR key_57_0[1] = { 0 };
 
 /* 3E242B666E87CD105374E86E1ED1D33EBF8020649C13CF5B8DCB6A2BD76C8B6E41C0F6338933693E24089611B6D8DA345F0817413088760268 */
 static UCHAR plain_57_0[] = {
@@ -155369,8 +155316,7 @@ static UCHAR secret_57_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 58
 /*  */
-static UCHAR key_58_0[] = {
-};
+static UCHAR key_58_0[1] = { 0 };
 
 /* 52BAC03E7D6DE634C752BF6E67A9083530B67A77CF014B7A14A7295A9A02DC59E282C9391E061C6101986406E16F5A3EC551FF062C6B02656AF4 */
 static UCHAR plain_58_0[] = {
@@ -158306,8 +158252,7 @@ static UCHAR secret_58_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 59
 /*  */
-static UCHAR key_59_0[] = {
-};
+static UCHAR key_59_0[1] = { 0 };
 
 /* 99FCC4735ECB716E5670026AEC1FA2400A0C8F5CE0B7456E7B18B6004209101A39804A60517D2D12A2E78E37A9D38E591AACB9612C6ABC5F93F66B */
 static UCHAR plain_59_0[] = {
@@ -161243,8 +161188,7 @@ static UCHAR secret_59_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 60
 /*  */
-static UCHAR key_60_0[] = {
-};
+static UCHAR key_60_0[1] = { 0 };
 
 /* B3025C5242F07F1A4A03532F23E71969166D062FC56C9E6A6FD5675EBA70FA41CD48F37B26C2EC1993A3770C9A27D23FD07BF4524ECD835DC9929947 */
 static UCHAR plain_60_0[] = {
@@ -164180,8 +164124,7 @@ static UCHAR secret_60_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 61
 /*  */
-static UCHAR key_61_0[] = {
-};
+static UCHAR key_61_0[1] = { 0 };
 
 /* 280ADC317396E025B83BAD7104D63F26C89EE002BB67BF6F4BC4B0423E42CB2FB610EF14038B840542B0E6694023B83694C1C4088853720C601A253065 */
 static UCHAR plain_61_0[] = {
@@ -167117,8 +167060,7 @@ static UCHAR secret_61_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 62
 /*  */
-static UCHAR key_62_0[] = {
-};
+static UCHAR key_62_0[1] = { 0 };
 
 /* E8657B3057E3DF44B3C8ED69EAEF2E0D1EFDA6575823853CD351381B1E038D30B65EBA23C90CA56A36F0C061DA8C9369B1C5FF5B718437665FB54241B7D4 */
 static UCHAR plain_62_0[] = {
@@ -170054,8 +169996,7 @@ static UCHAR secret_62_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 63
 /*  */
-static UCHAR key_63_0[] = {
-};
+static UCHAR key_63_0[1] = { 0 };
 
 /* 7C4DB76B5A04D15DD449397538CB3831BA8F0A5607795D3C4A32581E8FF7A2663F7AA76FED0B900A618A8122CC6DEB65010DD336A0B320601A1287281D06D1 */
 static UCHAR plain_63_0[] = {
@@ -172991,8 +172932,7 @@ static UCHAR secret_63_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 64
 /*  */
-static UCHAR key_64_0[] = {
-};
+static UCHAR key_64_0[1] = { 0 };
 
 /* 6660FF151DF8B67A193B1B07852A0F7DC0397C1DD3C0382AFC927C3F2E6EC7491C742D32F1266C150763B8167412034BC0B8304DE3ABD65E03DF34502F4E863C */
 static UCHAR plain_64_0[] = {
@@ -176058,8 +175998,7 @@ static UCHAR secret_64_129[] = {
 
 #if MAXIMUM_PLAIN_BYTES >= 65
 /*  */
-static UCHAR key_65_0[] = {
-};
+static UCHAR key_65_0[1] = { 0 };
 
 /* FFFEBA3FD0D1A823E9649C6A70FABE5FACBC5353C3F3D62AAFE7AF118BAEAB365B23676C37E2F17C14DB9533BBAFBB5B2F27C44363A4F64A11CEE7717015583F33 */
 static UCHAR plain_65_0[] = {
@@ -179126,11 +179065,11 @@ static UCHAR secret_65_129[] = {
 HMAC_SHA512_DATA hmac_sha512_data[] = 
 {
 #if MAXIMUM_PLAIN_BYTES >= 0
-    {key_0_0, sizeof(key_0_0), plain_0_0, sizeof(plain_0_0), secret_0_0},
+    {key_0_0, 0, plain_0_0, 0, secret_0_0},
 #endif /* MAXIMUM_PLAIN_BYTES >= 0 */
 
 #if MAXIMUM_PLAIN_BYTES >= 1
-    {key_1_0, sizeof(key_1_0), plain_1_0, sizeof(plain_1_0), secret_1_0},
+    {key_1_0, 0, plain_1_0, sizeof(plain_1_0), secret_1_0},
     {key_1_1, sizeof(key_1_1), plain_1_1, sizeof(plain_1_1), secret_1_1},
     {key_1_2, sizeof(key_1_2), plain_1_2, sizeof(plain_1_2), secret_1_2},
     {key_1_3, sizeof(key_1_3), plain_1_3, sizeof(plain_1_3), secret_1_3},
@@ -179263,7 +179202,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 1 */
 
 #if MAXIMUM_PLAIN_BYTES >= 2
-    {key_2_0, sizeof(key_2_0), plain_2_0, sizeof(plain_2_0), secret_2_0},
+    {key_2_0, 0, plain_2_0, sizeof(plain_2_0), secret_2_0},
     {key_2_1, sizeof(key_2_1), plain_2_1, sizeof(plain_2_1), secret_2_1},
     {key_2_2, sizeof(key_2_2), plain_2_2, sizeof(plain_2_2), secret_2_2},
     {key_2_3, sizeof(key_2_3), plain_2_3, sizeof(plain_2_3), secret_2_3},
@@ -179396,7 +179335,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 2 */
 
 #if MAXIMUM_PLAIN_BYTES >= 3
-    {key_3_0, sizeof(key_3_0), plain_3_0, sizeof(plain_3_0), secret_3_0},
+    {key_3_0, 0, plain_3_0, sizeof(plain_3_0), secret_3_0},
     {key_3_1, sizeof(key_3_1), plain_3_1, sizeof(plain_3_1), secret_3_1},
     {key_3_2, sizeof(key_3_2), plain_3_2, sizeof(plain_3_2), secret_3_2},
     {key_3_3, sizeof(key_3_3), plain_3_3, sizeof(plain_3_3), secret_3_3},
@@ -179529,7 +179468,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 3 */
 
 #if MAXIMUM_PLAIN_BYTES >= 4
-    {key_4_0, sizeof(key_4_0), plain_4_0, sizeof(plain_4_0), secret_4_0},
+    {key_4_0, 0, plain_4_0, sizeof(plain_4_0), secret_4_0},
     {key_4_1, sizeof(key_4_1), plain_4_1, sizeof(plain_4_1), secret_4_1},
     {key_4_2, sizeof(key_4_2), plain_4_2, sizeof(plain_4_2), secret_4_2},
     {key_4_3, sizeof(key_4_3), plain_4_3, sizeof(plain_4_3), secret_4_3},
@@ -179662,7 +179601,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 4 */
 
 #if MAXIMUM_PLAIN_BYTES >= 5
-    {key_5_0, sizeof(key_5_0), plain_5_0, sizeof(plain_5_0), secret_5_0},
+    {key_5_0, 0, plain_5_0, sizeof(plain_5_0), secret_5_0},
     {key_5_1, sizeof(key_5_1), plain_5_1, sizeof(plain_5_1), secret_5_1},
     {key_5_2, sizeof(key_5_2), plain_5_2, sizeof(plain_5_2), secret_5_2},
     {key_5_3, sizeof(key_5_3), plain_5_3, sizeof(plain_5_3), secret_5_3},
@@ -179795,7 +179734,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 5 */
 
 #if MAXIMUM_PLAIN_BYTES >= 6
-    {key_6_0, sizeof(key_6_0), plain_6_0, sizeof(plain_6_0), secret_6_0},
+    {key_6_0, 0, plain_6_0, sizeof(plain_6_0), secret_6_0},
     {key_6_1, sizeof(key_6_1), plain_6_1, sizeof(plain_6_1), secret_6_1},
     {key_6_2, sizeof(key_6_2), plain_6_2, sizeof(plain_6_2), secret_6_2},
     {key_6_3, sizeof(key_6_3), plain_6_3, sizeof(plain_6_3), secret_6_3},
@@ -179928,7 +179867,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 6 */
 
 #if MAXIMUM_PLAIN_BYTES >= 7
-    {key_7_0, sizeof(key_7_0), plain_7_0, sizeof(plain_7_0), secret_7_0},
+    {key_7_0, 0, plain_7_0, sizeof(plain_7_0), secret_7_0},
     {key_7_1, sizeof(key_7_1), plain_7_1, sizeof(plain_7_1), secret_7_1},
     {key_7_2, sizeof(key_7_2), plain_7_2, sizeof(plain_7_2), secret_7_2},
     {key_7_3, sizeof(key_7_3), plain_7_3, sizeof(plain_7_3), secret_7_3},
@@ -180061,7 +180000,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 7 */
 
 #if MAXIMUM_PLAIN_BYTES >= 8
-    {key_8_0, sizeof(key_8_0), plain_8_0, sizeof(plain_8_0), secret_8_0},
+    {key_8_0, 0, plain_8_0, sizeof(plain_8_0), secret_8_0},
     {key_8_1, sizeof(key_8_1), plain_8_1, sizeof(plain_8_1), secret_8_1},
     {key_8_2, sizeof(key_8_2), plain_8_2, sizeof(plain_8_2), secret_8_2},
     {key_8_3, sizeof(key_8_3), plain_8_3, sizeof(plain_8_3), secret_8_3},
@@ -180194,7 +180133,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 8 */
 
 #if MAXIMUM_PLAIN_BYTES >= 9
-    {key_9_0, sizeof(key_9_0), plain_9_0, sizeof(plain_9_0), secret_9_0},
+    {key_9_0, 0, plain_9_0, sizeof(plain_9_0), secret_9_0},
     {key_9_1, sizeof(key_9_1), plain_9_1, sizeof(plain_9_1), secret_9_1},
     {key_9_2, sizeof(key_9_2), plain_9_2, sizeof(plain_9_2), secret_9_2},
     {key_9_3, sizeof(key_9_3), plain_9_3, sizeof(plain_9_3), secret_9_3},
@@ -180327,7 +180266,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 9 */
 
 #if MAXIMUM_PLAIN_BYTES >= 10
-    {key_10_0, sizeof(key_10_0), plain_10_0, sizeof(plain_10_0), secret_10_0},
+    {key_10_0, 0, plain_10_0, sizeof(plain_10_0), secret_10_0},
     {key_10_1, sizeof(key_10_1), plain_10_1, sizeof(plain_10_1), secret_10_1},
     {key_10_2, sizeof(key_10_2), plain_10_2, sizeof(plain_10_2), secret_10_2},
     {key_10_3, sizeof(key_10_3), plain_10_3, sizeof(plain_10_3), secret_10_3},
@@ -180460,7 +180399,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 10 */
 
 #if MAXIMUM_PLAIN_BYTES >= 11
-    {key_11_0, sizeof(key_11_0), plain_11_0, sizeof(plain_11_0), secret_11_0},
+    {key_11_0, 0, plain_11_0, sizeof(plain_11_0), secret_11_0},
     {key_11_1, sizeof(key_11_1), plain_11_1, sizeof(plain_11_1), secret_11_1},
     {key_11_2, sizeof(key_11_2), plain_11_2, sizeof(plain_11_2), secret_11_2},
     {key_11_3, sizeof(key_11_3), plain_11_3, sizeof(plain_11_3), secret_11_3},
@@ -180593,7 +180532,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 11 */
 
 #if MAXIMUM_PLAIN_BYTES >= 12
-    {key_12_0, sizeof(key_12_0), plain_12_0, sizeof(plain_12_0), secret_12_0},
+    {key_12_0, 0, plain_12_0, sizeof(plain_12_0), secret_12_0},
     {key_12_1, sizeof(key_12_1), plain_12_1, sizeof(plain_12_1), secret_12_1},
     {key_12_2, sizeof(key_12_2), plain_12_2, sizeof(plain_12_2), secret_12_2},
     {key_12_3, sizeof(key_12_3), plain_12_3, sizeof(plain_12_3), secret_12_3},
@@ -180726,7 +180665,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 12 */
 
 #if MAXIMUM_PLAIN_BYTES >= 13
-    {key_13_0, sizeof(key_13_0), plain_13_0, sizeof(plain_13_0), secret_13_0},
+    {key_13_0, 0, plain_13_0, sizeof(plain_13_0), secret_13_0},
     {key_13_1, sizeof(key_13_1), plain_13_1, sizeof(plain_13_1), secret_13_1},
     {key_13_2, sizeof(key_13_2), plain_13_2, sizeof(plain_13_2), secret_13_2},
     {key_13_3, sizeof(key_13_3), plain_13_3, sizeof(plain_13_3), secret_13_3},
@@ -180859,7 +180798,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 13 */
 
 #if MAXIMUM_PLAIN_BYTES >= 14
-    {key_14_0, sizeof(key_14_0), plain_14_0, sizeof(plain_14_0), secret_14_0},
+    {key_14_0, 0, plain_14_0, sizeof(plain_14_0), secret_14_0},
     {key_14_1, sizeof(key_14_1), plain_14_1, sizeof(plain_14_1), secret_14_1},
     {key_14_2, sizeof(key_14_2), plain_14_2, sizeof(plain_14_2), secret_14_2},
     {key_14_3, sizeof(key_14_3), plain_14_3, sizeof(plain_14_3), secret_14_3},
@@ -180992,7 +180931,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 14 */
 
 #if MAXIMUM_PLAIN_BYTES >= 15
-    {key_15_0, sizeof(key_15_0), plain_15_0, sizeof(plain_15_0), secret_15_0},
+    {key_15_0, 0, plain_15_0, sizeof(plain_15_0), secret_15_0},
     {key_15_1, sizeof(key_15_1), plain_15_1, sizeof(plain_15_1), secret_15_1},
     {key_15_2, sizeof(key_15_2), plain_15_2, sizeof(plain_15_2), secret_15_2},
     {key_15_3, sizeof(key_15_3), plain_15_3, sizeof(plain_15_3), secret_15_3},
@@ -181125,7 +181064,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 15 */
 
 #if MAXIMUM_PLAIN_BYTES >= 16
-    {key_16_0, sizeof(key_16_0), plain_16_0, sizeof(plain_16_0), secret_16_0},
+    {key_16_0, 0, plain_16_0, sizeof(plain_16_0), secret_16_0},
     {key_16_1, sizeof(key_16_1), plain_16_1, sizeof(plain_16_1), secret_16_1},
     {key_16_2, sizeof(key_16_2), plain_16_2, sizeof(plain_16_2), secret_16_2},
     {key_16_3, sizeof(key_16_3), plain_16_3, sizeof(plain_16_3), secret_16_3},
@@ -181258,7 +181197,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 16 */
 
 #if MAXIMUM_PLAIN_BYTES >= 17
-    {key_17_0, sizeof(key_17_0), plain_17_0, sizeof(plain_17_0), secret_17_0},
+    {key_17_0, 0, plain_17_0, sizeof(plain_17_0), secret_17_0},
     {key_17_1, sizeof(key_17_1), plain_17_1, sizeof(plain_17_1), secret_17_1},
     {key_17_2, sizeof(key_17_2), plain_17_2, sizeof(plain_17_2), secret_17_2},
     {key_17_3, sizeof(key_17_3), plain_17_3, sizeof(plain_17_3), secret_17_3},
@@ -181391,7 +181330,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 17 */
 
 #if MAXIMUM_PLAIN_BYTES >= 18
-    {key_18_0, sizeof(key_18_0), plain_18_0, sizeof(plain_18_0), secret_18_0},
+    {key_18_0, 0, plain_18_0, sizeof(plain_18_0), secret_18_0},
     {key_18_1, sizeof(key_18_1), plain_18_1, sizeof(plain_18_1), secret_18_1},
     {key_18_2, sizeof(key_18_2), plain_18_2, sizeof(plain_18_2), secret_18_2},
     {key_18_3, sizeof(key_18_3), plain_18_3, sizeof(plain_18_3), secret_18_3},
@@ -181524,7 +181463,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 18 */
 
 #if MAXIMUM_PLAIN_BYTES >= 19
-    {key_19_0, sizeof(key_19_0), plain_19_0, sizeof(plain_19_0), secret_19_0},
+    {key_19_0, 0, plain_19_0, sizeof(plain_19_0), secret_19_0},
     {key_19_1, sizeof(key_19_1), plain_19_1, sizeof(plain_19_1), secret_19_1},
     {key_19_2, sizeof(key_19_2), plain_19_2, sizeof(plain_19_2), secret_19_2},
     {key_19_3, sizeof(key_19_3), plain_19_3, sizeof(plain_19_3), secret_19_3},
@@ -181657,7 +181596,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 19 */
 
 #if MAXIMUM_PLAIN_BYTES >= 20
-    {key_20_0, sizeof(key_20_0), plain_20_0, sizeof(plain_20_0), secret_20_0},
+    {key_20_0, 0, plain_20_0, sizeof(plain_20_0), secret_20_0},
     {key_20_1, sizeof(key_20_1), plain_20_1, sizeof(plain_20_1), secret_20_1},
     {key_20_2, sizeof(key_20_2), plain_20_2, sizeof(plain_20_2), secret_20_2},
     {key_20_3, sizeof(key_20_3), plain_20_3, sizeof(plain_20_3), secret_20_3},
@@ -181790,7 +181729,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 20 */
 
 #if MAXIMUM_PLAIN_BYTES >= 21
-    {key_21_0, sizeof(key_21_0), plain_21_0, sizeof(plain_21_0), secret_21_0},
+    {key_21_0, 0, plain_21_0, sizeof(plain_21_0), secret_21_0},
     {key_21_1, sizeof(key_21_1), plain_21_1, sizeof(plain_21_1), secret_21_1},
     {key_21_2, sizeof(key_21_2), plain_21_2, sizeof(plain_21_2), secret_21_2},
     {key_21_3, sizeof(key_21_3), plain_21_3, sizeof(plain_21_3), secret_21_3},
@@ -181923,7 +181862,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 21 */
 
 #if MAXIMUM_PLAIN_BYTES >= 22
-    {key_22_0, sizeof(key_22_0), plain_22_0, sizeof(plain_22_0), secret_22_0},
+    {key_22_0, 0, plain_22_0, sizeof(plain_22_0), secret_22_0},
     {key_22_1, sizeof(key_22_1), plain_22_1, sizeof(plain_22_1), secret_22_1},
     {key_22_2, sizeof(key_22_2), plain_22_2, sizeof(plain_22_2), secret_22_2},
     {key_22_3, sizeof(key_22_3), plain_22_3, sizeof(plain_22_3), secret_22_3},
@@ -182056,7 +181995,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 22 */
 
 #if MAXIMUM_PLAIN_BYTES >= 23
-    {key_23_0, sizeof(key_23_0), plain_23_0, sizeof(plain_23_0), secret_23_0},
+    {key_23_0, 0, plain_23_0, sizeof(plain_23_0), secret_23_0},
     {key_23_1, sizeof(key_23_1), plain_23_1, sizeof(plain_23_1), secret_23_1},
     {key_23_2, sizeof(key_23_2), plain_23_2, sizeof(plain_23_2), secret_23_2},
     {key_23_3, sizeof(key_23_3), plain_23_3, sizeof(plain_23_3), secret_23_3},
@@ -182189,7 +182128,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 23 */
 
 #if MAXIMUM_PLAIN_BYTES >= 24
-    {key_24_0, sizeof(key_24_0), plain_24_0, sizeof(plain_24_0), secret_24_0},
+    {key_24_0, 0, plain_24_0, sizeof(plain_24_0), secret_24_0},
     {key_24_1, sizeof(key_24_1), plain_24_1, sizeof(plain_24_1), secret_24_1},
     {key_24_2, sizeof(key_24_2), plain_24_2, sizeof(plain_24_2), secret_24_2},
     {key_24_3, sizeof(key_24_3), plain_24_3, sizeof(plain_24_3), secret_24_3},
@@ -182322,7 +182261,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 24 */
 
 #if MAXIMUM_PLAIN_BYTES >= 25
-    {key_25_0, sizeof(key_25_0), plain_25_0, sizeof(plain_25_0), secret_25_0},
+    {key_25_0, 0, plain_25_0, sizeof(plain_25_0), secret_25_0},
     {key_25_1, sizeof(key_25_1), plain_25_1, sizeof(plain_25_1), secret_25_1},
     {key_25_2, sizeof(key_25_2), plain_25_2, sizeof(plain_25_2), secret_25_2},
     {key_25_3, sizeof(key_25_3), plain_25_3, sizeof(plain_25_3), secret_25_3},
@@ -182455,7 +182394,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 25 */
 
 #if MAXIMUM_PLAIN_BYTES >= 26
-    {key_26_0, sizeof(key_26_0), plain_26_0, sizeof(plain_26_0), secret_26_0},
+    {key_26_0, 0, plain_26_0, sizeof(plain_26_0), secret_26_0},
     {key_26_1, sizeof(key_26_1), plain_26_1, sizeof(plain_26_1), secret_26_1},
     {key_26_2, sizeof(key_26_2), plain_26_2, sizeof(plain_26_2), secret_26_2},
     {key_26_3, sizeof(key_26_3), plain_26_3, sizeof(plain_26_3), secret_26_3},
@@ -182588,7 +182527,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 26 */
 
 #if MAXIMUM_PLAIN_BYTES >= 27
-    {key_27_0, sizeof(key_27_0), plain_27_0, sizeof(plain_27_0), secret_27_0},
+    {key_27_0, 0, plain_27_0, sizeof(plain_27_0), secret_27_0},
     {key_27_1, sizeof(key_27_1), plain_27_1, sizeof(plain_27_1), secret_27_1},
     {key_27_2, sizeof(key_27_2), plain_27_2, sizeof(plain_27_2), secret_27_2},
     {key_27_3, sizeof(key_27_3), plain_27_3, sizeof(plain_27_3), secret_27_3},
@@ -182721,7 +182660,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 27 */
 
 #if MAXIMUM_PLAIN_BYTES >= 28
-    {key_28_0, sizeof(key_28_0), plain_28_0, sizeof(plain_28_0), secret_28_0},
+    {key_28_0, 0, plain_28_0, sizeof(plain_28_0), secret_28_0},
     {key_28_1, sizeof(key_28_1), plain_28_1, sizeof(plain_28_1), secret_28_1},
     {key_28_2, sizeof(key_28_2), plain_28_2, sizeof(plain_28_2), secret_28_2},
     {key_28_3, sizeof(key_28_3), plain_28_3, sizeof(plain_28_3), secret_28_3},
@@ -182854,7 +182793,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 28 */
 
 #if MAXIMUM_PLAIN_BYTES >= 29
-    {key_29_0, sizeof(key_29_0), plain_29_0, sizeof(plain_29_0), secret_29_0},
+    {key_29_0, 0, plain_29_0, sizeof(plain_29_0), secret_29_0},
     {key_29_1, sizeof(key_29_1), plain_29_1, sizeof(plain_29_1), secret_29_1},
     {key_29_2, sizeof(key_29_2), plain_29_2, sizeof(plain_29_2), secret_29_2},
     {key_29_3, sizeof(key_29_3), plain_29_3, sizeof(plain_29_3), secret_29_3},
@@ -182987,7 +182926,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 29 */
 
 #if MAXIMUM_PLAIN_BYTES >= 30
-    {key_30_0, sizeof(key_30_0), plain_30_0, sizeof(plain_30_0), secret_30_0},
+    {key_30_0, 0, plain_30_0, sizeof(plain_30_0), secret_30_0},
     {key_30_1, sizeof(key_30_1), plain_30_1, sizeof(plain_30_1), secret_30_1},
     {key_30_2, sizeof(key_30_2), plain_30_2, sizeof(plain_30_2), secret_30_2},
     {key_30_3, sizeof(key_30_3), plain_30_3, sizeof(plain_30_3), secret_30_3},
@@ -183120,7 +183059,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 30 */
 
 #if MAXIMUM_PLAIN_BYTES >= 31
-    {key_31_0, sizeof(key_31_0), plain_31_0, sizeof(plain_31_0), secret_31_0},
+    {key_31_0, 0, plain_31_0, sizeof(plain_31_0), secret_31_0},
     {key_31_1, sizeof(key_31_1), plain_31_1, sizeof(plain_31_1), secret_31_1},
     {key_31_2, sizeof(key_31_2), plain_31_2, sizeof(plain_31_2), secret_31_2},
     {key_31_3, sizeof(key_31_3), plain_31_3, sizeof(plain_31_3), secret_31_3},
@@ -183253,7 +183192,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 31 */
 
 #if MAXIMUM_PLAIN_BYTES >= 32
-    {key_32_0, sizeof(key_32_0), plain_32_0, sizeof(plain_32_0), secret_32_0},
+    {key_32_0, 0, plain_32_0, sizeof(plain_32_0), secret_32_0},
     {key_32_1, sizeof(key_32_1), plain_32_1, sizeof(plain_32_1), secret_32_1},
     {key_32_2, sizeof(key_32_2), plain_32_2, sizeof(plain_32_2), secret_32_2},
     {key_32_3, sizeof(key_32_3), plain_32_3, sizeof(plain_32_3), secret_32_3},
@@ -183386,7 +183325,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 32 */
 
 #if MAXIMUM_PLAIN_BYTES >= 33
-    {key_33_0, sizeof(key_33_0), plain_33_0, sizeof(plain_33_0), secret_33_0},
+    {key_33_0, 0, plain_33_0, sizeof(plain_33_0), secret_33_0},
     {key_33_1, sizeof(key_33_1), plain_33_1, sizeof(plain_33_1), secret_33_1},
     {key_33_2, sizeof(key_33_2), plain_33_2, sizeof(plain_33_2), secret_33_2},
     {key_33_3, sizeof(key_33_3), plain_33_3, sizeof(plain_33_3), secret_33_3},
@@ -183519,7 +183458,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 33 */
 
 #if MAXIMUM_PLAIN_BYTES >= 34
-    {key_34_0, sizeof(key_34_0), plain_34_0, sizeof(plain_34_0), secret_34_0},
+    {key_34_0, 0, plain_34_0, sizeof(plain_34_0), secret_34_0},
     {key_34_1, sizeof(key_34_1), plain_34_1, sizeof(plain_34_1), secret_34_1},
     {key_34_2, sizeof(key_34_2), plain_34_2, sizeof(plain_34_2), secret_34_2},
     {key_34_3, sizeof(key_34_3), plain_34_3, sizeof(plain_34_3), secret_34_3},
@@ -183652,7 +183591,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 34 */
 
 #if MAXIMUM_PLAIN_BYTES >= 35
-    {key_35_0, sizeof(key_35_0), plain_35_0, sizeof(plain_35_0), secret_35_0},
+    {key_35_0, 0, plain_35_0, sizeof(plain_35_0), secret_35_0},
     {key_35_1, sizeof(key_35_1), plain_35_1, sizeof(plain_35_1), secret_35_1},
     {key_35_2, sizeof(key_35_2), plain_35_2, sizeof(plain_35_2), secret_35_2},
     {key_35_3, sizeof(key_35_3), plain_35_3, sizeof(plain_35_3), secret_35_3},
@@ -183785,7 +183724,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 35 */
 
 #if MAXIMUM_PLAIN_BYTES >= 36
-    {key_36_0, sizeof(key_36_0), plain_36_0, sizeof(plain_36_0), secret_36_0},
+    {key_36_0, 0, plain_36_0, sizeof(plain_36_0), secret_36_0},
     {key_36_1, sizeof(key_36_1), plain_36_1, sizeof(plain_36_1), secret_36_1},
     {key_36_2, sizeof(key_36_2), plain_36_2, sizeof(plain_36_2), secret_36_2},
     {key_36_3, sizeof(key_36_3), plain_36_3, sizeof(plain_36_3), secret_36_3},
@@ -183918,7 +183857,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 36 */
 
 #if MAXIMUM_PLAIN_BYTES >= 37
-    {key_37_0, sizeof(key_37_0), plain_37_0, sizeof(plain_37_0), secret_37_0},
+    {key_37_0, 0, plain_37_0, sizeof(plain_37_0), secret_37_0},
     {key_37_1, sizeof(key_37_1), plain_37_1, sizeof(plain_37_1), secret_37_1},
     {key_37_2, sizeof(key_37_2), plain_37_2, sizeof(plain_37_2), secret_37_2},
     {key_37_3, sizeof(key_37_3), plain_37_3, sizeof(plain_37_3), secret_37_3},
@@ -184051,7 +183990,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 37 */
 
 #if MAXIMUM_PLAIN_BYTES >= 38
-    {key_38_0, sizeof(key_38_0), plain_38_0, sizeof(plain_38_0), secret_38_0},
+    {key_38_0, 0, plain_38_0, sizeof(plain_38_0), secret_38_0},
     {key_38_1, sizeof(key_38_1), plain_38_1, sizeof(plain_38_1), secret_38_1},
     {key_38_2, sizeof(key_38_2), plain_38_2, sizeof(plain_38_2), secret_38_2},
     {key_38_3, sizeof(key_38_3), plain_38_3, sizeof(plain_38_3), secret_38_3},
@@ -184184,7 +184123,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 38 */
 
 #if MAXIMUM_PLAIN_BYTES >= 39
-    {key_39_0, sizeof(key_39_0), plain_39_0, sizeof(plain_39_0), secret_39_0},
+    {key_39_0, 0, plain_39_0, sizeof(plain_39_0), secret_39_0},
     {key_39_1, sizeof(key_39_1), plain_39_1, sizeof(plain_39_1), secret_39_1},
     {key_39_2, sizeof(key_39_2), plain_39_2, sizeof(plain_39_2), secret_39_2},
     {key_39_3, sizeof(key_39_3), plain_39_3, sizeof(plain_39_3), secret_39_3},
@@ -184317,7 +184256,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 39 */
 
 #if MAXIMUM_PLAIN_BYTES >= 40
-    {key_40_0, sizeof(key_40_0), plain_40_0, sizeof(plain_40_0), secret_40_0},
+    {key_40_0, 0, plain_40_0, sizeof(plain_40_0), secret_40_0},
     {key_40_1, sizeof(key_40_1), plain_40_1, sizeof(plain_40_1), secret_40_1},
     {key_40_2, sizeof(key_40_2), plain_40_2, sizeof(plain_40_2), secret_40_2},
     {key_40_3, sizeof(key_40_3), plain_40_3, sizeof(plain_40_3), secret_40_3},
@@ -184450,7 +184389,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 40 */
 
 #if MAXIMUM_PLAIN_BYTES >= 41
-    {key_41_0, sizeof(key_41_0), plain_41_0, sizeof(plain_41_0), secret_41_0},
+    {key_41_0, 0, plain_41_0, sizeof(plain_41_0), secret_41_0},
     {key_41_1, sizeof(key_41_1), plain_41_1, sizeof(plain_41_1), secret_41_1},
     {key_41_2, sizeof(key_41_2), plain_41_2, sizeof(plain_41_2), secret_41_2},
     {key_41_3, sizeof(key_41_3), plain_41_3, sizeof(plain_41_3), secret_41_3},
@@ -184583,7 +184522,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 41 */
 
 #if MAXIMUM_PLAIN_BYTES >= 42
-    {key_42_0, sizeof(key_42_0), plain_42_0, sizeof(plain_42_0), secret_42_0},
+    {key_42_0, 0, plain_42_0, sizeof(plain_42_0), secret_42_0},
     {key_42_1, sizeof(key_42_1), plain_42_1, sizeof(plain_42_1), secret_42_1},
     {key_42_2, sizeof(key_42_2), plain_42_2, sizeof(plain_42_2), secret_42_2},
     {key_42_3, sizeof(key_42_3), plain_42_3, sizeof(plain_42_3), secret_42_3},
@@ -184716,7 +184655,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 42 */
 
 #if MAXIMUM_PLAIN_BYTES >= 43
-    {key_43_0, sizeof(key_43_0), plain_43_0, sizeof(plain_43_0), secret_43_0},
+    {key_43_0, 0, plain_43_0, sizeof(plain_43_0), secret_43_0},
     {key_43_1, sizeof(key_43_1), plain_43_1, sizeof(plain_43_1), secret_43_1},
     {key_43_2, sizeof(key_43_2), plain_43_2, sizeof(plain_43_2), secret_43_2},
     {key_43_3, sizeof(key_43_3), plain_43_3, sizeof(plain_43_3), secret_43_3},
@@ -184849,7 +184788,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 43 */
 
 #if MAXIMUM_PLAIN_BYTES >= 44
-    {key_44_0, sizeof(key_44_0), plain_44_0, sizeof(plain_44_0), secret_44_0},
+    {key_44_0, 0, plain_44_0, sizeof(plain_44_0), secret_44_0},
     {key_44_1, sizeof(key_44_1), plain_44_1, sizeof(plain_44_1), secret_44_1},
     {key_44_2, sizeof(key_44_2), plain_44_2, sizeof(plain_44_2), secret_44_2},
     {key_44_3, sizeof(key_44_3), plain_44_3, sizeof(plain_44_3), secret_44_3},
@@ -184982,7 +184921,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 44 */
 
 #if MAXIMUM_PLAIN_BYTES >= 45
-    {key_45_0, sizeof(key_45_0), plain_45_0, sizeof(plain_45_0), secret_45_0},
+    {key_45_0, 0, plain_45_0, sizeof(plain_45_0), secret_45_0},
     {key_45_1, sizeof(key_45_1), plain_45_1, sizeof(plain_45_1), secret_45_1},
     {key_45_2, sizeof(key_45_2), plain_45_2, sizeof(plain_45_2), secret_45_2},
     {key_45_3, sizeof(key_45_3), plain_45_3, sizeof(plain_45_3), secret_45_3},
@@ -185115,7 +185054,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 45 */
 
 #if MAXIMUM_PLAIN_BYTES >= 46
-    {key_46_0, sizeof(key_46_0), plain_46_0, sizeof(plain_46_0), secret_46_0},
+    {key_46_0, 0, plain_46_0, sizeof(plain_46_0), secret_46_0},
     {key_46_1, sizeof(key_46_1), plain_46_1, sizeof(plain_46_1), secret_46_1},
     {key_46_2, sizeof(key_46_2), plain_46_2, sizeof(plain_46_2), secret_46_2},
     {key_46_3, sizeof(key_46_3), plain_46_3, sizeof(plain_46_3), secret_46_3},
@@ -185248,7 +185187,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 46 */
 
 #if MAXIMUM_PLAIN_BYTES >= 47
-    {key_47_0, sizeof(key_47_0), plain_47_0, sizeof(plain_47_0), secret_47_0},
+    {key_47_0, 0, plain_47_0, sizeof(plain_47_0), secret_47_0},
     {key_47_1, sizeof(key_47_1), plain_47_1, sizeof(plain_47_1), secret_47_1},
     {key_47_2, sizeof(key_47_2), plain_47_2, sizeof(plain_47_2), secret_47_2},
     {key_47_3, sizeof(key_47_3), plain_47_3, sizeof(plain_47_3), secret_47_3},
@@ -185381,7 +185320,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 47 */
 
 #if MAXIMUM_PLAIN_BYTES >= 48
-    {key_48_0, sizeof(key_48_0), plain_48_0, sizeof(plain_48_0), secret_48_0},
+    {key_48_0, 0, plain_48_0, sizeof(plain_48_0), secret_48_0},
     {key_48_1, sizeof(key_48_1), plain_48_1, sizeof(plain_48_1), secret_48_1},
     {key_48_2, sizeof(key_48_2), plain_48_2, sizeof(plain_48_2), secret_48_2},
     {key_48_3, sizeof(key_48_3), plain_48_3, sizeof(plain_48_3), secret_48_3},
@@ -185514,7 +185453,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 48 */
 
 #if MAXIMUM_PLAIN_BYTES >= 49
-    {key_49_0, sizeof(key_49_0), plain_49_0, sizeof(plain_49_0), secret_49_0},
+    {key_49_0, 0, plain_49_0, sizeof(plain_49_0), secret_49_0},
     {key_49_1, sizeof(key_49_1), plain_49_1, sizeof(plain_49_1), secret_49_1},
     {key_49_2, sizeof(key_49_2), plain_49_2, sizeof(plain_49_2), secret_49_2},
     {key_49_3, sizeof(key_49_3), plain_49_3, sizeof(plain_49_3), secret_49_3},
@@ -185647,7 +185586,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 49 */
 
 #if MAXIMUM_PLAIN_BYTES >= 50
-    {key_50_0, sizeof(key_50_0), plain_50_0, sizeof(plain_50_0), secret_50_0},
+    {key_50_0, 0, plain_50_0, sizeof(plain_50_0), secret_50_0},
     {key_50_1, sizeof(key_50_1), plain_50_1, sizeof(plain_50_1), secret_50_1},
     {key_50_2, sizeof(key_50_2), plain_50_2, sizeof(plain_50_2), secret_50_2},
     {key_50_3, sizeof(key_50_3), plain_50_3, sizeof(plain_50_3), secret_50_3},
@@ -185780,7 +185719,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 50 */
 
 #if MAXIMUM_PLAIN_BYTES >= 51
-    {key_51_0, sizeof(key_51_0), plain_51_0, sizeof(plain_51_0), secret_51_0},
+    {key_51_0, 0, plain_51_0, sizeof(plain_51_0), secret_51_0},
     {key_51_1, sizeof(key_51_1), plain_51_1, sizeof(plain_51_1), secret_51_1},
     {key_51_2, sizeof(key_51_2), plain_51_2, sizeof(plain_51_2), secret_51_2},
     {key_51_3, sizeof(key_51_3), plain_51_3, sizeof(plain_51_3), secret_51_3},
@@ -185913,7 +185852,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 51 */
 
 #if MAXIMUM_PLAIN_BYTES >= 52
-    {key_52_0, sizeof(key_52_0), plain_52_0, sizeof(plain_52_0), secret_52_0},
+    {key_52_0, 0, plain_52_0, sizeof(plain_52_0), secret_52_0},
     {key_52_1, sizeof(key_52_1), plain_52_1, sizeof(plain_52_1), secret_52_1},
     {key_52_2, sizeof(key_52_2), plain_52_2, sizeof(plain_52_2), secret_52_2},
     {key_52_3, sizeof(key_52_3), plain_52_3, sizeof(plain_52_3), secret_52_3},
@@ -186046,7 +185985,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 52 */
 
 #if MAXIMUM_PLAIN_BYTES >= 53
-    {key_53_0, sizeof(key_53_0), plain_53_0, sizeof(plain_53_0), secret_53_0},
+    {key_53_0, 0, plain_53_0, sizeof(plain_53_0), secret_53_0},
     {key_53_1, sizeof(key_53_1), plain_53_1, sizeof(plain_53_1), secret_53_1},
     {key_53_2, sizeof(key_53_2), plain_53_2, sizeof(plain_53_2), secret_53_2},
     {key_53_3, sizeof(key_53_3), plain_53_3, sizeof(plain_53_3), secret_53_3},
@@ -186179,7 +186118,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 53 */
 
 #if MAXIMUM_PLAIN_BYTES >= 54
-    {key_54_0, sizeof(key_54_0), plain_54_0, sizeof(plain_54_0), secret_54_0},
+    {key_54_0, 0, plain_54_0, sizeof(plain_54_0), secret_54_0},
     {key_54_1, sizeof(key_54_1), plain_54_1, sizeof(plain_54_1), secret_54_1},
     {key_54_2, sizeof(key_54_2), plain_54_2, sizeof(plain_54_2), secret_54_2},
     {key_54_3, sizeof(key_54_3), plain_54_3, sizeof(plain_54_3), secret_54_3},
@@ -186312,7 +186251,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 54 */
 
 #if MAXIMUM_PLAIN_BYTES >= 55
-    {key_55_0, sizeof(key_55_0), plain_55_0, sizeof(plain_55_0), secret_55_0},
+    {key_55_0, 0, plain_55_0, sizeof(plain_55_0), secret_55_0},
     {key_55_1, sizeof(key_55_1), plain_55_1, sizeof(plain_55_1), secret_55_1},
     {key_55_2, sizeof(key_55_2), plain_55_2, sizeof(plain_55_2), secret_55_2},
     {key_55_3, sizeof(key_55_3), plain_55_3, sizeof(plain_55_3), secret_55_3},
@@ -186445,7 +186384,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 55 */
 
 #if MAXIMUM_PLAIN_BYTES >= 56
-    {key_56_0, sizeof(key_56_0), plain_56_0, sizeof(plain_56_0), secret_56_0},
+    {key_56_0, 0, plain_56_0, sizeof(plain_56_0), secret_56_0},
     {key_56_1, sizeof(key_56_1), plain_56_1, sizeof(plain_56_1), secret_56_1},
     {key_56_2, sizeof(key_56_2), plain_56_2, sizeof(plain_56_2), secret_56_2},
     {key_56_3, sizeof(key_56_3), plain_56_3, sizeof(plain_56_3), secret_56_3},
@@ -186578,7 +186517,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 56 */
 
 #if MAXIMUM_PLAIN_BYTES >= 57
-    {key_57_0, sizeof(key_57_0), plain_57_0, sizeof(plain_57_0), secret_57_0},
+    {key_57_0, 0, plain_57_0, sizeof(plain_57_0), secret_57_0},
     {key_57_1, sizeof(key_57_1), plain_57_1, sizeof(plain_57_1), secret_57_1},
     {key_57_2, sizeof(key_57_2), plain_57_2, sizeof(plain_57_2), secret_57_2},
     {key_57_3, sizeof(key_57_3), plain_57_3, sizeof(plain_57_3), secret_57_3},
@@ -186711,7 +186650,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 57 */
 
 #if MAXIMUM_PLAIN_BYTES >= 58
-    {key_58_0, sizeof(key_58_0), plain_58_0, sizeof(plain_58_0), secret_58_0},
+    {key_58_0, 0, plain_58_0, sizeof(plain_58_0), secret_58_0},
     {key_58_1, sizeof(key_58_1), plain_58_1, sizeof(plain_58_1), secret_58_1},
     {key_58_2, sizeof(key_58_2), plain_58_2, sizeof(plain_58_2), secret_58_2},
     {key_58_3, sizeof(key_58_3), plain_58_3, sizeof(plain_58_3), secret_58_3},
@@ -186844,7 +186783,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 58 */
 
 #if MAXIMUM_PLAIN_BYTES >= 59
-    {key_59_0, sizeof(key_59_0), plain_59_0, sizeof(plain_59_0), secret_59_0},
+    {key_59_0, 0, plain_59_0, sizeof(plain_59_0), secret_59_0},
     {key_59_1, sizeof(key_59_1), plain_59_1, sizeof(plain_59_1), secret_59_1},
     {key_59_2, sizeof(key_59_2), plain_59_2, sizeof(plain_59_2), secret_59_2},
     {key_59_3, sizeof(key_59_3), plain_59_3, sizeof(plain_59_3), secret_59_3},
@@ -186977,7 +186916,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 59 */
 
 #if MAXIMUM_PLAIN_BYTES >= 60
-    {key_60_0, sizeof(key_60_0), plain_60_0, sizeof(plain_60_0), secret_60_0},
+    {key_60_0, 0, plain_60_0, sizeof(plain_60_0), secret_60_0},
     {key_60_1, sizeof(key_60_1), plain_60_1, sizeof(plain_60_1), secret_60_1},
     {key_60_2, sizeof(key_60_2), plain_60_2, sizeof(plain_60_2), secret_60_2},
     {key_60_3, sizeof(key_60_3), plain_60_3, sizeof(plain_60_3), secret_60_3},
@@ -187110,7 +187049,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 60 */
 
 #if MAXIMUM_PLAIN_BYTES >= 61
-    {key_61_0, sizeof(key_61_0), plain_61_0, sizeof(plain_61_0), secret_61_0},
+    {key_61_0, 0, plain_61_0, sizeof(plain_61_0), secret_61_0},
     {key_61_1, sizeof(key_61_1), plain_61_1, sizeof(plain_61_1), secret_61_1},
     {key_61_2, sizeof(key_61_2), plain_61_2, sizeof(plain_61_2), secret_61_2},
     {key_61_3, sizeof(key_61_3), plain_61_3, sizeof(plain_61_3), secret_61_3},
@@ -187243,7 +187182,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 61 */
 
 #if MAXIMUM_PLAIN_BYTES >= 62
-    {key_62_0, sizeof(key_62_0), plain_62_0, sizeof(plain_62_0), secret_62_0},
+    {key_62_0, 0, plain_62_0, sizeof(plain_62_0), secret_62_0},
     {key_62_1, sizeof(key_62_1), plain_62_1, sizeof(plain_62_1), secret_62_1},
     {key_62_2, sizeof(key_62_2), plain_62_2, sizeof(plain_62_2), secret_62_2},
     {key_62_3, sizeof(key_62_3), plain_62_3, sizeof(plain_62_3), secret_62_3},
@@ -187376,7 +187315,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 62 */
 
 #if MAXIMUM_PLAIN_BYTES >= 63
-    {key_63_0, sizeof(key_63_0), plain_63_0, sizeof(plain_63_0), secret_63_0},
+    {key_63_0, 0, plain_63_0, sizeof(plain_63_0), secret_63_0},
     {key_63_1, sizeof(key_63_1), plain_63_1, sizeof(plain_63_1), secret_63_1},
     {key_63_2, sizeof(key_63_2), plain_63_2, sizeof(plain_63_2), secret_63_2},
     {key_63_3, sizeof(key_63_3), plain_63_3, sizeof(plain_63_3), secret_63_3},
@@ -187509,7 +187448,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 63 */
 
 #if MAXIMUM_PLAIN_BYTES >= 64
-    {key_64_0, sizeof(key_64_0), plain_64_0, sizeof(plain_64_0), secret_64_0},
+    {key_64_0, 0, plain_64_0, sizeof(plain_64_0), secret_64_0},
     {key_64_1, sizeof(key_64_1), plain_64_1, sizeof(plain_64_1), secret_64_1},
     {key_64_2, sizeof(key_64_2), plain_64_2, sizeof(plain_64_2), secret_64_2},
     {key_64_3, sizeof(key_64_3), plain_64_3, sizeof(plain_64_3), secret_64_3},
@@ -187642,7 +187581,7 @@ HMAC_SHA512_DATA hmac_sha512_data[] =
 #endif /* MAXIMUM_PLAIN_BYTES >= 64 */
 
 #if MAXIMUM_PLAIN_BYTES >= 65
-    {key_65_0, sizeof(key_65_0), plain_65_0, sizeof(plain_65_0), secret_65_0},
+    {key_65_0, 0, plain_65_0, sizeof(plain_65_0), secret_65_0},
     {key_65_1, sizeof(key_65_1), plain_65_1, sizeof(plain_65_1), secret_65_1},
     {key_65_2, sizeof(key_65_2), plain_65_2, sizeof(plain_65_2), secret_65_2},
     {key_65_3, sizeof(key_65_3), plain_65_3, sizeof(plain_65_3), secret_65_3},

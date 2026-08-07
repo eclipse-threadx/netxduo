@@ -551,7 +551,7 @@ NX_CRYPTO_METHOD test_method;
     test_crypto_method_aes.nx_crypto_algorithm = NX_CRYPTO_AUTHENTICATION_AES_XCBC_MAC_96;
     status = _nx_crypto_method_aes_operation(0, NX_CRYPTO_NULL,
                                              &test_crypto_method_aes,
-                                             key_cbc_128_1, sizeof(key_cbc_128_1), /* key */
+                                             key_cbc_128_1, sizeof(key_cbc_128_1) << 3, /* key (size in bits) */
                                              test_plain, sizeof(test_plain), /* input */
                                              iv_cbc_128_0,
                                              output, sizeof(output),

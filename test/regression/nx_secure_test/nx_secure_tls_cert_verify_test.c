@@ -305,7 +305,7 @@ USHORT priority;
 
     nx_system_initialize();
 
-    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((int)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
+    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((ALIGN_TYPE)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
     EXPECT_EQ(NX_SUCCESS, status);
 
     status = _nx_secure_tls_session_reset(&session);
@@ -525,7 +525,7 @@ USHORT priority;
 
     nx_system_initialize();
 
-    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((int)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
+    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((ALIGN_TYPE)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
     EXPECT_EQ(NX_SUCCESS, status);
 
     status = _nx_secure_tls_session_reset(&session);
@@ -679,7 +679,7 @@ UINT set_type = 0;
 
         nx_system_initialize();
 
-        status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((int)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
+        status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((ALIGN_TYPE)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
         EXPECT_EQ(NX_SUCCESS, status);
 
         status = _nx_secure_tls_session_reset(&session);
@@ -865,7 +865,7 @@ USHORT priority;
 
     nx_system_initialize();
 
-    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((int)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
+    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((ALIGN_TYPE)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
     EXPECT_EQ(NX_SUCCESS, status);
 
     status = _nx_secure_tls_session_reset(&session);
@@ -1092,7 +1092,7 @@ UINT tmp_type;
 for (int i = 0; i < 10; i++) {
       nx_system_initialize();
 
-      status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((int)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
+      status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((ALIGN_TYPE)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
       EXPECT_EQ(NX_SUCCESS, status);
 
       status = _nx_secure_tls_session_reset(&session);
@@ -1312,7 +1312,7 @@ VOID *tmp_ptr;
   for (int i = 0; i < 7; i++) {
       nx_system_initialize();
 
-      status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((int)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
+      status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 1536,  (ULONG*)(((ALIGN_TYPE)packet_pool_area + 64) & ~63) , NX_PACKET_POOL_SIZE);
       EXPECT_EQ(NX_SUCCESS, status);
 
       status = _nx_secure_tls_session_reset(&session);

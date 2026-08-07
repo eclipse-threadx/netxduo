@@ -27,7 +27,16 @@ extern VOID    test_control_return(UINT status);
 #define ARP_CACHE_SIZE              1024
 #define BUFFER_SIZE                 64
 #define METADATA_SIZE               16000
+/* NX_SECURE_X509_CERT holds several pointers, so its size (and therefore the
+   per-certificate overhead stored in these working buffers) is larger on 64-bit
+   targets.  The upstream 2048-byte buffer is calibrated for 32-bit builds and
+   overflows into NX_SECURE_TLS_INSUFFICIENT_CERT_SPACE on LLP64/LP64; double it
+   there.  32-bit builds (Linux -m32, win32) are unchanged. */
+#if defined(_WIN64) || defined(__LP64__) || defined(_LP64)
+#define CERT_BUFFER_SIZE            4096
+#else
 #define CERT_BUFFER_SIZE            2048
+#endif
 #define SERVER_PORT                 4433
 
 /* Number of DTLS sessions to apply to DTLS server. */

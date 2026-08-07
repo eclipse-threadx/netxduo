@@ -146,6 +146,18 @@ static NX_SECURE_TLS_CIPHERSUITE_INFO _nx_crypto_ciphersuite_lookup_table_all[] 
 //    {TLS_RSA_WITH_NULL_MD5,                   &crypto_method_rsa,       &crypto_method_rsa,       &crypto_method_null,            0,       0,         &crypto_method_hmac_md5,        16,        &crypto_method_tls_prf_sha256},
 };
 
+/* On MSVC (c2) a zero-length array raises internal compiler error C1001.  In
+   configurations where every ciphersuite below is compiled out (TLS 1.3 with
+   PSK, AEAD and ECC all enabled) the array becomes empty, so add a single
+   sentinel element and keep the effective count at 0 (see CIPHERSUITE_COUNT)
+   so the test still reports N/A exactly as before. */
+#if defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) && \
+    defined(NX_SECURE_ENABLE_AEAD_CIPHER) && \
+    defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && \
+    (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#define CIPHERSUITES_EMPTY
+#endif
+
 static UINT ciphersuites[] =
 {
 #ifndef NX_SECURE_ENABLE_PSK_CIPHERSUITES
@@ -171,7 +183,16 @@ static UINT ciphersuites[] =
     TLS_AES_128_GCM_SHA256,
 #endif /* !(NX_SECURE_TLS_TLS_1_3_ENABLED) */
 
+#ifdef CIPHERSUITES_EMPTY
+    0  /* unused sentinel; CIPHERSUITE_COUNT stays 0 */
+#endif
 };
+
+#ifdef CIPHERSUITES_EMPTY
+#define CIPHERSUITE_COUNT 0
+#else
+#define CIPHERSUITE_COUNT (sizeof(ciphersuites) / sizeof(UINT))
+#endif
 
 /* Define thread prototypes.  */
 
@@ -385,7 +406,7 @@ ULONG response_length;
     /* Print out test information banner.  */
     printf("NetX Secure Test:   TLS Unsupported Ciphersuites Test..................");
 
-    if (sizeof(ciphersuites) == 0)
+    if (CIPHERSUITE_COUNT == 0)
     {
         
         printf("N/A\n");
@@ -406,7 +427,7 @@ ULONG response_length;
         ERROR_COUNTER(status);
     }
 
-    for (i = 0; i < sizeof(ciphersuites) / sizeof(UINT); i++)
+    for (i = 0; i < CIPHERSUITE_COUNT; i++)
     {
 
         /* Make sure client thread is ready. */
@@ -473,7 +494,7 @@ NXD_ADDRESS server_address;
         ERROR_COUNTER(status);
     }
 
-    for (i = 0; i < sizeof(ciphersuites) / sizeof(UINT); i++)
+    for (i = 0; i < CIPHERSUITE_COUNT; i++)
     {
 
         /* Let server thread run first. */
