@@ -24,7 +24,15 @@
         transcript bytes; keying the length to the signature scheme yields 48.
 
      2. Ciphersuite SHA-384, signature scheme SHA-384. Expect 48 transcript
-        bytes, which a hardcoded 32 would not produce. */
+        bytes, which a hardcoded 32 would not produce.
+
+   Configuration 2 is synthetic and cannot be run end to end today, so a passing test is not
+   evidence that SHA-384 ciphersuites work. No such TLS 1.3 suite is enabled
+   (crypto_libraries/src/nx_crypto_generic_ciphersuites.c:199), and NX_SECURE_TLS_MAX_HASH_SIZE
+   is 32, so a 48-byte transcript has nowhere to be stored: _nx_secure_tls_1_3_transcript_hash_save
+   would overrun its row of nx_secure_tls_transcript_hashes long before CertificateVerify is
+   reached. Enabling such a suite means growing that constant first, which is load-bearing for
+   the key schedule as well. This case covers the length derivation, nothing more. */
 
 #include "nx_api.h"
 #include "nx_secure_tls_api.h"
@@ -113,9 +121,8 @@ static NX_SECURE_X509_CRYPTO mismatched_hash_cipher_table[] =
     {NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_384,  &dummy_public_cipher_method,  &spy_hash_method_sha384},
 };
 
-/* Copy of TLS_AES_128_GCM_SHA256 with a SHA-384 hash, for configuration 2. Synthetic: no
-   SHA-384 TLS 1.3 ciphersuite is enabled today, and this exercises the length derivation
-   only -- it is not a claim that such a suite is usable. */
+/* Copy of TLS_AES_128_GCM_SHA256 with a SHA-384 hash, for configuration 2. See the header
+   comment for why this configuration is synthetic. */
 static NX_SECURE_TLS_CIPHERSUITE_INFO sha384_ciphersuite;
 
 /* Runs _nx_secure_tls_send_certificate_verify and asserts the transcript-hash length that
