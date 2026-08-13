@@ -96,6 +96,7 @@ void    netx_mqtt_client_connack_error_application_define(void *);
 void    netx_mqtt_client_branch_application_define(void *);
 void    netx_mqtt_websocket_non_block_test_application_define(void *);
 void    netx_mqtt_websocket_block_test_application_define(void *);
+void    netx_mqtt_tls_to_plain_reconnect_application_define(void *);
 #ifdef CTEST
 void    test_application_define(void *);
 #endif
@@ -142,6 +143,7 @@ TEST_ENTRY  test_control_tests[] =
     {netx_mqtt_client_branch_application_define, TEST_TIMEOUT_LOW},
     {netx_mqtt_websocket_non_block_test_application_define, TEST_TIMEOUT_LOW},
     {netx_mqtt_websocket_block_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_mqtt_tls_to_plain_reconnect_application_define, TEST_TIMEOUT_LOW},
 #endif /* CTEST */
 
     {TX_NULL, TEST_TIMEOUT_LOW},

@@ -40,7 +40,8 @@ set(mqtt_test_cases
     ${SOURCE_DIR}/mqtt_test/netx_mqtt_branch_test.c
     ${SOURCE_DIR}/mqtt_test/netx_mqtt_transmit_queue_depth_test.c
     ${SOURCE_DIR}/mqtt_test/netx_mqtt_websocket_non_block_test.c
-    ${SOURCE_DIR}/mqtt_test/netx_mqtt_websocket_block_test.c)
+    ${SOURCE_DIR}/mqtt_test/netx_mqtt_websocket_block_test.c
+    ${SOURCE_DIR}/mqtt_test/netx_mqtt_tls_to_plain_reconnect_test.c)
 
 set(test_utility_files
     ${SOURCE_DIR}/test/nx_ram_network_driver_test_1500.c
