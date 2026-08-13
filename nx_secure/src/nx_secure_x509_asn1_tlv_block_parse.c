@@ -125,12 +125,13 @@ ULONG  length;
 ULONG  length_bytes;
 
     current_index = 0;
-    current_tag = buffer[current_index];
 
     if (*buffer_length < 1)
     {
         return(NX_SECURE_X509_ASN1_LENGTH_TOO_LONG);
     }
+
+    current_tag = buffer[current_index];
 
     /*  Handle multi-byte encoded tags. */
     if ((current_tag & NX_SECURE_ASN_TAG_MULTIBYTE_MASK) == NX_SECURE_ASN_TAG_MULTIBYTE_MASK)
