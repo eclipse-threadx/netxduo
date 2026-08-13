@@ -13,6 +13,7 @@ set(web_test_cases
     ${SOURCE_DIR}/web_test/netx_web_head_basic_test.c
     ${SOURCE_DIR}/web_test/netx_web_post_basic_test.c
     ${SOURCE_DIR}/web_test/netx_web_put_basic_test.c
+    ${SOURCE_DIR}/web_test/netx_web_put_content_length_underflow_test.c
     ${SOURCE_DIR}/web_test/netx_web_delete_basic_test.c
     ${SOURCE_DIR}/web_test/netx_web_basic_authenticate_test.c
     ${SOURCE_DIR}/web_test/netx_web_if_modified_since_test.c
