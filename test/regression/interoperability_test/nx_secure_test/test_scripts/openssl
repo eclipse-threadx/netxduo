@@ -1,0 +1,121 @@
+#!/bin/bash
+##############################################################################
+# Copyright (c) 2026 Eclipse ThreadX contributors
+#
+# This program and the accompanying materials are made available under the
+# terms of the MIT License which is available at
+# https://opensource.org/licenses/MIT.
+#
+# SPDX-License-Identifier: MIT
+##############################################################################
+
+set -euo pipefail
+
+readonly OPENSSL_BIN="${NETXDUO_OPENSSL_BIN:-/opt/netxduo/openssl-3.5.7/bin/openssl}"
+readonly WOLFSSL_SERVER_BIN="${NETXDUO_WOLFSSL_SERVER_BIN:-/opt/netxduo/wolfssl-5.9.2/bin/wolfssl-server}"
+readonly WOLFSSL_HOME="${NETXDUO_WOLFSSL_HOME:-/opt/netxduo/wolfssl-5.9.2/share/wolfssl}"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+use_wolfssl=false
+for argument in "$@"; do
+    if [[ "${argument}" == "ECDH-ECDSA-AES128-SHA256" ]]; then
+        use_wolfssl=true
+        break
+    fi
+done
+
+if [[ "${1:-}" != "s_server" ]] || [[ "${use_wolfssl}" != true ]]; then
+    export OPENSSL_CONF="${SCRIPT_DIR}/openssl_interoperability.cnf"
+    exec "${OPENSSL_BIN}" "$@"
+fi
+
+wolfssl_arguments=(-b -e)
+verify_client=false
+curve_list=""
+certificate_file=""
+shift
+while (($# > 0)); do
+    case "$1" in
+        -rev)
+            shift
+            ;;
+        -key)
+            wolfssl_arguments+=(-k "$(realpath "$2")")
+            shift 2
+            ;;
+        -cert)
+            certificate_file="$(realpath "$2")"
+            wolfssl_arguments+=(-c "${certificate_file}")
+            shift 2
+            ;;
+        -CAfile)
+            wolfssl_arguments+=(-A "$(realpath "$2")")
+            shift 2
+            ;;
+        -curves)
+            curve_list="$2"
+            shift 2
+            ;;
+        -naccept)
+            wolfssl_arguments+=(-C "$2")
+            shift 2
+            ;;
+        -tls1_2)
+            wolfssl_arguments+=(-v 3)
+            shift
+            ;;
+        -cipher)
+            wolfssl_arguments+=(-l "$2")
+            shift 2
+            ;;
+        -port)
+            wolfssl_arguments+=(-p "$2")
+            shift 2
+            ;;
+        -Verify)
+            verify_client=true
+            shift 2
+            ;;
+        *)
+            echo "Unsupported wolfSSL interoperability option: $1" >&2
+            exit 2
+            ;;
+    esac
+done
+
+if [[ "${verify_client}" != true ]]; then
+    wolfssl_arguments+=(-d)
+fi
+
+if [[ -n "${curve_list}" ]] && [[ "${curve_list}" != *:* ]]; then
+    case "${curve_list}" in
+        prime192v1|secp224r1|prime256v1|secp384r1|secp521r1)
+            ;;
+        *)
+            echo "Unsupported wolfSSL interoperability curve: ${curve_list}" >&2
+            exit 2
+            ;;
+    esac
+
+    case "$(basename "${certificate_file}")" in
+        ECTestServer9_192.crt) certificate_curve="prime192v1" ;;
+        ECTestServer8_224.crt) certificate_curve="secp224r1" ;;
+        ECTestServer2.crt)     certificate_curve="prime256v1" ;;
+        ECTestServer4.crt)     certificate_curve="secp384r1" ;;
+        ECTestServer3.crt)     certificate_curve="secp521r1" ;;
+        *)
+            echo "Unsupported wolfSSL interoperability certificate: ${certificate_file}" >&2
+            exit 2
+            ;;
+    esac
+
+    if [[ "${curve_list}" != "${certificate_curve}" ]]; then
+        # Static ECDH takes its curve from the certificate. Select an
+        # intentionally incompatible suite to preserve negative server-curve
+        # tests when the requested curve does not match that certificate.
+        wolfssl_arguments+=(-l ECDHE-RSA-AES128-SHA256)
+    fi
+fi
+
+cd "${WOLFSSL_HOME}"
+exec "${WOLFSSL_SERVER_BIN}" "${wolfssl_arguments[@]}"
