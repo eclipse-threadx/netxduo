@@ -107,6 +107,7 @@ NX_IP *ip_ptr;
         {
             socket_ptr -> nx_tcp_socket_tx_sequence =  (((ULONG)NX_RAND()) << NX_SHIFT_BY_16) & 0xFFFFFFFF;
             socket_ptr -> nx_tcp_socket_tx_sequence += (ULONG)NX_RAND();
+            socket_ptr -> nx_tcp_socket_tx_sequence &= 0xFFFFFFFF;
         }
         else
         {
