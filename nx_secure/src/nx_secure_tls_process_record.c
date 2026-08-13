@@ -26,12 +26,6 @@
 
 static VOID _nx_secure_tls_packet_trim(NX_PACKET *packet_ptr);
 
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-UINT _nx_secure_tls_1_3_strip_padding(NX_PACKET *decrypted_packet,
-                                      USHORT *message_type_ptr,
-                                      UINT *message_length_ptr);
-#endif
-
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */

@@ -20,12 +20,6 @@
 #if !defined(NX_SECURE_TLS_CLIENT_DISABLED) && !defined(NX_SECURE_TLS_SERVER_DISABLED)
 extern VOID    test_control_return(UINT status);
 
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-extern UINT _nx_secure_tls_1_3_strip_padding(NX_PACKET *decrypted_packet,
-                                             USHORT *message_type_ptr,
-                                             UINT *message_length_ptr);
-#endif
-
 #define METADATA_SIZE               16000
 #define NUM_PACKETS                 24
 #define PACKET_SIZE                 1536
