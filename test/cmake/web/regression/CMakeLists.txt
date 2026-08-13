@@ -34,6 +34,7 @@ set(web_test_cases
     ${SOURCE_DIR}/web_test/netx_web_concurrent_sessions_test.c
     ${SOURCE_DIR}/web_test/netx_web_post_long_message_test.c
     ${SOURCE_DIR}/web_test/netx_web_host_field_test.c
+    ${SOURCE_DIR}/web_test/netx_web_header_boundary_test.c
     ${SOURCE_DIR}/web_test/netx_web_chunked_request_test.c
     ${SOURCE_DIR}/web_test/netx_web_chunked_request_additional_test.c
     ${SOURCE_DIR}/web_test/netx_web_chunked_response_test.c

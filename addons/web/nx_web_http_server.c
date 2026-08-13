@@ -7921,19 +7921,43 @@ UINT  _nx_web_http_server_field_value_get(NX_PACKET *packet_ptr, UCHAR *field_na
 {
 
 UCHAR  *ch;
+UCHAR  *scan_end;
 UINT    index;
+UINT    found;
+UINT    content_offset;
 
+
+    /* Header parsing must stop at the end of the header section: per RFC 7230 the
+       message body is opaque and must never be interpreted as header fields.
+       Restrict the search to the header, so that a field name appearing in the body
+       cannot be reported as a header field.  */
+    content_offset = _nx_web_http_server_calculate_content_offset(packet_ptr);
+
+    if (content_offset == 0)
+    {
+
+        /* The header terminator is not present in this packet, so the packet holds
+           no body and all of it is header.  */
+        scan_end = packet_ptr -> nx_packet_append_ptr;
+    }
+    else
+    {
+        scan_end = packet_ptr -> nx_packet_prepend_ptr + content_offset;
+    }
 
     /* Initialize. */
     ch = packet_ptr -> nx_packet_prepend_ptr;
+    found = NX_FALSE;
 
-    /* Loop to find field name. */
-    while(ch + name_length < packet_ptr -> nx_packet_append_ptr)
+    /* Loop to find field name.  The whole field name must lie inside the header, so
+       a name is not matched across the header/body boundary.  */
+    while((ch + name_length) <= scan_end)
     {
         if(_nx_web_http_server_memicmp(ch, name_length, field_name, name_length) == NX_SUCCESS)
         {
 
             /* Field name found. */
+            found = NX_TRUE;
             break;
         }
 
@@ -7941,18 +7965,22 @@ UINT    index;
         ch++;
     }
 
+    /* Is field name found?  */
+    if(found == NX_FALSE)
+        return NX_WEB_HTTP_NOT_FOUND;
+
     /* Skip field name and ':'. */
     ch += name_length + 1;
 
-    /* Is field name found? */
+    /* Is the value inside the packet? */
     if(ch >= packet_ptr -> nx_packet_append_ptr)
         return NX_WEB_HTTP_NOT_FOUND;
 
-    /* Skip white spaces. */
-    while(*ch == ' ')
+    /* Skip white spaces.  The bound is tested before the character is read, so a
+       value made up entirely of spaces cannot read past the end of the packet
+       data.  Running off the end is caught by the CRLF bound check below.  */
+    while((ch < packet_ptr -> nx_packet_append_ptr) && (*ch == ' '))
     {
-        if(ch >= packet_ptr -> nx_packet_append_ptr)
-            return NX_WEB_HTTP_NOT_FOUND;
 
         /* Get next character. */
         ch++;
