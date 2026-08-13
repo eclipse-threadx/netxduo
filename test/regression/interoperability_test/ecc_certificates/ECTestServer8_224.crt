@@ -2,16 +2,16 @@ Certificate:
     Data:
         Version: 3 (0x2)
         Serial Number: 7 (0x7)
-    Signature Algorithm: ecdsa-with-SHA256
-        Issuer: C=CN, ST=SH, L=SH, O=EL, OU=EL, CN=ECCA2
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer: C = CN, ST = SH, L = SH, O = EL, OU = EL, CN = ECCA2
         Validity
-            Not Before: Jun  7 02:25:27 2018 GMT
-            Not After : Jun  7 02:25:27 2019 GMT
-        Subject: C=CN, ST=SH, O=EL, OU=EL, CN=ECTestServer8
+            Not Before: Aug 13 19:56:59 2026 GMT
+            Not After : Aug 13 19:56:59 2046 GMT
+        Subject: C = CN, ST = SH, O = EL, OU = EL, CN = ECTestServer8
         Subject Public Key Info:
             Public Key Algorithm: id-ecPublicKey
                 Public-Key: (224 bit)
-                pub: 
+                pub:
                     04:fa:17:9d:00:cb:26:b5:b8:d5:45:d7:63:e1:db:
                     e9:c4:b5:86:e4:1d:a5:10:f5:da:6c:3a:4d:a3:5d:
                     77:ef:7c:e4:81:c7:72:52:ba:83:40:41:de:0a:cc:
@@ -19,33 +19,35 @@ Certificate:
                 ASN1 OID: secp224r1
                 NIST CURVE: P-224
         X509v3 extensions:
-            X509v3 Authority Key Identifier: 
+            X509v3 Basic Constraints:
+                CA:FALSE
+            X509v3 Key Usage:
+                Digital Signature, Non Repudiation, Key Encipherment, Data Encipherment, Key Agreement
+            X509v3 Extended Key Usage:
+                TLS Web Server Authentication, TLS Web Client Authentication, Code Signing, E-mail Protection, Time Stamping
+            X509v3 Subject Key Identifier:
+                1E:D5:BC:09:A8:9F:8A:BC:C8:4D:4B:6B:10:37:DF:9F:36:63:F9:07
+            X509v3 Authority Key Identifier:
                 DirName:/C=CN/ST=SH/L=SH/O=EL/OU=EL/CN=ECCA2
                 serial:A6:7D:85:34:93:36:D5:3B
-
-            X509v3 Basic Constraints: 
-                CA:FALSE
-            X509v3 Key Usage: 
-                Digital Signature, Non Repudiation, Key Encipherment, Data Encipherment, Key Agreement
-            X509v3 Extended Key Usage: 
-                TLS Web Server Authentication, TLS Web Client Authentication, Code Signing, E-mail Protection, Time Stamping
     Signature Algorithm: ecdsa-with-SHA256
-         30:44:02:20:71:ad:f5:33:c7:04:6a:28:b0:06:45:04:f3:f1:
-         4e:60:2f:68:1d:fa:b4:87:f2:af:21:e0:1b:84:84:8f:74:cf:
-         02:20:15:73:48:84:93:89:7a:c9:b8:b2:97:76:82:d7:62:31:
-         25:50:46:8b:ff:de:57:f3:bd:02:18:21:ba:d4:fe:b0
+    Signature Value:
+        30:46:02:21:00:9d:f9:63:2a:13:a4:f1:7c:28:a9:6f:3d:3a:
+        d3:88:f8:99:b8:5a:57:d3:3c:85:dd:50:36:46:43:d7:34:69:
+        b6:02:21:00:d3:20:3f:14:d1:32:d2:54:2c:8f:31:ba:ab:72:
+        5a:90:cd:d3:ed:97:8a:f9:ab:ca:0d:6a:30:dd:57:85:eb:4c
 -----BEGIN CERTIFICATE-----
-MIICRjCCAe2gAwIBAgIBBzAKBggqhkjOPQQDAjBRMQswCQYDVQQGEwJDTjELMAkG
+MIICZzCCAgygAwIBAgIBBzAKBggqhkjOPQQDAjBRMQswCQYDVQQGEwJDTjELMAkG
 A1UECAwCU0gxCzAJBgNVBAcMAlNIMQswCQYDVQQKDAJFTDELMAkGA1UECwwCRUwx
-DjAMBgNVBAMMBUVDQ0EyMB4XDTE4MDYwNzAyMjUyN1oXDTE5MDYwNzAyMjUyN1ow
+DjAMBgNVBAMMBUVDQ0EyMB4XDTI2MDgxMzE5NTY1OVoXDTQ2MDgxMzE5NTY1OVow
 TDELMAkGA1UEBhMCQ04xCzAJBgNVBAgMAlNIMQswCQYDVQQKDAJFTDELMAkGA1UE
 CwwCRUwxFjAUBgNVBAMMDUVDVGVzdFNlcnZlcjgwTjAQBgcqhkjOPQIBBgUrgQQA
 IQM6AAT6F50Ayya1uNVF12Ph2+nEtYbkHaUQ9dpsOk2jXXfvfOSBx3JSuoNAQd4K
-zOxztgvlFZD+KZBlWaOBxTCBwjBrBgNVHSMEZDBioVWkUzBRMQswCQYDVQQGEwJD
-TjELMAkGA1UECAwCU0gxCzAJBgNVBAcMAlNIMQswCQYDVQQKDAJFTDELMAkGA1UE
-CwwCRUwxDjAMBgNVBAMMBUVDQ0EyggkApn2FNJM21TswCQYDVR0TBAIwADALBgNV
-HQ8EBAMCA/gwOwYDVR0lBDQwMgYIKwYBBQUHAwEGCCsGAQUFBwMCBggrBgEFBQcD
-AwYIKwYBBQUHAwQGCCsGAQUFBwMIMAoGCCqGSM49BAMCA0cAMEQCIHGt9TPHBGoo
-sAZFBPPxTmAvaB36tIfyryHgG4SEj3TPAiAVc0iEk4l6ybiyl3aC12IxJVBGi//e
-V/O9AhghutT+sA==
+zOxztgvlFZD+KZBlWaOB5DCB4TAJBgNVHRMEAjAAMAsGA1UdDwQEAwID+DA7BgNV
+HSUENDAyBggrBgEFBQcDAQYIKwYBBQUHAwIGCCsGAQUFBwMDBggrBgEFBQcDBAYI
+KwYBBQUHAwgwHQYDVR0OBBYEFB7VvAmon4q8yE1LaxA33582Y/kHMGsGA1UdIwRk
+MGKhVaRTMFExCzAJBgNVBAYTAkNOMQswCQYDVQQIDAJTSDELMAkGA1UEBwwCU0gx
+CzAJBgNVBAoMAkVMMQswCQYDVQQLDAJFTDEOMAwGA1UEAwwFRUNDQTKCCQCmfYU0
+kzbVOzAKBggqhkjOPQQDAgNJADBGAiEAnfljKhOk8XwoqW89OtOI+Jm4WlfTPIXd
+UDZGQ9c0abYCIQDTID8U0TLSVCyPMbqrclqQzdPtl4r5q8oNajDdV4XrTA==
 -----END CERTIFICATE-----

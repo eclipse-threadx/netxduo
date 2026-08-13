@@ -391,3 +391,7 @@ foreach(test_case ${nx_secure_test_cases})
        [[ $exit_code = 0 ]] || [[ $exit_code = 233 ]] || { echo Exit code: $exit_code; exit $exit_code; };"
     WORKING_DIRECTORY ${SOURCE_DIR})
 endforeach()
+
+add_test(
+  NAME ${CMAKE_BUILD_TYPE}::test_certificate_validity
+  COMMAND bash ${SOURCE_DIR}/../verify_test_certificates.sh)
