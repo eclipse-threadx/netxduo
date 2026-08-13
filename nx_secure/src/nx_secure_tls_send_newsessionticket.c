@@ -41,6 +41,14 @@
 /*    for session resumption should the same client attempt another       */
 /*    connection within the lifespan of the ticket.                       */
 /*                                                                        */
+/*    NOTE: this function is currently uncalled. It is retained for a     */
+/*    future implementation of TLS 1.3 session resumption. The ticket it  */
+/*    builds today is a placeholder: no server-side state is stored, and  */
+/*    the ticket identity is a fixed string, so a client that replayed it */
+/*    would be rejected. See _nx_secure_tls_1_3_server_handshake for the  */
+/*    reason it is not called and RFC 8446 Section 4.6.1 for the fact     */
+/*    that sending NewSessionTicket is optional.                          */
+/*                                                                        */
 /*  INPUT                                                                 */
 /*                                                                        */
 /*    tls_session                           TLS control block             */
@@ -56,7 +64,7 @@
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
-/*    _nx_secure_tls_server_handshake       TLS server state machine      */
+/*    (none - retained for future session resumption support)             */
 /*                                                                        */
 /**************************************************************************/
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
