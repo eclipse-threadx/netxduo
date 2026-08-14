@@ -449,10 +449,10 @@ UINT           return_value = NX_CRYPTO_SUCCESS;
 /*    _nx_crypto_rsa_pss_sign             Build a PSS encoding            */
 /*                                                                        */
 /**************************************************************************/
-static UINT _nx_crypto_rsa_pss_mgf1(const NX_CRYPTO_METHOD *hash_method,
-                                     VOID *hash_metadata, ULONG hash_metadata_size,
-                                     const UCHAR *seed, UINT seed_length,
-                                     UCHAR *mask, UINT mask_length)
+NX_CRYPTO_KEEP static UINT _nx_crypto_rsa_pss_mgf1(const NX_CRYPTO_METHOD *hash_method,
+                                                   VOID *hash_metadata, ULONG hash_metadata_size,
+                                                   const UCHAR *seed, UINT seed_length,
+                                                   UCHAR *mask, UINT mask_length)
 {
 UINT   counter;
 UINT   offset;
@@ -605,11 +605,11 @@ VOID  *handler = NX_CRYPTO_NULL;
 /*                                        Process ServerKeyExchange       */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_crypto_rsa_pss_verify(const UCHAR *message_hash, UINT hash_length,
-                                const UCHAR *em, UINT em_bits,
-                                const NX_CRYPTO_METHOD *hash_method,
-                                VOID *hash_metadata, ULONG hash_metadata_size,
-                                UCHAR *scratch, UINT scratch_length)
+NX_CRYPTO_KEEP UINT _nx_crypto_rsa_pss_verify(const UCHAR *message_hash, UINT hash_length,
+                                              const UCHAR *em, UINT em_bits,
+                                              const NX_CRYPTO_METHOD *hash_method,
+                                              VOID *hash_metadata, ULONG hash_metadata_size,
+                                              UCHAR *scratch, UINT scratch_length)
 {
 UINT         em_len;
 UINT         db_len;
@@ -837,11 +837,11 @@ static const UCHAR _pss_zero8[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 /*                                        Send CertificateVerify          */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_crypto_rsa_pss_sign(const UCHAR *message_hash, UINT hash_length,
-                              UCHAR *em, UINT em_length, UINT em_bits,
-                              const NX_CRYPTO_METHOD *hash_method,
-                              VOID *hash_metadata, ULONG hash_metadata_size,
-                              UCHAR *scratch, UINT scratch_length)
+NX_CRYPTO_KEEP UINT _nx_crypto_rsa_pss_sign(const UCHAR *message_hash, UINT hash_length,
+                                            UCHAR *em, UINT em_length, UINT em_bits,
+                                            const NX_CRYPTO_METHOD *hash_method,
+                                            VOID *hash_metadata, ULONG hash_metadata_size,
+                                            UCHAR *scratch, UINT scratch_length)
 {
 UINT   em_len;
 UINT   db_len;
