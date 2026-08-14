@@ -48,8 +48,8 @@ set(tls_1_2_protocol_version_negotiation_test_file_list
     ${SOURCE_DIR}/nx_secure_echo_server_entry.c
     ${SOURCE_DIR}/tls_1_2_openssl_echo_client_entry.c)
 
-list(APPEND nx_secure_test_cases openssl_1_1_protocol_version_negotiation_test)
-set(openssl_1_1_protocol_version_negotiation_test_file_list
+list(APPEND nx_secure_test_cases openssl_3_5_protocol_version_negotiation_test)
+set(openssl_3_5_protocol_version_negotiation_test_file_list
     ${SOURCE_DIR}/tls_ecc_negotiation_test.c
     ${SOURCE_DIR}/nx_secure_ecc_echo_server_entry.c
     ${SOURCE_DIR}/tls_openssl_1_1_prime256v1_echo_client_entry.c)
@@ -395,3 +395,7 @@ endforeach()
 add_test(
   NAME ${CMAKE_BUILD_TYPE}::test_certificate_validity
   COMMAND bash ${SOURCE_DIR}/../verify_test_certificates.sh)
+
+add_test(
+  NAME ${CMAKE_BUILD_TYPE}::test_openssl_wrapper
+  COMMAND bash ${SOURCE_DIR}/test_scripts/test_openssl_wrapper.sh)
