@@ -122,31 +122,33 @@ UINT extension_type;
 
             /* TLS 1.3 + RSA cert: announce RSASSA-PSS (RFC 8446 §4.2.3 — PKCS#1 v1.5 is banned for
              * CertificateVerify in TLS 1.3). The send_certificate_verify path builds the EMSA-PSS-ENCODE
-             * via _nx_crypto_rsa_pss_sign. We pick rsa_pss_rsae_sha256 (0x0804) unconditionally — it's
-             * the only PSS sigalg our nx_crypto_rsa.c currently supports for signing, and any modern
-             * broker (mosquitto/OpenSSL) advertises it in CertificateRequest.sig_algs. */
+             * via _nx_crypto_rsa_pss_sign. We pick rsa_pss_rsae_sha256 unconditionally: it is the
+             * mandatory-to-implement CertificateVerify scheme (RFC 8446 §9.1), so every compliant
+             * server supports it. The match loop below still checks it against the server's
+             * advertised signature_algorithms and fails cleanly if it is absent. */
             if (local_certificate -> nx_secure_x509_public_algorithm == NX_SECURE_TLS_X509_TYPE_RSA)
             {
                 expected_cert_type = NX_SECURE_TLS_CERT_TYPE_RSA_SIGN;
-                expected_sign_alg = 0x0804u; /* rsa_pss_rsae_sha256 */
+                expected_sign_alg = NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA256;
             }
             else
             {
-            /* In TLS 1.3, the signing curve is constrained.  */
-            switch (local_certificate -> nx_secure_x509_private_key.ec_private_key.nx_secure_ec_named_curve)
-            {
-            case NX_CRYPTO_EC_SECP256R1:
-                expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256;
-                break;
-            case NX_CRYPTO_EC_SECP384R1:
-                expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_SHA384;
-                break;
-            case NX_CRYPTO_EC_SECP521R1:
-                expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512;
-                break;
-            default:
-                return(NX_SECURE_TLS_UNSUPPORTED_CERT_SIGN_ALG);
-            }
+
+                /* In TLS 1.3, the signing curve is constrained.  */
+                switch (local_certificate -> nx_secure_x509_private_key.ec_private_key.nx_secure_ec_named_curve)
+                {
+                case NX_CRYPTO_EC_SECP256R1:
+                    expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256;
+                    break;
+                case NX_CRYPTO_EC_SECP384R1:
+                    expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_SHA384;
+                    break;
+                case NX_CRYPTO_EC_SECP521R1:
+                    expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512;
+                    break;
+                default:
+                    return(NX_SECURE_TLS_UNSUPPORTED_CERT_SIGN_ALG);
+                }
             }
         }
         else

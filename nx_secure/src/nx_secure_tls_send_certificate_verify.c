@@ -32,7 +32,19 @@
 static UCHAR handshake_hash[64 + 34 + 64]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256/384/512. */
 static UCHAR _nx_secure_padded_signature[600];
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-static UCHAR _nx_secure_pss_scratch[600]; /* PSS encode: db[<=511 B] + salt[<=64 B] for RSA-4096+SHA-512 */
+
+/* Largest RSA modulus supported for PSS signing, in bytes (RSA-4096). Signing with a larger key
+   is rejected by the em_length check in _nx_crypto_rsa_pss_sign rather than overrunning. */
+#define NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE  512
+
+/* Scratch for EMSA-PSS-ENCODE: db[emLen - hLen - 1] + salt[hLen]. Worst case over the supported
+   hashes is emLen - 1 bytes (SHA-512: 447 + 64 = 511 for RSA-4096), so one modulus is always
+   enough; a larger key is refused with NX_CRYPTO_INVALID_BUFFER_SIZE rather than overrunning.
+   Note this buffer is static, like handshake_hash and _nx_secure_padded_signature above: two TLS
+   sessions signing a CertificateVerify concurrently will corrupt each other's data. The global
+   _nx_secure_tls_protection mutex does not cover this - it is released before the handshake
+   runs (nx_secure_tls_session_start.c) - so this is a property of the existing design. */
+static UCHAR _nx_secure_pss_scratch[NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE];
 #endif
 
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
@@ -179,9 +191,9 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
     if (tls_session -> nx_secure_tls_1_3)
     {
         /* Signature algorithm is set when processing CertificateRequest or SignatureAlgorithm extension.
-         * For RSA in TLS 1.3 the wire codes are rsa_pss_rsae_sha256/384/512 (0x0804/0805/0806). We reuse
-         * the existing RSA_SHA_* x509 cert types because the cipher/hash table lookup is shared with
-         * PKCS#1 — only the EMSA encoding step downstream switches to PSS. */
+         * For RSA in TLS 1.3 the schemes are rsa_pss_rsae_sha256/384/512. We reuse the existing
+         * RSA_SHA_* x509 cert types because the cipher/hash table lookup is shared with PKCS#1 —
+         * only the EMSA encoding step downstream switches to PSS. */
         switch (tls_session -> nx_secure_tls_signature_algorithm)
         {
         case NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256:
@@ -193,13 +205,13 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         case NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512:
             signature_algorithm = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512;
             break;
-        case 0x0804u: /* rsa_pss_rsae_sha256 */
+        case NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA256:
             signature_algorithm = NX_SECURE_TLS_X509_TYPE_RSA_SHA_256;
             break;
-        case 0x0805u: /* rsa_pss_rsae_sha384 */
+        case NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA384:
             signature_algorithm = NX_SECURE_TLS_X509_TYPE_RSA_SHA_384;
             break;
-        case 0x0806u: /* rsa_pss_rsae_sha512 */
+        case NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA512:
             signature_algorithm = NX_SECURE_TLS_X509_TYPE_RSA_SHA_512;
             break;
         default:
@@ -566,7 +578,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
             if (tls_session -> nx_secure_tls_1_3)
             {
                 /* TLS 1.3 CertificateVerify wire format: SignatureScheme (2 bytes, big-endian) || length (2 bytes) || signature.
-                 * nx_secure_tls_signature_algorithm carries the wire code (rsa_pss_rsae_sha256/384/512 = 0x0804/0805/0806)
+                 * nx_secure_tls_signature_algorithm carries the SignatureScheme (rsa_pss_rsae_sha256/384/512)
                  * stored by process_certificate_request. The PSS-encoded EM is built directly into _nx_secure_padded_signature
                  * at full size — the PKCS#1 v1.5 padding loop further down is gated to skip when nx_secure_tls_1_3 is set. */
                 current_buffer[length]     = (UCHAR)((tls_session -> nx_secure_tls_signature_algorithm) >> 8);

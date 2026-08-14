@@ -561,6 +561,15 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
 #define NX_SECURE_TLS_SIGNATURE_ECDSA_SHA384               (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA384 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA)
 #define NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512               (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA512 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA)
 
+/* RSASSA-PSS SignatureScheme values (RFC 8446 section 4.2.3), used for CertificateVerify in
+   TLS 1.3 where RSASSA-PKCS1-v1_5 is not allowed. Unlike the packed values above, these are
+   opaque 16-bit code points rather than a hash/signature algorithm pair. The rsae variants
+   below are for certificates carrying an rsaEncryption public key; the rsa_pss_pss_* variants
+   (0x0809-0x080B), for certificates carrying an RSASSA-PSS key, are not supported. */
+#define NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA256        0x0804u
+#define NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA384        0x0805u
+#define NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA512        0x0806u
+
 
 /* Session key generation and assignment constants. */
 #define NX_SECURE_TLS_KEY_SET_LOCAL                        0
