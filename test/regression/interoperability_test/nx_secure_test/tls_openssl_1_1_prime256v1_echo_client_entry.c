@@ -19,7 +19,7 @@ extern TLS_TEST_SEMAPHORE* semaphore_echo_server_prepared;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 #define VERSION_STR "-tls1_3"
 #else
-#define VERSION_STR ""
+#define VERSION_STR "-tls1_2"
 #endif
 
 /* Instance two test entry. */
