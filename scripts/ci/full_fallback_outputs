@@ -1,0 +1,13 @@
+full=true
+reason=classifier error
+changed_files=0
+netxduo_matrix=[{"name":"shard-1","profiles":"v4_no_checksum_build v4_build v4_small_build v4_packet_pad_build dns_default_build_coverage optimize_build","result_name":"Dev-NetXDuo-shard-1"},{"name":"shard-2","profiles":"v4_dns_cache_build v6_no_dad_build v6_address_change_build v6_no_chain_build v6_no_reset_disconn_build","result_name":"Dev-NetXDuo-shard-2"},{"name":"shard-3","profiles":"v4_dual_pool_build v6_no_checksum_build v6_dual_pool_build v4_no_frag_build v6_no_check_build","result_name":"Dev-NetXDuo-shard-3"},{"name":"shard-4","profiles":"v6_build v6_physical_48_build v6_small_build dhcp_default_build_coverage tsn_build_coverage","result_name":"Dev-NetXDuo-shard-4"},{"name":"shard-5","profiles":"v6_no_rs_build v6_bsd_raw_build v4_physical_48_build v4_no_reset_disconn_build v4_full_build v6_only_link_cap_build v6_only_build","result_name":"Dev-NetXDuo-shard-5"},{"name":"shard-6","profiles":"v6_no_icmpv6_error_build v6_no_frag_build v6_multicast_build v4_no_check_build v4_no_chain_build","result_name":"Dev-NetXDuo-shard-6"},{"name":"shard-7","profiles":"v4_address_check_build v6_pmtu_no_frag_build v6_small_nd_cache_build v6_full_secure_build","result_name":"Dev-NetXDuo-shard-7"},{"name":"shard-8","profiles":"v4_link_cap_build v6_link_cap_build v6_packet_pad_build v6_dhcp_tahi_build v6_full_build","result_name":"Dev-NetXDuo-shard-8"}]
+web_profiles=all
+ptp_profiles=all
+mqtt_profiles=all
+mqtt_interoperability_profiles=all
+netxduo64_profiles=all
+netxduo_fast_profiles=all
+nx_secure_profiles=all
+nx_secure_interoperability_profiles=all
+crypto_profiles=all

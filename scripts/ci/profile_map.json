@@ -1,0 +1,400 @@
+{
+  "version": 1,
+  "suites": {
+    "netxduo": {
+      "smoke": "default_build_coverage",
+      "profiles": [
+        "default_build_coverage",
+        "dhcp_default_build_coverage",
+        "dns_default_build_coverage",
+        "tsn_build_coverage",
+        "v4_build",
+        "v4_dns_cache_build",
+        "v4_no_checksum_build",
+        "v4_physical_48_build",
+        "v4_small_build",
+        "v4_packet_pad_build",
+        "v4_full_build",
+        "v4_no_frag_build",
+        "v4_no_check_build",
+        "v4_no_reset_disconn_build",
+        "v4_dual_pool_build",
+        "v4_no_chain_build",
+        "v4_link_cap_build",
+        "v4_address_check_build",
+        "v6_build",
+        "v6_only_build",
+        "v6_only_link_cap_build",
+        "v6_no_checksum_build",
+        "v6_dual_pool_build",
+        "v6_packet_pad_build",
+        "v6_physical_48_build",
+        "v6_small_nd_cache_build",
+        "v6_small_build",
+        "v6_full_build",
+        "v6_no_frag_build",
+        "v6_pmtu_no_frag_build",
+        "v6_no_chain_build",
+        "v6_no_dad_build",
+        "v6_no_check_build",
+        "v6_no_icmpv6_error_build",
+        "v6_no_reset_disconn_build",
+        "v6_link_cap_build",
+        "v6_address_change_build",
+        "v6_multicast_build",
+        "v6_no_rs_build",
+        "v6_dhcp_tahi_build",
+        "v6_bsd_raw_build",
+        "v6_full_secure_build",
+        "optimize_build"
+      ],
+      "shards": [
+        {
+          "name": "shard-1",
+          "profiles": [
+            "v4_no_checksum_build",
+            "v4_build",
+            "v4_small_build",
+            "v4_packet_pad_build",
+            "dns_default_build_coverage",
+            "optimize_build"
+          ]
+        },
+        {
+          "name": "shard-2",
+          "profiles": [
+            "v4_dns_cache_build",
+            "v6_no_dad_build",
+            "v6_address_change_build",
+            "v6_no_chain_build",
+            "v6_no_reset_disconn_build"
+          ]
+        },
+        {
+          "name": "shard-3",
+          "profiles": [
+            "v4_dual_pool_build",
+            "v6_no_checksum_build",
+            "v6_dual_pool_build",
+            "v4_no_frag_build",
+            "v6_no_check_build"
+          ]
+        },
+        {
+          "name": "shard-4",
+          "profiles": [
+            "v6_build",
+            "v6_physical_48_build",
+            "v6_small_build",
+            "dhcp_default_build_coverage",
+            "tsn_build_coverage"
+          ]
+        },
+        {
+          "name": "shard-5",
+          "profiles": [
+            "v6_no_rs_build",
+            "v6_bsd_raw_build",
+            "v4_physical_48_build",
+            "v4_no_reset_disconn_build",
+            "v4_full_build",
+            "v6_only_link_cap_build",
+            "v6_only_build"
+          ]
+        },
+        {
+          "name": "shard-6",
+          "profiles": [
+            "v6_no_icmpv6_error_build",
+            "v6_no_frag_build",
+            "v6_multicast_build",
+            "v4_no_check_build",
+            "v4_no_chain_build"
+          ]
+        },
+        {
+          "name": "shard-7",
+          "profiles": [
+            "v4_address_check_build",
+            "v6_pmtu_no_frag_build",
+            "v6_small_nd_cache_build",
+            "default_build_coverage",
+            "v6_full_secure_build"
+          ]
+        },
+        {
+          "name": "shard-8",
+          "profiles": [
+            "v4_link_cap_build",
+            "v6_link_cap_build",
+            "v6_packet_pad_build",
+            "v6_dhcp_tahi_build",
+            "v6_full_build"
+          ]
+        }
+      ]
+    },
+    "web": {
+      "profiles": [
+        "default_build_coverage",
+        "no_tls_build_coverage",
+        "digest_authenticate_build"
+      ]
+    },
+    "ptp": {
+      "profiles": [
+        "default_build_coverage",
+        "gptp_slave_build",
+        "gptp_master_build"
+      ]
+    },
+    "mqtt": {
+      "profiles": [
+        "default_build_coverage",
+        "secure_build_coverage",
+        "require_secure_build",
+        "queue_depth_build",
+        "cloud_default_build_coverage",
+        "cloud_secure_build_coverage",
+        "cloud_require_secure_build",
+        "cloud_queue_depth_build",
+        "websocket_secure_build"
+      ]
+    },
+    "mqtt_interoperability": {
+      "profiles": [
+        "default_build_coverage",
+        "secure_build_coverage",
+        "require_secure_build",
+        "queue_depth_build",
+        "cloud_default_build_coverage",
+        "cloud_secure_build_coverage",
+        "cloud_require_secure_build",
+        "cloud_queue_depth_build",
+        "websocket_secure_build"
+      ]
+    },
+    "netxduo64": {
+      "profiles": ["default_build_coverage"]
+    },
+    "netxduo_fast": {
+      "profiles": ["v6_full_build"]
+    },
+    "nx_secure": {
+      "profiles": [
+        "default_build_coverage",
+        "psk_build_coverage",
+        "tls_1_0_enable_build",
+        "tls_1_1_enable_build",
+        "tls_1_3_enable_build_coverage",
+        "client_disable_build",
+        "server_disable_build",
+        "tls_1_3_client_disable_build",
+        "tls_1_3_server_disable_build",
+        "ecjpake_build",
+        "dtls_build_coverage",
+        "eal4_build_coverage",
+        "sesip_build_coverage",
+        "no_ecc_build_coverage",
+        "no_renegotiation_build",
+        "no_client_renegotiation_build",
+        "no_x509_build",
+        "hash_clone_build",
+        "curve25519_448_build"
+      ]
+    },
+    "nx_secure_interoperability": {
+      "profiles": [
+        "default_build_coverage",
+        "psk_build_coverage",
+        "tls_1_0_enable_build",
+        "tls_1_1_enable_build",
+        "tls_1_3_enable_build_coverage",
+        "client_disable_build",
+        "server_disable_build",
+        "tls_1_3_client_disable_build",
+        "tls_1_3_server_disable_build",
+        "ecjpake_build",
+        "dtls_build_coverage",
+        "eal4_build_coverage",
+        "sesip_build_coverage",
+        "no_ecc_build_coverage",
+        "no_renegotiation_build",
+        "no_client_renegotiation_build",
+        "hash_clone_build",
+        "curve25519_448_build"
+      ]
+    },
+    "crypto": {
+      "profiles": [
+        "default_build_coverage",
+        "fips_build_coverage",
+        "standalone_build",
+        "curve25519_448_build"
+      ]
+    }
+  },
+  "bundles": {
+    "dependent_defaults": {
+      "web": ["default_build_coverage"],
+      "ptp": ["default_build_coverage"],
+      "mqtt": ["default_build_coverage"],
+      "mqtt_interoperability": ["default_build_coverage"],
+      "netxduo64": ["default_build_coverage"],
+      "netxduo_fast": ["v6_full_build"],
+      "nx_secure": ["default_build_coverage"],
+      "nx_secure_interoperability": ["default_build_coverage"],
+      "crypto": ["default_build_coverage"]
+    },
+    "netx_ipv4": {
+      "netxduo": [
+        "v4_build",
+        "v4_dns_cache_build",
+        "v4_no_checksum_build",
+        "v4_physical_48_build",
+        "v4_small_build",
+        "v4_packet_pad_build",
+        "v4_full_build",
+        "v4_no_frag_build",
+        "v4_no_check_build",
+        "v4_no_reset_disconn_build",
+        "v4_dual_pool_build",
+        "v4_no_chain_build",
+        "v4_link_cap_build",
+        "v4_address_check_build"
+      ]
+    },
+    "netx_ipv6": {
+      "netxduo": [
+        "v6_build",
+        "v6_only_build",
+        "v6_only_link_cap_build",
+        "v6_no_checksum_build",
+        "v6_dual_pool_build",
+        "v6_packet_pad_build",
+        "v6_physical_48_build",
+        "v6_small_nd_cache_build",
+        "v6_small_build",
+        "v6_full_build",
+        "v6_no_frag_build",
+        "v6_pmtu_no_frag_build",
+        "v6_no_chain_build",
+        "v6_no_dad_build",
+        "v6_no_check_build",
+        "v6_no_icmpv6_error_build",
+        "v6_no_reset_disconn_build",
+        "v6_link_cap_build",
+        "v6_address_change_build",
+        "v6_multicast_build",
+        "v6_no_rs_build",
+        "v6_dhcp_tahi_build",
+        "v6_bsd_raw_build",
+        "v6_full_secure_build"
+      ]
+    },
+    "netx_shared": {
+      "netxduo": [
+        "v4_build",
+        "v4_full_build",
+        "v6_build",
+        "v6_full_build"
+      ]
+    },
+    "netx_addon": {
+      "netxduo": ["v4_build", "v6_build"],
+      "netxduo_fast": ["v6_full_build"]
+    },
+    "mqtt": {
+      "mqtt": "all",
+      "mqtt_interoperability": "all"
+    },
+    "websocket": {
+      "netxduo": ["v4_build", "v6_full_secure_build"],
+      "mqtt": ["websocket_secure_build"],
+      "mqtt_interoperability": ["websocket_secure_build"]
+    },
+    "web_http": {
+      "netxduo": ["v4_build", "v6_build", "v6_full_secure_build"],
+      "web": "all"
+    },
+    "ptp_tsn": {
+      "netxduo": ["tsn_build_coverage"],
+      "ptp": "all"
+    },
+    "secure": {
+      "netxduo": ["v6_full_secure_build"],
+      "web": "all",
+      "mqtt": [
+        "secure_build_coverage",
+        "require_secure_build",
+        "cloud_secure_build_coverage",
+        "cloud_require_secure_build",
+        "websocket_secure_build"
+      ],
+      "mqtt_interoperability": [
+        "secure_build_coverage",
+        "require_secure_build",
+        "cloud_secure_build_coverage",
+        "cloud_require_secure_build",
+        "websocket_secure_build"
+      ],
+      "nx_secure": "all",
+      "nx_secure_interoperability": "all"
+    },
+    "crypto": {
+      "netxduo": ["v6_full_secure_build"],
+      "web": "all",
+      "mqtt": [
+        "secure_build_coverage",
+        "require_secure_build",
+        "cloud_secure_build_coverage",
+        "cloud_require_secure_build",
+        "websocket_secure_build"
+      ],
+      "mqtt_interoperability": [
+        "secure_build_coverage",
+        "require_secure_build",
+        "cloud_secure_build_coverage",
+        "cloud_require_secure_build",
+        "websocket_secure_build"
+      ],
+      "nx_secure": "all",
+      "nx_secure_interoperability": "all",
+      "crypto": "all"
+    },
+    "netx_regression": {
+      "netxduo": "all",
+      "netxduo_fast": "all"
+    },
+    "netx_64_regression": {
+      "netxduo": "all",
+      "netxduo64": "all",
+      "netxduo_fast": "all"
+    },
+    "ptp_regression": {
+      "netxduo": "all",
+      "netxduo_fast": "all",
+      "ptp": "all"
+    },
+    "mqtt_regression": {
+      "mqtt": "all"
+    },
+    "mqtt_interoperability_regression": {
+      "mqtt_interoperability": "all"
+    },
+    "secure_regression": {
+      "nx_secure": "all",
+      "crypto": "all"
+    },
+    "secure_interoperability_regression": {
+      "nx_secure_interoperability": "all"
+    },
+    "interoperability_framework": {
+      "mqtt_interoperability": "all",
+      "nx_secure_interoperability": "all"
+    },
+    "web_regression": {
+      "web": "all"
+    }
+  }
+}
