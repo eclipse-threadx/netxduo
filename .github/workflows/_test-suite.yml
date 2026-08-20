@@ -1,0 +1,160 @@
+# Copyright (c) 2026 Eclipse ThreadX contributors
+#
+# This program and the accompanying materials are made available under the
+# terms of the MIT License which is available at
+# https://opensource.org/licenses/MIT.
+#
+# SPDX-License-Identifier: MIT
+
+name: Test suite worker
+
+on:
+  workflow_call:
+    inputs:
+      suite:
+        description: Test suite directory below test/cmake
+        required: true
+        type: string
+      profiles:
+        description: Space-separated profile list, or all
+        required: false
+        default: all
+        type: string
+      result_name:
+        description: Unique suite or shard name used for artifacts
+        required: true
+        type: string
+      checkout_ref:
+        description: Git ref to check out; defaults to the triggering commit
+        required: false
+        default: ""
+        type: string
+      installer:
+        description: Optional additional repository-local installer
+        required: false
+        default: ""
+        type: string
+      upload_coverage:
+        description: Upload coverage reports produced by coverage profiles
+        required: false
+        default: true
+        type: boolean
+      test_timeout_minutes:
+        description: Maximum test-step duration
+        required: false
+        default: 30
+        type: number
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ inputs.result_name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out sources and submodules
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.checkout_ref || github.sha }}
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Validate worker request and wrappers
+        env:
+          INSTALLER: ${{ inputs.installer }}
+          PROFILES: ${{ inputs.profiles }}
+          RESULT_NAME: ${{ inputs.result_name }}
+          SUITE: ${{ inputs.suite }}
+        run: |
+          set -euo pipefail
+          if [[ ! "${RESULT_NAME}" =~ ^[[:alnum:]_.-]+$ ]]; then
+              echo "Invalid result name: ${RESULT_NAME}" >&2
+              exit 2
+          fi
+          if [[ -n "${INSTALLER}" ]]; then
+              if [[ ! "${INSTALLER}" =~ ^\./scripts/[[:alnum:]_.-]+\.sh$ ]] || [[ ! -x "${INSTALLER}" ]]; then
+                  echo "Invalid installer: ${INSTALLER}" >&2
+                  exit 2
+              fi
+          fi
+          read -r -a requested_profiles <<< "${PROFILES}"
+          RUN_CMAKE_SUITE_DRY_RUN=1 \
+              ./scripts/run_cmake_suite.sh "${SUITE}" build "${requested_profiles[@]}"
+          ./scripts/tests/profile_wrappers_test.sh
+
+      - name: Install dependencies
+        timeout-minutes: 10
+        env:
+          INSTALLER: ${{ inputs.installer }}
+        run: |
+          set -euo pipefail
+          ./scripts/install.sh
+          if [[ -n "${INSTALLER}" && "${INSTALLER}" != "./scripts/install.sh" ]]; then
+              "${INSTALLER}"
+          fi
+
+      - name: Report tool versions
+        run: |
+          set -euo pipefail
+          gcc --version | sed -n '1p'
+          test "$(gcc -dumpversion | cut -d. -f1)" = "14"
+          gcovr --version | sed -n '1p'
+          cmake --version | sed -n '1p'
+          printf 'Ninja %s\n' "$(ninja --version)"
+          openssl version -v
+          bundled_tls_found=false
+          while IFS= read -r bundled_openssl; do
+              "${bundled_openssl}/bin/openssl" version -v
+              bundled_tls_found=true
+          done < <(find /opt/netxduo -maxdepth 1 -type d -name 'openssl-*' 2>/dev/null)
+          while IFS= read -r bundled_wolfssl; do
+              printf 'Bundled wolfSSL %s\n' "${bundled_wolfssl##*/wolfssl-}"
+              bundled_tls_found=true
+          done < <(find /opt/netxduo -maxdepth 1 -type d -name 'wolfssl-*' 2>/dev/null)
+          if [[ "${bundled_tls_found}" = false ]]; then
+              echo "Bundled OpenSSL and wolfSSL: not installed for this suite"
+          fi
+
+      - name: Build requested profiles
+        timeout-minutes: 20
+        env:
+          PROFILES: ${{ inputs.profiles }}
+          SUITE: ${{ inputs.suite }}
+        run: |
+          set -euo pipefail
+          read -r -a requested_profiles <<< "${PROFILES}"
+          ./scripts/run_cmake_suite.sh "${SUITE}" build "${requested_profiles[@]}"
+
+      - name: Test requested profiles
+        timeout-minutes: ${{ inputs.test_timeout_minutes }}
+        env:
+          CTEST_REPEAT_FAIL: 2
+          PROFILES: ${{ inputs.profiles }}
+          SUITE: ${{ inputs.suite }}
+        run: |
+          set -euo pipefail
+          read -r -a requested_profiles <<< "${PROFILES}"
+          ./scripts/run_cmake_suite.sh "${SUITE}" test "${requested_profiles[@]}"
+
+      - name: Upload CTest results and failure logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ inputs.result_name }}-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test/cmake/${{ inputs.suite }}/build/**/*.xml
+            test/cmake/${{ inputs.suite }}/build/**/*.txt
+            test/cmake/${{ inputs.suite }}/build/**/Testing/Temporary/**
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload coverage reports
+        if: ${{ always() && inputs.upload_coverage }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ inputs.result_name }}-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test/cmake/${{ inputs.suite }}/coverage_report
+          if-no-files-found: ignore
+          retention-days: 14

@@ -25,8 +25,10 @@ sudo dpkg --add-architecture i386
 
 sudo apt update
 sudo apt install -y \
-    gcc-multilib \
-    g++ \
+    gcc-14 \
+    g++-14 \
+    gcc-14-multilib \
+    g++-14-multilib \
     python3-pip \
     build-essential \
     ca-certificates \
@@ -39,6 +41,10 @@ sudo apt install -y \
     gcovr \
     libpcap-dev:i386 libgcc-s1:i386 \
     ethtool
+
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 140
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 140
+sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-14 140
 
 openssl_archive="${secure_tmp_dir}/openssl-${OPENSSL_VERSION}.tar.gz"
 wget --quiet --output-document "${openssl_archive}" \

@@ -11,4 +11,4 @@
 ##############################################################################
 
 
-sudo CTEST_PARALLEL_LEVEL=1 $(dirname `realpath $0`)/../test/cmake/mqtt_interoperability/run.sh test all
+"$(dirname "$(realpath "$0")")/run_cmake_suite.sh" mqtt_interoperability test "$@"
