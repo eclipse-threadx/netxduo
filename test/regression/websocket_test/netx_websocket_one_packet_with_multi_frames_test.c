@@ -50,6 +50,7 @@ static UINT                client_websocket_uri_path_length;
 
 static void thread_client_entry(ULONG thread_input);
 static void thread_server_entry(ULONG thread_input);
+static void server_wait_for_pong(void);
 
 #define TEST_SERVER_ADDRESS  IP_ADDRESS(1,2,3,4)
 #define TEST_CLIENT_ADDRESS  IP_ADDRESS(1,2,3,5)
@@ -816,6 +817,7 @@ NX_PACKET       *packet_ptr;
                 status = nx_tcp_socket_send(&test_server, packet_ptr, NX_IP_PERIODIC_RATE);
                 if(status)
                     SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+                server_wait_for_pong();
                 break;
             case 3:
                 packet_ptr -> nx_packet_append_ptr = packet_ptr -> nx_packet_prepend_ptr;
@@ -885,6 +887,33 @@ NX_PACKET       *packet_ptr;
     {
         printf("SUCCESS!\n");
         test_control_return(0);
+    }
+}
+
+static void server_wait_for_pong(void)
+{
+NX_PACKET* pong_ptr;
+UCHAR pong_data[8];
+ULONG copied = 0;
+UINT status;
+
+    status = nx_tcp_socket_receive(&test_server, &pong_ptr, 1 * NX_IP_PERIODIC_RATE);
+    if (status)
+        SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+    else
+    {
+        if (pong_ptr->nx_packet_length != 8)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+        else
+        {
+            nx_packet_data_extract_offset(pong_ptr, 0, pong_data, 8, &copied);
+            if (copied != 8 ||
+                pong_data[0] != 0x8A) /* FIN + PONG */
+            {
+                SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+            }
+        }
+        nx_packet_release(pong_ptr);
     }
 }
 
