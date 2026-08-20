@@ -11,4 +11,4 @@
 ##############################################################################
 
 
-$(dirname `realpath $0`)/../test/cmake/ptp/run.sh build all
+"$(dirname "$(realpath "$0")")/run_cmake_suite.sh" ptp build "$@"
