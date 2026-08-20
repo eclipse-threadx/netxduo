@@ -331,6 +331,7 @@ set(test_utility_files
   ${UTILITY_SOURCE_DIR}/tls_test_get_external_test_process_output.c
   ${UTILITY_SOURCE_DIR}/tls_test_launch_external_test_process.c
   ${UTILITY_SOURCE_DIR}/tls_test_launch_external_test_process_in_background.c
+  ${UTILITY_SOURCE_DIR}/tls_test_launch_external_test_server.c
   ${UTILITY_SOURCE_DIR}/tls_test_director_clean_all.c
   ${UTILITY_SOURCE_DIR}/tls_test_director_cleanup_registered_instances.c
   ${UTILITY_SOURCE_DIR}/tls_test_director_create.c

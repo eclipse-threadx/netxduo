@@ -28,33 +28,6 @@ CHAR* external_cmd[] = { "openssl", "s_server", "-rev",
 
 extern TLS_TEST_SEMAPHORE* semaphore_echo_server_prepared;
 
-#define OPENSSL_SERVER_READY_ATTEMPTS     10U
-#define OPENSSL_SERVER_READY_OUTPUT_SIZE  256U
-
-/* Wait until the OpenSSL server is listening for TCP connections.  */
-static INT openssl_server_wait_until_ready(VOID)
-{
-CHAR *external_cmd[] = { "ss", "-H", "-ltn", "sport", "=", ":" DEVICE_SERVER_PORT_STRING, (CHAR *)NULL};
-CHAR output[OPENSSL_SERVER_READY_OUTPUT_SIZE];
-ULONG output_length;
-UINT attempt;
-INT exit_status;
-INT status;
-
-    for (attempt = 0U; attempt < OPENSSL_SERVER_READY_ATTEMPTS; attempt++)
-    {
-        output_length = (ULONG)sizeof(output);
-        status = tls_test_get_external_test_process_output(&exit_status, external_cmd, output, &output_length);
-        if ((TLS_TEST_SUCCESS == status) && (0 == exit_status) && (0U < output_length))
-        {
-            return TLS_TEST_SUCCESS;
-        }
-        tls_test_sleep(1);
-    }
-
-    return TLS_TEST_INSTANCE_FAILED;
-}
-
 /* Openssl echo server entry. */
 INT openssl_echo_server_entry(TLS_TEST_INSTANCE* instance_ptr)
 {
@@ -62,7 +35,6 @@ INT openssl_echo_server_entry(TLS_TEST_INSTANCE* instance_ptr)
 #if !defined(NX_SECURE_TLS_CLIENT_DISABLED) && defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE)
 
 INT status, exit_status;
-TLS_TEST_EXTERNAL_TEST_PROCESS external_test_process;
 
 /* Added -rev option to send reverse text received from clients back to the client. Added -naccept 1 to close the server after one tls session. */
 CHAR* external_cmd[] = { "openssl", "s_server", "-rev", "-key", "key.pem", "-cert", "cert.pem", "-naccept", "1", "-tls1_2",
@@ -73,23 +45,9 @@ CHAR* external_cmd[] = { "openssl", "s_server", "-rev", "-key", "key.pem", "-cer
                          "-port", DEVICE_SERVER_PORT_STRING,
                          (CHAR*)NULL};
 
-    /* Launch the OpenSSL server in the background. */
-    status = tls_test_launch_external_test_process_in_background(&external_test_process, external_cmd);
-    return_value_if_fail(TLS_TEST_SUCCESS == status, status);
-
-    /* Notify the client only after the OpenSSL server is listening. */
-    status = openssl_server_wait_until_ready();
-    if (TLS_TEST_SUCCESS != status)
-    {
-        status = tls_test_kill_external_test_process(&external_test_process);
-        status += tls_test_wait_external_test_process(&external_test_process, &exit_status);
-        return_value_if_fail(TLS_TEST_SUCCESS == status, TLS_TEST_UNKNOWN_TYPE_ERROR);
-        return TLS_TEST_INSTANCE_FAILED;
-    }
-    tls_test_semaphore_post(semaphore_echo_server_prepared);
-
-    /* Wait for the OpenSSL server to finish the client connection. */
-    status = tls_test_wait_external_test_process(&external_test_process, &exit_status);
+    /* Launch the OpenSSL server and notify the client when it is ready. */
+    status = tls_test_launch_external_test_server(&exit_status, external_cmd, semaphore_echo_server_prepared,
+                                                   DEVICE_SERVER_PORT_STRING, TLS_TEST_EXTERNAL_SERVER_TCP);
     return_value_if_fail(TLS_TEST_SUCCESS == status, status);
 
 #if 0 /* openssl exit with 0 no matter TLS session is established or not. */
