@@ -35,11 +35,10 @@ CHAR* external_cmd[] = { "openssl_echo_server.sh",
                          "-named_curve", "secp384r1", 
                          "-stateless", (CHAR*)NULL};
 
-    /* Post the semaphore to notify that the reverse echo server is prepared. */
-    tls_test_semaphore_post(semaphore_echo_server_prepared);
-
-    /* Launch the openssl server. */
-    tls_test_launch_external_test_process(&exit_status, external_cmd);
+    /* Launch the OpenSSL server and notify the client when it is ready. */
+    status = tls_test_launch_external_test_server(&exit_status, external_cmd, semaphore_echo_server_prepared,
+                                                   DEVICE_SERVER_PORT_STRING, TLS_TEST_EXTERNAL_SERVER_TCP);
+    return_value_if_fail(TLS_TEST_SUCCESS == status, status);
 
 #if 0 /* openssl exit with 0 no matter TLS session is established or not. */
     /* Check for the exit status of external program. */
