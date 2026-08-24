@@ -20,4 +20,4 @@ arg2=$2
 shift 2
 
 cd "$( dirname "$0" )"
-echo "hello" | openssl s_client -connect "$arg1":"$arg2" -ign_eof $@
+echo "hello" | openssl s_client -connect "$arg1":"$arg2" -ign_eof "$@"

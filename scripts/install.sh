@@ -10,21 +10,23 @@
 # SPDX-License-Identifier: MIT
 ##############################################################################
 
-#
+set -euo pipefail
 
-# Remove large folder
-rm -rf /opt/hostedtoolcache
-
-# Install necessary softwares for Ubuntu.
+# Install the host tools used by the CMake regression suites on Ubuntu 24.04.
+readonly GCOVR_VERSION="8.6"
+readonly GCOVR_PREFIX="/opt/netxduo/gcovr-${GCOVR_VERSION}"
 
 sudo dpkg --add-architecture i386
 sudo apt-get update
 sudo apt-get install -y \
-    gcc-multilib \
+    gcc-14 \
+    g++-14 \
+    gcc-14-multilib \
+    g++-14-multilib \
     git \
-    g++ \
-    python3-pip \
+    cmake \
     ninja-build \
+    python3-venv \
     unifdef \
     p7zip-full \
     tofrodos \
@@ -32,14 +34,16 @@ sudo apt-get install -y \
     gawk \
     libssl-dev:i386 \
     libcmocka-dev:i386 \
-    gcc-arm-none-eabi \
-    software-properties-common
+    gcc-arm-none-eabi
 
-wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
-CODENAME=$(lsb_release -c | cut -f2 -d':' | sed 's/\t//')
-apt-add-repository "deb https://apt.kitware.com/ubuntu/ $CODENAME main"
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 140
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 140
+sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-14 140
 
-python3 -m pip install --upgrade pip
-pip3 install gcovr==4.1
-pip install --upgrade cmake
-
+# gcovr 8.x is required for GCC 14's coverage data and JSON gcov format.
+sudo python3 -m venv "${GCOVR_PREFIX}"
+sudo "${GCOVR_PREFIX}/bin/python" -m pip install \
+    --disable-pip-version-check \
+    --no-cache-dir \
+    "gcovr==${GCOVR_VERSION}"
+sudo ln -sfn "${GCOVR_PREFIX}/bin/gcovr" /usr/local/bin/gcovr

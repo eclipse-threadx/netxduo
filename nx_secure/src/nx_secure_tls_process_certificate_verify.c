@@ -235,17 +235,23 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
              NX_SECURE_MEMCPY(&handshake_hash[64], client_context, 34); /* Use case of memcpy is verified. */
          }
 
-         /* Determine hash method and transcript hash length before copying.
-            hash_method drives the transcript hash size: 32 (SHA-256), 48 (SHA-384), 64 (SHA-512). */
+         /* hash_method is the peer's signature scheme's hash: it digests the content assembled here
+            and, for RSA-PSS, parameterizes the PSS encoding. */
          hash_method = crypto_methods -> nx_secure_x509_hash_method;
 
          metadata = tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch;
          metadata_size = tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch_size;
 
          {
-         UINT transcript_hash_len = (UINT)(hash_method -> nx_crypto_ICV_size_in_bits >> 3);
+         /* The transcript hash was computed with the negotiated ciphersuite's hash (RFC 8446 §4.4.3),
+            so its length comes from the ciphersuite — NOT from the signature scheme's hash, which can
+            differ (e.g. ecdsa_secp384r1_sha384 signature with the TLS_AES_128_GCM_SHA256 suite). The
+            SHA-256 fallback mirrors _nx_secure_tls_1_3_transcript_hash_save. */
+         const NX_CRYPTO_METHOD *transcript_hash_method = (tls_session -> nx_secure_tls_session_ciphersuite != NX_NULL) ?
+             tls_session -> nx_secure_tls_session_ciphersuite -> nx_secure_tls_hash :
+             tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_handshake_hash_sha256_method;
+         UINT transcript_hash_len = (UINT)(transcript_hash_method -> nx_crypto_ICV_size_in_bits >> 3);
 
-         /* Copy in transcript hash — length depends on negotiated hash algorithm. */
          NX_SECURE_MEMCPY(&handshake_hash[64 + 34], transcript_hash, transcript_hash_len); /* Use case of memcpy is verified. */
 
          handshake_hash_length = 64u + 34u + transcript_hash_len;

@@ -2,16 +2,16 @@ Certificate:
     Data:
         Version: 3 (0x2)
         Serial Number: 6 (0x6)
-    Signature Algorithm: ecdsa-with-SHA256
-        Issuer: C=CN, ST=SH, L=SH, O=EL, OU=EL, CN=ECCA4
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer: C = CN, ST = SH, L = SH, O = EL, OU = EL, CN = ECCA4
         Validity
-            Not Before: May 25 04:45:33 2018 GMT
-            Not After : May 25 04:45:33 2019 GMT
-        Subject: C=CN, ST=SH, O=EL, OU=EL, CN=ECTestServer7_256
+            Not Before: Aug 13 19:56:58 2026 GMT
+            Not After : Aug 13 19:56:58 2046 GMT
+        Subject: C = CN, ST = SH, O = EL, OU = EL, CN = ECTestServer7_256
         Subject Public Key Info:
             Public Key Algorithm: id-ecPublicKey
                 Public-Key: (256 bit)
-                pub: 
+                pub:
                     04:ee:e8:6b:81:32:42:79:9e:16:27:71:3b:c6:62:
                     2c:ea:50:83:13:be:07:20:96:f3:9e:b4:c9:e0:cc:
                     f9:97:3b:be:5c:ef:bc:39:c0:33:06:27:6e:a6:f6:
@@ -20,36 +20,38 @@ Certificate:
                 ASN1 OID: prime256v1
                 NIST CURVE: P-256
         X509v3 extensions:
-            X509v3 Authority Key Identifier: 
+            X509v3 Basic Constraints:
+                CA:FALSE
+            X509v3 Key Usage:
+                Digital Signature, Non Repudiation, Key Encipherment, Data Encipherment, Key Agreement
+            X509v3 Extended Key Usage:
+                TLS Web Server Authentication, TLS Web Client Authentication, Code Signing, E-mail Protection, Time Stamping
+            X509v3 Subject Key Identifier:
+                07:89:34:CF:67:2D:BE:EC:59:F7:2D:50:29:2C:A6:FF:B4:50:FB:59
+            X509v3 Authority Key Identifier:
                 DirName:/C=CN/ST=SH/L=SH/O=EL/OU=EL/CN=ECCA4
                 serial:BC:64:D9:FE:6A:91:0E:C2
-
-            X509v3 Basic Constraints: 
-                CA:FALSE
-            X509v3 Key Usage: 
-                Digital Signature, Non Repudiation, Key Encipherment, Data Encipherment, Key Agreement
-            X509v3 Extended Key Usage: 
-                TLS Web Server Authentication, TLS Web Client Authentication, Code Signing, E-mail Protection, Time Stamping
     Signature Algorithm: ecdsa-with-SHA256
-         30:66:02:31:00:8f:cd:27:83:3b:3a:93:a2:1c:1a:8d:be:02:
-         07:9f:6c:f5:28:83:91:7d:1c:49:f2:83:40:4a:78:11:b0:a0:
-         f4:50:1b:ba:79:59:f6:15:70:37:9f:0c:ae:1b:3e:25:9e:02:
-         31:00:e3:91:01:6a:26:98:86:7d:90:75:8b:1d:aa:cf:12:e5:
-         99:96:b4:49:ed:90:dc:45:f3:ee:12:11:45:db:94:69:da:5c:
-         7d:f8:53:17:05:b3:57:82:06:91:b9:db:a1:09
+    Signature Value:
+        30:64:02:30:79:2f:7c:d1:2d:95:5d:b9:3b:ed:d9:4d:52:ec:
+        7f:c2:17:a5:67:a2:be:ca:87:c2:ee:53:8a:af:d9:6a:bd:37:
+        a5:00:ca:ec:48:7f:4e:76:95:d5:66:a7:86:fd:2f:26:02:30:
+        6e:d0:e2:32:06:e8:7c:a8:1a:78:9e:38:43:97:c1:8a:6a:f3:
+        ce:b8:68:cd:b8:82:02:d4:68:97:f5:b9:48:33:5f:7c:79:2f:
+        74:9e:44:e3:3a:a2:fe:2e:e5:6d:b6:66
 -----BEGIN CERTIFICATE-----
-MIICdzCCAfygAwIBAgIBBjAKBggqhkjOPQQDAjBRMQswCQYDVQQGEwJDTjELMAkG
+MIIClDCCAhugAwIBAgIBBjAKBggqhkjOPQQDAjBRMQswCQYDVQQGEwJDTjELMAkG
 A1UECAwCU0gxCzAJBgNVBAcMAlNIMQswCQYDVQQKDAJFTDELMAkGA1UECwwCRUwx
-DjAMBgNVBAMMBUVDQ0E0MB4XDTE4MDUyNTA0NDUzM1oXDTE5MDUyNTA0NDUzM1ow
+DjAMBgNVBAMMBUVDQ0E0MB4XDTI2MDgxMzE5NTY1OFoXDTQ2MDgxMzE5NTY1OFow
 UDELMAkGA1UEBhMCQ04xCzAJBgNVBAgMAlNIMQswCQYDVQQKDAJFTDELMAkGA1UE
 CwwCRUwxGjAYBgNVBAMMEUVDVGVzdFNlcnZlcjdfMjU2MFkwEwYHKoZIzj0CAQYI
 KoZIzj0DAQcDQgAE7uhrgTJCeZ4WJ3E7xmIs6lCDE74HIJbznrTJ4Mz5lzu+XO+8
-OcAzBidupva6JY9AcSqxoURPNwUXRmQ7KXRisKOBxTCBwjBrBgNVHSMEZDBioVWk
-UzBRMQswCQYDVQQGEwJDTjELMAkGA1UECAwCU0gxCzAJBgNVBAcMAlNIMQswCQYD
-VQQKDAJFTDELMAkGA1UECwwCRUwxDjAMBgNVBAMMBUVDQ0E0ggkAvGTZ/mqRDsIw
-CQYDVR0TBAIwADALBgNVHQ8EBAMCA/gwOwYDVR0lBDQwMgYIKwYBBQUHAwEGCCsG
-AQUFBwMCBggrBgEFBQcDAwYIKwYBBQUHAwQGCCsGAQUFBwMIMAoGCCqGSM49BAMC
-A2kAMGYCMQCPzSeDOzqTohwajb4CB59s9SiDkX0cSfKDQEp4EbCg9FAbunlZ9hVw
-N58Mrhs+JZ4CMQDjkQFqJpiGfZB1ix2qzxLlmZa0Se2Q3EXz7hIRRduUadpcffhT
-FwWzV4IGkbnboQk=
+OcAzBidupva6JY9AcSqxoURPNwUXRmQ7KXRisKOB5DCB4TAJBgNVHRMEAjAAMAsG
+A1UdDwQEAwID+DA7BgNVHSUENDAyBggrBgEFBQcDAQYIKwYBBQUHAwIGCCsGAQUF
+BwMDBggrBgEFBQcDBAYIKwYBBQUHAwgwHQYDVR0OBBYEFAeJNM9nLb7sWfctUCks
+pv+0UPtZMGsGA1UdIwRkMGKhVaRTMFExCzAJBgNVBAYTAkNOMQswCQYDVQQIDAJT
+SDELMAkGA1UEBwwCU0gxCzAJBgNVBAoMAkVMMQswCQYDVQQLDAJFTDEOMAwGA1UE
+AwwFRUNDQTSCCQC8ZNn+apEOwjAKBggqhkjOPQQDAgNnADBkAjB5L3zRLZVduTvt
+2U1S7H/CF6Vnor7Kh8LuU4qv2Wq9N6UAyuxIf052ldVmp4b9LyYCMG7Q4jIG6Hyo
+GnieOEOXwYpq8864aM24ggLUaJf1uUgzX3x5L3SeROM6ov4u5W22Zg==
 -----END CERTIFICATE-----
