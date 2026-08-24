@@ -52,7 +52,7 @@ extern   "C" {
 #endif
 
 #ifndef __CCRX__
-#include "time.h"
+#include <time.h>
 #endif /* __CCRX__ */
 
 /* Bring in the necessary NetX include file.  */
@@ -233,7 +233,7 @@ extern   "C" {
 #define nx_bsd_ioctl            ioctl
 #define nx_bsd_inet_addr        inet_addr
 #define nx_bsd_inet_ntoa        inet_ntoa
-#define inet_aton(address_buffer_ptr, addr) nx_bsd_inet_aton_impl(address_buffer_ptr, addr, NX_TRUE)
+#define nx_bsd_inet_aton        inet_aton
 #define nx_bsd_inet_pton        inet_pton
 #define nx_bsd_inet_ntop        inet_ntop
 #define nx_bsd_listen           listen
@@ -291,6 +291,7 @@ extern   "C" {
 #define IPPROTO_RAW                         255                     /* Raw Socket                                                          */
 
 /* Define supported flags for 'send' and 'recv'. */
+#define MSG_OOB                             0x01                    /* Out-of-band data      */
 #define MSG_PEEK                            0x02                    /* Peek incoming message */
 #define MSG_DONTWAIT                        0x40                    /* Nonblocking IO        */
 
@@ -908,6 +909,12 @@ struct nx_bsd_pollfd
 #define NX_BSD_IPV6_ADDR_PER_HOST 2
 #endif /* NX_BSD_IPV6_ADDR_PER_HOST */
 
+/* Defines the depth of the per socket out-of-band (TCP urgent) data queue.  POSIX only
+   guarantees a single OOB byte per socket, which is the default. */
+#ifndef NX_BSD_SOCKET_OOB_QUEUE_SIZE
+#define NX_BSD_SOCKET_OOB_QUEUE_SIZE 1
+#endif /* NX_BSD_SOCKET_OOB_QUEUE_SIZE */
+
 /* Define the BSD socket status bits. */
 #define NX_BSD_SOCKET_CONNECTION_INPROGRESS      1
 #define NX_BSD_SOCKET_ERROR                      (1 << 1)
@@ -925,6 +932,11 @@ struct nx_bsd_pollfd
 #define NX_BSD_SOCKET_ACCEPTING                  (1 << 12)
 #define NX_BSD_SOCKET_CONNECTION_REQUEST         (1 << 13)
 #define NX_BSD_SOCKET_DISCONNECTION_REQUEST      (1 << 14)
+/* An urgent byte has been signalled to the application but not yet acknowledged.  This is
+   the exceptfds source of truth for select(). */
+#define NX_BSD_SOCKET_OOB_MARK                   (1 << 15)
+/* nx_bsd_socket_oob_sequence holds the sequence number of an already processed urgent byte. */
+#define NX_BSD_SOCKET_OOB_SEQUENCE_VALID         (1 << 16)
 
 /* Define the BSD socket options bits. */
 #define NX_BSD_SOCKET_ENABLE_RAW_SOCKET             1
@@ -980,6 +992,18 @@ typedef struct NX_BSD_SOCKET_STRUCT
                         *nx_bsd_socket_previous;
 
     INT                 nx_bsd_socket_id;
+
+    /* Out-of-band (TCP urgent) data queue. */
+    UCHAR               nx_bsd_socket_oob_queue[NX_BSD_SOCKET_OOB_QUEUE_SIZE];
+    UCHAR               nx_bsd_socket_oob_read_index;
+    UCHAR               nx_bsd_socket_oob_write_index;
+    UCHAR               nx_bsd_socket_oob_count;
+
+    /* Sequence number of the urgent byte last handed to the queue.  Several segments may
+       carry the URG bit for the same urgent byte, so the sequence number is what keeps the
+       byte from being queued twice. */
+    ULONG               nx_bsd_socket_oob_sequence;
+
 #ifdef NX_BSD_RAW_PPPOE_SUPPORT
     UINT                nx_bsd_socket_create_id;
 #endif /* NX_BSD_RAW_PPPOE_SUPPORT */
@@ -1004,7 +1028,7 @@ INT  nx_bsd_getsockname(INT sockID, struct nx_bsd_sockaddr *localAddress, INT *a
 INT  nx_bsd_ioctl(INT sockID, INT command, INT *result);
 nx_bsd_in_addr_t nx_bsd_inet_addr(const CHAR *buffer);
 CHAR *nx_bsd_inet_ntoa(struct nx_bsd_in_addr address_to_convert);
-INT  nx_bsd_inet_aton_impl(const CHAR *address_buffer_ptr, struct nx_bsd_in_addr *addr, INT use_strict_parsing);
+INT  nx_bsd_inet_aton(const CHAR *cp_arg, struct nx_bsd_in_addr *addr);
 INT  nx_bsd_inet_pton(INT af, const CHAR *src, VOID *dst);
 const CHAR *nx_bsd_inet_ntop(INT af, const VOID *src, CHAR *dst, nx_bsd_socklen_t size);
 INT  nx_bsd_listen(INT sockID, INT backlog);

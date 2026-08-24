@@ -136,7 +136,9 @@ INT                         from_len;
 INT                         to_len;
 CHAR                        buf[64];
 INT                         ret;
-UINT                        actual_status;
+ULONG                       actual_status;
+
+    printf("NetX Test:   Basic BSD recvfromto Test.....................");
 
     /* Wait for IP stack initialisation. */
     nx_ip_status_check(&ip_0, NX_IP_INITIALIZE_DONE, &actual_status,
@@ -147,6 +149,7 @@ UINT                        actual_status;
     if (sock < 0)
     {
         error_counter++;
+        printf("ERROR!\n");
         test_control_return(1);
         return;
     }
@@ -160,6 +163,7 @@ UINT                        actual_status;
     {
         error_counter++;
         soc_close(sock);
+        printf("ERROR!\n");
         test_control_return(1);
         return;
     }
@@ -207,6 +211,7 @@ UINT                        actual_status;
     if (sock < 0)
     {
         error_counter++;
+        printf("ERROR!\n");
         test_control_return(1);
         return;
     }
@@ -220,6 +225,7 @@ UINT                        actual_status;
     {
         error_counter++;
         soc_close(sock);
+        printf("ERROR!\n");
         test_control_return(1);
         return;
     }
@@ -237,24 +243,24 @@ UINT                        actual_status;
 
     soc_close(sock);
 
-    /* --- Test 3: inet_aton() now rejects abbreviated IPv4 forms (strict parsing) --- */
+    /* --- Test 3: inet_aton() still accepts abbreviated IPv4 forms --- */
     {
     struct in_addr  in_val;
     INT             rc;
 
-        /* a.b format (11.657930) must be rejected under strict parsing. */
+        /* a.b format: 11.657930 == 11.0x0a0a0a == 11.10.10.10 */
         rc = inet_aton("11.657930", &in_val);
-        if (rc != 0)
+        if ((rc != 1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
             error_counter++;
 
-        /* a.b.c format (11.10.2570) must be rejected under strict parsing. */
+        /* a.b.c format: 11.10.2570 == 11.10.0x0a0a == 11.10.10.10 */
         rc = inet_aton("11.10.2570", &in_val);
-        if (rc != 0)
+        if ((rc != 1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
             error_counter++;
 
         /* standard dotted-decimal must still work */
         rc = inet_aton("11.10.10.10", &in_val);
-        if (rc == 0)
+        if ((rc != 1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
             error_counter++;
     }
 
@@ -267,7 +273,7 @@ static void ntest_1_entry(ULONG thread_input)
 NX_UDP_SOCKET   udp_socket;
 NX_PACKET      *packet_ptr;
 NXD_ADDRESS     dest_addr;
-UINT            actual_status;
+ULONG           actual_status;
 
     nx_ip_status_check(&ip_1, NX_IP_INITIALIZE_DONE, &actual_status,
                        NX_IP_PERIODIC_RATE);
@@ -299,10 +305,22 @@ UINT            actual_status;
 
     /* Wait for receiver to finish then report result. */
     tx_semaphore_get(&sema_done, 5 * NX_IP_PERIODIC_RATE);
-    test_control_return(error_counter ? 1 : 0);
+
+    if (error_counter)
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+    }
+    else
+    {
+        printf("SUCCESS!\n");
+        test_control_return(0);
+    }
 }
 
 #else  /* !(NX_BSD_ENABLE && !NX_DISABLE_IPV4) */
+extern void test_control_return(UINT status);
+
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
 #else
@@ -310,6 +328,9 @@ void netx_bsd_recvfromto_test_application_define(void *first_unused_memory)
 #endif
 {
     NX_PARAMETER_NOT_USED(first_unused_memory);
+
+    printf("NetX Test:   Basic BSD recvfromto Test.....................N/A\n");
+
     test_control_return(3); /* skip */
 }
 #endif /* NX_BSD_ENABLE && !NX_DISABLE_IPV4 */

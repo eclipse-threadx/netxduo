@@ -59,15 +59,12 @@ int    status;
     if((status !=  1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
         error_counter++;
 
-    /* Abbreviated forms (fewer than four dotted numbers) are now rejected by
-       inet_aton(), which performs strict parsing. The a.b.c form must fail. */
     status = inet_aton("11.10.2570", &in_val); /* 2570 == 0x0a0a */
-    if(status != 0)
+    if((status !=  1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
         error_counter++;
-
-    /* The a.b form must also fail under strict parsing. */
+    
     status = inet_aton("11.657930", &in_val); /* 657930 == 0x0a0a0a */
-    if(status != 0)
+    if((status !=  1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
         error_counter++;
 
     /* octal */
@@ -83,6 +80,26 @@ int    status;
     /* decimal, octal and hex */
     status = inet_aton("11.012.0xa.10", &in_val);
     if((status !=  1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
+        error_counter++;
+
+    /* space */
+    status = inet_aton("11.10.10.10 ", &in_val);
+    if((status !=  1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
+        error_counter++;
+
+    /* horizontal tab */
+    status = inet_aton("11.10.10.10\t", &in_val);
+    if((status !=  1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
+        error_counter++;
+
+    /* carriage return */
+    status = inet_aton("11.10.10.10\r", &in_val);
+    if((status !=  1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
+        error_counter++;
+
+    /* DC4 (0x14) is not white space and must be rejected */
+    status = inet_aton("11.10.10.10\x14", &in_val);
+    if(status != 0)
         error_counter++;
 
     if(error_counter)

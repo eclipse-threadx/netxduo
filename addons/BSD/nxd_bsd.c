@@ -153,6 +153,9 @@ static VOID  nx_bsd_tcp_establish_notify(NX_TCP_SOCKET *socket_ptr);
 #endif /* NX_DISABLE_EXTENDED_NOTIFY_SUPPORT */
 static VOID  nx_bsd_select_wakeup(UINT sock_id, UINT fdsets);
 static VOID  nx_bsd_set_error_code(NX_BSD_SOCKET *bsd_socket_ptr, UINT status_code);
+static UINT  nx_bsd_tcp_oob_packet_process(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET *packet_ptr);
+static VOID  nx_bsd_tcp_oob_data_process(NX_BSD_SOCKET *bsd_socket_ptr);
+static INT   nx_bsd_tcp_oob_data_get(NX_BSD_SOCKET *bsd_socket_ptr, struct nx_bsd_iovec *iov, size_t iovlen);
 static VOID  nx_bsd_udp_packet_received(INT sockID, NX_PACKET *packet_ptr);
 static UINT  nx_bsd_tcp_syn_received_notify(NX_TCP_SOCKET *socket_ptr, NX_PACKET *packet_ptr);
 static INT   nx_bsd_tcp_create_listen_socket(INT master_sockid, INT backlog);
@@ -170,19 +173,20 @@ static INT   nx_bsd_recv_internal(INT sockID, struct nx_bsd_iovec *iov, size_t i
 static VOID  _nxd_bsd_ipv6_packet_send(NX_PACKET *packet_ptr, ULONG *src_addr, ULONG *dest_addr);
 #endif /* FEATURE_NX_IPV6 */
 
+static INT   nx_bsd_inet_pton_ipv4(const CHAR *address_buffer_ptr, struct nx_bsd_in_addr *addr);
 static INT   inet_ntoa_internal(const VOID *src, CHAR *dst, ULONG dst_size);
 static INT   bsd_string_to_number(const CHAR *string, UINT *number);
 static ULONG _nx_bsd_string_length(CHAR * string);
 
 #ifdef NX_BSD_RAW_PPPOE_SUPPORT
 static INT   nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength,
-                                          INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen);
+                                          INT flags, const struct nx_bsd_sockaddr* destAddr, INT destAddrLen);
 static UINT  nx_bsd_socket_create_id = 0;
 #endif /* NX_BSD_RAW_PPPOE_SUPPORT */
 
 #ifdef NX_BSD_RAW_SUPPORT
 static INT   _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength,
-                                              INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen);
+                                              INT flags, const struct nx_bsd_sockaddr* destAddr, INT destAddrLen);
 static VOID  _nx_bsd_hardware_packet_received(NX_PACKET *packet_ptr, UCHAR *consumed);
 #ifdef NX_ENABLE_VLAN
 static UINT  _nx_bsd_ethernet_receive_notify(NX_IP *ip_ptr, UINT interface_index, NX_PACKET *packet_ptr,
@@ -2636,6 +2640,7 @@ INT                 ret = 0;
 INT                 connected = 0;
 ULONG               requested_events;
 INT                 secondary_socket_id = 0;
+INT                 i;
 #ifndef NX_DISABLE_IPV4
 struct nx_bsd_sockaddr_in
                     peer4_address;
@@ -3019,10 +3024,27 @@ struct nx_bsd_sockaddr_in6
 
     if (ret < 0)
     {
+
         /* Could not create the next listen socket (e.g. all BSD socket slots are in use).
-           Mark the secondary slot invalid so it is not reused, but still return the
-           already-accepted socket descriptor to the caller. */
-        (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id = NX_BSD_MAX_SOCKETS;
+           On success nx_bsd_tcp_create_listen_socket() repoints every master socket on this
+           port to the newly created secondary socket.  That did not happen here, so the socket
+           just handed to the caller is still referenced as the secondary socket by this master
+           socket and by any other master socket sharing it (SO_REUSEADDR).  Invalidate every
+           one of those references: the accepted socket belongs to the caller now, so it must
+           not be handed out again, and it must not be disconnected and released when one of
+           those master sockets is closed.  Each master socket recovers on its own by
+           allocating a new secondary socket in its next accept() or select() call. */
+        for(i = 0; i < NX_BSD_MAX_SOCKETS; i++)
+        {
+
+            if((nx_bsd_socket_array[i].nx_bsd_socket_protocol == NX_PROTOCOL_TCP) &&
+               (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET) &&
+               (nx_bsd_socket_array[i].nx_bsd_socket_union_id.nx_bsd_socket_secondary_socket_id == secondary_socket_id))
+            {
+
+                (nx_bsd_socket_array[i].nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id = NX_BSD_MAX_SOCKETS;
+            }
+        }
     }
 
     /* Make sure this thread is still the owner.  */
@@ -3108,6 +3130,16 @@ UINT                wait_option;
 ULONG               data_sent = (ULONG)msgLength;
 
     bsd_socket_ptr = &nx_bsd_socket_array[sockID];
+
+    /* Is the caller after out-of-band data? */
+    if (flags & MSG_OOB)
+    {
+
+        nx_bsd_set_errno(EOPNOTSUPP);
+
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+        return(NX_SOC_ERROR);
+    }
 
 #ifndef NX_DISABLE_IPV4
     /* Determine the socket family for allocating a packet. */
@@ -3832,8 +3864,8 @@ USHORT               peer_port = 0;
 
                 /* This is for an IPv4 packet. */
                 peer_ip_address.nxd_ip_version = NX_IP_VERSION_V4;
-                peer_ip_address.nxd_ip_address.v4 = htonl(((struct nx_bsd_sockaddr_in *) destAddr) -> sin_addr.s_addr);
-                peer_port = htons(((struct nx_bsd_sockaddr_in *) destAddr) -> sin_port);
+                peer_ip_address.nxd_ip_address.v4 = htonl(((const struct nx_bsd_sockaddr_in *) destAddr) -> sin_addr.s_addr);
+                peer_port = htons(((const struct nx_bsd_sockaddr_in *) destAddr) -> sin_port);
 
                 /* Local interface ID is set to invalid value, so the send routine needs to
                    find the best interface to send the packet based on destination IP address. */
@@ -3847,12 +3879,12 @@ USHORT               peer_port = 0;
                 /* This is for an IPv6 packet. Set the NetX Duo IP address version. */
                 peer_ip_address.nxd_ip_version = NX_IP_VERSION_V6;
 
-                peer_ip_address.nxd_ip_address.v6[0] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[0]);
-                peer_ip_address.nxd_ip_address.v6[1] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[1]);
-                peer_ip_address.nxd_ip_address.v6[2] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[2]);
-                peer_ip_address.nxd_ip_address.v6[3] = ntohl(((struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[3]);
+                peer_ip_address.nxd_ip_address.v6[0] = ntohl(((const struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[0]);
+                peer_ip_address.nxd_ip_address.v6[1] = ntohl(((const struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[1]);
+                peer_ip_address.nxd_ip_address.v6[2] = ntohl(((const struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[2]);
+                peer_ip_address.nxd_ip_address.v6[3] = ntohl(((const struct nx_bsd_sockaddr_in6*)destAddr) -> sin6_addr._S6_un._S6_u32[3]);
 
-                peer_port = htons(((struct nx_bsd_sockaddr_in6 *) destAddr) -> sin6_port);
+                peer_port = htons(((const struct nx_bsd_sockaddr_in6 *) destAddr) -> sin6_port);
 
             }
 #endif
@@ -4224,6 +4256,19 @@ struct nx_bsd_sockaddr_in6
            operation was executed as part of the connect call) and is able to
            handle another "connect" call, or be closed. */
         return(NX_SOC_ERROR);
+    }
+
+    /* Is the caller after out-of-band data? */
+    if (flags & MSG_OOB)
+    {
+    INT oob_status;
+
+        oob_status =  nx_bsd_tcp_oob_data_get(bsd_socket_ptr, iov, iovlen);
+
+        /* Release the protection mutex.  */
+        tx_mutex_put(nx_bsd_protection_ptr);
+
+        return(oob_status);
     }
 
     /* Set pointers to the BSD NetX Duo sockets.  */
@@ -4935,6 +4980,13 @@ UINT                 index;
     bsd_socket_ptr -> nx_bsd_socket_received_packet_count = 0;
     bsd_socket_ptr -> nx_bsd_socket_received_packet_count_max = 0;
 
+    /* Drop any urgent data the application never took. */
+    bsd_socket_ptr -> nx_bsd_socket_oob_read_index = 0;
+    bsd_socket_ptr -> nx_bsd_socket_oob_write_index = 0;
+    bsd_socket_ptr -> nx_bsd_socket_oob_count = 0;
+    bsd_socket_ptr -> nx_bsd_socket_status_flags &=
+        (ULONG)(~(NX_BSD_SOCKET_OOB_MARK | NX_BSD_SOCKET_OOB_SEQUENCE_VALID));
+
     /* Now delete the underlying TCP or UDP socket. */
 
     /* Is this a TCP socket? */
@@ -5008,11 +5060,44 @@ UINT                 index;
 
         }
 
-        if(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET
-            && (bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id == NX_BSD_MAX_SOCKETS)
+        if((bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET) &&
+           ((bsd_socket_ptr -> nx_bsd_socket_union_id).nx_bsd_socket_secondary_socket_id >= NX_BSD_MAX_SOCKETS))
         {
-            /* Unlisten in case of failure in accepting connection due to resource limitation. */
-            nx_tcp_server_socket_unlisten(nx_bsd_default_ip, tcp_socket_ptr -> nx_tcp_socket_port);
+
+            /* This master socket ran out of resources while accepting a connection, so its secondary
+               socket id was marked invalid.  The shared-secondary scan below cannot reach it (that scan
+               requires a valid secondary id), so the listen left on this port by the failed accept()
+               would otherwise leak.  Several masters can share one port's listen (SO_REUSEADDR), so only
+               the last master on the port may release it: if another in-use master is still listening on
+               this local port, it will release the listen from its own close, so skip it here.  This is
+               the port-keyed analog of the shared-secondary scan below.  The port comes from the BSD
+               socket, not from the NetX socket: a master socket that joined the port through the
+               SO_REUSEADDR branch of bind() shares the secondary socket without its own NetX socket
+               being bound, so nx_tcp_socket_port is still zero for it. */
+            for(i = 0; i < NX_BSD_MAX_SOCKETS; i++)
+            {
+
+                /* Skip the master socket being closed. */
+                if(i == sockID)
+                    continue;
+
+                /* Stop if another in-use TCP master socket is still listening on the same port. */
+                if((nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE) &&
+                   (nx_bsd_socket_array[i].nx_bsd_socket_protocol == NX_PROTOCOL_TCP) &&
+                   (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET) &&
+                   (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_ENABLE_LISTEN) &&
+                   (nx_bsd_socket_array[i].nx_bsd_socket_local_port == bsd_socket_ptr -> nx_bsd_socket_local_port))
+                {
+                    break;
+                }
+            }
+
+            /* Unlisten only when this was the last master socket on the port, to release the listen
+               left behind by the failed accept() due to resource limitation. */
+            if(i == NX_BSD_MAX_SOCKETS)
+            {
+                nx_tcp_server_socket_unlisten(nx_bsd_default_ip, bsd_socket_ptr -> nx_bsd_socket_local_port);
+            }
         }
 
         /* Now we can delete the NetX TCP socket.  */
@@ -5819,7 +5904,7 @@ UINT    size;
 /*    Application Code                                                    */
 /*                                                                        */
 /**************************************************************************/
-INT nx_bsd_inet_aton_impl(const CHAR *address_buffer_ptr, struct nx_bsd_in_addr *addr, INT use_strict_parsing)
+INT nx_bsd_inet_aton(const CHAR *address_buffer_ptr, struct nx_bsd_in_addr *addr)
 {
 ULONG value;
 INT   base = 10, ip_address_index;
@@ -6009,11 +6094,6 @@ UINT  dot_flag;
            value |= ip_address_number[i] << (24 - (i*8));
        }
     }
-    else if (use_strict_parsing == NX_TRUE)
-    {
-        /* Strict parsing is enabled, but we have less than 4 numbers in the input.  This is not valid. */
-        return 0;
-    }
     /* Most common input... */
     else if (ip_address_index == 1)
     {
@@ -6100,7 +6180,7 @@ nx_bsd_in_addr_t nx_bsd_inet_addr(const CHAR *buffer)
 struct  nx_bsd_in_addr ip_address;
 UINT    status;
 
-    status = (UINT)nx_bsd_inet_aton_impl(buffer, &ip_address, NX_FALSE);
+    status = (UINT)nx_bsd_inet_aton(buffer, &ip_address);
 
     if (status == 0)
     {
@@ -6299,6 +6379,53 @@ ULONG                                   ticks;
 
                 NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
                 return NX_SOC_ERROR;
+            }
+
+            *option_length = (INT)sizeof(INT);
+
+        break;
+
+        case SO_TYPE:
+
+            if (*option_length < (INT)sizeof(INT))
+            {
+
+                tx_mutex_put(nx_bsd_protection_ptr);
+
+                /* Set the socket error if extended socket options enabled. */
+                nx_bsd_set_errno(EINVAL);
+
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
+            /* Verify that the socket is still valid. */
+            if (!(bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_IN_USE))
+            {
+
+                tx_mutex_put(nx_bsd_protection_ptr);
+
+                /* Set the socket error if extended socket options enabled. */
+                nx_bsd_set_errno(EBADF);
+
+                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                return NX_SOC_ERROR;
+            }
+
+            /* Return the socket type this BSD socket was created with. */
+            if (bsd_socket_ptr -> nx_bsd_socket_tcp_socket)
+            {
+                *((INT *)option_value) = SOCK_STREAM;
+            }
+            else if (bsd_socket_ptr -> nx_bsd_socket_udp_socket)
+            {
+                *((INT *)option_value) = SOCK_DGRAM;
+            }
+            else
+            {
+
+                /* Neither a TCP nor a UDP socket, so this is a raw socket. */
+                *((INT *)option_value) = SOCK_RAW;
             }
 
             *option_length = (INT)sizeof(INT);
@@ -8239,21 +8366,6 @@ INT                     ret;
                         nx_bsd_socket_array[i].nx_bsd_socket_received_byte_count += packet_ptr -> nx_packet_length;
                         nx_bsd_socket_array[i].nx_bsd_socket_received_packet_count++;
 
-                        /* Check for urgent data (URG bit) now, while the packet is still
-                           accessible.  The exceptfds scan runs after readfds and would miss
-                           this packet because nx_tcp_socket_receive() has already removed it
-                           from the TCP receive queue. */
-                        if (exceptfds && NX_BSD_FD_ISSET(i + NX_BSD_SOCKFD_START, exceptfds))
-                        {
-                        NX_TCP_HEADER *tcp_header_ptr;
-
-                            tcp_header_ptr = (NX_TCP_HEADER *)packet_ptr -> nx_packet_prepend_ptr;
-                            if (tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_URG_BIT)
-                            {
-                                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
-                            }
-                        }
-
                         /* Add this socket to the read ready list.  */
                         NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &readfds_found);
                     }
@@ -8310,36 +8422,40 @@ INT                     ret;
                 NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
 
-            /* Check to see if there is a connection request pending.  */
-            else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTION_REQUEST)
-            {
-
-                /* Listening socket should not be added to the write ready list.
-                   Excluding this socket from further processing. */
-                if(!(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET))
-                {
-                    /* Yes, add this socket to the write ready list.  */
-                    NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
-                }
-            }
-
             /* Check to see if there is an error.*/
             else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_ERROR)
             {
 
                 NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
             }
+
             /* Is this a TCP socket? */
             else if (nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket)
             {
+                /* Listening socket should not be added to the write ready list.
+                   Excluding this socket from further processing. */
+                if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_SERVER_MASTER_SOCKET)
+                {
+                    /* This if branch is intentionally empty. */
+                }
+
+                /* Check to see if there is a connection request pending.  */
+                else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTION_REQUEST)
+                {
+
+                    /* Yes, add this socket to the write ready list.  */
+                    NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
+                }
+
                 /* If a TCP socket is not connected, it shouldn't be in the write ready list regardless
                    of its bind state. Excluding socket in this state from further processing.*/
-                if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED)
+                else if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED)
                 {
                     /* Yes, add this socket to the write ready list.  */
                     NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &writefds_found);
                 }
             }
+
             /* Is this BSD socket bound?  */
             else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_BOUND)
             {
@@ -8378,25 +8494,11 @@ INT                     ret;
                 NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
             }
 
-            /* Check for urgent data (URG bit). This check is needed in case there is
-                no readfds to scan. Otherwise it's handled in the readfds scan above. */
-            /* Is this a TCP socket? */
-            else if (nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket)
+            /* Is there urgent data the application has not taken yet? */
+            else if (nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_OOB_MARK)
             {
-                if(nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_CONNECTED)
-                {
-                    packet_ptr = nx_bsd_socket_array[i].nx_bsd_socket_tcp_socket->nx_tcp_socket_receive_queue_head;
 
-                    if (packet_ptr != NX_NULL)
-                    {
-                        NX_TCP_HEADER *tcp_header_ptr = (NX_TCP_HEADER *)packet_ptr->nx_packet_prepend_ptr;
-
-                        if (tcp_header_ptr->nx_tcp_header_word_3 & NX_TCP_URG_BIT)
-                        {
-                            NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
-                        }
-                    }
-                }
+                NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &exceptfds_found);
             }
         }
     }
@@ -8510,6 +8612,23 @@ INT                     ret;
     else
     {
 
+        /* Re-evaluate the exception request set against the socket OOB mark here,
+           the way POSIX select() re-polls every fd after the sleep. The mark
+           stays up until the application takes the urgent data with recv(..., MSG_OOB).  */
+        if (exceptfds)
+        {
+            for (i = 0; i < (nfds - NX_BSD_SOCKFD_START); i++)
+            {
+
+                if ((nx_bsd_socket_array[i].nx_bsd_socket_status_flags & NX_BSD_SOCKET_OOB_MARK) &&
+                    (NX_BSD_FD_ISSET(i + NX_BSD_SOCKFD_START, &suspend_request.nx_bsd_socket_suspend_exception_request_fd_set)))
+                {
+
+                    NX_BSD_FD_SET(i + NX_BSD_SOCKFD_START, &suspend_request.nx_bsd_socket_suspend_exception_fd_set);
+                }
+            }
+        }
+
         /* Otherwise, a receive event has been found. Simply copy the receive events.  */
         if(readfds)
             *readfds =  suspend_request.nx_bsd_socket_suspend_read_fd_set;
@@ -8600,6 +8719,302 @@ UINT                    bsd_socket_index;
 
 
 
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_tcp_oob_data_process                         PORTABLE C      */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function extracts the TCP urgent byte from the segment that    */
+/*    just arrived, places it in the socket out-of-band queue and marks   */
+/*    the socket so that select() reports an exception until the          */
+/*    application takes the data with recv(..., MSG_OOB).                 */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    bsd_socket_ptr                        Pointer to the BSD socket     */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    nx_bsd_tcp_exception_notify                                         */
+/*                                                                        */
+/**************************************************************************/
+static VOID  nx_bsd_tcp_oob_data_process(NX_BSD_SOCKET *bsd_socket_ptr)
+{
+TX_INTERRUPT_SAVE_AREA
+
+NX_TCP_SOCKET   *tcp_socket_ptr;
+NX_PACKET       *packet_ptr;
+
+    tcp_socket_ptr =  bsd_socket_ptr -> nx_bsd_socket_tcp_socket;
+
+    /* Urgent data exists on TCP sockets only.  */
+    if (tcp_socket_ptr == NX_NULL)
+    {
+        return;
+    }
+
+    TX_DISABLE
+
+    /* That segment was appended to the queue, so in the common case the urgent byte sits in
+       the queue tail and there is no need to walk the queue at all.  */
+    packet_ptr =  tcp_socket_ptr -> nx_tcp_socket_receive_queue_tail;
+
+    if ((packet_ptr == NX_NULL) ||
+        (nx_bsd_tcp_oob_packet_process(bsd_socket_ptr, packet_ptr) == NX_FALSE))
+    {
+
+        /* Nothing new in the tail, so the segment went in ahead of it (out of order).  Walk
+           the queue.  It is a singly linked list whose tail does not have a NULL next
+           pointer, so stop on the tail itself.  */
+        packet_ptr =  tcp_socket_ptr -> nx_tcp_socket_receive_queue_head;
+
+        while (packet_ptr != NX_NULL)
+        {
+
+            nx_bsd_tcp_oob_packet_process(bsd_socket_ptr, packet_ptr);
+
+            if (packet_ptr == tcp_socket_ptr -> nx_tcp_socket_receive_queue_tail)
+            {
+                break;
+            }
+
+            packet_ptr =  packet_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next;
+        }
+    }
+
+    TX_RESTORE
+
+    return;
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_tcp_oob_packet_process                       PORTABLE C      */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function examines one queued TCP segment.  If it carries an    */
+/*    urgent byte that has not been taken yet, the byte is copied into    */
+/*    the socket out-of-band queue, removed from the in-band stream, and  */
+/*    the socket is marked so that select() reports an exception.         */
+/*                                                                        */
+/*    The caller must have interrupts disabled, and the packet must still */
+/*    be on the TCP receive queue so that its TCP header is still at the  */
+/*    prepend pointer.                                                    */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    bsd_socket_ptr                        Pointer to the BSD socket     */
+/*    packet_ptr                            Queued segment to examine     */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_TRUE                               A new urgent byte was found   */
+/*    NX_FALSE                              Nothing new in this segment   */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    nx_bsd_tcp_oob_data_process                                         */
+/*                                                                        */
+/**************************************************************************/
+static UINT  nx_bsd_tcp_oob_packet_process(NX_BSD_SOCKET *bsd_socket_ptr, NX_PACKET *packet_ptr)
+{
+NX_TCP_HEADER   *tcp_header_ptr;
+ULONG            header_length;
+ULONG            urgent_pointer;
+ULONG            urgent_sequence;
+ULONG            remaining_bytes;
+UCHAR           *urgent_byte_ptr;
+
+    /* A queued packet still carries its TCP header at the prepend pointer; NetX strips the
+       header only when the packet is handed to the application.  */
+    tcp_header_ptr =  (NX_TCP_HEADER *)packet_ptr -> nx_packet_prepend_ptr;
+
+    if (!(tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_URG_BIT))
+    {
+        return(NX_FALSE);
+    }
+
+    /* The urgent pointer is the lower half of header word 4 and points one byte past the
+       last byte of urgent data (RFC 1122, Section 4.2.2.4).  */
+    urgent_pointer =  tcp_header_ptr -> nx_tcp_header_word_4 & 0xFFFF;
+
+    if (urgent_pointer == 0)
+    {
+        return(NX_FALSE);
+    }
+
+    urgent_sequence =  tcp_header_ptr -> nx_tcp_sequence_number + (urgent_pointer - 1);
+
+    /* Take each urgent byte once.  Retransmissions, a run of segments repeating the URG bit,
+       and segments still queued from an earlier callback all point at a sequence number that
+       is not newer than the one already taken, so compare as a TCP sequence number (signed
+       difference, wrap safe).  A test for inequality would take those already processed
+       segments again on every callback.  Only the newest urgent byte is of interest anyway,
+       which is what POSIX out-of-band data amounts to.  */
+    if ((bsd_socket_ptr -> nx_bsd_socket_status_flags & NX_BSD_SOCKET_OOB_SEQUENCE_VALID) &&
+        ((INT)(urgent_sequence - bsd_socket_ptr -> nx_bsd_socket_oob_sequence) <= 0))
+    {
+        return(NX_FALSE);
+    }
+
+    bsd_socket_ptr -> nx_bsd_socket_oob_sequence = urgent_sequence;
+    bsd_socket_ptr -> nx_bsd_socket_status_flags |= (NX_BSD_SOCKET_OOB_SEQUENCE_VALID | NX_BSD_SOCKET_OOB_MARK);
+
+    header_length =  (tcp_header_ptr -> nx_tcp_header_word_3 >> NX_TCP_HEADER_SHIFT) * (ULONG)sizeof(ULONG);
+    urgent_byte_ptr = packet_ptr -> nx_packet_prepend_ptr + header_length + (urgent_pointer - 1);
+
+    /* Only an urgent byte inside the payload of this packet is taken out of band.  A byte in a
+       chained packet, or an urgent pointer past the end of this segment (urgent data spanning
+       segments), is left inline; the mark is raised either way.  */
+    if (urgent_byte_ptr >= packet_ptr -> nx_packet_append_ptr)
+    {
+        return(NX_TRUE);
+    }
+
+    /* Queue the urgent byte.  When the queue is full the oldest byte is dropped; POSIX keeps
+       only the newest urgent byte anyway.  */
+    bsd_socket_ptr -> nx_bsd_socket_oob_queue[bsd_socket_ptr -> nx_bsd_socket_oob_write_index] = *urgent_byte_ptr;
+    bsd_socket_ptr -> nx_bsd_socket_oob_write_index =
+        (UCHAR)((bsd_socket_ptr -> nx_bsd_socket_oob_write_index + 1) % NX_BSD_SOCKET_OOB_QUEUE_SIZE);
+
+    if (bsd_socket_ptr -> nx_bsd_socket_oob_count < NX_BSD_SOCKET_OOB_QUEUE_SIZE)
+    {
+        bsd_socket_ptr -> nx_bsd_socket_oob_count++;
+    }
+    else
+    {
+
+        /* Full: the write index just overwrote the oldest byte.  */
+        bsd_socket_ptr -> nx_bsd_socket_oob_read_index = bsd_socket_ptr -> nx_bsd_socket_oob_write_index;
+    }
+
+    /* Remove the urgent byte from the in-band stream.  */
+    remaining_bytes = (ULONG)(packet_ptr -> nx_packet_append_ptr - (urgent_byte_ptr + 1));
+
+    if (remaining_bytes != 0)
+    {
+        memmove(urgent_byte_ptr, urgent_byte_ptr + 1, remaining_bytes); /* Use case of memmove is verified. */
+    }
+
+    packet_ptr -> nx_packet_append_ptr--;
+    packet_ptr -> nx_packet_length--;
+
+    /* NetX returns receive window space from the packet length at delivery time, so hand back
+       the byte that will never be delivered.  This runs on the IP thread, which owns this
+       field.  */
+    bsd_socket_ptr -> nx_bsd_socket_tcp_socket -> nx_tcp_socket_rx_window_current++;
+
+    return(NX_TRUE);
+}
+
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_tcp_oob_data_get                             PORTABLE C      */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function hands the queued out-of-band bytes to a caller of     */
+/*    recv(..., MSG_OOB) and clears the socket out-of-band mark once the  */
+/*    queue runs empty.  MSG_OOB never suspends the caller.               */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    bsd_socket_ptr                        Pointer to the BSD socket     */
+/*    iov                                   Caller's buffer list          */
+/*    iovlen                                Number of buffers             */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    Number of bytes copied, or NX_SOC_ERROR                             */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    nx_bsd_recv_internal                                                */
+/*                                                                        */
+/**************************************************************************/
+static INT  nx_bsd_tcp_oob_data_get(NX_BSD_SOCKET *bsd_socket_ptr, struct nx_bsd_iovec *iov, size_t iovlen)
+{
+TX_INTERRUPT_SAVE_AREA
+
+ULONG    bytes_copied;
+UCHAR   *buffer_ptr;
+size_t   buffer_size;
+
+    /* Urgent data exists on TCP sockets only.  */
+    if (bsd_socket_ptr -> nx_bsd_socket_tcp_socket == NX_NULL)
+    {
+
+        nx_bsd_set_errno(EOPNOTSUPP);
+
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+        return(NX_SOC_ERROR);
+    }
+
+    bytes_copied =  0;
+
+    TX_DISABLE
+
+    while ((iovlen != 0) && (bsd_socket_ptr -> nx_bsd_socket_oob_count != 0))
+    {
+
+        buffer_ptr =  (UCHAR *)iov -> iov_base;
+        buffer_size = iov -> iov_len;
+
+        while ((buffer_size != 0) && (bsd_socket_ptr -> nx_bsd_socket_oob_count != 0))
+        {
+
+            *buffer_ptr =  bsd_socket_ptr -> nx_bsd_socket_oob_queue[bsd_socket_ptr -> nx_bsd_socket_oob_read_index];
+            bsd_socket_ptr -> nx_bsd_socket_oob_read_index =
+                (UCHAR)((bsd_socket_ptr -> nx_bsd_socket_oob_read_index + 1) % NX_BSD_SOCKET_OOB_QUEUE_SIZE);
+            bsd_socket_ptr -> nx_bsd_socket_oob_count--;
+
+            buffer_ptr++;
+            buffer_size--;
+            bytes_copied++;
+        }
+
+        iovlen--;
+        iov++;
+    }
+
+    /* The application has taken the urgent data, so the socket is no longer marked.  */
+    if (bsd_socket_ptr -> nx_bsd_socket_oob_count == 0)
+    {
+        bsd_socket_ptr -> nx_bsd_socket_status_flags &= (ULONG)(~NX_BSD_SOCKET_OOB_MARK);
+    }
+
+    TX_RESTORE
+
+    /* No urgent data pending.  */
+    if (bytes_copied == 0)
+    {
+
+        nx_bsd_set_errno(EWOULDBLOCK);
+
+        NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+        return(NX_SOC_ERROR);
+    }
+
+    return((INT)bytes_copied);
+}
+
+
+
 static VOID  nx_bsd_tcp_exception_notify(NX_TCP_SOCKET *socket_ptr)
 {
 UINT                    bsd_socket_index;
@@ -8623,8 +9038,13 @@ UINT                    bsd_socket_index;
         return;
     }
 
-    /* Check the suspended socket list for one ready to receive or send packets. */
-    nx_bsd_select_wakeup(bsd_socket_index, FDSET_EXCEPTION);
+    nx_bsd_tcp_oob_data_process(&nx_bsd_socket_array[bsd_socket_index]);
+
+    /* Check the suspended socket list only when there is urgent data to report. */
+    if (nx_bsd_socket_array[bsd_socket_index].nx_bsd_socket_status_flags & NX_BSD_SOCKET_OOB_MARK)
+    {
+        nx_bsd_select_wakeup(bsd_socket_index, FDSET_EXCEPTION);
+    }
 
 
     return;
@@ -9983,7 +10403,7 @@ static UINT nx_bsd_isspace(UCHAR c)
         return NX_TRUE;
     }
     /* Check for a single space character*/
-    else if (c == 20)
+    else if (c == ' ')
     {
         return NX_TRUE;
     }
@@ -10330,35 +10750,6 @@ INT                     bsd_sock_id;
             if ((fd_sets & FDSET_READ) && (NX_BSD_FD_ISSET(bsd_sock_id, &suspend_info -> nx_bsd_socket_suspend_read_request_fd_set)))
             {
                 NX_BSD_FD_SET(bsd_sock_id, &suspend_info -> nx_bsd_socket_suspend_read_fd_set);
-
-                /* Check whether the socket is also in the exception FD set. If so, and the socket
-                   actually has urgent (out-of-band) data pending, set the exception event as well,
-                   since the thread is waiting for both events. Normal data must NOT raise an
-                   exception event (POSIX), so gate this on the TCP URG bit -- consistent with the
-                   exceptfds scan in nx_bsd_select(). For UDP sockets there is no out-of-band data,
-                   so nx_bsd_socket_tcp_socket is NX_NULL and no exception is raised. */
-                if (NX_BSD_FD_ISSET(bsd_sock_id, &suspend_info -> nx_bsd_socket_suspend_exception_request_fd_set))
-                {
-                NX_TCP_SOCKET   *tcp_socket_ptr;
-
-                    tcp_socket_ptr =  nx_bsd_socket_array[sock_id].nx_bsd_socket_tcp_socket;
-                    if (tcp_socket_ptr != NX_NULL)
-                    {
-                    NX_PACKET   *packet_ptr;
-
-                        packet_ptr =  tcp_socket_ptr -> nx_tcp_socket_receive_queue_head;
-                        if (packet_ptr != NX_NULL)
-                        {
-                        NX_TCP_HEADER   *tcp_header_ptr;
-
-                            tcp_header_ptr =  (NX_TCP_HEADER *)packet_ptr -> nx_packet_prepend_ptr;
-                            if (tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_URG_BIT)
-                            {
-                                NX_BSD_FD_SET(bsd_sock_id, &suspend_info -> nx_bsd_socket_suspend_exception_fd_set);
-                            }
-                        }
-                    }
-                }
 
                 /* Adjust the suspension type so that the event flag set below will wakeup the thread 
                    selecting.  */
@@ -12827,10 +13218,10 @@ NX_IPV6_HEADER_OPTION           *option;
 /*    Application Code                                                    */
 /*                                                                        */
 /**************************************************************************/
-static INT nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
+static INT nx_bsd_pppoe_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags, const struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
 {
 UINT                if_index;
-struct nx_bsd_sockaddr_ll
+const struct nx_bsd_sockaddr_ll
                     *destAddr_ll;
 #if 0
 ULONG               src_mac_msw;
@@ -12871,7 +13262,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
         return(NX_SOC_ERROR);
     }
 
-    destAddr_ll = (struct nx_bsd_sockaddr_ll*)destAddr;
+    destAddr_ll = (const struct nx_bsd_sockaddr_ll*)destAddr;
 
     if((destAddr_ll -> sll_protocol != ETHERTYPE_PPPOE_SESS) && (destAddr_ll -> sll_protocol != ETHERTYPE_PPPOE_DISC))
     {
@@ -13131,10 +13522,10 @@ NX_BSD_SOCKET *bsd_ptr;
 /*    Application Code                                                    */
 /*                                                                        */
 /**************************************************************************/
-static INT _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags,  struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
+static INT _nx_bsd_hardware_internal_sendto(NX_BSD_SOCKET *bsd_socket_ptr, CHAR *msg, INT msgLength, INT flags, const struct nx_bsd_sockaddr* destAddr, INT destAddrLen)
 {
 UINT                if_index;
-struct nx_bsd_sockaddr_ll
+const struct nx_bsd_sockaddr_ll
                    *destAddr_ll;
 UINT                status;
 NX_PACKET          *packet_ptr = NX_NULL;
@@ -13170,7 +13561,7 @@ NX_PACKET          *packet_ptr = NX_NULL;
         return(NX_SOC_ERROR);
     }
 
-    destAddr_ll = (struct nx_bsd_sockaddr_ll*)destAddr;
+    destAddr_ll = (const struct nx_bsd_sockaddr_ll*)destAddr;
 
     /* Validate the interface ID */
     if_index = (UINT)(destAddr_ll -> sll_ifindex);
@@ -13491,6 +13882,163 @@ NX_BSD_SOCKET *bsd_ptr;
 #endif /* NX_BSD_RAW_SUPPORT */
 
 
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    nx_bsd_inet_pton_ipv4                               PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*                                                                        */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function converts an IPv4 address in dotted decimal notation   */
+/*    into a numeric IP address, applying the strict rules inet_pton()    */
+/*    is required to enforce.  Only the four part a.b.c.d form is         */
+/*    accepted; every part must be a decimal number in the range 0 to     */
+/*    255 written without a leading zero, and no other character, not     */
+/*    even white space, may appear anywhere in the string.  The           */
+/*    abbreviated a, a.b and a.b.c forms and the octal and hexadecimal    */
+/*    notations accepted by inet_aton() are all rejected here.            */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    address_buffer_ptr                    String holding the IP address */
+/*    addr                                  Struct to store the IP address*/
+/*                                          (optional, may be NX_NULL)    */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    1                                     Successful conversion         */
+/*    0                                     Error during conversion       */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_bsd_isdigit                        Indicate char is a number     */
+/*    htonl                                 Convert to network byte order */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    NetX Duo BSD Layer Source Code                                      */
+/*                                                                        */
+/**************************************************************************/
+static INT nx_bsd_inet_pton_ipv4(const CHAR *address_buffer_ptr, struct nx_bsd_in_addr *addr)
+{
+ULONG        value;
+ULONG        part;
+UINT         part_count;
+UINT         digit_flag;
+UCHAR        tempchar;
+const UCHAR *buffer_ptr;
+
+    /* Set local variables. */
+    buffer_ptr = (const UCHAR *) address_buffer_ptr;
+
+    /* Initialize the address being built, the part being accumulated, the number of
+       parts completed so far and the indication that the current part already has at
+       least one digit. */
+    value      = 0;
+    part       = 0;
+    part_count = 0;
+    digit_flag = NX_FALSE;
+
+    /* Get the first character. */
+    tempchar = *buffer_ptr;
+
+    /* Parse the characters from the input buffer. */
+    while (tempchar != '\0')
+    {
+
+        /* Check if this character is a decimal digit. */
+        if (nx_bsd_isdigit(tempchar))
+        {
+
+            /* It is.  A part written with a leading zero is not valid: if a digit was
+               already accepted for this part and the part is still zero, that digit
+               was a '0'. */
+            if ((digit_flag == NX_TRUE) && (part == 0))
+            {
+                return (0);
+            }
+
+            /* Multiply the part accumulated so far by the base and add this digit. */
+            part = (part * 10) + (ULONG)(tempchar - '0');
+
+            /* Check for a part greater than can be contained in 8 bits.  The check is
+               made on every digit, so the accumulator cannot overflow. */
+            if (part > 0xff)
+            {
+                return (0);
+            }
+
+            /* Is this the first digit of the part? */
+            if (digit_flag == NX_FALSE)
+            {
+
+                /* It is, so a new part has started.  Check for more parts than the four
+                   part a.b.c.d form allows. */
+                part_count++;
+
+                if (part_count > 4)
+                {
+                    return (0);
+                }
+
+                digit_flag = NX_TRUE;
+            }
+        }
+
+        /* Check if this character is the separator between two parts. */
+        else if (tempchar == '.')
+        {
+
+            /* It is.  A separator must be preceded by at least one digit. */
+            if (digit_flag == NX_FALSE)
+            {
+                return (0);
+            }
+
+            /* Prepend the completed part to the address and start the next part. */
+            value = (value << 8) | part;
+            part = 0;
+            digit_flag = NX_FALSE;
+        }
+        else
+        {
+
+            /* Anything else, including white space and a sign, is invalid. */
+            return (0);
+        }
+
+        /* Advance the IP address pointer to the next character. */
+        buffer_ptr++;
+
+        /* Get the next character. */
+        tempchar = *buffer_ptr;
+    }
+
+    /* The string must hold four parts and must not end with a separator. */
+    if ((part_count != 4) || (digit_flag == NX_FALSE))
+    {
+        return (0);
+    }
+
+    /* 'Add' the last extracted part to the total value. */
+    value = (value << 8) | part;
+
+    /* Check if a return pointer for the address data is supplied. */
+    if (addr)
+    {
+
+        /* Convert the IP address data to network byte order and return the data. */
+        addr -> s_addr = htonl(value);
+    }
+
+    return (1);
+}
+
 
 /**************************************************************************/
 /*                                                                        */
@@ -13522,7 +14070,7 @@ NX_BSD_SOCKET *bsd_ptr;
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    inet_aton                             Convert IPv4 address from     */
+/*    nx_bsd_inet_pton_ipv4                 Convert IPv4 address from     */
 /*                                          presentation to numeric       */
 /*                                                                        */
 /*  CALLED BY                                                             */
@@ -13554,7 +14102,7 @@ struct  nx_bsd_in_addr ipv4_addr;
     if(af == AF_INET)
     {
         /* Convert IPv4 address from presentation to numeric. */
-        if(nx_bsd_inet_aton_impl(src, &ipv4_addr, NX_TRUE))
+        if(nx_bsd_inet_pton_ipv4(src, &ipv4_addr))
         {
             /* Copy the IPv4 address to the destination. */
             *((ULONG *)dst) = ipv4_addr.s_addr;
@@ -13663,7 +14211,7 @@ struct  nx_bsd_in_addr ipv4_addr;
                 }
 
                 /* Convert the ipv4 address from presentation to numeric. */
-                if(nx_bsd_inet_aton_impl(ipv4_addr_start, &ipv4_addr, NX_TRUE))
+                if(nx_bsd_inet_pton_ipv4(ipv4_addr_start, &ipv4_addr))
                 {
 
                     /* Make sure the result is in network byte order. */

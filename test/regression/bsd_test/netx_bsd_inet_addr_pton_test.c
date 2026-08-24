@@ -109,7 +109,7 @@ UINT    status;
         error_counter++;
 
     status = inet_pton(AF_INET,  ipv4_addr_str1, ipv4_addr);
-    if((status != 1) && (memcmp(ipv4_addr, ipv4_addr_num1, 4) != 0 ))
+    if((status != 1) || (memcmp(ipv4_addr, ipv4_addr_num1, 4) != 0 ))
         error_counter++;
 
     status = inet_pton(AF_INET,  ipv4_addr_str2, ipv4_addr);

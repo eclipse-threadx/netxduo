@@ -15,22 +15,22 @@
 
 /* This test covers select() improvements from PR #375:
  *
- *  1. TCP readfds + exceptfds in one select() call — normal (non-urgent) data
- *     must set readfds but MUST NOT set exceptfds.
+ *  1. A listening (master) socket with a pending connection must be reported
+ *     readable (ready to accept) but MUST NOT be reported writable, even though
+ *     the master is internally marked CONNECTED once a client connects.
  *
  *  2. select() with zero timeout and no ready sockets must return 0 and must
  *     clear all output fd sets (TX_NO_EVENTS path).
  *
- *  3. A socket that is not in use must be reported in writefds (regression for
+ *  3. TCP readfds + exceptfds in one select() call — normal (non-urgent) data
+ *     must set readfds but MUST NOT set exceptfds.
+ *
+ *  4. A socket that is not in use must be reported in writefds (regression for
  *     the writefds "not in use" restore).
  *
- *  4. A TCP socket that is bound but NOT connected must NOT be reported in
+ *  5. A TCP socket that is bound but NOT connected must NOT be reported in
  *     writefds (a non-connected TCP socket is not writable regardless of its
  *     bind state).
- *
- *  5. A listening (master) socket with a pending connection must be reported
- *     readable (ready to accept) but MUST NOT be reported writable, even though
- *     the master is internally marked CONNECTED once a client connects.
  */
 
 #include "tx_api.h"
@@ -149,6 +149,9 @@ char                buf[64];
 
     NX_PARAMETER_NOT_USED(thread_input);
 
+    /* Print out test information banner.  */
+    printf("NetX Test:   Basic BSD Select Improvements Test............");
+
     /* ================================================================
      * Set up TCP server socket.
      * ================================================================ */
@@ -171,7 +174,7 @@ char                buf[64];
     tx_semaphore_put(&sema_1);
 
     /* ================================================================
-     * Test 5: a listening (master) socket with a pending connection
+     * Test 1: a listening (master) socket with a pending connection
      *         must be reported readable (a connection is ready to be
      *         accepted) but MUST NOT be reported writable. A listening
      *         socket is never a valid write target, even though the
@@ -214,7 +217,7 @@ char                buf[64];
         error_counter++;
 
     /* ================================================================
-     * Test 1: zero-timeout select with no data ready must return 0
+     * Test 2: zero-timeout select with no data ready must return 0
      *         and clear all output fd sets.
      * ================================================================ */
     FD_ZERO(&readfds);
@@ -239,7 +242,7 @@ char                buf[64];
         error_counter++;
 
     /* ================================================================
-     * Test 2: normal TCP data must set readfds and NOT exceptfds.
+     * Test 3: normal TCP data must set readfds and NOT exceptfds.
      * ================================================================ */
     FD_ZERO(&readfds);
     FD_ZERO(&exceptfds);
@@ -269,7 +272,7 @@ char                buf[64];
     recv(conn_sock, buf, sizeof(buf), 0);
 
     /* ================================================================
-     * Test 3: a socket that is not in use must appear in writefds.
+     * Test 4: a socket that is not in use must appear in writefds.
      * ================================================================ */
     {
     INT  closed_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -300,7 +303,7 @@ char                buf[64];
     }
 
     /* ================================================================
-     * Test 4: a TCP socket that is bound but NOT connected must NOT
+     * Test 5: a TCP socket that is bound but NOT connected must NOT
      *         appear in writefds. A non-connected TCP socket is not
      *         writable regardless of its bind state.
      * ================================================================ */
@@ -341,9 +344,15 @@ char                buf[64];
     soc_close(server_sock);
 
     if (error_counter)
+    {
+        printf("ERROR!\n");
         test_control_return(1);
+    }
     else
+    {
+        printf("SUCCESS!\n");
         test_control_return(0);
+    }
 }
 
 /* Client thread: connects and sends normal (non-urgent) TCP data. */
@@ -386,6 +395,8 @@ ULONG               actual_status;
 
 #else
 
+extern void test_control_return(UINT status);
+
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
 #else
@@ -393,6 +404,10 @@ void netx_bsd_select_improvements_test_application_define(void *first_unused_mem
 #endif
 {
     NX_PARAMETER_NOT_USED(first_unused_memory);
+
+    /* Print out test information banner.  */
+    printf("NetX Test:   Basic BSD Select Improvements Test............N/A\n");
+
     test_control_return(3);
 }
 

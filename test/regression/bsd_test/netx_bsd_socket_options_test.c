@@ -14,16 +14,21 @@
  **************************************************************************/
 
 /* This test exercises setsockopt/getsockopt for SO_LINGER, IP_TOS, IP_TTL,
-   SO_BROADCAST and TCP_NODELAY, including error-path coverage introduced
-   by the PR #374 bug-fixes. */
+   SO_BROADCAST, TCP_NODELAY and SO_TYPE, including error-path coverage
+   introduced by the PR #374 bug-fixes. */
 
 #include "tx_api.h"
 #include "nx_api.h"
 #if defined(NX_BSD_ENABLE) && !defined(NX_DISABLE_IPV4) && defined(__PRODUCT_NETXDUO__)
 #include "nxd_bsd.h"
 
+#if defined(NX_ENABLE_IP_RAW_PACKET_FILTER) || defined(NX_BSD_RAW_SUPPORT) || defined(NX_BSD_RAW_PPPOE_SUPPORT)
+#define TEST_RAW_SOCKET
+#endif
+
 #define DEMO_STACK_SIZE     4096
 #define BSD_THREAD_PRIORITY 2
+#define SO_TYPE_PORT        5555
 
 static TX_THREAD            ntest_0;
 static NX_PACKET_POOL       pool_0;
@@ -81,6 +86,12 @@ UINT    status;
     if (status)
         error_counter++;
 
+#ifdef TEST_RAW_SOCKET
+    status = nx_ip_raw_packet_enable(&ip_0);
+    if (status)
+        error_counter++;
+#endif /* TEST_RAW_SOCKET */
+
     status = bsd_initialize(&ip_0, &pool_0, (CHAR *)&bsd_thread_area[0],
                             sizeof(bsd_thread_area), BSD_THREAD_PRIORITY);
     if (status)
@@ -98,6 +109,9 @@ INT                  opt_len;
 INT                  ret;
 
     NX_PARAMETER_NOT_USED(thread_input);
+
+    /* Print out test information banner.  */
+    printf("NetX Test:   Basic BSD Socket Options Test.................");
 
     /* Create sockets. */
     tcp_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -312,17 +326,160 @@ INT                  ret;
     if (ret == 0)
         error_counter++;
 
+    /* ================================================================
+     * SO_TYPE: reports the type the socket was created with
+     * ================================================================ */
+    {
+    struct sockaddr_in  server_addr;
+    INT                 master_sock;
+#ifdef TEST_RAW_SOCKET
+    INT                 raw_sock;
+#endif /* TEST_RAW_SOCKET */
+
+        opt_val = -1;
+        opt_len = (INT)sizeof(INT);
+        ret = getsockopt(tcp_sock, SOL_SOCKET, SO_TYPE, &opt_val, &opt_len);
+        if (ret != 0)
+            error_counter++;
+        if (opt_val != SOCK_STREAM)
+            error_counter++;
+        if (opt_len != (INT)sizeof(INT))
+            error_counter++;
+
+        /* A larger buffer is fine, and the length is set to what was written. */
+        opt_val = -1;
+        opt_len = (INT)sizeof(INT) + 4;
+        ret = getsockopt(tcp_sock, SOL_SOCKET, SO_TYPE, &opt_val, &opt_len);
+        if (ret != 0)
+            error_counter++;
+        if (opt_val != SOCK_STREAM)
+            error_counter++;
+        if (opt_len != (INT)sizeof(INT))
+            error_counter++;
+
+        /* SO_TYPE on a UDP socket. */
+        opt_val = -1;
+        opt_len = (INT)sizeof(INT);
+        ret = getsockopt(udp_sock, SOL_SOCKET, SO_TYPE, &opt_val, &opt_len);
+        if (ret != 0)
+            error_counter++;
+        if (opt_val != SOCK_DGRAM)
+            error_counter++;
+        if (opt_len != (INT)sizeof(INT))
+            error_counter++;
+
+        /* Listening does not change the type. */
+        master_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (master_sock < 0)
+            error_counter++;
+
+        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr.sin_family      = AF_INET;
+        server_addr.sin_port        = htons(SO_TYPE_PORT);
+        server_addr.sin_addr.s_addr = INADDR_ANY;
+
+        if (bind(master_sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
+            error_counter++;
+        if (listen(master_sock, 5) < 0)
+            error_counter++;
+
+        opt_val = -1;
+        opt_len = (INT)sizeof(INT);
+        ret = getsockopt(master_sock, SOL_SOCKET, SO_TYPE, &opt_val, &opt_len);
+        if (ret != 0)
+            error_counter++;
+        if (opt_val != SOCK_STREAM)
+            error_counter++;
+
+        soc_close(master_sock);
+
+#ifdef TEST_RAW_SOCKET
+
+        /* A raw socket has neither a TCP nor a UDP socket behind it. */
+        raw_sock = socket(AF_INET, SOCK_RAW, 100);
+        if (raw_sock < 0)
+            error_counter++;
+
+        opt_val = -1;
+        opt_len = (INT)sizeof(INT);
+        ret = getsockopt(raw_sock, SOL_SOCKET, SO_TYPE, &opt_val, &opt_len);
+        if (ret != 0)
+            error_counter++;
+        if (opt_val != SOCK_RAW)
+            error_counter++;
+        if (opt_len != (INT)sizeof(INT))
+            error_counter++;
+
+        soc_close(raw_sock);
+#endif /* TEST_RAW_SOCKET */
+    }
+
+    /* SO_TYPE: an option buffer that cannot hold an INT is rejected. */
+    opt_val = -1;
+    opt_len = (INT)sizeof(INT) - 1;
+    ret = getsockopt(tcp_sock, SOL_SOCKET, SO_TYPE, &opt_val, &opt_len);
+    if ((ret == 0) || (errno != EINVAL))
+        error_counter++;
+
+    opt_val = -1;
+    opt_len = 0;
+    ret = getsockopt(tcp_sock, SOL_SOCKET, SO_TYPE, &opt_val, &opt_len);
+    if ((ret == 0) || (errno != EINVAL))
+        error_counter++;
+
+    /* SO_TYPE: a descriptor outside the socket table is rejected. */
+    opt_len = (INT)sizeof(INT);
+    ret = getsockopt(NX_BSD_SOCKFD_START - 1, SOL_SOCKET, SO_TYPE, &opt_val, &opt_len);
+    if ((ret == 0) || (errno != EBADF))
+        error_counter++;
+
+    opt_len = (INT)sizeof(INT);
+    ret = getsockopt(NX_BSD_SOCKFD_START + NX_BSD_MAX_SOCKETS, SOL_SOCKET, SO_TYPE,
+                     &opt_val, &opt_len);
+    if ((ret == 0) || (errno != EBADF))
+        error_counter++;
+
+    /* SO_TYPE is read only. */
+    opt_val = SOCK_DGRAM;
+    ret = setsockopt(tcp_sock, SOL_SOCKET, SO_TYPE, &opt_val, (INT)sizeof(opt_val));
+    if ((ret == 0) || (errno != EINVAL))
+        error_counter++;
+
+    opt_val = -1;
+    opt_len = (INT)sizeof(INT);
+    ret = getsockopt(tcp_sock, SOL_SOCKET, SO_TYPE, &opt_val, &opt_len);
+    if (ret != 0)
+        error_counter++;
+    if (opt_val != SOCK_STREAM)
+        error_counter++;
+
     /* Clean up. */
     soc_close(tcp_sock);
     soc_close(udp_sock);
 
+    /* SO_TYPE: a closed descriptor is in range but not in use. */
+    opt_val = -1;
+    opt_len = (INT)sizeof(INT);
+    ret = getsockopt(tcp_sock, SOL_SOCKET, SO_TYPE, &opt_val, &opt_len);
+    if ((ret == 0) || (errno != EBADF))
+        error_counter++;
+
     if (error_counter)
+    {
+        printf("ERROR!\n");
         test_control_return(1);
+    }
     else
+    {
+        printf("SUCCESS!\n");
         test_control_return(0);
+    }
 }
 
 #else
+
+extern void test_control_return(UINT status);
+
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
 #else
@@ -330,6 +487,10 @@ void netx_bsd_socket_options_test_application_define(void *first_unused_memory)
 #endif
 {
     NX_PARAMETER_NOT_USED(first_unused_memory);
+
+    /* Print out test information banner.  */
+    printf("NetX Test:   Basic BSD Socket Options Test.................N/A\n");
+
     test_control_return(3);
 }
 #endif /* NX_BSD_ENABLE && !NX_DISABLE_IPV4 && __PRODUCT_NETXDUO__ */
