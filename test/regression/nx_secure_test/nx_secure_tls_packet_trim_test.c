@@ -32,7 +32,8 @@ static ULONG pool_0_memory[PACKET_POOL_SIZE / sizeof(ULONG)];
 
 extern NX_SECURE_TLS_CRYPTO nx_crypto_tls_ciphers;
 
-static UINT test_crypto_operation_success(UINT op,       /* Encrypt, Decrypt, Authenticate */
+/* Copy the encrypted input to produce deterministic plaintext for this test. */
+static UINT test_crypto_operation_copy(UINT op,       /* Encrypt, Decrypt, Authenticate */
                                 VOID *handler, /* Crypto handler */
                                 struct NX_CRYPTO_METHOD_STRUCT *method,
                                 UCHAR *key,
@@ -47,7 +48,49 @@ static UINT test_crypto_operation_success(UINT op,       /* Encrypt, Decrypt, Au
                                 VOID *packet_ptr,
                                 VOID (*nx_crypto_hw_process_callback)(VOID *packet_ptr, UINT status))
 {
-    return NX_CRYPTO_SUCCESS;
+    NX_PARAMETER_NOT_USED(handler);
+    NX_PARAMETER_NOT_USED(method);
+    NX_PARAMETER_NOT_USED(key);
+    NX_PARAMETER_NOT_USED(key_size_in_bits);
+    NX_PARAMETER_NOT_USED(iv_ptr);
+    NX_PARAMETER_NOT_USED(crypto_metadata);
+    NX_PARAMETER_NOT_USED(crypto_metadata_size);
+    NX_PARAMETER_NOT_USED(packet_ptr);
+    NX_PARAMETER_NOT_USED(nx_crypto_hw_process_callback);
+
+    if (op == NX_CRYPTO_DECRYPT_UPDATE)
+    {
+        if (input_length_in_byte > output_length_in_byte)
+        {
+            return(NX_CRYPTO_INVALID_PARAMETER);
+        }
+
+        memcpy(output, input, input_length_in_byte);
+    }
+
+    return(NX_CRYPTO_SUCCESS);
+}
+
+/* Model successful authentication of an empty application record. */
+static UINT test_verify_empty_record(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite,
+                                     UCHAR *mac_secret,
+                                     ULONG sequence_num[NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE],
+                                     UCHAR *header_data, USHORT header_length,
+                                     NX_PACKET *packet_ptr, ULONG offset, UINT *length,
+                                     VOID *hash_mac_metadata, ULONG hash_mac_metadata_size)
+{
+    NX_PARAMETER_NOT_USED(ciphersuite);
+    NX_PARAMETER_NOT_USED(mac_secret);
+    NX_PARAMETER_NOT_USED(header_data);
+    NX_PARAMETER_NOT_USED(header_length);
+    NX_PARAMETER_NOT_USED(packet_ptr);
+    NX_PARAMETER_NOT_USED(offset);
+    NX_PARAMETER_NOT_USED(hash_mac_metadata);
+    NX_PARAMETER_NOT_USED(hash_mac_metadata_size);
+
+    *length = 0;
+    sequence_num[0]++;
+    return(NX_SECURE_TLS_SUCCESS);
 }
 
 static NX_CRYPTO_METHOD test_crypto_method_aes_cbc_256;
@@ -61,7 +104,7 @@ NX_SECURE_TLS_CIPHERSUITE_INFO test_crypto_ciphersuite_lookup_table[] =
 NX_SECURE_TLS_CIPHERSUITE_INFO test_crypto_ciphersuite_lookup_table_2[] =
 {
     /* Ciphersuite,                           public cipher,            public_auth,              session cipher & cipher mode,   iv size, key size,  hash method,                    hash size, TLS PRF */
-    {TLS_RSA_WITH_AES_256_CBC_SHA256,         &crypto_method_rsa,       &crypto_method_rsa,       &test_crypto_method_aes_cbc_256,     16,      32,        &crypto_method_hmac_sha256,     1983,        &crypto_method_tls_prf_sha256}
+    {TLS_RSA_WITH_AES_256_CBC_SHA256,         &crypto_method_rsa,       &crypto_method_rsa,       &test_crypto_method_aes_cbc_256,     16,      32,        &crypto_method_hmac_sha256,     32,          &crypto_method_tls_prf_sha256}
 };
 
 #ifdef CTEST
@@ -129,7 +172,7 @@ UCHAR packet_buffer[100];
     status = nx_packet_release(packet);
     EXPECT_EQ(NX_SUCCESS, status);
 
-    test_crypto_method_aes_cbc_256.nx_crypto_operation = test_crypto_operation_success;
+    test_crypto_method_aes_cbc_256.nx_crypto_operation = test_crypto_operation_copy;
     data_length = 2000;
     header_buffer[3] = (data_length >> 8);
     header_buffer[4] = (data_length & 0xff);
@@ -145,13 +188,10 @@ UCHAR packet_buffer[100];
 
     tls_session.nx_secure_record_queue_header = NX_NULL;
     tls_session.nx_secure_tls_session_ciphersuite = test_crypto_ciphersuite_lookup_table_2;
+    tls_session.nx_secure_verify_mac = test_verify_empty_record;
 
     status = _nx_secure_tls_process_record(&tls_session, packet, &bytes_processed, 0);
-#if (NX_SECURE_TLS_TLS_1_0_ENABLED)
     EXPECT_EQ(NX_CONTINUE, status);
-#else
-    EXPECT_EQ(NX_SECURE_TLS_HASH_MAC_VERIFY_FAILURE, status);
-#endif
 
     printf("SUCCESS!\n");
     test_control_return(0);
