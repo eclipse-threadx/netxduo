@@ -223,6 +223,54 @@
         "no_client_renegotiation_build",
         "hash_clone_build",
         "curve25519_448_build"
+      ],
+      "shards": [
+        {
+          "name": "baseline",
+          "profiles": ["default_build_coverage"]
+        },
+        {
+          "name": "legacy-tls",
+          "profiles": [
+            "psk_build_coverage",
+            "tls_1_0_enable_build",
+            "tls_1_1_enable_build"
+          ]
+        },
+        {
+          "name": "tls13",
+          "profiles": [
+            "tls_1_3_enable_build_coverage",
+            "tls_1_3_client_disable_build",
+            "tls_1_3_server_disable_build",
+            "curve25519_448_build"
+          ]
+        },
+        {
+          "name": "feature-reduction",
+          "profiles": [
+            "client_disable_build",
+            "server_disable_build",
+            "no_ecc_build_coverage"
+          ]
+        },
+        {
+          "name": "assurance",
+          "profiles": [
+            "ecjpake_build",
+            "dtls_build_coverage",
+            "eal4_build_coverage",
+            "sesip_build_coverage"
+          ]
+        },
+        {
+          "name": "renegotiation",
+          "profiles": [
+            "no_renegotiation_build",
+            "no_client_renegotiation_build",
+            "hash_clone_build"
+          ]
+        }
       ]
     },
     "crypto": {

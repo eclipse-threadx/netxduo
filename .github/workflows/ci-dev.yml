@@ -41,6 +41,7 @@ jobs:
       netxduo_fast_profiles: ${{ steps.route.outputs.netxduo_fast_profiles }}
       nx_secure_profiles: ${{ steps.route.outputs.nx_secure_profiles }}
       nx_secure_interoperability_profiles: ${{ steps.route.outputs.nx_secure_interoperability_profiles }}
+      nx_secure_interoperability_matrix: ${{ steps.route.outputs.nx_secure_interoperability_matrix }}
       crypto_profiles: ${{ steps.route.outputs.crypto_profiles }}
     steps:
       - name: Check out classification inputs
@@ -202,14 +203,18 @@ jobs:
 
   nx_secure_interoperability:
     needs: classify
-    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.nx_secure_interoperability_profiles != '' }}
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.nx_secure_interoperability_matrix != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.classify.outputs.nx_secure_interoperability_matrix) }}
     permissions:
       contents: read
     uses: ./.github/workflows/_test-suite.yml
     with:
       suite: nx_secure_interoperability
-      profiles: ${{ needs.classify.outputs.nx_secure_interoperability_profiles }}
-      result_name: Dev-Secure-Interoperability
+      profiles: ${{ matrix.profiles }}
+      result_name: ${{ matrix.result_name }}
       installer: ./scripts/install_secure.sh
 
   crypto:
@@ -263,5 +268,5 @@ jobs:
               --conditional "netxduo64=${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo64_profiles != '' }}:${{ needs.netxduo64.result }}" \
               --conditional "netxduo-fast=${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo_fast_profiles != '' }}:${{ needs.netxduo_fast.result }}" \
               --conditional "secure=${{ needs.classify.result == 'success' && needs.classify.outputs.nx_secure_profiles != '' }}:${{ needs.nx_secure.result }}" \
-              --conditional "secure-interoperability=${{ needs.classify.result == 'success' && needs.classify.outputs.nx_secure_interoperability_profiles != '' }}:${{ needs.nx_secure_interoperability.result }}" \
+              --conditional "secure-interoperability=${{ needs.classify.result == 'success' && needs.classify.outputs.nx_secure_interoperability_matrix != '[]' }}:${{ needs.nx_secure_interoperability.result }}" \
               --conditional "crypto=${{ needs.classify.result == 'success' && needs.classify.outputs.crypto_profiles != '' }}:${{ needs.crypto.result }}"

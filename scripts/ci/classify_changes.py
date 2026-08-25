@@ -104,18 +104,17 @@ class Selection:
             profiles.clear()
         self.add_reason(reason)
 
-    def _netxduo_matrix(self):
-        """Shard selected NetX Duo profiles without duplicating the smoke profile."""
-        netxduo = self.profile_map["suites"]["netxduo"]
-        smoke = netxduo["smoke"]
-        if "netxduo" in self.full_suites:
-            selected_profiles = set(netxduo["profiles"])
+    def _sharded_matrix(self, suite, result_prefix, excluded_profiles=()):
+        """Render selected suite profiles through its checked-in shard map."""
+        configuration = self.profile_map["suites"][suite]
+        if suite in self.full_suites:
+            selected_profiles = set(configuration["profiles"])
         else:
-            selected_profiles = set(self.selected["netxduo"])
-        selected_profiles.discard(smoke)
+            selected_profiles = set(self.selected[suite])
+        selected_profiles.difference_update(excluded_profiles)
 
         matrix = []
-        for shard in netxduo["shards"]:
+        for shard in configuration["shards"]:
             profiles = [
                 profile
                 for profile in shard["profiles"]
@@ -126,16 +125,29 @@ class Selection:
                     {
                         "name": shard["name"],
                         "profiles": " ".join(profiles),
-                        "result_name": "Dev-NetXDuo-" + shard["name"],
+                        "result_name": result_prefix + shard["name"],
                     }
                 )
                 selected_profiles.difference_update(profiles)
         if selected_profiles:
             raise ProfileMapError(
-                "NetX Duo profiles are missing from the shard map: "
+                f"{suite} profiles are missing from the shard map: "
                 + ", ".join(sorted(selected_profiles))
             )
         return matrix
+
+    def _netxduo_matrix(self):
+        """Shard selected NetX Duo profiles without duplicating the smoke profile."""
+        netxduo = self.profile_map["suites"]["netxduo"]
+        return self._sharded_matrix(
+            "netxduo", "Dev-NetXDuo-", (netxduo["smoke"],)
+        )
+
+    def _nx_secure_interoperability_matrix(self):
+        """Shard selected NetX Secure interoperability profiles."""
+        return self._sharded_matrix(
+            "nx_secure_interoperability", "Dev-Secure-Interoperability-"
+        )
 
     def outputs(self, changed_file_count):
         """Return compact values suitable for GitHub job outputs."""
@@ -145,6 +157,9 @@ class Selection:
             "changed_files": str(changed_file_count),
             "netxduo_matrix": json.dumps(
                 self._netxduo_matrix(), separators=(",", ":")
+            ),
+            "nx_secure_interoperability_matrix": json.dumps(
+                self._nx_secure_interoperability_matrix(), separators=(",", ":")
             ),
         }
         for suite, output_name in SUITE_OUTPUTS.items():
@@ -180,7 +195,7 @@ def load_profile_map(map_file):
 
 
 def validate_profile_map(profile_map, repository_root=REPOSITORY_ROOT):
-    """Validate bundles, suite declarations, and the NetX Duo shard partition."""
+    """Validate bundles, suite declarations, and checked-in shard partitions."""
     if profile_map.get("version") != 1:
         raise ProfileMapError("Unsupported profile map version")
     suites = profile_map.get("suites")
@@ -205,17 +220,33 @@ def validate_profile_map(profile_map, repository_root=REPOSITORY_ROOT):
 
     netxduo = suites["netxduo"]
     smoke = netxduo.get("smoke")
-    shards = netxduo.get("shards")
-    if smoke not in netxduo["profiles"] or not isinstance(shards, list):
-        raise ProfileMapError("Invalid NetX Duo smoke profile or shards")
-    sharded_profiles = [profile for shard in shards for profile in shard["profiles"]]
-    if len(sharded_profiles) != len(set(sharded_profiles)):
-        raise ProfileMapError("NetX Duo shard profiles are duplicated")
-    if set(sharded_profiles) != set(netxduo["profiles"]):
-        raise ProfileMapError("NetX Duo shards do not cover every profile")
-    shard_names = [shard["name"] for shard in shards]
-    if len(shard_names) != len(set(shard_names)):
-        raise ProfileMapError("NetX Duo shard names are duplicated")
+    if smoke not in netxduo["profiles"]:
+        raise ProfileMapError("Invalid NetX Duo smoke profile")
+
+    for suite in ("netxduo", "nx_secure_interoperability"):
+        configuration = suites[suite]
+        shards = configuration.get("shards")
+        if not isinstance(shards, list) or not shards:
+            raise ProfileMapError(f"Invalid {suite} shards")
+        if any(
+            not isinstance(shard, dict)
+            or not isinstance(shard.get("name"), str)
+            or not shard["name"]
+            or not isinstance(shard.get("profiles"), list)
+            or not shard["profiles"]
+            for shard in shards
+        ):
+            raise ProfileMapError(f"Invalid {suite} shard")
+        sharded_profiles = [
+            profile for shard in shards for profile in shard["profiles"]
+        ]
+        if len(sharded_profiles) != len(set(sharded_profiles)):
+            raise ProfileMapError(f"{suite} shard profiles are duplicated")
+        if set(sharded_profiles) != set(configuration["profiles"]):
+            raise ProfileMapError(f"{suite} shards do not cover every profile")
+        shard_names = [shard["name"] for shard in shards]
+        if len(shard_names) != len(set(shard_names)):
+            raise ProfileMapError(f"{suite} shard names are duplicated")
 
     for bundle_name, bundle in bundles.items():
         if not isinstance(bundle, dict) or not bundle:

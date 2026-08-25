@@ -400,6 +400,8 @@ foreach(test_case ${nx_secure_test_cases})
        kill -TERM $pid;
        [[ $exit_code = 0 ]] || [[ $exit_code = 233 ]] || { echo Exit code: $exit_code; exit $exit_code; };"
     WORKING_DIRECTORY ${SOURCE_DIR})
+  # Prevent a recovered interoperability hang from consuming the suite timeout.
+  set_tests_properties(${CMAKE_BUILD_TYPE}::${test_case} PROPERTIES TIMEOUT 180)
 endforeach()
 
 add_test(

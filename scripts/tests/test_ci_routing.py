@@ -57,8 +57,17 @@ class ClassifierTests(unittest.TestCase):
             for profile in entry["profiles"].split()
         }
 
+    @staticmethod
+    def secure_interoperability_profiles(outputs):
+        """Flatten secure interoperability profiles from classifier outputs."""
+        return {
+            profile
+            for entry in json.loads(outputs["nx_secure_interoperability_matrix"])
+            for profile in entry["profiles"].split()
+        }
+
     def test_profile_map_matches_every_cmake_suite(self):
-        """The map and eight NetX Duo shards cover declared profiles exactly."""
+        """The map and checked-in shard partitions cover profiles exactly."""
         classify_changes.validate_profile_map(self.profile_map)
         expected_counts = {
             "netxduo": 43,
@@ -87,6 +96,9 @@ class ClassifierTests(unittest.TestCase):
                 outputs = self.classify(*paths)
                 self.assertEqual("false", outputs["full"])
                 self.assertEqual("[]", outputs["netxduo_matrix"])
+                self.assertEqual(
+                    "[]", outputs["nx_secure_interoperability_matrix"]
+                )
                 for output_name in classify_changes.SUITE_OUTPUTS.values():
                     self.assertEqual("", outputs[output_name])
 
@@ -99,8 +111,47 @@ class ClassifierTests(unittest.TestCase):
         expected = set(self.profile_map["suites"]["netxduo"]["profiles"])
         expected.remove("default_build_coverage")
         self.assertEqual(expected, self.netxduo_profiles(outputs))
+        secure_matrix = json.loads(
+            outputs["nx_secure_interoperability_matrix"]
+        )
+        self.assertEqual(6, len(secure_matrix))
+        self.assertEqual(
+            set(
+                self.profile_map["suites"]["nx_secure_interoperability"][
+                    "profiles"
+                ]
+            ),
+            self.secure_interoperability_profiles(outputs),
+        )
         for output_name in classify_changes.SUITE_OUTPUTS.values():
             self.assertEqual("all", outputs[output_name])
+
+    def test_secure_interoperability_matrix_filters_partial_shards(self):
+        """Only selected secure profiles and non-empty shards enter the matrix."""
+        selection = classify_changes.Selection(self.profile_map)
+        selection.selected["nx_secure_interoperability"].update(
+            {
+                "default_build_coverage",
+                "tls_1_3_enable_build_coverage",
+                "curve25519_448_build",
+            }
+        )
+        outputs = selection.outputs(1)
+        matrix = json.loads(outputs["nx_secure_interoperability_matrix"])
+        self.assertEqual(
+            ["baseline", "tls13"], [entry["name"] for entry in matrix]
+        )
+        self.assertEqual(
+            {
+                "default_build_coverage",
+                "tls_1_3_enable_build_coverage",
+                "curve25519_448_build",
+            },
+            self.secure_interoperability_profiles(outputs),
+        )
+        self.assertEqual(
+            "Dev-Secure-Interoperability-tls13", matrix[1]["result_name"]
+        )
 
     def test_ipv4_source_selects_ipv4_and_dependent_defaults(self):
         """IPv4 implementation changes cover all IPv4 variants and consumers."""
@@ -185,6 +236,9 @@ class ClassifierTests(unittest.TestCase):
         outputs = self.classify("nx_secure/src/nx_secure_tls_session_create.c")
         self.assertEqual("all", outputs["nx_secure_profiles"])
         self.assertEqual("all", outputs["nx_secure_interoperability_profiles"])
+        self.assertEqual(
+            6, len(json.loads(outputs["nx_secure_interoperability_matrix"]))
+        )
         self.assertEqual("all", outputs["web_profiles"])
         self.assertIn("secure_build_coverage", outputs["mqtt_profiles"].split())
         self.assertEqual(
@@ -423,6 +477,31 @@ class ClassifierTests(unittest.TestCase):
             "shard-1"
         )
         mutations.append(duplicate_shard_name)
+        missing_secure_shard_profile = copy.deepcopy(self.profile_map)
+        missing_secure_shard_profile["suites"]["nx_secure_interoperability"][
+            "shards"
+        ][1]["profiles"].pop()
+        mutations.append(missing_secure_shard_profile)
+        duplicate_secure_shard_profile = copy.deepcopy(self.profile_map)
+        duplicate_secure_shard_profile["suites"]["nx_secure_interoperability"][
+            "shards"
+        ][1]["profiles"].append("default_build_coverage")
+        mutations.append(duplicate_secure_shard_profile)
+        duplicate_secure_shard_name = copy.deepcopy(self.profile_map)
+        duplicate_secure_shard_name["suites"]["nx_secure_interoperability"][
+            "shards"
+        ][1]["name"] = "baseline"
+        mutations.append(duplicate_secure_shard_name)
+        empty_secure_shard = copy.deepcopy(self.profile_map)
+        empty_secure_shard["suites"]["nx_secure_interoperability"]["shards"][
+            0
+        ]["profiles"] = []
+        mutations.append(empty_secure_shard)
+        missing_secure_shards = copy.deepcopy(self.profile_map)
+        del missing_secure_shards["suites"]["nx_secure_interoperability"][
+            "shards"
+        ]
+        mutations.append(missing_secure_shards)
         empty_bundle = copy.deepcopy(self.profile_map)
         empty_bundle["bundles"]["netx_addon"] = {}
         mutations.append(empty_bundle)
@@ -448,6 +527,13 @@ class ClassifierTests(unittest.TestCase):
 
         selection = classify_changes.Selection(self.profile_map)
         selection.selected["netxduo"].add("not_sharded_build")
+        with self.assertRaises(classify_changes.ProfileMapError):
+            selection.outputs(1)
+
+        selection = classify_changes.Selection(self.profile_map)
+        selection.selected["nx_secure_interoperability"].add(
+            "not_sharded_build"
+        )
         with self.assertRaises(classify_changes.ProfileMapError):
             selection.outputs(1)
 
