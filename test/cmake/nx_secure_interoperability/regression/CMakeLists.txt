@@ -402,6 +402,14 @@ foreach(test_case ${nx_secure_test_cases})
     WORKING_DIRECTORY ${SOURCE_DIR})
   # Prevent a recovered interoperability hang from consuming the suite timeout.
   set_tests_properties(${CMAKE_BUILD_TYPE}::${test_case} PROPERTIES TIMEOUT 180)
+  if(CMAKE_BUILD_TYPE STREQUAL "no_renegotiation_build"
+     OR CMAKE_BUILD_TYPE STREQUAL "sesip_build_coverage")
+    # OpenSSL 3 requires an explicit opt-in for servers built without RFC 5746.
+    set_property(
+      TEST ${CMAKE_BUILD_TYPE}::${test_case}
+      APPEND
+      PROPERTY ENVIRONMENT "NETXDUO_OPENSSL_LEGACY_SERVER_CONNECT=1")
+  endif()
 endforeach()
 
 add_test(
