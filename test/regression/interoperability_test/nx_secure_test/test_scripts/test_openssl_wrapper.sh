@@ -72,6 +72,17 @@ if grep -q 'openssl_arg=-tls1_2' "${WRAPPER_LOG}"; then
     exit 1
 fi
 
+NETXDUO_OPENSSL_TLS_1_2_DEFAULT=1 \
+    PATH="${wrapper_test_dir}:${PATH}" \
+    "${SCRIPT_DIR}/openssl_echo_client.sh" 127.0.0.1 4433 \
+    -ciphersuites TLS_AES_128_GCM_SHA256
+grep -q 'openssl_arg=-ciphersuites' "${WRAPPER_LOG}"
+grep -q 'openssl_arg=TLS_AES_128_GCM_SHA256' "${WRAPPER_LOG}"
+if grep -q 'openssl_arg=-tls1_2' "${WRAPPER_LOG}"; then
+    echo "OpenSSL TLS 1.3 ciphersuite selection was overridden" >&2
+    exit 1
+fi
+
 : > "${WRAPPER_LOG}"
 env -u NETXDUO_OPENSSL_LEGACY_SERVER_CONNECT \
     PATH="${wrapper_test_dir}:${PATH}" \
