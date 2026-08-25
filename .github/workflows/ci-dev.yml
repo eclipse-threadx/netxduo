@@ -1,0 +1,273 @@
+# Copyright (c) 2026 Eclipse ThreadX contributors
+#
+# This program and the accompanying materials are made available under the
+# terms of the MIT License which is available at
+# https://opensource.org/licenses/MIT.
+#
+# SPDX-License-Identifier: MIT
+
+name: CI dev
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-dev-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  classify:
+    name: Classify changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      healthy: ${{ steps.route.outputs.healthy }}
+      full: ${{ steps.route.outputs.full }}
+      reason: ${{ steps.route.outputs.reason }}
+      changed_files: ${{ steps.route.outputs.changed_files }}
+      netxduo_matrix: ${{ steps.route.outputs.netxduo_matrix }}
+      web_profiles: ${{ steps.route.outputs.web_profiles }}
+      ptp_profiles: ${{ steps.route.outputs.ptp_profiles }}
+      mqtt_profiles: ${{ steps.route.outputs.mqtt_profiles }}
+      mqtt_interoperability_profiles: ${{ steps.route.outputs.mqtt_interoperability_profiles }}
+      netxduo64_profiles: ${{ steps.route.outputs.netxduo64_profiles }}
+      netxduo_fast_profiles: ${{ steps.route.outputs.netxduo_fast_profiles }}
+      nx_secure_profiles: ${{ steps.route.outputs.nx_secure_profiles }}
+      nx_secure_interoperability_profiles: ${{ steps.route.outputs.nx_secure_interoperability_profiles }}
+      nx_secure_interoperability_matrix: ${{ steps.route.outputs.nx_secure_interoperability_matrix }}
+      crypto_profiles: ${{ steps.route.outputs.crypto_profiles }}
+    steps:
+      - name: Check out classification inputs
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Test classifier and profile map
+        id: validation
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python3 scripts/tests/test_ci_routing.py
+          python3 scripts/ci/classify_changes.py --validate
+
+      - name: Classify changed paths
+        id: route
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          VALIDATION_OUTCOME: ${{ steps.validation.outcome }}
+        run: |
+          set -euo pipefail
+          route_output="${RUNNER_TEMP}/dev-ci-route-output"
+          : > "${route_output}"
+          classifier_healthy=true
+          if [[ "${VALIDATION_OUTCOME}" != "success" ]]; then
+              cp scripts/ci/full_fallback_outputs "${route_output}"
+              classifier_healthy=false
+              echo "Classifier validation failed; selecting the full suite." >> "${GITHUB_STEP_SUMMARY}"
+          elif [[ "${EVENT_NAME}" = "workflow_dispatch" ]]; then
+              python3 scripts/ci/classify_changes.py \
+                  --full-reason "manual dispatch" \
+                  --github-output "${route_output}" \
+                  --summary "${GITHUB_STEP_SUMMARY}"
+          elif ! python3 scripts/ci/classify_changes.py \
+              --base "${BASE_SHA}" \
+              --head "${HEAD_SHA}" \
+              --github-output "${route_output}" \
+              --summary "${GITHUB_STEP_SUMMARY}"; then
+              cp scripts/ci/full_fallback_outputs "${route_output}"
+              classifier_healthy=false
+              echo "Classifier execution failed; selecting the full suite." >> "${GITHUB_STEP_SUMMARY}"
+          fi
+          printf 'healthy=%s\n' "${classifier_healthy}" >> "${route_output}"
+          cat "${route_output}" >> "${GITHUB_OUTPUT}"
+
+  smoke:
+    name: NetXDuo/default_build_coverage
+    needs: classify
+    if: ${{ always() }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: netxduo
+      profiles: default_build_coverage
+      result_name: Dev-NetXDuo-smoke
+      upload_coverage: true
+      test_timeout_minutes: 30
+
+  netxduo_profiles:
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo_matrix != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.classify.outputs.netxduo_matrix) }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: netxduo
+      profiles: ${{ matrix.profiles }}
+      result_name: ${{ matrix.result_name }}
+      upload_coverage: true
+      test_timeout_minutes: 45
+
+  web:
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.web_profiles != '' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: web
+      profiles: ${{ needs.classify.outputs.web_profiles }}
+      result_name: Dev-Web
+
+  ptp:
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.ptp_profiles != '' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: ptp
+      profiles: ${{ needs.classify.outputs.ptp_profiles }}
+      result_name: Dev-PTP
+
+  mqtt:
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.mqtt_profiles != '' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: mqtt
+      profiles: ${{ needs.classify.outputs.mqtt_profiles }}
+      result_name: Dev-MQTT
+
+  mqtt_interoperability:
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.mqtt_interoperability_profiles != '' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: mqtt_interoperability
+      profiles: ${{ needs.classify.outputs.mqtt_interoperability_profiles }}
+      result_name: Dev-MQTT-Interoperability
+      installer: ./scripts/install_mqtt.sh
+
+  netxduo64:
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo64_profiles != '' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: netxduo64
+      profiles: ${{ needs.classify.outputs.netxduo64_profiles }}
+      result_name: Dev-NetXDuo64
+
+  netxduo_fast:
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo_fast_profiles != '' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: netxduo_fast
+      profiles: ${{ needs.classify.outputs.netxduo_fast_profiles }}
+      result_name: Dev-NetXDuo-Fast
+      upload_coverage: false
+
+  nx_secure:
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.nx_secure_profiles != '' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: nx_secure
+      profiles: ${{ needs.classify.outputs.nx_secure_profiles }}
+      result_name: Dev-Secure
+
+  nx_secure_interoperability:
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.nx_secure_interoperability_matrix != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.classify.outputs.nx_secure_interoperability_matrix) }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: nx_secure_interoperability
+      profiles: ${{ matrix.profiles }}
+      result_name: ${{ matrix.result_name }}
+      installer: ./scripts/install_secure.sh
+      install_timeout_minutes: 20
+
+  crypto:
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.crypto_profiles != '' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_test-suite.yml
+    with:
+      suite: crypto
+      profiles: ${{ needs.classify.outputs.crypto_profiles }}
+      result_name: Dev-Crypto
+
+  gate:
+    name: CI / dev gate
+    needs:
+      - classify
+      - smoke
+      - netxduo_profiles
+      - web
+      - ptp
+      - mqtt
+      - mqtt_interoperability
+      - netxduo64
+      - netxduo_fast
+      - nx_secure
+      - nx_secure_interoperability
+      - crypto
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Check out gate validator
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Require every selected job
+        run: |
+          python3 scripts/ci/check_dev_gate.py \
+              --required "classify=${{ needs.classify.result }}" \
+              --required "classifier-health=${{ needs.classify.outputs.healthy == 'true' && 'success' || 'failure' }}" \
+              --required "smoke=${{ needs.smoke.result }}" \
+              --conditional "netxduo=${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo_matrix != '[]' }}:${{ needs.netxduo_profiles.result }}" \
+              --conditional "web=${{ needs.classify.result == 'success' && needs.classify.outputs.web_profiles != '' }}:${{ needs.web.result }}" \
+              --conditional "ptp=${{ needs.classify.result == 'success' && needs.classify.outputs.ptp_profiles != '' }}:${{ needs.ptp.result }}" \
+              --conditional "mqtt=${{ needs.classify.result == 'success' && needs.classify.outputs.mqtt_profiles != '' }}:${{ needs.mqtt.result }}" \
+              --conditional "mqtt-interoperability=${{ needs.classify.result == 'success' && needs.classify.outputs.mqtt_interoperability_profiles != '' }}:${{ needs.mqtt_interoperability.result }}" \
+              --conditional "netxduo64=${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo64_profiles != '' }}:${{ needs.netxduo64.result }}" \
+              --conditional "netxduo-fast=${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo_fast_profiles != '' }}:${{ needs.netxduo_fast.result }}" \
+              --conditional "secure=${{ needs.classify.result == 'success' && needs.classify.outputs.nx_secure_profiles != '' }}:${{ needs.nx_secure.result }}" \
+              --conditional "secure-interoperability=${{ needs.classify.result == 'success' && needs.classify.outputs.nx_secure_interoperability_matrix != '[]' }}:${{ needs.nx_secure_interoperability.result }}" \
+              --conditional "crypto=${{ needs.classify.result == 'success' && needs.classify.outputs.crypto_profiles != '' }}:${{ needs.crypto.result }}"

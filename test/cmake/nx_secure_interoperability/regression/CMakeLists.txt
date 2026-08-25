@@ -371,6 +371,18 @@ include(network_config.cmake)
 set(PCAP_SOURCE
   ${CMAKE_CURRENT_LIST_DIR}/../../../regression/interoperability_test/nx_pcap_network_driver.c
 )
+set(legacy_server_connect_builds
+    dtls_build_coverage
+    ecjpake_build
+    no_ecc_build_coverage
+    no_renegotiation_build
+    sesip_build_coverage)
+set(tls_1_2_default_builds
+    curve25519_448_build
+    sesip_build_coverage
+    tls_1_3_client_disable_build
+    tls_1_3_enable_build_coverage
+    tls_1_3_server_disable_build)
 foreach(test_case ${nx_secure_test_cases})
   add_executable(${test_case} ${${test_case}_file_list} ${PCAP_SOURCE})
   network_config(${test_case})
@@ -400,6 +412,21 @@ foreach(test_case ${nx_secure_test_cases})
        kill -TERM $pid;
        [[ $exit_code = 0 ]] || [[ $exit_code = 233 ]] || { echo Exit code: $exit_code; exit $exit_code; };"
     WORKING_DIRECTORY ${SOURCE_DIR})
+  # Prevent a recovered interoperability hang from consuming the suite timeout.
+  set_tests_properties(${CMAKE_BUILD_TYPE}::${test_case} PROPERTIES TIMEOUT 180)
+  set(test_environment)
+  if(CMAKE_BUILD_TYPE IN_LIST legacy_server_connect_builds)
+    # NetX DTLS and builds without RFC 5746 need OpenSSL's explicit opt-in.
+    list(APPEND test_environment "NETXDUO_OPENSSL_LEGACY_SERVER_CONNECT=1")
+  endif()
+  if(CMAKE_BUILD_TYPE IN_LIST tls_1_2_default_builds)
+    # Keep legacy test cases on TLS 1.2 when the build also enables TLS 1.3.
+    list(APPEND test_environment "NETXDUO_OPENSSL_TLS_1_2_DEFAULT=1")
+  endif()
+  if(test_environment)
+    set_property(TEST ${CMAKE_BUILD_TYPE}::${test_case}
+                 APPEND PROPERTY ENVIRONMENT ${test_environment})
+  endif()
 endforeach()
 
 add_test(

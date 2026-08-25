@@ -42,6 +42,63 @@ export NETXDUO_WOLFSSL_HOME="${wrapper_test_dir}/wolfssl-home"
 grep -q "openssl_conf=${SCRIPT_DIR}/openssl_interoperability.cnf" "${WRAPPER_LOG}"
 grep -q 'openssl_arg=version' "${WRAPPER_LOG}"
 
+env -u NETXDUO_OPENSSL_LEGACY_SERVER_CONNECT \
+    PATH="${wrapper_test_dir}:${PATH}" \
+    "${SCRIPT_DIR}/openssl_echo_client.sh" 127.0.0.1 4433 -tls1_2
+if grep -q 'openssl_arg=-legacy_server_connect' "${WRAPPER_LOG}"; then
+    echo "Default OpenSSL client enabled legacy server connections" >&2
+    exit 1
+fi
+
+NETXDUO_OPENSSL_LEGACY_SERVER_CONNECT=1 \
+    PATH="${wrapper_test_dir}:${PATH}" \
+    "${SCRIPT_DIR}/openssl_echo_client.sh" 127.0.0.1 4433 -tls1_2
+grep -q 'openssl_arg=-legacy_server_connect' "${WRAPPER_LOG}"
+grep -q 'openssl_arg=-tls1_2' "${WRAPPER_LOG}"
+
+NETXDUO_OPENSSL_TLS_1_2_DEFAULT=1 \
+    PATH="${wrapper_test_dir}:${PATH}" \
+    "${SCRIPT_DIR}/openssl_echo_client.sh" 127.0.0.1 4433 \
+    -cipher AES128-SHA256
+grep -q 'openssl_arg=-tls1_2' "${WRAPPER_LOG}"
+grep -q 'openssl_arg=AES128-SHA256' "${WRAPPER_LOG}"
+
+NETXDUO_OPENSSL_TLS_1_2_DEFAULT=1 \
+    PATH="${wrapper_test_dir}:${PATH}" \
+    "${SCRIPT_DIR}/openssl_echo_client.sh" 127.0.0.1 4433 -tls1_3
+grep -q 'openssl_arg=-tls1_3' "${WRAPPER_LOG}"
+if grep -q 'openssl_arg=-tls1_2' "${WRAPPER_LOG}"; then
+    echo "Explicit OpenSSL protocol selection was overridden" >&2
+    exit 1
+fi
+
+NETXDUO_OPENSSL_TLS_1_2_DEFAULT=1 \
+    PATH="${wrapper_test_dir}:${PATH}" \
+    "${SCRIPT_DIR}/openssl_echo_client.sh" 127.0.0.1 4433 \
+    -ciphersuites TLS_AES_128_GCM_SHA256
+grep -q 'openssl_arg=-ciphersuites' "${WRAPPER_LOG}"
+grep -q 'openssl_arg=TLS_AES_128_GCM_SHA256' "${WRAPPER_LOG}"
+if grep -q 'openssl_arg=-tls1_2' "${WRAPPER_LOG}"; then
+    echo "OpenSSL TLS 1.3 ciphersuite selection was overridden" >&2
+    exit 1
+fi
+
+: > "${WRAPPER_LOG}"
+env -u NETXDUO_OPENSSL_LEGACY_SERVER_CONNECT \
+    PATH="${wrapper_test_dir}:${PATH}" \
+    "${SCRIPT_DIR}/demo_openssl_client.sh" 127.0.0.1 4433 -tls1_2
+if grep -q 'openssl_arg=-legacy_server_connect' "${WRAPPER_LOG}"; then
+    echo "Default OpenSSL demo client enabled legacy server connections" >&2
+    exit 1
+fi
+
+: > "${WRAPPER_LOG}"
+NETXDUO_OPENSSL_LEGACY_SERVER_CONNECT=1 \
+    PATH="${wrapper_test_dir}:${PATH}" \
+    "${SCRIPT_DIR}/demo_openssl_client.sh" 127.0.0.1 4433 -tls1_2
+grep -q 'openssl_arg=-legacy_server_connect' "${WRAPPER_LOG}"
+grep -q 'openssl_arg=-tls1_2' "${WRAPPER_LOG}"
+
 "${SCRIPT_DIR}/openssl" s_server -rev \
     -key "${wrapper_test_dir}/ECTestServer9_192.key" \
     -cert "${wrapper_test_dir}/ECTestServer9_192.crt" \

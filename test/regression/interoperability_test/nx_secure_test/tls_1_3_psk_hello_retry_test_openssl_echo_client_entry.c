@@ -26,6 +26,7 @@ INT status, exit_status;
 
 /* Added -curves prime256v1 to avoid hello retry. */
 CHAR* external_cmd[] = { "openssl_echo_client.sh", TLS_TEST_IP_ADDRESS_STRING, DEVICE_SERVER_PORT_STRING,
+                         "-tls1_3",
                          "-psk", "112233445566",
                          "-psk_identity", "psk_test",
                          (CHAR*)NULL};

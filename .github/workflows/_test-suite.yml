@@ -39,6 +39,11 @@ on:
         required: false
         default: true
         type: boolean
+      install_timeout_minutes:
+        description: Maximum dependency-install duration
+        required: false
+        default: 10
+        type: number
       test_timeout_minutes:
         description: Maximum test-step duration
         required: false
@@ -85,7 +90,7 @@ jobs:
           ./scripts/tests/profile_wrappers_test.sh
 
       - name: Install dependencies
-        timeout-minutes: 10
+        timeout-minutes: ${{ inputs.install_timeout_minutes }}
         env:
           INSTALLER: ${{ inputs.installer }}
         run: |
