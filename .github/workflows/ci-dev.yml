@@ -216,6 +216,7 @@ jobs:
       profiles: ${{ matrix.profiles }}
       result_name: ${{ matrix.result_name }}
       installer: ./scripts/install_secure.sh
+      install_timeout_minutes: 20
 
   crypto:
     needs: classify
