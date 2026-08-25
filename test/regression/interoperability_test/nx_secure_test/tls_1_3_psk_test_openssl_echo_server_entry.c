@@ -26,6 +26,8 @@ INT status, exit_status;
 
 /* Added -rev option to send reverse text received from clients back to the client. Added -naccept 1 to close the server after one tls session. */
 CHAR* external_cmd[] = { "openssl", "s_server", "-rev",
+                         "-port", DEVICE_SERVER_PORT_STRING,
+                         "-tls1_3",
                          "-nocert",
                          "-psk", "112233445566",
                          "-psk_identity", "psk_test",

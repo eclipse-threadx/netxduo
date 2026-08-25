@@ -17,7 +17,7 @@
 
 #include "tls_test_frame.h"
 
-#define TLS_TEST_EXTERNAL_SERVER_READY_ATTEMPTS           60U
+#define TLS_TEST_EXTERNAL_SERVER_READY_ATTEMPTS           30U
 #define TLS_TEST_EXTERNAL_SERVER_READY_OUTPUT_SIZE         1U
 
 /* Stop and reap an external server process.  */
