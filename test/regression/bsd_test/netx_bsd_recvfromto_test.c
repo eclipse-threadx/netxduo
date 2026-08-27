@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (C) 2026 Eclipse ThreadX contributors
+ * Copyright (c) 2026 Eclipse ThreadX contributors
  *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
@@ -139,6 +139,8 @@ CHAR                        buf[64];
 INT                         ret;
 ULONG                       actual_status;
 
+    printf("NetX Test:   Basic BSD recvfromto Test.....................");
+
     /* Wait for IP stack initialisation. */
     nx_ip_status_check(&ip_0, NX_IP_INITIALIZE_DONE, &actual_status,
                        NX_IP_PERIODIC_RATE);
@@ -148,6 +150,7 @@ ULONG                       actual_status;
     if (sock < 0)
     {
         error_counter++;
+        printf("ERROR!\n");
         test_control_return(1);
         return;
     }
@@ -161,6 +164,7 @@ ULONG                       actual_status;
     {
         error_counter++;
         soc_close(sock);
+        printf("ERROR!\n");
         test_control_return(1);
         return;
     }
@@ -208,6 +212,7 @@ ULONG                       actual_status;
     if (sock < 0)
     {
         error_counter++;
+        printf("ERROR!\n");
         test_control_return(1);
         return;
     }
@@ -221,6 +226,7 @@ ULONG                       actual_status;
     {
         error_counter++;
         soc_close(sock);
+        printf("ERROR!\n");
         test_control_return(1);
         return;
     }
@@ -245,17 +251,17 @@ ULONG                       actual_status;
 
         /* a.b format: 11.657930 == 11.0x0a0a0a == 11.10.10.10 */
         rc = inet_aton("11.657930", &in_val);
-        if (rc == 0)
+        if ((rc != 1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
             error_counter++;
 
         /* a.b.c format: 11.10.2570 == 11.10.0x0a0a == 11.10.10.10 */
         rc = inet_aton("11.10.2570", &in_val);
-        if (rc == 0)
+        if ((rc != 1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
             error_counter++;
 
         /* standard dotted-decimal must still work */
         rc = inet_aton("11.10.10.10", &in_val);
-        if (rc == 0)
+        if ((rc != 1) || (in_val.s_addr != htonl(0x0b0a0a0a)))
             error_counter++;
     }
 
@@ -300,10 +306,22 @@ ULONG           actual_status;
 
     /* Wait for receiver to finish then report result. */
     tx_semaphore_get(&sema_done, 5 * NX_IP_PERIODIC_RATE);
-    test_control_return(error_counter ? 1 : 0);
+
+    if (error_counter)
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+    }
+    else
+    {
+        printf("SUCCESS!\n");
+        test_control_return(0);
+    }
 }
 
 #else  /* !(NX_BSD_ENABLE && !NX_DISABLE_IPV4) */
+extern void test_control_return(UINT status);
+
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
 #else
@@ -311,6 +329,9 @@ void netx_bsd_recvfromto_test_application_define(void *first_unused_memory)
 #endif
 {
     NX_PARAMETER_NOT_USED(first_unused_memory);
+
+    printf("NetX Test:   Basic BSD recvfromto Test.....................N/A\n");
+
     test_control_return(3); /* skip */
 }
 #endif /* NX_BSD_ENABLE && !NX_DISABLE_IPV4 */
