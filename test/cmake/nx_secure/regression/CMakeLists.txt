@@ -142,6 +142,7 @@ set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_provisioned_psk_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_hello_retry_cookie_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_certverify_transcript_hash_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_rsa_client_auth_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_client_ca_select_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_receive_invalid_server_handshake_message_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_invalid_client_state_test.c
@@ -186,6 +187,7 @@ if("s${CMAKE_BUILD_TYPE}" STREQUAL "sdefault_build_coverage")
     ${SOURCE_DIR}/nx_secure_test/nx_secure_hmac_sha512_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_phash_prf_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_rsa_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_rsa_pss_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_sha256_rfc_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_sha224_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_sha256_test.c
