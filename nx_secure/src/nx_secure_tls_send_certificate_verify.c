@@ -31,26 +31,12 @@
 #endif /* NX_SECURE_ENABLE_DTLS */
 
 #ifndef NX_SECURE_DISABLE_X509
-static UCHAR handshake_hash[64 + 34 + 64]; /* We concatenate MD5 and SHA-1 hashes into this buffer, OR SHA-256/384/512. */
-static UCHAR _nx_secure_padded_signature[600];
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 
-/* Largest RSA modulus supported for PSS signing, in bytes (RSA-4096). This bound is enforced
-   explicitly on the TLS 1.3 path below, before _nx_crypto_rsa_pss_sign is called. Do not rely on
-   the buffer checks inside that function to catch an oversized key: its em_length check is against
-   _nx_secure_padded_signature (600 bytes), which a modulus larger than this would still pass, and
-   its scratch check would then reject at 513 bytes rather than at the intended 512. */
+/* Largest RSA modulus supported for PSS signing, in bytes (RSA-4096). Enforced explicitly on the
+   TLS 1.3 path below: the checks inside _nx_crypto_rsa_pss_sign measure em_length against the
+   signature buffer, which is larger, so an oversized key would otherwise reach the scratch write. */
 #define NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE  512
-
-/* Scratch for EMSA-PSS-ENCODE: db[emLen - hLen - 1] + salt[hLen]. Worst case over the supported
-   hashes is emLen - 1 bytes (SHA-512: 447 + 64 = 511 for RSA-4096), so one modulus is always
-   enough; a larger key is refused with NX_CRYPTO_INVALID_BUFFER_SIZE rather than overrunning.
-   This buffer is static, like handshake_hash and _nx_secure_padded_signature above. That is safe
-   because every caller runs under the global _nx_secure_tls_protection mutex:
-   _nx_secure_tls_session_receive_records and _nx_secure_dtls_session_receive hold it across record
-   processing, and the handshake state machines only release it around blocking calls, none of
-   which occur in this function. */
-static UCHAR _nx_secure_pss_scratch[NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE];
 #endif
 
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED)
@@ -114,6 +100,11 @@ UINT                       signature_length = 0;
 UINT                       i;
 UCHAR                     *current_buffer;
 UCHAR                     *working_ptr;
+UCHAR                     *handshake_hash;
+UCHAR                     *padded_signature;
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+UCHAR                     *pss_scratch;
+#endif
 const NX_CRYPTO_METHOD    *public_cipher_method;
 const NX_CRYPTO_METHOD    *hash_method = NX_NULL;
 NX_SECURE_X509_CERT       *local_certificate;
@@ -178,6 +169,15 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
           } CertificateVerify;
      */
 
+
+    /* Point at this session's CertificateVerify scratch area. These buffers used to be file-scope
+       statics, which two sessions signing at the same time would overwrite for each other. They are
+       carved out of the crypto metadata area at session create time, so they are per-session. */
+    handshake_hash = &((UCHAR *)tls_session -> nx_secure_tls_certificate_verify_scratch)[NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_OFFSET];
+    padded_signature = &((UCHAR *)tls_session -> nx_secure_tls_certificate_verify_scratch)[NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_OFFSET];
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    pss_scratch = &((UCHAR *)tls_session -> nx_secure_tls_certificate_verify_scratch)[NX_SECURE_TLS_CERTIFICATE_VERIFY_PSS_OFFSET];
+#endif
 
     /* Get reference to local device certificate. NX_NULL is passed for name to get default entry. */
     status = _nx_secure_x509_local_device_certificate_get(&tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store,
@@ -371,7 +371,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                                                 0,
                                                 NX_NULL,
                                                 &handshake_hash[0],
-                                                sizeof(handshake_hash),
+                                                NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE,
                                                 metadata,
                                                 metadata_size,
                                                 NX_NULL,
@@ -416,7 +416,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                                                0,
                                                NX_NULL,
                                                &handshake_hash[0],
-                                               sizeof(handshake_hash),
+                                               NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE,
                                                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
                                                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha256_metadata_size,
                                                NX_NULL,
@@ -497,7 +497,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                                                0,
                                                NX_NULL,
                                                &handshake_hash[16],
-                                               sizeof(handshake_hash) - 16,
+                                               NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE - 16,
                                                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
                                                tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_sha1_metadata_size,
                                                NX_NULL,
@@ -538,22 +538,22 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         /* If using RSA, the length is equal to the key size. */
         data_size = local_certificate -> nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus_length;
 
-        /* Every signature path below builds data_size bytes into _nx_secure_padded_signature,
-           so a certificate with a bigger modulus cannot be used. */
-        if (data_size > sizeof(_nx_secure_padded_signature))
+        /* The PKCS#1 block is assembled in a buffer of a fixed size, so a modulus larger than that
+           buffer cannot be signed. Reject it rather than writing past the end of the buffer. */
+        if (data_size > NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE)
         {
 #ifdef NX_SECURE_KEY_CLEAR
-            NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
+            NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
-            /* Invalid certificate. */
+            /* Certificate key is too large for the signature buffer. */
             return(NX_SECURE_TLS_INVALID_CERTIFICATE);
         }
 
         if (((ULONG)(send_packet -> nx_packet_data_end) - (ULONG)(send_packet -> nx_packet_append_ptr)) < (4u + data_size))
         {
 #ifdef NX_SECURE_KEY_CLEAR
-            NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
+            NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
             /* Packet buffer is too small to hold random and ID. */
@@ -564,7 +564,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         current_buffer = send_packet -> nx_packet_append_ptr;
 
         /* Start with a clear buffer. */
-        NX_SECURE_MEMSET(_nx_secure_padded_signature, 0x0, sizeof(_nx_secure_padded_signature));
+        NX_SECURE_MEMSET(padded_signature, 0x0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
 
         length = 0;
 
@@ -583,16 +583,14 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
             if (tls_session -> nx_secure_tls_1_3)
             {
-                /* Enforce the supported modulus bound before encoding. _nx_secure_pss_scratch is
-                   sized for NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE, and the checks inside
-                   _nx_crypto_rsa_pss_sign do not enforce that bound exactly: em_length is measured
-                   against the larger _nx_secure_padded_signature, and the scratch check only trips
-                   once db_len + s_len exceeds the buffer, one byte later. Reject here so the limit
-                   is the documented one. */
-                if (data_size > NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE)
+                /* EMSA-PSS-ENCODE builds db + salt, emLen - 1 bytes at most, into the PSS scratch region.
+                   Reject a modulus beyond the supported key size, and also one the configured scratch
+                   region cannot hold, which an application may have sized down. */
+                if ((data_size > NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE) ||
+                    ((data_size - 1u) > NX_SECURE_TLS_CERTIFICATE_VERIFY_PSS_SCRATCH_SIZE))
                 {
 #ifdef NX_SECURE_KEY_CLEAR
-                    NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
+                    NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR */
 
                     /* Invalid certificate. */
@@ -601,7 +599,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 
                 /* TLS 1.3 CertificateVerify wire format: SignatureScheme (2 bytes, big-endian) || length (2 bytes) || signature.
                  * nx_secure_tls_signature_algorithm carries the SignatureScheme (rsa_pss_rsae_sha256/384/512)
-                 * stored by process_certificate_request. The PSS-encoded EM is built directly into _nx_secure_padded_signature
+                 * stored by process_certificate_request. The PSS-encoded EM is built directly into padded_signature
                  * at full size — the PKCS#1 v1.5 padding loop further down is gated to skip when nx_secure_tls_1_3 is set. */
                 current_buffer[length]     = (UCHAR)((tls_session -> nx_secure_tls_signature_algorithm) >> 8);
                 current_buffer[length + 1] = (UCHAR)((tls_session -> nx_secure_tls_signature_algorithm) & 0xFFu);
@@ -617,19 +615,19 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                    nominal size. A modulus with a leading zero bit would make emBits too large, and
                    the resulting EM could equal or exceed n, yielding a signature the peer rejects. */
                 status = _nx_crypto_rsa_pss_sign(handshake_hash, handshake_hash_length,
-                                                  _nx_secure_padded_signature,
-                                                  (UINT)sizeof(_nx_secure_padded_signature),
+                                                  padded_signature,
+                                                  NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE,
                                                   (data_size << 3) - 1u,
                                                   hash_method,
                                                   tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch,
                                                   tls_session -> nx_secure_tls_handshake_hash.nx_secure_tls_handshake_hash_scratch_size,
-                                                  _nx_secure_pss_scratch, sizeof(_nx_secure_pss_scratch));
+                                                  pss_scratch, NX_SECURE_TLS_CERTIFICATE_VERIFY_PSS_SCRATCH_SIZE);
                 if (status != NX_CRYPTO_SUCCESS)
                 {
 #ifdef NX_SECURE_KEY_CLEAR
-                    NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
-                    NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
-                    NX_SECURE_MEMSET(_nx_secure_pss_scratch, 0, sizeof(_nx_secure_pss_scratch));
+                    NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
+                    NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
+                    NX_SECURE_MEMSET(pss_scratch, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_PSS_SCRATCH_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR */
                     return(status);
                 }
@@ -653,7 +651,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
             if (data_size < signature_length)
             {
 #ifdef NX_SECURE_KEY_CLEAR
-                NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
+                NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
                 /* Invalid certificate. */
@@ -662,7 +660,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 
             /* Get a working pointer into the padded signature buffer. All PKCS-1 encoded data
                comes at the end of the RSA encrypted block. */
-            working_ptr = &_nx_secure_padded_signature[data_size - signature_length];
+            working_ptr = &padded_signature[data_size - signature_length];
 
             /* Copy in the DER encoding. */
             NX_SECURE_MEMCPY(&working_ptr[0], _NX_SECURE_OID_SHA256, 19); /* Use case of memcpy is verified.  lgtm[cpp/banned-api-usage-required-any] */
@@ -694,7 +692,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
             if (data_size < signature_length)
             {
 #ifdef NX_SECURE_KEY_CLEAR
-                NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
+                NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
                 /* Invalid certificate. */
                 return(NX_SECURE_TLS_INVALID_CERTIFICATE);
@@ -702,7 +700,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 
             /* Get a working pointer into the padded signature buffer. All PKCS-1 encoded data
                comes at the end of the RSA encrypted block. */
-            working_ptr = &_nx_secure_padded_signature[data_size - signature_length];
+            working_ptr = &padded_signature[data_size - signature_length];
 
             /* Now put the data into the padded buffer - must be at the end. */
             NX_SECURE_MEMCPY(working_ptr, handshake_hash, 36); /* Use case of memcpy is verified. */
@@ -710,9 +708,9 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 #endif
 
 #ifdef NX_SECURE_KEY_CLEAR
-        /* At this point, the handshake_hash has been copied into _nx_secure_padded_signature and
+        /* At this point, the handshake_hash has been copied into padded_signature and
         is no longer needed so we can clear it here. */
-        NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
+        NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
         /* PKCS-1 Signature padding. The scheme is to start with the block type (0x00, 0x01 for signing)
@@ -720,16 +718,16 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
            which comes at the end of the RSA block. */
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
-        /* TLS 1.3 uses RSA-PSS, which already wrote the full EM into _nx_secure_padded_signature above.
-           Do not remove this guard: signature_length is still 0 on the TLS 1.3 path, so the loop below
-           would overwrite the EM with 0xFF from offset 2 up to data_size - 2. */
+        /* TLS 1.3 uses RSA-PSS, which already wrote the full EM into padded_signature above.
+           Do not remove this guard: signature_length is still 0 on the TLS 1.3 path, so the loop
+           below would overwrite the EM with 0xFF from offset 2 up to data_size - 2. */
         if (!tls_session -> nx_secure_tls_1_3)
 #endif
         {
-            _nx_secure_padded_signature[1] = 0x1; /* Block type is 0x00, 0x01 for signatures */
+            padded_signature[1] = 0x1; /* Block type is 0x00, 0x01 for signatures */
             for (i = 2; i < (data_size - signature_length - 1); ++i)
             {
-                _nx_secure_padded_signature[i] = (UCHAR)0xFF;
+                padded_signature[i] = (UCHAR)0xFF;
             }
         }
 
@@ -742,11 +740,11 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                                                         (NX_CRYPTO_METHOD*)public_cipher_method,
                                                         (UCHAR *)local_certificate -> nx_secure_x509_private_key.user_key.key_data,
                                                         (NX_CRYPTO_KEY_SIZE)(local_certificate -> nx_secure_x509_private_key.user_key.key_length),
-                                                        _nx_secure_padded_signature,
+                                                        padded_signature,
                                                         length,
                                                         NX_NULL,
                                                         &current_buffer[length],
-                                                        sizeof(_nx_secure_padded_signature),
+                                                        NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE,
                                                         local_certificate -> nx_secure_x509_public_cipher_metadata_area,
                                                         local_certificate -> nx_secure_x509_public_cipher_metadata_size,
                                                         NX_NULL, NX_NULL);
@@ -754,7 +752,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
             if(status != NX_CRYPTO_SUCCESS)
             {
 #ifdef NX_SECURE_KEY_CLEAR
-                NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+                NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
                 return(status);
             }
@@ -776,7 +774,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                 if(status != NX_CRYPTO_SUCCESS)
                 {
 #ifdef NX_SECURE_KEY_CLEAR
-                    NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+                    NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
                     return(status);
                 }
@@ -790,11 +788,11 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                                                             (NX_CRYPTO_METHOD*)public_cipher_method,
                                                             (UCHAR *)local_certificate -> nx_secure_x509_private_key.rsa_private_key.nx_secure_rsa_private_exponent,
                                                             (NX_CRYPTO_KEY_SIZE)(local_certificate -> nx_secure_x509_private_key.rsa_private_key.nx_secure_rsa_private_exponent_length << 3),
-                                                            _nx_secure_padded_signature,
+                                                            padded_signature,
                                                             data_size,
                                                             NX_NULL,
                                                             &current_buffer[length],
-                                                            sizeof(_nx_secure_padded_signature),
+                                                            NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE,
                                                             local_certificate -> nx_secure_x509_public_cipher_metadata_area,
                                                             local_certificate -> nx_secure_x509_public_cipher_metadata_size,
                                                             NX_NULL, NX_NULL);
@@ -802,7 +800,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                 if(status != NX_CRYPTO_SUCCESS)
                 {
 #ifdef NX_SECURE_KEY_CLEAR
-                    NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+                    NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
                     return(status);
                 }
@@ -815,7 +813,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                 if(status != NX_CRYPTO_SUCCESS)
                 {
 #ifdef NX_SECURE_KEY_CLEAR
-                    NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+                    NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
                     return(status);
                 }
@@ -905,8 +903,8 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         if(status != NX_SUCCESS || curve_method_cert == NX_NULL)
         {
             /* Clear secrets on errors. */
-            NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
-            NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+            NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
+            NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
         }
 #endif /* NX_SECURE_KEY_CLEAR  */
 
@@ -927,8 +925,8 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
             if (status != NX_CRYPTO_SUCCESS)
             {
 #ifdef NX_SECURE_KEY_CLEAR
-                NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
-                NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+                NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
+                NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
                 return(status);
@@ -949,8 +947,8 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         if (status != NX_CRYPTO_SUCCESS)
         {
 #ifdef NX_SECURE_KEY_CLEAR
-            NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
-            NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+            NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
+            NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
             return(status);
@@ -975,8 +973,8 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
         if (status != NX_CRYPTO_SUCCESS)
         {
 #ifdef NX_SECURE_KEY_CLEAR
-            NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
-            NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+            NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
+            NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
             return(status);
@@ -988,8 +986,8 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
             if(status != NX_CRYPTO_SUCCESS)
             {
 #ifdef NX_SECURE_KEY_CLEAR
-                NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
-                NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+                NX_SECURE_MEMSET(handshake_hash, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE);
+                NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
                 return(status);
@@ -1004,7 +1002,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
 #ifdef NX_SECURE_KEY_CLEAR
-    NX_SECURE_MEMSET(_nx_secure_padded_signature, 0, sizeof(_nx_secure_padded_signature));
+    NX_SECURE_MEMSET(padded_signature, 0, NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE);
 #endif /* NX_SECURE_KEY_CLEAR  */
 
 
