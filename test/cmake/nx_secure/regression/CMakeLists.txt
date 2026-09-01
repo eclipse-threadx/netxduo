@@ -126,6 +126,7 @@ set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_no_remote_certs_allocated_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_partial_remote_certs_allocated_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_process_certificate_verify_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_certificate_verify_concurrency_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_process_changecipherspec_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_process_certificate_request_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_process_finished_test.c
