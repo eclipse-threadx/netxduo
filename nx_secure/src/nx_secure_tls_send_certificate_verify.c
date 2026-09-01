@@ -35,8 +35,11 @@ static UCHAR handshake_hash[64 + 34 + 64]; /* We concatenate MD5 and SHA-1 hashe
 static UCHAR _nx_secure_padded_signature[600];
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 
-/* Largest RSA modulus supported for PSS signing, in bytes (RSA-4096). Signing with a larger key
-   is rejected by the em_length check in _nx_crypto_rsa_pss_sign rather than overrunning. */
+/* Largest RSA modulus supported for PSS signing, in bytes (RSA-4096). This bound is enforced
+   explicitly on the TLS 1.3 path below, before _nx_crypto_rsa_pss_sign is called. Do not rely on
+   the buffer checks inside that function to catch an oversized key: its em_length check is against
+   _nx_secure_padded_signature (600 bytes), which a modulus larger than this would still pass, and
+   its scratch check would then reject at 513 bytes rather than at the intended 512. */
 #define NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE  512
 
 /* Scratch for EMSA-PSS-ENCODE: db[emLen - hLen - 1] + salt[hLen]. Worst case over the supported
@@ -579,6 +582,22 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
             if (tls_session -> nx_secure_tls_1_3)
             {
+                /* Enforce the supported modulus bound before encoding. _nx_secure_pss_scratch is
+                   sized for NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE, and the checks inside
+                   _nx_crypto_rsa_pss_sign do not enforce that bound exactly: em_length is measured
+                   against the larger _nx_secure_padded_signature, and the scratch check only trips
+                   once db_len + s_len exceeds the buffer, one byte later. Reject here so the limit
+                   is the documented one. */
+                if (data_size > NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE)
+                {
+#ifdef NX_SECURE_KEY_CLEAR
+                    NX_SECURE_MEMSET(handshake_hash, 0, sizeof(handshake_hash));
+#endif /* NX_SECURE_KEY_CLEAR */
+
+                    /* Invalid certificate. */
+                    return(NX_SECURE_TLS_INVALID_CERTIFICATE);
+                }
+
                 /* TLS 1.3 CertificateVerify wire format: SignatureScheme (2 bytes, big-endian) || length (2 bytes) || signature.
                  * nx_secure_tls_signature_algorithm carries the SignatureScheme (rsa_pss_rsae_sha256/384/512)
                  * stored by process_certificate_request. The PSS-encoded EM is built directly into _nx_secure_padded_signature
@@ -592,6 +611,10 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                 /* signature_length is left alone here. It only feeds the PKCS#1 v1.5 padding loop
                    further down, which must not run for TLS 1.3. */
 
+                /* emBits = modBits - 1. data_size is the modulus length in bytes, so this assumes
+                   the modulus has its top bit set, which is true of every RSA key generated to a
+                   nominal size. A modulus with a leading zero bit would make emBits too large, and
+                   the resulting EM could equal or exceed n, yielding a signature the peer rejects. */
                 status = _nx_crypto_rsa_pss_sign(handshake_hash, handshake_hash_length,
                                                   _nx_secure_padded_signature,
                                                   (UINT)sizeof(_nx_secure_padded_signature),

@@ -130,7 +130,9 @@ UINT extension_type;
              * advertised signature_algorithms and fails cleanly if it is absent. */
             if (local_certificate -> nx_secure_x509_public_algorithm == NX_SECURE_TLS_X509_TYPE_RSA)
             {
-                expected_cert_type = NX_SECURE_TLS_CERT_TYPE_RSA_SIGN;
+                /* expected_cert_type is deliberately not set here. TLS 1.3 dropped the
+                   certificate_types field from CertificateRequest, so it is only read on the
+                   pre-1.3 path below. */
                 expected_sign_alg = NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA256;
             }
             else

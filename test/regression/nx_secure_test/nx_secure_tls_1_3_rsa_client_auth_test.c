@@ -59,6 +59,12 @@ extern VOID test_control_return(UINT status);
    the certificate check in front of the signature paths has to reject it. */
 #define OVERSIZED_MODULUS_LENGTH    1024
 
+/* Between NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE (512) and sizeof(_nx_secure_padded_signature)
+   (600): small enough to clear the generic certificate check, larger than the PSS scratch
+   buffer supports. Guards the explicit PSS modulus bound - without it the buffer checks
+   inside _nx_crypto_rsa_pss_sign would let 513 bytes through. */
+#define PSS_OVERSIZED_MODULUS_LENGTH 520
+
 static TX_THREAD                thread_0;
 static ULONG                    thread_0_stack[THREAD_STACK_SIZE / sizeof(ULONG)];
 static UCHAR                    tls_session_metadata[METADATA_SIZE];
@@ -371,6 +377,19 @@ NX_PACKET *packet;
     EXPECT_EQ(NX_SUCCESS, status);
     saved_modulus_length = local_certificate.nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus_length;
     local_certificate.nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus_length = OVERSIZED_MODULUS_LENGTH;
+    tls_session.nx_secure_tls_signature_algorithm = NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA256;
+    status = _nx_secure_tls_send_certificate_verify(&tls_session, packet);
+    EXPECT_EQ(NX_SECURE_TLS_INVALID_CERTIFICATE, status);
+    EXPECT_EQ(0, packet -> nx_packet_length);
+    local_certificate.nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus_length = (USHORT)saved_modulus_length;
+    nx_packet_release(packet);
+
+    /* A modulus that fits the padded-signature buffer but exceeds the PSS scratch bound is
+       rejected by the explicit NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE check on the TLS 1.3 path. */
+    status = nx_packet_allocate(&pool_0, &packet, NX_TCP_PACKET, NX_WAIT_FOREVER);
+    EXPECT_EQ(NX_SUCCESS, status);
+    saved_modulus_length = local_certificate.nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus_length;
+    local_certificate.nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus_length = PSS_OVERSIZED_MODULUS_LENGTH;
     tls_session.nx_secure_tls_signature_algorithm = NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA256;
     status = _nx_secure_tls_send_certificate_verify(&tls_session, packet);
     EXPECT_EQ(NX_SECURE_TLS_INVALID_CERTIFICATE, status);
