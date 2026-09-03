@@ -89,7 +89,8 @@ foreach ($currentConfiguration in $selectedConfigurations) {
         "-DTHREADX_ARCH=$($settings.NetXArch)",
         "-DTHREADX_TOOLCHAIN=$($settings.NetXToolchain)",
         "-DTHREADX_SOURCE_DIR=$ThreadXDir",
-        "-DFILEX_SOURCE_DIR=$FilexDir"
+        "-DFILEX_SOURCE_DIR=$FilexDir",
+        "-DTX_USER_FILE=$(Join-Path $repoRoot 'test\cmake\netxduo_fast\libs\tx_user.h')"
     )
 
     Write-Host "Building $Arch / netxduo_fast / $currentConfiguration"

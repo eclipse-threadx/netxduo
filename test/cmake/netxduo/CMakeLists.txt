@@ -128,6 +128,11 @@ set(BSD
     -DNX_IPV6_DESTINATION_TABLE_SIZE=32
     -DNX_BSD_ENABLE_DNS
     -DNX_DNS_ENABLE_EXTENDED_RR_TYPES)
+if(MSVC)
+  # NetX BSD supplies its own socket API and types. Prevent windows.h from
+  # pulling in the incompatible Winsock declarations first.
+  list(APPEND BSD -D_WINSOCKAPI_)
+endif()
 set(TAHI -DNX_TAHI_ENABLE)
 set(IPV6 -DFEATURE_NX_IPV6)
 set(IPV6_PMTU_DISCOVERY -DNX_ENABLE_IPV6_PATH_MTU_DISCOVERY)
