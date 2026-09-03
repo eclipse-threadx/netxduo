@@ -1432,7 +1432,7 @@ UINT header_size = NX_WEBSOCKET_HEADER_NORMAL_SIZE;
 
     /* Fill the next byte for MASK and Payload length.  */
     *data_ptr = NX_WEBSOCKET_MASK;
-    if (packet_ptr -> nx_packet_length < 125)
+    if (packet_ptr -> nx_packet_length <= 125)
     {
         *data_ptr |= (UCHAR)packet_ptr -> nx_packet_length;
         data_ptr++;
@@ -1776,6 +1776,7 @@ ULONG bytes_copied;
 ULONG packet_length;
 NX_PACKET *data_packet;
 UCHAR *data_ptr;
+UCHAR is_control_frame = NX_FALSE;
 
 
     /* Is there a packet waiting for processing? */
@@ -1835,6 +1836,21 @@ UCHAR *data_ptr;
         fin_bit = bytes[0] & NX_WEBSOCKET_FIN_MASK;
         opcode = bytes[0] & NX_WEBSOCKET_OPCODE_MASK;
 
+        if ((opcode == NX_WEBSOCKET_OPCODE_PING) ||
+            (opcode == NX_WEBSOCKET_OPCODE_PONG) ||
+            (opcode == NX_WEBSOCKET_OPCODE_CONNECTION_CLOSE))
+        {
+
+            /* A control frame cannot be fragmented */
+            if (fin_bit != NX_WEBSOCKET_FIN)
+            {
+                _nx_websocket_client_cleanup(client_ptr);
+                return(NX_INVALID_PACKET);
+            }
+
+            is_control_frame = NX_TRUE;
+        }
+
         /* Parse the mask bit and payload length */
         if (bytes[1] & NX_WEBSOCKET_MASK)
         {
@@ -1891,6 +1907,23 @@ UCHAR *data_ptr;
             offset += NX_WEBSOCKET_MASKING_KEY_SIZE;
         }
 
+        if (is_control_frame == NX_TRUE)
+        {
+
+            /* A control frame cannot have a payload longer than 125 bytes */
+            if (payload_length > NX_WEBSOCKET_CONTROL_FRAME_PAYLOAD_MAXIMUM_LENGTH)
+            {
+                _nx_websocket_client_cleanup(client_ptr);
+                return(NX_INVALID_PACKET);
+            }
+
+            /* Control frames are processed only if the frame is complete. */
+            if ((*packet_ptr) -> nx_packet_length < (offset + payload_length))
+            {
+                return(NX_CONTINUE);
+            }
+        }
+
         /* Set the flag to indicate the frame header found, and re-initialize corresponding variables */
         client_ptr -> nx_websocket_client_frame_header_found = NX_TRUE;
         client_ptr -> nx_websocket_client_frame_data_received = 0;
@@ -1899,55 +1932,59 @@ UCHAR *data_ptr;
         client_ptr -> nx_websocket_client_frame_data_length = payload_length;
 
         /* Check the rules apply to fragmentation corresponding to the FIN bit and opcode
-        RFC 6455, Section 5.4, Page 33-35 */
-        if (fin_bit == NX_WEBSOCKET_FIN) /* This is the final frame (tip: the first frame may also be the final frame) */
+        RFC 6455, Section 5.4, Page 33-35. A control frame may be interleaved between the
+        fragments of a fragmented message, and must not touch the data frame states. */
+        if (is_control_frame == NX_FALSE)
         {
-            if (client_ptr -> nx_websocket_client_frame_fragmented == NX_FALSE) /* A single unfragmented frame shall be received */
+            if (fin_bit == NX_WEBSOCKET_FIN) /* This is the final frame (tip: the first frame may also be the final frame) */
             {
-                if (opcode == 0) /* The opcode should not denotes a continuation frame for a single unfragmented frame */
+                if (client_ptr -> nx_websocket_client_frame_fragmented == NX_FALSE) /* A single unfragmented frame shall be received */
                 {
-                    _nx_websocket_client_cleanup(client_ptr);
-                    return(NX_INVALID_PACKET);
+                    if (opcode == 0) /* The opcode should not denotes a continuation frame for a single unfragmented frame */
+                    {
+                        _nx_websocket_client_cleanup(client_ptr);
+                        return(NX_INVALID_PACKET);
+                    }
+
+                    /* Update the header opcode */
+                    client_ptr -> nx_websocket_client_frame_opcode = opcode;
                 }
-
-                /* Update the header opcode */
-                client_ptr -> nx_websocket_client_frame_opcode = opcode;
-            }
-            else /* This is the termination frame in overall fragmented frames */
-            {
-                if (opcode != 0) /* The opcode of the termination frame shall be zero */
+                else /* This is the termination frame in overall fragmented frames */
                 {
-                    _nx_websocket_client_cleanup(client_ptr);
-                    return(NX_INVALID_PACKET);
+                    if (opcode != 0) /* The opcode of the termination frame shall be zero */
+                    {
+                        _nx_websocket_client_cleanup(client_ptr);
+                        return(NX_INVALID_PACKET);
+                    }
+
+                    /* Set the header flag to be unfragmented for next time to use */
+                    client_ptr -> nx_websocket_client_frame_fragmented = NX_FALSE;
                 }
-
-                /* Set the header flag to be unfragmented for next time to use */
-                client_ptr -> nx_websocket_client_frame_fragmented = NX_FALSE;
             }
-        }
-        else /* This is not the final header */
-        {
-            if (client_ptr -> nx_websocket_client_frame_fragmented == NX_FALSE) /* This is the beginning frame in fragmented frames */
+            else /* This is not the final header */
             {
-
-                /* The opcode of the beginning frame shall indicate the opcode of overall fragmented frames. Besides,
-                since control frames cannot be fragmented, the supported frame type shall be text or binary */
-                if ((opcode != NX_WEBSOCKET_OPCODE_BINARY_FRAME) && (opcode != NX_WEBSOCKET_OPCODE_TEXT_FRAME))
+                if (client_ptr -> nx_websocket_client_frame_fragmented == NX_FALSE) /* This is the beginning frame in fragmented frames */
                 {
-                    _nx_websocket_client_cleanup(client_ptr);
-                    return(NX_INVALID_PACKET);
+
+                    /* The opcode of the beginning frame shall indicate the opcode of overall fragmented frames. Besides,
+                    since control frames cannot be fragmented, the supported frame type shall be text or binary */
+                    if ((opcode != NX_WEBSOCKET_OPCODE_BINARY_FRAME) && (opcode != NX_WEBSOCKET_OPCODE_TEXT_FRAME))
+                    {
+                        _nx_websocket_client_cleanup(client_ptr);
+                        return(NX_INVALID_PACKET);
+                    }
+
+                    /* Update the frame fragmented flag and the opcode since a beginning frame is received */
+                    client_ptr -> nx_websocket_client_frame_fragmented = NX_TRUE;
+                    client_ptr -> nx_websocket_client_frame_opcode = opcode;
                 }
-
-                /* Update the frame fragmented flag and the opcode since a beginning frame is received */
-                client_ptr -> nx_websocket_client_frame_fragmented = NX_TRUE;
-                client_ptr -> nx_websocket_client_frame_opcode = opcode;
-            }
-            else /* This is a continuation frame in overall fragmented frames */
-            {
-                if (opcode != 0) /* The opcode of a continuation frame shall be zero */
+                else /* This is a continuation frame in overall fragmented frames */
                 {
-                    _nx_websocket_client_cleanup(client_ptr);
-                    return(NX_INVALID_PACKET);
+                    if (opcode != 0) /* The opcode of a continuation frame shall be zero */
+                    {
+                        _nx_websocket_client_cleanup(client_ptr);
+                        return(NX_INVALID_PACKET);
+                    }
                 }
             }
         }
@@ -2191,13 +2228,6 @@ UCHAR *data_ptr;
 
             /* Because we have found a full frame, reset the flag for frame header found (necessary especially if the payload was empty) */
             client_ptr -> nx_websocket_client_frame_header_found = NX_FALSE;
-
-            /* A control frame cannot have a payload longer than 125 bytes */
-            if (client_ptr -> nx_websocket_client_frame_data_length > NX_WEBSOCKET_CONTROL_FRAME_PAYLOAD_MAXIMUM_LENGTH)
-            {
-                _nx_websocket_client_cleanup(client_ptr);
-                return(NX_INVALID_PACKET);
-            }
 
             /* Copy out the payload, since it must be echoed in the PONG, then trim it from the
                frame.  A control frame may carry no payload at all, in which case trimming the
@@ -2975,6 +3005,10 @@ void  _nx_websocket_client_cleanup(NX_WEBSOCKET_CLIENT *client_ptr)
 
     /* Reset the flag for frame header found */
     client_ptr -> nx_websocket_client_frame_header_found = NX_FALSE;
+
+    /* Reset the fragmentation state as well, so that a message left half received by the error
+       being cleaned up here is not carried over into whatever is parsed next */
+    client_ptr -> nx_websocket_client_frame_fragmented = NX_FALSE;
 
     /* Release the waiting list.  */
     if (client_ptr -> nx_websocket_client_processing_packet)

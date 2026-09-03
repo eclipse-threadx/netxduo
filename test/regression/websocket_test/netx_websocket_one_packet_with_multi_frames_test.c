@@ -51,6 +51,7 @@ static UINT                client_websocket_uri_path_length;
 static void thread_client_entry(ULONG thread_input);
 static void thread_server_entry(ULONG thread_input);
 static void server_wait_for_pong(void);
+static void client_receive_interleaved_message(void);
 
 #define TEST_SERVER_ADDRESS  IP_ADDRESS(1,2,3,4)
 #define TEST_CLIENT_ADDRESS  IP_ADDRESS(1,2,3,5)
@@ -155,6 +156,36 @@ static UCHAR server_response_frame_packet_4_5[] =
 0x82, 0x04, 0x01, 0x02, 0x03, 0x04,             // Frame 4
 };
 
+/* Test 5 purposes to test control frames interleaved between the fragments of a fragmented
+   message.  Both halves carry the same message, split into the same three fragments, so the
+   client checks the same reassembled payload either way.  */
+
+/* Test 5a: the whole exchange in one packet, with a PING between the first and second
+   fragment and a PONG between the second and the third.  */
+static UCHAR server_response_interleaved_1_packet[] =
+{
+0x02, 0x04, 0x01, 0x02, 0x03, 0x04, // Fragmented: beginning frame
+0x89, 0x02, 0xAA, 0xBB,             // Interleaved PING, must be answered with a PONG
+0x00, 0x04, 0x05, 0x06, 0x07, 0x08, // Fragmented: continuation frame
+0x8A, 0x00,                         // Interleaved PONG, must be consumed silently
+0x80, 0x04, 0x09, 0x0A, 0x0B, 0x0C, // Fragmented: termination frame
+};
+
+/* Test 5b: the interleaved PING straddles a packet boundary, so its header is parsed in one
+   call to _nx_websocket_client_data_process() and its payload in the next.  */
+static UCHAR server_response_interleaved_2_packet_1[] =
+{
+0x02, 0x04, 0x01, 0x02, 0x03, 0x04, // Fragmented: beginning frame
+0x00, 0x04, 0x05, 0x06, 0x07, 0x08, // Fragmented: continuation frame
+0x89, 0x02,                         // Interleaved PING, header only
+};
+
+static UCHAR server_response_interleaved_2_packet_2[] =
+{
+0xAA, 0xBB,                         // ... and its payload, in the next packet
+0x80, 0x04, 0x09, 0x0A, 0x0B, 0x0C, // Fragmented: termination frame
+};
+
 static UCHAR client_test_data[] =
 {
 0x11, 0x22, 0x33, 0x44,
@@ -164,7 +195,11 @@ static ULONG                   error_counter;
 
 extern void SET_ERROR_COUNTER(ULONG *error_counter, CHAR *filename, int line_number);
 
-#define TEST_LOOP 5
+#define TEST_LOOP 7
+
+/* The three fragments of the Test 5 message carry 1 .. TEST_5_MESSAGE_SIZE.  */
+#define TEST_5_FRAGMENTS     3
+#define TEST_5_MESSAGE_SIZE  12
 
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
@@ -721,6 +756,51 @@ UINT            code;
         /* Check the waiting list */
         if (client_websocket.nx_websocket_client_processing_packet != NX_NULL)
             SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+
+        /* ---- Test 5 ----
+
+           Test 5 runs last because Test 4 above must run against a clean parser: if Test 5
+           fails, _nx_websocket_client_cleanup() leaves nx_websocket_client_frame_fragmented
+           set, and Test 4 would then have every frame rejected and dereference the NX_NULL
+           packet it got back.  Keeping Test 5 last turns that crash back into a report.  */
+
+        /* 5a: the fragments and the interleaved control frames all in one packet.  */
+        status = nx_packet_allocate(&client_pool, &packet_ptr1, NX_TCP_PACKET, NX_IP_PERIODIC_RATE);
+        if (status)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+
+        /* Append and send data.  */
+        packet_ptr1 -> nx_packet_append_ptr = packet_ptr1 -> nx_packet_prepend_ptr;
+        packet_ptr1 -> nx_packet_length = 0;
+        status = nx_packet_data_append(packet_ptr1, client_test_data, sizeof(client_test_data), &client_pool, NX_IP_PERIODIC_RATE);
+        if (status)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+        status = nx_websocket_client_send(&client_websocket, packet_ptr1, NX_WEBSOCKET_OPCODE_BINARY_FRAME, NX_TRUE, NX_WAIT_FOREVER);
+        if (status)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+
+        client_receive_interleaved_message();
+
+        /* 5b: the same message, but with the interleaved PING split across two packets.  */
+        status = nx_packet_allocate(&client_pool, &packet_ptr1, NX_TCP_PACKET, NX_IP_PERIODIC_RATE);
+        if (status)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+
+        /* Append and send data.  */
+        packet_ptr1 -> nx_packet_append_ptr = packet_ptr1 -> nx_packet_prepend_ptr;
+        packet_ptr1 -> nx_packet_length = 0;
+        status = nx_packet_data_append(packet_ptr1, client_test_data, sizeof(client_test_data), &client_pool, NX_IP_PERIODIC_RATE);
+        if (status)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+        status = nx_websocket_client_send(&client_websocket, packet_ptr1, NX_WEBSOCKET_OPCODE_BINARY_FRAME, NX_TRUE, NX_WAIT_FOREVER);
+        if (status)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+
+        client_receive_interleaved_message();
+
+        /* Nothing may be left over from either half.  */
+        if (client_websocket.nx_websocket_client_processing_packet != NX_NULL)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
     }
 
     nx_tcp_client_socket_unbind(&test_client);
@@ -849,6 +929,34 @@ NX_PACKET       *packet_ptr;
                 if(status)
                     SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
                 break;
+            case 5:
+                /* Test 5a: fragments and interleaved control frames in a single packet.  */
+                packet_ptr -> nx_packet_append_ptr = packet_ptr -> nx_packet_prepend_ptr;
+                packet_ptr -> nx_packet_length = 0;
+                nx_packet_data_append(packet_ptr, server_response_interleaved_1_packet, sizeof(server_response_interleaved_1_packet), &server_pool, NX_IP_PERIODIC_RATE);
+                status = nx_tcp_socket_send(&test_server, packet_ptr, NX_IP_PERIODIC_RATE);
+                if(status)
+                    SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+                server_wait_for_pong();
+                break;
+            case 6:
+                /* Test 5b: the same message, with the interleaved PING split across the two
+                   packets so its header and its payload are parsed in separate calls.  */
+                packet_ptr -> nx_packet_append_ptr = packet_ptr -> nx_packet_prepend_ptr;
+                packet_ptr -> nx_packet_length = 0;
+                nx_packet_data_append(packet_ptr, server_response_interleaved_2_packet_1, sizeof(server_response_interleaved_2_packet_1), &server_pool, NX_IP_PERIODIC_RATE);
+                status = nx_tcp_socket_send(&test_server, packet_ptr, NX_IP_PERIODIC_RATE);
+                if(status)
+                    SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+                status = nx_packet_allocate(&server_pool, &packet_ptr, NX_TCP_PACKET, NX_IP_PERIODIC_RATE);
+                if(status)
+                    SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+                nx_packet_data_append(packet_ptr, server_response_interleaved_2_packet_2, sizeof(server_response_interleaved_2_packet_2), &server_pool, NX_IP_PERIODIC_RATE);
+                status = nx_tcp_socket_send(&test_server, packet_ptr, NX_IP_PERIODIC_RATE);
+                if(status)
+                    SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+                server_wait_for_pong();
+                break;
             default:
                 break;
             }
@@ -914,6 +1022,95 @@ UINT status;
             }
         }
         nx_packet_release(pong_ptr);
+    }
+}
+
+/* Drains one fragmented message that has control frames interleaved between its fragments.
+
+   The fragments are not matched one-to-one with receive calls: a call that consumes an
+   interleaved control frame reports NX_NO_PACKET, because _nx_websocket_client_receive()
+   only re-parses the waiting list at the top of its first loop iteration.  What matters is
+   that no call fails, that the three fragments arrive in order and intact, and above all
+   that the interleaved control frames leave the fragmentation state alone -- the message
+   must stay open until its own termination frame is parsed.  */
+static void client_receive_interleaved_message(void)
+{
+UINT        i;
+UINT        status;
+UINT        code;
+UINT        fragments = 0;
+NX_PACKET  *packet_ptr;
+UCHAR       received[TEST_5_MESSAGE_SIZE];
+ULONG       received_length = 0;
+ULONG       copied;
+UINT        owned_on_entry;
+
+    /* Test 4 drives _nx_websocket_client_data_process() directly, and the mutex put/get pair
+       that function performs around nx_packet_allocate() acquires a mutex no caller held, so
+       the client thread still owns it here.  Compare against that starting count rather than
+       against zero: what matters is that the PING path, which takes the mutex recursively to
+       send its PONG, gives back exactly what it took.  */
+    owned_on_entry = client_websocket.nx_websocket_client_mutex.tx_mutex_ownership_count;
+
+    for (i = 0; (i < 10) && (fragments < TEST_5_FRAGMENTS); i++)
+    {
+        status = nx_websocket_client_receive(&client_websocket, &packet_ptr, &code, NX_IP_PERIODIC_RATE);
+
+        /* Whatever happened, the call must not have left the mutex held.  */
+        if (client_websocket.nx_websocket_client_mutex.tx_mutex_ownership_count != owned_on_entry)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+
+        if (status == NX_SUCCESS)
+        {
+            fragments++;
+
+            /* Every fragment is reported with the opcode of the message as a whole, which an
+               interleaved control frame must not have overwritten.  */
+            if (code != NX_WEBSOCKET_OPCODE_BINARY_FRAME)
+                SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+
+            if (received_length + packet_ptr -> nx_packet_length > sizeof(received))
+                SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+            else
+            {
+                nx_packet_data_extract_offset(packet_ptr, 0, &received[received_length],
+                                              packet_ptr -> nx_packet_length, &copied);
+                received_length += copied;
+            }
+
+            nx_packet_release(packet_ptr);
+        }
+        else if (status != NX_NO_PACKET)
+        {
+
+            /* NX_NO_PACKET only means the call found no application data behind the control
+               frame it consumed.  Anything else -- NX_INVALID_PACKET in particular -- means
+               the interleaved control frame broke the parse of the message around it.  */
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+            break;
+        }
+
+        /* The message stays fragmented until its termination frame is parsed, so the flag
+           must still be set after every call that handled an interleaved control frame.  */
+        if (fragments < TEST_5_FRAGMENTS)
+        {
+            if (client_websocket.nx_websocket_client_frame_fragmented != NX_TRUE)
+                SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+        }
+        else if (client_websocket.nx_websocket_client_frame_fragmented != NX_FALSE)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+    }
+
+    /* All three fragments must have arrived, carrying 1 .. TEST_5_MESSAGE_SIZE in order.  */
+    if ((fragments != TEST_5_FRAGMENTS) || (received_length != TEST_5_MESSAGE_SIZE))
+        SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+    else
+    {
+        for (i = 0; i < TEST_5_MESSAGE_SIZE; i++)
+        {
+            if (received[i] != (UCHAR)(i + 1))
+                SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+        }
     }
 }
 
