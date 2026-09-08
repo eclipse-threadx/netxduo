@@ -38,6 +38,7 @@ extern const UINT ciphersuite_map_size;
 extern NX_SECURE_TLS_CRYPTO nx_crypto_tls_ciphers;
 
 extern volatile ULONG      _tx_thread_system_state;
+extern TX_THREAD          *_tx_thread_current_ptr;
 extern TX_THREAD           _tx_timer_thread;
 
 /* Define thread prototypes.  */
