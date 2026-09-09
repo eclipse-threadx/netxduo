@@ -487,6 +487,8 @@ NX_PACKET *receive_packet;
 
     memset(&crypto_method, 0, sizeof(crypto_method));
     memset(&test_method, 0, sizeof(test_method));
+    memset(&cert, 0, sizeof(cert));
+    memset(&remote_cert, 0, sizeof(remote_cert));
 
     /* Create a socket.  */
     /* Special window size for test. */
