@@ -45,10 +45,11 @@ static UCHAR _nx_secure_padded_signature[600];
 /* Scratch for EMSA-PSS-ENCODE: db[emLen - hLen - 1] + salt[hLen]. Worst case over the supported
    hashes is emLen - 1 bytes (SHA-512: 447 + 64 = 511 for RSA-4096), so one modulus is always
    enough; a larger key is refused with NX_CRYPTO_INVALID_BUFFER_SIZE rather than overrunning.
-   Note this buffer is static, like handshake_hash and _nx_secure_padded_signature above: two TLS
-   sessions signing a CertificateVerify concurrently will corrupt each other's data. The global
-   _nx_secure_tls_protection mutex does not cover this - it is released before the handshake
-   runs (nx_secure_tls_session_start.c) - so this is a property of the existing design. */
+   This buffer is static, like handshake_hash and _nx_secure_padded_signature above. That is safe
+   because every caller runs under the global _nx_secure_tls_protection mutex:
+   _nx_secure_tls_session_receive_records and _nx_secure_dtls_session_receive hold it across record
+   processing, and the handshake state machines only release it around blocking calls, none of
+   which occur in this function. */
 static UCHAR _nx_secure_pss_scratch[NX_SECURE_TLS_PSS_MAX_MODULUS_SIZE];
 #endif
 
