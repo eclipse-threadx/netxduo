@@ -39,7 +39,8 @@ set(crypto_test_cases
     ${SOURCE_DIR}/nx_secure_huge_number_test.c
     ${SOURCE_DIR}/nx_secure_md5_test.c
     ${SOURCE_DIR}/nx_secure_phash_prf_test.c
-    ${SOURCE_DIR}/nx_secure_pkcs1_v1_5_test.c)
+    ${SOURCE_DIR}/nx_secure_pkcs1_v1_5_test.c
+    ${SOURCE_DIR}/nx_secure_rsa_pss_test.c)
 set(test_utility_files ${SOURCE_DIR}/../crypto_test/cryptotestcontrol.c)
 if(("${CMAKE_BUILD_TYPE}" STREQUAL "standalone_build"))
     include(${CMAKE_CURRENT_SOURCE_DIR}/crypto_standalone.cmake)
