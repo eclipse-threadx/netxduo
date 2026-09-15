@@ -1,0 +1,340 @@
+/***************************************************************************/
+/* Copyright (c) 2026 Eclipse ThreadX contributors                          */
+/*                                                                         */
+/* This program and the accompanying materials are made available under     */
+/* the terms of the MIT License which is available at                       */
+/* https://opensource.org/licenses/MIT.                                     */
+/*                                                                         */
+/* AI Disclosure: This test was largely AI-generated. The AI-generated      */
+/* portions are made available under CC0-1.0.                               */
+/* Assisted-by: OpenAI Codex                                                */
+/* SPDX-License-Identifier: MIT AND CC0-1.0                                 */
+/***************************************************************************/
+
+/* Regression for #433. Inject segments at the TCP reassembly boundary and
+   inspect packets at the IP driver boundary, using the real stack and pool. */
+#include "tx_api.h"
+#include "nx_api.h"
+#include "nx_tcp.h"
+#include <stdio.h>
+#include <string.h>
+
+extern void test_control_return(UINT status);
+#ifdef CTEST
+VOID test_application_define(void *first_unused_memory);
+#else
+void netx_tcp_low_watermark_rx_window_test_application_define(void *first_unused_memory);
+#endif
+
+#if defined(__PRODUCT_NETXDUO__) && defined(NX_ENABLE_LOW_WATERMARK) && !defined(NX_DISABLE_IPV4)
+
+#define STACK_SIZE 4096
+#define PACKET_SIZE 1536
+#define POOL_SIZE (32 * (PACKET_SIZE + sizeof(NX_PACKET)))
+#define BASE 1000UL
+#define WINDOW 8192UL
+#define HOLE 244UL
+#define SEGMENT 980UL
+#define OOO(k) (BASE + HOLE + ((ULONG)(k) - 1) * SEGMENT)
+#define CHECK(condition) do { if (!(condition)) { \
+    printf("ERROR at line %u: %s\n", (UINT)__LINE__, #condition); \
+    test_control_return(1); return; } } while (0)
+
+static NX_IP ip;
+static NX_PACKET_POOL pool;
+static NX_TCP_SOCKET socket_0;
+static TX_THREAD thread_0;
+static UCHAR pool_memory[POOL_SIZE];
+static ULONG sent_count;
+static ULONG last_word;
+static ULONG last_ack;
+static UINT header_error;
+static const CHAR *scenario;
+
+static void thread_entry(ULONG input);
+static void capture_driver(NX_IP_DRIVER *request);
+static void start_case(void);
+static void finish_case(void);
+static void receive_segment(ULONG sequence, ULONG length);
+static void queue_segments(UINT count);
+static void check_drop(ULONG sequence, UINT count);
+static void check_header(ULONG window, ULONG expected);
+
+#ifdef CTEST
+VOID test_application_define(void *first_unused_memory)
+#else
+void netx_tcp_low_watermark_rx_window_test_application_define(void *first_unused_memory)
+#endif
+{
+CHAR *memory = (CHAR *)first_unused_memory;
+
+    nx_system_initialize();
+    CHECK(nx_packet_pool_create(&pool, "Pool", PACKET_SIZE,
+                                pool_memory, sizeof(pool_memory)) == NX_SUCCESS);
+    CHECK(nx_ip_create(&ip, "IP", IP_ADDRESS(1, 2, 3, 4), 0xFFFFFF00UL,
+                       &pool, capture_driver, memory, STACK_SIZE, 1) == NX_SUCCESS);
+    CHECK(nx_tcp_enable(&ip) == NX_SUCCESS);
+    CHECK(tx_thread_create(&thread_0, "Test", thread_entry, 0,
+                           memory + STACK_SIZE, STACK_SIZE, 4, 4,
+                           TX_NO_TIME_SLICE, TX_AUTO_START) == TX_SUCCESS);
+}
+
+/* A sink driver: no peer or timing dependencies. The normal transmit release
+   keeps data queued for retransmission and returns control packets to the pool. */
+static void capture_driver(NX_IP_DRIVER *request)
+{
+NX_PACKET *packet;
+NX_TCP_HEADER *header;
+ULONG word;
+
+    request -> nx_ip_driver_status = NX_SUCCESS;
+    switch (request -> nx_ip_driver_command)
+    {
+    case NX_LINK_INITIALIZE:
+        request -> nx_ip_driver_interface -> nx_interface_ip_mtu_size = 1500;
+        request -> nx_ip_driver_interface -> nx_interface_address_mapping_needed = NX_FALSE;
+        break;
+    case NX_LINK_ENABLE:
+        request -> nx_ip_driver_interface -> nx_interface_link_up = NX_TRUE;
+        break;
+    case NX_LINK_DISABLE:
+        request -> nx_ip_driver_interface -> nx_interface_link_up = NX_FALSE;
+        break;
+    case NX_LINK_PACKET_SEND:
+        packet = request -> nx_ip_driver_packet;
+        header = (NX_TCP_HEADER *)(packet -> nx_packet_prepend_ptr + packet -> nx_packet_ip_header_length);
+        word = header -> nx_tcp_header_word_3;
+        NX_CHANGE_ULONG_ENDIAN(word);
+        last_word = word;
+        last_ack = header -> nx_tcp_acknowledgment_number;
+        NX_CHANGE_ULONG_ENDIAN(last_ack);
+        sent_count++;
+        /* Require data offset 5, no reserved bits, and exactly ACK or ACK|PSH. */
+        if (((word & ~NX_LOWER_16_MASK) != ((5UL << NX_TCP_HEADER_SHIFT) | NX_TCP_ACK_BIT)) &&
+            ((word & ~NX_LOWER_16_MASK) != ((5UL << NX_TCP_HEADER_SHIFT) | NX_TCP_ACK_BIT | NX_TCP_PSH_BIT)))
+        {
+            header_error++;
+        }
+        nx_packet_transmit_release(packet);
+        break;
+    default:
+        break;
+    }
+}
+
+static void start_case(void)
+{
+    CHECK(nx_packet_pool_low_watermark_set(&pool, 0) == NX_SUCCESS);
+    CHECK(nx_tcp_socket_create(&ip, &socket_0, "Socket", NX_IP_NORMAL,
+                               NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, WINDOW,
+                               NX_NULL, NX_NULL) == NX_SUCCESS);
+    CHECK(nx_tcp_client_socket_bind(&socket_0, 1234, NX_NO_WAIT) == NX_SUCCESS);
+    CHECK(nx_tcp_socket_receive_queue_max_set(&socket_0, 8) == NX_SUCCESS);
+    /* Skip the handshake to set up an exact, deterministic receive sequence. */
+    socket_0.nx_tcp_socket_state = NX_TCP_ESTABLISHED;
+    socket_0.nx_tcp_socket_connect_ip.nxd_ip_version = NX_IP_VERSION_V4;
+    socket_0.nx_tcp_socket_connect_ip.nxd_ip_address.v4 = IP_ADDRESS(1, 2, 3, 5);
+    socket_0.nx_tcp_socket_connect_port = 4321;
+    socket_0.nx_tcp_socket_next_hop_address = IP_ADDRESS(1, 2, 3, 5);
+    socket_0.nx_tcp_socket_connect_interface = &ip.nx_ip_interface[0];
+    socket_0.nx_tcp_socket_rx_sequence = BASE;
+    socket_0.nx_tcp_socket_rx_window_current = WINDOW;
+    socket_0.nx_tcp_socket_rx_window_last_sent = WINDOW;
+    socket_0.nx_tcp_socket_tx_window_advertised = WINDOW;
+    socket_0.nx_tcp_socket_tx_window_congestion = WINDOW;
+    socket_0.nx_tcp_socket_connect_mss = 1460;
+    socket_0.nx_tcp_socket_connect_mss2 = 1460UL * 1460UL;
+#ifdef NX_ENABLE_TCP_WINDOW_SCALING
+    /* A nonzero shift also checks that validation precedes scaling of a wrap. */
+    socket_0.nx_tcp_rcv_win_scale_value = 2;
+#endif
+    sent_count = 0;
+    last_word = last_ack = 0;
+    header_error = 0;
+}
+
+static void finish_case(void)
+{
+    CHECK(header_error == 0);
+    _nx_tcp_socket_receive_queue_flush(&socket_0);
+    _nx_tcp_socket_transmit_queue_flush(&socket_0);
+    socket_0.nx_tcp_socket_state = NX_TCP_CLOSED;
+    CHECK(nx_tcp_client_socket_unbind(&socket_0) == NX_SUCCESS);
+    CHECK(nx_tcp_socket_delete(&socket_0) == NX_SUCCESS);
+    CHECK(pool.nx_packet_pool_available == pool.nx_packet_pool_total);
+    printf("  %s: SUCCESS!\n", scenario);
+}
+
+static void receive_segment(ULONG sequence, ULONG length)
+{
+NX_PACKET *packet;
+NX_TCP_HEADER *header;
+ULONG i;
+
+    CHECK(nx_packet_allocate(&pool, &packet, NX_TCP_PACKET, NX_NO_WAIT) == NX_SUCCESS);
+    packet -> nx_packet_prepend_ptr -= sizeof(NX_TCP_HEADER);
+    packet -> nx_packet_append_ptr = packet -> nx_packet_prepend_ptr + sizeof(NX_TCP_HEADER) + length;
+    packet -> nx_packet_length = sizeof(NX_TCP_HEADER) + length;
+    packet -> nx_packet_ip_version = NX_IP_VERSION_V4;
+    packet -> nx_packet_ip_header = packet -> nx_packet_prepend_ptr - 20;
+    header = (NX_TCP_HEADER *)packet -> nx_packet_prepend_ptr;
+    memset(header, 0, sizeof(*header));
+    header -> nx_tcp_header_word_3 = (5UL << NX_TCP_HEADER_SHIFT) | NX_TCP_ACK_BIT;
+    header -> nx_tcp_sequence_number = sequence;
+    for (i = 0; i < length; i++)
+    {
+        packet -> nx_packet_prepend_ptr[sizeof(NX_TCP_HEADER) + i] = (UCHAR)(sequence + i);
+    }
+#ifdef NX_TCP_ACK_EVERY_N_PACKETS
+    socket_0.nx_tcp_socket_ack_n_packet_counter = NX_TCP_ACK_EVERY_N_PACKETS;
+#endif
+    CHECK(_nx_tcp_socket_state_data_check(&socket_0, packet) == NX_TRUE);
+}
+
+static void queue_segments(UINT count)
+{
+UINT i;
+
+    for (i = 1; i <= count; i++)
+    {
+        receive_segment(OOO(i), SEGMENT);
+    }
+    CHECK(socket_0.nx_tcp_socket_receive_queue_count == count);
+    CHECK(socket_0.nx_tcp_socket_rx_sequence == BASE);
+    CHECK(socket_0.nx_tcp_socket_rx_window_current == WINDOW);
+}
+
+/* Validate both ACK accounting and the actual bytes available to the caller.
+   The peer must never be told that discarded data was received. */
+static void check_drop(ULONG sequence, UINT count)
+{
+NX_PACKET *packet;
+ULONG delivered = 0;
+ULONG i;
+
+    CHECK(socket_0.nx_tcp_socket_rx_sequence == sequence);
+    CHECK(socket_0.nx_tcp_socket_receive_queue_count == count);
+    CHECK(socket_0.nx_tcp_socket_rx_window_current == 0);
+    CHECK(socket_0.nx_tcp_socket_rx_window_last_sent == 0);
+    _nx_tcp_packet_send_ack(&socket_0, socket_0.nx_tcp_socket_tx_sequence);
+    CHECK(sent_count != 0 && last_ack == sequence);
+    CHECK((last_word & NX_LOWER_16_MASK) == 0 && header_error == 0);
+    CHECK(pool.nx_packet_pool_available == pool.nx_packet_pool_total - count);
+    while (nx_tcp_socket_receive(&socket_0, &packet, NX_NO_WAIT) == NX_SUCCESS)
+    {
+        for (i = 0; i < packet -> nx_packet_length; i++)
+        {
+            CHECK(packet -> nx_packet_prepend_ptr[i] == (UCHAR)(BASE + delivered + i));
+        }
+        delivered += packet -> nx_packet_length;
+        CHECK(nx_packet_release(packet) == NX_SUCCESS);
+    }
+    CHECK(delivered == sequence - BASE);
+    CHECK(socket_0.nx_tcp_socket_receive_queue_head == NX_NULL);
+    CHECK(socket_0.nx_tcp_socket_receive_queue_tail == NX_NULL);
+}
+
+/* Exercise control send, new data send, and retransmission for each value.
+   In particular, retransmission must replace a previously valid window. */
+static void check_header(ULONG window, ULONG expected)
+{
+NX_PACKET *packet;
+ULONG before;
+ULONG data_flags;
+
+    socket_0.nx_tcp_socket_rx_window_current = window;
+    before = sent_count;
+    _nx_tcp_packet_send_ack(&socket_0, socket_0.nx_tcp_socket_tx_sequence);
+    CHECK(sent_count == before + 1);
+    CHECK(last_word == ((5UL << NX_TCP_HEADER_SHIFT) | NX_TCP_ACK_BIT | expected));
+
+    CHECK(nx_packet_allocate(&pool, &packet, NX_TCP_PACKET, NX_NO_WAIT) == NX_SUCCESS);
+    CHECK(nx_packet_data_append(packet, "test", 4, &pool, NX_NO_WAIT) == NX_SUCCESS);
+    before = sent_count;
+    CHECK(_nx_tcp_socket_send_internal(&socket_0, packet, NX_NO_WAIT) == NX_SUCCESS);
+    CHECK(sent_count == before + 1);
+    data_flags = (5UL << NX_TCP_HEADER_SHIFT) | NX_TCP_ACK_BIT | NX_TCP_PSH_BIT;
+    CHECK(last_word == (data_flags | expected));
+    _nx_tcp_socket_transmit_queue_flush(&socket_0);
+
+    socket_0.nx_tcp_socket_rx_window_current = WINDOW;
+    CHECK(nx_packet_allocate(&pool, &packet, NX_TCP_PACKET, NX_NO_WAIT) == NX_SUCCESS);
+    CHECK(nx_packet_data_append(packet, "test", 4, &pool, NX_NO_WAIT) == NX_SUCCESS);
+    CHECK(_nx_tcp_socket_send_internal(&socket_0, packet, NX_NO_WAIT) == NX_SUCCESS);
+    socket_0.nx_tcp_socket_rx_window_current = window;
+    before = sent_count;
+    _nx_tcp_socket_retransmit(&ip, &socket_0, NX_FALSE);
+    CHECK(sent_count == before + 1);
+    CHECK(last_word == (data_flags | expected));
+    _nx_tcp_socket_transmit_queue_flush(&socket_0);
+}
+
+static void thread_entry(ULONG input)
+{
+ULONG actual;
+
+    (void)input;
+    printf("NetX Test: TCP low-watermark receive window (#433)\n");
+    CHECK(nx_ip_status_check(&ip, NX_IP_INITIALIZE_DONE, &actual, NX_IP_PERIODIC_RATE) == NX_SUCCESS);
+    /* Internal TCP entry points require the IP mutex. Hold it across each
+       setup and assertion so periodic processing cannot change the fixture. */
+    CHECK(tx_mutex_get(&ip.nx_ip_protection, TX_WAIT_FOREVER) == TX_SUCCESS);
+
+    scenario = "queue-limit hole fill";
+    start_case();
+    queue_segments(8);
+    receive_segment(BASE, HOLE);
+    check_drop(OOO(8), 8);
+    finish_case();
+
+    scenario = "queue-limit superset shrinks queue";
+    start_case();
+    queue_segments(8);
+    receive_segment(BASE, HOLE + SEGMENT);
+    check_drop(OOO(8), 7);
+    finish_case();
+
+    scenario = "pool-low-watermark short queue";
+    start_case();
+    queue_segments(2);
+    CHECK(nx_packet_pool_low_watermark_set(&pool, pool.nx_packet_pool_available) == NX_SUCCESS);
+    receive_segment(BASE, HOLE);
+    check_drop(OOO(2), 2);
+    finish_case();
+
+    scenario = "pool-low-watermark incoming superset is tail";
+    start_case();
+    queue_segments(1);
+    CHECK(nx_packet_pool_low_watermark_set(&pool, pool.nx_packet_pool_available) == NX_SUCCESS);
+    receive_segment(BASE, HOLE + SEGMENT);
+    check_drop(BASE, 0);
+    finish_case();
+
+    scenario = "three header builders: ordinary, wrapped and oversized windows";
+    start_case();
+#ifdef NX_ENABLE_TCP_WINDOW_SCALING
+    check_header(WINDOW, WINDOW >> 2);
+    check_header(0UL - 7624UL, 0);
+    check_header(0x12345UL << 2, 0xFFFF);
+#else
+    check_header(WINDOW, WINDOW);
+    check_header(0UL - 7624UL, 0);
+    check_header(0x12345UL, 0xFFFF);
+#endif
+    finish_case();
+    CHECK(tx_mutex_put(&ip.nx_ip_protection) == TX_SUCCESS);
+    test_control_return(0);
+}
+
+#else
+#ifdef CTEST
+VOID test_application_define(void *first_unused_memory)
+#else
+void netx_tcp_low_watermark_rx_window_test_application_define(void *first_unused_memory)
+#endif
+{
+    (void)first_unused_memory;
+    printf("NetX Test: TCP low-watermark receive window (#433)................N/A\n");
+    test_control_return(3);
+}
+#endif
