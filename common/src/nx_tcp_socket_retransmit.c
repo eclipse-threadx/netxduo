@@ -6,6 +6,8 @@
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
  *
+ * AI Disclosure: Receive-window changes developed with AI assistance.
+ * Assisted-by: OpenAI Codex
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
@@ -270,15 +272,20 @@ ULONG      window_size;
         /* Set window size. */
 #ifdef NX_ENABLE_TCP_WINDOW_SCALING
         window_size = socket_ptr -> nx_tcp_socket_rx_window_current >> socket_ptr -> nx_tcp_rcv_win_scale_value;
-
-        /* Make sure the window_size is less than 0xFFFF. */
-        if (window_size > 0xFFFF)
-        {
-            window_size = 0xFFFF;
-        }
 #else
         window_size = socket_ptr -> nx_tcp_socket_rx_window_current;
 #endif /* NX_ENABLE_TCP_WINDOW_SCALING */
+
+        /* The window is ORed into the header word unmasked. A wrapped (negative)
+           window advertises zero instead of overwriting the data offset and flags.  */
+        if ((INT)socket_ptr -> nx_tcp_socket_rx_window_current < 0)
+        {
+            window_size = 0;
+        }
+        else if (window_size > 0xFFFF)
+        {
+            window_size = 0xFFFF;
+        }
 
         header_ptr -> nx_tcp_header_word_3 =        NX_TCP_HEADER_SIZE | NX_TCP_ACK_BIT | NX_TCP_PSH_BIT | window_size;
 
