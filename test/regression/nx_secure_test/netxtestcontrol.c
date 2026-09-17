@@ -142,6 +142,7 @@ void nx_secure_tls_certificate_coverage_test_application_define(void *);
 void nx_secure_tls_no_remote_certs_allocated_test_application_define(void *first_unused_memory);
 void nx_secure_tls_partial_remote_certs_allocated_test_application_define(void *first_unused_memory);
 void nx_secure_tls_process_certificate_verify_test_application_define(void *first_unused_memory);
+void nx_secure_tls_certificate_verify_concurrency_test_application_define(void *first_unused_memory);
 void nx_secure_tls_client_handshake_test_application_define(void *first_unused_memory);
 void nx_secure_tls_clienthello_extension_test_application_define(void *first_unused_memory);
 void nx_secure_tls_coverage_test_application_define(void *first_unused_memory);
@@ -336,6 +337,7 @@ TEST_ENTRY  test_control_tests[] =
     {nx_secure_tls_no_remote_certs_allocated_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_partial_remote_certs_allocated_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_process_certificate_verify_test_application_define, TEST_TIMEOUT_LOW},
+    {nx_secure_tls_certificate_verify_concurrency_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_rsa_4096_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_rsa_private_key_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_send_plaintext_alert_after_key_generation_test_application_define, TEST_TIMEOUT_LOW},
