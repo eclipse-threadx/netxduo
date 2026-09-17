@@ -178,7 +178,7 @@ UINT   status;
         total_extensions_length = (USHORT)(total_extensions_length + extension_length);
 
         /* Send KeyShare extension (for TLS 1.3). */
-        _nx_secure_tls_send_clienthello_key_share_extension(tls_session, packet_buffer, &length, &extension_length, available_size);
+        status = _nx_secure_tls_send_clienthello_key_share_extension(tls_session, packet_buffer, &length, &extension_length, available_size);
         if(status != NX_SUCCESS)
         {
             return(status);
@@ -189,6 +189,15 @@ UINT   status;
         if ((tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HELLO_RETRY) && 
             (tls_session -> nx_secure_tls_cookie_length != 0))
         {
+
+            /* The cookie extension needs six bytes of headers plus the cookie itself. */
+            if ((length > available_size) ||
+                ((available_size - length) < (6u + tls_session -> nx_secure_tls_cookie_length)))
+            {
+
+                /* Packet buffer too small. */
+                return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
+            }
 
             /* Add Extension Type. */
             packet_buffer[length] = (UCHAR)((NX_SECURE_TLS_EXTENSION_COOKIE) >> 8);
