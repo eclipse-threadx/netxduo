@@ -2510,7 +2510,7 @@ UINT        status;
            TLS-related header space including crypto initial vector area. */
         status = nx_secure_tls_packet_allocate(client_ptr -> nx_websocket_client_tls_session_ptr,
                                                client_ptr -> nx_websocket_client_packet_pool_ptr,
-                                               packet_ptr, TX_WAIT_FOREVER);
+                                               packet_ptr, wait_option);
     }
     else
     {
