@@ -2188,12 +2188,6 @@ UCHAR is_control_frame = NX_FALSE;
 
         case NX_WEBSOCKET_OPCODE_CONNECTION_CLOSE:
         {
-            /* Make sure the complete control frame is received */
-            if (client_ptr -> nx_websocket_client_frame_data_received < client_ptr -> nx_websocket_client_frame_data_length)
-            {
-                return(NX_CONTINUE);
-            }
-
             /* A disconnection is informed, notify the application.  */
             if (client_ptr -> nx_websocket_client_connection_status_callback)
             {
@@ -2219,12 +2213,6 @@ UCHAR is_control_frame = NX_FALSE;
 
         case NX_WEBSOCKET_OPCODE_PING:
         {
-
-            /* Make sure the complete control frame is received */
-            if (client_ptr -> nx_websocket_client_frame_data_received < client_ptr -> nx_websocket_client_frame_data_length)
-            {
-                return(NX_CONTINUE);
-            }
 
             /* Because we have found a full frame, reset the flag for frame header found (necessary especially if the payload was empty) */
             client_ptr -> nx_websocket_client_frame_header_found = NX_FALSE;
@@ -2277,12 +2265,6 @@ UCHAR is_control_frame = NX_FALSE;
 
         case NX_WEBSOCKET_OPCODE_PONG:
         {
-
-            /* Make sure the complete control frame is received */
-            if (client_ptr -> nx_websocket_client_frame_data_received < client_ptr -> nx_websocket_client_frame_data_length)
-            {
-                return(NX_CONTINUE);
-            }
 
             /* Because we have found a full frame, reset the flag for frame header found (necessary especially if the payload was empty) */
             client_ptr -> nx_websocket_client_frame_header_found = NX_FALSE;
