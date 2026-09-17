@@ -619,6 +619,11 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
 #define NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE                 (2)   /* Size of sequence numbers for TLS records in 32-bit words. */
 #define NX_SECURE_TLS_RECORD_HEADER_SIZE                   (5)   /* Size of the TLS record header in bytes. */
 #define NX_SECURE_TLS_HANDSHAKE_HEADER_SIZE                (4)   /* Size of the TLS handshake record header in bytes. */
+
+/* Size of the buffer holding handshake messages whose hash method is not yet known. */
+#ifndef NX_SECURE_TLS_HANDSHAKE_CACHE_SIZE
+#define NX_SECURE_TLS_HANDSHAKE_CACHE_SIZE                 (500)
+#endif
 #define NX_SECURE_TLS_FINISHED_HASH_SIZE                   (12)  /* Size of the TLS handshake Finished hash in bytes. If SSLv3 is added, the hash size will need to
                                                                     be revisited because it is different. */
 #define NX_SECURE_TLS_MAX_CIPHER_BLOCK_SIZE                (128) /* Size of the largest block used by session ciphers (in block mode). */
@@ -977,7 +982,7 @@ typedef struct NX_SECURE_TLS_KEY_MATERIAL_STRUCT
 
     /* Pointer to buffer where we can store handshake messages to hash once we know
        the hash routine we are using. */
-    UCHAR nx_secure_tls_handshake_cache[500];
+    UCHAR nx_secure_tls_handshake_cache[NX_SECURE_TLS_HANDSHAKE_CACHE_SIZE];
     UINT  nx_secure_tls_handshake_cache_length;
 
     /* The TLS protocol requires a "secret" used in the hash of each message,
