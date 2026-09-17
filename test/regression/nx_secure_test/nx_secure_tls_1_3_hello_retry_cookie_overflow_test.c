@@ -95,6 +95,18 @@ ULONG  required_size;
 
     required_size = prefix_length + COOKIE_HEADER_SIZE + COOKIE_SIZE;
 
+    /* The largest cookie a peer can announce cannot reach the buffer. */
+    cookie_session_setup(0xFFFF);
+    packet_offset = 0;
+    extensions_length = 0;
+    status = _nx_secure_tls_send_clienthello_extensions(&tls_session, packet_buffer,
+                                                        &packet_offset, &extensions_length,
+                                                        BUFFER_SIZE);
+    EXPECT_EQ(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL, status);
+    EXPECT_EQ(0, tls_session.nx_secure_tls_cookie_length);
+    EXPECT_TRUE(tls_session.nx_secure_tls_cookie == NX_NULL);
+    EXPECT_TRUE(buffer_untouched_from(prefix_length) == NX_TRUE);
+
     /* An exact fit is accepted and consumes the whole extension. */
     cookie_session_setup(COOKIE_SIZE);
     packet_offset = 0;
@@ -105,6 +117,7 @@ ULONG  required_size;
     EXPECT_EQ(NX_SUCCESS, status);
     EXPECT_EQ(required_size, packet_offset);
     EXPECT_EQ(0, tls_session.nx_secure_tls_cookie_length);
+    EXPECT_TRUE(tls_session.nx_secure_tls_cookie == NX_NULL);
     EXPECT_TRUE(buffer_untouched_from(required_size) == NX_TRUE);
 
     /* One byte short is rejected before anything is written. */
@@ -115,7 +128,8 @@ ULONG  required_size;
                                                         &packet_offset, &extensions_length,
                                                         required_size - 1);
     EXPECT_EQ(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL, status);
-    EXPECT_EQ(COOKIE_SIZE, tls_session.nx_secure_tls_cookie_length);
+    EXPECT_EQ(0, tls_session.nx_secure_tls_cookie_length);
+    EXPECT_TRUE(tls_session.nx_secure_tls_cookie == NX_NULL);
     EXPECT_TRUE(buffer_untouched_from(prefix_length) == NX_TRUE);
 
     /* Room for part of the header only is rejected before anything is written. */
@@ -126,17 +140,8 @@ ULONG  required_size;
                                                         &packet_offset, &extensions_length,
                                                         prefix_length + (COOKIE_HEADER_SIZE - 3));
     EXPECT_EQ(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL, status);
-    EXPECT_TRUE(buffer_untouched_from(prefix_length) == NX_TRUE);
-
-    /* The largest cookie a peer can announce cannot reach the buffer. */
-    cookie_session_setup(0xFFFF);
-    packet_offset = 0;
-    extensions_length = 0;
-    status = _nx_secure_tls_send_clienthello_extensions(&tls_session, packet_buffer,
-                                                        &packet_offset, &extensions_length,
-                                                        BUFFER_SIZE);
-    EXPECT_EQ(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL, status);
-    EXPECT_EQ(0xFFFF, tls_session.nx_secure_tls_cookie_length);
+    EXPECT_EQ(0, tls_session.nx_secure_tls_cookie_length);
+    EXPECT_TRUE(tls_session.nx_secure_tls_cookie == NX_NULL);
     EXPECT_TRUE(buffer_untouched_from(prefix_length) == NX_TRUE);
 
     /* A KeyShare extension that does not fit ends the build. */

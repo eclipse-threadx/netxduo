@@ -195,7 +195,10 @@ UINT   status;
                 ((available_size - length) < (6u + tls_session -> nx_secure_tls_cookie_length)))
             {
 
-                /* Packet buffer too small. */
+                /* Packet buffer too small. Drop the cookie, which points into the
+                   ServerHello packet and does not outlive this handshake message. */
+                tls_session -> nx_secure_tls_cookie = NX_NULL;
+                tls_session -> nx_secure_tls_cookie_length = 0;
                 return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
             }
 
@@ -219,8 +222,10 @@ UINT   status;
             NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_cookie, tls_session -> nx_secure_tls_cookie_length); /* Use case of memcpy is verified. */
             length += (tls_session -> nx_secure_tls_cookie_length);
 
-            /* Update total extensions length and reset the stored cookie length. */
+            /* Update total extensions length and drop the cookie, which points into the
+               ServerHello packet and does not outlive this handshake message. */
             total_extensions_length = (USHORT)(total_extensions_length + extension_length + 4);
+            tls_session -> nx_secure_tls_cookie = NX_NULL;
             tls_session -> nx_secure_tls_cookie_length = 0;
         }
     }
