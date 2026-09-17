@@ -8,6 +8,7 @@
 /*                                                                         */
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 /* This case tests websocket process data ability when one tcp/tls packet includes multi-frames. */
 #include    "tx_api.h"
