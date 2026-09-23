@@ -330,7 +330,9 @@ NX_PACKET *current_packet;
     status = nx_tcp_socket_send(tls_session -> nx_secure_tls_tcp_socket, send_packet, wait_option);
 
 #ifdef NX_SECURE_KEY_CLEAR
-    if (tls_session -> nx_secure_tls_local_session_active)
+    /* On success the chain belongs to the TCP layer, which releases it once
+       acknowledged: only clear it when the send failed and we still own it. */
+    if ((status != NX_SUCCESS) && (tls_session -> nx_secure_tls_local_session_active))
     {
 
         /* Clear all data in chained packet. */
