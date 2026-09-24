@@ -189,7 +189,6 @@ set(RAND_ID -DNX_ENABLE_IP_ID_RANDOMIZATION)
 set(PPP_COMPRESSION -DNX_PPP_COMPRESSION_ENABLE)
 
 # Exercise low-watermark regressions without and with TCP window scaling.
-# AI Disclosure: These low-watermark profile changes used OpenAI Codex assistance.
 set(v4_build ${IPV4} ${PACKET_DEBUG} ${LOW_WATERMARK})
 set(v4_dns_cache_build ${IPV4} ${DNS_CACHE})
 set(v4_no_checksum_build ${IPV4} ${DISABLE_TX_CHECKSUM} ${DISABLE_RX_CHECKSUM})

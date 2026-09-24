@@ -6,10 +6,9 @@
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
  *
- * AI Disclosure: Receive-window changes developed with AI assistance.
- * Assisted-by: OpenAI Codex
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 
 /**************************************************************************/
