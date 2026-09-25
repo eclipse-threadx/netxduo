@@ -593,6 +593,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ip_packet_filter_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_packet_filter_extended_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmpv6_invalid_na.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcp_low_watermark_rx_window_test.c
     ${SOURCE_DIR}/netxduo_test/netx_low_watermark_test.c
     ${SOURCE_DIR}/netxduo_test/netx_rarp_nxe_api_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_interface_detachment_arp_table_test.c

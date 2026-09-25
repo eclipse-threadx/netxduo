@@ -894,6 +894,16 @@ NX_IP         *ip_ptr;
         do
         {
 
+#ifdef NX_ENABLE_LOW_WATERMARK
+            /* The tail is released below, so it must never be acknowledged. The
+               packet count check at the end of this loop misses the tail when the
+               pool watermark triggered the drop or a superset packet shrank the queue.  */
+            if (drop_packet && (search_ptr == socket_ptr -> nx_tcp_socket_receive_queue_tail))
+            {
+                break;
+            }
+#endif /* NX_ENABLE_LOW_WATERMARK */
+
             /* Setup a pointer to header of this packet in the sent list.  */
             /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
             search_header_ptr =  (NX_TCP_HEADER *)search_ptr -> nx_packet_prepend_ptr;
@@ -1028,7 +1038,13 @@ NX_IP         *ip_ptr;
 #endif
 
     /* Check if the rx sequence number has been updated.  */
-    if (original_rx_sequence != socket_ptr -> nx_tcp_socket_rx_sequence)
+    if ((original_rx_sequence != socket_ptr -> nx_tcp_socket_rx_sequence)
+#ifdef NX_ENABLE_LOW_WATERMARK
+        /* A drop already set the window from the advanced rx_sequence.
+           Subtracting the advance again would wrap the ULONG window.  */
+        && (drop_packet == NX_FALSE)
+#endif /* NX_ENABLE_LOW_WATERMARK */
+       )
     {
 
         /* Decrease the receive window size since rx_sequence is updated.  */

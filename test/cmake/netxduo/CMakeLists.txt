@@ -188,7 +188,8 @@ set(HTTP_PROXY -DNX_ENABLE_HTTP_PROXY)
 set(RAND_ID -DNX_ENABLE_IP_ID_RANDOMIZATION)
 set(PPP_COMPRESSION -DNX_PPP_COMPRESSION_ENABLE)
 
-set(v4_build ${IPV4} ${PACKET_DEBUG})
+# Exercise low-watermark regressions without and with TCP window scaling.
+set(v4_build ${IPV4} ${PACKET_DEBUG} ${LOW_WATERMARK})
 set(v4_dns_cache_build ${IPV4} ${DNS_CACHE})
 set(v4_no_checksum_build ${IPV4} ${DISABLE_TX_CHECKSUM} ${DISABLE_RX_CHECKSUM})
 set(v4_physical_48_build ${IPV4} ${PHY_HEADER} ${MDNS_NO_CLIENT} ${PPPOE} ${MULTI_INTERFACE})
@@ -207,6 +208,7 @@ set(v4_small_build
 set(v4_packet_pad_build ${IPV4} ${PACKET_ALIGNMENT})
 set(v4_full_build
     ${IPV4}
+    ${LOW_WATERMARK}
     ${TCP_KEEPALIVE}
     ${TCP_WINDOW}
     ${IP_STATIC_ROUTING}
