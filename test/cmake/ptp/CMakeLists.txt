@@ -3,6 +3,10 @@ cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0057 NEW)
 cmake_policy(SET CMP0077 NEW)
 
+if((DEFINED THREADX_ARCH) AND (THREADX_ARCH STREQUAL "win64"))
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+endif()
+
 project(web_test LANGUAGES C)
 
 # Set build configurations
@@ -38,63 +42,121 @@ set(VLAN -DNX_ENABLE_VLAN)
 set(gptp_slave_build ${GPTP} ${VLAN})
 set(gptp_master_build ${GPTP} ${VLAN} -DNX_PTP_ENABLE_MASTER)
 
-add_compile_options(
-  -m32
-  -std=c99
-  -ggdb
-  -g3
-  -gdwarf-2
-  -fdiagnostics-color
-  -Werror
-  -DTX_INCLUDE_USER_DEFINE_FILE
-  ${${CMAKE_BUILD_TYPE}})
-add_link_options(-m32)
+# On the Win64 simulator the ptp suite reuses the general netxduo regression: the
+# MSVC branch of regression/CMakeLists.txt always selects the general test set
+# (the PTP-only tests depend on Linux-only shared libraries). Those tests need the
+# same base configuration the netxduo suite compiles with — in particular
+# NX_MAX_PHYSICAL_INTERFACES>=2, without which the multi-interface tests index
+# nx_ip_interface[] out of bounds and crash. Scoped to MSVC so the Linux ptp build
+# (which sets PTP_ONLY=ON and builds only the ptp tests) is unaffected.
+set(MSVC_REGRESSION_BASE -DNX_TAHI_ENABLE -DNX_MAX_PHYSICAL_INTERFACES=4 -DNX_ENABLE_IPV6_PATH_MTU_DISCOVERY)
+
+if(MSVC)
+  add_compile_options(/W3 /Zi
+                      -std=c99
+                      -DTX_INCLUDE_USER_DEFINE_FILE
+                      ${MSVC_REGRESSION_BASE}
+                      ${${CMAKE_BUILD_TYPE}})
+  add_link_options(/DEBUG /INCREMENTAL:NO)
+  message(STATUS "Building for Win64 (MSVC)")
+else()
+  add_compile_options(
+    -m32
+    -std=c99
+    -ggdb
+    -g3
+    -gdwarf-2
+    -fdiagnostics-color
+    -Werror
+    -DTX_INCLUDE_USER_DEFINE_FILE
+    ${${CMAKE_BUILD_TYPE}})
+  add_link_options(-m32)
+  message(STATUS "Building for 32bit")
+endif()
 
 enable_testing()
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. netxduo)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/regression regression)
+# On Windows, build ThreadX and FileX from source before netxduo is configured.
+if(MSVC)
+  if(NOT DEFINED THREADX_SOURCE_DIR)
+    message(FATAL_ERROR
+      "THREADX_SOURCE_DIR must point to a ThreadX source tree. "
+      "Pass -DTHREADX_SOURCE_DIR=<path> or use build_ptp.ps1.")
+  endif()
+  if(NOT DEFINED FILEX_SOURCE_DIR)
+    message(FATAL_ERROR
+      "FILEX_SOURCE_DIR must point to a FileX source tree. "
+      "Pass -DFILEX_SOURCE_DIR=<path> or use build_ptp.ps1.")
+  endif()
+  add_subdirectory(${THREADX_SOURCE_DIR} threadx_build)
+  # Mirror the ThreadX simulator timing options used by the main netxduo build
+  # (test/cmake/netxduo/CMakeLists.txt): fast-forward the simulated clock through
+  # idle periods and fire a single simulated tick per wall-clock interrupt.
+  # Without these, the win64 ThreadX port default (5 ticks/interrupt, wall-clock
+  # idle) makes the general regression suite unstable on this simulator.
+  target_compile_options(threadx PRIVATE -DTX_WIN32_NO_IDLE_ENABLE)
+  target_compile_options(threadx PRIVATE -DTX_WIN32_TICKS_PER_INTERRUPT=1)
+  add_subdirectory(${FILEX_SOURCE_DIR} filex_build)
+endif()
 
-# Coverage
-if(CMAKE_BUILD_TYPE MATCHES ".*_coverage")
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. netxduo)
+
+# "regression" is a git symlink to ../netxduo/regression. On Windows checkouts
+# with core.symlinks=false it is materialized as a plain text file rather than a
+# directory, so fall back to the symlink's real target in that case.
+set(PTP_REGRESSION_DIR ${CMAKE_CURRENT_LIST_DIR}/regression)
+if(NOT IS_DIRECTORY ${PTP_REGRESSION_DIR})
+  set(PTP_REGRESSION_DIR ${CMAKE_CURRENT_LIST_DIR}/../netxduo/regression)
+endif()
+add_subdirectory(${PTP_REGRESSION_DIR} regression)
+
+# Coverage instrumentation (GCC/Clang only — not supported by MSVC)
+if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES ".*_coverage")
   target_compile_options(netxduo PRIVATE -fprofile-arcs -ftest-coverage)
   target_link_options(netxduo PRIVATE -fprofile-arcs -ftest-coverage)
 endif()
 
-# Build ThreadX library once
-execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh build_libs)
-add_custom_target(build_libs ALL COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh
-                                         build_libs)
-add_dependencies(netxduo build_libs)
-target_include_directories(netxduo PUBLIC ${CMAKE_BINARY_DIR}/../libs/inc)
-add_library(threadx SHARED IMPORTED GLOBAL)
-add_library("azrtos::threadx" ALIAS threadx)
-set_target_properties(
-  threadx PROPERTIES IMPORTED_LOCATION
-                     ${CMAKE_BINARY_DIR}/../libs/threadx/libthreadx.so)
-add_library(filex SHARED IMPORTED GLOBAL)
-add_library("azrtos::filex" ALIAS filex)
-set_target_properties(
-  filex PROPERTIES IMPORTED_LOCATION
-                   ${CMAKE_BINARY_DIR}/../libs/filex/libfilex.so)
-target_link_libraries(netxduo PUBLIC filex)
+# Build ThreadX and FileX shared libraries (Linux only)
+if(NOT MSVC)
+  execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh build_libs)
+  add_custom_target(build_libs ALL COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run.sh
+                                           build_libs)
+  add_dependencies(netxduo build_libs)
+  target_include_directories(netxduo PUBLIC ${CMAKE_BINARY_DIR}/../libs/inc)
+  add_library(threadx SHARED IMPORTED GLOBAL)
+  add_library("azrtos::threadx" ALIAS threadx)
+  set_target_properties(
+    threadx PROPERTIES IMPORTED_LOCATION
+                       ${CMAKE_BINARY_DIR}/../libs/threadx/libthreadx.so)
+  add_library(filex SHARED IMPORTED GLOBAL)
+  add_library("azrtos::filex" ALIAS filex)
+  set_target_properties(
+    filex PROPERTIES IMPORTED_LOCATION
+                     ${CMAKE_BINARY_DIR}/../libs/filex/libfilex.so)
+  target_link_libraries(netxduo PUBLIC filex)
+endif()
 
-target_compile_options(
-  netxduo
-  PRIVATE -Werror
-          -Wall
-          -Wextra
-          -pedantic
-          -fmessage-length=0
-          -fsigned-char
-          -ffunction-sections
-          -fdata-sections
-          -Wunused
-          -Wuninitialized
-          -Wmissing-declarations
-          -Wconversion
-          -Wpointer-arith
-          -Wshadow
-          -Wlogical-op
-          -Waggregate-return
-          -Wfloat-equal)
+if(MSVC)
+  target_compile_options(netxduo PRIVATE /W3)
+else()
+  target_compile_options(
+    netxduo
+    PRIVATE -Werror
+            -Wall
+            -Wextra
+            -pedantic
+            -fmessage-length=0
+            -fsigned-char
+            -ffunction-sections
+            -fdata-sections
+            -Wunused
+            -Wuninitialized
+            -Wmissing-declarations
+            -Wconversion
+            -Wpointer-arith
+            -Wshadow
+            -Wlogical-op
+            -Waggregate-return
+            -Wfloat-equal)
+endif()
+# Some portions generated by Codex (gpt-5.6-sol).
