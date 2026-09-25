@@ -71,7 +71,7 @@ For more information, please see the Eclipse Committer Handbook: https://www.ecl
 
 ## Required tooling
 
-Build and test NetX Duo with CMake and Ninja. The root CMake project requires CMake 3.13 or later. The Linux regression workers run on Ubuntu 24.04 with GCC 14 and `gcovr` 8.6. `scripts/install.sh` installs their host tools. The repository also has a `win32` MSVC port; Windows builds use the Visual Studio Build Tools, without requiring the Visual Studio IDE. The CI regression suites described below run on Linux.
+Build and test NetX Duo with CMake and Ninja. The root CMake project requires CMake 3.13 or later. The Linux regression workers run on Ubuntu 24.04 with GCC 14 and `gcovr` 8.6. `scripts/install.sh` installs their host tools. The Windows simulator has `win32` and `win64` MSVC ports; its builds use the Visual Studio Build Tools, without requiring the Visual Studio IDE. The CI regression suites described below run on Linux.
 
 NetX Duo depends on ThreadX. Some file-server add-ons also use FileX. Initialize the repository's submodules before building or testing:
 
@@ -105,7 +105,16 @@ scripts/test_nxd.sh default_build_coverage
 
 All scripts in the table are under `scripts/`. The interoperability suites need their matching `scripts/install_mqtt.sh` or `scripts/install_secure.sh` setup. The Azure IoT add-on has separate `scripts/build_azure_iot.sh` and `scripts/test_azure_iot.sh` wrappers. Use `scripts/check_endian.sh` for changes that might depend on little-endian compilation.
 
-A profile ending in `_coverage` produces a coverage report for that configuration. The `dev` workflow uploads reports from selected coverage profiles, but it does not enforce a 100% coverage floor. The project goal remains 100% test coverage. Add or update regression tests for new behaviour, and describe which profiles and targets actually exercised the change. A successful host build does not establish that code runs correctly on an embedded target.
+The Windows simulator provides PowerShell build and test script pairs for the core, 64-bit host, fast-path, Web, PTP, MQTT, Secure, and crypto suites. Run them from PowerShell with the Visual Studio Build Tools available. Supply the ThreadX and FileX source checkouts explicitly when the build script accepts them. For example:
+
+```powershell
+scripts/build_nxd.ps1 -Arch win64 -Configuration default_build_coverage -ThreadXDir 'path/to/threadx' -FilexDir 'path/to/filex'
+scripts/test_nxd.ps1 -Arch win64 -Configuration default_build_coverage
+```
+
+Use `-Arch win32` for the 32-bit simulator. The Windows test scripts run CTest serially because concurrent simulator tests can interfere with timing. The interoperability and Azure IoT scripts listed above are Linux scripts; there are no matching Windows PowerShell runners.
+
+On Linux, a profile ending in `_coverage` produces a coverage report for that configuration. The MSVC Windows runs do not collect coverage. The `dev` workflow uploads reports from selected coverage profiles, but it does not enforce a 100% coverage floor. The project goal remains 100% test coverage. Add or update regression tests for new behaviour, and describe which profiles and targets actually exercised the change. A successful host build does not establish that code runs correctly on an embedded target.
 
 ## Continuous integration
 
