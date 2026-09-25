@@ -201,7 +201,7 @@ Add this header when creating a new C or assembly (`.S`) file:
  **************************************************************************/
 ```
 
-Substitute the current year, product name, and model and version. If a file was written without AI assistance, omit the AI Disclosure paragraph and use `SPDX-License-Identifier: MIT`.
+Substitute the current year, product name, and model and version. If a file was written without generative AI, omit the AI Disclosure paragraph and use `SPDX-License-Identifier: MIT`.
 
 ### Header for existing files
 
@@ -236,7 +236,7 @@ Use the comment marker already used by the file. Keep an existing disclosure lin
 
 ### Commit attribution
 
-Attribute AI assistance with an `Assisted-by` trailer in each commit that contains AI-assisted changes:
+Add an `Assisted-by` trailer to each commit that contains AI-assisted changes:
 
 ```text
 Fixed the packet receive status
