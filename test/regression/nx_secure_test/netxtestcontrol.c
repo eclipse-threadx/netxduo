@@ -92,6 +92,7 @@ typedef  struct TEST_ENTRY_STRUCT
 /* Define the prototypes for the test entry points.  */
 VOID nx_secure_tls_session_receive_coverage_test_application_define(void *);
 VOID nx_secure_tls_send_record_coverage_test_application_define(void *);
+VOID nx_secure_tls_send_record_key_clear_test_application_define(void *);
 void nx_secure_tls_client_handshake_coverage_test_application_define(void *);
 void nx_secure_tls_finished_hash_coverage_test_application_define(void *);
 void nx_secure_tls_generate_key_coverage_test_application_define(void *);
@@ -286,6 +287,7 @@ TEST_ENTRY  test_control_tests[] =
 #else /* ifdef CTEST */
     {nx_secure_tls_session_receive_coverage_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_send_record_coverage_test_application_define, TEST_TIMEOUT_LOW},
+    {nx_secure_tls_send_record_key_clear_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_client_handshake_coverage_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_handshake_hash_coverage_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_generate_premaster_coverage_test_application_define, TEST_TIMEOUT_LOW},
