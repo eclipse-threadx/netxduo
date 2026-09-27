@@ -69,6 +69,13 @@ for suite in netxduo netxduo_fast web ptp mqtt mqtt_interoperability \
         | sed ':label;N;s/\n/ /;b label' \
         | grep -Pzo "[a-zA-Z0-9_]*build[a-zA-Z0-9_]*\s*" | tr -d '\0')
     for configuration in $configurations; do
+        # Configurations a suite reports informationally rather than into the
+        # merge are declared in that suite's coverage.sh, which is the one place
+        # the exclusion lives. Reading it here keeps the expected set and the
+        # written set derived from the same declaration.
+        case " $(sed -n 's/^INFORMATIONAL="\(.*\)"$/\1/p' "$suite/coverage.sh") " in
+            *" $configuration "*) continue ;;
+        esac
         expected+=("$suite.$configuration")
     done
 done

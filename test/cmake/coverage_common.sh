@@ -42,6 +42,29 @@
 cov_repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)
 cov_suite=$(basename "$PWD")
 
+# gcovr 8.6 aborts a report outright when a line's execution count exceeds its
+# "suspicious hits" threshold, which defaults to 2**32. That heuristic exists to
+# catch the garbage gcov emits under GCC PR 68080, and on this tree it fires on
+# correct data instead: crypto_libraries/src/nx_crypto_huge_number.c:2481 is the
+# inner loop of a Montgomery multiply and legitimately executes 9,126,853,149
+# times in the fips configuration. The count is self-consistent -- the outer
+# loop body runs 122,210,221 times, which is 74.7 inner iterations each, exactly
+# a bignum multiply over ~75-limb operands -- and it is nine orders of magnitude
+# below the 2**63 range a wrapped counter lands in.
+#
+# The threshold is raised rather than the error ignored.
+# --gcov-ignore-parse-errors=suspicious_hits.* does not skip the check, it sets
+# the offending line's count to *zero*, so a covered line is reported uncovered
+# and the report carries a false gap. That is worse than the abort it prevents.
+#
+# 2**40 is bounded on both sides. It is ~4.8x above what this machine can
+# physically count in a suite that runs for a few hundred seconds, so it cannot
+# fire on real data; and it is ~8.4 million times below 2**63, so wrapped-counter
+# garbage is still caught. Nothing here reads a count's magnitude in any case --
+# every figure derives from count > 0 -- so the check protects no figure we
+# publish, and its only observed effect was to fail a valid report.
+cov_gcov_args=(--gcov-suspicious-hits-threshold 1099511627776)
+
 # The certified denominator: common/src, all 511 files at v6.4.1_rel less
 # nx_ram_network_driver.c, the harness's simulated Ethernet device -- 510.
 #
@@ -91,10 +114,10 @@ cov_report_subject()
     local out=coverage_report/per_configuration
 
     mkdir -p "$out/$config"
-    gcovr -r "$subject_abs" "$objdir" "$@" \
+    gcovr -r "$subject_abs" "${cov_gcov_args[@]}" "$objdir" "$@" \
           --json "$out/$config.json" \
           --xml-pretty --output "$out/$config.xml"
-    gcovr -r "$subject_abs" "$objdir" "$@" \
+    gcovr -r "$subject_abs" "${cov_gcov_args[@]}" "$objdir" "$@" \
           --html --html-details --output "$out/$config/index.html"
 
     cov_assert_nonempty "$out/$config.xml" "the $cov_suite report for '$config'" "$objdir"
@@ -135,10 +158,12 @@ cov_report_certified_into()
     local key=$cov_suite.$config
 
     mkdir -p "$out/$key"
-    gcovr -r "$cov_repo_root" -f "$cov_certified_filter" -e "$cov_certified_exclude" "$objdir" \
+    gcovr -r "$cov_repo_root" -f "$cov_certified_filter" -e "$cov_certified_exclude" \
+          "${cov_gcov_args[@]}" "$objdir" \
           --json "$out/$key.json" \
           --xml-pretty --output "$out/$key.xml"
-    gcovr -r "$cov_repo_root" -f "$cov_certified_filter" -e "$cov_certified_exclude" "$objdir" \
+    gcovr -r "$cov_repo_root" -f "$cov_certified_filter" -e "$cov_certified_exclude" \
+          "${cov_gcov_args[@]}" "$objdir" \
           --html --html-details --output "$out/$key/index.html"
 
     cov_assert_nonempty "$out/$key.xml" "the certified-source report for '$key'" "$objdir"

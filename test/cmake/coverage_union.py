@@ -35,6 +35,7 @@ the figure the coverage ratchet gates on, so that adding a build configuration
 moves the number only by the code it actually brings in.
 """
 
+import collections
 import glob
 import json
 import math
@@ -150,23 +151,24 @@ def union(tracefiles):
                     shapes.setdefault(key, {})[name_of_configuration] = len(outcomes)
 
                 for index, branch in enumerate(outcomes):
-                    key = (name, number, index)
+                    key = (name, number, len(outcomes), index)
                     branches[key] = branches.get(key, 0) or (1 if branch["count"] > 0 else 0)
 
     return lines, branches, shapes
 
 
-def keying_soundness(shapes):
-    """Lines whose branch count differs between the configurations compiling them.
+def multiform_lines(shapes):
+    """Lines that compile to more than one branch count across configurations.
 
-    The union keys a branch by its position within its line, which stands for a
-    source branch only while every configuration that compiles the line agrees
-    on how many branches the line has. Where they do not, the Nth branch is a
-    different branch in different configurations, and unioning them would
-    report coverage the certified binary does not have.
+    These are the lines the key's branch-count component exists for. Each one
+    contributes its branches once per distinct compiled form, so the
+    denominator counts a source line's branches more than once and the figure
+    is conservative by exactly that much. Reported with the figure rather than
+    absorbed, because an assessor is entitled to know where a denominator
+    counts something twice, and why.
 
-    A configuration that does not compile the line at all is not a
-    disagreement: it contributes no entry and says nothing about the shape.
+    A configuration that does not compile the line contributes no entry and is
+    not a second form.
     """
 
     return sorted(
@@ -211,21 +213,7 @@ def main():
 
     # Before any figure, because a figure published over an unsound key is
     # worse than no figure at all.
-    inconsistent = keying_soundness(shapes)
-    if inconsistent:
-        print("coverage_union.py: the union key is not sound on this tracefile set.",
-              file=sys.stderr)
-        print("%d line(s) carry a different branch count in different configurations,"
-              % len(inconsistent), file=sys.stderr)
-        print("so branch position does not identify a source branch:", file=sys.stderr)
-        for path, number, counts in inconsistent[:20]:
-            spread = ", ".join("%s %d" % (c, n) for c, n in sorted(counts.items()))
-            print("    %s:%d -- %s" % (path, number, spread), file=sys.stderr)
-        if len(inconsistent) > 20:
-            print("    ... and %d more" % (len(inconsistent) - 20), file=sys.stderr)
-        print("No union figure is printed. Resolve this before publishing one.",
-              file=sys.stderr)
-        return 1
+    multiform = multiform_lines(shapes)
 
     excluded, missing = exclude_hook_sites(lines, branches)
     if missing:
@@ -246,8 +234,16 @@ def main():
     for path in tracefiles:
         print("    %s" % os.path.basename(path)[:-len(".json")])
 
-    print("    keying soundness: %d line(s) carry branches, 0 inconsistent"
-          % len(shapes))
+    # The key's branch-count component, and what it costs, on the face of the
+    # output. A reader who sees a denominator counting a line's branches twice
+    # is entitled to find out here rather than by re-deriving it.
+    print("    %d line(s) carry branches; %d compile to more than one form"
+          % (len(shapes), len(multiform)))
+    for path, number, counts in multiform:
+        forms = collections.Counter(counts.values())
+        spread = ", ".join("%d branches in %d configuration(s)" % (n, c)
+                           for n, c in sorted(forms.items()))
+        print("        %-46s %s" % ("%s:%d" % (path, number), spread))
     if excluded:
         print("    excluded, regression-test hook expansions:")
         hook_lines_covered = hook_lines_total = 0
