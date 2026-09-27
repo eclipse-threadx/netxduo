@@ -99,7 +99,19 @@ if [ ${#absent[@]} -ne 0 ]; then
     echo "Re-run the missing suites with TX_COVERAGE=ON, or set" >&2
     echo "NX_COVERAGE_ALLOW_PARTIAL=1 to compute an explicitly partial figure." >&2
     [ "${NX_COVERAGE_ALLOW_PARTIAL:-0}" = "1" ] || exit 1
-    echo "coverage_merge.sh: NX_COVERAGE_ALLOW_PARTIAL is set. This figure is partial." >&2
+
+    # A partial figure is useful while iterating on one subsystem, and it must
+    # never be able to occupy the path the component's figure occupies. So it
+    # is not a warning on an otherwise identical artefact: it is written under a
+    # different name, and the complete report is left untouched wherever it sits.
+    #
+    # This is the same enforcement used for netxduo64 and
+    # optimize_build -- a path the wrong data cannot be written into, rather
+    # than a label a reader has to notice. A stderr line does not survive being
+    # copied into an evidence pack; a file name does.
+    name=netxduo_certified_PARTIAL
+    echo "coverage_merge.sh: PARTIAL -- ${#inputs[@]} of ${#expected[@]} configurations." >&2
+    echo "Writing $name.xml. This is not the NetX Duo coverage figure." >&2
 fi
 
 # The gate is not set here. The first threshold comes from the figure a
@@ -109,7 +121,8 @@ min_line=${NX_COVERAGE_MIN_LINE:-0}
 min_branch=${NX_COVERAGE_MIN_BRANCH:-0}
 
 out=coverage_report
-mkdir -p "$out/netxduo_certified"
+name=${name:-netxduo_certified}
+mkdir -p "$out/$name"
 
 add_args=()
 for t in "${inputs[@]}"; do
@@ -131,11 +144,11 @@ done
 # the certified denominator was applied once, where the tracefiles were written, so
 # the merged report and the union are computed from exactly the same filtered
 # data rather than from two filters that could drift apart.
-gcovr -r "$repo_root" "${add_args[@]}" --xml-pretty --output "$out/netxduo_certified.xml"
+gcovr -r "$repo_root" "${add_args[@]}" --xml-pretty --output "$out/$name.xml"
 gcovr -r "$repo_root" "${add_args[@]}" --html --html-details \
-      --output "$out/netxduo_certified/index.html"
+      --output "$out/$name/index.html"
 
-if ! grep -q "<class " "$out/netxduo_certified.xml"; then
+if ! grep -q "<class " "$out/$name.xml"; then
     echo "coverage_merge.sh: the merged report contains no files." >&2
     exit 1
 fi
@@ -143,7 +156,7 @@ fi
 # Named, not just counted. coverage_report/ is not cleaned between runs, so a
 # tracefile left behind by an earlier run over a different configuration set
 # would otherwise be merged in without anything saying so.
-echo "coverage_merge.sh: NetX Duo certified source, ${#inputs[@]} configuration(s):"
+echo "coverage_merge.sh: $name, ${#inputs[@]} configuration(s):"
 for t in "${inputs[@]}"; do
     echo "    $(basename "$t" .json)"
 done
