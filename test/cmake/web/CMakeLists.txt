@@ -50,7 +50,28 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. netxduo)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/regression regression)
 
 # Coverage
-if(CMAKE_BUILD_TYPE MATCHES ".*_coverage")
+#
+# The gate here used to be the build type alone, and only 32 of the 110 build
+# configurations across the ten suites have a name matching "*_coverage" -- 4
+# of netxduo's 43, and none of netxduo_fast's. So 78 configurations built and
+# ran every test and their coverage was thrown away. That is not redundancy
+# discarded: each configuration selects a different set of NX_ feature macros,
+# so the code the others compile is *absent from the denominator* rather than
+# reported as uncovered, and thirteen files of common/src were absent from
+# every report because no instrumented configuration compiled them at all.
+#
+# TX_COVERAGE instruments a build regardless of its name. It defaults to OFF
+# and the build-type match is kept, exactly as threadx does it: the pinned
+# cmake_bootstrap.sh collects coverage on that same name match as well as on
+# TX_COVERAGE, and that file is threadx's rather than ours. Dropping the match
+# here would leave a by-hand run of a *_coverage configuration building
+# uninstrumented while the runner still called coverage.sh on it, which now
+# fails on an empty report. The two switches are reconciled where it matters
+# instead: coverage_merge.sh refuses to publish a figure unless every
+# configuration of every contributing suite is present in the merge set, so a
+# partial set cannot be read as the component's number.
+option(TX_COVERAGE "Instrument this build for coverage regardless of build type" OFF)
+if(TX_COVERAGE OR CMAKE_BUILD_TYPE MATCHES ".*_coverage")
   target_compile_options(netxduo PRIVATE -fprofile-arcs -ftest-coverage)
   target_link_options(netxduo PRIVATE -fprofile-arcs -ftest-coverage)
 endif()

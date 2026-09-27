@@ -103,7 +103,6 @@ jobs:
       cmake_path: ./test/cmake/netxduo_fast
       result_affix: NetXDuo_Fast
       skip_deploy: true
-      skip_coverage: true
   Secure:
     permissions:
       contents: read

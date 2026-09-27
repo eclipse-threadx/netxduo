@@ -3,11 +3,18 @@
 set -e
 
 cd $(dirname $0)
+. ../coverage_common.sh
 
-# The certified denominator is common/src less nx_ram_network_driver.c, the
-# harness's simulated Ethernet device. gcovr's -r is what confines the report:
-# the instrumented library also holds nx_secure, crypto_libraries and addons.
-root_path=$(cd ../../../common/src; pwd)
-mkdir -p coverage_report/$1
-gcovr --object-directory=build/$1/netxduo/CMakeFiles/netxduo.dir/common/src -r ../../../common/src -e $root_path/nx_ram_network_driver.c --xml-pretty --output coverage_report/$1.xml
-gcovr --object-directory=build/$1/netxduo/CMakeFiles/netxduo.dir/common/src -r ../../../common/src -e $root_path/nx_ram_network_driver.c --html --html-details --output coverage_report/$1/index.html
+# This suite's subject is the certified source itself, so it emits no separate
+# subject report: its per-configuration tracefiles are the certified ones, and
+# its merged report is the union of them over all 43 configurations.
+#
+# That merged figure is this suite's, not the component's. The component's is a
+# union across the eight suites that compile certified source, and
+# coverage_merge.sh computes it one directory up.
+if [ "$1" = "--merge" ]; then
+    cov_merge per_configuration/certified "certified source" "$cov_repo_root"
+    exit $?
+fi
+
+cov_report_certified "$1"
