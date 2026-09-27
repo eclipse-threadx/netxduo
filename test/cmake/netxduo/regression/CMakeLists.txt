@@ -139,9 +139,27 @@ set(dns_test_cases
     ${SOURCE_DIR}/dns_test/netx_dns_abnormal_packet_test.c
     ${SOURCE_DIR}/dns_test/netx_dns_source_port_test.c
     ${SOURCE_DIR}/dns_test/netx_dns_non_blocking_a_test.c
-    ${SOURCE_DIR}/dns_test/netx_dns_nxe_api_test.c
     ${SOURCE_DIR}/dns_test/netx_dns_fake_response_test.c
     ${SOURCE_DIR}/dns_test/netx_dns_packet_double_release_test.c)
+
+# netx_dns_nxe_api_test calls the _nxe_dns_* error-checking front-ends directly,
+# and nxd_dns.h only declares them when error checking is enabled: its
+# NX_DISABLE_ERROR_CHECKING arm maps the public names straight to the _nx_dns_*
+# core functions and the prototypes sit in the arm that macro excludes. So the
+# test cannot compile in a configuration that defines it, and without this guard
+# four builds lose the target and ctest reports it as a test that did not run.
+#
+# The functions themselves are still there. nxd_dns.c defines all eighteen
+# unconditionally -- it defines NX_DISABLE_ERROR_CHECKING for itself only so its
+# internal calls skip the front-ends -- so this guard is about what the header
+# declares, not about what the library contains. Do not read it as "these builds
+# have no error-checking API".
+#
+# Nothing is lost by skipping it here. The test exercises addons/dns, and it
+# still runs in every other configuration.
+if(NOT "-DNX_DISABLE_ERROR_CHECKING" IN_LIST ${CMAKE_BUILD_TYPE})
+  list(APPEND dns_test_cases ${SOURCE_DIR}/dns_test/netx_dns_nxe_api_test.c)
+endif()
 
 set(ftp_test_cases
     ${SOURCE_DIR}/ftp_test/netx_ftp_access_control_commands_02_test.c
