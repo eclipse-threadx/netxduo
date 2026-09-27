@@ -7,9 +7,9 @@ name: regression_test
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [ master, v6.4.1_cert ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, v6.4.1_cert ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -165,7 +165,13 @@ jobs:
       cmake_path: ./test/cmake/mqtt_interoperability
       result_affix: MQTT_Interoperability
       skip_deploy: true
+  # Publishing is confined to master. deploy_code_coverage replaces the
+  # project's public GitHub Pages coverage site wholesale, and its own condition
+  # fires on any push, so without this the first push of the certification
+  # branch would publish that branch's numbers as the project's. The branch
+  # produces its evidence as workflow artifacts instead.
   Deploy:
+    if: github.ref == 'refs/heads/master'
     permissions:
       contents: read
       issues: read
@@ -173,8 +179,112 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Secure, Crypto, Secure_Interoperability, MQTT_Interoperability]
+    needs: [NetXDuo, Web, PTP, MQTT, NetXDuo64, NetXDuo_Fast, Secure, Crypto, Secure_Interoperability, MQTT_Interoperability]
     uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@v6.4.1_cert
     with:
       skip_test: true
-      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Secure Crypto Secure_Interoperability MQTT_Interoperability"
+      deploy_list: "NetXDuo Web PTP MQTT NetXDuo64 NetXDuo_Fast Secure Crypto Secure_Interoperability MQTT_Interoperability"
+
+  # The NetX Duo certification figure, which is a union across the eight suites
+  # that build the certified source 32-bit. It exists here rather than in the
+  # shared template because it is this component's denominator: the template's
+  # own coverage_report/merged.xml is per suite, which is a different object,
+  # and a component-specific denominator inside a workflow four repositories
+  # share would make every other component carry it. Not Deploy either -- that
+  # is the same template invoked with skip_test and has no build tree.
+  #
+  # The inputs are the suite jobs' per-configuration tracefiles, which the
+  # template already uploads as "coverage_detail <affix>" carrying the
+  # certified/ and informational/ split, so nothing in threadx has to change.
+  #
+  # !cancelled() rather than success(), which is the idiom the template uses for
+  # its own coverage steps and for the same reason: the run whose behaviour
+  # changed is the one whose coverage is worth reading. A suite that fails at
+  # the test step still leaves its tracefiles and still contributes. A suite
+  # that fails at the build step leaves none, and coverage_merge.sh then fails
+  # this job by name rather than publishing a short set.
+  Certified_Coverage:
+    if: ${{ !cancelled() }}
+    permissions:
+      contents: read
+    needs: [NetXDuo, NetXDuo_Fast, Web, PTP, MQTT, MQTT_Interoperability, Secure, Secure_Interoperability]
+    runs-on: ubuntu-24.04
+    container:
+      image: debian:trixie@sha256:f324c7ff54321e8d9c588493a20244965938ce0aa50bbd1022d38010e9ffc4b1
+
+    steps:
+    # Before the checkout, for the reason the template gives: actions/checkout
+    # needs git, and without it the action falls back to a REST API tarball that
+    # leaves no .git behind.
+    - name: Install git
+      run: |
+        apt-get update
+        apt-get install -y --no-install-recommends ca-certificates git
+
+    - name: Check out the repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        submodules: true
+
+    # The same install script the suite jobs run, so the gcovr that merges the
+    # tracefiles is the version that wrote them and the assertion that pins it
+    # is the same assertion.
+    - name: Install softwares
+      run: ./scripts/install.sh
+
+    - name: Download per-configuration coverage
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      with:
+        pattern: coverage_detail *
+        merge-multiple: true
+        path: tracefiles
+
+    # The completeness check, the union, the gate and the log naming every
+    # tracefile consumed are all inside this script. Its exit status is the
+    # gate: a merge set short of the contributing configurations fails here
+    # rather than publishing a figure over part of them.
+    - name: Merge the certified coverage
+      run: |
+        set -o pipefail
+        TRACEFILE_DIR=$GITHUB_WORKSPACE/tracefiles/certified \
+          test/cmake/coverage_merge.sh 2>&1 | tee "$RUNNER_TEMP/merge.log"
+
+    # What the run verified, in the job's own summary, because the figure above
+    # and the suite results are two different claims and a green gate beside a
+    # red suite must not read as one. The coverage figure is true of what was
+    # executed either way; that the software passed its tests is only true if
+    # every contributing suite succeeded, and this says which.
+    - name: Record what the figure stands on
+      if: ${{ !cancelled() }}
+      run: |
+        {
+          echo "## NetX Duo certified coverage"
+          echo
+          sed -n 's/^ *\(files\|lines\|branches\) */- **\1** /p' "$RUNNER_TEMP/merge.log"
+          echo
+          echo "| Contributing suite | Result |"
+          echo "|---|---|"
+          echo "| NetXDuo | ${{ needs.NetXDuo.result }} |"
+          echo "| NetXDuo_Fast | ${{ needs.NetXDuo_Fast.result }} |"
+          echo "| Web | ${{ needs.Web.result }} |"
+          echo "| PTP | ${{ needs.PTP.result }} |"
+          echo "| MQTT | ${{ needs.MQTT.result }} |"
+          echo "| MQTT_Interoperability | ${{ needs.MQTT_Interoperability.result }} |"
+          echo "| Secure | ${{ needs.Secure.result }} |"
+          echo "| Secure_Interoperability | ${{ needs.Secure_Interoperability.result }} |"
+          echo
+          if [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = "true" ]; then
+            echo "**A contributing suite did not succeed.** The figure above is the coverage"
+            echo "of what this run executed and is not evidence that the suite passed."
+          else
+            echo "Every contributing suite succeeded."
+          fi
+        } >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload the certified coverage report
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: ${{ !cancelled() }}
+      with:
+        name: certified_coverage
+        path: test/cmake/coverage_report
+        retention-days: ${{ github.ref == 'refs/heads/v6.4.1_cert' && 90 || 1 }}

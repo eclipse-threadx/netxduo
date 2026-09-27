@@ -33,10 +33,21 @@ repo_root=$(cd ../.. && pwd -P)
 # neither: it compiles no certified source and asserts that on every run.
 #
 # TRACEFILE_DIR overrides the source for CI, where the tracefiles arrive as
-# downloaded artifacts rather than as build output. The artifacts keep the
-# certified/ and informational/ split, so the same rule applies there.
+# downloaded artifacts rather than as build output. It names one directory
+# holding every suite job's per_configuration tree, merged: those keep the
+# certified/ and informational/ split, so the glob below is the same rule rather
+# than a flat one.
+#
+# It has to be. per_configuration also holds each suite's *subject* tracefile at
+# its top level -- addons/web for web, nx_secure for nx_secure -- named
+# <configuration>.json rather than <suite>.<configuration>.json. A flat glob
+# would collect those instead: eight suites' worth of the wrong denominator,
+# written against a root gcovr would resolve their names against wrongly, with
+# netxduo64's excluded data sitting one directory away.
 if [ -n "$TRACEFILE_DIR" ]; then
-    inputs=("$TRACEFILE_DIR"/*.json)
+    shopt -s nullglob
+    inputs=("$TRACEFILE_DIR"/certified/*.json)
+    shopt -u nullglob
 else
     shopt -s nullglob
     inputs=(*/coverage_report/per_configuration/certified/*.json)
@@ -55,7 +66,7 @@ fi
 # match kept for the pinned runner's sake -- so a run with TX_COVERAGE unset
 # still instruments the configurations whose names end in _coverage and still
 # writes their tracefiles here. Without this check that run would produce a
-# union over 32 of the 105 contributing configurations, print a plausible
+# union over 32 of the 104 contributing configurations, print a plausible
 # percentage, and nothing would say it was not the component's figure. The same
 # applies to a CI run in which one suite job failed and uploaded nothing.
 #
