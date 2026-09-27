@@ -2,7 +2,11 @@
 
 cd $(dirname $0)
 
-# if threadx repo does not exist, clone it
-[ -d ../threadx ] || git clone https://github.com/eclipse-threadx/threadx.git ../threadx --depth 1
-[ -f .run.sh ] || ln -sf ../threadx/scripts/cmake_bootstrap.sh .run.sh
+. ../dependencies.sh
+
+pin_threadx || exit 1
+
+# Recreated on every run, so a link left pointing elsewhere cannot be reused.
+ln -sfn ../threadx/scripts/cmake_bootstrap.sh .run.sh
+
 ./.run.sh $*
