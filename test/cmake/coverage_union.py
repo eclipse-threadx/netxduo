@@ -127,24 +127,29 @@ def union(tracefiles):
     """Union line and branch coverage across per-configuration tracefiles.
 
     Also returns, per (file, line), the branch count each configuration
-    compiled it with, which is what the keying-soundness check reads.
+    compiled it with, which is what the keying-soundness check reads, and the
+    configurations that covered nothing at all.
     """
 
     lines = {}
     branches = {}
     shapes = {}
+    silent = []
 
     for path in tracefiles:
         name_of_configuration = os.path.basename(path)[:-len(".json")]
         with open(path, encoding="utf-8") as handle:
             data = json.load(handle)
 
+        covered_here = 0
         for entry in data.get("files", []):
             name = entry["file"]
             for line in entry.get("lines", []):
                 number = line["line_number"]
                 key = (name, number)
-                lines[key] = lines.get(key, 0) or (1 if line["count"] > 0 else 0)
+                hit = 1 if line["count"] > 0 else 0
+                covered_here += hit
+                lines[key] = lines.get(key, 0) or hit
 
                 outcomes = line.get("branches", [])
                 if outcomes:
@@ -154,7 +159,10 @@ def union(tracefiles):
                     key = (name, number, len(outcomes), index)
                     branches[key] = branches.get(key, 0) or (1 if branch["count"] > 0 else 0)
 
-    return lines, branches, shapes
+        if covered_here == 0:
+            silent.append(name_of_configuration)
+
+    return lines, branches, shapes, silent
 
 
 def multiform_lines(shapes):
@@ -206,9 +214,34 @@ def main():
         print("Run the suites with TX_COVERAGE=ON first.", file=sys.stderr)
         return 1
 
-    lines, branches, shapes = union(tracefiles)
+    lines, branches, shapes, silent = union(tracefiles)
     if not lines:
         print("coverage_union.py: the tracefiles contain no files.", file=sys.stderr)
+        return 1
+
+    # A configuration that covered nothing did not run its tests, and its
+    # tracefile is not evidence of anything.
+    #
+    # The completeness check upstream counts tracefiles, not what is in them. A
+    # suite whose build succeeds and whose every test then fails still writes a
+    # full-shaped report for each of its configurations -- every certified file
+    # present, every line at count 0 -- so the merge set looks complete and a
+    # figure gets published. Measured on this tree: a run in which both
+    # interoperability suites failed every test on a missing container
+    # capability produced nine tracefiles of 495 files and 11,150 lines with 0
+    # covered, and the completeness check passed them.
+    #
+    # The gate does not catch this, which is why it is caught here. The figure
+    # is a union, and those suites contribute no line that no other
+    # configuration reaches, so 27 of the 104 configurations can fall to zero
+    # and move the published percentage by nothing at all.
+    if silent:
+        print("coverage_union.py: %d configuration(s) covered no certified line:"
+              % len(silent), file=sys.stderr)
+        for name in silent:
+            print("    %s" % name, file=sys.stderr)
+        print("A configuration that covered nothing did not run its tests. Its", file=sys.stderr)
+        print("tracefile makes the merge set look complete and adds no evidence.", file=sys.stderr)
         return 1
 
     # Before any figure, because a figure published over an unsound key is
