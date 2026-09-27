@@ -149,6 +149,12 @@ jobs:
       cmake_path: ./test/cmake/nx_secure_interoperability
       result_affix: Secure_Interoperability
       skip_deploy: true
+      # Each test builds a veth pair and addresses it, which needs
+      # CAP_NET_ADMIN in the container's network namespace. Without it
+      # every configuration fails on its first test with "RTNETLINK
+      # answers: Operation not permitted". CAP_NET_RAW, which tcpdump and
+      # the tests' libpcap capture need, is in the default set already.
+      container_options: --cap-add=NET_ADMIN
   MQTT_Interoperability:
     permissions:
       contents: read
@@ -165,6 +171,12 @@ jobs:
       cmake_path: ./test/cmake/mqtt_interoperability
       result_affix: MQTT_Interoperability
       skip_deploy: true
+      # Each test builds a veth pair and addresses it, which needs
+      # CAP_NET_ADMIN in the container's network namespace. Without it
+      # every configuration fails on its first test with "RTNETLINK
+      # answers: Operation not permitted". CAP_NET_RAW, which tcpdump and
+      # the tests' libpcap capture need, is in the default set already.
+      container_options: --cap-add=NET_ADMIN
   # Publishing is confined to master. deploy_code_coverage replaces the
   # project's public GitHub Pages coverage site wholesale, and its own condition
   # fires on any push, so without this the first push of the certification
