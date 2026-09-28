@@ -9,12 +9,17 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 /* This case tests response in multiple packets.  */
 #include    "tx_api.h"
 #include    "nx_api.h"
 #include    "fx_api.h"
 #include    "nx_web_http_client.h"
 #include    "nx_web_http_server.h"
+
+extern UINT _nx_web_http_client_content_length_get(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr);
+extern UINT _nx_web_http_client_process_header_fields(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr);
 
 extern void test_control_return(UINT);
 
@@ -41,12 +46,16 @@ extern void _nx_ram_network_driver_1024(NX_IP_DRIVER *driver_req_ptr);
 /* Set up the HTTP client global variables. */
 
 #define         CLIENT_PACKET_SIZE  (NX_WEB_HTTP_CLIENT_MIN_PACKET_SIZE * 2)
+#define         PADDING_FIELD_SIZE  192
+#define         PADDING_FIELD_COUNT 8
 
 static TX_THREAD           client_thread;
 static NX_PACKET_POOL      client_pool;
 static NX_WEB_HTTP_CLIENT  my_client;
 static NX_IP               client_ip;
 static UINT                error_counter;
+static UINT                padding_fields_seen;
+static UINT                boundary_fields_seen;
 
 /* Set up the HTTP server global variables */
 
@@ -84,11 +93,16 @@ static UINT loop = 1;
 #endif /* NX_WEB_HTTPS_ENABLE  */
 
 static UINT server_request_callback(NX_WEB_HTTP_SERVER *server_ptr, UINT request_type, CHAR *resource, NX_PACKET *packet_ptr);
+static VOID header_callback(NX_WEB_HTTP_CLIENT *client_ptr, CHAR *field_name, UINT field_name_length,
+                            CHAR *field_value, UINT field_value_length);
+static VOID boundary_header_callback(NX_WEB_HTTP_CLIENT *client_ptr, CHAR *field_name, UINT field_name_length,
+                                     CHAR *field_value, UINT field_value_length);
+static VOID test_header_boundaries(VOID);
 
 static char pkt[] = {
 0x48, 0x54,                                     /* ......HT */
 0x54, 0x50, 0x2f, 0x31, 0x2e, 0x30, 0x20, 0x32, /* TP/1.0 2 */
-0x30, 0x30, 0x20, 0x0d, 0x0a, 0x43, 0x6f, 0x6e, /* 00 ..Con */
+0x30, 0x30, 0x20, 0x0d, 0x0a,                   /* 00 .. */
 };
 
 static char pkt1[] = {
@@ -117,6 +131,131 @@ static char pkt2[] = {
 0x2f, 0x68, 0x65, 0x61, 0x64, 0x3e, 0x0d, 0x0a, /* /head>.. */
 0x0d, 0x0a, 0x3c, 0x62, 0x6f, 0x64, 0x79, 0x3e, /* ..<body> */
 };
+
+/* Check the padding fields even when their values cross packet boundaries.  */
+static VOID header_callback(NX_WEB_HTTP_CLIENT *client_ptr, CHAR *field_name, UINT field_name_length,
+                            CHAR *field_value, UINT field_value_length)
+{
+UINT i;
+
+    NX_PARAMETER_NOT_USED(client_ptr);
+    if ((field_name_length == 5) && (memcmp(field_name, "X-Pad", 5) == 0))
+    {
+        padding_fields_seen++;
+        if (field_value_length != (PADDING_FIELD_SIZE - 9))
+        {
+            error_counter++;
+        }
+        else
+        {
+            for (i = 0; i < field_value_length; i++)
+            {
+                if (field_value[i] != 'A')
+                {
+                    error_counter++;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+/* Check a field name and header terminator split across packet buffers.  */
+static VOID boundary_header_callback(NX_WEB_HTTP_CLIENT *client_ptr, CHAR *field_name, UINT field_name_length,
+                                     CHAR *field_value, UINT field_value_length)
+{
+    NX_PARAMETER_NOT_USED(client_ptr);
+    if ((field_name_length == 14) && (memcmp(field_name, "Content-Length", 14) == 0) &&
+        (field_value_length == 1) && (field_value[0] == '5'))
+    {
+        boundary_fields_seen++;
+    }
+    else if ((field_name_length == 5) && (memcmp(field_name, "X-Pad", 5) == 0) &&
+             (field_value_length == 1) && (field_value[0] == 'x'))
+    {
+        boundary_fields_seen++;
+    }
+    else
+    {
+        error_counter++;
+    }
+}
+
+/* Verify both response parsers using a deliberately fragmented header.  */
+static VOID test_header_boundaries(VOID)
+{
+NX_PACKET          *first_packet = NX_NULL;
+NX_PACKET          *second_packet = NX_NULL;
+NX_PACKET          *third_packet = NX_NULL;
+NX_WEB_HTTP_CLIENT  client;
+CHAR                first_data[] = "HTTP/1.1 200 OK\r\nContent-Len";
+CHAR                second_data[] = "gth: 5\r\nX-Pad: x\r\n\r";
+CHAR                third_data[] = "\nhello";
+UINT                status;
+UINT                length;
+UINT                offset;
+
+    status = nx_packet_allocate(&client_pool, &first_packet, NX_TCP_PACKET, NX_NO_WAIT);
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_allocate(&client_pool, &second_packet, NX_TCP_PACKET, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_allocate(&client_pool, &third_packet, NX_TCP_PACKET, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_data_append(first_packet, first_data, sizeof(first_data) - 1,
+                                       &client_pool, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_data_append(second_packet, second_data, sizeof(second_data) - 1,
+                                       &client_pool, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_data_append(third_packet, third_data, sizeof(third_data) - 1,
+                                       &client_pool, NX_NO_WAIT);
+    }
+
+    if (status == NX_SUCCESS)
+    {
+        first_packet -> nx_packet_next = second_packet;
+        second_packet -> nx_packet_next = third_packet;
+        first_packet -> nx_packet_last = third_packet;
+        first_packet -> nx_packet_length += second_packet -> nx_packet_length + third_packet -> nx_packet_length;
+        memset(&client, 0, sizeof(client));
+        client.nx_web_http_client_response_callback = boundary_header_callback;
+        boundary_fields_seen = 0;
+
+        length = _nx_web_http_client_content_length_get(&client, first_packet);
+        offset = _nx_web_http_client_process_header_fields(&client, first_packet);
+        if ((length != 5) || (offset != (first_packet -> nx_packet_length - 5)) ||
+            (boundary_fields_seen != 2))
+        {
+            error_counter++;
+        }
+        nx_packet_release(first_packet);
+    }
+    else
+    {
+        error_counter++;
+        if (first_packet != NX_NULL)
+        {
+            nx_packet_release(first_packet);
+        }
+        if (second_packet != NX_NULL)
+        {
+            nx_packet_release(second_packet);
+        }
+        if (third_packet != NX_NULL)
+        {
+            nx_packet_release(third_packet);
+        }
+    }
+}
 
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
@@ -184,6 +323,8 @@ UINT    status;
     if (status)
         error_counter++;
 
+    test_header_boundaries();
+
     /* Create an IP instance.  */
     status = nx_ip_create(&client_ip, "HTTP Client IP", HTTP_CLIENT_ADDRESS, 
                           0xFFFFFF00UL, &client_pool, _nx_ram_network_driver_1024,
@@ -244,6 +385,7 @@ void thread_client_entry(ULONG thread_input)
 {
 UINT            i;
 UINT            status;
+UINT            body_packet_seen;
 NX_PACKET       *recv_packet;
 
 
@@ -285,6 +427,12 @@ NX_PACKET       *recv_packet;
             if (status)
                 error_counter++;
 
+            padding_fields_seen = 0;
+            body_packet_seen = 0;
+            status = nx_web_http_client_response_header_callback_set(&my_client, header_callback);
+            if (status)
+                error_counter++;
+
             /* Send a GET request.  */
             if (i == 0)
             {
@@ -311,6 +459,19 @@ NX_PACKET       *recv_packet;
             {
                 status = nx_web_http_client_response_body_get(&my_client, &recv_packet, 1 * NX_IP_PERIODIC_RATE);
 
+                if ((status == NX_SUCCESS) || (status == NX_WEB_HTTP_GET_DONE))
+                {
+                    if (body_packet_seen == 0)
+                    {
+                        if ((recv_packet -> nx_packet_length == 0) ||
+                            (*(recv_packet -> nx_packet_prepend_ptr) != (UCHAR)'<'))
+                        {
+                            error_counter++;
+                        }
+                        body_packet_seen = 1;
+                    }
+                }
+
                 if (status)
                 {
                     break;
@@ -326,6 +487,9 @@ NX_PACKET       *recv_packet;
                 error_counter++;
             else
                 nx_packet_release(recv_packet);
+
+            if ((padding_fields_seen != PADDING_FIELD_COUNT) || (body_packet_seen == 0))
+                error_counter++;
 
             status = nx_web_http_client_delete(&my_client);
             if (status)
@@ -487,6 +651,8 @@ static UINT server_request_callback(NX_WEB_HTTP_SERVER *server_ptr, UINT request
 {
 NX_PACKET   *response_pkt;
 UINT         status;
+UINT         i;
+CHAR         padding_field[PADDING_FIELD_SIZE];
 
     /* Process multipart data.  */
     if(request_type == NX_WEB_HTTP_SERVER_GET_REQUEST)
@@ -501,7 +667,21 @@ UINT         status;
             error_counter++;
         }
 
+        memset(padding_field, 'A', sizeof(padding_field));
+        memcpy(padding_field, "X-Pad: ", 7);
+        padding_field[PADDING_FIELD_SIZE - 2] = (CHAR)13;
+        padding_field[PADDING_FIELD_SIZE - 1] = (CHAR)10;
+
         status = nx_packet_data_append(response_pkt, pkt, sizeof(pkt), &server_pool, NX_WAIT_FOREVER);
+        for (i = 0; (i < PADDING_FIELD_COUNT) && (status == NX_SUCCESS); i++)
+        {
+            status = nx_packet_data_append(response_pkt, padding_field, sizeof(padding_field),
+                                           &server_pool, NX_WAIT_FOREVER);
+        }
+        if (status == NX_SUCCESS)
+        {
+            status = nx_packet_data_append(response_pkt, "Con", 3, &server_pool, NX_WAIT_FOREVER);
+        }
 
         if(status == NX_SUCCESS)
         {
@@ -509,6 +689,11 @@ UINT         status;
             {
                 nx_packet_release(response_pkt);
             }
+        }
+        else
+        {
+            nx_packet_release(response_pkt);
+            error_counter++;
         }
 
         /* Allocate a response packet.  */
