@@ -66,7 +66,7 @@ fi
 # match kept for the pinned runner's sake -- so a run with TX_COVERAGE unset
 # still instruments the configurations whose names end in _coverage and still
 # writes their tracefiles here. Without this check that run would produce a
-# union over 32 of the 104 contributing configurations, print a plausible
+# union over 32 of the 102 contributing configurations, print a plausible
 # percentage, and nothing would say it was not the component's figure. The same
 # applies to a CI run in which one suite job failed and uploaded nothing.
 #

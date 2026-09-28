@@ -233,8 +233,8 @@ def main():
     #
     # The gate does not catch this, which is why it is caught here. The figure
     # is a union, and those suites contribute no line that no other
-    # configuration reaches, so 27 of the 104 configurations can fall to zero
-    # and move the published percentage by nothing at all.
+    # configuration reaches, so 27 of the contributing configurations can fall to
+    # zero and move the published percentage by nothing at all.
     # Two causes, and the message does not guess between them. Its tests may not
     # have run -- a suite that builds and then fails every test still writes a
     # full-shaped report of zeros. Or they ran and every one of them reported
