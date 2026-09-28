@@ -219,8 +219,8 @@ def main():
         print("coverage_union.py: the tracefiles contain no files.", file=sys.stderr)
         return 1
 
-    # A configuration that covered nothing did not run its tests, and its
-    # tracefile is not evidence of anything.
+    # A configuration that covered no certified line adds nothing to the union,
+    # and the merge set's completeness check cannot see that.
     #
     # The completeness check upstream counts tracefiles, not what is in them. A
     # suite whose build succeeds and whose every test then fails still writes a
@@ -235,13 +235,22 @@ def main():
     # is a union, and those suites contribute no line that no other
     # configuration reaches, so 27 of the 104 configurations can fall to zero
     # and move the published percentage by nothing at all.
+    # Two causes, and the message does not guess between them. Its tests may not
+    # have run -- a suite that builds and then fails every test still writes a
+    # full-shaped report of zeros. Or they ran and every one of them reported
+    # N/A for this configuration, which is a pass to ctest and no evidence here.
+    # Either way the remedy is a decision rather than a retry: make the tests
+    # apply, or declare the configuration informational as netxduo64 and
+    # optimize_build are, so it leaves the expected set instead of sitting in it
+    # contributing nothing.
     if silent:
         print("coverage_union.py: %d configuration(s) covered no certified line:"
               % len(silent), file=sys.stderr)
         for name in silent:
             print("    %s" % name, file=sys.stderr)
-        print("A configuration that covered nothing did not run its tests. Its", file=sys.stderr)
-        print("tracefile makes the merge set look complete and adds no evidence.", file=sys.stderr)
+        print("Each is in the merge set and adds nothing to the union. Either its", file=sys.stderr)
+        print("tests did not run, or they ran and every one reported N/A. Make them", file=sys.stderr)
+        print("apply, or declare the configuration INFORMATIONAL in its coverage.sh.", file=sys.stderr)
         return 1
 
     # Before any figure, because a figure published over an unsound key is
