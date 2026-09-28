@@ -1,3 +1,16 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 #include "tls_test_frame.h"
 
 /* Global demo emaphore. */
@@ -12,8 +25,8 @@ INT dtls_client_entry( TLS_TEST_INSTANCE* instance_ptr)
 /* Just use TLSv1.2 */
 CHAR* external_cmd[] = {
     "openssl_echo_client.sh", TLS_TEST_IP_ADDRESS_STRING, DEVICE_SERVER_PORT_STRING,
-    /* This programe must be executed at the directory of cmake_nx_secure_interoperability_test */
-    "-CAfile", "../ecc_certificates/ECCA2.crt",
+    /* Resolve the CA file from the OpenSSL client script directory. */
+    "-CAfile", "../../ecc_certificates/ECCA2.crt",
     "-dtls1_2",
     (CHAR*)NULL};
 INT status, exit_status, instance_status = TLS_TEST_SUCCESS, i = 0;

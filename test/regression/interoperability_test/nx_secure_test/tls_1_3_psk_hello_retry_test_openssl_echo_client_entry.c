@@ -1,3 +1,16 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 #include "tls_test_frame.h"
 
 extern TLS_TEST_SEMAPHORE* semaphore_echo_server_prepared;
@@ -12,7 +25,8 @@ INT openssl_echo_client_entry(TLS_TEST_INSTANCE* instance_ptr)
 INT status, exit_status;
 
 /* Added -curves prime256v1 to avoid hello retry. */
-CHAR* external_cmd[] = { "openssl_1_1_echo_client.sh", TLS_TEST_IP_ADDRESS_STRING, DEVICE_SERVER_PORT_STRING,
+CHAR* external_cmd[] = { "openssl_echo_client.sh", TLS_TEST_IP_ADDRESS_STRING, DEVICE_SERVER_PORT_STRING,
+                         "-tls1_3",
                          "-psk", "112233445566",
                          "-psk_identity", "psk_test",
                          (CHAR*)NULL};

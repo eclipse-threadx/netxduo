@@ -1,3 +1,16 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 #include "tls_test_frame.h"
 
 INT nx_secure_ecc_server_ciphersuites_entry(TLS_TEST_INSTANCE* instance_ptr);
@@ -183,7 +196,7 @@ INT status, exit_status, instance_status = TLS_TEST_SUCCESS, i = 0;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
         if (ciphersuites_client[i].cipher_index == 10)
         {
-            external_cmd[0] = "openssl_1_1_echo_client.sh";
+            external_cmd[0] = "openssl_echo_client.sh";
             external_cmd[3] = "-ciphersuites";
         }
 #endif

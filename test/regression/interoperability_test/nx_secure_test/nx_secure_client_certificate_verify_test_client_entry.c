@@ -1,3 +1,16 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 #include "tls_test_frame.h"
 
 /* Define the ThreadX and NetX object control blocks...  */
@@ -172,6 +185,10 @@ NX_PARAMETER_NOT_USED(thread_input);
 
     /* Attempt to connect the echo server. */
     status = nx_tcp_client_socket_connect(&tcp_socket, REMOTE_IP_ADDRESS_NUMBER, DEVICE_SERVER_PORT, NX_WAIT_FOREVER);
+    if(NX_SUCCESS != status)
+    {
+        print_error_message("TCP connection failed with status 0x%02x.\n", status);
+    }
     exit_if_fail(NX_SUCCESS == status, TLS_TEST_UNKNOWN_TYPE_ERROR);
 
     status = nx_secure_tls_session_start(&tls_session, &tcp_socket, NX_WAIT_FOREVER);

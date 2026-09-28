@@ -1,3 +1,16 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 #include "tls_test_frame.h"
 
 /* Global demo emaphore. */
@@ -10,7 +23,7 @@ INT openssl_echo_client_entry( TLS_TEST_INSTANCE* instance_ptr)
 #if !defined (NX_SECURE_TLS_SERVER_DISABLED) && defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && (NX_SECURE_TLS_TLS_1_3_ENABLED)
 
 /* Just use TLSv1.2 */
-CHAR* external_cmd[] = { "openssl_1_1_echo_client.sh", TLS_TEST_IP_ADDRESS_STRING, DEVICE_SERVER_PORT_STRING, "-tls1_3", "-curves", "prime256v1", (CHAR*)NULL};
+CHAR* external_cmd[] = { "openssl_echo_client.sh", TLS_TEST_IP_ADDRESS_STRING, DEVICE_SERVER_PORT_STRING, "-tls1_3", "-curves", "prime256v1", (CHAR*)NULL};
 INT status, exit_status, instance_status = TLS_TEST_SUCCESS, i = 0;
 
     for (i = 0; i < 2; i++)

@@ -1,3 +1,14 @@
+/***************************************************************************/
+/* Copyright (c) 2024 Microsoft Corporation                                */
+/* Copyright (c) 2026 Eclipse ThreadX contributors                         */
+/*                                                                         */
+/* This program and the accompanying materials are made available under    */
+/* the terms of the MIT License which is available at                      */
+/* https://opensource.org/licenses/MIT.                                    */
+/*                                                                         */
+/* SPDX-License-Identifier: MIT                                            */
+/***************************************************************************/
+
 #include "tls_test_frame.h"
 #include "test_server.der.c"
 #include "test_server.key.der.c"
@@ -135,7 +146,7 @@ void server_thread_entry(ULONG thread_input)
     /* Enable Client Certificate Verification. */
     nx_secure_tls_session_client_verify_enable(&tls_session);
 
-    // Initialize our certificates        
+    // Initialize our certificates
     nx_secure_tls_remote_certificate_allocate(&tls_session, &remote_certificate, remote_cert_buffer, sizeof(remote_cert_buffer));
     nx_secure_tls_remote_certificate_allocate(&tls_session, &remote_issuer, remote_issuer_buffer, sizeof(remote_issuer_buffer));
     
