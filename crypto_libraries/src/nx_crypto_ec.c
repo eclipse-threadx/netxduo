@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -370,6 +372,120 @@ static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_secp521r1_h[] =
     HN_ULONG_TO_UBASE(0x00000001)
 };
 
+/* RFC 5639 brainpoolP256r1 domain parameters.  */
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp256r1_p[] =
+{
+    HN_ULONG_TO_UBASE(0x1F6E5377), HN_ULONG_TO_UBASE(0x2013481D), HN_ULONG_TO_UBASE(0xD5262028), HN_ULONG_TO_UBASE(0x6E3BF623),
+    HN_ULONG_TO_UBASE(0x9D838D72), HN_ULONG_TO_UBASE(0x3E660A90), HN_ULONG_TO_UBASE(0xA1EEA9BC), HN_ULONG_TO_UBASE(0xA9FB57DB)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp256r1_a[] =
+{
+    HN_ULONG_TO_UBASE(0xF330B5D9), HN_ULONG_TO_UBASE(0xE94A4B44), HN_ULONG_TO_UBASE(0x26DC5C6C), HN_ULONG_TO_UBASE(0xFB8055C1),
+    HN_ULONG_TO_UBASE(0x417AFFE7), HN_ULONG_TO_UBASE(0xEEF67530), HN_ULONG_TO_UBASE(0xFC2C3057), HN_ULONG_TO_UBASE(0x7D5A0975)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp256r1_b[] =
+{
+    HN_ULONG_TO_UBASE(0xFF8C07B6), HN_ULONG_TO_UBASE(0x6BCCDC18), HN_ULONG_TO_UBASE(0x5CF7E1CE), HN_ULONG_TO_UBASE(0x95841629),
+    HN_ULONG_TO_UBASE(0xBBD77CBF), HN_ULONG_TO_UBASE(0xF330B5D9), HN_ULONG_TO_UBASE(0xE94A4B44), HN_ULONG_TO_UBASE(0x26DC5C6C)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp256r1_gx[] =
+{
+    HN_ULONG_TO_UBASE(0x9ACE3262), HN_ULONG_TO_UBASE(0x3A4453BD), HN_ULONG_TO_UBASE(0xE3BD23C2), HN_ULONG_TO_UBASE(0xB9DE27E1),
+    HN_ULONG_TO_UBASE(0xFC81B7AF), HN_ULONG_TO_UBASE(0x2C4B482F), HN_ULONG_TO_UBASE(0xCB7E57CB), HN_ULONG_TO_UBASE(0x8BD2AEB9)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp256r1_gy[] =
+{
+    HN_ULONG_TO_UBASE(0x2F046997), HN_ULONG_TO_UBASE(0x5C1D54C7), HN_ULONG_TO_UBASE(0x2DED8E54), HN_ULONG_TO_UBASE(0xC2774513),
+    HN_ULONG_TO_UBASE(0x14611DC9), HN_ULONG_TO_UBASE(0x97F8461A), HN_ULONG_TO_UBASE(0xC3DAC4FD), HN_ULONG_TO_UBASE(0x547EF835)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp256r1_n[] =
+{
+    HN_ULONG_TO_UBASE(0x974856A7), HN_ULONG_TO_UBASE(0x901E0E82), HN_ULONG_TO_UBASE(0xB561A6F7), HN_ULONG_TO_UBASE(0x8C397AA3),
+    HN_ULONG_TO_UBASE(0x9D838D71), HN_ULONG_TO_UBASE(0x3E660A90), HN_ULONG_TO_UBASE(0xA1EEA9BC), HN_ULONG_TO_UBASE(0xA9FB57DB)
+};
+
+/* RFC 5639 brainpoolP384r1 domain parameters.  */
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp384r1_p[] =
+{
+    HN_ULONG_TO_UBASE(0x3107EC53), HN_ULONG_TO_UBASE(0x87470013), HN_ULONG_TO_UBASE(0x901D1A71), HN_ULONG_TO_UBASE(0xACD3A729),
+    HN_ULONG_TO_UBASE(0x7FB71123), HN_ULONG_TO_UBASE(0x12B1DA19), HN_ULONG_TO_UBASE(0xED5456B4), HN_ULONG_TO_UBASE(0x152F7109),
+    HN_ULONG_TO_UBASE(0x50E641DF), HN_ULONG_TO_UBASE(0x0F5D6F7E), HN_ULONG_TO_UBASE(0xA3386D28), HN_ULONG_TO_UBASE(0x8CB91E82)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp384r1_a[] =
+{
+    HN_ULONG_TO_UBASE(0x22CE2826), HN_ULONG_TO_UBASE(0x04A8C7DD), HN_ULONG_TO_UBASE(0x503AD4EB), HN_ULONG_TO_UBASE(0x8AA5814A),
+    HN_ULONG_TO_UBASE(0xBA91F90F), HN_ULONG_TO_UBASE(0x139165EF), HN_ULONG_TO_UBASE(0x4FB22787), HN_ULONG_TO_UBASE(0xC2BEA28E),
+    HN_ULONG_TO_UBASE(0xCE05AFA0), HN_ULONG_TO_UBASE(0x3C72080A), HN_ULONG_TO_UBASE(0x3D8C150C), HN_ULONG_TO_UBASE(0x7BC382C6)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp384r1_b[] =
+{
+    HN_ULONG_TO_UBASE(0xFA504C11), HN_ULONG_TO_UBASE(0x3AB78696), HN_ULONG_TO_UBASE(0x95DBC994), HN_ULONG_TO_UBASE(0x7CB43902),
+    HN_ULONG_TO_UBASE(0x3EEB62D5), HN_ULONG_TO_UBASE(0x2E880EA5), HN_ULONG_TO_UBASE(0x07DCD2A6), HN_ULONG_TO_UBASE(0x2FB77DE1),
+    HN_ULONG_TO_UBASE(0x16F0447C), HN_ULONG_TO_UBASE(0x8B39B554), HN_ULONG_TO_UBASE(0x22CE2826), HN_ULONG_TO_UBASE(0x04A8C7DD)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp384r1_gx[] =
+{
+    HN_ULONG_TO_UBASE(0x47D4AF1E), HN_ULONG_TO_UBASE(0xEF87B2E2), HN_ULONG_TO_UBASE(0x36D646AA), HN_ULONG_TO_UBASE(0xE826E034),
+    HN_ULONG_TO_UBASE(0x0CBD10E8), HN_ULONG_TO_UBASE(0xDB7FCAFE), HN_ULONG_TO_UBASE(0x7EF14FE3), HN_ULONG_TO_UBASE(0x8847A3E7),
+    HN_ULONG_TO_UBASE(0xB7C13F6B), HN_ULONG_TO_UBASE(0xA2A63A81), HN_ULONG_TO_UBASE(0x68CF45FF), HN_ULONG_TO_UBASE(0x1D1C64F0)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp384r1_gy[] =
+{
+    HN_ULONG_TO_UBASE(0x263C5315), HN_ULONG_TO_UBASE(0x42820341), HN_ULONG_TO_UBASE(0x77918111), HN_ULONG_TO_UBASE(0x0E464621),
+    HN_ULONG_TO_UBASE(0xF9912928), HN_ULONG_TO_UBASE(0xE19C054F), HN_ULONG_TO_UBASE(0xFEEC5864), HN_ULONG_TO_UBASE(0x62B70B29),
+    HN_ULONG_TO_UBASE(0x95CFD552), HN_ULONG_TO_UBASE(0x5CB1EB8E), HN_ULONG_TO_UBASE(0x20F9C2A4), HN_ULONG_TO_UBASE(0x8ABE1D75)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp384r1_n[] =
+{
+    HN_ULONG_TO_UBASE(0xE9046565), HN_ULONG_TO_UBASE(0x3B883202), HN_ULONG_TO_UBASE(0x6B7FC310), HN_ULONG_TO_UBASE(0xCF3AB6AF),
+    HN_ULONG_TO_UBASE(0xAC0425A7), HN_ULONG_TO_UBASE(0x1F166E6C), HN_ULONG_TO_UBASE(0xED5456B3), HN_ULONG_TO_UBASE(0x152F7109),
+    HN_ULONG_TO_UBASE(0x50E641DF), HN_ULONG_TO_UBASE(0x0F5D6F7E), HN_ULONG_TO_UBASE(0xA3386D28), HN_ULONG_TO_UBASE(0x8CB91E82)
+};
+
+/* RFC 5639 brainpoolP512r1 domain parameters.  */
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp512r1_p[] =
+{
+    HN_ULONG_TO_UBASE(0x583A48F3), HN_ULONG_TO_UBASE(0x28AA6056), HN_ULONG_TO_UBASE(0x2D82C685), HN_ULONG_TO_UBASE(0x2881FF2F),
+    HN_ULONG_TO_UBASE(0xE6A380E6), HN_ULONG_TO_UBASE(0xAECDA12A), HN_ULONG_TO_UBASE(0x9BC66842), HN_ULONG_TO_UBASE(0x7D4D9B00),
+    HN_ULONG_TO_UBASE(0x70330871), HN_ULONG_TO_UBASE(0xD6639CCA), HN_ULONG_TO_UBASE(0xB3C9D20E), HN_ULONG_TO_UBASE(0xCB308DB3),
+    HN_ULONG_TO_UBASE(0x33C9FC07), HN_ULONG_TO_UBASE(0x3FD4E6AE), HN_ULONG_TO_UBASE(0xDBE9C48B), HN_ULONG_TO_UBASE(0xAADD9DB8)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp512r1_a[] =
+{
+    HN_ULONG_TO_UBASE(0x77FC94CA), HN_ULONG_TO_UBASE(0xE7C1AC4D), HN_ULONG_TO_UBASE(0x2BF2C7B9), HN_ULONG_TO_UBASE(0x7F1117A7),
+    HN_ULONG_TO_UBASE(0x8B9AC8B5), HN_ULONG_TO_UBASE(0x0A2EF1C9), HN_ULONG_TO_UBASE(0xA8253AA1), HN_ULONG_TO_UBASE(0x2DED5D5A),
+    HN_ULONG_TO_UBASE(0xEA9863BC), HN_ULONG_TO_UBASE(0xA83441CA), HN_ULONG_TO_UBASE(0x3DF91610), HN_ULONG_TO_UBASE(0x94CBDD8D),
+    HN_ULONG_TO_UBASE(0xAC234CC5), HN_ULONG_TO_UBASE(0xE2327145), HN_ULONG_TO_UBASE(0x8B603B89), HN_ULONG_TO_UBASE(0x7830A331)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp512r1_b[] =
+{
+    HN_ULONG_TO_UBASE(0x8016F723), HN_ULONG_TO_UBASE(0x2809BD63), HN_ULONG_TO_UBASE(0x5EBAE5DD), HN_ULONG_TO_UBASE(0x984050B7),
+    HN_ULONG_TO_UBASE(0xDC083E67), HN_ULONG_TO_UBASE(0x77FC94CA), HN_ULONG_TO_UBASE(0xE7C1AC4D), HN_ULONG_TO_UBASE(0x2BF2C7B9),
+    HN_ULONG_TO_UBASE(0x7F1117A7), HN_ULONG_TO_UBASE(0x8B9AC8B5), HN_ULONG_TO_UBASE(0x0A2EF1C9), HN_ULONG_TO_UBASE(0xA8253AA1),
+    HN_ULONG_TO_UBASE(0x2DED5D5A), HN_ULONG_TO_UBASE(0xEA9863BC), HN_ULONG_TO_UBASE(0xA83441CA), HN_ULONG_TO_UBASE(0x3DF91610)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp512r1_gx[] =
+{
+    HN_ULONG_TO_UBASE(0xBCB9F822), HN_ULONG_TO_UBASE(0x8B352209), HN_ULONG_TO_UBASE(0x406A5E68), HN_ULONG_TO_UBASE(0x7C6D5047),
+    HN_ULONG_TO_UBASE(0x93B97D5F), HN_ULONG_TO_UBASE(0x50D1687B), HN_ULONG_TO_UBASE(0xE2D0D48D), HN_ULONG_TO_UBASE(0xFF3B1F78),
+    HN_ULONG_TO_UBASE(0xF4D0098E), HN_ULONG_TO_UBASE(0xB43B62EE), HN_ULONG_TO_UBASE(0xB5D916C1), HN_ULONG_TO_UBASE(0x85ED9F70),
+    HN_ULONG_TO_UBASE(0x9C4C6A93), HN_ULONG_TO_UBASE(0x5A21322E), HN_ULONG_TO_UBASE(0xD82ED964), HN_ULONG_TO_UBASE(0x81AEE4BD)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp512r1_gy[] =
+{
+    HN_ULONG_TO_UBASE(0x3AD80892), HN_ULONG_TO_UBASE(0x78CD1E0F), HN_ULONG_TO_UBASE(0xA8F05406), HN_ULONG_TO_UBASE(0xD1CA2B2F),
+    HN_ULONG_TO_UBASE(0x8A2763AE), HN_ULONG_TO_UBASE(0x5BCA4BD8), HN_ULONG_TO_UBASE(0x4A5F485E), HN_ULONG_TO_UBASE(0xB2DCDE49),
+    HN_ULONG_TO_UBASE(0x881F8111), HN_ULONG_TO_UBASE(0xA000C55B), HN_ULONG_TO_UBASE(0x24A57B1A), HN_ULONG_TO_UBASE(0xF209F700),
+    HN_ULONG_TO_UBASE(0xCF7822FD), HN_ULONG_TO_UBASE(0xC0EABFA9), HN_ULONG_TO_UBASE(0x566332EC), HN_ULONG_TO_UBASE(0x7DDE385D)
+};
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpoolp512r1_n[] =
+{
+    HN_ULONG_TO_UBASE(0x9CA90069), HN_ULONG_TO_UBASE(0xB5879682), HN_ULONG_TO_UBASE(0x085DDADD), HN_ULONG_TO_UBASE(0x1DB1D381),
+    HN_ULONG_TO_UBASE(0x7FAC1047), HN_ULONG_TO_UBASE(0x41866119), HN_ULONG_TO_UBASE(0x4CA92619), HN_ULONG_TO_UBASE(0x553E5C41),
+    HN_ULONG_TO_UBASE(0x70330870), HN_ULONG_TO_UBASE(0xD6639CCA), HN_ULONG_TO_UBASE(0xB3C9D20E), HN_ULONG_TO_UBASE(0xCB308DB3),
+    HN_ULONG_TO_UBASE(0x33C9FC07), HN_ULONG_TO_UBASE(0x3FD4E6AE), HN_ULONG_TO_UBASE(0xDBE9C48B), HN_ULONG_TO_UBASE(0xAADD9DB8)
+};
+
 extern NX_CRYPTO_CONST NX_CRYPTO_EC_FIXED_POINTS _nx_crypto_ec_secp192r1_fixed_points;
 extern NX_CRYPTO_CONST NX_CRYPTO_EC_FIXED_POINTS _nx_crypto_ec_secp224r1_fixed_points;
 extern NX_CRYPTO_CONST NX_CRYPTO_EC_FIXED_POINTS _nx_crypto_ec_secp256r1_fixed_points;
@@ -685,6 +801,189 @@ NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_secp521r1 =
     _nx_crypto_ec_fp_projective_multiple,
     _nx_crypto_ec_secp521r1_reduce
 };
+/* Prime-field Brainpool curves use the generic reduction path.  */
+static NX_CRYPTO_CONST HN_UBASE _nx_crypto_ec_brainpool_h[] = { HN_ULONG_TO_UBASE(1) };
+
+/* RFC 5639 brainpoolp256r1 curve for ECDH and ECDSA.  */
+NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_brainpoolp256r1 =
+{
+    "brainpoolP256r1",
+    NX_CRYPTO_EC_BRAINPOOLP256r1,
+    4,
+    256,
+    { .fp = {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp256r1_p,
+        sizeof(_nx_crypto_ec_brainpoolp256r1_p) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp256r1_p),
+        (UINT)NX_CRYPTO_FALSE
+    } },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp256r1_a,
+        sizeof(_nx_crypto_ec_brainpoolp256r1_a) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp256r1_a),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp256r1_b,
+        sizeof(_nx_crypto_ec_brainpoolp256r1_b) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp256r1_b),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    {
+        NX_CRYPTO_EC_POINT_AFFINE,
+        {
+            (HN_UBASE *)_nx_crypto_ec_brainpoolp256r1_gx,
+            sizeof(_nx_crypto_ec_brainpoolp256r1_gx) >> HN_SIZE_SHIFT,
+            sizeof(_nx_crypto_ec_brainpoolp256r1_gx),
+            (UINT)NX_CRYPTO_FALSE
+        },
+        {
+            (HN_UBASE *)_nx_crypto_ec_brainpoolp256r1_gy,
+            sizeof(_nx_crypto_ec_brainpoolp256r1_gy) >> HN_SIZE_SHIFT,
+            sizeof(_nx_crypto_ec_brainpoolp256r1_gy),
+            (UINT)NX_CRYPTO_FALSE
+        },
+        {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u}
+    },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp256r1_n,
+        sizeof(_nx_crypto_ec_brainpoolp256r1_n) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp256r1_n),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpool_h,
+        sizeof(_nx_crypto_ec_brainpool_h) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpool_h),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    NX_CRYPTO_NULL,
+    _nx_crypto_ec_fp_affine_add,
+    _nx_crypto_ec_fp_affine_subtract,
+    _nx_crypto_ec_fp_projective_multiple,
+    _nx_crypto_ec_fp_reduce
+};
+
+/* RFC 5639 brainpoolp384r1 curve for ECDH and ECDSA.  */
+NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_brainpoolp384r1 =
+{
+    "brainpoolP384r1",
+    NX_CRYPTO_EC_BRAINPOOLP384r1,
+    4,
+    384,
+    { .fp = {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp384r1_p,
+        sizeof(_nx_crypto_ec_brainpoolp384r1_p) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp384r1_p),
+        (UINT)NX_CRYPTO_FALSE
+    } },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp384r1_a,
+        sizeof(_nx_crypto_ec_brainpoolp384r1_a) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp384r1_a),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp384r1_b,
+        sizeof(_nx_crypto_ec_brainpoolp384r1_b) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp384r1_b),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    {
+        NX_CRYPTO_EC_POINT_AFFINE,
+        {
+            (HN_UBASE *)_nx_crypto_ec_brainpoolp384r1_gx,
+            sizeof(_nx_crypto_ec_brainpoolp384r1_gx) >> HN_SIZE_SHIFT,
+            sizeof(_nx_crypto_ec_brainpoolp384r1_gx),
+            (UINT)NX_CRYPTO_FALSE
+        },
+        {
+            (HN_UBASE *)_nx_crypto_ec_brainpoolp384r1_gy,
+            sizeof(_nx_crypto_ec_brainpoolp384r1_gy) >> HN_SIZE_SHIFT,
+            sizeof(_nx_crypto_ec_brainpoolp384r1_gy),
+            (UINT)NX_CRYPTO_FALSE
+        },
+        {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u}
+    },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp384r1_n,
+        sizeof(_nx_crypto_ec_brainpoolp384r1_n) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp384r1_n),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpool_h,
+        sizeof(_nx_crypto_ec_brainpool_h) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpool_h),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    NX_CRYPTO_NULL,
+    _nx_crypto_ec_fp_affine_add,
+    _nx_crypto_ec_fp_affine_subtract,
+    _nx_crypto_ec_fp_projective_multiple,
+    _nx_crypto_ec_fp_reduce
+};
+
+/* RFC 5639 brainpoolp512r1 curve for ECDH and ECDSA.  */
+NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_brainpoolp512r1 =
+{
+    "brainpoolP512r1",
+    NX_CRYPTO_EC_BRAINPOOLP512r1,
+    4,
+    512,
+    { .fp = {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp512r1_p,
+        sizeof(_nx_crypto_ec_brainpoolp512r1_p) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp512r1_p),
+        (UINT)NX_CRYPTO_FALSE
+    } },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp512r1_a,
+        sizeof(_nx_crypto_ec_brainpoolp512r1_a) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp512r1_a),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp512r1_b,
+        sizeof(_nx_crypto_ec_brainpoolp512r1_b) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp512r1_b),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    {
+        NX_CRYPTO_EC_POINT_AFFINE,
+        {
+            (HN_UBASE *)_nx_crypto_ec_brainpoolp512r1_gx,
+            sizeof(_nx_crypto_ec_brainpoolp512r1_gx) >> HN_SIZE_SHIFT,
+            sizeof(_nx_crypto_ec_brainpoolp512r1_gx),
+            (UINT)NX_CRYPTO_FALSE
+        },
+        {
+            (HN_UBASE *)_nx_crypto_ec_brainpoolp512r1_gy,
+            sizeof(_nx_crypto_ec_brainpoolp512r1_gy) >> HN_SIZE_SHIFT,
+            sizeof(_nx_crypto_ec_brainpoolp512r1_gy),
+            (UINT)NX_CRYPTO_FALSE
+        },
+        {(HN_UBASE *)NX_CRYPTO_NULL, 0u, 0u, 0u}
+    },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpoolp512r1_n,
+        sizeof(_nx_crypto_ec_brainpoolp512r1_n) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpoolp512r1_n),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    {
+        (HN_UBASE *)_nx_crypto_ec_brainpool_h,
+        sizeof(_nx_crypto_ec_brainpool_h) >> HN_SIZE_SHIFT,
+        sizeof(_nx_crypto_ec_brainpool_h),
+        (UINT)NX_CRYPTO_FALSE
+    },
+    NX_CRYPTO_NULL,
+    _nx_crypto_ec_fp_affine_add,
+    _nx_crypto_ec_fp_affine_subtract,
+    _nx_crypto_ec_fp_projective_multiple,
+    _nx_crypto_ec_fp_reduce
+};
+
 #ifndef NX_CRYPTO_SELF_TEST
 static NX_CRYPTO_CONST NX_CRYPTO_EC *_nx_crypto_ec_named_curves[] =
 {
@@ -692,7 +991,10 @@ static NX_CRYPTO_CONST NX_CRYPTO_EC *_nx_crypto_ec_named_curves[] =
     &_nx_crypto_ec_secp224r1,
     &_nx_crypto_ec_secp256r1,
     &_nx_crypto_ec_secp384r1,
-    &_nx_crypto_ec_secp521r1
+    &_nx_crypto_ec_secp521r1,
+    &_nx_crypto_ec_brainpoolp256r1,
+    &_nx_crypto_ec_brainpoolp384r1,
+    &_nx_crypto_ec_brainpoolp512r1
 };
 #endif
 /**************************************************************************/
@@ -1903,7 +2205,6 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_subtract_digit_reduce(NX_CRYPTO_EC *curve,
 /*    Application Code                                                    */
 /*                                                                        */
 /**************************************************************************/
-#ifndef NX_CRYPTO_SELF_TEST
 NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_reduce(NX_CRYPTO_EC *curve,
                                             NX_CRYPTO_HUGE_NUMBER *value,
                                             HN_UBASE *scratch)
@@ -1912,7 +2213,6 @@ NX_CRYPTO_KEEP VOID _nx_crypto_ec_fp_reduce(NX_CRYPTO_EC *curve,
 
     _nx_crypto_huge_number_modulus(value, &curve -> nx_crypto_ec_field.fp);
 }
-#endif
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
@@ -2273,15 +2573,30 @@ UINT                  buffer_size;
     NX_CRYPTO_EC_SQUARE_REDUCE(curve, &temp3, &temp2, scratch);
     NX_CRYPTO_EC_SHIFT_LEFT_REDUCE(curve, &temp2, 3, scratch);
 
-    /* C = 3 * (X1 - Z1 ^ 2) * (X1 + Z1 ^ 2) */
+    /* C = 3 * X1^2 + a * Z1^4; use the shorter form for a = -3 curves. */
     NX_CRYPTO_EC_SQUARE_REDUCE(curve, &projective_point -> nx_crypto_ec_point_z,
                                &temp3, scratch);
-    NX_CRYPTO_HUGE_NUMBER_COPY(&temp4, &projective_point -> nx_crypto_ec_point_x);
-    NX_CRYPTO_HUGE_NUMBER_COPY(&temp5, &projective_point -> nx_crypto_ec_point_x);
-    _nx_crypto_ec_subtract_reduce(curve, &temp4, &temp3, scratch);
-    _nx_crypto_ec_add_reduce(curve, &temp5, &temp3, scratch);
-    NX_CRYPTO_EC_MULTIPLE_REDUCE(curve, &temp4, &temp5, &temp3, scratch);
-    NX_CRYPTO_EC_MULTIPLE_DIGIT_REDUCE(curve, &temp3, 3, &temp4, scratch);
+    if ((curve -> nx_crypto_ec_id >= NX_CRYPTO_EC_BRAINPOOLP256r1) &&
+        (curve -> nx_crypto_ec_id <= NX_CRYPTO_EC_BRAINPOOLP512r1))
+    {
+        NX_CRYPTO_EC_SQUARE_REDUCE(curve, &temp3, &temp4, scratch);
+        NX_CRYPTO_EC_MULTIPLE_REDUCE(curve, &temp4, &curve -> nx_crypto_ec_a,
+                                     &temp3, scratch);
+        NX_CRYPTO_EC_SQUARE_REDUCE(curve, &projective_point -> nx_crypto_ec_point_x,
+                                   &temp4, scratch);
+        NX_CRYPTO_EC_MULTIPLE_DIGIT_REDUCE(curve, &temp4, 3, &temp5, scratch);
+        _nx_crypto_ec_add_reduce(curve, &temp5, &temp3, scratch);
+        NX_CRYPTO_HUGE_NUMBER_COPY(&temp4, &temp5);
+    }
+    else
+    {
+        NX_CRYPTO_HUGE_NUMBER_COPY(&temp4, &projective_point -> nx_crypto_ec_point_x);
+        NX_CRYPTO_HUGE_NUMBER_COPY(&temp5, &projective_point -> nx_crypto_ec_point_x);
+        _nx_crypto_ec_subtract_reduce(curve, &temp4, &temp3, scratch);
+        _nx_crypto_ec_add_reduce(curve, &temp5, &temp3, scratch);
+        NX_CRYPTO_EC_MULTIPLE_REDUCE(curve, &temp4, &temp5, &temp3, scratch);
+        NX_CRYPTO_EC_MULTIPLE_DIGIT_REDUCE(curve, &temp3, 3, &temp4, scratch);
+    }
 
     /* Z3 = 2 * Y1 * Z1 */
     NX_CRYPTO_EC_MULTIPLE_REDUCE(curve, &projective_point -> nx_crypto_ec_point_y,
@@ -3928,6 +4243,57 @@ NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
 
     *((NX_CRYPTO_EC **)output) = (NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1;
 
+    return(NX_CRYPTO_SUCCESS);
+}
+
+/* Return the RFC 5639 curve selected by the Brainpool crypto method.  */
+NX_CRYPTO_KEEP UINT _nx_crypto_method_ec_brainpool_operation(UINT op,
+                                                             VOID *handle,
+                                                             struct NX_CRYPTO_METHOD_STRUCT *method,
+                                                             UCHAR *key, NX_CRYPTO_KEY_SIZE key_size_in_bits,
+                                                             UCHAR *input, ULONG input_length_in_byte,
+                                                             UCHAR *iv_ptr,
+                                                             UCHAR *output, ULONG output_length_in_byte,
+                                                             VOID *crypto_metadata, ULONG crypto_metadata_size,
+                                                             VOID *packet_ptr,
+                                                             VOID (*nx_crypto_hw_process_callback)(VOID *, UINT))
+{
+NX_CRYPTO_EC *curve;
+
+    NX_CRYPTO_PARAMETER_NOT_USED(handle);
+    NX_CRYPTO_PARAMETER_NOT_USED(key);
+    NX_CRYPTO_PARAMETER_NOT_USED(key_size_in_bits);
+    NX_CRYPTO_PARAMETER_NOT_USED(input);
+    NX_CRYPTO_PARAMETER_NOT_USED(input_length_in_byte);
+    NX_CRYPTO_PARAMETER_NOT_USED(iv_ptr);
+    NX_CRYPTO_PARAMETER_NOT_USED(output_length_in_byte);
+    NX_CRYPTO_PARAMETER_NOT_USED(crypto_metadata);
+    NX_CRYPTO_PARAMETER_NOT_USED(crypto_metadata_size);
+    NX_CRYPTO_PARAMETER_NOT_USED(packet_ptr);
+    NX_CRYPTO_PARAMETER_NOT_USED(nx_crypto_hw_process_callback);
+
+    if ((op != NX_CRYPTO_EC_CURVE_GET) || (method == NX_CRYPTO_NULL) ||
+        (output == NX_CRYPTO_NULL))
+    {
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    switch (method -> nx_crypto_algorithm)
+    {
+    case NX_CRYPTO_EC_BRAINPOOLP256r1:
+        curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_brainpoolp256r1;
+        break;
+    case NX_CRYPTO_EC_BRAINPOOLP384r1:
+        curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_brainpoolp384r1;
+        break;
+    case NX_CRYPTO_EC_BRAINPOOLP512r1:
+        curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_brainpoolp512r1;
+        break;
+    default:
+        return(NX_CRYPTO_NOT_SUCCESSFUL);
+    }
+
+    *((NX_CRYPTO_EC **)output) = curve;
     return(NX_CRYPTO_SUCCESS);
 }
 

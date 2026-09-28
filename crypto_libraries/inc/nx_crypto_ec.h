@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -460,12 +462,21 @@ extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_secp224r1;
 extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_secp256r1;
 extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_secp384r1;
 extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_secp521r1;
+extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_brainpoolp256r1;
+extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_brainpoolp384r1;
+extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_brainpoolp512r1;
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp256;
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp384;
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp512;
 
 #define NX_CRYPTO_EC_GET_SECP192R1(curve) curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_secp192r1
 #define NX_CRYPTO_EC_GET_SECP224R1(curve) curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_secp224r1
 #define NX_CRYPTO_EC_GET_SECP256R1(curve) curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_secp256r1
 #define NX_CRYPTO_EC_GET_SECP384R1(curve) curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_secp384r1
 #define NX_CRYPTO_EC_GET_SECP521R1(curve) curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1
+#define NX_CRYPTO_EC_GET_BRAINPOOLP256R1(curve) curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_brainpoolp256r1
+#define NX_CRYPTO_EC_GET_BRAINPOOLP384R1(curve) curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_brainpoolp384r1
+#define NX_CRYPTO_EC_GET_BRAINPOOLP512R1(curve) curve = (NX_CRYPTO_EC *)&_nx_crypto_ec_brainpoolp512r1
 
 UINT _nx_crypto_ec_point_is_infinite(NX_CRYPTO_EC_POINT *point);
 VOID _nx_crypto_ec_point_set_infinite(NX_CRYPTO_EC_POINT *point);
@@ -614,6 +625,16 @@ UINT _nx_crypto_method_ec_secp521r1_operation(UINT op,
                                               VOID *crypto_metadata, ULONG crypto_metadata_size,
                                               VOID *packet_ptr,
                                               VOID (*nx_crypto_hw_process_callback)(VOID *, UINT));
+UINT _nx_crypto_method_ec_brainpool_operation(UINT op,
+                                              VOID *handle,
+                                              struct NX_CRYPTO_METHOD_STRUCT *method,
+                                              UCHAR *key, NX_CRYPTO_KEY_SIZE key_size_in_bits,
+                                              UCHAR *input, ULONG input_length_in_byte,
+                                              UCHAR *iv_ptr,
+                                              UCHAR *output, ULONG output_length_in_byte,
+                                              VOID *crypto_metadata, ULONG crypto_metadata_size,
+                                              VOID *packet_ptr,
+                                              VOID (*nx_crypto_hw_process_callback)(VOID *, UINT));
 
 #ifdef NX_CRYPTO_ENABLE_CURVE25519_448
 extern NX_CRYPTO_CONST NX_CRYPTO_EC _nx_crypto_ec_x25519;
@@ -659,4 +680,3 @@ UINT _nx_crypto_ec_extract_fixed_size_le(NX_CRYPTO_HUGE_NUMBER *number,
 #endif
 
 #endif /* NX_CRYPTO_EC_H */
-

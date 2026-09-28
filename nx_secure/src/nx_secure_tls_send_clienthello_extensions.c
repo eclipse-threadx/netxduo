@@ -30,6 +30,47 @@
 #ifndef NX_SECURE_DISABLE_X509
 #define NX_SECURE_TLS_SIGNATURE_ALGORITHMS_LIST_MAX_LENGTH (0xFFFFu - 6u)
 
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE)
+/* Select the TLS 1.3 signature scheme for a supported Brainpool curve. */
+static USHORT _nx_secure_tls_brainpool_signature_scheme(NX_SECURE_TLS_SESSION *tls_session,
+                                                         USHORT named_curve)
+{
+    UINT i;
+    USHORT x509_type;
+    USHORT signature_scheme;
+
+    switch (named_curve)
+    {
+    case (USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1:
+        x509_type = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_256;
+        signature_scheme = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256;
+        break;
+    case (USHORT)NX_CRYPTO_EC_BRAINPOOLP384r1:
+        x509_type = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_384;
+        signature_scheme = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP384R1_SHA384;
+        break;
+    case (USHORT)NX_CRYPTO_EC_BRAINPOOLP512r1:
+        x509_type = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512;
+        signature_scheme = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP512R1_SHA512;
+        break;
+    default:
+        return(0u);
+    }
+
+    for (i = 0; i < tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table_size; i++)
+    {
+        NX_SECURE_X509_CRYPTO *method = &tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table[i];
+        if ((method -> nx_secure_x509_crypto_identifier == x509_type) &&
+            (method -> nx_secure_x509_public_cipher_method != NX_NULL) &&
+            (method -> nx_secure_x509_public_cipher_method -> nx_crypto_algorithm == NX_CRYPTO_DIGITAL_SIGNATURE_ECDSA))
+        {
+            return(signature_scheme);
+        }
+    }
+    return(0u);
+}
+#endif
+
 static VOID _nx_secure_tls_get_signature_algorithm(NX_SECURE_TLS_SESSION *tls_session,
                                                    NX_SECURE_X509_CRYPTO *crypto_method,
                                                    USHORT *signature_algorithm);
@@ -351,6 +392,21 @@ NX_SECURE_X509_CRYPTO *cipher_table;
         }
     }
 
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE)
+    if (tls_session -> nx_secure_tls_1_3)
+    {
+        for (i = 0; i < tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups_count; i++)
+        {
+            signature_algorithm = _nx_secure_tls_brainpool_signature_scheme(tls_session,
+                tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups[i]);
+            if (signature_algorithm != 0u)
+            {
+                signature_algorithms_length += 2u;
+            }
+        }
+    }
+#endif
+
     if ((signature_algorithms_length > NX_SECURE_TLS_SIGNATURE_ALGORITHMS_LIST_MAX_LENGTH) ||
         (*packet_offset > available_size) ||
         ((available_size - *packet_offset) < (6u + signature_algorithms_length)))
@@ -395,6 +451,23 @@ NX_SECURE_X509_CRYPTO *cipher_table;
         }
 #endif
     }
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE)
+    if (tls_session -> nx_secure_tls_1_3)
+    {
+        for (i = 0; i < tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups_count; i++)
+        {
+            signature_algorithm = _nx_secure_tls_brainpool_signature_scheme(tls_session,
+                tls_session -> nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups[i]);
+            if (signature_algorithm != 0u)
+            {
+                packet_buffer[offset] = (UCHAR)(signature_algorithm >> 8);
+                packet_buffer[offset + 1] = (UCHAR)signature_algorithm;
+                offset += 2;
+            }
+        }
+    }
+#endif
 
     ext = NX_SECURE_TLS_EXTENSION_SIGNATURE_ALGORITHMS;  /* Signature algorithms */
     ext_len = (USHORT)(ext_len + 2);
@@ -851,6 +924,7 @@ USHORT named_curve;
 
     /* Get the curve for the key we are sending. */
     named_curve = (USHORT)ecdhe_data->nx_secure_tls_ecdhe_named_curve;
+    named_curve = _nx_secure_tls_brainpool_group_to_wire(named_curve);
 
     /* Key length will differ for each curve. For p256, 32 octets per coordinate, plus the "legacy_form" byte. */
     key_length = ecdhe_data->nx_secure_tls_ecdhe_public_key_length;
@@ -1758,8 +1832,15 @@ NX_SECURE_TLS_ECC *ecc_info;
 
     for (i = 0; i < ecc_info -> nx_secure_tls_ecc_supported_groups_count; i++)
     {
-        packet_buffer[offset] = (UCHAR)((ecc_info -> nx_secure_tls_ecc_supported_groups[i] & 0xFF00) >> 8);
-        packet_buffer[offset + 1] = (UCHAR)(ecc_info -> nx_secure_tls_ecc_supported_groups[i] & 0x00FF);
+        USHORT named_group = ecc_info -> nx_secure_tls_ecc_supported_groups[i];
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+        if (tls_session -> nx_secure_tls_1_3)
+        {
+            named_group = _nx_secure_tls_brainpool_group_to_wire(named_group);
+        }
+#endif
+        packet_buffer[offset] = (UCHAR)((named_group & 0xFF00) >> 8);
+        packet_buffer[offset + 1] = (UCHAR)(named_group & 0x00FF);
         offset += 2;
     }
 

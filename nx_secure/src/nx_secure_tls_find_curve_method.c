@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -25,6 +27,27 @@
 #include "nx_secure_tls.h"
 
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+
+/* Map RFC 7027 Brainpool curve IDs to their RFC 8734 TLS 1.3 group IDs. */
+USHORT _nx_secure_tls_brainpool_group_to_wire(USHORT named_curve)
+{
+    if ((named_curve >= (USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1) &&
+        (named_curve <= (USHORT)NX_CRYPTO_EC_BRAINPOOLP512r1))
+    {
+        return((USHORT)(named_curve + 5u));
+    }
+    return(named_curve);
+}
+
+/* Map RFC 8734 TLS 1.3 group IDs to the corresponding crypto curve IDs. */
+USHORT _nx_secure_tls_brainpool_group_from_wire(USHORT named_group)
+{
+    if ((named_group >= 0x001Fu) && (named_group <= 0x0021u))
+    {
+        return((USHORT)(named_group - 5u));
+    }
+    return(named_group);
+}
 
 /**************************************************************************/
 /*                                                                        */

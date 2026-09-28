@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -136,6 +138,9 @@ static const UCHAR NX_SECURE_X509_OID_SECP224R1[]        = {0x2B, 0x81, 0x04, 0x
 static const UCHAR NX_SECURE_X509_OID_SECP256R1[]        = {0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07};   /* ISO.USA.10045.3.1.7 - Named curve: secp256r1. */
 static const UCHAR NX_SECURE_X509_OID_SECP384R1[]        = {0x2B, 0x81, 0x04, 0x00, 0x22};                     /* ISO.Identified Organization.Certicom.curve.34 - Named curve: secp384r1. */
 static const UCHAR NX_SECURE_X509_OID_SECP521R1[]        = {0x2B, 0x81, 0x04, 0x00, 0x23};                     /* ISO.Identified Organization.Certicom.curve.35 - Named curve: secp521r1. */
+static const UCHAR NX_SECURE_X509_OID_BRAINPOOLP256R1[]  = {0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x07}; /* RFC 5639 brainpoolP256r1. */
+static const UCHAR NX_SECURE_X509_OID_BRAINPOOLP384R1[]  = {0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x0B}; /* RFC 5639 brainpoolP384r1. */
+static const UCHAR NX_SECURE_X509_OID_BRAINPOOLP512R1[]  = {0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x0D}; /* RFC 5639 brainpoolP512r1. */
 static const UCHAR NX_SECURE_X509_OID_ECDSA_SHA1[]       = {0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x04, 0x01};         /* ISO.USA.10045.4.1 - ecdsa-with-SHA1. */
 static const UCHAR NX_SECURE_X509_OID_ECDSA_SHA224[]     = {0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x04, 0x03, 0x01};   /* ISO.USA.10045.4.3.1 - ecdsa-with-SHA224. */
 static const UCHAR NX_SECURE_X509_OID_ECDSA_SHA256[]     = {0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x04, 0x03, 0x02};   /* ISO.USA.10045.4.3.2 - ecdsa-with-SHA256. */
@@ -216,6 +221,9 @@ NX_SECURE_X509_OID_MAP _nx_secure_x509_oid_map[] =
     {NX_SECURE_TLS_X509_EC_SECP256R1               , NX_SECURE_X509_OID_SECP256R1             ,  sizeof(NX_SECURE_X509_OID_SECP256R1)},
     {NX_SECURE_TLS_X509_EC_SECP384R1               , NX_SECURE_X509_OID_SECP384R1             ,  sizeof(NX_SECURE_X509_OID_SECP384R1)},
     {NX_SECURE_TLS_X509_EC_SECP521R1               , NX_SECURE_X509_OID_SECP521R1             ,  sizeof(NX_SECURE_X509_OID_SECP521R1)},
+    {NX_SECURE_TLS_X509_EC_BRAINPOOLP256R1         , NX_SECURE_X509_OID_BRAINPOOLP256R1       ,  sizeof(NX_SECURE_X509_OID_BRAINPOOLP256R1)},
+    {NX_SECURE_TLS_X509_EC_BRAINPOOLP384R1         , NX_SECURE_X509_OID_BRAINPOOLP384R1       ,  sizeof(NX_SECURE_X509_OID_BRAINPOOLP384R1)},
+    {NX_SECURE_TLS_X509_EC_BRAINPOOLP512R1         , NX_SECURE_X509_OID_BRAINPOOLP512R1       ,  sizeof(NX_SECURE_X509_OID_BRAINPOOLP512R1)},
     {NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_1           , NX_SECURE_X509_OID_ECDSA_SHA1            ,  sizeof(NX_SECURE_X509_OID_ECDSA_SHA1)},
     {NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_224         , NX_SECURE_X509_OID_ECDSA_SHA224          ,  sizeof(NX_SECURE_X509_OID_ECDSA_SHA224)},
     {NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_256         , NX_SECURE_X509_OID_ECDSA_SHA256          ,  sizeof(NX_SECURE_X509_OID_ECDSA_SHA256)},
@@ -296,4 +304,3 @@ UINT i;
 
     *oid_value = NX_SECURE_TLS_X509_TYPE_UNKNOWN;
 }
-

@@ -9,11 +9,16 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
-/* This test concentrates on TLS ciphersuite TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA. The curve used in this demo is P256.  */
+/* Portions of this file were generated with AI assistance. */
+
+/* This test exchanges data using an ECC certificate and key share. */
 
 #include   "nx_api.h"
 #include   "nx_secure_tls_api.h"
 #include   "ecc_certs.c"
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#include   "brainpool_certs.c"
+#endif
 #include   "nx_crypto_ecdh.h"
 
 extern VOID    test_control_return(UINT status);
@@ -62,6 +67,12 @@ static UCHAR                    tls_packet_buffer[2][4000];
 extern const                    USHORT nx_crypto_ecc_supported_groups[];
 extern const                    NX_CRYPTO_METHOD *nx_crypto_ecc_curves[];
 extern const                    UINT nx_crypto_ecc_supported_groups_size;
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp256;
+static const USHORT brainpool_groups[] = {(USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1};
+static const NX_CRYPTO_METHOD *brainpool_curves[] = {&crypto_method_ec_brainpoolp256};
+#endif
 extern const                    NX_SECURE_TLS_CRYPTO nx_crypto_tls_ciphers_ecc;
 
 /* Define thread prototypes.  */
@@ -156,9 +167,15 @@ UINT status;
         ERROR_COUNTER();
     }
 
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    status = nx_secure_tls_ecc_initialize(tls_session_ptr, brainpool_groups,
+                                          sizeof(brainpool_groups) / sizeof(brainpool_groups[0]),
+                                          brainpool_curves);
+#else
     status = nx_secure_tls_ecc_initialize(tls_session_ptr, nx_crypto_ecc_supported_groups,
                                           nx_crypto_ecc_supported_groups_size,
                                           nx_crypto_ecc_curves);
+#endif
     if (status)
     {
         ERROR_COUNTER();
@@ -174,7 +191,12 @@ UINT status;
         ERROR_COUNTER();
     }
 
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    status = nx_secure_x509_certificate_initialize(&client_trusted_ca,
+                                                   brainpool_root_der, sizeof(brainpool_root_der),
+#else
     status = nx_secure_x509_certificate_initialize(&client_trusted_ca, ECCA2_der, ECCA2_der_len,
+#endif
                                                    NX_NULL, 0, NULL, 0,
                                                    NX_SECURE_X509_KEY_TYPE_NONE);
     if (status)
@@ -210,19 +232,32 @@ UINT status;
         ERROR_COUNTER();
     }
 
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    status = nx_secure_tls_ecc_initialize(tls_session_ptr, brainpool_groups,
+                                          sizeof(brainpool_groups) / sizeof(brainpool_groups[0]),
+                                          brainpool_curves);
+#else
     status = nx_secure_tls_ecc_initialize(tls_session_ptr, nx_crypto_ecc_supported_groups,
                                           nx_crypto_ecc_supported_groups_size,
                                           nx_crypto_ecc_curves);
+#endif
     if (status)
     {
         ERROR_COUNTER();
     }
 
     memset(&server_local_certificate, 0, sizeof(server_local_certificate));
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    status = nx_secure_x509_certificate_initialize(&server_local_certificate,
+                                                   brainpool_server_der, sizeof(brainpool_server_der),
+                                                   NX_NULL, 0, brainpool_server_key_der,
+                                                   sizeof(brainpool_server_key_der),
+#else
     status = nx_secure_x509_certificate_initialize(&server_local_certificate,
                                                    ECTestServer2_der, ECTestServer2_der_len,
                                                    NX_NULL, 0, ECTestServer2_key_der,
                                                    ECTestServer2_key_der_len,
+#endif
                                                    NX_SECURE_X509_KEY_TYPE_EC_DER);
     if (status)
     {
@@ -282,6 +317,18 @@ NX_PACKET *packet_ptr;
     {
         ERROR_COUNTER();
     }
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    if ((tls_server_session_0.nx_secure_tls_1_3 != NX_TRUE) ||
+        (tls_server_session_0.nx_secure_tls_signature_algorithm !=
+         NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256) ||
+        (tls_server_session_0.nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[
+            tls_server_session_0.nx_secure_tls_key_material.nx_secure_tls_ecc_key_data_selected].nx_secure_tls_ecdhe_named_curve !=
+         (USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1))
+    {
+        ERROR_COUNTER();
+    }
+#endif
 
     status = nx_secure_tls_session_receive(&tls_server_session_0, &packet_ptr, NX_WAIT_FOREVER);
     if (status)
@@ -406,12 +453,28 @@ NXD_ADDRESS server_address;
     }
 
     /* Start TLS session. */
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    tls_client_session_0.nx_secure_tls_1_3 = NX_TRUE;
+#ifndef NX_SECURE_TLS_DISABLE_SECURE_RENEGOTIATION
+    tls_client_session_0.nx_secure_tls_renegotation_enabled = NX_FALSE;
+#endif
+#endif
     status = nx_secure_tls_session_start(&tls_client_session_0, &client_socket_0,
                                           NX_WAIT_FOREVER);
     if (status)
     {
         ERROR_COUNTER();
     }
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    if ((tls_client_session_0.nx_secure_tls_1_3 != NX_TRUE) ||
+        (tls_client_session_0.nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[
+            tls_client_session_0.nx_secure_tls_key_material.nx_secure_tls_ecc_key_data_selected].nx_secure_tls_ecdhe_named_curve !=
+         (USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1))
+    {
+        ERROR_COUNTER();
+    }
+#endif
 
     /* Prepare packet to send. */
     status = nx_packet_allocate(&pool_0, &packet_ptr, NX_TCP_PACKET, NX_NO_WAIT);
