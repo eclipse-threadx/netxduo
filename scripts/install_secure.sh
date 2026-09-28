@@ -14,12 +14,14 @@ script_dir=$(dirname "$(realpath "$0")")
 
 # Each test builds a veth pair, addresses it, disables transmit offload on it
 # and captures the traffic, so the suite needs ip, ifconfig, ethtool and
-# tcpdump. None of them is in the pinned image: the tag's CI ran on a hosted
-# Ubuntu runner where all four were preinstalled, so the tag's version of this
-# script never had to name them. make and perl are for the OpenSSL build below.
+# tcpdump, and demo_ping_test launches ping. None of them is in the pinned
+# image: the tag's CI ran on a hosted Ubuntu runner where all five were
+# preinstalled, so the tag's version of this script never had to name them.
+# make and perl are for the OpenSSL build below.
 apt-get install -y --no-install-recommends \
     ethtool \
     iproute2 \
+    iputils-ping \
     make \
     net-tools \
     openssl \

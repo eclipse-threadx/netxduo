@@ -258,7 +258,7 @@ jobs:
     - name: Merge the certified coverage
       run: |
         set -o pipefail
-        TRACEFILE_DIR=$GITHUB_WORKSPACE/tracefiles/certified \
+        TRACEFILE_DIR=$GITHUB_WORKSPACE/tracefiles \
           test/cmake/coverage_merge.sh 2>&1 | tee "$RUNNER_TEMP/merge.log"
 
     # What the run verified, in the job's own summary, because the figure above
