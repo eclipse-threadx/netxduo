@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -4693,12 +4695,6 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
             }
         }
 
-        /* Timer event.  */
-        if (events & NX_DHCP_CLIENT_TIMER_EVENT)
-        {
-            _nx_dhcp_timeout_process(dhcp_ptr);
-        }
-
 #ifdef NX_DHCP_CLIENT_SEND_ARP_PROBE
 
         /* IP address conflict event.  */
@@ -4729,6 +4725,12 @@ NX_DHCP_INTERFACE_RECORD *interface_record = NX_NULL;
             }
         }
 #endif /* NX_DHCP_CLIENT_SEND_ARP_PROBE  */
+
+        /* Timer event.  */
+        if (events & NX_DHCP_CLIENT_TIMER_EVENT)
+        {
+            _nx_dhcp_timeout_process(dhcp_ptr);
+        }
 
     } while (1);
 }
@@ -5445,32 +5447,40 @@ NX_IP           *ip_ptr;
 
 #ifdef NX_DHCP_CLIENT_SEND_ARP_PROBE
 
-                        /* Send the ARP probe.  */
-                        _nx_arp_probe_send(ip_ptr, interface_record -> nx_dhcp_interface_index, interface_record -> nx_dhcp_ip_address);
-
-                        /* Decrease the probe count.  */
-                        interface_record -> nx_dhcp_probe_count--;
-
-                        /* Check the probe count.  */
+                        /* Send the remaining ARP probes.  */
                         if (interface_record -> nx_dhcp_probe_count)
                         {
 
-                            /* Calculate the delay time.  */
-                            probing_delay = (ULONG)NX_RAND() % (NX_DHCP_ARP_PROBE_MAX);
+                            _nx_arp_probe_send(ip_ptr, interface_record -> nx_dhcp_interface_index, interface_record -> nx_dhcp_ip_address);
+                            interface_record -> nx_dhcp_probe_count--;
 
-                            /* Determine if this is less than the minimum.  */
-                            if (probing_delay < NX_DHCP_ARP_PROBE_MIN)
+                            /* Check the probe count.  */
+                            if (interface_record -> nx_dhcp_probe_count)
                             {
 
-                                /* Set the delay to the minimum.  */
-                                probing_delay = NX_DHCP_ARP_PROBE_MIN;
-                            }
+                                /* Calculate the delay time.  */
+                                probing_delay = (ULONG)NX_RAND() % (NX_DHCP_ARP_PROBE_MAX);
 
-                            /* Check the probing_delay for timer interval.  */
-                            if (probing_delay)
-                                interface_record -> nx_dhcp_timeout = probing_delay;
+                                /* Determine if this is less than the minimum.  */
+                                if (probing_delay < NX_DHCP_ARP_PROBE_MIN)
+                                {
+
+                                    /* Set the delay to the minimum.  */
+                                    probing_delay = NX_DHCP_ARP_PROBE_MIN;
+                                }
+
+                                /* Check the probing_delay for timer interval.  */
+                                if (probing_delay)
+                                    interface_record -> nx_dhcp_timeout = probing_delay;
+                                else
+                                    interface_record -> nx_dhcp_timeout = 1;
+                            }
                             else
-                                interface_record -> nx_dhcp_timeout = 1;
+                            {
+
+                                /* Wait for conflicts after the last probe.  */
+                                interface_record -> nx_dhcp_timeout = NX_DHCP_ARP_ANNOUNCE_WAIT;
+                            }
                         }
                         else
                         {

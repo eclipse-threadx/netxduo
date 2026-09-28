@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -222,6 +224,14 @@ extern   "C" {
 
 #ifndef NX_DHCP_ARP_PROBE_MAX
 #define NX_DHCP_ARP_PROBE_MAX           (2 * NX_IP_PERIODIC_RATE)
+#endif
+
+/* Define the wait after the last probe before using the address. RFC 5227, Section 2.1.1. */
+#ifndef NX_DHCP_ARP_ANNOUNCE_WAIT
+#define NX_DHCP_ARP_ANNOUNCE_WAIT       (2 * NX_IP_PERIODIC_RATE)
+#endif
+#if (NX_DHCP_ARP_ANNOUNCE_WAIT == 0)
+#error "NX_DHCP_ARP_ANNOUNCE_WAIT must be greater than zero"
 #endif
 #endif /* NX_DHCP_CLIENT_SEND_ARP_PROBE  */
 
