@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -115,11 +117,12 @@ TX_INTERRUPT_SAVE_AREA
 
 NX_IP_DRIVER      driver_request;
 NX_IP            *ip_ptr;
-ULONG             ip_events;
+ULONG             ip_events = 0;
 NX_PACKET        *packet_ptr;
 UINT              i;
 UINT              index;
-ULONG             foo;
+UINT              status;
+ULONG             driver_return_value = 0;
 #ifdef FEATURE_NX_IPV6
 NXD_IPV6_ADDRESS *interface_ipv6_address;
 #endif /* FEATURE_NX_IPV6 */
@@ -233,14 +236,24 @@ NXD_IPV6_ADDRESS *interface_ipv6_address;
         tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
         /* Pickup IP event flags.  */
-        tx_event_flags_get(&(ip_ptr -> nx_ip_events), NX_IP_ALL_EVENTS, TX_OR_CLEAR, &ip_events, TX_WAIT_FOREVER);
+        status =  tx_event_flags_get(&(ip_ptr -> nx_ip_events), NX_IP_ALL_EVENTS, TX_OR_CLEAR, &ip_events, TX_WAIT_FOREVER);
+
+        /* Retry an interrupted wait; stop if the event group is unavailable.  */
+        if (status == TX_WAIT_ABORTED)
+        {
+            tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
+            continue;
+        }
+        if (status != TX_SUCCESS)
+        {
+            return;
+        }
 
         /* Obtain the IP internal mutex before processing the IP event.  */
         tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
 
 #ifdef NX_DRIVER_DEFERRED_PROCESSING
         /* Check for any packets deferred by the Driver.  */
-        /*lint -e{644} suppress variable might not be initialized, since "ip_events" was initialized in tx_event_flags_get. */
         if (ip_events & NX_IP_DRIVER_PACKET_EVENT)
         {
 
@@ -290,7 +303,6 @@ NXD_IPV6_ADDRESS *interface_ipv6_address;
 #endif
 
         /* Check for an IP receive packet event.  */
-        /*lint -e{644} suppress variable might not be initialized, since "ip_events" was initialized by tx_event_flags_get. */
         if (ip_events & NX_IP_RECEIVE_EVENT)
         {
 
@@ -512,10 +524,10 @@ NXD_IPV6_ADDRESS *interface_ipv6_address;
         }
 
         /* Check for an IGMP message event.  */
-        if (ip_events & NX_IP_IGMP_EVENT)
+        if ((ip_events & NX_IP_IGMP_EVENT) && (ip_ptr -> nx_ip_igmp_queue_process))
         {
 
-            /* Process the ICMP packet queue.  */
+            /* Process the IGMP packet queue.  */
             (ip_ptr -> nx_ip_igmp_queue_process)(ip_ptr);
         }
 
@@ -582,7 +594,7 @@ NXD_IPV6_ADDRESS *interface_ipv6_address;
                     driver_request.nx_ip_driver_ptr =        ip_ptr;
                     driver_request.nx_ip_driver_command =    NX_LINK_DEFERRED_PROCESSING;
                     driver_request.nx_ip_driver_interface  = &(ip_ptr -> nx_ip_interface[index]);
-                    driver_request.nx_ip_driver_return_ptr = &foo;
+                    driver_request.nx_ip_driver_return_ptr = &driver_return_value;
 
                     (ip_ptr -> nx_ip_interface[index].nx_interface_link_driver_entry)(&driver_request);
                 }
