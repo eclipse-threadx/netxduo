@@ -10633,3 +10633,161 @@ UINT _nx_web_http_server_authentication_check_set(NX_WEB_HTTP_SERVER *http_serve
     /* Return success.  */
     return(NX_SUCCESS);
 }
+
+
+/* Start a persistent Server-Sent Events response for the current GET request. */
+UINT _nx_web_http_server_event_stream_start(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION **session_pptr)
+{
+#ifndef NX_WEB_HTTP_KEEPALIVE_DISABLE
+CHAR response_header[] = NX_WEB_HTTP_VERSION " 200 OK\r\n"
+                         "Content-Type: text/event-stream\r\n"
+                         "Cache-Control: no-cache\r\n"
+                         "Connection: keep-alive\r\n\r\n";
+NX_PACKET *packet_ptr;
+UINT status;
+
+    if((server_ptr == NX_NULL) || (session_pptr == NX_NULL))
+    {
+        return(NX_PTR_ERROR);
+    }
+
+    *session_pptr = NX_NULL;
+    if((server_ptr -> nx_web_http_server_request_type != NX_WEB_HTTP_SERVER_GET_REQUEST) ||
+       (server_ptr -> nx_web_http_server_keepalive != NX_TRUE) ||
+       (server_ptr -> nx_web_http_server_current_session_ptr == NX_NULL) ||
+       (tx_thread_identify() != &server_ptr -> nx_web_http_server_tcpserver.nx_tcpserver_thread))
+    {
+        return(NX_WEB_HTTP_ERROR);
+    }
+
+    status = _nx_web_http_server_response_packet_allocate(server_ptr, &packet_ptr, NX_WAIT_FOREVER);
+    if(status != NX_SUCCESS)
+    {
+        server_ptr -> nx_web_http_server_allocation_errors++;
+        return(status);
+    }
+
+    status = nx_packet_data_append(packet_ptr, response_header, sizeof(response_header) - 1,
+                                   server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
+    if(status == NX_SUCCESS)
+    {
+        status = _nx_web_http_server_send(server_ptr, packet_ptr, NX_WEB_HTTP_SERVER_TIMEOUT_SEND);
+    }
+    if(status != NX_SUCCESS)
+    {
+        nx_packet_release(packet_ptr);
+        return(status);
+    }
+
+    server_ptr -> nx_web_http_server_current_session_ptr -> nx_tcp_session_streaming = NX_TRUE;
+    *session_pptr = server_ptr -> nx_web_http_server_current_session_ptr;
+    return(NX_SUCCESS);
+#else
+    NX_PARAMETER_NOT_USED(server_ptr);
+    NX_PARAMETER_NOT_USED(session_pptr);
+    return(NX_WEB_HTTP_ERROR);
+#endif
+}
+
+
+/* Check the arguments before starting a Server-Sent Events response. */
+UINT _nxe_web_http_server_event_stream_start(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION **session_pptr)
+{
+    if((server_ptr == NX_NULL) || (session_pptr == NX_NULL) ||
+       (server_ptr -> nx_web_http_server_id != NX_WEB_HTTP_SERVER_ID))
+    {
+        return(NX_PTR_ERROR);
+    }
+
+    NX_THREADS_ONLY_CALLER_CHECKING
+    return(_nx_web_http_server_event_stream_start(server_ptr, session_pptr));
+}
+
+
+/* Send one event payload on the selected persistent response stream. */
+UINT _nx_web_http_server_event_stream_send(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION *session_ptr,
+                                           VOID *data_ptr, ULONG data_length)
+{
+NX_PACKET *packet_ptr;
+UINT status;
+UINT i;
+
+    if((server_ptr == NX_NULL) || (session_ptr == NX_NULL) || (data_ptr == NX_NULL))
+    {
+        return(NX_PTR_ERROR);
+    }
+
+    for(i = 0; i < server_ptr -> nx_web_http_server_tcpserver.nx_tcpserver_sessions_count; i++)
+    {
+        if(session_ptr == &server_ptr -> nx_web_http_server_tcpserver.nx_tcpserver_sessions[i])
+        {
+            break;
+        }
+    }
+    if(i == server_ptr -> nx_web_http_server_tcpserver.nx_tcpserver_sessions_count)
+    {
+        return(NX_PTR_ERROR);
+    }
+    if((data_length == 0) || (session_ptr -> nx_tcp_session_streaming != NX_TRUE) ||
+       (session_ptr -> nx_tcp_session_socket.nx_tcp_socket_state != NX_TCP_ESTABLISHED))
+    {
+        return(NX_WEB_HTTP_ERROR);
+    }
+
+#ifdef NX_WEB_HTTPS_ENABLE
+    if(server_ptr -> nx_web_http_is_https_server)
+    {
+        status = nx_secure_tls_packet_allocate(&session_ptr -> nx_tcp_session_tls_session,
+                                               server_ptr -> nx_web_http_server_packet_pool_ptr,
+                                               &packet_ptr, NX_WAIT_FOREVER);
+    }
+    else
+#endif
+    {
+        status = nx_packet_allocate(server_ptr -> nx_web_http_server_packet_pool_ptr,
+                                    &packet_ptr, NX_TCP_PACKET, NX_WAIT_FOREVER);
+    }
+    if(status != NX_SUCCESS)
+    {
+        server_ptr -> nx_web_http_server_allocation_errors++;
+        return(status);
+    }
+
+    status = nx_packet_data_append(packet_ptr, data_ptr, data_length,
+                                   server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
+    if(status == NX_SUCCESS)
+    {
+#ifdef NX_WEB_HTTPS_ENABLE
+        if(server_ptr -> nx_web_http_is_https_server)
+        {
+            status = nx_secure_tls_session_send(&session_ptr -> nx_tcp_session_tls_session,
+                                                packet_ptr, NX_WEB_HTTP_SERVER_TIMEOUT_SEND);
+        }
+        else
+#endif
+        {
+            status = nx_tcp_socket_send(&session_ptr -> nx_tcp_session_socket,
+                                        packet_ptr, NX_WEB_HTTP_SERVER_TIMEOUT_SEND);
+        }
+    }
+    if(status != NX_SUCCESS)
+    {
+        nx_packet_release(packet_ptr);
+    }
+    return(status);
+}
+
+
+/* Check the arguments before sending an event payload. */
+UINT _nxe_web_http_server_event_stream_send(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION *session_ptr,
+                                            VOID *data_ptr, ULONG data_length)
+{
+    if((server_ptr == NX_NULL) || (session_ptr == NX_NULL) || (data_ptr == NX_NULL) ||
+       (server_ptr -> nx_web_http_server_id != NX_WEB_HTTP_SERVER_ID))
+    {
+        return(NX_PTR_ERROR);
+    }
+
+    NX_THREADS_ONLY_CALLER_CHECKING
+    return(_nx_web_http_server_event_stream_send(server_ptr, session_ptr, data_ptr, data_length));
+}
