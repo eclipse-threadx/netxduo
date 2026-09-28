@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -80,6 +82,9 @@ extern NX_CRYPTO_METHOD crypto_method_auth_psk;
 extern NX_CRYPTO_METHOD crypto_method_ec_secp256;
 extern NX_CRYPTO_METHOD crypto_method_ec_secp384;
 extern NX_CRYPTO_METHOD crypto_method_ec_secp521;
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp256;
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp384;
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp512;
 extern NX_CRYPTO_METHOD crypto_method_ec_x25519;
 extern NX_CRYPTO_METHOD crypto_method_ec_x448;
 extern NX_CRYPTO_METHOD crypto_method_md5;
@@ -294,6 +299,9 @@ const USHORT nx_crypto_ecc_supported_groups[] =
 #endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */
     (USHORT)NX_CRYPTO_EC_SECP384R1,
     (USHORT)NX_CRYPTO_EC_SECP521R1,
+    (USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1,
+    (USHORT)NX_CRYPTO_EC_BRAINPOOLP384r1,
+    (USHORT)NX_CRYPTO_EC_BRAINPOOLP512r1,
 };
 
 const NX_CRYPTO_METHOD *nx_crypto_ecc_curves[] =
@@ -305,6 +313,9 @@ const NX_CRYPTO_METHOD *nx_crypto_ecc_curves[] =
 #endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */
     &crypto_method_ec_secp384,
     &crypto_method_ec_secp521,
+    &crypto_method_ec_brainpoolp256,
+    &crypto_method_ec_brainpoolp384,
+    &crypto_method_ec_brainpoolp512,
 };
 
 const UINT nx_crypto_ecc_supported_groups_size = sizeof(nx_crypto_ecc_supported_groups) / sizeof(USHORT);
@@ -616,6 +627,9 @@ const NX_CRYPTO_METHOD *supported_crypto[] =
 #endif /* NX_CRYPTO_ENABLE_CURVE25519_448 */
     &crypto_method_ec_secp384,
     &crypto_method_ec_secp521,
+    &crypto_method_ec_brainpoolp256,
+    &crypto_method_ec_brainpoolp384,
+    &crypto_method_ec_brainpoolp512,
 };
 
 const UINT supported_crypto_size = sizeof(supported_crypto) / sizeof(NX_CRYPTO_METHOD*);
@@ -646,7 +660,6 @@ const NX_CRYPTO_CIPHERSUITE *ciphersuite_map[] =
 const UINT ciphersuite_map_size = sizeof(ciphersuite_map) / sizeof(NX_CRYPTO_CIPHERSUITE*);
 
 #endif /* NX_CRYPTO_STANDALONE_ENABLE */
-
 
 
 

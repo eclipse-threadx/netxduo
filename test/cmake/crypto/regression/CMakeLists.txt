@@ -34,6 +34,7 @@ set(crypto_test_cases
     ${SOURCE_DIR}/nx_secure_ecdh_error_checking_test.c
     ${SOURCE_DIR}/nx_secure_ecdh_self_test.c
     ${SOURCE_DIR}/nx_secure_ecdsa_test.c
+    ${SOURCE_DIR}/nx_secure_brainpool_test.c
     ${SOURCE_DIR}/nx_secure_ecdsa_error_checking_test.c
     ${SOURCE_DIR}/nx_secure_ecjpake_self_test.c
     ${SOURCE_DIR}/nx_secure_huge_number_test.c
@@ -55,7 +56,7 @@ endif()
 
 target_include_directories(test_utility PUBLIC ${SOURCE_DIR}/test)
 target_compile_definitions(test_utility PUBLIC BATCH_TEST CTEST)
-if(("${CMAKE_BUILD_TYPE}" STREQUAL "fips_build_coverage") OR ("${CMAKE_BUILD_TYPE}" STREQUAL "standalone_build"))
+if("${CMAKE_BUILD_TYPE}" STREQUAL "fips_build_coverage")
   target_link_libraries(test_utility PUBLIC crypto)
 endif()
 

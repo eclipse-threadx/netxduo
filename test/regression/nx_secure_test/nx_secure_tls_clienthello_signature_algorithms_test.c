@@ -25,12 +25,12 @@
 extern VOID test_control_return(UINT status);
 
 #if !defined(NX_SECURE_TLS_CLIENT_DISABLED) && !defined(NX_SECURE_DISABLE_X509) && \
-    (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && (NX_SECURE_TLS_TLS_1_3_ENABLED)
 
 #define TEST_PACKET_OFFSET                 3u
 #define TEST_PACKET_SIZE                   32u
-#define TLS_1_3_EXTENSION_SIZE             20u
-#define TLS_1_2_EXTENSION_SIZE             14u
+#define TLS_1_3_EXTENSION_SIZE             26u
+#define TLS_1_2_EXTENSION_SIZE             18u
 #define OVERSIZED_TABLE_ENTRY_COUNT        16383u
 
 static NX_CRYPTO_METHOD rsa_method =
@@ -68,7 +68,9 @@ static NX_SECURE_X509_CRYPTO signature_methods[] =
     {0, &rsa_method,         &sha256_method},
     {0, &rsa_method,         &sha384_method},
     {0, &rsa_method,         &sha512_method},
-    {0, &ecdsa_method,       &sha256_method},
+    {NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_256, &ecdsa_method, &sha256_method},
+    {NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_384, &ecdsa_method, &sha384_method},
+    {NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512, &ecdsa_method, &sha512_method},
     {0, &unsupported_method, &sha256_method}
 };
 
@@ -76,22 +78,46 @@ static NX_SECURE_X509_CRYPTO oversized_signature_methods[OVERSIZED_TABLE_ENTRY_C
 
 static const USHORT supported_groups[] =
 {
-    (USHORT)NX_CRYPTO_EC_SECP256R1
+    (USHORT)NX_CRYPTO_EC_SECP256R1,
+    (USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1,
+    (USHORT)NX_CRYPTO_EC_BRAINPOOLP384r1,
+    (USHORT)NX_CRYPTO_EC_BRAINPOOLP512r1
+};
+
+extern NX_CRYPTO_METHOD crypto_method_ec_secp256;
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp256;
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp384;
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp512;
+
+static const NX_CRYPTO_METHOD *supported_curve_methods[] =
+{
+    &crypto_method_ec_secp256,
+    &crypto_method_ec_brainpoolp256,
+    &crypto_method_ec_brainpoolp384,
+    &crypto_method_ec_brainpoolp512
+};
+
+static const UCHAR brainpool_oids[3][9] =
+{
+    {0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x07},
+    {0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x0B},
+    {0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x0D}
 };
 
 static const UCHAR expected_tls_1_3_extension[TLS_1_3_EXTENSION_SIZE] =
 {
-    0x00, 0x0D, 0x00, 0x10, 0x00, 0x0E,
+    0x00, 0x0D, 0x00, 0x16, 0x00, 0x14,
     0x08, 0x04, 0x04, 0x01,
     0x08, 0x05, 0x05, 0x01,
     0x08, 0x06, 0x06, 0x01,
-    0x04, 0x03
+    0x04, 0x03, 0x08, 0x1A, 0x08, 0x1B, 0x08, 0x1C
 };
 
 static const UCHAR expected_tls_1_2_extension[TLS_1_2_EXTENSION_SIZE] =
 {
-    0x00, 0x0D, 0x00, 0x0A, 0x00, 0x08,
-    0x04, 0x01, 0x05, 0x01, 0x06, 0x01, 0x04, 0x03
+    0x00, 0x0D, 0x00, 0x0E, 0x00, 0x0C,
+    0x04, 0x01, 0x05, 0x01, 0x06, 0x01,
+    0x04, 0x03, 0x05, 0x03, 0x06, 0x03
 };
 
 #endif
@@ -115,7 +141,7 @@ void nx_secure_tls_clienthello_signature_algorithms_test_application_define(void
 #endif
 {
 #if !defined(NX_SECURE_TLS_CLIENT_DISABLED) && !defined(NX_SECURE_DISABLE_X509) && \
-    (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    defined(NX_SECURE_ENABLE_ECC_CIPHERSUITE) && (NX_SECURE_TLS_TLS_1_3_ENABLED)
 NX_SECURE_TLS_SESSION tls_session;
 NX_SECURE_TLS_CRYPTO crypto_table;
 UCHAR packet_buffer[TEST_PACKET_SIZE];
@@ -123,6 +149,12 @@ ULONG packet_offset;
 USHORT extension_length;
 UINT status;
 UINT i;
+UINT selected_curve;
+UINT cert_curve_supported;
+UINT oid_value;
+USHORT ecdhe_signature_algorithm;
+UCHAR groups_wire[4] = {0x00, 0x02, 0x00, 0x1F};
+NX_SECURE_TLS_HELLO_EXTENSION groups_extension;
 
     NX_PARAMETER_NOT_USED(first_unused_memory);
 
@@ -138,6 +170,31 @@ UINT i;
     tls_session.nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups = supported_groups;
     tls_session.nx_secure_tls_ecc.nx_secure_tls_ecc_supported_groups_count =
         (USHORT)(sizeof(supported_groups) / sizeof(supported_groups[0]));
+    tls_session.nx_secure_tls_ecc.nx_secure_tls_ecc_curves = supported_curve_methods;
+
+    /* RFC 8734 groups differ from the TLS 1.2 Brainpool identifiers. */
+    EXPECT_EQ(0x001Fu, _nx_secure_tls_brainpool_group_to_wire((USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1));
+    EXPECT_EQ(0x0020u, _nx_secure_tls_brainpool_group_to_wire((USHORT)NX_CRYPTO_EC_BRAINPOOLP384r1));
+    EXPECT_EQ(0x0021u, _nx_secure_tls_brainpool_group_to_wire((USHORT)NX_CRYPTO_EC_BRAINPOOLP512r1));
+    EXPECT_EQ((USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1, _nx_secure_tls_brainpool_group_from_wire(0x001Fu));
+    EXPECT_EQ((USHORT)NX_CRYPTO_EC_BRAINPOOLP384r1, _nx_secure_tls_brainpool_group_from_wire(0x0020u));
+    EXPECT_EQ((USHORT)NX_CRYPTO_EC_BRAINPOOLP512r1, _nx_secure_tls_brainpool_group_from_wire(0x0021u));
+
+    groups_extension.nx_secure_tls_extension_id = NX_SECURE_TLS_EXTENSION_EC_GROUPS;
+    groups_extension.nx_secure_tls_extension_data_length = sizeof(groups_wire);
+    groups_extension.nx_secure_tls_extension_data = groups_wire;
+    for (i = 0; i < 3u; i++)
+    {
+        _nx_secure_x509_oid_parse(brainpool_oids[i], sizeof(brainpool_oids[i]), &oid_value);
+        EXPECT_EQ((UINT)(NX_SECURE_TLS_X509_EC_BRAINPOOLP256R1 + i), oid_value);
+
+        groups_wire[3] = (UCHAR)(0x1Fu + i);
+        status = _nx_secure_tls_proc_clienthello_sec_sa_extension(&tls_session,
+            &groups_extension, 1u, &selected_curve, 0u, &cert_curve_supported,
+            &ecdhe_signature_algorithm, NX_NULL);
+        EXPECT_EQ(NX_SUCCESS, status);
+        EXPECT_EQ((UINT)supported_groups[i + 1u], selected_curve);
+    }
 
     /* The old two-bytes-per-table-entry check accepted this buffer even
        though the RSA-PSS entries now require paired TLS 1.2 algorithms. */

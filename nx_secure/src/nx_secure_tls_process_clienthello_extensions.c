@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -533,6 +535,12 @@ UCHAR expected_signature = 0;
             for (j = 0; j < groups_len; j += 2)
             {
                 group = (USHORT)((groups[j] << 8) + groups[j + 1]);
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+                if (tls_session -> nx_secure_tls_1_3)
+                {
+                    group = _nx_secure_tls_brainpool_group_from_wire(group);
+                }
+#endif
 
                 status = _nx_secure_tls_find_curve_method(&tls_session -> nx_secure_tls_ecc, group, &curve_method, &new_curve_priority);
 
@@ -780,6 +788,7 @@ NX_SECURE_TLS_ECC *ecc_info;
 
         /* Get the key group.  */
         key_group = (USHORT)((packet_buffer[offset] << 8) + packet_buffer[offset + 1]);
+        key_group = _nx_secure_tls_brainpool_group_from_wire(key_group);
         offset = (USHORT)(offset + 2);
 
         /* Get the key length. */
@@ -1116,6 +1125,15 @@ NX_SECURE_X509_CERT *local_certificate = NX_NULL;
             case NX_CRYPTO_EC_SECP521R1:
                 expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512;
                 break;
+            case NX_CRYPTO_EC_BRAINPOOLP256r1:
+                expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256;
+                break;
+            case NX_CRYPTO_EC_BRAINPOOLP384r1:
+                expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP384R1_SHA384;
+                break;
+            case NX_CRYPTO_EC_BRAINPOOLP512r1:
+                expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP512R1_SHA512;
+                break;
             default:
                 return;
             }
@@ -1214,6 +1232,15 @@ VOID _nx_secure_tls_get_signature_algorithm_id(UINT signature_algorithm, USHORT 
         *signature_algorithm_id = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_384;
         break;
     case NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512:
+        *signature_algorithm_id = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512;
+        break;
+    case NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256:
+        *signature_algorithm_id = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_256;
+        break;
+    case NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP384R1_SHA384:
+        *signature_algorithm_id = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_384;
+        break;
+    case NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP512R1_SHA512:
         *signature_algorithm_id = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512;
         break;
     /* RSASSA-PSS schemes (RFC 8446 §4.2.3). Mapped to the same internal IDs
@@ -1571,6 +1598,3 @@ NX_SECURE_TLS_PSK_STORE *psk_store;
     return(NX_SUCCESS);
 }
 #endif
-
-
-

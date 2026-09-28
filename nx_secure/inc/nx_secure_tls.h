@@ -560,6 +560,9 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
 #define NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256               (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA256 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA)
 #define NX_SECURE_TLS_SIGNATURE_ECDSA_SHA384               (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA384 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA)
 #define NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512               (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA512 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA)
+#define NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256 0x081Au
+#define NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP384R1_SHA384 0x081Bu
+#define NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP512R1_SHA512 0x081Cu
 
 
 /* Session key generation and assignment constants. */
@@ -1636,6 +1639,8 @@ UINT _nx_secure_tls_ecc_generate_keys(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciph
                                       VOID *public_auth_metadata, ULONG public_auth_metadata_size);
 UINT _nx_secure_tls_find_curve_method(NX_SECURE_TLS_ECC *tls_ecc, USHORT named_curve,
                                       const NX_CRYPTO_METHOD **curve_method, UINT *curve_priority);
+USHORT _nx_secure_tls_brainpool_group_to_wire(USHORT named_curve);
+USHORT _nx_secure_tls_brainpool_group_from_wire(USHORT named_group);
 UINT _nx_secure_tls_proc_clienthello_sec_sa_extension(NX_SECURE_TLS_SESSION *tls_session,
                                                       NX_SECURE_TLS_HELLO_EXTENSION *exts,
                                                       UINT num_extensions,

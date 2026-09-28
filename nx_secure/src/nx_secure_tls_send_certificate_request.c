@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -177,6 +179,15 @@ UINT   sign_alg;
                     case (NX_CRYPTO_EC_SECP521R1 & 0x00FF):
                         sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512;
                         break;
+                    case (NX_CRYPTO_EC_BRAINPOOLP256r1 & 0x00FF):
+                        sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256;
+                        break;
+                    case (NX_CRYPTO_EC_BRAINPOOLP384r1 & 0x00FF):
+                        sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP384R1_SHA384;
+                        break;
+                    case (NX_CRYPTO_EC_BRAINPOOLP512r1 & 0x00FF):
+                        sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP512R1_SHA512;
+                        break;
                     default:
                         continue;
                     }
@@ -265,4 +276,3 @@ UINT   sign_alg;
 
     return(NX_SUCCESS);
 }
-
