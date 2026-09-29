@@ -1,3 +1,16 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 /* This NetX test concentrates on the basic BSD UDP non-blocking bind to a specific address and connect + send operation.  */
 
 
@@ -22,6 +35,7 @@ static TX_THREAD               ntest_1;
 static NX_PACKET_POOL          pool_0;
 static NX_IP                   ip_0;
 static NX_IP                   ip_1;
+static NX_UDP_SOCKET           server_socket;
 static ULONG                   bsd_thread_area[DEMO_STACK_SIZE / sizeof(ULONG)];
 #define BSD_THREAD_PRIORITY    2
 #define NUM_CLIENTS            20
@@ -399,7 +413,6 @@ ULONG           actual_status;
 UINT            status;
 UINT            iface;
 NX_PACKET       *packet_ptr;
-NX_UDP_SOCKET   server_socket;
 ULONG           peer_ip;
 UINT            peer_port;
 NX_IPV4_HEADER *ipv4_header;

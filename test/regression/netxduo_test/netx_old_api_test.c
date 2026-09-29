@@ -1,3 +1,16 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 /* This case tests if compile works with old APIs. */
 
 #include   "nx_api.h"
@@ -14,6 +27,9 @@ extern void    test_control_return(UINT status);
 static NX_PACKET_POOL          pool_0;
 static NX_IP                   ip_0;
 static TX_THREAD               ntest_0;
+#if defined(__PRODUCT_NETXDUO__)
+static NX_UDP_SOCKET           udp_socket;
+#endif
 
 /* Define the counters used in the test application...  */
 
@@ -73,7 +89,6 @@ static void    ntest_0_entry(ULONG thread_input)
 {
 #if defined(__PRODUCT_NETXDUO__)
 NX_PACKET      *packet_ptr;
-NX_UDP_SOCKET  udp_socket;
 #ifdef FEATURE_NX_IPV6
 
 NXD_ADDRESS             src_address;
