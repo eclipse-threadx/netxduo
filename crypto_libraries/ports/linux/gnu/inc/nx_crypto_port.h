@@ -69,6 +69,13 @@ typedef short                                     SHORT;
 typedef unsigned short                            USHORT;
 #endif
 
+/* An integer wide enough to hold a pointer.  ThreadX defines this, and the
+   crypto sources use it to align a scratch pointer; a standalone build has no
+   ThreadX, so it is defined here under the same guard ThreadX uses.  */
+#ifndef ALIGN_TYPE_DEFINED
+#define ALIGN_TYPE                                ULONG
+#endif
+
 #endif /* NX_CRYPTO_STANDALONE_ENABLE */
 
 #endif /* _NX_CRYPTO_PORT_H_ */
