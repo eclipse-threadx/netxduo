@@ -243,6 +243,19 @@ int main()
 
 #endif
 
+#if defined(NX_CRYPTO_STANDALONE_ENABLE) && defined(BATCH_TEST)
+
+    /* Without the kernel there is no control thread, so tx_kernel_enter above
+       ran the test on this stack and returned here.  The summary and the exit
+       status are reported from this point, because the control thread that
+       normally reports them was never created and a verdict that reaches no
+       exit status is a test that cannot fail.  */
+    printf("**** Testing Complete ****\n");
+    printf("**** Test Summary:  Tests Passed:  %lu   Tests Warning:  %lu   Tests Failed:  %lu\n", test_control_successful_tests, test_control_warning_tests, test_control_failed_tests);
+    fflush(stdout);
+    exit((INT)test_control_failed_tests);
+#endif
+
     return 0;
 }
 
