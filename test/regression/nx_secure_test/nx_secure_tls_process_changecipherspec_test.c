@@ -1,3 +1,16 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 /* This test concentrates on TLS ECC ciphersuites negotiation.  */
 
 #include "nx_api.h"
@@ -11,6 +24,11 @@ extern VOID    test_control_return(UINT status);
 
 extern NX_SECURE_TLS_CRYPTO nx_crypto_tls_ciphers;
 
+/* Define the ThreadX and NetX object control blocks...  */
+
+static NX_SECURE_TLS_SESSION    tls_session;
+static UCHAR                    tls_session_metadata[METADATA_SIZE];
+
 #ifdef CTEST
 void test_application_define(void *first_unused_memory);
 void test_application_define(void *first_unused_memory)
@@ -19,8 +37,6 @@ VOID    nx_secure_tls_process_changecipherspec_test_application_define(void *fir
 #endif
 {
 UINT status;
-NX_SECURE_TLS_SESSION tls_session;
-UCHAR tls_session_metadata[METADATA_SIZE];
 UCHAR packet_buffer[1];
 
     /* Print out test information banner.  */

@@ -1,3 +1,16 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 /* This test concentrates on TLS ECC ciphersuites negotiation.  */
 
 #include "nx_api.h"
@@ -16,6 +29,8 @@ extern VOID    test_control_return(UINT status);
 
 static NX_PACKET_POOL pool_0;
 static ULONG pool_0_memory[PACKET_POOL_SIZE / sizeof(ULONG)];
+static NX_SECURE_TLS_SESSION tls_session;
+static UCHAR tls_session_metadata[METADATA_SIZE];
 
 extern NX_SECURE_TLS_CRYPTO nx_crypto_tls_ciphers;
 
@@ -59,8 +74,6 @@ VOID    nx_secure_tls_packet_trim_test_application_define(void *first_unused_mem
 #endif
 {
 UINT status;
-NX_SECURE_TLS_SESSION tls_session;
-UCHAR tls_session_metadata[METADATA_SIZE];
 UCHAR header_buffer[5];
 UCHAR data_buffer[2000] = "hello";
 ULONG data_length;
