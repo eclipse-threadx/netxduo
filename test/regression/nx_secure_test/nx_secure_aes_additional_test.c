@@ -1,3 +1,16 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 /* Test for aes ctr encrypting the plain text which is not multiples of 16. */
 
 #include <stdio.h>
@@ -51,6 +64,12 @@ static TX_THREAD thread_0;
 #endif
 
 static VOID thread_0_entry(ULONG thread_input);
+
+/* The crypto methods require a 4-byte aligned metadata area, and a UCHAR array
+   carries no alignment of its own, so this one is given static storage: the
+   linker aligns it, while its offset in a frame is whatever the locals around
+   it leave.  */
+static UCHAR metadata[2048];
 
 static UINT test_crypto_function(VOID *a, UCHAR *b, UCHAR *c, UINT d)
 {
@@ -136,7 +155,7 @@ static VOID thread_0_entry(ULONG thread_input)
 {
 UINT i, status, backup;
 UCHAR test_plain[17] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-UCHAR metadata[2048], input[1024], output[1024];
+UCHAR input[1024], output[1024];
 NX_CRYPTO_METHOD test_method;
 
     /* Print out test information banner.  */
