@@ -136,6 +136,10 @@ int err = 0;
             status = sigaction( SIGTERM, &sig_act, NULL);
             return_value_if_fail( -1 != status, TLS_TEST_SYSTEM_CALL_FAILED);
 
+            /* Report the frames of a fault in this instance.  The director sees
+               only the signal number, and the frames are gone once it reaps. */
+            tls_test_instance_install_fault_report( iter -> tls_test_instance_name);
+
             /* Set timeer for the test process. */
             alarm( iter -> tls_test_timeout);
 

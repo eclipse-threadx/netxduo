@@ -77,6 +77,7 @@ add_library(
   ${UTILITY_SOURCE_DIR}/tls_test_instance_append.c
   ${UTILITY_SOURCE_DIR}/tls_test_instance_create.c
   ${UTILITY_SOURCE_DIR}/tls_test_instance_destroy.c
+  ${UTILITY_SOURCE_DIR}/tls_test_instance_fault_report.c
   ${UTILITY_SOURCE_DIR}/tls_test_instance_find_next.c
   ${UTILITY_SOURCE_DIR}/tls_test_instance_set_exit_status.c
   ${UTILITY_SOURCE_DIR}/tls_test_instance_shared_buffer_manipulate.c

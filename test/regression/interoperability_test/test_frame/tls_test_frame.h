@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 #ifndef __TLS_TEST_FRAME__
 #define __TLS_TEST_FRAME__
 
@@ -109,6 +111,7 @@ INT tls_test_director_cleanup_registered_instances( TLS_TEST_DIRECTOR* director_
 INT tls_test_director_destroy( TLS_TEST_DIRECTOR* director_ptr);
 INT tls_test_director_clean_all( TLS_TEST_DIRECTOR* director_ptr);
 INT tls_test_director_test_start( TLS_TEST_DIRECTOR* director_ptr);
+INT tls_test_instance_install_fault_report( const CHAR* instance_name);
 
 /* Shared buffer manipulation. */
 INT tls_test_instance_get_shared_buffer( TLS_TEST_INSTANCE* instance_ptr, VOID** shared_buffer_ptr);
