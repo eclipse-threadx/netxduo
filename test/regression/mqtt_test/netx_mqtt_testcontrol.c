@@ -1,3 +1,16 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 /* This is the test control routine the NetX TCP/IP stack.  All tests are dispatched from this routine.  */
 
 #include "tx_api.h"
@@ -294,31 +307,57 @@ void  test_control_return(UINT status)
 #endif
 }
 
+/* Report a kernel object the cleanup walk cannot remove.  Only the kind, the
+   address and the status are printed: a delete is refused when the control
+   block no longer holds its identifier, which is what a reused frame looks
+   like, so the object's name field is a pointer that no longer resolves.  */
+
+static UINT  test_control_cleanup_report(CHAR *object_kind, VOID *object_ptr, UINT status)
+{
+
+    printf("ERROR! test_control_cleanup cannot delete %s at %p, status %u\n",
+           object_kind, object_ptr, status);
+    test_control_failed_tests++;
+    return(1);
+}
+
 void  test_control_cleanup(void)
 {
     TX_MUTEX        *mutex_ptr;
     TX_THREAD       *thread_ptr;
+    VOID            *object_ptr;
+    UINT            status;
+    UINT            cleanup_error;
+
+    /* A refused delete leaves the object at the head of its list, so every walk
+       below stops on the first object it cannot remove rather than spinning on
+       it for the whole test timeout.  */
+    cleanup_error = 0;
+    status = TX_SUCCESS;
 
     /* Clean timer used by RAM driver. */
     _nx_ram_network_driver_timer_clean();
 
     /* Delete all IP instances.   */
-    while (_nx_ip_created_ptr)
+    while ((_nx_ip_created_ptr) && (cleanup_error == 0))
     {
 
         /* Delete all UDP sockets.  */
-        while (_nx_ip_created_ptr -> nx_ip_udp_created_sockets_ptr)
+        while ((_nx_ip_created_ptr -> nx_ip_udp_created_sockets_ptr) && (cleanup_error == 0))
         {
 
             /* Make sure the UDP socket is unbound.  */
             nx_udp_socket_unbind(_nx_ip_created_ptr -> nx_ip_udp_created_sockets_ptr);
 
             /* Delete the UDP socket.  */
-            nx_udp_socket_delete(_nx_ip_created_ptr -> nx_ip_udp_created_sockets_ptr);
+            object_ptr = (VOID *)_nx_ip_created_ptr -> nx_ip_udp_created_sockets_ptr;
+            status = nx_udp_socket_delete(_nx_ip_created_ptr -> nx_ip_udp_created_sockets_ptr);
+            if (status != NX_SUCCESS)
+                cleanup_error = test_control_cleanup_report("UDP socket", object_ptr, status);
         }
 
         /* Delete all TCP sockets.  */
-        while (_nx_ip_created_ptr -> nx_ip_tcp_created_sockets_ptr)
+        while ((_nx_ip_created_ptr -> nx_ip_tcp_created_sockets_ptr) && (cleanup_error == 0))
         {
 
             /* Disconnect.  */
@@ -331,98 +370,133 @@ void  test_control_cleanup(void)
             nx_tcp_server_socket_unaccept(_nx_ip_created_ptr -> nx_ip_tcp_created_sockets_ptr);
 
             /* Delete the TCP socket.  */
-            nx_tcp_socket_delete(_nx_ip_created_ptr -> nx_ip_tcp_created_sockets_ptr);
+            object_ptr = (VOID *)_nx_ip_created_ptr -> nx_ip_tcp_created_sockets_ptr;
+            status = nx_tcp_socket_delete(_nx_ip_created_ptr -> nx_ip_tcp_created_sockets_ptr);
+            if (status != NX_SUCCESS)
+                cleanup_error = test_control_cleanup_report("TCP socket", object_ptr, status);
         }
 
         /* Clear all listen requests.  */
-        while (_nx_ip_created_ptr -> nx_ip_tcp_active_listen_requests)
+        while ((_nx_ip_created_ptr -> nx_ip_tcp_active_listen_requests) && (cleanup_error == 0))
         {
 
             /* Make sure the TCP server socket is unlistened.  */
-            nx_tcp_server_socket_unlisten(_nx_ip_created_ptr, (_nx_ip_created_ptr -> nx_ip_tcp_active_listen_requests) -> nx_tcp_listen_port);
+            object_ptr = (VOID *)_nx_ip_created_ptr -> nx_ip_tcp_active_listen_requests;
+            status = nx_tcp_server_socket_unlisten(_nx_ip_created_ptr, (_nx_ip_created_ptr -> nx_ip_tcp_active_listen_requests) -> nx_tcp_listen_port);
+            if (status != NX_SUCCESS)
+                cleanup_error = test_control_cleanup_report("listen request", object_ptr, status);
         }
 
         /* Delete the IP instance.  */
-        nx_ip_delete(_nx_ip_created_ptr);
+        if (cleanup_error == 0)
+        {
+            object_ptr = (VOID *)_nx_ip_created_ptr;
+            status = nx_ip_delete(_nx_ip_created_ptr);
+            if (status != NX_SUCCESS)
+                cleanup_error = test_control_cleanup_report("IP instance", object_ptr, status);
+        }
     }
 
     /* Delete all the packet pools.  */
-    while (_nx_packet_pool_created_ptr)
+    while ((_nx_packet_pool_created_ptr) && (cleanup_error == 0))
     {
-        nx_packet_pool_delete(_nx_packet_pool_created_ptr);
+        object_ptr = (VOID *)_nx_packet_pool_created_ptr;
+        status = nx_packet_pool_delete(_nx_packet_pool_created_ptr);
+        if (status != NX_SUCCESS)
+            cleanup_error = test_control_cleanup_report("packet pool", object_ptr, status);
     }
 
     /* Reset the RAM driver.  */
     _nx_ram_network_driver_reset();
 
     /* Delete all queues.  */
-    while(_tx_queue_created_ptr)
+    while((_tx_queue_created_ptr) && (cleanup_error == 0))
     {
 
         /* Delete queue.  */
-        tx_queue_delete(_tx_queue_created_ptr);
+        object_ptr = (VOID *)_tx_queue_created_ptr;
+        status = tx_queue_delete(_tx_queue_created_ptr);
+        if (status != TX_SUCCESS)
+            cleanup_error = test_control_cleanup_report("queue", object_ptr, status);
     }
 
     /* Delete all semaphores.  */
-    while(_tx_semaphore_created_ptr)
+    while((_tx_semaphore_created_ptr) && (cleanup_error == 0))
     {
 #ifndef NETXTEST_TIMEOUT_DISABLE
         if(_tx_semaphore_created_ptr != &test_control_sema)
         {
 
             /* Delete semaphore.  */
-            tx_semaphore_delete(_tx_semaphore_created_ptr);
+            object_ptr = (VOID *)_tx_semaphore_created_ptr;
+            status = tx_semaphore_delete(_tx_semaphore_created_ptr);
         }
         else if(_tx_semaphore_created_count == 1)
             break;
         else
         {
             /* Delete semaphore.  */
-            tx_semaphore_delete(_tx_semaphore_created_ptr -> tx_semaphore_created_next);
+            object_ptr = (VOID *)_tx_semaphore_created_ptr -> tx_semaphore_created_next;
+            status = tx_semaphore_delete(_tx_semaphore_created_ptr -> tx_semaphore_created_next);
         }
 #else
         /* Delete semaphore.  */
-        tx_semaphore_delete(_tx_semaphore_created_ptr);
+        object_ptr = (VOID *)_tx_semaphore_created_ptr;
+        status = tx_semaphore_delete(_tx_semaphore_created_ptr);
 #endif
+        if (status != TX_SUCCESS)
+            cleanup_error = test_control_cleanup_report("semaphore", object_ptr, status);
     }
 
     /* Delete all event flag groups.  */
-    while(_tx_event_flags_created_ptr)
+    while((_tx_event_flags_created_ptr) && (cleanup_error == 0))
     {
 
         /* Delete event flag group.  */
-        tx_event_flags_delete(_tx_event_flags_created_ptr);
+        object_ptr = (VOID *)_tx_event_flags_created_ptr;
+        status = tx_event_flags_delete(_tx_event_flags_created_ptr);
+        if (status != TX_SUCCESS)
+            cleanup_error = test_control_cleanup_report("event flag group", object_ptr, status);
     }
 
     /* Delete all byte pools.  */
-    while(_tx_byte_pool_created_ptr)
+    while((_tx_byte_pool_created_ptr) && (cleanup_error == 0))
     {
 
         /* Delete byte pool.  */
-        tx_byte_pool_delete(_tx_byte_pool_created_ptr);
+        object_ptr = (VOID *)_tx_byte_pool_created_ptr;
+        status = tx_byte_pool_delete(_tx_byte_pool_created_ptr);
+        if (status != TX_SUCCESS)
+            cleanup_error = test_control_cleanup_report("byte pool", object_ptr, status);
     }
 
     /* Delete all block pools.  */
-    while(_tx_block_pool_created_ptr)
+    while((_tx_block_pool_created_ptr) && (cleanup_error == 0))
     {
 
         /* Delete block pool.  */
-        tx_block_pool_delete(_tx_block_pool_created_ptr);
+        object_ptr = (VOID *)_tx_block_pool_created_ptr;
+        status = tx_block_pool_delete(_tx_block_pool_created_ptr);
+        if (status != TX_SUCCESS)
+            cleanup_error = test_control_cleanup_report("block pool", object_ptr, status);
     }
 
     /* Delete all timers.  */
-    while(_tx_timer_created_ptr)
+    while((_tx_timer_created_ptr) && (cleanup_error == 0))
     {
 
         /* Deactivate timer.  */
         tx_timer_deactivate(_tx_timer_created_ptr);
 
         /* Delete timer.  */
-        tx_timer_delete(_tx_timer_created_ptr);
+        object_ptr = (VOID *)_tx_timer_created_ptr;
+        status = tx_timer_delete(_tx_timer_created_ptr);
+        if (status != TX_SUCCESS)
+            cleanup_error = test_control_cleanup_report("timer", object_ptr, status);
     }
 
     /* Delete all mutexes (except for system mutex).  */
-    while(_tx_mutex_created_ptr)
+    while((_tx_mutex_created_ptr) && (cleanup_error == 0))
     {
 
         /* Setup working mutex pointer.  */
@@ -444,11 +518,13 @@ void  test_control_cleanup(void)
 #endif
 
         /* Delete mutex.  */
-        tx_mutex_delete(mutex_ptr);
+        status = tx_mutex_delete(mutex_ptr);
+        if (status != TX_SUCCESS)
+            cleanup_error = test_control_cleanup_report("mutex", (VOID *)mutex_ptr, status);
     }
 
     /* Delete all threads, except for timer thread, and test control thread.  */
-    while (_tx_thread_created_ptr)
+    while ((_tx_thread_created_ptr) && (cleanup_error == 0))
     {
 
         /* Setup working pointer.  */
@@ -486,7 +562,9 @@ void  test_control_cleanup(void)
         tx_thread_terminate(thread_ptr);
 
         /* Delete the thread.  */
-        tx_thread_delete(thread_ptr);
+        status = tx_thread_delete(thread_ptr);
+        if (status != TX_SUCCESS)
+            cleanup_error = test_control_cleanup_report("thread", (VOID *)thread_ptr, status);
     }
 
     /* At this point, only the test control thread and the system timer thread and/or mutex should still be
