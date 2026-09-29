@@ -593,6 +593,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ip_packet_filter_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_packet_filter_extended_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmpv6_invalid_na.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcp_low_watermark_rx_window_test.c
     ${SOURCE_DIR}/netxduo_test/netx_low_watermark_test.c
     ${SOURCE_DIR}/netxduo_test/netx_rarp_nxe_api_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_interface_detachment_arp_table_test.c
@@ -823,7 +824,9 @@ set(websocket_test_cases
     ${SOURCE_DIR}/websocket_test/netx_websocket_connect_test.c
     ${SOURCE_DIR}/websocket_test/netx_websocket_mask_test.c
     ${SOURCE_DIR}/websocket_test/netx_websocket_fin_test.c
-    ${SOURCE_DIR}/websocket_test/netx_websocket_opcode_test.c)
+    ${SOURCE_DIR}/websocket_test/netx_websocket_opcode_test.c
+    ${SOURCE_DIR}/websocket_test/netx_websocket_empty_control_frame_test.c
+    ${SOURCE_DIR}/websocket_test/netx_websocket_frame_boundary_test.c)
 
 set(pop3_test_cases
     ${SOURCE_DIR}/pop3_test/netx_pop3_two_mails_received_test.c
