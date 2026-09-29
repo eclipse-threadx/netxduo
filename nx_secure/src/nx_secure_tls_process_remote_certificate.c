@@ -87,6 +87,7 @@ UINT                 endpoint_length;
 UINT                 bytes_processed;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 UINT                 extensions_length;
+UINT                 context_length;
 #endif
 UCHAR               *cert_buffer;
 ULONG                cert_buf_size;
@@ -139,13 +140,38 @@ ULONG                cert_buf_size;
            the beginning of the handshake record. If the first byte is non-zero
            it means the following bytes (length given as the value of that byte)
            should be the context. */
-        packet_buffer++;
-        message_length--;
-      
+
+        /* RFC 8446, section 4.4.2: certificate_request_context is a one-byte
+           length followed by that many bytes. Require the length byte to be
+           present before reading it: message_length is unsigned, so decrementing
+           a zero-length message wrapped it to its maximum and left every bounds
+           check below unable to fail. */
+        if (message_length < 1)
+        {
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+        }
+
+        context_length = (UINT)packet_buffer[0];
+
+        /* Require the context itself to be present as well. The length byte was
+           previously skipped on its own, which left the parser misaligned by the
+           size of the context whenever one was actually supplied. */
+        if (message_length < (1u + context_length))
+        {
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+        }
+
+        packet_buffer += 1u + context_length;
+        message_length -= 1u + context_length;
     }
 #endif
-      
-     
+
+    /* The certificate list length that follows is three bytes. */
+    if (message_length < 3u)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
+
     /* Extract the certificate(s) from the incoming data, starting with. */
     total_length = (UINT)((packet_buffer[0] << 16) + (packet_buffer[1] << 8) + packet_buffer[2]);
     length = length + 3;
