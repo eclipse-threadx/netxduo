@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 #include "mqtt_interoperability_test.h"
 #include "ca.c"
 
@@ -161,8 +163,8 @@ static UCHAR message_buffer[NXD_MQTT_MAX_MESSAGE_LENGTH];
 static UCHAR topic_buffer[NXD_MQTT_MAX_TOPIC_NAME_LENGTH];
 
 /* For remote certificate. */
-NX_SECURE_X509_CERT remote_certificate, remote_issuer;
-NX_SECURE_X509_CERT remote_certificate_0, remote_issuer_0, ca_certificate;
+NX_SECURE_X509_CERT remote_certificate, remote_issuer, ca_certificate;
+NX_SECURE_X509_CERT remote_certificate_0, remote_issuer_0, ca_certificate_0;
 UCHAR remote_cert_buffer[2000];
 UCHAR remote_issuer_buffer[2000];
 UCHAR remote_cert_buffer_0[2000];
@@ -188,9 +190,9 @@ UINT tls_setup_method_0(NXD_MQTT_CLIENT* client_ptr, NX_SECURE_TLS_SESSION* tls_
     nx_secure_tls_remote_certificate_allocate(tls_session, &remote_certificate_0, remote_cert_buffer_0, sizeof(remote_cert_buffer_0));
     nx_secure_tls_remote_certificate_allocate(tls_session, &remote_issuer_0, remote_issuer_buffer_0, sizeof(remote_issuer_buffer_0));
 
-    nx_secure_x509_certificate_initialize(&ca_certificate, ca_der, ca_der_len,
+    nx_secure_x509_certificate_initialize(&ca_certificate_0, ca_der, ca_der_len,
                                           NX_NULL, 0, NX_NULL, 0, NX_SECURE_X509_KEY_TYPE_NONE);
-    nx_secure_tls_trusted_certificate_add(tls_session, &ca_certificate);
+    nx_secure_tls_trusted_certificate_add(tls_session, &ca_certificate_0);
 
     return(NX_SUCCESS);
 }
