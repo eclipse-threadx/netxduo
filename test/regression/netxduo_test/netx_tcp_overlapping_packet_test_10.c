@@ -1,3 +1,16 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 /* This NetX test concentrates on overlapping TCP data packets.  */
 
 #include   "tx_api.h"
@@ -143,8 +156,10 @@ static void    thread_0_entry(ULONG thread_input)
     if(status)
         error_counter++;
 
-    /* Bind the socket.  */
-    status = nx_tcp_client_socket_bind(&client_socket, 12, NX_WAIT_FOREVER);
+    /* Bind the socket.  The bound matches the connect below, the longest wait
+       this test makes.  Nothing here contends for the port or for the pool, so
+       a wait that expires is a failure to report rather than one to sit out.  */
+    status = nx_tcp_client_socket_bind(&client_socket, 12, 5 * NX_IP_PERIODIC_RATE);
 
     /* Check for error.  */
     if(status)
@@ -160,10 +175,10 @@ static void    thread_0_entry(ULONG thread_input)
         error_counter++;
 
     /* Create 4 packets  */
-    status = nx_packet_allocate(&pool_0, &my_packet1, NX_TCP_PACKET, NX_WAIT_FOREVER);
-    status += nx_packet_allocate(&pool_0, &my_packet2, NX_TCP_PACKET, NX_WAIT_FOREVER);
-    status += nx_packet_allocate(&pool_0, &my_packet3, NX_TCP_PACKET, NX_WAIT_FOREVER);
-    status += nx_packet_allocate(&pool_0, &my_packet4, NX_TCP_PACKET, NX_WAIT_FOREVER);
+    status = nx_packet_allocate(&pool_0, &my_packet1, NX_TCP_PACKET, 5 * NX_IP_PERIODIC_RATE);
+    status += nx_packet_allocate(&pool_0, &my_packet2, NX_TCP_PACKET, 5 * NX_IP_PERIODIC_RATE);
+    status += nx_packet_allocate(&pool_0, &my_packet3, NX_TCP_PACKET, 5 * NX_IP_PERIODIC_RATE);
+    status += nx_packet_allocate(&pool_0, &my_packet4, NX_TCP_PACKET, 5 * NX_IP_PERIODIC_RATE);
 
     if(status)
         error_counter++;
