@@ -1,3 +1,16 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
 #include   "tx_api.h"
 #include   "nx_api.h"
 #include   "nx_tcp.h"
@@ -356,6 +369,13 @@ extern NX_CRYPTO_METHOD crypto_method_hkdf;
 extern NX_CRYPTO_METHOD crypto_method_hmac;
 extern NX_CRYPTO_METHOD crypto_method_ecdhe;
 
+
+/* Crypto methods installed into the lookup table below.  They are at file scope
+   because the table outlives the thread that fills it in, and a field of the
+   table is read again when the session is deleted.  */
+static NX_CRYPTO_METHOD hash_method;
+static NX_CRYPTO_METHOD test_method;
+static NX_CRYPTO_METHOD test_crypto_method, test_auth_method;
 
 /* Lookup table used to map ciphersuites to cryptographic routines. */
 static NX_SECURE_TLS_CIPHERSUITE_INFO test_ciphersuite = {TLS_NULL_WITH_NULL_NULL, NX_NULL, NX_NULL, NX_NULL, 0, 0, NX_NULL, 0, NX_NULL};
@@ -1265,7 +1285,6 @@ UCHAR test_iv[16];
     status = _nx_secure_tls_metadata_size_calculate(&test_crypto_table, &metadata_size);
     EXPECT_EQ(NX_SUCCESS, status);
 
-    NX_CRYPTO_METHOD hash_method;
     ULONG sequence_number[NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE];
 
     memset(&hash_method, 0, sizeof(hash_method));
@@ -1290,7 +1309,6 @@ UCHAR test_iv[16];
 
     /* tls_send_record failed while calling tls_record_hash_initialize. */
     server_tls_session.nx_secure_tls_local_session_active = 1;
-    NX_CRYPTO_METHOD test_method;
     memset(&test_method, 0, sizeof(test_method));
     test_ciphersuite.nx_secure_tls_session_cipher = &test_method;
     test_method.nx_crypto_algorithm = 0;
@@ -1363,7 +1381,6 @@ UCHAR test_iv[16];
     _nx_secure_tls_process_remote_certificate(&server_tls_session, CertMsg, sizeof(CertMsg), 0);
 
     /* Tests for tls_generate_keys. */
-    NX_CRYPTO_METHOD test_crypto_method, test_auth_method;
     /* Unknown crypto algorithm. */
     test_crypto_method.nx_crypto_algorithm = 0xff;
     test_auth_method.nx_crypto_algorithm = 0xff;
