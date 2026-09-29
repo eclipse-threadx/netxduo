@@ -270,14 +270,44 @@ ULONG                cert_buf_size;
         /* Check for TLS 1.3 extensions following each certificate. */
         if(tls_session->nx_secure_tls_1_3)
         {
+            /* The two-byte extensions length has to be inside the message before
+               it can be read. */
+            if ((length + 2u) > message_length)
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+
             extensions_length = (UINT)((packet_buffer[length] << 8) + packet_buffer[length + 1]);
 
             /* Add extensions length bytes. */
             length += 2;
-            
+
+            /* This entry occupies three length bytes, the certificate, the two
+               extensions length bytes and the extensions themselves, and all of
+               that has to fit in what is left of the certificate list. Without
+               this check the subtraction below wraps, because total_length is
+               unsigned: every later bounds test then compares a three-byte field
+               against a value near its maximum and cannot fail, and the loop
+               continues with a cursor advanced by a length nothing has bounded.
+
+               The subtraction of the certificate itself is safe: the check
+               against total_length earlier in this loop has already established
+               that 3 + cert_length fits. */
+            if ((2u + extensions_length) > (total_length - (3u + cert_length)))
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+
+            /* The extensions have to be inside the message as well, since the
+               cursor is about to move past them. */
+            if ((length + extensions_length) > message_length)
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+
             /* Add extensions length to offset. */
             length += extensions_length;
-            
+
             /* Adjust the total length with our extension data. */
             total_length -= (2 + extensions_length);
         }
