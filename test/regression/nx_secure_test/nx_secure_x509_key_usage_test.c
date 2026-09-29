@@ -1,8 +1,12 @@
+// Portions of this file were generated with AI assistance.
+
 #include <stdio.h>
 
 #include "nx_secure_tls_api.h"
 
 #include "tls_test_utility.h"
+
+#ifndef NX_SECURE_DISABLE_X509
 
 static TX_THREAD thread_0;
 
@@ -13,6 +17,8 @@ static void    thread_0_entry(ULONG thread_input);
 #define DEMO_STACK_SIZE 2048
 static CHAR thread_stack[DEMO_STACK_SIZE];
 
+#endif
+
 #ifdef CTEST
 void test_application_define(void *first_unused_memory);
 void test_application_define(void *first_unused_memory)
@@ -21,27 +27,38 @@ void nx_secure_x509_key_usage_test_application_define(void *first_unused_memory)
 #endif
 {
 
+#ifndef NX_SECURE_DISABLE_X509
+
     /* Create the main thread.  */
     tx_thread_create(&thread_0, "thread 0", thread_0_entry, 0,
                      thread_stack, DEMO_STACK_SIZE,
                      4, 4, TX_NO_TIME_SLICE, TX_AUTO_START);
+#else
+
+    /* X.509 is compiled out of this configuration.  The N/A result is reported
+       from here rather than from a spawned thread: the control thread does not
+       wait for an N/A result, so one raised anywhere but on its own stack
+       reaches it after it has stopped listening.  */
+    printf("NetX Secure Test:   X509 Key Usage Test...............................N/A\n");
+    test_control_return(3);
+#endif
+
 }
+
+#ifndef NX_SECURE_DISABLE_X509
 
 static void    thread_0_entry(ULONG thread_input)
 {
     /* Print out test information banner.  */
     printf("NetX Secure Test:   X509 Key Usage Test...............................");
 
-#ifndef NX_SECURE_DISABLE_X509
     NX_SECURE_X509_KeyUsageTest();
 
     printf("SUCCESS!\n");
-#else
-    printf("N/A\n");
-#endif
-
     test_control_return(0);
 }
+
+#endif
 
 #ifndef NX_SECURE_DISABLE_X509
 

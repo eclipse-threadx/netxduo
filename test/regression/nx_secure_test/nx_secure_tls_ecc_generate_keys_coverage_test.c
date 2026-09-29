@@ -1,3 +1,5 @@
+// Portions of this file were generated with AI assistance.
+
 #include <stdio.h>
 
 #include "nx_secure_tls_api.h"
@@ -35,11 +37,12 @@ void nx_secure_tls_ecc_generate_keys_coverage_test_application_define(void *firs
     NX_Secure_TLS_ecc_generate_keys_test();
 
     printf("SUCCESS!\n");
+    test_control_return(0);
 #else
     
     printf("N/A\n");
+    test_control_return(3);
 #endif
-    test_control_return(0);
 
 }
 

@@ -1,3 +1,5 @@
+// Portions of this file were generated with AI assistance.
+
 /* This NetX test concentrates on out of order TCP data packets.  */
 
 #include   "tx_api.h"
@@ -314,6 +316,6 @@ void    netx_tcp_out_of_order_packet_max_test_application_define(void *first_unu
 #endif
 {
     printf("NetX Test:   TCP Out of Order Packet Max Test..........................N/A\n");
-    test_control_return(2);
+    test_control_return(3);
 }
 #endif /* NX_TCP_MAX_OUT_OF_ORDER_PACKETS */

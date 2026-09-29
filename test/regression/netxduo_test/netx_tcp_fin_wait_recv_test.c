@@ -1,3 +1,5 @@
+// Portions of this file were generated with AI assistance.
+
 /* This NetX test concentrates on receiving retransmitted packet when FIN is received at FIN_WAIT1/FIN_WAIT2 state.  */
 
 #include   "tx_api.h"
@@ -295,6 +297,6 @@ void    netx_tcp_fin_wait_recv_test_application_define(void *first_unused_memory
 #endif
 {
     printf("NetX Test:   TCP receive on FIN_WAIT1 and FIN_WAIT2 state..............N/A\n");
-    test_control_return(2);
+    test_control_return(3);
 }
 #endif /* NX_TCP_MAX_OUT_OF_ORDER_PACKETS */
