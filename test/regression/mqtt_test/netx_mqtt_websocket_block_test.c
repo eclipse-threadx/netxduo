@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 /* MQTT over websocket connect test.  This test case validates MQTT client connect over websocket in blocking mode. */
 
 #include   "tx_api.h"
@@ -557,7 +559,11 @@ UINT       packet_count;
         }
 #endif
         if (status)
+        {
             SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+            test_control_return(1);
+            return;
+        }
 
         /* Get connect_key.  */
         _server_connect_response_process(packet_ptr);
@@ -747,4 +753,3 @@ void       netx_mqtt_websocket_block_test_application_define(void *first_unused_
     test_control_return(3);
 }
 #endif
-

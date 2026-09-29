@@ -1580,7 +1580,8 @@ USHORT                        transmit_packet_id;
                         return(1);
                     }
 
-                    if (4u > ((ULONG)(response_packet -> nx_packet_data_end) - (ULONG)(response_packet -> nx_packet_append_ptr)))
+                    if (4u > (ULONG)((ALIGN_TYPE)(response_packet -> nx_packet_data_end) -
+                                     (ALIGN_TYPE)(response_packet -> nx_packet_append_ptr)))
                     {
                         nx_packet_release(response_packet);
 
@@ -4738,7 +4739,8 @@ UCHAR     *byte;
         return(NXD_MQTT_INTERNAL_ERROR);
     }
 
-    if (2u > ((ULONG)(packet_ptr -> nx_packet_data_end) - (ULONG)(packet_ptr -> nx_packet_append_ptr)))
+    if (2u > (ULONG)((ALIGN_TYPE)(packet_ptr -> nx_packet_data_end) -
+                     (ALIGN_TYPE)(packet_ptr -> nx_packet_append_ptr)))
     {
         nx_packet_release(packet_ptr);
 
@@ -5915,7 +5917,7 @@ NXD_MQTT_CLIENT *client_ptr = (NXD_MQTT_CLIENT *)context;
 /*    Application Code                                                    */
 /*                                                                        */
 /**************************************************************************/
-UINT _nxd_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length, UCHAR *bearer, UINT bearer_length)
+UINT _nxd_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length)
 {
 UINT status;
 
@@ -5932,8 +5934,8 @@ UINT status;
     client_ptr -> nxd_mqtt_client_websocket_host_length = host_length;
     client_ptr -> nxd_mqtt_client_websocket_uri_path = uri_path;
     client_ptr -> nxd_mqtt_client_websocket_uri_path_length = uri_path_length;
-    client_ptr -> nxd_mqtt_client_websocket_bearer = bearer;
-    client_ptr -> nxd_mqtt_client_websocket_bearer_length = bearer_length;
+    client_ptr -> nxd_mqtt_client_websocket_bearer = NX_NULL;
+    client_ptr -> nxd_mqtt_client_websocket_bearer_length = 0;
 
     /* Create WebSocket.  */
     status = nx_websocket_client_create(&client_ptr -> nxd_mqtt_client_websocket, (UCHAR *)"",
@@ -5989,7 +5991,7 @@ UINT status;
 /*    Application Code                                                    */
 /*                                                                        */
 /**************************************************************************/
-UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length, UCHAR *bearer, UINT bearer_length)
+UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length)
 {
 
     /* Validate the parameters.  */
@@ -5999,6 +6001,6 @@ UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, U
         return(NX_PTR_ERROR);
     }
 
-    return(_nxd_mqtt_client_websocket_set(client_ptr, host, host_length, uri_path, uri_path_length, bearer, bearer_length));
+    return(_nxd_mqtt_client_websocket_set(client_ptr, host, host_length, uri_path, uri_path_length));
 }
 #endif /* NXD_MQTT_OVER_WEBSOCKET */
