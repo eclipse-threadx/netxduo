@@ -1362,4 +1362,10 @@ foreach(test_case ${test_cases})
   add_executable(${test_name} ${test_case})
   target_link_libraries(${test_name} PRIVATE test_utility)
   add_test(${CMAKE_BUILD_TYPE}::${test_name} ${test_name})
+
+  # A test whose subject matter is compiled out of this configuration prints an
+  # N/A banner and exits 3, which is the suite's own N/A sentinel. This property
+  # is what makes ctest record that exit as a skip rather than as a failure.
+  set_tests_properties(${CMAKE_BUILD_TYPE}::${test_name} PROPERTIES
+                       SKIP_RETURN_CODE 3)
 endforeach()

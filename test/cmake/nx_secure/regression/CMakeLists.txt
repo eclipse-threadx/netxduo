@@ -221,4 +221,10 @@ foreach(test_case ${nx_secure_test_cases})
   # what a hang costs, not what it reports: the test still fails, and still
   # appears as a timeout in the report the evidence pack carries.
   set_tests_properties(${CMAKE_BUILD_TYPE}::${test_name} PROPERTIES TIMEOUT 180)
+
+  # A test whose subject matter is compiled out of this configuration prints an
+  # N/A banner and exits 3, which is the suite's own N/A sentinel. This property
+  # is what makes ctest record that exit as a skip rather than as a failure.
+  set_tests_properties(${CMAKE_BUILD_TYPE}::${test_name} PROPERTIES
+                       SKIP_RETURN_CODE 3)
 endforeach()

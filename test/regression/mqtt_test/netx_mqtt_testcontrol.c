@@ -272,7 +272,16 @@ void  test_control_thread_entry(ULONG thread_input)
     fclose(stream);
 #endif
 #ifdef BATCH_TEST
-    exit(test_control_failed_tests);
+    /* Report the verdict through the exit status: a failure outranks an N/A,
+       and an N/A outranks a pass.  A test whose subject matter is compiled
+       out of this configuration then reaches ctest as a skip rather than as a
+       pass.  Under CTEST the binary holds one test, so each count is 0 or 1.  */
+    if (test_control_failed_tests)
+        exit((INT)test_control_failed_tests);
+    else if (test_control_na_tests)
+        exit(3);
+    else
+        exit(0);
 #endif
 
 

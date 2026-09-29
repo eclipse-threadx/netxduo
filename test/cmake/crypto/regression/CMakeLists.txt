@@ -66,4 +66,10 @@ foreach(test_case ${crypto_test_cases})
     NAME ${CMAKE_BUILD_TYPE}::${test_name}
     COMMAND ${test_name}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..)
+
+  # A test whose subject matter is compiled out of this configuration prints an
+  # N/A banner and exits 3, which is the suite's own N/A sentinel. This property
+  # is what makes ctest record that exit as a skip rather than as a failure.
+  set_tests_properties(${CMAKE_BUILD_TYPE}::${test_name} PROPERTIES
+                       SKIP_RETURN_CODE 3)
 endforeach()
