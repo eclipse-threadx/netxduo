@@ -826,7 +826,8 @@ set(websocket_test_cases
     ${SOURCE_DIR}/websocket_test/netx_websocket_fin_test.c
     ${SOURCE_DIR}/websocket_test/netx_websocket_opcode_test.c
     ${SOURCE_DIR}/websocket_test/netx_websocket_empty_control_frame_test.c
-    ${SOURCE_DIR}/websocket_test/netx_websocket_frame_boundary_test.c)
+    ${SOURCE_DIR}/websocket_test/netx_websocket_frame_boundary_test.c
+    ${SOURCE_DIR}/websocket_test/netx_websocket_masked_frame_in_packets_test.c)
 
 set(pop3_test_cases
     ${SOURCE_DIR}/pop3_test/netx_pop3_two_mails_received_test.c
