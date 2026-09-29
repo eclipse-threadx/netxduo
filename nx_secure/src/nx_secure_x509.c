@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -23,6 +25,7 @@
 #define NX_SECURE_SOURCE_CODE
 
 #include "nx_secure_x509.h"
+#include "nx_crypto_rsa.h"
 
 static UINT _nx_secure_x509_parse_cert_data(const UCHAR *buffer, ULONG length,
                                             UINT *bytes_processed, NX_SECURE_X509_CERT *cert);
@@ -339,6 +342,14 @@ NX_SECURE_EC_PUBLIC_KEY *ec_pubkey;
          * This is due to the modulus being encoded as an ASN.1 bit string, which may
          * require padding bits to get to a multiple of 8 for byte alignment. The byte
          * represents the number of padding bits, but in X509 it should always be 0. */
+        /* The modulus is used against fixed-size buffers throughout the crypto layer, all of them
+           dimensioned for NX_CRYPTO_MAX_RSA_MODULUS_SIZE. A key beyond that, or one whose INTEGER
+           carries no leading byte to skip, is refused here rather than at each use site. */
+        if ((tlv_length < 1) || ((tlv_length - 1) > (NX_CRYPTO_MAX_RSA_MODULUS_SIZE >> 3)))
+        {
+            return(NX_SECURE_X509_INVALID_PUBLIC_KEY);
+        }
+
         cert -> nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus = tlv_data + 1;
         cert -> nx_secure_x509_public_key.rsa_public_key.nx_secure_rsa_public_modulus_length = (USHORT)(tlv_length - 1);
 
