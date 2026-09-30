@@ -1665,6 +1665,14 @@ UINT         status;
         return(NX_SECURE_X509_UNEXPECTED_ASN1_TAG);
     }
 
+    /* The leading octet of the bit string holds the number of padding bits and is
+       skipped below. A bit string with no content octets therefore holds no
+       signature, and subtracting that octet from its length would wrap. */
+    if (tlv_length == 0)
+    {
+        return(NX_SECURE_X509_INVALID_CERTIFICATE);
+    }
+
     /* Save off a pointer to the signature data and its length. */
     /* Signature has a 0 byte at the front we need to skip.
      * This is due to the data being encoded as an ASN.1 bit string, which may
