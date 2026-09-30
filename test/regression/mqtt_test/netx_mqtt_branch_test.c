@@ -8,6 +8,7 @@
 /*                                                                         */
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
+/* Portions of this file were generated with AI assistance. */
 
 /* MQTT connect test.  This test case validates MQTT client connect without username/password. */
 
@@ -29,6 +30,11 @@ extern void    test_control_return(UINT status);
 /* Define the ThreadX and NetX object control blocks...  */
 
 static TX_THREAD               ntest_0;
+static TX_THREAD               disconnect_set_thread;
+static ULONG                   disconnect_set_stack[DEMO_STACK_SIZE / sizeof(ULONG)];
+static UINT                    disconnect_set_status;
+static UINT                    initial_disconnect_calls;
+static UINT                    replacement_disconnect_calls;
 
 static NX_PACKET_POOL          pool_0;
 static NX_PACKET_POOL          pool_1;
@@ -74,6 +80,7 @@ static ULONG                   error_counter;
 /* Define thread prototypes.  */
 
 static void    ntest_0_entry(ULONG thread_input);
+static void    disconnect_set_entry(ULONG thread_input);
 extern void    _nx_ram_network_driver(struct NX_IP_DRIVER_STRUCT *driver_req);
 
 extern void SET_ERROR_COUNTER(ULONG *error_counter, CHAR *filename, int line_number);
@@ -242,6 +249,27 @@ UINT status;
 static UINT keepalive_value;
 static UINT cleansession_value;
 static UINT QoS;
+/* Keep the initial callback distinct from the replacement callback. */
+static void disconnect_notify_initial(NXD_MQTT_CLIENT *mqtt_client)
+{
+    (void)mqtt_client;
+    initial_disconnect_calls++;
+}
+
+/* Provide the callback installed by the worker thread. */
+static void disconnect_notify_replacement(NXD_MQTT_CLIENT *mqtt_client)
+{
+    (void)mqtt_client;
+    replacement_disconnect_calls++;
+}
+
+/* Replace the callback while the other test thread holds the client mutex. */
+static void disconnect_set_entry(ULONG thread_input)
+{
+    (void)thread_input;
+    disconnect_set_status = nxd_mqtt_client_disconnect_notify_set(client_ptr, disconnect_notify_replacement);
+}
+
 /* Define the test threads.  */
 /* This thread sets up MQTT client and performs multiple branch tests on different APIs. */
 static void    ntest_0_entry(ULONG thread_input)
@@ -314,6 +342,44 @@ UINT        i;
     if(status != NXD_MQTT_MUTEX_FAILURE)
         SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
     client_ptr -> nxd_mqtt_client_mutex_ptr->tx_mutex_id = TX_MUTEX_ID;
+
+    /* Reject a callback update when the client mutex cannot be acquired. */
+    status = nxd_mqtt_client_disconnect_notify_set(client_ptr, disconnect_notify_initial);
+    if (status != NXD_MQTT_SUCCESS)
+        SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+    client_ptr -> nxd_mqtt_client_mutex_ptr -> tx_mutex_id = 0;
+    status = nxd_mqtt_client_disconnect_notify_set(client_ptr, disconnect_notify_replacement);
+    if ((status != NXD_MQTT_MUTEX_FAILURE) ||
+        (client_ptr -> nxd_mqtt_disconnect_notify != disconnect_notify_initial))
+        SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+    client_ptr -> nxd_mqtt_client_mutex_ptr -> tx_mutex_id = TX_MUTEX_ID;
+
+    /* The worker must wait for the client mutex before updating the callback. */
+    status = tx_mutex_get(client_ptr -> nxd_mqtt_client_mutex_ptr, TX_WAIT_FOREVER);
+    if (status != TX_SUCCESS)
+        SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+    if (status == TX_SUCCESS)
+    {
+        status = tx_thread_create(&disconnect_set_thread, "disconnect setter", disconnect_set_entry, 0,
+                                  disconnect_set_stack, sizeof(disconnect_set_stack),
+                                  3, 3, TX_NO_TIME_SLICE, TX_AUTO_START);
+        if (status != TX_SUCCESS)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+        else if ((disconnect_set_thread.tx_thread_state != TX_MUTEX_SUSP) ||
+                 (client_ptr -> nxd_mqtt_disconnect_notify != disconnect_notify_initial))
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+        if (tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr) != TX_SUCCESS)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+        if (status == TX_SUCCESS)
+        {
+            if ((disconnect_set_thread.tx_thread_state != TX_COMPLETED) ||
+                (disconnect_set_status != NXD_MQTT_SUCCESS) ||
+                (client_ptr -> nxd_mqtt_disconnect_notify != disconnect_notify_replacement))
+                SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+            if (tx_thread_delete(&disconnect_set_thread) != TX_SUCCESS)
+                SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+        }
+    }
 
     /* Test invalid mutex ptr on sub_unsub. */
     client_ptr -> nxd_mqtt_client_mutex_ptr -> tx_mutex_id = 0;
@@ -405,5 +471,3 @@ UINT        i;
         test_control_return(0);
     }
 }
-
- 
