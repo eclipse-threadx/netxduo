@@ -1,3 +1,5 @@
+// Portions of this file were generated with AI assistance.
+
 /* This test concentrates on different payload size for TLS record.  */
 
 #include   "nx_api.h"
@@ -264,7 +266,11 @@ UINT i;
 
     server_tls_setup(&tls_server_session_0);
 
-    status = nx_tcp_server_socket_accept(&server_socket_0, NX_WAIT_FOREVER);
+    /* The bound on this and on every wait below is the one the client's send
+       loop already uses, and the longest this test waits anywhere.  The peer is
+       the other thread of the same process, so a wait that expires means the
+       exchange did not happen rather than that more time would help.  */
+    status = nx_tcp_server_socket_accept(&server_socket_0, NX_IP_PERIODIC_RATE * 5);
     if (status)
     {
         ERROR_COUNTER();
@@ -272,18 +278,23 @@ UINT i;
 
     /* Start TLS session. */
     status = nx_secure_tls_session_start(&tls_server_session_0, &server_socket_0,
-                                          NX_WAIT_FOREVER);
+                                          NX_IP_PERIODIC_RATE * 5);
     if (status)
     {
         ERROR_COUNTER();
     }
 
     for (i = 1; i < BUFFER_SIZE; i++)
-    {        
-        status = nx_secure_tls_session_receive(&tls_server_session_0, &packet_ptr, NX_WAIT_FOREVER);
+    {
+        status = nx_secure_tls_session_receive(&tls_server_session_0, &packet_ptr, NX_IP_PERIODIC_RATE * 5);
         if (status)
         {
+
+            /* Leave the loop rather than serve out 8,190 more bounds on a
+               session that is already gone, and without reading packet_ptr,
+               which a failed receive does not set.  */
             ERROR_COUNTER();
+            break;
         }
 
         memset(response_buffer, 0, i);
@@ -358,7 +369,7 @@ const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_ptr;
     client_tls_setup(&tls_client_session_0);
 
     status =  nxd_tcp_client_socket_connect(&client_socket_0, &server_address, SERVER_PORT,
-                                            NX_WAIT_FOREVER);
+                                            NX_IP_PERIODIC_RATE * 5);
     if (status)
     {
         ERROR_COUNTER();
@@ -366,7 +377,7 @@ const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_ptr;
 
     /* Start TLS session. */
     status = nx_secure_tls_session_start(&tls_client_session_0, &client_socket_0,
-                                          NX_WAIT_FOREVER);
+                                          NX_IP_PERIODIC_RATE * 5);
     if (status)
     {
         ERROR_COUNTER();

@@ -216,8 +216,8 @@ foreach(test_case ${nx_secure_test_cases})
   # A hung test here costs the shared runner's 1000-second ctest timeout, and
   # four of them hang in almost every configuration, which is 63 timeouts and
   # about four and a half hours of the job's wall clock. The slowest test that
-  # actually passes takes 63 seconds and every other one is under 32, so this
-  # bounds a hang at roughly three times the slowest real result. It changes
+  # actually passes takes 48 seconds and every other one is under 24, so this
+  # bounds a hang at nearly four times the slowest real result. It changes
   # what a hang costs, not what it reports: the test still fails, and still
   # appears as a timeout in the report the evidence pack carries.
   set_tests_properties(${CMAKE_BUILD_TYPE}::${test_name} PROPERTIES TIMEOUT 180)

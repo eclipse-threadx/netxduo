@@ -1,3 +1,5 @@
+// Portions of this file were generated with AI assistance.
+
 /* This tests that in NX_PPP_IPCP_CONFIGURE_REQUEST_ACKED_STATE state, we can send the correct NAK.  */
 
 #include "tx_api.h"
@@ -212,8 +214,10 @@ NX_PACKET   *my_packet;
         error_counter++;
     }
 
-    /* Bind the UDP socket to the IP port.  */
-    status =  nx_udp_socket_bind(&socket_0, 0x88, TX_WAIT_FOREVER);
+    /* Bind the UDP socket to the IP port.  The bound is the one this test
+       already waits for its link, and nothing else claims port 0x88, so a wait
+       that expires is a failure to report rather than one to sit out.  */
+    status =  nx_udp_socket_bind(&socket_0, 0x88, 30 * NX_IP_PERIODIC_RATE);
 
     /* Check status.  */
     if (status)
@@ -228,22 +232,33 @@ NX_PACKET   *my_packet;
     tx_thread_relinquish();
 
     /* Allocate a packet.  */
-    status =  nx_packet_allocate(&pool_0, &my_packet, NX_UDP_PACKET, TX_WAIT_FOREVER);
-
-    /* Check status.  */
-    if (status != NX_SUCCESS)
-        error_counter++;
-
-    /* Write ABCs into the packet payload!  */
-    nx_packet_data_append(my_packet, DEMO_DATA, sizeof(DEMO_DATA), &pool_0, TX_WAIT_FOREVER);
-
-    /* Send the UDP packet.  */
-    status =  nx_udp_socket_send(&socket_0, my_packet, IP_ADDRESS(1, 2, 3, 5), 0x89);
+    status =  nx_packet_allocate(&pool_0, &my_packet, NX_UDP_PACKET, 30 * NX_IP_PERIODIC_RATE);
 
     /* Check status.  */
     if (status != NX_SUCCESS)
     {
         error_counter++;
+    }
+    else
+    {
+
+        /* Write ABCs into the packet payload!  */
+        status =  nx_packet_data_append(my_packet, DEMO_DATA, sizeof(DEMO_DATA), &pool_0, 30 * NX_IP_PERIODIC_RATE);
+
+        /* Check status.  */
+        if (status != NX_SUCCESS)
+        {
+            error_counter++;
+        }
+
+        /* Send the UDP packet.  */
+        status =  nx_udp_socket_send(&socket_0, my_packet, IP_ADDRESS(1, 2, 3, 5), 0x89);
+
+        /* Check status.  */
+        if (status != NX_SUCCESS)
+        {
+            error_counter++;
+        }
     }
 
     while(thread_1_alive)
@@ -286,32 +301,40 @@ NX_PACKET   *my_packet;
     if (status)
     {
         error_counter++;
+        thread_1_alive = NX_FALSE;
         return;
     }
 
     /* Bind the UDP socket to the IP port.  */
-    status =  nx_udp_socket_bind(&socket_1, 0x89, TX_WAIT_FOREVER);
+    status =  nx_udp_socket_bind(&socket_1, 0x89, 30 * NX_IP_PERIODIC_RATE);
 
     /* Check status.  */
     if (status)
     {
         error_counter++;
+        thread_1_alive = NX_FALSE;
         return;
     }
 
-    /* Receive a UDP packet.  */
-    status =  nx_udp_socket_receive(&socket_1, &my_packet, TX_WAIT_FOREVER);
+    /* Receive a UDP packet.  The sender is the thread that let this one run, so
+       a wait that expires means the exchange did not happen at all.  */
+    status =  nx_udp_socket_receive(&socket_1, &my_packet, 30 * NX_IP_PERIODIC_RATE);
 
     /* Check status.  */
     if (status != NX_SUCCESS)
+    {
         error_counter++;
+    }
+    else
+    {
 
-    /* Release the packet.  */
-    status =  nx_packet_release(my_packet);
+        /* Release the packet.  */
+        status =  nx_packet_release(my_packet);
 
-    /* Check status.  */
-    if (status != NX_SUCCESS)
-        error_counter++;
+        /* Check status.  */
+        if (status != NX_SUCCESS)
+            error_counter++;
+    }
 
     thread_1_alive = NX_FALSE;
 
