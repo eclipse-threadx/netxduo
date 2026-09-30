@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* 9.18 TCP, in ESTABLISHED state, MUST return to CLOSED state on RESET.  */
 
 /* RFC 793, Section 3.9, page 70, Event Processing. 

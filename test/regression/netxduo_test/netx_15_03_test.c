@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* 15.03 If a retransmitted packet is identical to the original packet, then the same IP identification field MAY be used.  */
 
 /* Procedure

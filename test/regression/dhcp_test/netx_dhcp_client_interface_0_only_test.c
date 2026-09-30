@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* Testing the multiple interface DHCP Client */
 
 /* This is a test of the default DHCP Client configuration; one interface (primary interface) is configured.

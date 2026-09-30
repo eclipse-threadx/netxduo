@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This NetX test concentrates on the code coverage for ICMPv6 functions,
  * _nx_icmpv6_DAD_failure.c
  * _nx_icmpv6_dest_table_find.c

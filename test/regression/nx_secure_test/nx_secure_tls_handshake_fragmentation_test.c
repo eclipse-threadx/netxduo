@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This test concentrates on fragmented TLS handshake message across multiple TLS records 
 (e.g. when a certificate message is splitted into multiple fragments).
 The Cipher Suite used was TLS_RSA_WITH_AES_128_GCM_SHA256 (0x009c). */

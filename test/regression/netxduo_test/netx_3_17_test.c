@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* 3.17 TCP in SYN-SENT state MUST send RST after receiving a segment carrying 
    an unacceptable ACK and send the SYN again, SEQ number is taken from SEG.ACK.  */
 

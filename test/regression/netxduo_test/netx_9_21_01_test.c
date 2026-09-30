@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* 9.21 TCP, in CLOSING, LAST-ACK state, MUST return to CLOSED state on receiving a RST.  */
 
 /*9.21.1 test the TCP in LAST-ACK state*/

@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* Get_Integers_Large_and_Neg_Numbers.c  */
 
 /* Set 255 1.3.6.1.2.1.4.1.0 Frame 28223 (85 bytes) */

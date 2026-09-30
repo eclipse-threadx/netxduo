@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* If the client's request is invalid, servers SHOULD respond with a DHCPNAK message to the client.
  * rfc 2131, page 18, 3.1 Client-server interaction - allocating a network address
  */

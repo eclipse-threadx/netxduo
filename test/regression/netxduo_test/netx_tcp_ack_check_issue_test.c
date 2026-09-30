@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This NetX test concentrates a bug in nx_tcp_socket_state_ack_check.c.  */
 /* When the packet is in TCP transmit queue but not sent by driver yet, 
  * an incoming ACK packet will trigger an ACK response. That is a bug. */

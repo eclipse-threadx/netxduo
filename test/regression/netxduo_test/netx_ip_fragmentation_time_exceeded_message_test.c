@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This NetX test concentrates on ICMP Time Exceeded Message for IP fragmentation.  */
 /* Requirement: __PRODUCT_NETXDUO__ is defined, NX_DISABLE_ICMPV4_ERROR_MESSAGE is not defined. NX_DISABLE_FRAGMENTATION is not defined. */
 /* Test sequence:

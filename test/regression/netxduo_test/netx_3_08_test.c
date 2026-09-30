@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* 3.8 TCP, in LISTEN state, MUST send a RST after receiving a spurious SYN,ACK that potentially corresponds to an old SYN.  */
 
 #include   "tx_api.h"

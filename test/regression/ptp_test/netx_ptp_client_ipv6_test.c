@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* PTP IPv6 test.  This test case validates PTP client synchronize over IPv6. 
    To run this test case, NetXDuo must be built with NX_ENABLE_IPV6_MULTICAST and FEATURE_NX_IPV6.
 */

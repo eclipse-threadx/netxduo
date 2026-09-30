@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* 6.24 If RECEIVE call arrives on CLOSE-WAIT state and there is no data awaiting delivery, TCP MUST respond error: connection closing to the application.  */
 
 /* Procedure

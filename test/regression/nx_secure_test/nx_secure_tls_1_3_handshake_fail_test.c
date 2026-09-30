@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This test TLS 1.3 client with OpenSSL server.  */
 /* openssl s_server -key ECTestServer2.key -cert ECTestServer2.crt -tls1_3 -rev */
 

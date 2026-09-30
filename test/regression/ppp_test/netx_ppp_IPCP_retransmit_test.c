@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This tests that in NX_PPP_IPCP_CONFIGURE_REQUEST_ACKED_STATE state, we can send the correct NAK.  */
 
 #include "tx_api.h"

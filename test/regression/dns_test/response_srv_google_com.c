@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /*
 No.     Time        Source                Destination           Protocol    Length     Info
 10    2.964289000        192.168.0.1            192.168.0.105               DNS     293        Yes    Standard query response 0x0002 SRV 5 0 5222 xmpp.l.google.com SRV 20 0 5222 alt3.xmpp.l.google.com SRV 20 0 5222 alt2.xmpp.l.google.com SRV 20 0 5222 alt4.xmpp.l.google.com SRV 20 0 5222 alt1.xmpp.l.google.com

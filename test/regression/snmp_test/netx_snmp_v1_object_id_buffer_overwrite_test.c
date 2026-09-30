@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This NetX test concentrates on the basic SNMPv1 operation.  The 'manager' sends
    a request for an unknown item ("oid"). The SNMP agent should not responds, but
    set an internal error and be able to respond to the next request. 

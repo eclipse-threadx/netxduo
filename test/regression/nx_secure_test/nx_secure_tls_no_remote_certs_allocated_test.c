@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This test concentrates on TLS CertificateVerify message processing,
    but doesn't allocate certificates - this tests the internal certificate
    in-place parsing and allocation within the CertificateVerify context.  */

@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This NetX test concentrates on the basic SNMPv2 operation.  The 'manager' sends
    three requests, Get, Get Next, and Get Bulk, and the SNMP agent responds.  A successful
    result means the Agent received and sent the expected number of messages, and no 

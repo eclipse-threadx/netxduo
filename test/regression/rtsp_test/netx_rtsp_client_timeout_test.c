@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This case tests:
    1. Client 0 and client 1 connect to RTSP server;
    2. CLient 2 tries to connect to RTSP server but fails because the NX_RTSP_SERVER_MAX_CLIENTS is 2;

@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* As the client has not received its network address, it MUST NOT fill in the 'ciaddr' field. And servers with knowledge of 
  * the client's configuration parameters respond with a DHCPACK message to the client.
  * rfc 2131, page 18, 3.2 Client-server interaction - resuing a previously allocated network address

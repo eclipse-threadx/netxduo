@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 #include    "nx_api.h"
 #if defined __PRODUCT_NETXDUO__ && !defined NX_DISABLE_IPV4
 #include    "netx_mdns_test.h"

@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /*
 No.     Time        Source                Destination           Protocol    Length     Info
 237    10.385804000    192.168.0.1            192.168.0.105             DNS         164        Yes    Standard query response 0x0002 TXT

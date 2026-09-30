@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* DHCPREQUEST generated during REBINDING state: 'server identifier' MUST NOT be filled in, 'requested IP address' option MUST NOT 
  * be filled in, 'ciaddr' MUST be filled in with client's IP address.
  * rfc 2131, page 32, 4.3.2 DHCPREQUEST message

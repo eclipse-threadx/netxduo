@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This NetX test concentrates on the ARP dynamic entry timeouts on NX_ARP_MAXIMUM_RETRIES * NX_ARP_UPDATE_RATE operation.  */
 
 #include   "tx_api.h"

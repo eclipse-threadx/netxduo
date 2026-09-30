@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* 9.17 TCP, in SYN-RCVD state, reached through active OPEN, MUST inform "connection refused" to application on recv a RST.
    and socket state MUST go to CLOSED state on RST.*/
 

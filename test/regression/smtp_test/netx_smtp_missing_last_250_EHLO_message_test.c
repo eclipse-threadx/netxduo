@@ -1,3 +1,13 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation 
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ * 
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
 /* This NetX tests the SMTP client for handling a server 250 reply to EHLO which has multiple
    250 parameters but none of them have the 'final' 250 code e.g. 250 followed by space. 
    Therefore the SMTP client should abort the connection.  The simulated server should not
