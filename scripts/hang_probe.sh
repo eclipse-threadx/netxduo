@@ -27,6 +27,31 @@ out="$build_dir/hang_probe.txt"
 hz=$(getconf CLK_TCK 2>/dev/null || echo 100)
 
 declare -A reported
+declare -A seen
+observed=0
+longest=0
+fired=0
+
+# Always write the file, and write it before anything can go wrong, so that an
+# empty report is evidence the watchdog ran and saw nothing rather than evidence
+# it never started. A probe whose silence cannot be told from its absence is
+# worth nothing, which is the same trap the cleanup walk fell into.
+{
+    echo "hang probe started $(date -Is)"
+    echo "  build directory $build_dir"
+    echo "  threshold ${threshold}s, ctest timeout is 1000s"
+} > "$out"
+
+finish() {
+    {
+        echo "hang probe stopping $(date -Is)"
+        echo "  test processes seen: $observed"
+        echo "  longest observed: ${longest}s"
+        echo "  reported as outliving the threshold: $fired"
+    } >> "$out"
+    exit 0
+}
+trap finish TERM INT
 
 sample() {
     local pid=$1 name=$2 tag=$3
@@ -44,17 +69,30 @@ sample() {
                  "syscall=$(cat "$t/syscall" 2>/dev/null)"
         done
         # The load addresses, so a futex word in the syscall arguments above can be
-        # resolved to a symbol offline without needing the live process.
+        # resolved to a symbol offline without needing the live process.  The syscall
+        # line is empty without privilege to read it; the state, wchan and CPU
+        # counters are not, and they are what separate a stall from a slow test.
         echo "  --- load addresses"
         grep -E ' r-xp .*(regression/|lib.*\.so)' "/proc/$pid/maps" 2>/dev/null | sed 's/^/  /'
     } >> "$out" 2>/dev/null
 }
 
+last_beat=$SECONDS
+
 while true; do
+    # A sparse heartbeat, so that a watchdog which dies part way through a
+    # multi-hour job leaves a record that stops rather than one that never
+    # started. Ten minutes is far below the threshold and costs one line.
+    if [ $((SECONDS - last_beat)) -ge 600 ]; then
+        echo "  alive $(date -Is): seen $observed, longest ${longest}s, reported $fired" >> "$out"
+        last_beat=$SECONDS
+    fi
+
     for pd in /proc/[0-9]*; do
         pid=${pd#/proc/}
         exe=$(readlink "$pd/exe" 2>/dev/null) || continue
         case "$exe" in "$build_dir"/*) ;; *) continue ;; esac
+        if [ -z "${seen[$pid]:-}" ]; then seen[$pid]=1; observed=$((observed+1)); fi
         [ -n "${reported[$pid]:-}" ] && continue
         # Elapsed from /proc rather than ps, which a minimal container may not carry.
         # Field 22 of stat is the start time in clock ticks since boot. The comm field
@@ -65,8 +103,10 @@ while true; do
         [ -z "$starttime" ] && continue
         uptime=$(awk '{print int($1)}' /proc/uptime 2>/dev/null)
         elapsed=$(( uptime - starttime / hz ))
+        [ "$elapsed" -gt "$longest" ] && longest=$elapsed
         if [ "$elapsed" -ge "$threshold" ]; then
             reported[$pid]=1
+            fired=$((fired+1))
             name=$(basename "$exe")
             for k in 1 2 3; do
                 kill -0 "$pid" 2>/dev/null || { echo "  exited before sample $k" >> "$out"; break; }
