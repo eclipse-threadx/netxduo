@@ -195,7 +195,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "(c) 2024 Microsoft Corp. (c) 2026-present Eclipse ThreadX Contributors.  *  NetX Duo Cortex-R4/AC5 Version 6.5.1.202602 *";
+                                    "(c) 2024 Microsoft Corp. (c) 2026-present Eclipse ThreadX Contributors.  *  NetX Duo Cortex-R4/AC5 Version 6.5.2.202603 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif
