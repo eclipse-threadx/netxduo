@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -21,6 +23,9 @@
 /**************************************************************************/
 
 #define NX_PPP_SOURCE_CODE
+
+/* Limit receive work so other PPP events can run during sustained input.  */
+#define NX_PPP_RECEIVE_BATCH_SIZE 16
 
 
 /* Force error checking to be disabled in this module */
@@ -151,9 +156,11 @@ TX_INTERRUPT_SAVE_AREA
 
 NX_PPP      *ppp_ptr;
 ULONG       ppp_events;
+ULONG       pending_events;
 NX_PACKET   *packet_ptr;
 NX_PACKET   *next_packet_ptr;
 ULONG       count;
+USHORT      receive_read_index;
 
 
     /* Setup the PPP pointer.  */
@@ -426,22 +433,50 @@ ULONG       count;
         if (ppp_events & NX_PPP_EVENT_PACKET_RECEIVE)
         { 
 
-            /* Pickup the next PPP packet from serial port to process. This is called whether an event was set or not
-               simply to handle the case when a non-PPP frame is received.  */
-            _nx_ppp_receive_packet_get(ppp_ptr, &packet_ptr);
-
-            /* Now determine if there is a packet to process.  */
-            if (packet_ptr)
+            /* Process buffered frames, including frames following a discarded one.  */
+            count =  0;
+            do
             {
+                receive_read_index =  ppp_ptr -> nx_ppp_serial_buffer_read_index;
+                _nx_ppp_receive_packet_get(ppp_ptr, &packet_ptr);
+
+                /* Process a complete PPP frame.  */
+                if (packet_ptr)
+                {
 
 #ifdef NX_PPP_DEBUG_LOG_ENABLE
 
-                /* Insert an entry into the PPP frame debug log.  */
-                _nx_ppp_debug_log_capture(ppp_ptr, 'R', packet_ptr);
+                    /* Insert an entry into the PPP frame debug log.  */
+                    _nx_ppp_debug_log_capture(ppp_ptr, 'R', packet_ptr);
 #endif
 
-                /* Yes, call the PPP packet processing routine.  */
-                _nx_ppp_receive_packet_process(ppp_ptr, packet_ptr);
+                    /* Call the PPP packet processing routine.  */
+                    _nx_ppp_receive_packet_process(ppp_ptr, packet_ptr);
+
+                    /* Apply a pending stop before reading another frame.  */
+                    if (tx_event_flags_get(&(ppp_ptr -> nx_ppp_event), NX_PPP_EVENT_STOP,
+                                           TX_OR, &pending_events, TX_NO_WAIT) == TX_SUCCESS)
+                    {
+                        break;
+                    }
+                }
+
+                /* Wait for more input when the parser cannot consume a byte.  */
+                if ((packet_ptr == NX_NULL) &&
+                    (receive_read_index == ppp_ptr -> nx_ppp_serial_buffer_read_index))
+                {
+                    break;
+                }
+
+                count++;
+            } while ((count < NX_PPP_RECEIVE_BATCH_SIZE) &&
+                     ppp_ptr -> nx_ppp_serial_buffer_byte_count);
+
+            /* Schedule remaining buffered frames after other pending events.  */
+            if ((count == NX_PPP_RECEIVE_BATCH_SIZE) &&
+                ppp_ptr -> nx_ppp_serial_buffer_byte_count)
+            {
+                tx_event_flags_set(&(ppp_ptr -> nx_ppp_event), NX_PPP_EVENT_PACKET_RECEIVE, TX_OR);
             }
         }
 
@@ -8467,6 +8502,7 @@ UINT  _nx_ppp_byte_receive(NX_PPP *ppp_ptr, UCHAR byte)
 {
 
 TX_INTERRUPT_SAVE_AREA
+UINT        escape_complete;
 
 
     /* Disable interrupts.  */
@@ -8516,6 +8552,10 @@ TX_INTERRUPT_SAVE_AREA
 
     /* Otherwise, PPP is active and there is room in the buffer!  */
 
+    /* Wake the parser when this byte completes a pending escape sequence.  */
+    escape_complete =  (ppp_ptr -> nx_ppp_serial_buffer_byte_count == 1) &&
+                       (ppp_ptr -> nx_ppp_serial_buffer[ppp_ptr -> nx_ppp_serial_buffer_read_index] == 0x7d);
+
     /* Place the byte in the buffer.  */
     ppp_ptr -> nx_ppp_serial_buffer[ppp_ptr -> nx_ppp_serial_buffer_write_index++] =  byte;
 
@@ -8541,7 +8581,7 @@ TX_INTERRUPT_SAVE_AREA
 
     /* Determine if the PPP receive thread needs to be alerted.  */
     if ((ppp_ptr -> nx_ppp_serial_buffer_byte_count >= NX_PPP_SERIAL_BUFFER_ALERT_THRESHOLD) ||
-        (byte == 0x7e))
+        (byte == 0x7e) || escape_complete)
     {
 
         /* Yes, alert the receiving thread that a byte is available for processing.  */

@@ -836,6 +836,7 @@ set(pop3_test_cases
     ${SOURCE_DIR}/pop3_test/netx_pop3_abnormal_packet_test.c)
 
 set(ppp_test_cases
+    ${SOURCE_DIR}/ppp_test/netx_ppp_receive_burst_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_PAP_bad_password_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_check_boundary_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_IPCP_timeout.c
