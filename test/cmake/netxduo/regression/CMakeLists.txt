@@ -117,6 +117,7 @@ set(dhcp_test_cases
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_secondary_interface_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_interface_order_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_ip_mutex_test.c
+    ${SOURCE_DIR}/dhcp_test/netx_dhcp_final_probe_wait_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_server_source_port_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_ntp_option_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_parameter_request_test.c
