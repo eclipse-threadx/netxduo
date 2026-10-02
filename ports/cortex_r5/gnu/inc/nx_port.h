@@ -174,7 +174,7 @@
 
 #ifdef NX_SYSTEM_INIT
 CHAR                            _nx_version_id[] = 
-                                    "Copyright (c) 2024 Microsoft Corporation.  *  NetX Cortex-R5/GNU Version 6.4.1 *";
+                                    "Copyright (c) 2024 Microsoft Corporation.  *  NetX Cortex-R5/GNU Version 6.5.2.202603 *";
 #else
 extern  CHAR                    _nx_version_id[];
 #endif

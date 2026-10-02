@@ -457,8 +457,8 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 #define AZURE_RTOS_NETXDUO
 #define NETXDUO_MAJOR_VERSION                    6
 #define NETXDUO_MINOR_VERSION                    5
-#define NETXDUO_PATCH_VERSION                    1
-#define NETXDUO_BUILD_VERSION                    202602
+#define NETXDUO_PATCH_VERSION                    2
+#define NETXDUO_BUILD_VERSION                    202603
 #define NETXDUO_HOTFIX_VERSION                   ' '
 
 /* Define the following symbols for backward compatibility */
