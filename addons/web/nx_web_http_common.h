@@ -136,7 +136,7 @@ extern   "C" {
 #define NX_WEB_HTTP_STATUS_CODE_RESET_CONTENT          0x30020        /* "205 Reset Content"                                  */
 #define NX_WEB_HTTP_STATUS_CODE_PARTIAL_CONTENT        0x30021        /* "206 Partial Content"                                */
 #define NX_WEB_HTTP_STATUS_CODE_MULTIPLE_CHOICES       0x30022        /* "300 Multiple Choices"                               */
-#define NX_WEB_HTTP_STATUS_CODE_MOVED_PERMANETLY       0x30023        /* "301 Moved Permanently"                              */
+#define NX_WEB_HTTP_STATUS_CODE_MOVED_PERMANENTLY      0x30023        /* "301 Moved Permanently"                              */
 #define NX_WEB_HTTP_STATUS_CODE_FOUND                  0x30024        /* "302 Found"                                          */
 #define NX_WEB_HTTP_STATUS_CODE_SEE_OTHER              0x30025        /* "303 See Other"                                      */
 #define NX_WEB_HTTP_STATUS_CODE_NOT_MODIFIED           0x30026        /* "304 Not Modified"                                   */
@@ -167,7 +167,29 @@ extern   "C" {
 #define NX_WEB_HTTP_STATUS_CODE_GATEWAY_TIMEOUT        0x3003F        /* "504 Gateway Time-out"                               */
 #define NX_WEB_HTTP_STATUS_CODE_VERSION_ERROR          0x30040        /* "505 HTTP Version not supported"                     */
 #define NX_WEB_HTTP_STATUS_CODE_TOO_MANY_REQUESTS      0x30041        /* "429 Too Many Requests"                              */
+#define NX_WEB_HTTP_STATUS_CODE_PROCESSING             0x30042        /* "102 Processing"                                     */
+#define NX_WEB_HTTP_STATUS_CODE_EARLY_HINTS            0x30043        /* "103 Early Hints"                                    */
+#define NX_WEB_HTTP_STATUS_CODE_MULTI_STATUS           0x30044        /* "207 Multi-Status"                                   */
+#define NX_WEB_HTTP_STATUS_CODE_ALREADY_REPORTED       0x30045        /* "208 Already Reported"                               */
+#define NX_WEB_HTTP_STATUS_CODE_IM_USED                0x30046        /* "226 IM Used"                                        */
+#define NX_WEB_HTTP_STATUS_CODE_PERMANENT_REDIRECT     0x30047        /* "308 Permanent Redirect"                             */
+#define NX_WEB_HTTP_STATUS_CODE_IM_A_TEAPOT            0x30048        /* "418 I'm a teapot"                                   */
+#define NX_WEB_HTTP_STATUS_CODE_MISDIRECTED_REQUEST    0x30049        /* "421 Misdirected Request"                            */
+#define NX_WEB_HTTP_STATUS_CODE_UNPROCESSABLE_CONTENT  0x3004A        /* "422 Unprocessable Content"                          */
+#define NX_WEB_HTTP_STATUS_CODE_LOCKED                 0x3004B        /* "423 Locked"                                         */
+#define NX_WEB_HTTP_STATUS_CODE_FAILED_DEPENDENCY      0x3004C        /* "424 Failed Dependency"                              */
+#define NX_WEB_HTTP_STATUS_CODE_TOO_EARLY              0x3004D        /* "425 Too Early"                                      */
+#define NX_WEB_HTTP_STATUS_CODE_UPGRADE_REQUIRED       0x3004E        /* "426 Upgrade Required"                               */
+#define NX_WEB_HTTP_STATUS_CODE_PRECONDITION_REQUIRED  0x3004F        /* "428 Precondition Required"                          */
+#define NX_WEB_HTTP_STATUS_CODE_REQUEST_HEADER_FIELDS_TOO_LARGE 0x30050        /* "431 Request Header Fields Too Large"                */
+#define NX_WEB_HTTP_STATUS_CODE_UNAVAILABLE_FOR_LEGAL_REASONS   0x30051        /* "451 Unavailable For Legal Reasons"                  */
+#define NX_WEB_HTTP_STATUS_CODE_VARIANT_ALSO_NEGOTIATES         0x30052        /* "506 Variant Also Negotiates"                        */
+#define NX_WEB_HTTP_STATUS_CODE_INSUFFICIENT_STORAGE   0x30053        /* "507 Insufficient Storage"                           */
+#define NX_WEB_HTTP_STATUS_CODE_LOOP_DETECTED          0x30054        /* "508 Loop Detected"                                  */
+#define NX_WEB_HTTP_STATUS_CODE_NOT_EXTENDED           0x30055        /* "510 Not Extended"                                   */
+#define NX_WEB_HTTP_STATUS_CODE_NETWORK_AUTHENTICATION_REQUIRED 0x30056        /* "511 Network Authentication Required"                */
 #define NX_WEB_HTTP_AUTHENTICATION_ERROR               NX_WEB_HTTP_STATUS_CODE_UNAUTHORIZED        /* HTTP client authentication failed                    */
+#define NX_WEB_HTTP_STATUS_CODE_MOVED_PERMANETLY       NX_WEB_HTTP_STATUS_CODE_MOVED_PERMANENTLY   /* Keep typo to not break existing code                 */
 
 /* Define the HTTP Server TCP port number */
 
