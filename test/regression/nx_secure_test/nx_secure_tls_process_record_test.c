@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 /* This test concentrates on TLS ECC ciphersuites negotiation.  */
 
 #include "nx_api.h"
@@ -46,6 +48,41 @@ static UINT test_crypto_operation_success(UINT op,       /* Encrypt, Decrypt, Au
                                 VOID (*nx_crypto_hw_process_callback)(VOID *packet_ptr, UINT status))
 {
     return NX_CRYPTO_SUCCESS;
+}
+
+static UINT test_crypto_operation_copy(UINT op,       /* Encrypt, Decrypt, Authenticate */
+                                VOID *handler, /* Crypto handler */
+                                struct NX_CRYPTO_METHOD_STRUCT *method,
+                                UCHAR *key,
+                                NX_CRYPTO_KEY_SIZE key_size_in_bits,
+                                UCHAR *input,
+                                ULONG input_length_in_byte,
+                                UCHAR *iv_ptr,
+                                UCHAR *output,
+                                ULONG output_length_in_byte,
+                                VOID *crypto_metadata,
+                                ULONG crypto_metadata_size,
+                                VOID *packet_ptr,
+                                VOID (*nx_crypto_hw_process_callback)(VOID *packet_ptr, UINT status))
+{
+    if (op == NX_CRYPTO_DECRYPT_UPDATE)
+    {
+        memcpy(output, input, input_length_in_byte);
+    }
+
+    return NX_CRYPTO_SUCCESS;
+}
+
+static UINT test_verify_empty_record(const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite,
+                                     UCHAR *mac_secret,
+                                     ULONG sequence_num[NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE],
+                                     UCHAR *header_data, USHORT header_length,
+                                     NX_PACKET *packet_ptr, ULONG offset, UINT *length,
+                                     VOID *hash_mac_metadata, ULONG hash_mac_metadata_size)
+{
+    *length = 0;
+    sequence_num[0]++;
+    return(NX_SECURE_TLS_SUCCESS);
 }
 
 static NX_CRYPTO_METHOD test_crypto_method_aes_cbc_256;
@@ -227,7 +264,158 @@ UCHAR packet_buffer[100];
     EXPECT_EQ(NX_SUCCESS, status);
 
     status = _nx_secure_tls_process_record(&tls_session, packet, &bytes_processed, 0);
-    EXPECT_EQ(NX_SECURE_TLS_INVALID_PACKET, status);
+    EXPECT_EQ(NX_CONTINUE, status);
+
+    status = nx_packet_release(tls_session.nx_secure_record_decrypted_packet);
+    EXPECT_EQ(NX_SUCCESS, status);
+    tls_session.nx_secure_record_decrypted_packet = NX_NULL;
+    status = nx_packet_release(packet);
+    EXPECT_EQ(NX_SUCCESS, status);
+
+    /* Test an encrypted empty application record at a TCP packet boundary. */
+    tls_session.nx_secure_record_queue_header = NX_NULL;
+    tls_session.nx_secure_tls_record_offset = 0;
+    tls_session.nx_secure_tls_remote_session_active = NX_TRUE;
+    tls_session.nx_secure_tls_protocol_version = NX_SECURE_TLS_VERSION_TLS_1_0;
+    tls_session.nx_secure_tls_session_ciphersuite = test_crypto_ciphersuite_lookup_table;
+    tls_session.nx_secure_verify_mac = test_verify_empty_record;
+    test_crypto_method_aes_cbc_256.nx_crypto_operation = test_crypto_operation_copy;
+
+    status = nx_packet_allocate(&pool_0, &packet, NX_IPv4_TCP_PACKET, NX_WAIT_FOREVER);
+    EXPECT_EQ(NX_SUCCESS, status);
+
+    data_length = 48;
+    header_buffer[1] = (UCHAR)(NX_SECURE_TLS_VERSION_TLS_1_0 >> 8);
+    header_buffer[2] = (UCHAR)(NX_SECURE_TLS_VERSION_TLS_1_0);
+    header_buffer[3] = (UCHAR)(data_length >> 8);
+    header_buffer[4] = (UCHAR)(data_length & 0xff);
+    status = nx_packet_data_append(packet, header_buffer, sizeof(header_buffer), &pool_0, NX_WAIT_FOREVER);
+    EXPECT_EQ(NX_SUCCESS, status);
+
+    memset(data_buffer, 0, data_length);
+    memset(&data_buffer[32], 15, 16);
+    status = nx_packet_data_append(packet, data_buffer, data_length, &pool_0, NX_WAIT_FOREVER);
+    EXPECT_EQ(NX_SUCCESS, status);
+
+    /* A second empty record exercises continued processing within the same TCP packet. */
+    status = nx_packet_data_append(packet, header_buffer, sizeof(header_buffer), &pool_0, NX_WAIT_FOREVER);
+    EXPECT_EQ(NX_SUCCESS, status);
+    status = nx_packet_data_append(packet, data_buffer, data_length, &pool_0, NX_WAIT_FOREVER);
+    EXPECT_EQ(NX_SUCCESS, status);
+
+    bytes_processed = 0;
+    status = _nx_secure_tls_process_record(&tls_session, packet, &bytes_processed, 0);
+    EXPECT_EQ(NX_CONTINUE, status);
+    EXPECT_EQ(packet -> nx_packet_length, tls_session.nx_secure_tls_record_offset);
+    EXPECT_EQ(packet -> nx_packet_length, bytes_processed);
+
+    status = nx_packet_release(tls_session.nx_secure_record_decrypted_packet);
+    EXPECT_EQ(NX_SUCCESS, status);
+    tls_session.nx_secure_record_decrypted_packet = NX_NULL;
+    status = nx_packet_release(packet);
+    EXPECT_EQ(NX_SUCCESS, status);
+    tls_session.nx_secure_record_queue_header = NX_NULL;
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    /* Regression tests for the TLS 1.3 record de-padding (RFC 8446 §5.4).
+       Before the fix, the code read the literal last byte of the plaintext
+       as the inner content type; any padded record from a compliant peer
+       (JDK 11+, OpenSSL with padding on) was mishandled. */
+    {
+        NX_PACKET *decrypted;
+        USHORT     out_type;
+        UINT       out_length;
+        UCHAR      inner_plaintext[16];
+
+        /* Case 1: padded record. Plaintext = "hello" + type byte + 5 zeros.
+           The inner type must come back and the length must exclude both
+           the type byte and the padding. */
+        tls_session.nx_secure_record_queue_header = NX_NULL;
+        status = nx_packet_allocate(&pool_0, &decrypted, NX_IPv4_TCP_PACKET, NX_WAIT_FOREVER);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        memset(inner_plaintext, 0, sizeof(inner_plaintext));
+        memcpy(inner_plaintext, "hello", 5);
+        inner_plaintext[5] = NX_SECURE_TLS_APPLICATION_DATA;
+        status = nx_packet_data_append(decrypted, inner_plaintext, 11, &pool_0, NX_WAIT_FOREVER);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        out_type   = 0;
+        out_length = 0;
+        status = _nx_secure_tls_1_3_strip_padding(decrypted, &out_type, &out_length);
+        EXPECT_EQ(NX_SECURE_TLS_SUCCESS, status);
+        EXPECT_EQ((USHORT)NX_SECURE_TLS_APPLICATION_DATA, out_type);
+        EXPECT_EQ((UINT)5, out_length);
+        EXPECT_EQ((ULONG)5, decrypted -> nx_packet_length);
+
+        status = nx_packet_release(decrypted);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        /* Case 2: all-zero plaintext. §5.4 says this is a peer protocol
+           violation and must yield unexpected_message. */
+        status = nx_packet_allocate(&pool_0, &decrypted, NX_IPv4_TCP_PACKET, NX_WAIT_FOREVER);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        memset(inner_plaintext, 0, sizeof(inner_plaintext));
+        status = nx_packet_data_append(decrypted, inner_plaintext, 10, &pool_0, NX_WAIT_FOREVER);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        out_type   = 0xff;
+        out_length = 42;
+        status = _nx_secure_tls_1_3_strip_padding(decrypted, &out_type, &out_length);
+        EXPECT_EQ(NX_SECURE_TLS_UNEXPECTED_MESSAGE, status);
+        EXPECT_EQ((USHORT)0, out_type);
+        EXPECT_EQ((UINT)0, out_length);
+
+        status = nx_packet_release(decrypted);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        /* Case 3: unpadded record. Pre-fix arithmetic gave length - 1; the
+           new scan must return the exact same values so existing traffic is
+           unaffected. This is the regression-risk assertion. */
+        status = nx_packet_allocate(&pool_0, &decrypted, NX_IPv4_TCP_PACKET, NX_WAIT_FOREVER);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        memcpy(inner_plaintext, "hello", 5);
+        inner_plaintext[5] = NX_SECURE_TLS_APPLICATION_DATA;
+        status = nx_packet_data_append(decrypted, inner_plaintext, 6, &pool_0, NX_WAIT_FOREVER);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        out_type   = 0;
+        out_length = 0;
+        status = _nx_secure_tls_1_3_strip_padding(decrypted, &out_type, &out_length);
+        EXPECT_EQ(NX_SECURE_TLS_SUCCESS, status);
+        EXPECT_EQ((USHORT)NX_SECURE_TLS_APPLICATION_DATA, out_type);
+        EXPECT_EQ((UINT)5, out_length);
+
+        status = nx_packet_release(decrypted);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        /* Case 4: padded record that straddles a fragment boundary. The scan
+           must walk through the chained NX_PACKETs, not just the head. */
+        status = nx_packet_allocate(&pool_0, &decrypted, NX_IPv4_TCP_PACKET, NX_WAIT_FOREVER);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        /* Payload > single-packet capacity (1536) forces chaining. Fill with
+           a non-zero content byte, then the type, then trailing zeros — the
+           trailing zeros will land in a later fragment. */
+        memset(data_buffer, 0xAB, 2000);
+        data_buffer[1999] = NX_SECURE_TLS_APPLICATION_DATA;
+        memset(&data_buffer[2000], 0, 500);
+        status = nx_packet_data_append(decrypted, data_buffer, 2500, &pool_0, NX_WAIT_FOREVER);
+        EXPECT_EQ(NX_SUCCESS, status);
+
+        out_type   = 0;
+        out_length = 0;
+        status = _nx_secure_tls_1_3_strip_padding(decrypted, &out_type, &out_length);
+        EXPECT_EQ(NX_SECURE_TLS_SUCCESS, status);
+        EXPECT_EQ((USHORT)NX_SECURE_TLS_APPLICATION_DATA, out_type);
+        EXPECT_EQ((UINT)1999, out_length);
+
+        status = nx_packet_release(decrypted);
+        EXPECT_EQ(NX_SUCCESS, status);
+    }
+#endif /* NX_SECURE_TLS_TLS_1_3_ENABLED */
 
     printf("SUCCESS!\n");
     test_control_return(0);

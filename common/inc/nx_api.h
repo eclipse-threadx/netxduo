@@ -1,6 +1,7 @@
 /***************************************************************************
  * Copyright (c) 2024 Microsoft Corporation
  * Copyright (c) 2025-present Eclipse ThreadX Contributors
+ * Copyright (C) 2026 Eclipse ThreadX contributors
  *
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
@@ -8,6 +9,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 
 /**************************************************************************/
@@ -455,8 +457,8 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 #define AZURE_RTOS_NETXDUO
 #define NETXDUO_MAJOR_VERSION                    6
 #define NETXDUO_MINOR_VERSION                    5
-#define NETXDUO_PATCH_VERSION                    1
-#define NETXDUO_BUILD_VERSION                    202602
+#define NETXDUO_PATCH_VERSION                    2
+#define NETXDUO_BUILD_VERSION                    202603
 #define NETXDUO_HOTFIX_VERSION                   ' '
 
 /* Define the following symbols for backward compatibility */
@@ -859,7 +861,9 @@ VOID _nx_trace_event_update(TX_TRACE_BUFFER_ENTRY *event, ULONG timestamp, ULONG
 
 /* Define the IPv4 default time to live.  */
 
+#ifndef NX_IP_TIME_TO_LIVE
 #define NX_IP_TIME_TO_LIVE                     ((ULONG)0x00000080) /* Default packet time to live            */
+#endif /* NX_IP_TIME_TO_LIVE */
 #define NX_IP_TIME_TO_LIVE_MASK                ((ULONG)0xFF000000) /* Mask for isolating the time to live    */
 #define NX_IP_TIME_TO_LIVE_SHIFT               24                  /* Number of bits to shift left           */
 
@@ -4011,4 +4015,3 @@ UINT _nx_utility_base64_decode(UCHAR *base64name, UINT base64name_size, UCHAR *n
 #endif
 
 #endif
-

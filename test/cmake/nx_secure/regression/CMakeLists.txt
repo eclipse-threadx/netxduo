@@ -1,3 +1,5 @@
+# Portions of this file were generated with AI assistance.
+
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 cmake_policy(SET CMP0057 NEW)
 
@@ -9,6 +11,7 @@ get_filename_component(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../regression
 set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_session_receive_coverage_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_send_record_coverage_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_send_record_key_clear_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_client_handshake_coverage_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_finished_hash_generate_coverage_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_generate_keys_coverage_test.c
@@ -124,6 +127,7 @@ set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_no_remote_certs_allocated_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_partial_remote_certs_allocated_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_process_certificate_verify_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_certificate_verify_concurrency_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_process_changecipherspec_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_process_certificate_request_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_process_finished_test.c
@@ -139,9 +143,19 @@ set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_key_share_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_provisioned_psk_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_hello_retry_cookie_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_handshake_cache_overflow_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_hello_retry_cache_overflow_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_hello_retry_cookie_overflow_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_certverify_transcript_hash_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_x509_oversized_rsa_key_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_x509_asn1_zero_length_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_rsa_client_auth_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_certificate_context_length_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_certificate_extensions_length_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_client_ca_select_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_receive_invalid_server_handshake_message_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_invalid_client_state_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_no_newsessionticket_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_serverhello_length_checking_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_session_create_ext_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_before_key_generation_test.c
@@ -156,6 +170,7 @@ set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_certificate_coverage_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_server_key_exchange_coverage_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_send_certificate_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_clienthello_signature_algorithms_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_send_clienthello_test.c)
 
 # Pure crypto related test cases
@@ -181,6 +196,7 @@ if("s${CMAKE_BUILD_TYPE}" STREQUAL "sdefault_build_coverage")
     ${SOURCE_DIR}/nx_secure_test/nx_secure_hmac_sha512_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_phash_prf_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_rsa_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_rsa_pss_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_sha256_rfc_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_sha224_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_sha256_test.c

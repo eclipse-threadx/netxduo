@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 
 /**************************************************************************/
@@ -314,6 +315,7 @@ ULONG          search_begin_sequence;
 ULONG          search_end_sequence;
 ULONG          original_rx_sequence;
 ULONG          trim_data_length;
+ULONG          urgent_pointer;
 TX_THREAD     *thread_ptr;
 ULONG          acked_packets = 0;
 UINT           need_ack = NX_FALSE;
@@ -371,6 +373,26 @@ NX_IP         *ip_ptr;
 
             /* Trim the data that exceed the receive window.  */
             _nx_tcp_socket_state_data_trim_front(packet_ptr, trim_data_length);
+
+            /* Keep the urgent pointer relative to the first remaining sequence number.  If
+               the urgent byte was in the discarded prefix, clear the pointer so a callback
+               cannot identify a different byte in the retained payload as urgent.  */
+            if (tcp_header_ptr -> nx_tcp_header_word_3 & NX_TCP_URG_BIT)
+            {
+                urgent_pointer =  tcp_header_ptr -> nx_tcp_header_word_4 & NX_LOWER_16_MASK;
+
+                if (urgent_pointer > trim_data_length)
+                {
+                    urgent_pointer -= trim_data_length;
+                }
+                else
+                {
+                    urgent_pointer =  0;
+                }
+
+                tcp_header_ptr -> nx_tcp_header_word_4 =
+                    (tcp_header_ptr -> nx_tcp_header_word_4 & ~NX_LOWER_16_MASK) | urgent_pointer;
+            }
 
             /* Fix the sequence of this packet. */
             tcp_header_ptr -> nx_tcp_sequence_number += trim_data_length;
@@ -872,6 +894,16 @@ NX_IP         *ip_ptr;
         do
         {
 
+#ifdef NX_ENABLE_LOW_WATERMARK
+            /* The tail is released below, so it must never be acknowledged. The
+               packet count check at the end of this loop misses the tail when the
+               pool watermark triggered the drop or a superset packet shrank the queue.  */
+            if (drop_packet && (search_ptr == socket_ptr -> nx_tcp_socket_receive_queue_tail))
+            {
+                break;
+            }
+#endif /* NX_ENABLE_LOW_WATERMARK */
+
             /* Setup a pointer to header of this packet in the sent list.  */
             /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
             search_header_ptr =  (NX_TCP_HEADER *)search_ptr -> nx_packet_prepend_ptr;
@@ -1006,7 +1038,13 @@ NX_IP         *ip_ptr;
 #endif
 
     /* Check if the rx sequence number has been updated.  */
-    if (original_rx_sequence != socket_ptr -> nx_tcp_socket_rx_sequence)
+    if ((original_rx_sequence != socket_ptr -> nx_tcp_socket_rx_sequence)
+#ifdef NX_ENABLE_LOW_WATERMARK
+        /* A drop already set the window from the advanced rx_sequence.
+           Subtracting the advance again would wrap the ULONG window.  */
+        && (drop_packet == NX_FALSE)
+#endif /* NX_ENABLE_LOW_WATERMARK */
+       )
     {
 
         /* Decrease the receive window size since rx_sequence is updated.  */
@@ -1198,4 +1236,3 @@ NX_IP         *ip_ptr;
     /* Return true since the packet was queued.  */
     return(NX_TRUE);
 }
-

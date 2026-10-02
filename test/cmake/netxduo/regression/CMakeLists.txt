@@ -56,7 +56,11 @@ if("-DNX_BSD_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
       ${SOURCE_DIR}/bsd_test/netx_bsd_select_spurious_event_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_socket_options_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_select_improvements_test.c
-      ${SOURCE_DIR}/bsd_test/netx_bsd_recvfromto_test.c)
+      ${SOURCE_DIR}/bsd_test/netx_bsd_recvfromto_test.c
+      ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_accept_socket_limit_test.c
+      ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_accept_socket_limit_shared_test.c
+      ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_oob_errno_test.c
+      ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_oob_test.c)
   if("-DNX_BSD_RAW_SUPPORT" IN_LIST ${CMAKE_BUILD_TYPE})
     list(
       APPEND
@@ -589,6 +593,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ip_packet_filter_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_packet_filter_extended_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmpv6_invalid_na.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcp_low_watermark_rx_window_test.c
     ${SOURCE_DIR}/netxduo_test/netx_low_watermark_test.c
     ${SOURCE_DIR}/netxduo_test/netx_rarp_nxe_api_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_interface_detachment_arp_table_test.c
@@ -819,7 +824,10 @@ set(websocket_test_cases
     ${SOURCE_DIR}/websocket_test/netx_websocket_connect_test.c
     ${SOURCE_DIR}/websocket_test/netx_websocket_mask_test.c
     ${SOURCE_DIR}/websocket_test/netx_websocket_fin_test.c
-    ${SOURCE_DIR}/websocket_test/netx_websocket_opcode_test.c)
+    ${SOURCE_DIR}/websocket_test/netx_websocket_opcode_test.c
+    ${SOURCE_DIR}/websocket_test/netx_websocket_empty_control_frame_test.c
+    ${SOURCE_DIR}/websocket_test/netx_websocket_frame_boundary_test.c
+    ${SOURCE_DIR}/websocket_test/netx_websocket_masked_frame_in_packets_test.c)
 
 set(pop3_test_cases
     ${SOURCE_DIR}/pop3_test/netx_pop3_two_mails_received_test.c
@@ -1285,16 +1293,18 @@ if(PRODUCT STREQUAL netxduo)
       # PTP utilities
       ${SOURCE_DIR}/ptp_test/netx_ptp_utility.c)
   endif()
-  list(APPEND test_utility_files
-       # TAHI utilities
-       ${SOURCE_DIR}/tahi_test/netx_tahi_run_test_case.c)
+  if(NOT MSVC)
+    list(APPEND test_utility_files
+         # TAHI utilities (require tahi.so — Linux only)
+         ${SOURCE_DIR}/tahi_test/netx_tahi_run_test_case.c)
+  endif()
 endif()
 add_library(test_utility ${test_utility_files})
 target_link_libraries(test_utility PUBLIC azrtos::${PRODUCT})
 target_include_directories(test_utility PUBLIC ${SOURCE_DIR}/test
                                                ${SOURCE_DIR}/tahi_test)
 target_compile_definitions(test_utility PUBLIC BATCH_TEST CTEST)
-if("-DNX_TAHI_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
+if("-DNX_TAHI_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE} AND NOT MSVC)
   add_library(tahi SHARED IMPORTED)
   if($ENV{ENABLE_64})
     set_target_properties(tahi PROPERTIES IMPORTED_LOCATION
@@ -1306,7 +1316,27 @@ if("-DNX_TAHI_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
   target_link_libraries(test_utility PUBLIC tahi)
 endif()
 
-if($ENV{ENABLE_64})
+if(MSVC)
+  # These test files use void* pointer arithmetic ((void*)&x - 1) to construct
+  # intentionally misaligned pointers for NXE alignment checks. GCC treats
+  # sizeof(void) as 1 as an extension; MSVC rejects it with error C2036.
+  # netx_ipv6_pmtu_test references netx_tahi_run_test_case which is excluded
+  # from test_utility on MSVC (tahi.so is Linux-only).
+  # Exclude these files from win64 builds rather than modifying test sources.
+  list(REMOVE_ITEM dhcp_test_cases
+       ${SOURCE_DIR}/dhcp_test/netx_dhcp_server_second_interface_test.c)
+  list(REMOVE_ITEM dns_test_cases
+       ${SOURCE_DIR}/dns_test/netx_dns_nxe_api_test.c)
+  list(REMOVE_ITEM netxduo_test_cases
+       ${SOURCE_DIR}/netxduo_test/netx_udp_fragmentation_processing_test.c
+       ${SOURCE_DIR}/netxduo_test/netx_ipv6_pmtu_test.c)
+endif()
+
+if(MSVC)
+  # Win64 simulation: mirror the ENABLE_64 subset; TAHI/MDNS/PTP/SMTP/SNMP
+  # test cases are excluded because they depend on Linux-only shared libraries.
+  set(test_cases ${netxduo_test_cases} ${dhcp_test_cases} ${dns_test_cases})
+elseif($ENV{ENABLE_64})
   set(test_cases ${netxduo_test_cases} ${dhcp_test_cases} ${dns_test_cases})
 elseif($ENV{DHCP_ONLY})
   set(test_cases ${dhcp_test_cases})
@@ -1347,6 +1377,10 @@ endif()
 foreach(test_case ${test_cases})
   get_filename_component(test_name ${test_case} NAME_WE)
   add_executable(${test_name} ${test_case})
+  if(test_name STREQUAL netx_dns_nxe_api_test)
+    target_compile_definitions(${test_name} PRIVATE NX_DNS_SOURCE_CODE)
+  endif()
   target_link_libraries(${test_name} PRIVATE test_utility)
   add_test(${CMAKE_BUILD_TYPE}::${test_name} ${test_name})
 endforeach()
+# Portions of this file were generated with AI assistance.

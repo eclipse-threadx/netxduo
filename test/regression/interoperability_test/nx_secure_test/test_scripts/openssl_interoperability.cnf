@@ -1,0 +1,13 @@
+# OpenSSL 3.5 requires security level 0 for the deliberately retained legacy
+# protocol and curve interoperability cases. This configuration is scoped to
+# the test-only OpenSSL wrapper in this directory.
+openssl_conf = openssl_init
+
+[openssl_init]
+ssl_conf = ssl_configuration
+
+[ssl_configuration]
+system_default = interoperability_defaults
+
+[interoperability_defaults]
+CipherString = DEFAULT:@SECLEVEL=0

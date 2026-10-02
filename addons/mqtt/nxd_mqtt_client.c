@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 
 /**************************************************************************/
@@ -47,6 +48,16 @@
 #define MQTT_PING_TIMEOUT_EVENT       ((ULONG)0x00000010)
 #define MQTT_NETWORK_DISCONNECT_EVENT ((ULONG)0x00000020)
 #define MQTT_TCP_ESTABLISH_EVENT      ((ULONG)0x00000040)
+
+/* The ThreadX thread/timer entry input is a ULONG, which is 32-bit on the
+   win64 (LLP64) simulator and truncates a 64-bit control-block pointer.  The
+   thread entry recovers the client from the running thread; the timer entry
+   (which runs in the timer thread, not the client thread) reconstructs the
+   pointer from this cached high-address base OR'd with the truncated low
+   32 bits.  On LP64/ILP32 platforms the base is zero, so behavior is
+   unchanged. */
+static ALIGN_TYPE _nxd_mqtt_control_block_base;
+
 
 static UINT _nxd_mqtt_client_create_internal(NXD_MQTT_CLIENT *client_ptr, CHAR *client_name,
                                              CHAR *client_id, UINT client_id_length,
@@ -1241,6 +1252,7 @@ ULONG  bytes_copied;
 /*                                                                        */
 /*    NX_TRUE - packet is consumed                                        */
 /*    NX_FALSE - packet is not consumed                                   */
+/*    NXD_MQTT_INVALID_PACKET - packet is malformed, not consumed         */
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
@@ -1580,7 +1592,8 @@ USHORT                        transmit_packet_id;
                         return(1);
                     }
 
-                    if (4u > ((ULONG)(response_packet -> nx_packet_data_end) - (ULONG)(response_packet -> nx_packet_append_ptr)))
+                    if (4u > (ULONG)((ALIGN_TYPE)(response_packet -> nx_packet_data_end) -
+                                     (ALIGN_TYPE)(response_packet -> nx_packet_append_ptr)))
                     {
                         nx_packet_release(response_packet);
 
@@ -2016,6 +2029,7 @@ UINT       status;
 UCHAR      packet_type;
 UINT       remaining_length;
 UINT       packet_consumed;
+UINT       packet_invalid;
 ULONG      offset;
 ULONG      bytes_copied;
 ULONG      packet_length;
@@ -2088,6 +2102,7 @@ ULONG      packet_length;
         }
 
         packet_consumed = NX_FALSE;
+        packet_invalid = NX_FALSE;
         while (packet_ptr)
         {
             /* Parse the incoming packet. */
@@ -2130,7 +2145,17 @@ ULONG      packet_length;
                 break;
 
             case MQTT_CONTROL_PACKET_TYPE_PUBLISH:
-                packet_consumed = _nxd_mqtt_process_publish(client_ptr, packet_ptr);
+                status = _nxd_mqtt_process_publish(client_ptr, packet_ptr);
+                if (status == NX_TRUE)
+                {
+                    packet_consumed = NX_TRUE;
+                }
+                else if (status == NXD_MQTT_INVALID_PACKET)
+                {
+
+                    /* Malformed PUBLISH. Stop parsing this chain; it is released below. */
+                    packet_invalid = NX_TRUE;
+                }
                 break;
 
             case MQTT_CONTROL_PACKET_TYPE_PUBACK:
@@ -2169,7 +2194,7 @@ ULONG      packet_length;
                 break;
             }
 
-            if (packet_consumed)
+            if (packet_consumed || packet_invalid)
             {
                 break;
             }
@@ -2539,7 +2564,11 @@ UCHAR len[2];
 /*  CALLED BY                                                             */
 /*                                                                        */
 /*    _nxd_mqtt_client_connect                                            */
+/*    _nxd_mqtt_client_websocket_connection_status_callback               */
+/*    _nxd_mqtt_process_connack                                           */
 /*    _nxd_mqtt_process_disconnect                                        */
+/*    _nxd_mqtt_tcp_establish_process                                     */
+/*    _nxd_mqtt_tls_establish_process                                     */
 /*                                                                        */
 /**************************************************************************/
 VOID _nxd_mqtt_client_connection_end(NXD_MQTT_CLIENT *client_ptr, ULONG wait_option)
@@ -2570,6 +2599,10 @@ VOID _nxd_mqtt_client_connection_end(NXD_MQTT_CLIENT *client_ptr, ULONG wait_opt
 #endif
     nx_tcp_socket_disconnect(&(client_ptr -> nxd_mqtt_client_socket), wait_option);
     nx_tcp_client_socket_unbind(&(client_ptr -> nxd_mqtt_client_socket));
+
+#ifdef NX_SECURE_ENABLE
+    client_ptr -> nxd_mqtt_client_use_tls = 0;
+#endif
 
     /* Disable timer if timer has been started. */
     if (client_ptr -> nxd_mqtt_keepalive)
@@ -2622,7 +2655,9 @@ static UINT _nxd_mqtt_send_simple_message(NXD_MQTT_CLIENT *client_ptr, UCHAR hea
 static VOID _nxd_mqtt_periodic_timer_entry(ULONG client)
 {
 /* Check if it is time to send out a ping message. */
-NXD_MQTT_CLIENT *client_ptr = (NXD_MQTT_CLIENT *)client;
+/* The ULONG timer input truncates a 64-bit pointer on the win64 simulator;
+   reconstruct the full pointer from the cached control-block base. */
+NXD_MQTT_CLIENT *client_ptr = (NXD_MQTT_CLIENT *)(_nxd_mqtt_control_block_base | (ALIGN_TYPE)client);
 
     /* If an outstanding ping response has not been received, and the client exceeds the time waiting for ping response,
        the client shall disconnect from the server. */
@@ -2841,7 +2876,13 @@ static VOID _nxd_mqtt_thread_entry(ULONG mqtt_client)
 NXD_MQTT_CLIENT *client_ptr;
 ULONG            events;
 
-    client_ptr = (NXD_MQTT_CLIENT *)mqtt_client;
+    /* The ThreadX thread entry input is a ULONG (32-bit on the win64 LLP64
+       simulator), which truncates a 64-bit control-block pointer.  Recover the
+       client control block from the currently executing thread instead, which
+       is width-independent and behaves identically on every platform. */
+    NX_PARAMETER_NOT_USED(mqtt_client);
+    client_ptr = (NXD_MQTT_CLIENT *)((UCHAR *)tx_thread_identify() -
+                 (ALIGN_TYPE)&(((NXD_MQTT_CLIENT *)0) -> nxd_mqtt_thread));
 
     /* Loop to process events on the MQTT client */
     for (;;)
@@ -3107,8 +3148,9 @@ UINT                status;
     client_ptr -> nxd_mqtt_client_mutex_ptr = &(client_ptr -> nxd_mqtt_protection);
 
     /* Now create MQTT client thread */
+    _nxd_mqtt_control_block_base = (ALIGN_TYPE)client_ptr & ~(ALIGN_TYPE)0xFFFFFFFFUL;
     status = tx_thread_create(&(client_ptr -> nxd_mqtt_thread), client_name, _nxd_mqtt_thread_entry,
-                              (ULONG)client_ptr, stack_ptr, stack_size, mqtt_thread_priority, mqtt_thread_priority,
+                              (ULONG)(ALIGN_TYPE)client_ptr, stack_ptr, stack_size, mqtt_thread_priority, mqtt_thread_priority,
                               NXD_MQTT_CLIENT_THREAD_TIME_SLICE, TX_DONT_START);
 
     /* Determine if an error occurred. */
@@ -3671,7 +3713,8 @@ UINT                 old_priority;
         client_ptr -> nxd_mqtt_ping_timeout = NXD_MQTT_PING_TIMEOUT_DELAY;
 
         /* Create timer */
-        tx_timer_create(&(client_ptr -> nxd_mqtt_timer), "MQTT Timer", _nxd_mqtt_periodic_timer_entry, (ULONG)client_ptr,
+        _nxd_mqtt_control_block_base = (ALIGN_TYPE)client_ptr & ~(ALIGN_TYPE)0xFFFFFFFFUL;
+        tx_timer_create(&(client_ptr -> nxd_mqtt_timer), "MQTT Timer", _nxd_mqtt_periodic_timer_entry, (ULONG)(ALIGN_TYPE)client_ptr,
                         client_ptr -> nxd_mqtt_timer_value, client_ptr -> nxd_mqtt_timer_value, TX_AUTO_ACTIVATE);
     }
     else
@@ -3752,6 +3795,10 @@ UINT                 old_priority;
         }
 #endif /* NX_SECURE_ENABLE */
         nx_tcp_client_socket_unbind(&(client_ptr -> nxd_mqtt_client_socket));
+
+#ifdef NX_SECURE_ENABLE
+        client_ptr -> nxd_mqtt_client_use_tls = 0;
+#endif /* NX_SECURE_ENABLE */
         tx_timer_delete(&(client_ptr -> nxd_mqtt_timer));
         return(NXD_MQTT_CONNECT_FAILURE);
     }
@@ -4726,7 +4773,8 @@ UCHAR     *byte;
         return(NXD_MQTT_INTERNAL_ERROR);
     }
 
-    if (2u > ((ULONG)(packet_ptr -> nx_packet_data_end) - (ULONG)(packet_ptr -> nx_packet_append_ptr)))
+    if (2u > (ULONG)((ALIGN_TYPE)(packet_ptr -> nx_packet_data_end) -
+                     (ALIGN_TYPE)(packet_ptr -> nx_packet_append_ptr)))
     {
         nx_packet_release(packet_ptr);
 
@@ -5903,7 +5951,7 @@ NXD_MQTT_CLIENT *client_ptr = (NXD_MQTT_CLIENT *)context;
 /*    Application Code                                                    */
 /*                                                                        */
 /**************************************************************************/
-UINT _nxd_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length, UCHAR *bearer, UINT bearer_length)
+UINT _nxd_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length)
 {
 UINT status;
 
@@ -5920,8 +5968,8 @@ UINT status;
     client_ptr -> nxd_mqtt_client_websocket_host_length = host_length;
     client_ptr -> nxd_mqtt_client_websocket_uri_path = uri_path;
     client_ptr -> nxd_mqtt_client_websocket_uri_path_length = uri_path_length;
-    client_ptr -> nxd_mqtt_client_websocket_bearer = bearer;
-    client_ptr -> nxd_mqtt_client_websocket_bearer_length = bearer_length;
+    client_ptr -> nxd_mqtt_client_websocket_bearer = NX_NULL;
+    client_ptr -> nxd_mqtt_client_websocket_bearer_length = 0;
 
     /* Create WebSocket.  */
     status = nx_websocket_client_create(&client_ptr -> nxd_mqtt_client_websocket, (UCHAR *)"",
@@ -5977,7 +6025,7 @@ UINT status;
 /*    Application Code                                                    */
 /*                                                                        */
 /**************************************************************************/
-UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length, UCHAR *bearer, UINT bearer_length)
+UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, UINT host_length, UCHAR *uri_path, UINT uri_path_length)
 {
 
     /* Validate the parameters.  */
@@ -5987,6 +6035,6 @@ UINT _nxde_mqtt_client_websocket_set(NXD_MQTT_CLIENT *client_ptr, UCHAR *host, U
         return(NX_PTR_ERROR);
     }
 
-    return(_nxd_mqtt_client_websocket_set(client_ptr, host, host_length, uri_path, uri_path_length, bearer, bearer_length));
+    return(_nxd_mqtt_client_websocket_set(client_ptr, host, host_length, uri_path, uri_path_length));
 }
 #endif /* NXD_MQTT_OVER_WEBSOCKET */

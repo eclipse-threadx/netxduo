@@ -104,45 +104,6 @@ jobs:
       result_affix: NetXDuo_Fast
       skip_deploy: true
       skip_coverage: true
-  Azure_IoT:
-    permissions:
-      contents: read
-      issues: read
-      checks: write
-      pull-requests: write
-      pages: write
-      id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
-    with:
-      build_script: ./scripts/build_azure_iot.sh
-      test_script: ./scripts/test_azure_iot.sh
-      cmake_path: ./test/cmake/azure_iot
-      result_affix: Azure_IoT
-      skip_deploy: true
-  Azure_IoT_Windows:
-    permissions:
-      contents: read
-      issues: read
-      checks: write
-      pull-requests: write
-    runs-on: windows-2019
-    steps:
-    - name: Check out the repository
-      uses: actions/checkout@v4
-      with:
-        submodules: true
-    - name: Checkout submodules
-      run: |
-        if (!(Test-Path ./test/cmake/threadx)) {git clone https://github.com/eclipse-threadx/threadx.git ./test/cmake/threadx --depth 1}
-    - name: CMake
-      run: |
-        mkdir build
-        cd build
-        cmake ../test/cmake/azure_iot -A Win32
-    - name: Build
-      run: |
-        cd build
-        cmake --build .
   Secure:
     permissions:
       contents: read
@@ -213,8 +174,8 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Azure_IoT, Secure, Crypto, Secure_Interoperability, MQTT_Interoperability]
+    needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Secure, Crypto, Secure_Interoperability, MQTT_Interoperability]
     uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
     with:
       skip_test: true
-      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Azure_IoT Secure Crypto Secure_Interoperability MQTT_Interoperability"
+      deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Secure Crypto Secure_Interoperability MQTT_Interoperability"

@@ -15,8 +15,10 @@ sudo dpkg --add-architecture i386
 
 sudo apt update
 sudo apt install -y \
-    gcc-multilib \
-    g++ \
+    gcc-14 \
+    g++-14 \
+    gcc-14-multilib \
+    g++-14-multilib \
     python3-pip \
     ninja-build \
     unifdef \
@@ -26,3 +28,7 @@ sudo apt install -y \
     ethtool \
     mosquitto \
     mosquitto-clients
+
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 140
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 140
+sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-14 140

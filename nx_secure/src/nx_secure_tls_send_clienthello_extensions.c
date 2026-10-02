@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
 
 /**************************************************************************/
 /**************************************************************************/
@@ -27,14 +28,14 @@
 #ifndef NX_SECURE_TLS_CLIENT_DISABLED
 
 #ifndef NX_SECURE_DISABLE_X509
+#define NX_SECURE_TLS_SIGNATURE_ALGORITHMS_LIST_MAX_LENGTH (0xFFFFu - 6u)
+
 static VOID _nx_secure_tls_get_signature_algorithm(NX_SECURE_TLS_SESSION *tls_session,
                                                    NX_SECURE_X509_CRYPTO *crypto_method,
                                                    USHORT *signature_algorithm);
-
-static UINT _nx_secure_tls_send_clienthello_sig_extension(NX_SECURE_TLS_SESSION *tls_session,
-                                                          UCHAR *packet_buffer, ULONG *packet_offset,
-                                                          USHORT *extension_length,
-                                                          ULONG available_size);
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+static USHORT _nx_secure_tls_get_rsa_pkcs1_signature_algorithm(USHORT signature_algorithm);
+#endif
 #endif
 #ifndef NX_SECURE_TLS_SNI_EXTENSION_DISABLED
 static UINT _nx_secure_tls_send_clienthello_sni_extension(NX_SECURE_TLS_SESSION *tls_session,
@@ -177,7 +178,7 @@ UINT   status;
         total_extensions_length = (USHORT)(total_extensions_length + extension_length);
 
         /* Send KeyShare extension (for TLS 1.3). */
-        _nx_secure_tls_send_clienthello_key_share_extension(tls_session, packet_buffer, &length, &extension_length, available_size);
+        status = _nx_secure_tls_send_clienthello_key_share_extension(tls_session, packet_buffer, &length, &extension_length, available_size);
         if(status != NX_SUCCESS)
         {
             return(status);
@@ -188,6 +189,18 @@ UINT   status;
         if ((tls_session -> nx_secure_tls_client_state == NX_SECURE_TLS_CLIENT_STATE_HELLO_RETRY) && 
             (tls_session -> nx_secure_tls_cookie_length != 0))
         {
+
+            /* The cookie extension needs six bytes of headers plus the cookie itself. */
+            if ((length > available_size) ||
+                ((available_size - length) < (6u + tls_session -> nx_secure_tls_cookie_length)))
+            {
+
+                /* Packet buffer too small. Drop the cookie, which points into the
+                   ServerHello packet and does not outlive this handshake message. */
+                tls_session -> nx_secure_tls_cookie = NX_NULL;
+                tls_session -> nx_secure_tls_cookie_length = 0;
+                return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
+            }
 
             /* Add Extension Type. */
             packet_buffer[length] = (UCHAR)((NX_SECURE_TLS_EXTENSION_COOKIE) >> 8);
@@ -209,8 +222,10 @@ UINT   status;
             NX_SECURE_MEMCPY(&packet_buffer[length], tls_session -> nx_secure_tls_cookie, tls_session -> nx_secure_tls_cookie_length); /* Use case of memcpy is verified. */
             length += (tls_session -> nx_secure_tls_cookie_length);
 
-            /* Update total extensions length and reset the stored cookie length. */
+            /* Update total extensions length and drop the cookie, which points into the
+               ServerHello packet and does not outlive this handshake message. */
             total_extensions_length = (USHORT)(total_extensions_length + extension_length + 4);
+            tls_session -> nx_secure_tls_cookie = NX_NULL;
             tls_session -> nx_secure_tls_cookie_length = 0;
         }
     }
@@ -294,7 +309,10 @@ UINT   status;
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    None                                                                */
+/*    _nx_secure_tls_get_signature_algorithm                              */
+/*                                          Get signature algorithm       */
+/*    _nx_secure_tls_get_rsa_pkcs1_signature_algorithm                    */
+/*                                          Get TLS 1.2 RSA algorithm     */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -303,15 +321,19 @@ UINT   status;
 /*                                                                        */
 /**************************************************************************/
 #ifndef NX_SECURE_DISABLE_X509
-static UINT _nx_secure_tls_send_clienthello_sig_extension(NX_SECURE_TLS_SESSION *tls_session,
-                                                          UCHAR *packet_buffer, ULONG *packet_offset,
-                                                          USHORT *extension_length,
-                                                          ULONG available_size)
+UINT _nx_secure_tls_send_clienthello_sig_extension(NX_SECURE_TLS_SESSION *tls_session,
+                                                   UCHAR *packet_buffer, ULONG *packet_offset,
+                                                   USHORT *extension_length,
+                                                   ULONG available_size)
 {
 ULONG  offset, ext_pos;
 USHORT ext_len, sig_len, sighash_len, ext;
 UINT i;
 USHORT signature_algorithm;
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+USHORT rsa_pkcs1_signature_algorithm;
+#endif
+ULONG signature_algorithms_length;
 NX_SECURE_X509_CRYPTO *cipher_table;
 
     /* Signature Extensions structure:
@@ -322,8 +344,30 @@ NX_SECURE_X509_CRYPTO *cipher_table;
      * by a single octet. Therefore each entry in the list is 2 bytes long.
      */
 
-    if (available_size < (*packet_offset + 6u +
-                          (ULONG)(tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table_size << 1)))
+    cipher_table = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table;
+    signature_algorithms_length = 0;
+
+    /* Calculate the exact list length before writing. A TLS 1.3-capable client
+       advertises both RSA-PSS for TLS 1.3 and RSA PKCS#1 v1.5 for TLS 1.2. */
+    for (i = 0; i < tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table_size; i++)
+    {
+        _nx_secure_tls_get_signature_algorithm(tls_session, &cipher_table[i], &signature_algorithm);
+        if (signature_algorithm != 0u)
+        {
+            signature_algorithms_length += 2u;
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+            rsa_pkcs1_signature_algorithm = _nx_secure_tls_get_rsa_pkcs1_signature_algorithm(signature_algorithm);
+            if (rsa_pkcs1_signature_algorithm != 0u)
+            {
+                signature_algorithms_length += 2u;
+            }
+#endif
+        }
+    }
+
+    if ((signature_algorithms_length > NX_SECURE_TLS_SIGNATURE_ALGORITHMS_LIST_MAX_LENGTH) ||
+        (*packet_offset > available_size) ||
+        ((available_size - *packet_offset) < (6u + signature_algorithms_length)))
     {
 
         /* Packet buffer too small. */
@@ -336,9 +380,8 @@ NX_SECURE_X509_CRYPTO *cipher_table;
     ext_pos = offset;
     offset += 6;
 
-    ext_len = sighash_len = 0;
-
-    cipher_table = tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table;
+    ext_len = 0;
+    sighash_len = (USHORT)signature_algorithms_length;
 
     /* Loop the x509 cipher table to add signature algorithms. */
     for (i = 0; i < tls_session -> nx_secure_tls_crypto_table -> nx_secure_tls_x509_cipher_table_size; i++)
@@ -355,7 +398,16 @@ NX_SECURE_X509_CRYPTO *cipher_table;
         packet_buffer[offset + 1] = (UCHAR)(signature_algorithm & 0x00FF);
 
         offset += 2;
-        sighash_len = (USHORT)(sighash_len + 2);
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+        rsa_pkcs1_signature_algorithm = _nx_secure_tls_get_rsa_pkcs1_signature_algorithm(signature_algorithm);
+        if (rsa_pkcs1_signature_algorithm != 0u)
+        {
+            packet_buffer[offset] = (UCHAR)((rsa_pkcs1_signature_algorithm & 0xFF00u) >> 8);
+            packet_buffer[offset + 1] = (UCHAR)(rsa_pkcs1_signature_algorithm & 0x00FFu);
+            offset += 2;
+        }
+#endif
     }
 
     ext = NX_SECURE_TLS_EXTENSION_SIGNATURE_ALGORITHMS;  /* Signature algorithms */
@@ -384,6 +436,68 @@ NX_SECURE_X509_CRYPTO *cipher_table;
 
     return(NX_SUCCESS);
 }
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_secure_tls_get_rsa_pkcs1_signature_algorithm    PORTABLE C      */
+/*                                                           6.4.3        */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Eclipse ThreadX Contributors                                        */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function maps an RSA-PSS signature scheme used by TLS 1.3 to   */
+/*    the corresponding RSA PKCS#1 v1.5 scheme used by TLS 1.2.           */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    signature_algorithm                   RSA-PSS signature scheme      */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    signature_algorithm                   RSA PKCS#1 signature scheme,  */
+/*                                            or zero when not RSA-PSS    */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    None                                                                */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_secure_tls_send_clienthello_sig_extension                       */
+/*                                          Send signature extension      */
+/*                                                                        */
+/**************************************************************************/
+static USHORT _nx_secure_tls_get_rsa_pkcs1_signature_algorithm(USHORT signature_algorithm)
+{
+USHORT rsa_pkcs1_signature_algorithm;
+
+    switch (signature_algorithm)
+    {
+    case NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA256:
+        rsa_pkcs1_signature_algorithm = (USHORT)NX_SECURE_TLS_SIGNATURE_RSA_SHA256;
+        break;
+
+    case NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA384:
+        rsa_pkcs1_signature_algorithm = (USHORT)NX_SECURE_TLS_SIGNATURE_RSA_SHA384;
+        break;
+
+    case NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA512:
+        rsa_pkcs1_signature_algorithm = (USHORT)NX_SECURE_TLS_SIGNATURE_RSA_SHA512;
+        break;
+
+    default:
+        rsa_pkcs1_signature_algorithm = 0;
+        break;
+    }
+
+    return(rsa_pkcs1_signature_algorithm);
+}
+#endif
 
 VOID _nx_secure_tls_get_signature_algorithm(NX_SECURE_TLS_SESSION *tls_session,
                                             NX_SECURE_X509_CRYPTO *crypto_method,
@@ -459,13 +573,13 @@ UCHAR sig_algo = 0;
         switch (hash_algo)
         {
         case NX_SECURE_TLS_HASH_ALGORITHM_SHA256:
-            *signature_algorithm = 0x0804u; /* rsa_pss_rsae_sha256 */
+            *signature_algorithm = NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA256;
             break;
         case NX_SECURE_TLS_HASH_ALGORITHM_SHA384:
-            *signature_algorithm = 0x0805u; /* rsa_pss_rsae_sha384 */
+            *signature_algorithm = NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA384;
             break;
         case NX_SECURE_TLS_HASH_ALGORITHM_SHA512:
-            *signature_algorithm = 0x0806u; /* rsa_pss_rsae_sha512 */
+            *signature_algorithm = NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA512;
             break;
         default:
             *signature_algorithm = 0;
@@ -1689,4 +1803,3 @@ NX_SECURE_TLS_ECC *ecc_info;
 }
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 #endif /* NX_SECURE_TLS_CLIENT_DISABLED */
-

@@ -404,9 +404,9 @@ UCHAR            *message;
         reply_counter[1] = NX_TRUE;
     else if(!memcmp(message,"200 Type Binary",15))
         reply_counter[2] = NX_TRUE;
-    else if(!memcmp(message,"250 File Sent",13))
+    else if(!memcmp(message,"226 File Sent",13))
         reply_counter[3] = NX_TRUE;
-    else if(!memcmp(message,"250 File Written ",16))
+    else if(!memcmp(message,"226 File Written",16))
         reply_counter[4] = NX_TRUE;
     else if(!memcmp( message,"200 NOOP Success",16))
         reply_counter[5] = NX_TRUE;

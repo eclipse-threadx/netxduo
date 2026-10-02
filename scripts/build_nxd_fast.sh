@@ -11,4 +11,4 @@
 ##############################################################################
 
 
-$(dirname `realpath $0`)/../test/cmake/netxduo_fast/run.sh build all
+"$(dirname "$(realpath "$0")")/run_cmake_suite.sh" netxduo_fast build "$@"

@@ -39,7 +39,8 @@ set(crypto_test_cases
     ${SOURCE_DIR}/nx_secure_huge_number_test.c
     ${SOURCE_DIR}/nx_secure_md5_test.c
     ${SOURCE_DIR}/nx_secure_phash_prf_test.c
-    ${SOURCE_DIR}/nx_secure_pkcs1_v1_5_test.c)
+    ${SOURCE_DIR}/nx_secure_pkcs1_v1_5_test.c
+    ${SOURCE_DIR}/nx_secure_rsa_pss_test.c)
 set(test_utility_files ${SOURCE_DIR}/../crypto_test/cryptotestcontrol.c)
 if(("${CMAKE_BUILD_TYPE}" STREQUAL "standalone_build"))
     include(${CMAKE_CURRENT_SOURCE_DIR}/crypto_standalone.cmake)
@@ -54,7 +55,11 @@ endif()
 
 target_include_directories(test_utility PUBLIC ${SOURCE_DIR}/test)
 target_compile_definitions(test_utility PUBLIC BATCH_TEST CTEST)
-if(("${CMAKE_BUILD_TYPE}" STREQUAL "fips_build_coverage") OR ("${CMAKE_BUILD_TYPE}" STREQUAL "standalone_build"))
+if((NOT MSVC) AND (("${CMAKE_BUILD_TYPE}" STREQUAL "fips_build_coverage") OR ("${CMAKE_BUILD_TYPE}" STREQUAL "standalone_build")))
+  # On Linux the crypto library is built separately (run.sh build_libs) and must
+  # be linked explicitly. On MSVC the crypto_libraries sources are compiled into
+  # netxduo (see ../CMakeLists.txt), so there is no standalone "crypto" target to
+  # link against and doing so fails with LNK1181.
   target_link_libraries(test_utility PUBLIC crypto)
 endif()
 
@@ -67,3 +72,4 @@ foreach(test_case ${crypto_test_cases})
     COMMAND ${test_name}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..)
 endforeach()
+# Portions of this file were generated with AI assistance.

@@ -11,4 +11,4 @@
 ##############################################################################
 
 
-CTEST_PARALLEL_LEVEL=4 $(dirname `realpath $0`)/../test/cmake/netxduo_fast/run.sh test all
+"$(dirname "$(realpath "$0")")/run_cmake_suite.sh" netxduo_fast test "$@"

@@ -92,6 +92,7 @@ typedef  struct TEST_ENTRY_STRUCT
 /* Define the prototypes for the test entry points.  */
 VOID nx_secure_tls_session_receive_coverage_test_application_define(void *);
 VOID nx_secure_tls_send_record_coverage_test_application_define(void *);
+VOID nx_secure_tls_send_record_key_clear_test_application_define(void *);
 void nx_secure_tls_client_handshake_coverage_test_application_define(void *);
 void nx_secure_tls_finished_hash_coverage_test_application_define(void *);
 void nx_secure_tls_generate_key_coverage_test_application_define(void *);
@@ -142,6 +143,7 @@ void nx_secure_tls_certificate_coverage_test_application_define(void *);
 void nx_secure_tls_no_remote_certs_allocated_test_application_define(void *first_unused_memory);
 void nx_secure_tls_partial_remote_certs_allocated_test_application_define(void *first_unused_memory);
 void nx_secure_tls_process_certificate_verify_test_application_define(void *first_unused_memory);
+void nx_secure_tls_certificate_verify_concurrency_test_application_define(void *first_unused_memory);
 void nx_secure_tls_client_handshake_test_application_define(void *first_unused_memory);
 void nx_secure_tls_clienthello_extension_test_application_define(void *first_unused_memory);
 void nx_secure_tls_coverage_test_application_define(void *first_unused_memory);
@@ -236,7 +238,11 @@ void nx_secure_tls_1_3_ciphersuites_test_application_define(void *);
 void nx_secure_tls_1_3_clienthello_length_checking_test_application_define(void *first_unused_memory);
 void nx_secure_tls_1_3_handshake_fail_test_application_define(void *);
 void nx_secure_tls_1_3_hello_retry_cookie_test_application_define(void *);
+void nx_secure_tls_1_3_handshake_cache_overflow_test_application_define(void *);
+void nx_secure_tls_1_3_hello_retry_cache_overflow_test_application_define(void *);
+void nx_secure_tls_1_3_hello_retry_cookie_overflow_test_application_define(void *);
 void nx_secure_tls_1_3_invalid_client_state_test_application_define(void *first_unused_memory);
+void nx_secure_tls_1_3_no_newsessionticket_test_application_define(void *first_unused_memory);
 void nx_secure_tls_1_3_key_share_test_application_define(void *);
 void nx_secure_tls_1_3_provisioned_psk_test_application_define(void *);
 void nx_secure_tls_1_3_receive_invalid_server_handshake_message_test_application_define(void *);
@@ -284,6 +290,7 @@ TEST_ENTRY  test_control_tests[] =
 #else /* ifdef CTEST */
     {nx_secure_tls_session_receive_coverage_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_send_record_coverage_test_application_define, TEST_TIMEOUT_LOW},
+    {nx_secure_tls_send_record_key_clear_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_client_handshake_coverage_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_handshake_hash_coverage_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_generate_premaster_coverage_test_application_define, TEST_TIMEOUT_LOW},
@@ -335,6 +342,7 @@ TEST_ENTRY  test_control_tests[] =
     {nx_secure_tls_no_remote_certs_allocated_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_partial_remote_certs_allocated_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_process_certificate_verify_test_application_define, TEST_TIMEOUT_LOW},
+    {nx_secure_tls_certificate_verify_concurrency_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_rsa_4096_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_rsa_private_key_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_send_plaintext_alert_after_key_generation_test_application_define, TEST_TIMEOUT_LOW},
@@ -360,7 +368,11 @@ TEST_ENTRY  test_control_tests[] =
     {nx_secure_tls_1_3_clienthello_length_checking_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_handshake_fail_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_hello_retry_cookie_test_application_define, TEST_TIMEOUT_LOW},
+    {nx_secure_tls_1_3_handshake_cache_overflow_test_application_define, TEST_TIMEOUT_LOW},
+    {nx_secure_tls_1_3_hello_retry_cache_overflow_test_application_define, TEST_TIMEOUT_LOW},
+    {nx_secure_tls_1_3_hello_retry_cookie_overflow_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_invalid_client_state_test_application_define, TEST_TIMEOUT_LOW},
+    {nx_secure_tls_1_3_no_newsessionticket_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_key_share_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_serverhello_length_checking_test_application_define, TEST_TIMEOUT_LOW},
     {nx_secure_tls_1_3_session_create_ext_test_application_define, TEST_TIMEOUT_LOW},

@@ -11,4 +11,4 @@
 ##############################################################################
 
 
-CTEST_PARALLEL_LEVEL=4 $(dirname `realpath $0`)/../test/cmake/nx_secure/run.sh test all
+"$(dirname "$(realpath "$0")")/run_cmake_suite.sh" nx_secure test "$@"

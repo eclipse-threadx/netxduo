@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
 
 /**************************************************************************/
 /**************************************************************************/
@@ -551,6 +552,9 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
 #define NX_SECURE_TLS_SIGNATURE_RSA_SHA256                 (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA256 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA)
 #define NX_SECURE_TLS_SIGNATURE_RSA_SHA384                 (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA384 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA)
 #define NX_SECURE_TLS_SIGNATURE_RSA_SHA512                 (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA512 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_RSA)
+#define NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA256        0x0804u
+#define NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA384        0x0805u
+#define NX_SECURE_TLS_SIGNATURE_RSA_PSS_RSAE_SHA512        0x0806u
 #define NX_SECURE_TLS_SIGNATURE_ECDSA_SHA1                 (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA1 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA)
 #define NX_SECURE_TLS_SIGNATURE_ECDSA_SHA224               (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA224 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA)
 #define NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256               (((UINT)NX_SECURE_TLS_HASH_ALGORITHM_SHA256 << 8) + (UINT)NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA)
@@ -615,6 +619,11 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
 #define NX_SECURE_TLS_SEQUENCE_NUMBER_SIZE                 (2)   /* Size of sequence numbers for TLS records in 32-bit words. */
 #define NX_SECURE_TLS_RECORD_HEADER_SIZE                   (5)   /* Size of the TLS record header in bytes. */
 #define NX_SECURE_TLS_HANDSHAKE_HEADER_SIZE                (4)   /* Size of the TLS handshake record header in bytes. */
+
+/* Size of the buffer holding handshake messages whose hash method is not yet known. */
+#ifndef NX_SECURE_TLS_HANDSHAKE_CACHE_SIZE
+#define NX_SECURE_TLS_HANDSHAKE_CACHE_SIZE                 (500)
+#endif
 #define NX_SECURE_TLS_FINISHED_HASH_SIZE                   (12)  /* Size of the TLS handshake Finished hash in bytes. If SSLv3 is added, the hash size will need to
                                                                     be revisited because it is different. */
 #define NX_SECURE_TLS_MAX_CIPHER_BLOCK_SIZE                (128) /* Size of the largest block used by session ciphers (in block mode). */
@@ -652,6 +661,51 @@ typedef struct NX_SECURE_VERSIONS_LIST_STRUCT
 #ifndef NX_SECURE_TLS_KEY_MATERIAL_SIZE
 #define NX_SECURE_TLS_KEY_MATERIAL_SIZE                    (2 * (NX_SECURE_TLS_MAX_HASH_SIZE + NX_SECURE_TLS_MAX_KEY_SIZE + NX_SECURE_TLS_MAX_IV_SIZE))
 #endif
+
+#ifndef NX_SECURE_DISABLE_X509
+/* The CertificateVerify signature is built and checked in scratch buffers holding one session's
+ * transcript, so they belong to the session rather than to the translation unit. They are carved
+ * out of the application-supplied crypto metadata area at session create time. Sending and
+ * processing a CertificateVerify never overlap within a single session, so the send and process
+ * paths share the same area.
+ */
+
+/* Holds the RFC 8446 Section 4.4.3 signed content: 64 octets of 0x20 padding, the 34-byte context
+ * string including its 0-byte separator, and the transcript hash (SHA-512 at most). The same
+ * buffer then holds the digest of that content, or the concatenated MD5 and SHA-1 hashes for
+ * TLS 1.0 and 1.1. */
+#define NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE         (64 + 34 + 64)
+
+/* Holds the whole PKCS#1 v1.5 encoded block, whose length is the RSA modulus length. Redefine
+ * this to (NX_CRYPTO_MAX_RSA_MODULUS_SIZE / 8) or smaller to save memory when the largest
+ * certificate key in use is known to be smaller than the default. */
+#ifndef NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE
+#define NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE    (600)
+#endif
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+/* EMSA-PSS working area (RFC 8017 Section 9.1.2): db (at most modulus length - hash length - 1)
+ * followed by H'. Sized for RSA-4096 with SHA-512. */
+#ifndef NX_SECURE_TLS_CERTIFICATE_VERIFY_PSS_SCRATCH_SIZE
+#define NX_SECURE_TLS_CERTIFICATE_VERIFY_PSS_SCRATCH_SIZE  (600)
+#endif
+#endif /* NX_SECURE_TLS_TLS_1_3_ENABLED */
+
+/* Offsets of the buffers above within the scratch area. Every buffer starts on a four-byte
+ * boundary so that the crypto routines are handed aligned input. */
+#define NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_OFFSET       (0)
+#define NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_OFFSET  (((NX_SECURE_TLS_CERTIFICATE_VERIFY_HASH_SIZE + 3) / 4) * 4)
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#define NX_SECURE_TLS_CERTIFICATE_VERIFY_PSS_OFFSET        (NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_OFFSET + \
+                                                            ((((NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE) + 3) / 4) * 4))
+#define NX_SECURE_TLS_CERTIFICATE_VERIFY_SCRATCH_SIZE      (NX_SECURE_TLS_CERTIFICATE_VERIFY_PSS_OFFSET + \
+                                                            NX_SECURE_TLS_CERTIFICATE_VERIFY_PSS_SCRATCH_SIZE)
+#else
+#define NX_SECURE_TLS_CERTIFICATE_VERIFY_SCRATCH_SIZE      (NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_OFFSET + \
+                                                            NX_SECURE_TLS_CERTIFICATE_VERIFY_SIGNATURE_SIZE)
+#endif /* NX_SECURE_TLS_TLS_1_3_ENABLED */
+#endif /* NX_SECURE_DISABLE_X509 */
 
 /* PSK-specific defines. If PSK is disabled, don't bring PSK types into the build. */
 #if defined(NX_SECURE_ENABLE_PSK_CIPHERSUITES) || defined(NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE) || (NX_SECURE_TLS_TLS_1_3_ENABLED)
@@ -928,7 +982,7 @@ typedef struct NX_SECURE_TLS_KEY_MATERIAL_STRUCT
 
     /* Pointer to buffer where we can store handshake messages to hash once we know
        the hash routine we are using. */
-    UCHAR nx_secure_tls_handshake_cache[500];
+    UCHAR nx_secure_tls_handshake_cache[NX_SECURE_TLS_HANDSHAKE_CACHE_SIZE];
     UINT  nx_secure_tls_handshake_cache_length;
 
     /* The TLS protocol requires a "secret" used in the hash of each message,
@@ -1277,6 +1331,15 @@ typedef struct NX_SECURE_TLS_SESSION_STRUCT
     /* Define the TLS PRF metadata size. */
     ULONG nx_secure_tls_prf_metadata_size;
 
+#ifndef NX_SECURE_DISABLE_X509
+    /* Define the CertificateVerify scratch area. This is per-session so that concurrent sessions
+       do not overwrite each other's signature working data. */
+    VOID *nx_secure_tls_certificate_verify_scratch;
+
+    /* Define the CertificateVerify scratch size. */
+    ULONG nx_secure_tls_certificate_verify_scratch_size;
+#endif
+
     /* Function (set by user) to call when TLS needs the current time. */
     ULONG (*nx_secure_tls_session_time_function)(void);
 
@@ -1407,6 +1470,8 @@ typedef struct NX_SECURE_TLS_SESSION_STRUCT
 
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 UINT _nx_secure_tls_1_3_crypto_init(NX_SECURE_TLS_SESSION *tls_session);
+UINT _nx_secure_tls_1_3_strip_padding(NX_PACKET *decrypted_packet, USHORT *message_type_ptr,
+                                      UINT *message_length_ptr);
 UINT _nx_secure_tls_1_3_client_handshake(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
                                          UINT data_length, ULONG wait_option);
 UINT _nx_secure_tls_1_3_server_handshake(NX_SECURE_TLS_SESSION *tls_session, UCHAR *packet_buffer,
@@ -1531,6 +1596,11 @@ UINT _nx_secure_tls_send_clienthello(NX_SECURE_TLS_SESSION *tls_session, NX_PACK
 UINT _nx_secure_tls_send_clienthello_extensions(NX_SECURE_TLS_SESSION *tls_session,
                                                 UCHAR *packet_buffer, ULONG *packet_offset,
                                                 ULONG *extensions_length, ULONG available_size);
+#if !defined(NX_SECURE_TLS_CLIENT_DISABLED) && !defined(NX_SECURE_DISABLE_X509)
+UINT _nx_secure_tls_send_clienthello_sig_extension(NX_SECURE_TLS_SESSION *tls_session,
+                                                   UCHAR *packet_buffer, ULONG *packet_offset,
+                                                   USHORT *extension_length, ULONG available_size);
+#endif
 UINT _nx_secure_tls_send_client_key_exchange(NX_SECURE_TLS_SESSION *tls_session,
                                              NX_PACKET *send_packet);
 UINT _nx_secure_tls_send_finished(NX_SECURE_TLS_SESSION *tls_session, NX_PACKET *send_packet);
@@ -1844,4 +1914,3 @@ TLS_DECLARE  TX_MUTEX _nx_secure_tls_protection;
 #endif
 
 #endif /* SRC_NX_SECURE_TLS_H_ */
-
