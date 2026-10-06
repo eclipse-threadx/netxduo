@@ -85,6 +85,9 @@ static unsigned char pkt3[86] = {
 
 static ULONG                   error_counter =     0;
 
+/* One whole eight byte option followed by a tail too short to hold another. */
+static UCHAR                   option_area[16];
+
 
 /* Define thread prototypes.  */
 
@@ -194,6 +197,7 @@ NX_IPV6_HEADER
 ND_CACHE_ENTRY
             nd_entry;
 UINT        i;
+UINT        status;
 
     /* Print out some test information banners.  */
     printf("NetX Test:   ICMPv6 Branch Test........................................");
@@ -405,6 +409,36 @@ UINT        i;
     COPY_IPV6_ADDRESS(destination_address, ip_header_ptr -> nx_ip_header_source_ip);
     _nx_icmpv6_send_error_message(&ip_0, packet_ptr, 0, 0);
 #endif
+
+
+    /* Test _nx_icmpv6_validate_options(). */
+    /* An option area that does not divide exactly into whole options must be
+       rejected. The loop used to stop while one or two bytes were still unexamined
+       and the test after it only caught a negative remainder, so such an area was
+       reported valid and every consumer then read an option header at that tail. */
+    memset(option_area, 0, sizeof(option_area));
+    option_area[0] = 1;   /* source link-layer address */
+    option_area[1] = 1;   /* one unit of eight bytes */
+
+    status = _nx_icmpv6_validate_options((NX_ICMPV6_OPTION *)option_area, 10, 0);
+    if (status != NX_NOT_SUCCESSFUL)
+        error_counter++;
+
+    status = _nx_icmpv6_validate_options((NX_ICMPV6_OPTION *)option_area, 9, 0);
+    if (status != NX_NOT_SUCCESSFUL)
+        error_counter++;
+
+    /* An area that does divide exactly must still be accepted. */
+    status = _nx_icmpv6_validate_options((NX_ICMPV6_OPTION *)option_area, 8, 0);
+    if (status != NX_SUCCESS)
+        error_counter++;
+
+    /* A zero option length must be rejected rather than advance the walk by nothing. */
+    option_area[1] = 0;
+    status = _nx_icmpv6_validate_options((NX_ICMPV6_OPTION *)option_area, 8, 0);
+    if (status != NX_NOT_SUCCESSFUL)
+        error_counter++;
+    option_area[1] = 1;
 
 
     /* Test _nx_icmpv6_process_ns(). */
