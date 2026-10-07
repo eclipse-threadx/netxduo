@@ -1,0 +1,90 @@
+= uProtocol implementation validation
+
+Recorded 2026-10-07 on branch `1-add-uprotocol-support`.
+Specification: `3130bc5bfe661f60509b9d5e1d03995d608a18b2`.
+This record was prepared with Codex (GPT-6); it is not human approval or a conformance certification.
+
+== Host verification
+
+Ubuntu 26.04, GCC 15.2, CMake/Ninja, ThreadX Linux simulator with 32-bit multilib.
+The existing HTTP server triggers GCC 15's `unterminated-string-initialization` warning.
+Local build caches use `-Wno-error=unterminated-string-initialization`; the HTTP source and repository warning policy were not changed.
+The new sources build under the suite's C99 and warning settings.
+
+[cols="3,1"]
+|===
+|MQTT profile |CTest result
+|`default_build_coverage` (including optional Mosquitto test) |40/40 passed
+|`secure_build_coverage` |39/39 passed
+|`require_secure_build` |39/39 passed
+|`queue_depth_build` |39/39 passed
+|`cloud_default_build_coverage` |39/39 passed
+|`cloud_secure_build_coverage` |39/39 passed
+|`cloud_require_secure_build` |39/39 passed
+|`cloud_queue_depth_build` |39/39 passed
+|`websocket_secure_build` |39/39 passed
+|===
+
+The regression controller treats unsupported profile-specific cases as warnings, which CTest reports as successful exits.
+In particular, the new plain-TCP uProtocol wire test does not run in the two required-TLS profiles.
+The codec tests run in those profiles.
+Secure and WebSocket profile results include the existing MQTT tests; they do not establish uProtocol interoperability over TLS or WebSocket with an independent peer.
+
+Additional checks:
+
+* Core NetX Duo `default_build_coverage`: 919/919 CTest cases passed.
+* CI classifier unit tests: 33 passed.
+* The sample compiles as an object target in every MQTT profile.
+* Changed MQTT and uProtocol C sources compile with `NX_LITTLE_ENDIAN` enabled and suppressed using `scripts/check_endian.sh`. This checks compilation, not execution on a big-endian device.
+* A separate host harness exercised 100,000 malformed property/URI inputs under AddressSanitizer and UndefinedBehaviorSanitizer without findings. It linked the production codecs and NetX packet extraction code; it did not run the ThreadX scheduler under sanitizers.
+* `git diff --check` passed.
+
+The new tests cover independent wire values, URI/UUID parsing, four message-type attribute round trips, D2D/E2E topic formatting, malformed UTF-8/properties/acknowledgements, fragmented PUBLISH, shared listeners, PUBACK rejection, expiry, receive-buffer exhaustion, reconnect/resubscription, and persistent-session retransmission with reduced Receive Maximum.
+The real Mosquitto test checks publish/subscribe and reconnect over the NetX RAM-network relay.
+
+== Coverage and remaining gaps
+
+The default MQTT profile's gcovr report gives:
+
+[cols="3,1,1"]
+|===
+|Source |Line coverage |Branch coverage
+|`nxd_mqtt5_client.c` |90.3% |73.1%
+|`nxd_mqtt_client.c` |81.7% |70.8%
+|`nxd_uprotocol.c` |82.8% |54.2%
+|`nxd_uprotocol_codec.c` |82.3% |58.9%
+|===
+
+Coverage is below the project's 100% goal.
+Remaining gaps include allocation/synchronization failures, many invalid-argument combinations, TLS-specific uProtocol paths and some optional attributes.
+No claim is made that all branches or all pinned specification requirements are verified.
+The explicit-zero TTL ambiguity between the pinned mapping and MQTT expiry semantics is documented in `README.adoc` for maintainer discussion; omit TTL for non-expiring publish/notification messages.
+
+Not performed: embedded-board execution, Windows builds, actual big-endian execution, independent-uProtocol-library interoperability, MISRA static analysis, or the complete repository-wide CI selection.
+A complete uProtocol language SDK, services and RPC convenience layer are outside this transport addon's scope, as described in `README.adoc`.
+
+== Reproduction
+
+Use the normal `scripts/build_mqtt.sh` / `scripts/test_mqtt.sh` wrappers for the nine profiles.
+To enable the optional broker test in an existing default build:
+
+[source,sh]
+----
+cmake -S test/cmake/mqtt -B test/cmake/mqtt/build/default_build_coverage -DNXD_UPROTOCOL_BROKER_TESTS=ON
+cmake --build test/cmake/mqtt/build/default_build_coverage -j 6
+ctest --test-dir test/cmake/mqtt/build/default_build_coverage --output-on-failure
+----
+
+For this GCC 15 host, add the local warning exception when configuring each profile, for example `-DCMAKE_C_FLAGS_DEFAULT_BUILD_COVERAGE=-Wno-error=unterminated-string-initialization`.
+The ThreadX Linux simulator required execution outside the agent sandbox; sandboxed runs terminated with SIGSYS.
+
+Generated build/test logs, the sanitizer harness and coverage reports are in the ignored `build/uprotocol-reference/` directory on this workspace.
+They are not source dependencies.
+
+== Upstream submission
+
+The implementation remains uncommitted on the requested branch.
+Before submitting a PR targeting `dev`, the human contributor must review the code and provenance, confirm their ECA/commit identity, complete applicable Eclipse IP review for this contribution, and include the required `Assisted-by: Codex (GPT-6)` attribution with an appropriate attribution email.
+The source headers state that human review is required; they do not falsely assert that review has already happened.
+A matching documentation PR to `rtos-docs-asciidoc` is still required by `CONTRIBUTING.md`; `README.adoc` supplies the local API documentation for that contribution.
+No PR, external documentation change or human sign-off was created by the agent.

@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+/* Portions of this file were generated with AI assistance. */
 
 
 /**************************************************************************/
@@ -294,9 +295,28 @@ typedef struct MQTT_PACKET_DISCONNECT_STRUCT
 #define NXD_MQTT_ERROR_NOT_AUTHORIZED        0x10085
 
 
+/* MQTT version selection is per client and may only change while idle. */
+#define NXD_MQTT_VERSION_3_1_1 4u
+#define NXD_MQTT_VERSION_5     5u
+#define NXD_MQTT5_REASON_ERROR 0x10100u
+
 /* Define the basic MQTT Client control block. */
 typedef struct NXD_MQTT_CLIENT_STRUCT
 {
+    UINT                           nxd_mqtt_protocol_version;
+    ULONG                          nxd_mqtt_session_expiry;
+    UINT                           nxd_mqtt_session_present;
+    ULONG                          nxd_mqtt_maximum_packet_size;
+    ULONG                          nxd_mqtt_peer_maximum_packet_size;
+    UINT                           nxd_mqtt_peer_receive_maximum;
+    UINT                           nxd_mqtt5_inflight;
+    NX_PACKET                     *nxd_mqtt5_retransmit_next;
+    UINT                           nxd_mqtt_peer_maximum_qos;
+    UINT                           nxd_mqtt_peer_retain_available;
+    UINT                           nxd_mqtt_peer_wildcard_available;
+    UINT                           nxd_mqtt_last_reason_code;
+    VOID                         (*nxd_mqtt5_ack_notify)(struct NXD_MQTT_CLIENT_STRUCT *, UINT, USHORT, UINT, VOID *);
+    VOID                          *nxd_mqtt5_ack_context;
     CHAR                          *nxd_mqtt_client_name;
     CHAR                          *nxd_mqtt_client_id;
     UINT                           nxd_mqtt_client_id_length;
@@ -372,6 +392,33 @@ typedef struct NXD_MQTT_CLIENT_STRUCT
 } NXD_MQTT_CLIENT;
 
 
+
+/* MQTT 5 properties are encoded without the Property Length prefix.
+   Buffers remain owned by the caller. Publish copies them before returning.
+   Receive leaves an oversized message queued and reports required lengths. */
+UINT nxd_mqtt_client_protocol_version_set(NXD_MQTT_CLIENT *client_ptr, UINT version);
+UINT nxd_mqtt_client_session_configure(NXD_MQTT_CLIENT *client_ptr, ULONG expiry, ULONG maximum_packet_size);
+UINT nxd_mqtt_client_publish_properties(NXD_MQTT_CLIENT *client_ptr, CHAR *topic, UINT topic_length,
+                                       CHAR *message, UINT message_length, UINT retain, UINT qos,
+                                       const UCHAR *properties, UINT properties_length, ULONG wait_option);
+UINT nxd_mqtt_client_message_get_properties(NXD_MQTT_CLIENT *client_ptr, UCHAR *topic, UINT topic_size,
+                                          UINT *topic_length, UCHAR *message, UINT message_size,
+                                          UINT *message_length, UCHAR *properties, UINT properties_size,
+                                          UINT *properties_length);
+/* Drop the oldest queued message, for applications enforcing receive limits. */
+UINT nxd_mqtt_client_message_discard(NXD_MQTT_CLIENT *client_ptr);
+/* Internal MQTT 5 codec helpers, shared with the protocol engine. */
+UINT _nxd_mqtt5_properties_validate(const UCHAR *data, UINT length, UINT packet_type);
+UINT _nxd_mqtt5_properties_read(NXD_MQTT_CLIENT *client, NX_PACKET *packet, ULONG *offset,
+                               ULONG end, UINT type, ULONG *properties_offset, UINT *properties_length);
+UINT _nxd_mqtt5_topic_validate(const CHAR *topic, UINT length, UINT filter);
+UINT _nxd_mqtt5_packet_check(NXD_MQTT_CLIENT *client, NX_PACKET *packet);
+UINT _nxd_mqtt5_connack(NXD_MQTT_CLIENT *client, NX_PACKET *packet);
+UINT _nxd_mqtt5_ack(NXD_MQTT_CLIENT *client, NX_PACKET *packet, USHORT *id, UINT *reason);
+UINT _nxd_mqtt5_publish_offsets(NX_PACKET *packet, ULONG *offset, ULONG *length,
+                               ULONG *properties_offset, UINT *properties_length);
+UINT _nxd_mqtt5_connect_properties(NXD_MQTT_CLIENT *client, NX_PACKET *packet, ULONG wait_option);
+UINT _nxd_mqtt5_vbi_encode(ULONG value, UCHAR *bytes);
 
 #ifndef NXD_MQTT_CLIENT_SOURCE_CODE
 

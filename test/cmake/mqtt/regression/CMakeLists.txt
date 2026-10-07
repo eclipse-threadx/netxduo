@@ -1,3 +1,4 @@
+# Portions of this file were generated with AI assistance.
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 cmake_policy(SET CMP0057 NEW)
 
@@ -7,6 +8,9 @@ get_filename_component(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../regression
                        ABSOLUTE)
 
 set(mqtt_test_cases
+    ${SOURCE_DIR}/mqtt_test/netx_mqtt5_codec_test.c
+    ${SOURCE_DIR}/uprotocol_test/netx_uprotocol_mqtt_test.c
+    ${SOURCE_DIR}/uprotocol_test/netx_uprotocol_codec_test.c
     ${SOURCE_DIR}/mqtt_test/netx_mqtt_api_test.c
     ${SOURCE_DIR}/mqtt_test/netx_mqtt_connect_auth_test.c
     ${SOURCE_DIR}/mqtt_test/netx_mqtt_connect_auth_empty_test.c
@@ -61,3 +65,20 @@ foreach(
   target_link_libraries(${test_name} PRIVATE test_utility)
   add_test(${CMAKE_BUILD_TYPE}::${test_name} ${test_name})
 endforeach()
+
+# Optional broker interoperability using existing host test tools; no root or
+# virtual Ethernet interface is needed because the RAM broker relays TCP bytes.
+option(NXD_UPROTOCOL_BROKER_TESTS "Run uProtocol MQTT 5 tests with Mosquitto" OFF)
+if(NXD_UPROTOCOL_BROKER_TESTS AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux" AND NOT CMAKE_BUILD_TYPE MATCHES "require_secure")
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    find_program(UPROTOCOL_MOSQUITTO mosquitto)
+    if(NOT UPROTOCOL_MOSQUITTO)
+        message(FATAL_ERROR "Mosquitto is required for NXD_UPROTOCOL_BROKER_TESTS")
+    endif()
+    add_test(NAME ${CMAKE_BUILD_TYPE}::netx_uprotocol_mosquitto_test
+             COMMAND ${Python3_EXECUTABLE} ${SOURCE_DIR}/uprotocol_test/run_mosquitto.py
+                     ${UPROTOCOL_MOSQUITTO} $<TARGET_FILE:netx_uprotocol_mqtt_test>)
+endif()
+
+add_library(uprotocol_sample OBJECT ${SOURCE_DIR}/../../samples/demo_uprotocol_mqtt.c)
+target_link_libraries(uprotocol_sample PRIVATE azrtos::netxduo)
