@@ -1843,6 +1843,29 @@ UINT                    status;
     client_request_ptr -> nx_tftp_client_request_retransmits = 0;
 #endif
 
+    /* A DATA datagram carries at most NX_TFTP_FILE_TRANSFER_MAX bytes of file data
+       after its four byte header. Nothing enforced that upper bound, and both the
+       copy and the write below are sized from nx_packet_length, so an oversized
+       datagram drove a read past the first packet of the chain and an allocation
+       the pool could not satisfy. The same constant is already consulted further
+       down to recognise the final short block; it is enforced here. */
+    if (packet_ptr -> nx_packet_length > (4u + NX_TFTP_FILE_TRANSFER_MAX))
+    {
+
+        /* Send an error to the client.  */
+        _nx_tftp_server_send_error(server_ptr, &ip_address, port, NX_TFTP_ERROR_ILLEGAL_OPERATION, "NetX TFTP Server: Data block too large");
+
+        /* Error, close the file, release the packet and delete the client request.  */
+        fx_file_close(&(client_request_ptr -> nx_tftp_client_request_file));
+
+        /* Release the packet. */
+        nx_packet_release(packet_ptr);
+
+        memset(client_request_ptr, 0, sizeof(NX_TFTP_CLIENT_REQUEST));
+
+        return;
+    }
+
     /* Determine if there is anything to write.  */
     if (packet_ptr -> nx_packet_length > 4)
     {
@@ -1860,7 +1883,14 @@ UINT                    status;
             /* Yes, the packet is chained.  We have to copy the receive packet into a packet with the
                a payload of at least 560 bytes so the write request can be supplied with just the
                payload pointer.  */
-            status =  nx_packet_copy(packet_ptr, &temp_ptr, server_ptr -> nx_tftp_server_packet_pool_ptr, NX_WAIT_FOREVER);
+            /* A bounded wait: nx_packet_copy is built on _nx_packet_data_append, which
+               inherits this option and allocates one packet per payload of data. With
+               NX_WAIT_FOREVER an allocation the pool could never satisfy suspended the
+               server thread permanently rather than failing the request. The server
+               runs this on its single thread, so waiting here stalls every client,
+               not only this one; the allocation failure path below already counts
+               the error and tells the client. */
+            status =  nx_packet_copy(packet_ptr, &temp_ptr, server_ptr -> nx_tftp_server_packet_pool_ptr, NX_NO_WAIT);
 
             /* Check for successful packet copy.  */
             if (status != NX_SUCCESS)
