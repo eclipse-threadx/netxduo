@@ -19,7 +19,10 @@
 
 extern void     test_control_return(UINT);
 
-#if !defined(NX_DISABLE_IPV4)
+/* The defect needs a DATA datagram that arrives as a packet chain: without
+   chaining the write stays inside the packet and neither the over-read nor the
+   stall can occur, which is the workaround the advisory names. */
+#if !defined(NX_DISABLE_IPV4) && !defined(NX_DISABLE_PACKET_CHAIN)
 
 #define     DEMO_STACK_SIZE         4096
 
