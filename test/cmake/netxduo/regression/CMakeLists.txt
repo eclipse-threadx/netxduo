@@ -1194,7 +1194,8 @@ set(tftp_test_cases
     ${SOURCE_DIR}/tftp_test/netx_tftp_error_file_name_test.c
     ${SOURCE_DIR}/tftp_test/netx_tftp_read_interaction_test.c
     ${SOURCE_DIR}/tftp_test/netx_tftp_error_destionation_port_test.c
-    ${SOURCE_DIR}/tftp_test/netx_tftp_malformed_packet_test.c)
+    ${SOURCE_DIR}/tftp_test/netx_tftp_malformed_packet_test.c
+    ${SOURCE_DIR}/tftp_test/netx_tftp_oversized_data_test.c)
 
 if(NOT "-DNX_DISABLE_IPV6" IN_LIST ${CMAKE_BUILD_TYPE})
   list(APPEND tftp_test_cases
