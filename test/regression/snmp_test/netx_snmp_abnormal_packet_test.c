@@ -20,6 +20,10 @@
 
 extern void    test_control_return(UINT);
 
+/* nxd_snmp.h declares this only when NX_SNMP_SOURCE_CODE is defined, which a test
+   does not define. Declared here as the web tests declare the internals they reach. */
+extern UINT    _nx_snmp_utility_object_id_get(UCHAR *buffer_ptr, UCHAR *object_string, INT buffer_length);
+
 #define     DEMO_STACK_SIZE         4096
 
 #if !defined(NX_DISABLE_IPV4)
