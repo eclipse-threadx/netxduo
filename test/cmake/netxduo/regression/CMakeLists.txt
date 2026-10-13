@@ -343,6 +343,8 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_3_23_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmpv6_invalid_ra_dest_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_retransmit_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_tcp_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_udp_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_basic_processing_test.c
     ${SOURCE_DIR}/netxduo_test/netx_3_21_test.c
     ${SOURCE_DIR}/netxduo_test/netx_arp_basic_test.c
@@ -1215,6 +1217,7 @@ endif()
 
 set(test_utility_files
     ${SOURCE_DIR}/test/nx_ram_network_driver_test_1500.c
+    ${SOURCE_DIR}/test/nx_tcpip_offload_driver.c
     ${SOURCE_DIR}/test/netxtestcontrol.c
     # DHCP utilities
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_clone_function.c
