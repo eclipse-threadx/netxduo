@@ -230,40 +230,17 @@ ULONG       sends_before;
 
 #ifdef FEATURE_NX_IPV6
 
-    /* 3. The same over IPv6. The send is asserted; the delivery is not, and
-          that is deliberate.
+    /* 3. The same over IPv6, asserted as a full round trip.
 
-          _nx_udp_socket_driver_packet_receive fabricates an IPv6 header with
-          _nx_ipv6_header_add, which reads
-          nx_packet_address.nx_packet_ipv6_address_ptr. The deferred receive
-          that follows it reads nx_packet_address.nx_packet_interface_ptr.
-          Those are two members of one union, the driver writes the slot once
-          before the call and never gets control between the two readers, so
-          no value satisfies both: with the interface in it the header add
-          fails and nothing is queued, and with the address pointer in it the
-          header add succeeds and _nx_ipv6_packet_receive then drops the
-          packet as not addressed to this host. Both were measured.
-
-          The IPv4 arm has no such conflict -- _nx_ip_header_add reads neither
-          member -- which is why the round trip above is asserted in full.
-
-          So what is asserted here is everything up to and including the
-          offload handler, which is the part a driver can reach. */
-    sends_before = nx_tcpip_offload_operations[NX_TCPIP_OFFLOAD_UDP_SOCKET_SEND];
-
-    status =  nx_packet_allocate(&pool_0, &packet_ptr, NX_UDP_PACKET, NX_WAIT_FOREVER);
-    if (status)
-        error_counter++;
-    else
-    {
-        nx_packet_data_append(packet_ptr, "offload udp", 11, &pool_0, NX_WAIT_FOREVER);
-
-        status = nxd_udp_socket_send(&client_socket, packet_ptr, &ipv6_address_1, SERVER_PORT);
-        if (status)
-            error_counter++;
-    }
-
-    if (nx_tcpip_offload_operations[NX_TCPIP_OFFLOAD_UDP_SOCKET_SEND] != sends_before + 1)
+          It could not be until the union handling in
+          _nx_udp_socket_driver_packet_receive was fixed:
+          _nx_ipv6_header_add reads
+          nx_packet_address.nx_packet_ipv6_address_ptr and the deferred
+          receive behind it reads nx_packet_address.nx_packet_interface_ptr,
+          two members of one slot the driver writes once. The receive routine
+          now saves the interface, resolves the local address, and puts the
+          interface back around the call. */
+    if (exchange(&ipv6_address_1))
         error_counter++;
 #endif /* FEATURE_NX_IPV6 */
 

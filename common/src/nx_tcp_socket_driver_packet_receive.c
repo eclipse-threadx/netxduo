@@ -80,6 +80,9 @@ VOID _nx_tcp_socket_driver_packet_receive(NX_TCP_SOCKET *socket_ptr, NX_PACKET *
 {
 NX_IP *ip_ptr;
 NX_TCP_HEADER *header_ptr;
+#ifdef FEATURE_NX_IPV6
+NX_INTERFACE *interface_ptr;
+#endif /* FEATURE_NX_IPV6 */
 
     /* Setup the IP pointer.  */
     ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
@@ -155,6 +158,18 @@ NX_TCP_HEADER *header_ptr;
 #ifdef FEATURE_NX_IPV6
     if (socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_version == NX_IP_VERSION_V6)
     {
+
+        /* nx_packet_address is a union. _nx_ipv6_header_add reads
+           nx_packet_ipv6_address_ptr from it, and the deferred receive below
+           reads nx_packet_interface_ptr from the same slot, so the interface
+           the driver left there has to be saved and put back around the call.
+           Without this the header add dereferences an interface pointer as an
+           address, and setting the address pointer instead leaves the receive
+           path reading an address as an interface.  */
+        interface_ptr = packet_ptr -> nx_packet_address.nx_packet_interface_ptr;
+        packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr =
+            socket_ptr -> nx_tcp_socket_ipv6_addr;
+
         if (_nx_ipv6_header_add(ip_ptr, &packet_ptr,
                                 NX_PROTOCOL_TCP,
                                 packet_ptr -> nx_packet_length,
@@ -168,6 +183,9 @@ NX_TCP_HEADER *header_ptr;
             tx_mutex_put(&(ip_ptr -> nx_ip_protection));
             return;
         }
+
+        /* Put the interface back for the receive path.  */
+        packet_ptr -> nx_packet_address.nx_packet_interface_ptr = interface_ptr;
     }
 #endif /* FEATURE_NX_IPV6 */
         
