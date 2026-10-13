@@ -425,6 +425,27 @@ UINT  status;
                 interface_ptr -> nx_interface_ip_address;
         }
 #endif /* !NX_DISABLE_IPV4 */
+#ifdef FEATURE_NX_IPV6
+        if (nx_tcpip_offload_endpoints[self].nx_tcpip_offload_local_ip.nxd_ip_version == NX_IP_VERSION_V6)
+        {
+
+            /* The socket's source address has already been selected by the
+               time the handler is called, so it is read off the socket rather
+               than off the interface, which may carry several. */
+            if (((NX_TCP_SOCKET *)socket_ptr) -> nx_tcp_socket_ipv6_addr)
+            {
+            ULONG *from = ((NX_TCP_SOCKET *)socket_ptr) -> nx_tcp_socket_ipv6_addr -> nxd_ipv6_address;
+            ULONG *to = nx_tcpip_offload_endpoints[self].nx_tcpip_offload_local_ip.nxd_ip_address.v6;
+
+                /* Copied word by word rather than with COPY_IPV6_ADDRESS,
+                   which is only a macro when NX_IPV6_UTIL_INLINE is set. */
+                to[0] = from[0];
+                to[1] = from[1];
+                to[2] = from[2];
+                to[3] = from[3];
+            }
+        }
+#endif /* FEATURE_NX_IPV6 */
 
         /* Tell the listener who is calling, then wake it. The listener's
            socket is still the one in NX_TCP_LISTEN_STATE: it is
