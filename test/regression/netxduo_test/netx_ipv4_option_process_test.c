@@ -229,6 +229,20 @@ NX_PACKET   *my_packet;
         test_control_return(1);
     }    
 
+    /*  Test a timestamp option with fewer than three bytes left in the option area,
+        which GHSA-vwh7-h99r-fvwq added a guard for: the option processing reads a
+        type, a length and an offset, and before the guard it read them from beyond
+        the option area when the type byte sat in the last two bytes.  */
+    status = nx_icmp_ping(&ip_0, IP_ADDRESS(1, 2, 3, 5), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 28, &my_packet, 1 * NX_IP_PERIODIC_RATE);
+
+    /* Check the status.  */  
+    if ((status != NX_NO_RESPONSE) || (my_packet))
+    {
+
+        printf("ERROR!\n");
+        test_control_return(1);
+    }    
+
     printf("SUCCESS!\n");
     test_control_return(0);
 }
@@ -480,6 +494,33 @@ ULONG            message_word;
             /* Add type, length, offset, overflw and flags.  */
             memcpy(icmp_header_ptr, &message_word, sizeof(ULONG));
         }  
+
+        /* Add a timestamp option that begins in the last two bytes of the option
+           area, so that fewer than the three bytes the option processing reads
+           remain. GHSA-vwh7-h99r-fvwq.  */
+        else if (icmp_counter == 9)
+        {
+
+            /* Move the data to add the option. */
+            offset = 4;
+            shift = packet_ptr -> nx_packet_length - ip_header_length;
+            memmove(((UCHAR *)(icmp_header_ptr)) + offset, icmp_header_ptr, shift);
+
+            /* Clear memory.  */
+            memset(&message_word, 0, sizeof(ULONG));
+
+            /* Two no-operation bytes advance the walk to index 2, then a timestamp
+               type byte with only two bytes of option area remaining.  */
+            message_word = (ULONG)((NX_IP_OPTION_NO_OPERATION << 24) |
+                                   (NX_IP_OPTION_NO_OPERATION << 16) |
+                                   (NX_IP_OPTION_INTERNET_TIMESTAMP << 8));
+
+            /* Adjust for endianness. */
+            NX_CHANGE_ULONG_ENDIAN(message_word);
+
+            /* Copy the option into the buffer. */
+            memcpy(icmp_header_ptr, &message_word, sizeof(ULONG));
+        }
 
         /* Update the header IP length and total length.  */   
         ip_header_length += offset;       
