@@ -38,9 +38,18 @@ extern void    test_control_return(UINT status);
 
 #define     DEMO_STACK_SIZE         2048
 
-/* One packet, so a single allocation empties it and the next one fails. */
-#define     AUX_POOL_PACKETS        1
+/* The auxiliary pool has to be emptied for this test to work, and how many
+   packets a block holds is not something the test can compute: NX_PACKET
+   alignment and header padding are per-configuration, and v4_packet_pad_build
+   sets NX_PACKET_ALIGNMENT to 64. So the block is sized generously and
+   drained in a loop rather than sized for one packet and allocated once.
+
+   Sizing it for exactly one packet is what the first version did, and
+   nx_packet_pool_create refused the block outright wherever alignment pushed
+   one packet past it. */
 #define     AUX_PACKET_SIZE         256
+#define     AUX_POOL_BYTES          4096
+#define     AUX_MAX_HELD            64
 
 static TX_THREAD               thread_0;
 
@@ -98,8 +107,8 @@ UINT    status;
        for compare the two pointers, so they are only reachable when the two
        pools are genuinely different objects. */
     status =  nx_packet_pool_create(&auxiliary_pool, "NetX Auxiliary Pool", AUX_PACKET_SIZE, pointer,
-                                    (AUX_PACKET_SIZE + sizeof(NX_PACKET)) * AUX_POOL_PACKETS);
-    pointer = pointer + (AUX_PACKET_SIZE + sizeof(NX_PACKET)) * AUX_POOL_PACKETS;
+                                    AUX_POOL_BYTES);
+    pointer = pointer + AUX_POOL_BYTES;
     if (status)
         error_counter++;
 
@@ -152,7 +161,8 @@ static void    thread_0_entry(ULONG thread_input)
 UINT        status;
 NX_PACKET  *packet_ptr;
 #ifdef NX_ENABLE_DUAL_PACKET_POOL
-NX_PACKET  *hog_ptr = NX_NULL;
+NX_PACKET  *held[AUX_MAX_HELD];
+UINT        held_count;
 #endif
 #if defined(NX_ENABLE_IPV6_MULTICAST) && defined(FEATURE_NX_IPV6)
 NXD_ADDRESS group_address;
@@ -171,11 +181,25 @@ UINT        joins;
     /* 1. Empty the auxiliary pool, so the stack's first allocation fails and
           it falls back to the default pool. That fallback is guarded by the
           two pools being different objects, which is the branch outcome the
-          inventory records as uncovered. */
-    status = nx_packet_allocate(&auxiliary_pool, &hog_ptr, NX_PHYSICAL_HEADER, NX_NO_WAIT);
-    if (status)
-        error_counter++;
+          inventory records as uncovered.
 
+          Drained in a loop because the packet count is a property of the
+          configuration's alignment and padding, not of this test. */
+    held_count = 0;
+    while (held_count < AUX_MAX_HELD)
+    {
+        if (nx_packet_allocate(&auxiliary_pool, &held[held_count], NX_PHYSICAL_HEADER, NX_NO_WAIT))
+            break;
+
+        held_count++;
+    }
+
+    /* A pool that gave nothing, or one this test could not empty, makes every
+       assertion below vacuous. */
+    if (held_count == 0)
+        error_counter++;
+    if (held_count == AUX_MAX_HELD)
+        error_counter++;
     if (auxiliary_pool.nx_packet_pool_available != 0)
         error_counter++;
 
@@ -205,7 +229,11 @@ UINT        joins;
     if (auxiliary_pool.nx_packet_pool_available != 0)
         error_counter++;
 
-    nx_packet_release(hog_ptr);
+    while (held_count > 0)
+    {
+        held_count--;
+        nx_packet_release(held[held_count]);
+    }
 
 #endif /* NX_ENABLE_DUAL_PACKET_POOL */
 
