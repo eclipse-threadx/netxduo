@@ -13202,6 +13202,18 @@ UINT    string_length;
         length =  2;
     }
 
+    /* The declared length must fit in the bytes the buffer actually holds. The
+       single byte form is checked above; neither multi-byte form was, so a peer
+       could declare up to 65535 bytes of object data in a short packet and the walk
+       below would run that many times past the end of the buffer. This is the check
+       _nx_snmp_utility_octet_get already applies to every length form. */
+    if ((INT)(length + total) > buffer_length)
+    {
+
+        /* Indicate an invalid request is received. */
+        return(0);
+    }
+
     /* Save the original byte.  */
     saved_byte =  byte;
 
@@ -13287,10 +13299,15 @@ UINT    string_length;
             /* Otherwise, we have a more complicated value that we must loop through
                to calculate.  */
 
-            /* Loop to calculate how many bytes there are representing the value.  */
+            /* Loop to calculate how many bytes there are representing the value.
+               The count is bounded as the scan runs rather than after it finishes:
+               the check below rejects a run longer than three bytes, but only once
+               those bytes have been read. The scan also stays inside the object data
+               still declared, which the length check above has bounded to the
+               buffer. */
             i = 0;
             multiply =  128;
-            while (buffer_ptr[i] & NX_SNMP_ANS1_MULTI_BYTES)
+            while ((i < total) && (i <= 3) && (buffer_ptr[i] & NX_SNMP_ANS1_MULTI_BYTES))
             {
 
                 /* Increment count.  */
