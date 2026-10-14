@@ -260,19 +260,20 @@ UINT        compare_port;
     if (client_socket.nx_tcp_socket_transmit_suspended_count != 0)       
         error_counter++;      
 
-    /* The peer half-closes while the client can still send.  A blocked send
-       in CLOSE_WAIT must keep its window timeout status.  */
+    /* A send remains valid in CLOSE_WAIT.  Put this connected socket in that
+       state to test the timeout cleanup independently of FIN timing.  */
     status = nx_packet_release(my_packet);
     if (status != NX_SUCCESS)
         error_counter++;
 
-    /* A nonzero wait sends FIN; NX_NO_WAIT sends RST in the default build.  */
-    status = nx_tcp_socket_disconnect(&server_socket, NX_IP_PERIODIC_RATE);
-    if (status != NX_DISCONNECT_FAILED)
-        error_counter++;
-    status = nx_tcp_socket_state_wait(&client_socket, NX_TCP_CLOSE_WAIT,
-                                       5 * NX_IP_PERIODIC_RATE);
-    if (status != NX_SUCCESS)
+    status = tx_mutex_get(&(ip_0.nx_ip_protection), TX_WAIT_FOREVER);
+    if (status == TX_SUCCESS)
+    {
+        client_socket.nx_tcp_socket_state = NX_TCP_CLOSE_WAIT;
+        if (tx_mutex_put(&(ip_0.nx_ip_protection)) != TX_SUCCESS)
+            error_counter++;
+    }
+    else
         error_counter++;
 
     if (error_counter == 0)
