@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 /* This NetX test concentrates on the raw packet IPv6 send/receive operation.  */
 
 #include   "tx_api.h"
@@ -18,6 +20,7 @@ extern void    test_control_return(UINT status);
 #include   "nx_tcp.h"
 #include   "nx_udp.h"
 #include   "nx_ip.h"
+#include   "nx_ipv6.h"
 
 #define     DEMO_STACK_SIZE         2048
 
@@ -35,16 +38,22 @@ static NX_IP                   ip_1;
 /* Define the counters used in the test application...  */
 
 static ULONG                   error_counter;
+static ULONG                   raw_source[4];
+static ULONG                   raw_source_seen;
+static ULONG                   raw_source_mismatch;
 
 /* Define thread prototypes.  */
 
 static void    ntest_0_entry(ULONG thread_input);
 static void    ntest_1_entry(ULONG thread_input);
+static UINT    raw_packet_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT *operation_ptr, UINT *delay_ptr);
 extern void    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
+extern UINT    (*advanced_packet_process_callback)(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT *operation_ptr, UINT *delay_ptr);
 
 
 static NXD_ADDRESS  ipv6_addr_0;
 static NXD_ADDRESS  ipv6_addr_1;
+static NXD_ADDRESS  ipv6_addr_wrong;
 
 /* Define what the initial system looks like.  */
 
@@ -63,6 +72,8 @@ UINT    status;
     pointer = (CHAR *) first_unused_memory;
 
     error_counter = 0;
+    raw_source_seen = 0;
+    raw_source_mismatch = 0;
 
     /* Create the main thread.  */
     tx_thread_create(&ntest_0, "thread 0", ntest_0_entry, 0,  
@@ -130,6 +141,11 @@ UINT    status;
     ipv6_addr_1.nxd_ip_address.v6[1] = 0x00000000;
     ipv6_addr_1.nxd_ip_address.v6[2] = 0x00000000;
     ipv6_addr_1.nxd_ip_address.v6[3] = 0x00010002;
+
+    /* Put a non-matching address in slot 0. The raw send to 2001::/64
+       must use ipv6_addr_1 in the next slot. */
+    ipv6_addr_wrong = ipv6_addr_1;
+    ipv6_addr_wrong.nxd_ip_address.v6[0] = 0x30010000;
 
     /* Enable IPv6 */
     status = nxd_ipv6_enable(&ip_0);
@@ -272,6 +288,10 @@ ULONG       value;
 NXD_ADDRESS dest_addr;
 
 
+    status = nxd_ipv6_address_set(&ip_1, 0, &ipv6_addr_wrong, 64, NX_NULL);
+    if(status != NX_SUCCESS)
+        error_counter++;
+
     status = nxd_ipv6_address_set(&ip_1, 0, &ipv6_addr_1, 64, NX_NULL);
     if(status != NX_SUCCESS)
         error_counter++;
@@ -298,7 +318,8 @@ NXD_ADDRESS dest_addr;
     if (status != NX_SUCCESS)
         error_counter++;
 
-    /* Send the raw IP packet.  */
+    /* Send the raw IP packet and capture its source at the driver.  */
+    advanced_packet_process_callback = raw_packet_process;
     status =  nxd_ip_raw_packet_send(&ip_1, my_packet, &ipv6_addr_0, NX_IP_RAW >> 16, 0x80, NX_IP_NORMAL);
 
     /* Check status.  */
@@ -374,6 +395,15 @@ NXD_ADDRESS dest_addr;
 
     tx_thread_sleep(3 * NX_IP_PERIODIC_RATE);
 
+    advanced_packet_process_callback = NX_NULL;
+    if ((raw_source_seen == 0) || (raw_source_mismatch != 0))
+    {
+        printf("\nRaw IPv6 source check: seen=%lu mismatch=%lu source=%08lx:%08lx:%08lx:%08lx\n",
+               raw_source_seen, raw_source_mismatch,
+               raw_source[0], raw_source[1], raw_source[2], raw_source[3]);
+        error_counter++;
+    }
+
     status =  nx_ip_raw_packet_disable(&ip_0);
 
     /* Check status.  */
@@ -381,6 +411,33 @@ NXD_ADDRESS dest_addr;
         error_counter++;
 
 
+}
+
+static UINT raw_packet_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT *operation_ptr, UINT *delay_ptr)
+{
+NX_IPV6_HEADER *ipv6_header;
+ULONG           word_1;
+
+    ipv6_header = (NX_IPV6_HEADER *)packet_ptr -> nx_packet_prepend_ptr;
+    word_1 = ipv6_header -> nx_ip_header_word_1;
+    NX_CHANGE_ULONG_ENDIAN(word_1);
+
+    if (((word_1 >> 8) & 0xFF) == (NX_IP_RAW >> 16))
+    {
+        raw_source[0] = ipv6_header -> nx_ip_header_source_ip[0];
+        raw_source[1] = ipv6_header -> nx_ip_header_source_ip[1];
+        raw_source[2] = ipv6_header -> nx_ip_header_source_ip[2];
+        raw_source[3] = ipv6_header -> nx_ip_header_source_ip[3];
+        NX_IPV6_ADDRESS_CHANGE_ENDIAN(raw_source);
+        raw_source_seen++;
+        if ((raw_source[0] != ipv6_addr_1.nxd_ip_address.v6[0]) ||
+            (raw_source[1] != ipv6_addr_1.nxd_ip_address.v6[1]) ||
+            (raw_source[2] != ipv6_addr_1.nxd_ip_address.v6[2]) ||
+            (raw_source[3] != ipv6_addr_1.nxd_ip_address.v6[3]))
+            raw_source_mismatch++;
+    }
+
+    return(NX_TRUE);
 }
 #else
 
