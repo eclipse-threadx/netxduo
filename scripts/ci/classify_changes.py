@@ -9,6 +9,8 @@
 # SPDX-License-Identifier: MIT
 ##############################################################################
 
+# Portions of this file were generated with AI assistance.
+
 """Select NetX Duo CI profiles from a reliable Git change range."""
 
 import argparse
@@ -321,7 +323,7 @@ def _classify_regression_path(path, selection):
         selection.add_bundle("netx_regression", component)
     elif component == "ptp_test":
         selection.add_bundle("ptp_regression", component)
-    elif component == "mqtt_test":
+    elif component in {"mqtt_test", "uprotocol_test"}:
         selection.add_bundle("mqtt_regression", component)
     elif component in {"nx_secure_test", "crypto_test"}:
         selection.add_bundle("secure_regression", component)
@@ -372,7 +374,7 @@ def classify_path(path, selection):
         else:
             selection.add_bundle("netx_shared", "shared NetX Duo source")
         selection.add_bundle("dependent_defaults", "dependent default profiles")
-    elif path.startswith("addons/mqtt/"):
+    elif path.startswith(("addons/mqtt/", "addons/uprotocol/")):
         selection.add_bundle("mqtt", "MQTT add-on")
     elif path.startswith("addons/websocket/"):
         selection.add_bundle("websocket", "WebSocket add-on")

@@ -9,6 +9,8 @@
 # SPDX-License-Identifier: MIT
 ##############################################################################
 
+# Portions of this file were generated with AI assistance.
+
 """Regression tests for conditional dev CI routing and gate aggregation."""
 
 import copy
@@ -65,6 +67,11 @@ class ClassifierTests(unittest.TestCase):
             for entry in json.loads(outputs["nx_secure_interoperability_matrix"])
             for profile in entry["profiles"].split()
         }
+
+    def test_uprotocol_routes_with_mqtt(self):
+        """The new addon and its tests must run the MQTT regression profiles."""
+        self.assertEqual(self.classify("addons/uprotocol/nxd_uprotocol.c")["mqtt_profiles"], "all")
+        self.assertEqual(self.classify("test/regression/uprotocol_test/netx_uprotocol_codec_test.c")["mqtt_profiles"], "all")
 
     def test_profile_map_matches_every_cmake_suite(self):
         """The map and checked-in shard partitions cover profiles exactly."""
