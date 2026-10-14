@@ -464,6 +464,14 @@ static UINT crypto_operation_func(UINT op,       /* Encrypt, Decrypt, Authentica
     return NX_CRYPTO_NOT_SUCCESSFUL;
 }
 
+/* A signature body for the certificate the coverage cases hand to the verify path. The
+   ECDSA verify dereferences the signature before it consults the length, so a cleared
+   certificate alone still faults there; upstream is shielded by GHSA-ww3q-3444-q488's
+   guard, which this branch does not carry. The first byte is not 0x30, so the verify
+   rejects it and the case reaches NX_SECURE_TLS_CERTIFICATE_SIG_CHECK_FAILED by the
+   route it means to test rather than by chance. */
+static UCHAR                 test_signature_data[64];
+
 static NX_SECURE_TLS_CRYPTO  fake_crypto_table;
 static NX_CRYPTO_METHOD      fake_sha256_method; 
 
@@ -486,6 +494,13 @@ UCHAR test_iv[16];
 
     /* Print out test information banner.  */
     printf("NetX Secure Test:   TLS Coverage Test..................................");
+
+    /* cert_1 and cert_2 are stack locals of this function, and the cases below hand them
+       to the full certificate verify path, which walks fields none of those cases
+       assigns. What was dereferenced was therefore whatever the stack held. Cleared
+       here as upstream 52d3416f clears them. */
+    memset(&cert_1, 0, sizeof(cert_1));
+    memset(&cert_2, 0, sizeof(cert_2));
 
     /* Ensure the IP instance has been initialized.  */
     status = nx_ip_status_check(&ip_0, NX_IP_INITIALIZE_DONE, &actual_status, NX_IP_PERIODIC_RATE);
@@ -1799,6 +1814,8 @@ UCHAR test_iv[16];
     cert_1.nx_secure_x509_cipher_table = test_x509_cipher_table;
     cert_1.nx_secure_x509_cipher_table_size = 1;
     cert_1.nx_secure_x509_signature_algorithm = NX_SECURE_TLS_X509_TYPE_DH;
+    cert_1.nx_secure_x509_signature_data = test_signature_data;
+    cert_1.nx_secure_x509_signature_data_length = sizeof(test_signature_data);
 
     /* add an issuer cert */
     cert_1.nx_secure_x509_issuer.nx_secure_x509_common_name = "cert1";
