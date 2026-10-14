@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 /* This NetX test concentrates on the basic TCP operation.  */
 
 #include   "tx_api.h"
@@ -257,6 +259,39 @@ UINT        compare_port;
     /* Check the TCP socket bind suspended count.  */
     if (client_socket.nx_tcp_socket_transmit_suspended_count != 0)       
         error_counter++;      
+
+    /* The peer half-closes while the client can still send.  A blocked send
+       in CLOSE_WAIT must keep its window timeout status.  */
+    status = nx_packet_release(my_packet);
+    if (status != NX_SUCCESS)
+        error_counter++;
+
+    /* A nonzero wait sends FIN; NX_NO_WAIT sends RST in the default build.  */
+    status = nx_tcp_socket_disconnect(&server_socket, NX_IP_PERIODIC_RATE);
+    if (status != NX_DISCONNECT_FAILED)
+        error_counter++;
+    status = nx_tcp_socket_state_wait(&client_socket, NX_TCP_CLOSE_WAIT,
+                                       5 * NX_IP_PERIODIC_RATE);
+    if (status != NX_SUCCESS)
+        error_counter++;
+
+    if (error_counter == 0)
+    {
+        status = nx_packet_allocate(&pool_0, &my_packet, NX_TCP_PACKET, NX_WAIT_FOREVER);
+        if (status == NX_SUCCESS)
+        {
+            my_packet -> nx_packet_length = 220;
+            my_packet -> nx_packet_append_ptr = my_packet -> nx_packet_prepend_ptr + 220;
+            status = nx_tcp_socket_send(&client_socket, my_packet,
+                                        2 * NX_IP_PERIODIC_RATE);
+            if ((status != NX_WINDOW_OVERFLOW) ||
+                (client_socket.nx_tcp_socket_transmit_suspended_count != 0))
+                error_counter++;
+            nx_packet_release(my_packet);
+        }
+        else
+            error_counter++;
+    }
 
     /* Check status.  */
     if (error_counter)
