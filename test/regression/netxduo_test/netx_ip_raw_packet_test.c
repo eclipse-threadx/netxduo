@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 /* This NetX test concentrates on the raw packet IP send/receive operation.  */
 
 #include   "tx_api.h"
@@ -135,6 +137,8 @@ ULONG       ip_send_packets_dropped;
 ULONG       ip_total_fragments_sent;
 ULONG       ip_total_fragments_received;
 NX_PACKET   *my_packet;
+NXD_ADDRESS unreachable;
+ULONG       held_packets_available;
 
     
     /* Print out test information banner.  */
@@ -251,6 +255,44 @@ NX_PACKET   *my_packet;
         test_control_return(1);
     }
 #endif
+
+    /* A failed raw send must report the missing route and leave its packet
+       with the caller.  Exercise this before installing a default gateway.  */
+    status = nx_ip_raw_packet_enable(&ip_0);
+    if (status != NX_SUCCESS)
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+    }
+
+    status = nx_packet_allocate(&pool_0, &my_packet, NX_UDP_PACKET, NX_NO_WAIT);
+    if (status == NX_SUCCESS)
+        status = nx_packet_data_append(my_packet, "raw route", 9, &pool_0, NX_NO_WAIT);
+    if (status != NX_SUCCESS)
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+    }
+
+    unreachable.nxd_ip_version = NX_IP_VERSION_V4;
+    unreachable.nxd_ip_address.v4 = IP_ADDRESS(203, 0, 113, 1);
+    held_packets_available = pool_0.nx_packet_pool_available;
+    status = nxd_ip_raw_packet_source_send(&ip_0, my_packet, &unreachable,
+                                           0, NX_IP_RAW >> 16, 64, NX_IP_NORMAL);
+    if ((status != NX_IP_ADDRESS_ERROR) ||
+        (pool_0.nx_packet_pool_available != held_packets_available))
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+    }
+
+    status = nx_packet_release(my_packet);
+    status += nx_ip_raw_packet_disable(&ip_0);
+    if (status != NX_SUCCESS)
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+    }
 
     /* Set the gateway address.  */
     status =  nx_ip_gateway_address_set(&ip_0, IP_ADDRESS(1, 2, 3, 87));
