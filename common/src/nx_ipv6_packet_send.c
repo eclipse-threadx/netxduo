@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -61,6 +63,7 @@
 /*    payload_size                          Size of the payload           */
 /*    hop_limit                             Hop limit value to set in IP  */
 /*                                             header.                    */
+/*    traffic_class                         Traffic class for the header  */
 /*    src_address                           Source address                */
 /*    dest_address                          Destination address           */
 /*                                                                        */
@@ -89,7 +92,7 @@
 /**************************************************************************/
 VOID _nx_ipv6_packet_send(NX_IP *ip_ptr, NX_PACKET *packet_ptr,
                           ULONG protocol, ULONG payload_size, ULONG hop_limit,
-                          ULONG *src_address, ULONG *dest_address)
+                          ULONG traffic_class, ULONG *src_address, ULONG *dest_address)
 {
 
 UINT                       status = NX_SUCCESS;
@@ -131,7 +134,8 @@ NX_IPV6_DESTINATION_ENTRY *dest_entry_ptr;
 
     /* Add IPv6 header. */
     if (_nx_ipv6_header_add(ip_ptr, &packet_ptr, protocol, payload_size,
-                            hop_limit, src_address, dest_address, &fragment) != NX_SUCCESS)
+                            hop_limit, traffic_class, src_address, dest_address,
+                            &fragment) != NX_SUCCESS)
     {
 
         /* Failed to add header. */

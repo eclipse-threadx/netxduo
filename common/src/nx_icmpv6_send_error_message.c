@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -356,7 +358,7 @@ NXD_ADDRESS      dest_addr;
 #endif /* NX_ENABLE_INTERFACE_CAPABILITY */
 
     /* Transmit the packet.  The hop limit is set to 255. */
-    _nx_ipv6_packet_send(ip_ptr, pkt_ptr, NX_PROTOCOL_ICMPV6, pkt_ptr -> nx_packet_length, 255,
+    _nx_ipv6_packet_send(ip_ptr, pkt_ptr, NX_PROTOCOL_ICMPV6, pkt_ptr -> nx_packet_length, 255, 0,
                          pkt_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr -> nxd_ipv6_address,
                          src_ip);
 

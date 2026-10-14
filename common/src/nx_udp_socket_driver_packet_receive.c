@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -134,6 +136,7 @@ NX_UDP_HEADER  *udp_header_ptr;
                                 NX_PROTOCOL_UDP,
                                 packet_ptr -> nx_packet_length,
                                 ip_ptr -> nx_ipv6_hop_limit,
+                                0,
                                 remote_ip -> nxd_ip_address.v6,
                                 local_ip -> nxd_ip_address.v6,
                                 NX_NULL))
