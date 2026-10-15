@@ -255,7 +255,16 @@ jobs:
     # tracefile consumed are all inside this script. Its exit status is the
     # gate: a merge set short of the contributing configurations fails here
     # rather than publishing a figure over part of them.
+    #
+    # The thresholds are the union the coverage work has reached so far,
+    # truncated as the script prints it, so a tree in which nothing regressed
+    # meets them exactly. The union is deterministic: two runs over the same
+    # tests report the same figure to the line and the outcome, whichever
+    # intermittent tests failed in each. They rise as gaps are closed.
     - name: Merge the certified coverage
+      env:
+        NX_COVERAGE_MIN_LINE: "97.89"
+        NX_COVERAGE_MIN_BRANCH: "95.58"
       run: |
         set -o pipefail
         TRACEFILE_DIR=$GITHUB_WORKSPACE/tracefiles \
