@@ -46,6 +46,15 @@ static NX_IP                   ip_1;
 static NX_TCP_SOCKET           client_socket;
 static NX_UDP_SOCKET           udp_socket;
 
+#ifdef NX_ENABLE_VLAN
+/* Never created, so each identifier is zero -- and the packet belongs to no
+   pool until one that was never created is assigned to it.  */
+static NX_TCP_SOCKET           invalid_tcp_socket;
+static NX_UDP_SOCKET           invalid_udp_socket;
+static NX_PACKET_POOL          invalid_pool;
+static NX_PACKET               invalid_packet;
+#endif
+
 static ULONG                   error_counter;
 
 static void    thread_0_entry(ULONG thread_input);
@@ -143,6 +152,19 @@ NX_PACKET  *packet_ptr;
     if (nx_udp_socket_vlan_priority_set(NX_NULL, 0) != NX_PTR_ERROR)
         error_counter++;
     if (nx_packet_vlan_priority_set(NX_NULL, 0) != NX_PTR_ERROR)
+        error_counter++;
+
+    /* The same checks' identity arms: a socket that was never created, and a
+       packet whose pool owner is missing or is not a pool. */
+    if (nx_tcp_socket_vlan_priority_set(&invalid_tcp_socket, 0) != NX_PTR_ERROR)
+        error_counter++;
+    if (nx_udp_socket_vlan_priority_set(&invalid_udp_socket, 0) != NX_PTR_ERROR)
+        error_counter++;
+    invalid_packet.nx_packet_pool_owner = NX_NULL;
+    if (nx_packet_vlan_priority_set(&invalid_packet, 0) != NX_PTR_ERROR)
+        error_counter++;
+    invalid_packet.nx_packet_pool_owner = &invalid_pool;
+    if (nx_packet_vlan_priority_set(&invalid_packet, 0) != NX_PTR_ERROR)
         error_counter++;
 
     if (nx_tcp_socket_vlan_priority_set(&client_socket, NX_VLAN_PRIORITY_MAX + 1) != NX_INVALID_PARAMETERS)

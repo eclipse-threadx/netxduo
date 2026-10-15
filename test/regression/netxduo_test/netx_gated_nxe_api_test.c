@@ -1,0 +1,186 @@
+/***************************************************************************
+ * Copyright (c) 2024 Microsoft Corporation
+ * Copyright (c) 2026 Eclipse ThreadX contributors
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the MIT License which is available at
+ * https://opensource.org/licenses/MIT.
+ *
+ * SPDX-License-Identifier: MIT
+ **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
+
+/* This NetX test concentrates on the parameter checks of the error-checking
+   shells whose service is compiled only under a feature macro, and which no
+   *_nxe_api_test reaches: the three extended notify setters, compiled unless
+   NX_DISABLE_EXTENDED_NOTIFY_SUPPORT, and the raw packet filter setter,
+   compiled under NX_ENABLE_IP_RAW_PACKET_FILTER.
+
+   The invalid objects are built the way netx_tcp_nxe_api_test builds them --
+   a socket that was never created, and one carrying the TCP identifier but
+   bound to an IP instance with TCP not enabled -- so no live instance is
+   altered to reach an arm.  */
+
+#include   "tx_api.h"
+#include   "nx_api.h"
+#include   "nx_tcp.h"
+
+extern void    test_control_return(UINT status);
+
+#if !defined(NX_DISABLE_ERROR_CHECKING) && \
+    (!defined(NX_DISABLE_EXTENDED_NOTIFY_SUPPORT) || defined(NX_ENABLE_IP_RAW_PACKET_FILTER))
+
+#define     DEMO_STACK_SIZE         2048
+
+static TX_THREAD               thread_0;
+
+static NX_PACKET_POOL          pool_0;
+static NX_IP                   ip_0;
+static NX_TCP_SOCKET           tcp_socket;
+
+/* Never created, so each identifier is zero.  */
+static NX_IP                   invalid_ip;
+static NX_TCP_SOCKET           invalid_socket;
+
+static ULONG                   error_counter;
+
+static void    thread_0_entry(ULONG thread_input);
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+static VOID    tcp_notify(NX_TCP_SOCKET *socket_ptr);
+#endif
+
+extern void    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
+
+#ifdef CTEST
+VOID test_application_define(void *first_unused_memory)
+#else
+void    netx_gated_nxe_api_test_application_define(void *first_unused_memory)
+#endif
+{
+
+CHAR    *pointer;
+UINT    status;
+
+    pointer =  (CHAR *) first_unused_memory;
+
+    error_counter = 0;
+
+    tx_thread_create(&thread_0, "thread 0", thread_0_entry, 0,
+            pointer, DEMO_STACK_SIZE,
+            4, 4, TX_NO_TIME_SLICE, TX_AUTO_START);
+    pointer =  pointer + DEMO_STACK_SIZE;
+
+    nx_system_initialize();
+
+    status =  nx_packet_pool_create(&pool_0, "NetX Main Packet Pool", 256, pointer, 16384);
+    pointer = pointer + 16384;
+    if (status)
+        error_counter++;
+
+    status = nx_ip_create(&ip_0, "NetX IP Instance 0", IP_ADDRESS(1, 2, 3, 4), 0xFFFFFF00UL, &pool_0,
+                          _nx_ram_network_driver_1500, pointer, 2048, 1);
+    pointer =  pointer + 2048;
+    if (status)
+        error_counter++;
+
+    status =  nx_tcp_enable(&ip_0);
+    if (status)
+        error_counter++;
+}
+
+
+static void    thread_0_entry(ULONG thread_input)
+{
+
+    NX_PARAMETER_NOT_USED(thread_input);
+
+    printf("NetX Test:   Gated NXE API Test.......................................");
+
+    if (error_counter)
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+    }
+
+    if (nx_tcp_socket_create(&ip_0, &tcp_socket, "TCP Socket",
+                             NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, 200,
+                             NX_NULL, NX_NULL))
+        error_counter++;
+
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+
+    /* 1. A socket that was never created.  */
+    invalid_socket.nx_tcp_socket_id = 0;
+    if (nx_tcp_socket_establish_notify(&invalid_socket, tcp_notify) != NX_PTR_ERROR)
+        error_counter++;
+    if (nx_tcp_socket_disconnect_complete_notify(&invalid_socket, tcp_notify) != NX_PTR_ERROR)
+        error_counter++;
+    if (nx_tcp_socket_timed_wait_callback(&invalid_socket, tcp_notify) != NX_PTR_ERROR)
+        error_counter++;
+
+    /* 2. A valid socket and no callback.  */
+    if (nx_tcp_socket_establish_notify(&tcp_socket, NX_NULL) != NX_PTR_ERROR)
+        error_counter++;
+    if (nx_tcp_socket_disconnect_complete_notify(&tcp_socket, NX_NULL) != NX_PTR_ERROR)
+        error_counter++;
+    if (nx_tcp_socket_timed_wait_callback(&tcp_socket, NX_NULL) != NX_PTR_ERROR)
+        error_counter++;
+
+    /* 3. A socket on an IP instance with TCP not enabled.  */
+    invalid_socket.nx_tcp_socket_id = NX_TCP_ID;
+    invalid_socket.nx_tcp_socket_ip_ptr = &invalid_ip;
+    invalid_ip.nx_ip_tcp_packet_receive = NX_NULL;
+    if (nx_tcp_socket_establish_notify(&invalid_socket, tcp_notify) != NX_NOT_ENABLED)
+        error_counter++;
+    if (nx_tcp_socket_disconnect_complete_notify(&invalid_socket, tcp_notify) != NX_NOT_ENABLED)
+        error_counter++;
+    if (nx_tcp_socket_timed_wait_callback(&invalid_socket, tcp_notify) != NX_NOT_ENABLED)
+        error_counter++;
+    invalid_socket.nx_tcp_socket_id = 0;
+
+#endif /* NX_DISABLE_EXTENDED_NOTIFY_SUPPORT */
+
+#ifdef NX_ENABLE_IP_RAW_PACKET_FILTER
+
+    /* 4. An IP instance that was never created.  */
+    if (nx_ip_raw_packet_filter_set(&invalid_ip, NX_NULL) != NX_PTR_ERROR)
+        error_counter++;
+
+#endif /* NX_ENABLE_IP_RAW_PACKET_FILTER */
+
+    if (error_counter)
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+    }
+    else
+    {
+        printf("SUCCESS!\n");
+        test_control_return(0);
+    }
+}
+
+#ifndef NX_DISABLE_EXTENDED_NOTIFY_SUPPORT
+static VOID    tcp_notify(NX_TCP_SOCKET *socket_ptr)
+{
+    NX_PARAMETER_NOT_USED(socket_ptr);
+}
+#endif
+
+#else
+
+#ifdef CTEST
+VOID test_application_define(void *first_unused_memory)
+#else
+void    netx_gated_nxe_api_test_application_define(void *first_unused_memory)
+#endif
+{
+
+    NX_PARAMETER_NOT_USED(first_unused_memory);
+
+    printf("NetX Test:   Gated NXE API Test.......................................N/A\n");
+
+    test_control_return(3);
+}
+#endif
