@@ -198,6 +198,19 @@ ULONG      window_size;
     socket_ptr -> nx_tcp_socket_timeout = socket_ptr -> nx_tcp_socket_timeout_rate <<
         (socket_ptr -> nx_tcp_socket_timeout_retries * socket_ptr -> nx_tcp_socket_timeout_shift);
 
+#ifdef FEATURE_NX_IPV6
+    /* An IPv6 connection cannot send while its source address is not valid: deleted,
+       or IPv6 disabled, until an address is set in that entry again. A deleted entry is
+       detached from its interface, which _nx_ipv6_packet_send asserts never happens.
+       The data path refuses in the same case. Leave the packets queued, as for an
+       unanswered retransmission; the retry count above still limits how long.  */
+    if ((socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_version == NX_IP_VERSION_V6) &&
+        (socket_ptr -> nx_tcp_socket_ipv6_addr -> nxd_ipv6_address_state != NX_IPV6_ADDR_STATE_VALID))
+    {
+        return;
+    }
+#endif /* FEATURE_NX_IPV6 */
+
     /* Get available size of packet that can be sent. */
     available = socket_ptr -> nx_tcp_socket_tx_window_congestion;
 

@@ -27,7 +27,6 @@
 #include "nx_api.h"
 #include "nx_ip.h"
 #include "nx_ipv6.h"
-#include "nx_tcp.h"
 
 /**************************************************************************/
 /*                                                                        */
@@ -132,7 +131,6 @@ ULONG             obsoleted_address[4];
         if (result == NX_SUCCESS)
         {
         ULONG multicast_address[4];
-        NX_TCP_SOCKET *socket_ptr;
 
             SET_SOLICITED_NODE_MULTICAST_ADDRESS(multicast_address, ipv6_address -> nxd_ipv6_address);
             /* First remove the corresponding solicited node multicast address. */
@@ -149,30 +147,6 @@ ULONG             obsoleted_address[4];
 
             if_index = ipv6_address -> nxd_ipv6_address_attached -> nx_interface_index;
 #endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
-
-            /* Reset the TCP connections using this address. Each socket keeps a
-               pointer to this entry, and the memset below detaches it from its
-               interface, which _nx_ipv6_packet_send asserts never happens: the
-               connection's next ACK, FIN, RST or retransmission would stop the
-               caller with the IP protection held.  This is what
-               _nx_ip_interface_detach does for the connections on an interface
-               it removes. A closed or listening socket sends nothing until it is
-               connected again, which selects its address afresh.  */
-            socket_ptr = ip_ptr -> nx_ip_tcp_created_sockets_ptr;
-            if (socket_ptr != NX_NULL)
-            {
-                do
-                {
-                    if ((socket_ptr -> nx_tcp_socket_ipv6_addr == ipv6_address) &&
-                        (socket_ptr -> nx_tcp_socket_state > NX_TCP_LISTEN_STATE))
-                    {
-                        _nx_tcp_socket_connection_reset(socket_ptr);
-                    }
-
-                    /* Move to the next. */
-                    socket_ptr = socket_ptr -> nx_tcp_socket_created_next;
-                } while (socket_ptr != ip_ptr -> nx_ip_tcp_created_sockets_ptr);
-            }
 
             /* At this point ipv6_address is off the interface IPv6 address list. */
             memset(ipv6_address, 0, sizeof(NXD_IPV6_ADDRESS));

@@ -13,35 +13,41 @@
  * SPDX-License-Identifier: MIT and CC0-1.0
  **************************************************************************/
 
-/* This NetX test concentrates on deleting an IPv6 address that an
-   established TCP connection is using.
+/* This NetX test concentrates on an established IPv6 TCP connection whose
+   source address is deleted and later set again.
 
    A TCP socket keeps a pointer to the address entry it sends from, and
    nxd_ipv6_address_delete clears that entry, detaching it from its
-   interface. The data path checks the address before sending, but the
-   control path -- the ACK, FIN, RST and retransmission -- hands the segment
-   straight to _nx_ipv6_packet_send, which asserts that the entry is attached.
-   Without the reset in nxd_ipv6_address_delete, the connection's next
-   control segment stops the thread sending it with the IP protection held,
-   and the IP instance with it; this test then never finishes.
+   interface. The connection survives: sends are refused with
+   NX_NO_INTERFACE_ADDRESS while the entry is empty, and once an address is
+   set in it again the same connection carries on, as
+   netx_tcp_ipv6_basic_processing_test also shows. What must not happen in
+   between is a send. The control path -- the ACK, FIN, RST and window probe
+   -- and the retransmission path hand their segment to _nx_ipv6_packet_send,
+   which asserts that the entry is attached; before those paths checked the
+   address, the first such segment stopped the sending thread with the IP
+   protection held, and the IP instance with it, and this test never
+   finished.
 
-   The delete resets the connections using the address, as interface detach
-   does for an interface's. Sockets that are closed, or that use no address
-   yet, are left as they were. */
+   Here an acknowledgment falls due, and a data segment lost on the link
+   falls due for retransmission, while the address is gone. Both are held
+   back. When the address is set again the retransmission goes out, the
+   peer receives the data, and the connection is used and closed normally. */
 
 #include   "tx_api.h"
 #include   "nx_api.h"
+#include   "nx_ram_network_driver_test_1500.h"
 
 extern void    test_control_return(UINT status);
 
 #if defined(FEATURE_NX_IPV6)
 
 #define     DEMO_STACK_SIZE         2048
-#define     PORT_RESET              80
-#define     PORT_CLOSED             81
-#define     PORT_AFTER              82
+#define     SERVER_PORT             80
 
 extern void    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
+extern UINT    (*advanced_packet_process_callback)(NX_IP *ip_ptr, NX_PACKET *packet_ptr,
+                                                   UINT *operation_ptr, UINT *delay_ptr);
 
 static TX_THREAD               thread_0;
 
@@ -49,25 +55,19 @@ static NX_PACKET_POOL          pool_0;
 static NX_IP                   ip_0;
 static NX_IP                   ip_1;
 
-/* All three clients are on ip_0: one connected when its address is deleted,
-   one connected earlier and closed since, and one never connected. */
-static NX_TCP_SOCKET           client_reset;
-static NX_TCP_SOCKET           client_closed;
-static NX_TCP_SOCKET           client_unused;
-static NX_TCP_SOCKET           server_reset;
-static NX_TCP_SOCKET           server_closed;
-static NX_TCP_SOCKET           server_after;
+static NX_TCP_SOCKET           client_socket;
+static NX_TCP_SOCKET           server_socket;
 
 static NXD_ADDRESS             ipv6_address_0;
 static NXD_ADDRESS             ipv6_address_1;
 
 static ULONG                   error_counter;
-static ULONG                   disconnect_callbacks;
+static UINT                    drop_next_data;
 
 static void    thread_0_entry(ULONG thread_input);
-static void    disconnect_callback(NX_TCP_SOCKET *socket_ptr);
-static UINT    connect_pair(NX_TCP_SOCKET *client_ptr, UINT client_port, NX_TCP_SOCKET *server_ptr,
-                            UINT server_port);
+static UINT    link_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT *operation_ptr, UINT *delay_ptr);
+static UINT    send_text(NX_TCP_SOCKET *socket_ptr, CHAR *text, UINT length);
+static UINT    receive_text(NX_TCP_SOCKET *socket_ptr, CHAR *text, UINT length, ULONG wait_option);
 static UINT    wait_for_valid(NX_IP *ip_ptr);
 
 #ifdef CTEST
@@ -82,8 +82,8 @@ UINT    status;
 
     pointer =  (CHAR *) first_unused_memory;
 
-    error_counter =        0;
-    disconnect_callbacks = 0;
+    error_counter =  0;
+    drop_next_data = NX_FALSE;
 
     tx_thread_create(&thread_0, "thread 0", thread_0_entry, 0,
             pointer, DEMO_STACK_SIZE, 4, 4, TX_NO_TIME_SLICE, TX_AUTO_START);
@@ -134,10 +134,9 @@ static void    thread_0_entry(ULONG thread_input)
 {
 
 UINT        status;
-NX_PACKET  *packet_ptr;
 UINT        i;
-NXD_ADDRESS extra_address;
-UINT        extra_index;
+UINT        address_index;
+NX_PACKET  *packet_ptr;
 
     NX_PARAMETER_NOT_USED(thread_input);
 
@@ -146,99 +145,79 @@ UINT        extra_index;
     if (wait_for_valid(&ip_0) || wait_for_valid(&ip_1))
         error_counter++;
 
-    /* An address deleted before any TCP socket exists on the instance. */
-    extra_address = ipv6_address_0;
-    extra_address.nxd_ip_address.v6[3] = 3;
-    status =  nxd_ipv6_address_set(&ip_0, 0, &extra_address, 64, &extra_index);
-    status += nxd_ipv6_address_delete(&ip_0, extra_index);
-    if (status || (extra_index == 0) || ip_0.nx_ipv6_address[extra_index].nxd_ipv6_address_valid)
-        error_counter++;
-
-    status =  nx_tcp_socket_create(&ip_0, &client_reset, "Client Reset", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
-                                   NX_IP_TIME_TO_LIVE, 8192, NX_NULL, disconnect_callback);
-    status += nx_tcp_socket_create(&ip_0, &client_closed, "Client Closed", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
+    status =  nx_tcp_socket_create(&ip_0, &client_socket, "Client", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
                                    NX_IP_TIME_TO_LIVE, 8192, NX_NULL, NX_NULL);
-    status += nx_tcp_socket_create(&ip_0, &client_unused, "Client Unused", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
-                                   NX_IP_TIME_TO_LIVE, 8192, NX_NULL, disconnect_callback);
-    status += nx_tcp_socket_create(&ip_1, &server_reset, "Server Reset", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
+    status += nx_tcp_socket_create(&ip_1, &server_socket, "Server", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
                                    NX_IP_TIME_TO_LIVE, 8192, NX_NULL, NX_NULL);
-    status += nx_tcp_socket_create(&ip_1, &server_closed, "Server Closed", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
-                                   NX_IP_TIME_TO_LIVE, 8192, NX_NULL, NX_NULL);
-    status += nx_tcp_socket_create(&ip_1, &server_after, "Server After", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
-                                   NX_IP_TIME_TO_LIVE, 8192, NX_NULL, NX_NULL);
+    status += nx_tcp_server_socket_listen(&ip_1, SERVER_PORT, &server_socket, 5, NX_NULL);
+    status += nx_tcp_client_socket_bind(&client_socket, 60, NX_WAIT_FOREVER);
     if (status)
         error_counter++;
 
-    /* A connection made and closed before the delete. Its socket still
-       points at the address it used, but it is closed and is left alone.
-       How a disconnect with no wait closes depends on the build (a RST, or
-       a FIN with NX_DISABLE_RESET_DISCONNECT), so the client is unbound
-       afterwards, which leaves it closed either way. */
-    if (connect_pair(&client_closed, 60, &server_closed, PORT_CLOSED))
+    /* One thread plays both ends, and the server answers only once it
+       accepts, so the connect does not wait. */
+    status = nxd_tcp_client_socket_connect(&client_socket, &ipv6_address_1, SERVER_PORT, NX_NO_WAIT);
+    if ((status != NX_SUCCESS) && (status != NX_IN_PROGRESS))
         error_counter++;
-    nx_tcp_socket_disconnect(&client_closed, NX_NO_WAIT);
-    tx_thread_sleep(NX_IP_PERIODIC_RATE / 10);
-    nx_tcp_socket_disconnect(&server_closed, NX_NO_WAIT);
-    tx_thread_sleep(NX_IP_PERIODIC_RATE / 10);
-    for (i = 0; (i < 5 * NX_IP_PERIODIC_RATE) && (nx_tcp_client_socket_unbind(&client_closed) != NX_SUCCESS); i++)
+    status = nx_tcp_server_socket_accept(&server_socket, 5 * NX_IP_PERIODIC_RATE);
+    if (status)
+        error_counter++;
+    for (i = 0; (i < 5 * NX_IP_PERIODIC_RATE) && (client_socket.nx_tcp_socket_state != NX_TCP_ESTABLISHED); i++)
         tx_thread_sleep(1);
-    if ((client_closed.nx_tcp_socket_state != NX_TCP_CLOSED) ||
-        (client_closed.nx_tcp_socket_ipv6_addr != &(ip_0.nx_ipv6_address[0])))
+    if (client_socket.nx_tcp_socket_state != NX_TCP_ESTABLISHED)
         error_counter++;
 
-    /* The connection whose address is deleted. Data is received on it first,
-       so the client has an ACK to send. */
-    if (connect_pair(&client_reset, 61, &server_reset, PORT_RESET))
+    /* Data from the client, lost on the link and waiting to be
+       retransmitted, then data from the server, received and not yet
+       acknowledged: the client sends nothing after it that could carry the
+       acknowledgment. */
+    advanced_packet_process_callback = link_process;
+    drop_next_data = NX_TRUE;
+    if (send_text(&client_socket, "to server", 9) || (drop_next_data != NX_FALSE))
         error_counter++;
-    status = nx_packet_allocate(&pool_0, &packet_ptr, NX_TCP_PACKET, NX_WAIT_FOREVER);
-    if (status == NX_SUCCESS)
-    {
-        nx_packet_data_append(packet_ptr, "data", 4, &pool_0, NX_WAIT_FOREVER);
-        if (nx_tcp_socket_send(&server_reset, packet_ptr, NX_IP_PERIODIC_RATE))
-        {
-            error_counter++;
-            nx_packet_release(packet_ptr);
-        }
-    }
-    status = nx_tcp_socket_receive(&client_reset, &packet_ptr, NX_IP_PERIODIC_RATE);
-    if (status)
+    if (client_socket.nx_tcp_socket_transmit_sent_count != 1)
         error_counter++;
-    else
-        nx_packet_release(packet_ptr);
-
-    if (client_unused.nx_tcp_socket_ipv6_addr != NX_NULL)
+    if (send_text(&server_socket, "to client", 9) || receive_text(&client_socket, "to client", 9, NX_IP_PERIODIC_RATE))
         error_counter++;
 
+    /* The address goes. The connection stays, sends are refused, and the
+       acknowledgment and the retransmission both fall due and are held. */
     status = nxd_ipv6_address_delete(&ip_0, 0);
     if (status)
         error_counter++;
-
-    /* The connection using the address is reset, and its owner told. */
-    if ((client_reset.nx_tcp_socket_state != NX_TCP_CLOSED) || (disconnect_callbacks != 1))
-        error_counter++;
-
-    /* The others are untouched. */
-    if ((client_closed.nx_tcp_socket_state != NX_TCP_CLOSED) ||
-        (client_unused.nx_tcp_socket_state != NX_TCP_CLOSED) ||
-        (client_unused.nx_tcp_socket_ipv6_addr != NX_NULL))
-        error_counter++;
-
-    /* A disconnect on the reset socket has nothing to send, and returns. */
-    status = nx_tcp_socket_disconnect(&client_reset, NX_NO_WAIT);
-    if (status != NX_NOT_CONNECTED)
-        error_counter++;
-
-    /* Both IP instances still work: give ip_0 its address back and connect
-       again. Before the reset existed, this is where the test stopped. */
-    tx_thread_sleep(NX_IP_PERIODIC_RATE);
-    status = nxd_ipv6_address_set(&ip_0, 0, &ipv6_address_0, 64, NX_NULL);
-    if (status || wait_for_valid(&ip_0))
-        error_counter++;
-
-    status = nx_tcp_client_socket_unbind(&client_reset);
+    status = nx_packet_allocate(&pool_0, &packet_ptr, NX_TCP_PACKET, NX_WAIT_FOREVER);
     if (status)
         error_counter++;
-    if (connect_pair(&client_reset, 62, &server_after, PORT_AFTER))
+    else
+    {
+        nx_packet_data_append(packet_ptr, "refused", 7, &pool_0, NX_WAIT_FOREVER);
+        if (nx_tcp_socket_send(&client_socket, packet_ptr, NX_NO_WAIT) != NX_NO_INTERFACE_ADDRESS)
+            error_counter++;
+        nx_packet_release(packet_ptr);
+    }
+
+    tx_thread_sleep(3 * NX_IP_PERIODIC_RATE);
+    if ((client_socket.nx_tcp_socket_state != NX_TCP_ESTABLISHED) ||
+        (client_socket.nx_tcp_socket_transmit_sent_count != 1) ||
+        (client_socket.nx_tcp_socket_timeout_retries == 0))
+        error_counter++;
+    if (receive_text(&server_socket, "to server", 9, NX_NO_WAIT) != NX_NO_PACKET)
+        error_counter++;
+
+    /* The address is set again, in the same entry. The retransmission goes
+       out and the connection carries on. */
+    status = nxd_ipv6_address_set(&ip_0, 0, &ipv6_address_0, 64, &address_index);
+    if ((status) || (address_index != 0) || wait_for_valid(&ip_0))
+        error_counter++;
+    if (receive_text(&server_socket, "to server", 9, 10 * NX_IP_PERIODIC_RATE))
+        error_counter++;
+    if (send_text(&client_socket, "again", 5) || receive_text(&server_socket, "again", 5, NX_IP_PERIODIC_RATE))
+        error_counter++;
+
+    advanced_packet_process_callback = NX_NULL;
+
+    status = nx_tcp_socket_disconnect(&client_socket, NX_NO_WAIT);
+    if ((status != NX_SUCCESS) && (status != NX_IN_PROGRESS))
         error_counter++;
 
     if (error_counter)
@@ -254,37 +233,86 @@ UINT        extra_index;
 }
 
 
-/* Connects a client on ip_0 to a server on ip_1 over IPv6. One thread plays
-   both ends, and the server answers only once it accepts, so the connect
-   does not wait. */
-static UINT    connect_pair(NX_TCP_SOCKET *client_ptr, UINT client_port, NX_TCP_SOCKET *server_ptr,
-                            UINT server_port)
+/* Loses the next data segment ip_0 sends, when asked. The IPv6 header is
+   found after any link header. */
+static UINT    link_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT *operation_ptr, UINT *delay_ptr)
 {
 
-UINT    status;
-UINT    i;
+UCHAR  *frame;
+UCHAR  *tcp_header;
+ULONG   link_length;
 
-    status =  nx_tcp_server_socket_listen(&ip_1, server_port, server_ptr, 5, NX_NULL);
-    status += nx_tcp_client_socket_bind(client_ptr, client_port, NX_WAIT_FOREVER);
-    if (status)
-        return(NX_NOT_SUCCESSFUL);
+    NX_PARAMETER_NOT_USED(delay_ptr);
 
-    status = nxd_tcp_client_socket_connect(client_ptr, &ipv6_address_1, server_port, NX_NO_WAIT);
-    if ((status != NX_SUCCESS) && (status != NX_IN_PROGRESS))
-        return(status);
+    if ((ip_ptr != &ip_0) || (drop_next_data == NX_FALSE))
+        return(NX_TRUE);
 
-    status = nx_tcp_server_socket_accept(server_ptr, 5 * NX_IP_PERIODIC_RATE);
-    if (status)
-        return(status);
+    frame = packet_ptr -> nx_packet_prepend_ptr;
+    if ((frame[0] >> 4) == NX_IP_VERSION_V6)
+        link_length = 0;
+    else if ((frame[12] == 0x86) && (frame[13] == 0xDD))
+        link_length = 14;
+    else if ((frame[12] == 0x81) && (frame[13] == 0x00) && (frame[16] == 0x86) && (frame[17] == 0xDD))
+        link_length = 18;
+    else
+        return(NX_TRUE);
 
-    for (i = 0; i < 5 * NX_IP_PERIODIC_RATE; i++)
+    if (frame[link_length + 6] != NX_PROTOCOL_TCP)
+        return(NX_TRUE);
+
+    tcp_header = frame + link_length + 40;
+    if (packet_ptr -> nx_packet_length > link_length + 40 + (ULONG)((tcp_header[12] >> 4) * 4))
     {
-        if (client_ptr -> nx_tcp_socket_state == NX_TCP_ESTABLISHED)
-            return(NX_SUCCESS);
-        tx_thread_sleep(1);
+        drop_next_data = NX_FALSE;
+        *operation_ptr = NX_RAMDRIVER_OP_DROP;
     }
 
-    return(NX_NOT_CONNECTED);
+    return(NX_TRUE);
+}
+
+
+static UINT    send_text(NX_TCP_SOCKET *socket_ptr, CHAR *text, UINT length)
+{
+
+UINT        status;
+NX_PACKET  *packet_ptr;
+
+    status = nx_packet_allocate(&pool_0, &packet_ptr, NX_TCP_PACKET, NX_WAIT_FOREVER);
+    if (status)
+        return(status);
+
+    status = nx_packet_data_append(packet_ptr, text, length, &pool_0, NX_WAIT_FOREVER);
+    if (status == NX_SUCCESS)
+        status = nx_tcp_socket_send(socket_ptr, packet_ptr, NX_IP_PERIODIC_RATE);
+    if (status)
+        nx_packet_release(packet_ptr);
+
+    return(status);
+}
+
+
+/* Returns NX_SUCCESS if exactly the text arrives in time, the receive
+   status otherwise. */
+static UINT    receive_text(NX_TCP_SOCKET *socket_ptr, CHAR *text, UINT length, ULONG wait_option)
+{
+
+UINT        status;
+NX_PACKET  *packet_ptr;
+ULONG       bytes;
+UCHAR       buffer[32];
+
+    status = nx_tcp_socket_receive(socket_ptr, &packet_ptr, wait_option);
+    if (status)
+        return(status);
+
+    bytes = 0;
+    status = nx_packet_data_retrieve(packet_ptr, buffer, &bytes);
+    nx_packet_release(packet_ptr);
+
+    if ((status) || (bytes != length) || (memcmp(buffer, text, length) != 0))
+        return(NX_NOT_SUCCESSFUL);
+
+    return(NX_SUCCESS);
 }
 
 
@@ -303,15 +331,6 @@ UINT    i;
     }
 
     return(NX_NOT_SUCCESSFUL);
-}
-
-
-static void    disconnect_callback(NX_TCP_SOCKET *socket_ptr)
-{
-    if (socket_ptr != &client_reset)
-        error_counter++;
-
-    disconnect_callbacks++;
 }
 
 #else

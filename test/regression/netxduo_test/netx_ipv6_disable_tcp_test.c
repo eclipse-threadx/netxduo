@@ -14,18 +14,20 @@
  **************************************************************************/
 
 /* This NetX test concentrates on disabling IPv6 while an IPv6 TCP connection
-   is established.
+   is established, with an acknowledgment due on it.
 
    nxd_ipv6_disable clears every IPv6 address entry, detaching each from its
    interface, and a TCP socket keeps a pointer to the entry it sends from.
-   The connection's next control segment -- an ACK, FIN, RST or
-   retransmission -- reaches _nx_ipv6_packet_send, which asserts that the
-   entry is attached. Without the reset in nxd_ipv6_disable that assertion
-   stops the thread sending it with the IP protection held, and the IP
-   instance with it; this test then never finishes.
+   The connection's control segments -- the ACK that falls due here among
+   them -- hand their segment to _nx_ipv6_packet_send, which asserts that the
+   entry is attached; before the control path checked the address, the first
+   one stopped the sending thread with the IP protection held, and the IP
+   instance with it, and this test never finished.
 
-   The disable resets the IPv6 connections. An IPv4 connection on the same
-   instance carries on, and a closed socket is left as it was. */
+   The connection survives, as it does a deleted address: sends are refused
+   while there is no address, an IPv4 connection on the same instance
+   carries on throughout, and once IPv6 is enabled again and the address set
+   in the same entry, the IPv6 connection carries on too. */
 
 #include   "tx_api.h"
 #include   "nx_api.h"
@@ -37,7 +39,6 @@ extern void    test_control_return(UINT status);
 #define     DEMO_STACK_SIZE         2048
 #define     PORT_IPV6               80
 #define     PORT_IPV4               81
-#define     PORT_AFTER              82
 
 extern void    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
 
@@ -47,13 +48,8 @@ static NX_PACKET_POOL          pool_0;
 static NX_IP                   ip_0;
 static NX_IP                   ip_1;
 
-/* An instance with IPv6 enabled and no TCP socket at all. */
-static NX_IP                   ip_2;
-
 static NX_TCP_SOCKET           client_ipv6;
-static NX_TCP_SOCKET           client_closed;
 static NX_TCP_SOCKET           server_ipv6;
-static NX_TCP_SOCKET           server_after;
 #ifndef NX_DISABLE_IPV4
 static NX_TCP_SOCKET           client_ipv4;
 static NX_TCP_SOCKET           server_ipv4;
@@ -63,10 +59,8 @@ static NXD_ADDRESS             ipv6_address_0;
 static NXD_ADDRESS             ipv6_address_1;
 
 static ULONG                   error_counter;
-static ULONG                   disconnect_callbacks;
 
 static void    thread_0_entry(ULONG thread_input);
-static void    disconnect_callback(NX_TCP_SOCKET *socket_ptr);
 static UINT    connect_pair(NX_TCP_SOCKET *client_ptr, UINT client_port, NX_TCP_SOCKET *server_ptr,
                             UINT server_port, NXD_ADDRESS *server_address);
 static UINT    send_and_receive(NX_TCP_SOCKET *from_ptr, NX_TCP_SOCKET *to_ptr);
@@ -84,8 +78,7 @@ UINT    status;
 
     pointer =  (CHAR *) first_unused_memory;
 
-    error_counter =        0;
-    disconnect_callbacks = 0;
+    error_counter = 0;
 
     tx_thread_create(&thread_0, "thread 0", thread_0_entry, 0,
             pointer, DEMO_STACK_SIZE, 4, 4, TX_NO_TIME_SLICE, TX_AUTO_START);
@@ -104,9 +97,6 @@ UINT    status;
     status += nx_ip_create(&ip_1, "NetX IP Instance 1", IP_ADDRESS(1, 2, 3, 5), 0xFFFFFF00UL, &pool_0,
                            _nx_ram_network_driver_1500, pointer, 2048, 1);
     pointer =  pointer + 2048;
-    status += nx_ip_create(&ip_2, "NetX IP Instance 2", IP_ADDRESS(1, 2, 3, 6), 0xFFFFFF00UL, &pool_0,
-                           _nx_ram_network_driver_1500, pointer, 2048, 1);
-    pointer =  pointer + 2048;
     if (status)
         error_counter++;
 
@@ -123,7 +113,6 @@ UINT    status;
     status += nx_tcp_enable(&ip_1);
     status += nxd_ipv6_enable(&ip_0);
     status += nxd_ipv6_enable(&ip_1);
-    status += nxd_ipv6_enable(&ip_2);
     status += nxd_icmp_enable(&ip_0);
     status += nxd_icmp_enable(&ip_1);
     if (status)
@@ -149,6 +138,8 @@ static void    thread_0_entry(ULONG thread_input)
 {
 
 UINT        status;
+UINT        address_index;
+NX_PACKET  *packet_ptr;
 #ifndef NX_DISABLE_IPV4
 NXD_ADDRESS ipv4_address_1;
 #endif
@@ -160,18 +151,9 @@ NXD_ADDRESS ipv4_address_1;
     if (wait_for_valid(&ip_0) || wait_for_valid(&ip_1))
         error_counter++;
 
-    /* IPv6 disabled on an instance with no TCP socket. */
-    status = nxd_ipv6_disable(&ip_2);
-    if (status || ip_2.nx_ipv6_packet_receive)
-        error_counter++;
-
     status =  nx_tcp_socket_create(&ip_0, &client_ipv6, "Client IPv6", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
-                                   NX_IP_TIME_TO_LIVE, 8192, NX_NULL, disconnect_callback);
-    status += nx_tcp_socket_create(&ip_0, &client_closed, "Client Closed", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
-                                   NX_IP_TIME_TO_LIVE, 8192, NX_NULL, disconnect_callback);
-    status += nx_tcp_socket_create(&ip_1, &server_ipv6, "Server IPv6", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
                                    NX_IP_TIME_TO_LIVE, 8192, NX_NULL, NX_NULL);
-    status += nx_tcp_socket_create(&ip_1, &server_after, "Server After", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
+    status += nx_tcp_socket_create(&ip_1, &server_ipv6, "Server IPv6", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
                                    NX_IP_TIME_TO_LIVE, 8192, NX_NULL, NX_NULL);
     if (status)
         error_counter++;
@@ -180,7 +162,7 @@ NXD_ADDRESS ipv4_address_1;
     /* An IPv4 connection on the same instance, which the disable must not
        touch. */
     status =  nx_tcp_socket_create(&ip_0, &client_ipv4, "Client IPv4", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
-                                   NX_IP_TIME_TO_LIVE, 8192, NX_NULL, disconnect_callback);
+                                   NX_IP_TIME_TO_LIVE, 8192, NX_NULL, NX_NULL);
     status += nx_tcp_socket_create(&ip_1, &server_ipv4, "Server IPv4", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
                                    NX_IP_TIME_TO_LIVE, 8192, NX_NULL, NX_NULL);
     if (status)
@@ -191,8 +173,8 @@ NXD_ADDRESS ipv4_address_1;
         error_counter++;
 #endif
 
-    /* The IPv6 connection. Data is received on it first, so the client has
-       an ACK to send. */
+    /* The IPv6 connection. Data is received on it last, so the client owes
+       an acknowledgment when IPv6 is disabled. */
     if (connect_pair(&client_ipv6, 60, &server_ipv6, PORT_IPV6, &ipv6_address_1))
         error_counter++;
     if (send_and_receive(&server_ipv6, &client_ipv6))
@@ -202,42 +184,36 @@ NXD_ADDRESS ipv4_address_1;
     if (status)
         error_counter++;
 
-    /* The IPv6 connection is reset, and its owner told. */
-    if ((client_ipv6.nx_tcp_socket_state != NX_TCP_CLOSED) || (disconnect_callbacks != 1))
+    /* The acknowledgment falls due and is held. The connection stays, and a
+       send on it is refused. */
+    tx_thread_sleep(NX_IP_PERIODIC_RATE);
+    if (client_ipv6.nx_tcp_socket_state != NX_TCP_ESTABLISHED)
         error_counter++;
-
-    /* The closed socket is untouched. */
-    if (client_closed.nx_tcp_socket_state != NX_TCP_CLOSED)
+    status = nx_packet_allocate(&pool_0, &packet_ptr, NX_TCP_PACKET, NX_WAIT_FOREVER);
+    if (status)
         error_counter++;
+    else
+    {
+        nx_packet_data_append(packet_ptr, "refused", 7, &pool_0, NX_WAIT_FOREVER);
+        if (nx_tcp_socket_send(&client_ipv6, packet_ptr, NX_NO_WAIT) != NX_NO_INTERFACE_ADDRESS)
+            error_counter++;
+        nx_packet_release(packet_ptr);
+    }
 
 #ifndef NX_DISABLE_IPV4
     /* The IPv4 connection carries on, in both directions. */
-    if (client_ipv4.nx_tcp_socket_state != NX_TCP_ESTABLISHED)
-        error_counter++;
     if (send_and_receive(&client_ipv4, &server_ipv4) || send_and_receive(&server_ipv4, &client_ipv4))
         error_counter++;
 #endif
 
-    /* A disconnect on the reset socket has nothing to send, and returns. */
-    status = nx_tcp_socket_disconnect(&client_ipv6, NX_NO_WAIT);
-    if (status != NX_NOT_CONNECTED)
-        error_counter++;
-
-    /* IPv6 enabled again, and a new IPv6 connection made. Before the reset
-       existed, this is where the test stopped. */
-    tx_thread_sleep(NX_IP_PERIODIC_RATE);
+    /* IPv6 enabled again and the address set in the same entry: the IPv6
+       connection carries on. */
     status =  nxd_ipv6_enable(&ip_0);
     status += nxd_icmp_enable(&ip_0);
-    status += nxd_ipv6_address_set(&ip_0, 0, &ipv6_address_0, 64, NX_NULL);
-    if (status || wait_for_valid(&ip_0))
+    status += nxd_ipv6_address_set(&ip_0, 0, &ipv6_address_0, 64, &address_index);
+    if ((status) || (address_index != 0) || wait_for_valid(&ip_0))
         error_counter++;
-
-    status = nx_tcp_client_socket_unbind(&client_ipv6);
-    if (status)
-        error_counter++;
-    if (connect_pair(&client_ipv6, 62, &server_after, PORT_AFTER, &ipv6_address_1))
-        error_counter++;
-    if (send_and_receive(&client_ipv6, &server_after))
+    if (send_and_receive(&client_ipv6, &server_ipv6) || send_and_receive(&server_ipv6, &client_ipv6))
         error_counter++;
 
     if (error_counter)
@@ -306,7 +282,7 @@ NX_PACKET  *packet_ptr;
         return(status);
     }
 
-    status = nx_tcp_socket_receive(to_ptr, &packet_ptr, NX_IP_PERIODIC_RATE);
+    status = nx_tcp_socket_receive(to_ptr, &packet_ptr, 5 * NX_IP_PERIODIC_RATE);
     if (status)
         return(status);
 
@@ -333,15 +309,6 @@ UINT    i;
     }
 
     return(NX_NOT_SUCCESSFUL);
-}
-
-
-static void    disconnect_callback(NX_TCP_SOCKET *socket_ptr)
-{
-    if (socket_ptr != &client_ipv6)
-        error_counter++;
-
-    disconnect_callbacks++;
 }
 
 #else

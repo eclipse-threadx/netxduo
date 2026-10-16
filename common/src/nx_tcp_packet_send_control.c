@@ -112,6 +112,19 @@ ULONG          window_size;
     /* Setup the IP pointer.  */
     ip_ptr =  socket_ptr -> nx_tcp_socket_ip_ptr;
 
+#ifdef FEATURE_NX_IPV6
+    /* An IPv6 connection cannot send while its source address is not valid: deleted,
+       or IPv6 disabled, until an address is set in that entry again. A deleted entry is
+       detached from its interface, which _nx_ipv6_packet_send asserts never happens.
+       The data path refuses in the same case; a control segment is dropped, as one
+       lost on the link would be.  */
+    if ((socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_version == NX_IP_VERSION_V6) &&
+        (socket_ptr -> nx_tcp_socket_ipv6_addr -> nxd_ipv6_address_state != NX_IPV6_ADDR_STATE_VALID))
+    {
+        return;
+    }
+#endif /* FEATURE_NX_IPV6 */
+
     if (control_bits & NX_TCP_SYN_BIT)
     {
 
