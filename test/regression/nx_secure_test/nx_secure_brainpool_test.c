@@ -279,9 +279,50 @@ static VOID thread_0_entry(ULONG thread_input)
     UCHAR shared_secret[64];
     NX_CRYPTO_ECDH ecdh;
     NX_CRYPTO_EXTENDED_OUTPUT extended_output;
+    NX_CRYPTO_METHOD unsupported_curve_method;
 
     (void)thread_input;
     printf("NetX Secure Test:   Brainpool ECDSA Test..............................");
+
+    /* Reject invalid curve requests before returning a domain pointer. */
+    status = vectors[0].method -> nx_crypto_operation(NX_CRYPTO_VERIFY,
+        NX_CRYPTO_NULL, vectors[0].method, NX_CRYPTO_NULL, 0,
+        NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, (UCHAR *)&curve, sizeof(curve),
+        NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_NOT_SUCCESSFUL)
+    {
+        test_control_return(1);
+        return;
+    }
+    status = vectors[0].method -> nx_crypto_operation(NX_CRYPTO_EC_CURVE_GET,
+        NX_CRYPTO_NULL, NX_CRYPTO_NULL, NX_CRYPTO_NULL, 0,
+        NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, (UCHAR *)&curve, sizeof(curve),
+        NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_NOT_SUCCESSFUL)
+    {
+        test_control_return(1);
+        return;
+    }
+    status = vectors[0].method -> nx_crypto_operation(NX_CRYPTO_EC_CURVE_GET,
+        NX_CRYPTO_NULL, vectors[0].method, NX_CRYPTO_NULL, 0,
+        NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, NX_CRYPTO_NULL, sizeof(curve),
+        NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_NOT_SUCCESSFUL)
+    {
+        test_control_return(1);
+        return;
+    }
+    unsupported_curve_method = *vectors[0].method;
+    unsupported_curve_method.nx_crypto_algorithm = NX_CRYPTO_EC_SECP256R1;
+    status = vectors[0].method -> nx_crypto_operation(NX_CRYPTO_EC_CURVE_GET,
+        NX_CRYPTO_NULL, &unsupported_curve_method, NX_CRYPTO_NULL, 0,
+        NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, (UCHAR *)&curve, sizeof(curve),
+        NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, NX_CRYPTO_NULL);
+    if (status != NX_CRYPTO_NOT_SUCCESSFUL)
+    {
+        test_control_return(1);
+        return;
+    }
 
     for (i = 0; i < sizeof(vectors) / sizeof(vectors[0]); i++)
     {

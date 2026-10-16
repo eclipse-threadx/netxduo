@@ -585,6 +585,12 @@ UCHAR sig_algo = 0;
 
     *signature_algorithm = 0;
 
+    if ((crypto_method -> nx_secure_x509_public_cipher_method == NX_NULL) ||
+        (crypto_method -> nx_secure_x509_hash_method == NX_NULL))
+    {
+        return;
+    }
+
     switch (crypto_method -> nx_secure_x509_public_cipher_method -> nx_crypto_algorithm)
     {
     case NX_CRYPTO_KEY_EXCHANGE_RSA:

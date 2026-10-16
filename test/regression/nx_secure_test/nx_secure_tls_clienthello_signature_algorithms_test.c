@@ -120,6 +120,36 @@ static const UCHAR expected_tls_1_2_extension[TLS_1_2_EXTENSION_SIZE] =
     0x04, 0x03, 0x05, 0x03, 0x06, 0x03
 };
 
+static const UCHAR expected_certificate_request[] =
+{
+    0x00, 0x00, 0x0E, 0x00, 0x0D, 0x00, 0x0A, 0x00, 0x08,
+    0x04, 0x03, 0x08, 0x1A, 0x08, 0x1B, 0x08, 0x1C
+};
+
+static NX_SECURE_X509_CERT local_brainpool_cert;
+static const UINT brainpool_curve_ids[] =
+{
+    NX_CRYPTO_EC_BRAINPOOLP256r1,
+    NX_CRYPTO_EC_BRAINPOOLP384r1,
+    NX_CRYPTO_EC_BRAINPOOLP512r1
+};
+static const UINT expected_brainpool_signatures[] =
+{
+    NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256,
+    NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP384R1_SHA384,
+    NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP512R1_SHA512
+};
+static const USHORT expected_brainpool_x509_types[] =
+{
+    NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_256,
+    NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_384,
+    NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512
+};
+static UCHAR brainpool_signature_wire[] =
+{
+    0x00, 0x06, 0x08, 0x1A, 0x08, 0x1B, 0x08, 0x1C
+};
+
 #endif
 
 /**************************************************************************/
@@ -155,6 +185,10 @@ UINT oid_value;
 USHORT ecdhe_signature_algorithm;
 UCHAR groups_wire[4] = {0x00, 0x02, 0x00, 0x1F};
 NX_SECURE_TLS_HELLO_EXTENSION groups_extension;
+NX_SECURE_TLS_HELLO_EXTENSION signature_extension;
+NX_PACKET certificate_request_packet;
+UCHAR certificate_request_data[64];
+USHORT signature_id;
 
     NX_PARAMETER_NOT_USED(first_unused_memory);
 
@@ -172,10 +206,47 @@ NX_SECURE_TLS_HELLO_EXTENSION groups_extension;
         (USHORT)(sizeof(supported_groups) / sizeof(supported_groups[0]));
     tls_session.nx_secure_tls_ecc.nx_secure_tls_ecc_curves = supported_curve_methods;
 
+    /* A TLS 1.3 certificate request advertises each supported Brainpool scheme. */
+    memset(&certificate_request_packet, 0, sizeof(certificate_request_packet));
+    certificate_request_packet.nx_packet_prepend_ptr = certificate_request_data;
+    certificate_request_packet.nx_packet_append_ptr = certificate_request_data;
+    certificate_request_packet.nx_packet_data_end = certificate_request_data + sizeof(certificate_request_data);
+    tls_session.nx_secure_tls_protocol_version = NX_SECURE_TLS_VERSION_TLS_1_2;
+    status = _nx_secure_tls_send_certificate_request(&tls_session, &certificate_request_packet);
+    EXPECT_EQ(NX_SUCCESS, status);
+    EXPECT_EQ(sizeof(expected_certificate_request), certificate_request_packet.nx_packet_length);
+    EXPECT_EQ(0, memcmp(certificate_request_data, expected_certificate_request,
+                        sizeof(expected_certificate_request)));
+    memset(&local_brainpool_cert, 0, sizeof(local_brainpool_cert));
+    local_brainpool_cert.nx_secure_x509_public_algorithm = NX_SECURE_TLS_X509_TYPE_EC;
+    tls_session.nx_secure_tls_credentials.nx_secure_tls_active_certificate = &local_brainpool_cert;
+    signature_extension.nx_secure_tls_extension_id = NX_SECURE_TLS_EXTENSION_SIGNATURE_ALGORITHMS;
+    signature_extension.nx_secure_tls_extension_data_length = sizeof(brainpool_signature_wire);
+    signature_extension.nx_secure_tls_extension_data = brainpool_signature_wire;
+    for (i = 0; i < 3U; i++)
+    {
+        local_brainpool_cert.nx_secure_x509_private_key.ec_private_key.nx_secure_ec_named_curve =
+            brainpool_curve_ids[i];
+        status = _nx_secure_tls_process_certificate_request(&tls_session, certificate_request_data,
+                                                               sizeof(expected_certificate_request));
+        EXPECT_EQ(NX_SUCCESS, status);
+        EXPECT_EQ(expected_brainpool_signatures[i], tls_session.nx_secure_tls_signature_algorithm);
+        status = _nx_secure_tls_proc_clienthello_sec_sa_extension(&tls_session, &signature_extension,
+            1U, &selected_curve, 0U, &cert_curve_supported, &ecdhe_signature_algorithm, NX_NULL);
+        EXPECT_EQ(NX_SUCCESS, status);
+        EXPECT_EQ(expected_brainpool_signatures[i], tls_session.nx_secure_tls_signature_algorithm);
+        signature_id = 0;
+        _nx_secure_tls_get_signature_algorithm_id(expected_brainpool_signatures[i], &signature_id);
+        EXPECT_EQ(expected_brainpool_x509_types[i], signature_id);
+    }
+    tls_session.nx_secure_tls_credentials.nx_secure_tls_active_certificate = NX_NULL;
+    tls_session.nx_secure_tls_protocol_version = 0;
+
     /* RFC 8734 groups differ from the TLS 1.2 Brainpool identifiers. */
     EXPECT_EQ(0x001Fu, _nx_secure_tls_brainpool_group_to_wire((USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1));
     EXPECT_EQ(0x0020u, _nx_secure_tls_brainpool_group_to_wire((USHORT)NX_CRYPTO_EC_BRAINPOOLP384r1));
     EXPECT_EQ(0x0021u, _nx_secure_tls_brainpool_group_to_wire((USHORT)NX_CRYPTO_EC_BRAINPOOLP512r1));
+    EXPECT_EQ(0x0022u, _nx_secure_tls_brainpool_group_to_wire(0x0022u));
     EXPECT_EQ((USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1, _nx_secure_tls_brainpool_group_from_wire(0x001Fu));
     EXPECT_EQ((USHORT)NX_CRYPTO_EC_BRAINPOOLP384r1, _nx_secure_tls_brainpool_group_from_wire(0x0020u));
     EXPECT_EQ((USHORT)NX_CRYPTO_EC_BRAINPOOLP512r1, _nx_secure_tls_brainpool_group_from_wire(0x0021u));
@@ -232,6 +303,34 @@ NX_SECURE_TLS_HELLO_EXTENSION groups_extension;
                        TLS_1_3_EXTENSION_SIZE) == 0);
     EXPECT_EQ(0xA5u, packet_buffer[TEST_PACKET_OFFSET - 1u]);
     EXPECT_EQ(0xA5u, packet_buffer[TEST_PACKET_OFFSET + TLS_1_3_EXTENSION_SIZE]);
+
+    /* Only usable ECDSA methods may advertise Brainpool signature schemes. */
+    signature_methods[3].nx_secure_x509_public_cipher_method = NX_NULL;
+    packet_offset = TEST_PACKET_OFFSET;
+    extension_length = 0;
+    status = _nx_secure_tls_send_clienthello_sig_extension(&tls_session, packet_buffer,
+                                                           &packet_offset, &extension_length,
+                                                           sizeof(packet_buffer));
+    EXPECT_EQ(NX_SUCCESS, status);
+    signature_methods[3].nx_secure_x509_public_cipher_method = &ecdsa_method;
+
+    signature_methods[3].nx_secure_x509_hash_method = NX_NULL;
+    packet_offset = TEST_PACKET_OFFSET;
+    extension_length = 0;
+    status = _nx_secure_tls_send_clienthello_sig_extension(&tls_session, packet_buffer,
+                                                           &packet_offset, &extension_length,
+                                                           sizeof(packet_buffer));
+    EXPECT_EQ(NX_SUCCESS, status);
+    signature_methods[3].nx_secure_x509_hash_method = &sha256_method;
+
+    signature_methods[4].nx_secure_x509_public_cipher_method = &unsupported_method;
+    packet_offset = TEST_PACKET_OFFSET;
+    extension_length = 0;
+    status = _nx_secure_tls_send_clienthello_sig_extension(&tls_session, packet_buffer,
+                                                           &packet_offset, &extension_length,
+                                                           sizeof(packet_buffer));
+    EXPECT_EQ(NX_SUCCESS, status);
+    signature_methods[4].nx_secure_x509_public_cipher_method = &ecdsa_method;
 
     /* Disabling TLS 1.3 retains the original TLS 1.2-only list. */
     memset(packet_buffer, 0xA5, sizeof(packet_buffer));
