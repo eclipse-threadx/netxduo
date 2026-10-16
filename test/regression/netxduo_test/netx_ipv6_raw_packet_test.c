@@ -286,6 +286,9 @@ UINT        status;
 NX_PACKET   *my_packet;
 ULONG       value;
 NXD_ADDRESS dest_addr;
+NX_PACKET   *sent_packet;
+NX_IPV6_HEADER *ipv6_header;
+ULONG       source[4];
 
 
     status = nxd_ipv6_address_set(&ip_1, 0, &ipv6_addr_wrong, 64, NX_NULL);
@@ -304,6 +307,70 @@ NXD_ADDRESS dest_addr;
 
     /* Check for an error.  */
     if ((status) || (value != NX_IP_INITIALIZE_DONE))
+        error_counter++;
+
+#ifndef NX_DISABLE_LOOPBACK_INTERFACE
+    /* The loopback send must use ::1 as its source, even with a global
+       address occupying slot 0.  */
+    dest_addr.nxd_ip_version = NX_IP_VERSION_V6;
+    dest_addr.nxd_ip_address.v6[0] = 0;
+    dest_addr.nxd_ip_address.v6[1] = 0;
+    dest_addr.nxd_ip_address.v6[2] = 0;
+    dest_addr.nxd_ip_address.v6[3] = 1;
+    status = nx_packet_allocate(&pool_0, &my_packet, NX_UDP_PACKET, NX_WAIT_FOREVER);
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_data_append(my_packet, "loopback", 8, &pool_0, NX_WAIT_FOREVER);
+        if (status == NX_SUCCESS)
+        {
+            status = nxd_ip_raw_packet_send(&ip_1, my_packet, &dest_addr,
+                                            NX_IP_RAW >> 16, 0x80, NX_IP_NORMAL);
+        }
+        if (status == NX_SUCCESS)
+        {
+            status = nx_ip_raw_packet_receive(&ip_1, &my_packet, NX_IP_PERIODIC_RATE);
+            if (status == NX_SUCCESS)
+            {
+                ipv6_header = (NX_IPV6_HEADER *)my_packet -> nx_packet_ip_header;
+                source[0] = ipv6_header -> nx_ip_header_source_ip[0];
+                source[1] = ipv6_header -> nx_ip_header_source_ip[1];
+                source[2] = ipv6_header -> nx_ip_header_source_ip[2];
+                source[3] = ipv6_header -> nx_ip_header_source_ip[3];
+                NX_IPV6_ADDRESS_CHANGE_ENDIAN(source);
+                if ((source[0] != 0) || (source[1] != 0) ||
+                    (source[2] != 0) || (source[3] != 1))
+                    error_counter++;
+                nx_packet_release(my_packet);
+            }
+        }
+        else if (my_packet != NX_NULL)
+            nx_packet_release(my_packet);
+        if (status != NX_SUCCESS)
+            error_counter++;
+    }
+    else
+        error_counter++;
+#endif
+
+    /* A destination with no matching source or default router must fail
+       before consuming the caller's packet.  */
+    dest_addr.nxd_ip_version = NX_IP_VERSION_V6;
+    dest_addr.nxd_ip_address.v6[0] = 0x40010000;
+    dest_addr.nxd_ip_address.v6[1] = 0;
+    dest_addr.nxd_ip_address.v6[2] = 0;
+    dest_addr.nxd_ip_address.v6[3] = 1;
+    status = nx_packet_allocate(&pool_0, &my_packet, NX_UDP_PACKET, NX_WAIT_FOREVER);
+    if (status == NX_SUCCESS)
+    {
+        sent_packet = my_packet;
+        status = _nxde_ip_raw_packet_send(&ip_1, &my_packet, &dest_addr,
+                                          NX_IP_RAW >> 16, 0x80, NX_IP_NORMAL);
+        if ((status != NX_NO_INTERFACE_ADDRESS) || (my_packet != sent_packet))
+            error_counter++;
+        if (my_packet == sent_packet)
+            nx_packet_release(my_packet);
+    }
+    else
         error_counter++;
 
     /* Allocate a packet.  */
@@ -345,7 +412,7 @@ NXD_ADDRESS dest_addr;
     dest_addr.nxd_ip_address.v4 = IP_ADDRESS(1, 2, 3, 9);
 
     /* Send the second raw IP packet.  */
-    status =  nxd_ip_raw_packet_source_send(&ip_1, my_packet, &dest_addr, 0, NX_IP_RAW >> 16, 0x80, NX_IP_NORMAL);
+    status =  nxd_ip_raw_packet_send(&ip_1, my_packet, &dest_addr, NX_IP_RAW >> 16, 0x80, NX_IP_NORMAL);
 
     /* Check status.  */
     if (status != NX_SUCCESS)
