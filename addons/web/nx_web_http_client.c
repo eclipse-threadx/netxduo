@@ -1344,6 +1344,50 @@ ULONG      fragment_length;
     return(packet_ptr);
 }
 
+/* Locate the response status prefix using bytes present in the chain.  */
+UINT _nx_web_http_client_response_prefix_get(NX_PACKET *packet_ptr, CHAR *buffer, CHAR **prefix)
+{
+NX_PACKET *current_packet_ptr = packet_ptr;
+ULONG      copied = 0;
+ULONG      fragment_length;
+ULONG      copy_length;
+
+    if (packet_ptr -> nx_packet_length < 12U)
+    {
+        return(NX_WEB_HTTP_ERROR);
+    }
+
+    if ((ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) >= 12U)
+    {
+        *prefix = (CHAR *)packet_ptr -> nx_packet_prepend_ptr;
+        return(NX_SUCCESS);
+    }
+
+    while ((current_packet_ptr != NX_NULL) && (copied < 12U))
+    {
+        fragment_length = (ULONG)(current_packet_ptr -> nx_packet_append_ptr -
+                                  current_packet_ptr -> nx_packet_prepend_ptr);
+        copy_length = 12U - copied;
+        if (fragment_length < copy_length)
+        {
+            copy_length = fragment_length;
+        }
+        if (copy_length != 0U)
+        {
+            memcpy(buffer + copied, current_packet_ptr -> nx_packet_prepend_ptr, copy_length);
+            copied += copy_length;
+        }
+        current_packet_ptr = current_packet_ptr -> nx_packet_next;
+    }
+
+    if (copied != 12U)
+    {
+        return(NX_WEB_HTTP_ERROR);
+    }
+    *prefix = buffer;
+    return(NX_SUCCESS);
+}
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
@@ -1452,7 +1496,6 @@ UINT        length = 0, offset = 0;
 NX_PACKET   *response_packet_ptr = NX_NULL;
 CHAR        *buffer_ptr;
 CHAR        response_start[12];
-ULONG       copied;
 UINT        i = 0;
 UINT        status_code = NX_SUCCESS;
 
@@ -1474,24 +1517,15 @@ UINT        status_code = NX_SUCCESS;
         /* Pickup the response from the Server.  */
         status =  _nx_web_http_client_get_server_response(client_ptr, &response_packet_ptr, wait_option);
 
-        /* Validate the response packet length.  */
+        /* Validate the response prefix against the packet chain.  */
         if (status == NX_SUCCESS)
         {
-            if (response_packet_ptr -> nx_packet_append_ptr - response_packet_ptr -> nx_packet_prepend_ptr < 12)
+            if (_nx_web_http_client_response_prefix_get(response_packet_ptr, response_start,
+                                                        &buffer_ptr) != NX_SUCCESS)
             {
-                if ((response_packet_ptr -> nx_packet_length < 12) ||
-                    (nx_packet_data_extract_offset(response_packet_ptr, 0, response_start, 12, &copied) != NX_SUCCESS) ||
-                    (copied != 12))
-                {
-                    /* Release invalid packet.  */
-                    nx_packet_release(response_packet_ptr);
-                    status = NX_WEB_HTTP_ERROR;
-                }
-                buffer_ptr = response_start;
-            }
-            else
-            {
-                buffer_ptr = (CHAR *)response_packet_ptr -> nx_packet_prepend_ptr;
+                /* Release invalid packet.  */
+                nx_packet_release(response_packet_ptr);
+                status = NX_WEB_HTTP_ERROR;
             }
         }
 
@@ -5724,52 +5758,23 @@ static UINT _nx_web_http_client_header_byte_get(NX_WEB_HTTP_CLIENT_HEADER_CURSOR
     return(NX_SUCCESS);
 }
 
-/* Provide one complete field to a response header callback.  */
-static UINT _nx_web_http_client_header_field_get(NX_PACKET *packet_ptr, ULONG offset,
-                                                 UINT length, CHAR *buffer, CHAR **field)
+/* Select the packet view or bounded copy of a parsed header field.  */
+static UINT _nx_web_http_client_header_field_select(NX_PACKET *packet_ptr, UCHAR *start_ptr,
+                                                    UINT length, CHAR *buffer, CHAR **field)
 {
-NX_PACKET *current_packet_ptr = packet_ptr;
-ULONG      remaining_offset = offset;
-ULONG      fragment_length;
-ULONG      copied;
-
-    if (length == 0)
+    if (length == 0U)
     {
         *field = buffer;
         return(NX_SUCCESS);
     }
 
-    while (current_packet_ptr != NX_NULL)
+    if (length <= (ULONG)(packet_ptr -> nx_packet_append_ptr - start_ptr))
     {
-        fragment_length = (ULONG)(current_packet_ptr -> nx_packet_append_ptr -
-                                  current_packet_ptr -> nx_packet_prepend_ptr);
-        if (remaining_offset < fragment_length)
-        {
-            break;
-        }
-        remaining_offset -= fragment_length;
-        current_packet_ptr = current_packet_ptr -> nx_packet_next;
-    }
-
-    if (current_packet_ptr == NX_NULL)
-    {
-        return(NX_WEB_HTTP_ERROR);
-    }
-
-    if (length <= (ULONG)(current_packet_ptr -> nx_packet_append_ptr -
-                         (current_packet_ptr -> nx_packet_prepend_ptr + remaining_offset)))
-    {
-        *field = (CHAR *)(current_packet_ptr -> nx_packet_prepend_ptr + remaining_offset);
+        *field = (CHAR *)start_ptr;
         return(NX_SUCCESS);
     }
 
     if (length > NX_WEB_HTTP_MAX_HEADER_FIELD)
-    {
-        return(NX_WEB_HTTP_ERROR);
-    }
-
-    if ((nx_packet_data_extract_offset(packet_ptr, offset, buffer, length, &copied) != NX_SUCCESS) ||
-        (copied != length))
     {
         return(NX_WEB_HTTP_ERROR);
     }
@@ -5795,8 +5800,10 @@ UINT       value;
 UINT       digit_count;
 UINT       valid;
 UINT       version;
-ULONG      name_offset;
-ULONG      value_offset;
+NX_PACKET *name_packet_ptr;
+NX_PACKET *value_packet_ptr;
+UCHAR     *name_start_ptr;
+UCHAR     *value_start_ptr;
 CHAR       name_buffer[NX_WEB_HTTP_MAX_HEADER_FIELD];
 CHAR       value_buffer[NX_WEB_HTTP_MAX_HEADER_FIELD];
 CHAR      *name_ptr;
@@ -5859,7 +5866,6 @@ CHAR      *value_ptr;
 
     for (;;)
     {
-        name_offset = cursor.offset;
         if (_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS)
         {
             return(0);
@@ -5874,6 +5880,9 @@ CHAR      *value_ptr;
             return((UINT)cursor.offset);
         }
 
+        name_packet_ptr = cursor.packet_ptr;
+        name_start_ptr = cursor.data_ptr - 1;
+
         name_length = 0;
         while (byte != (UCHAR)':')
         {
@@ -5884,6 +5893,10 @@ CHAR      *value_ptr;
             if (name_length < sizeof(name_prefix))
             {
                 name_prefix[name_length] = byte;
+            }
+            if (name_length < sizeof(name_buffer))
+            {
+                name_buffer[name_length] = (CHAR)byte;
             }
             name_length++;
             if (_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS)
@@ -5900,7 +5913,8 @@ CHAR      *value_ptr;
             }
         } while (byte == (UCHAR)' ');
 
-        value_offset = cursor.offset - 1;
+        value_packet_ptr = cursor.packet_ptr;
+        value_start_ptr = cursor.data_ptr - 1;
         value_length = 0;
         while (byte != (UCHAR)13)
         {
@@ -5911,6 +5925,10 @@ CHAR      *value_ptr;
             if (value_length < sizeof(value_prefix))
             {
                 value_prefix[value_length] = byte;
+            }
+            if (value_length < sizeof(value_buffer))
+            {
+                value_buffer[value_length] = (CHAR)byte;
             }
             value_length++;
             if (_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS)
@@ -5983,10 +6001,10 @@ CHAR      *value_ptr;
 #endif
             if (client_ptr -> nx_web_http_client_response_callback != NX_NULL)
             {
-                if ((_nx_web_http_client_header_field_get(packet_ptr, name_offset, name_length,
-                                                           name_buffer, &name_ptr) != NX_SUCCESS) ||
-                    (_nx_web_http_client_header_field_get(packet_ptr, value_offset, value_length,
-                                                           value_buffer, &value_ptr) != NX_SUCCESS))
+                if ((_nx_web_http_client_header_field_select(name_packet_ptr, name_start_ptr,
+                                                              name_length, name_buffer, &name_ptr) != NX_SUCCESS) ||
+                    (_nx_web_http_client_header_field_select(value_packet_ptr, value_start_ptr,
+                                                              value_length, value_buffer, &value_ptr) != NX_SUCCESS))
                 {
                     return(0);
                 }

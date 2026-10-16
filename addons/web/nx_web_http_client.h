@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
 
 /**************************************************************************/
 /**************************************************************************/
@@ -622,6 +623,7 @@ UINT        _nx_web_http_client_delete_secure_start_extended(NX_WEB_HTTP_CLIENT 
 
 UINT        _nx_web_http_client_type_get(CHAR *name, CHAR *http_type_string);
 UINT        _nx_web_http_client_content_length_get(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr);
+UINT        _nx_web_http_client_response_prefix_get(NX_PACKET *packet_ptr, CHAR *buffer, CHAR **prefix);
 UINT        _nx_web_http_client_process_header_fields(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr);
 UINT        _nx_web_http_client_number_convert(UINT number, CHAR *string);
 UINT        _nx_web_http_client_content_type_header_add(NX_WEB_HTTP_CLIENT *client_ptr, CHAR *resource, ULONG wait_option);

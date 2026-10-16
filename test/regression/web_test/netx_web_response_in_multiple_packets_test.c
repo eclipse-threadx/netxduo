@@ -20,6 +20,7 @@
 
 extern UINT _nx_web_http_client_content_length_get(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr);
 extern UINT _nx_web_http_client_process_header_fields(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr);
+extern UINT _nx_web_http_client_response_prefix_get(NX_PACKET *packet_ptr, CHAR *buffer, CHAR **prefix);
 
 extern void test_control_return(UINT);
 
@@ -99,6 +100,8 @@ static VOID boundary_header_callback(NX_WEB_HTTP_CLIENT *client_ptr, CHAR *field
                                      CHAR *field_value, UINT field_value_length);
 static VOID test_header_boundaries(VOID);
 static VOID test_header_validation(VOID);
+static VOID test_response_prefix(VOID);
+static VOID test_short_server_responses(VOID);
 
 /* Describe a response header and the parser result it must produce.  */
 typedef struct HEADER_CASE_STRUCT
@@ -313,6 +316,113 @@ UINT                offset;
         {
             error_counter++;
         }
+        client.nx_web_http_client_response_callback = NX_NULL;
+        if (_nx_web_http_client_process_header_fields(&client, first_packet) != offset)
+        {
+            error_counter++;
+        }
+        nx_packet_release(first_packet);
+    }
+    else
+    {
+        error_counter++;
+        if (first_packet != NX_NULL)
+        {
+            nx_packet_release(first_packet);
+        }
+        if (second_packet != NX_NULL)
+        {
+            nx_packet_release(second_packet);
+        }
+        if (third_packet != NX_NULL)
+        {
+            nx_packet_release(third_packet);
+        }
+    }
+}
+
+/* Check status bytes against the physical packet chain and advertised length.  */
+static VOID test_response_prefix(VOID)
+{
+NX_PACKET *first_packet = NX_NULL;
+NX_PACKET *second_packet = NX_NULL;
+NX_PACKET *third_packet = NX_NULL;
+CHAR       buffer[12];
+CHAR      *prefix = NX_NULL;
+UCHAR     *first_end;
+UCHAR     *second_end;
+UCHAR     *third_end;
+ULONG      length;
+UINT       status;
+
+    status = nx_packet_allocate(&client_pool, &first_packet, NX_TCP_PACKET, NX_NO_WAIT);
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_allocate(&client_pool, &second_packet, NX_TCP_PACKET, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_allocate(&client_pool, &third_packet, NX_TCP_PACKET, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_data_append(first_packet, "HTTP/", 5, &client_pool, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_data_append(second_packet, "1.1 200 OK\r\n", 12, &client_pool, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_data_append(third_packet, "x", 1, &client_pool, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        first_end = first_packet -> nx_packet_append_ptr;
+        second_end = second_packet -> nx_packet_append_ptr;
+        third_end = third_packet -> nx_packet_append_ptr;
+        first_packet -> nx_packet_next = second_packet;
+        second_packet -> nx_packet_next = third_packet;
+        first_packet -> nx_packet_last = third_packet;
+        first_packet -> nx_packet_length += second_packet -> nx_packet_length + third_packet -> nx_packet_length;
+        length = first_packet -> nx_packet_length;
+
+        if ((_nx_web_http_client_response_prefix_get(first_packet, buffer, &prefix) != NX_SUCCESS) ||
+            (prefix != buffer) || (memcmp(prefix, "HTTP/1.1 200", 12) != 0))
+        {
+            error_counter++;
+        }
+
+        first_packet -> nx_packet_append_ptr = first_packet -> nx_packet_prepend_ptr;
+        first_packet -> nx_packet_length = 12;
+        if ((_nx_web_http_client_response_prefix_get(first_packet, buffer, &prefix) != NX_SUCCESS) ||
+            (prefix != buffer) || (memcmp(prefix, "1.1 200 OK\r\n", 12) != 0))
+        {
+            error_counter++;
+        }
+
+        second_packet -> nx_packet_append_ptr--;
+        third_packet -> nx_packet_append_ptr = third_packet -> nx_packet_prepend_ptr;
+        if (_nx_web_http_client_response_prefix_get(first_packet, buffer, &prefix) == NX_SUCCESS)
+        {
+            error_counter++;
+        }
+        second_packet -> nx_packet_append_ptr = second_end;
+        third_packet -> nx_packet_append_ptr = third_end;
+
+        first_packet -> nx_packet_length = 11;
+        if (_nx_web_http_client_response_prefix_get(first_packet, buffer, &prefix) == NX_SUCCESS)
+        {
+            error_counter++;
+        }
+
+        first_packet -> nx_packet_append_ptr = first_end;
+        first_packet -> nx_packet_length = length;
+        if ((_nx_web_http_client_response_prefix_get(second_packet, buffer, &prefix) != NX_SUCCESS) ||
+            (prefix != (CHAR *)second_packet -> nx_packet_prepend_ptr))
+        {
+            error_counter++;
+        }
         nx_packet_release(first_packet);
     }
     else
@@ -510,6 +620,66 @@ const CHAR         *terminator = "\r\n\r\n";
     }
 }
 
+/* Exercise an empty response body and a header shorter than a status code.  */
+static VOID test_short_server_responses(VOID)
+{
+NX_PACKET *packet_ptr = NX_NULL;
+UINT       status;
+
+    status = nx_web_http_client_create(&my_client, "HTTP Client", &client_ip, &client_pool, 1536);
+    if (status == NX_SUCCESS)
+    {
+        status = nx_web_http_client_get_start(&my_client, &server_ip_address,
+                                              NX_WEB_HTTP_SERVER_PORT, "/empty",
+                                              "www.abc.com", "name", "password", NX_WAIT_FOREVER);
+        if (status == NX_SUCCESS)
+        {
+            status = nx_web_http_client_response_body_get(&my_client, &packet_ptr, NX_WAIT_FOREVER);
+        }
+        if ((status != NX_WEB_HTTP_GET_DONE) || (packet_ptr == NX_NULL) ||
+            (packet_ptr -> nx_packet_length != 0U))
+        {
+            error_counter++;
+        }
+        if (packet_ptr != NX_NULL)
+        {
+            nx_packet_release(packet_ptr);
+        }
+        if (nx_web_http_client_delete(&my_client) != NX_SUCCESS)
+        {
+            error_counter++;
+        }
+    }
+    else
+    {
+        error_counter++;
+    }
+
+    status = nx_web_http_client_create(&my_client, "HTTP Client", &client_ip, &client_pool, 1536);
+    if (status == NX_SUCCESS)
+    {
+        status = nx_web_http_client_get_start(&my_client, &server_ip_address,
+                                              NX_WEB_HTTP_SERVER_PORT, "/short",
+                                              "www.abc.com", "name", "password", NX_WAIT_FOREVER);
+        if (status == NX_SUCCESS)
+        {
+            status = nx_web_http_client_response_body_get(&my_client, &packet_ptr, NX_WAIT_FOREVER);
+        }
+        if (status != NX_WEB_HTTP_ERROR)
+        {
+            error_counter++;
+        }
+        if (nx_web_http_client_delete(&my_client) != NX_SUCCESS)
+        {
+            error_counter++;
+        }
+    }
+    else
+    {
+        error_counter++;
+    }
+}
+
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
 #else
@@ -577,6 +747,7 @@ UINT    status;
         error_counter++;
 
     test_header_boundaries();
+    test_response_prefix();
     test_header_validation();
 
     /* Create an IP instance.  */
@@ -749,6 +920,11 @@ NX_PACKET       *recv_packet;
             if (status)
                error_counter++;
 
+            if (i == 0U)
+            {
+                test_short_server_responses();
+            }
+
         /* Set the flag.  */
         if (i == 0)
         {
@@ -911,6 +1087,35 @@ CHAR         padding_field[PADDING_FIELD_SIZE];
     /* Process multipart data.  */
     if(request_type == NX_WEB_HTTP_SERVER_GET_REQUEST)
     {
+
+        if ((strcmp(resource, "/empty") == 0) || (strcmp(resource, "/short") == 0))
+        {
+            status = nx_web_http_server_response_packet_allocate(server_ptr, &response_pkt, TX_WAIT_FOREVER);
+            if (status != NX_SUCCESS)
+            {
+                error_counter++;
+                return(NX_WEB_HTTP_CALLBACK_COMPLETED);
+            }
+            if (strcmp(resource, "/empty") == 0)
+            {
+                status = nx_packet_data_append(response_pkt,
+                                               "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n",
+                                               sizeof("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n") - 1U,
+                                               &server_pool, NX_WAIT_FOREVER);
+            }
+            else
+            {
+                status = nx_packet_data_append(response_pkt, "\r\n\r\n", 4U,
+                                               &server_pool, NX_WAIT_FOREVER);
+            }
+            if ((status != NX_SUCCESS) ||
+                (nx_web_http_server_callback_packet_send(server_ptr, response_pkt) != NX_SUCCESS))
+            {
+                nx_packet_release(response_pkt);
+                error_counter++;
+            }
+            return(NX_WEB_HTTP_CALLBACK_COMPLETED);
+        }
 
         /* Allocate a response packet.  */
         status =  nx_web_http_server_response_packet_allocate(server_ptr, &response_pkt, TX_WAIT_FOREVER);
