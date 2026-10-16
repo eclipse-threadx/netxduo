@@ -10660,7 +10660,7 @@ UINT status;
         return(NX_WEB_HTTP_ERROR);
     }
 
-    status = _nx_web_http_server_response_packet_allocate(server_ptr, &packet_ptr, NX_WAIT_FOREVER);
+    status = _nx_web_http_server_response_packet_allocate(server_ptr, &packet_ptr, NX_NO_WAIT);
     if(status != NX_SUCCESS)
     {
         server_ptr -> nx_web_http_server_allocation_errors++;
@@ -10668,7 +10668,7 @@ UINT status;
     }
 
     status = nx_packet_data_append(packet_ptr, response_header, sizeof(response_header) - 1,
-                                   server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
+                                   server_ptr -> nx_web_http_server_packet_pool_ptr, NX_NO_WAIT);
     if(status == NX_SUCCESS)
     {
         status = _nx_web_http_server_send(server_ptr, packet_ptr, NX_WEB_HTTP_SERVER_TIMEOUT_SEND);
@@ -10739,13 +10739,13 @@ UINT i;
     {
         status = nx_secure_tls_packet_allocate(&session_ptr -> nx_tcp_session_tls_session,
                                                server_ptr -> nx_web_http_server_packet_pool_ptr,
-                                               &packet_ptr, NX_WAIT_FOREVER);
+                                               &packet_ptr, NX_NO_WAIT);
     }
     else
 #endif
     {
         status = nx_packet_allocate(server_ptr -> nx_web_http_server_packet_pool_ptr,
-                                    &packet_ptr, NX_TCP_PACKET, NX_WAIT_FOREVER);
+                                    &packet_ptr, NX_TCP_PACKET, NX_NO_WAIT);
     }
     if(status != NX_SUCCESS)
     {
@@ -10754,7 +10754,7 @@ UINT i;
     }
 
     status = nx_packet_data_append(packet_ptr, data_ptr, data_length,
-                                   server_ptr -> nx_web_http_server_packet_pool_ptr, NX_WAIT_FOREVER);
+                                   server_ptr -> nx_web_http_server_packet_pool_ptr, NX_NO_WAIT);
     if(status == NX_SUCCESS)
     {
 #ifdef NX_WEB_HTTPS_ENABLE

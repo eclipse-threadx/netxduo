@@ -40,6 +40,7 @@ static NX_IP client_ip;
 static NX_PACKET_POOL server_pool;
 static NX_PACKET_POOL client_pool;
 static NX_PACKET_POOL invalid_pool;
+static NX_PACKET_POOL small_pool;
 static NX_WEB_HTTP_SERVER server;
 static NX_WEB_HTTP_SERVER invalid_server;
 static NX_TCP_SOCKET client_socket;
@@ -48,6 +49,7 @@ static TX_THREAD client_thread;
 static UCHAR server_stack[16384];
 static UCHAR server_pool_memory[PACKET_SIZE * 32];
 static UCHAR client_pool_memory[PACKET_SIZE * 16];
+static UCHAR small_pool_memory[sizeof(NX_PACKET) + 128U + NX_PACKET_ALIGNMENT];
 static UCHAR server_ip_stack[4096];
 static UCHAR client_ip_stack[4096];
 static UCHAR server_arp[1024];
@@ -83,6 +85,7 @@ ULONG saved_tls_id;
 UINT tls_status;
 #endif
 CHAR payload[] = "data: x\n\n";
+CHAR large_payload[128];
 
     if ((nx_web_http_server_event_stream_start(NX_NULL, &selected_session) != NX_PTR_ERROR) ||
         (nx_web_http_server_event_stream_start(&server, NX_NULL) != NX_PTR_ERROR) ||
@@ -178,6 +181,17 @@ CHAR payload[] = "data: x\n\n";
     }
     server.nx_web_http_server_packet_pool_ptr = saved_pool;
 
+    /* A one-packet pool must fail a chained append and release its packet. */
+    memset(large_payload, 'x', sizeof(large_payload));
+    server.nx_web_http_server_packet_pool_ptr = &small_pool;
+    if ((_nx_web_http_server_event_stream_send(&server, stream_session,
+                                               large_payload, sizeof(large_payload)) != NX_NO_PACKET) ||
+        (small_pool.nx_packet_pool_available != small_pool.nx_packet_pool_total))
+    {
+        error_count++;
+    }
+    server.nx_web_http_server_packet_pool_ptr = saved_pool;
+
 #ifdef NX_WEB_HTTPS_ENABLE
     /* The HTTPS path must release a packet rejected for excessive length. */
     saved_https = server.nx_web_http_is_https_server;
@@ -226,6 +240,16 @@ UINT saved_state;
     server_ptr -> nx_web_http_server_packet_pool_ptr = saved_pool;
     if ((status == NX_SUCCESS) || (invalid_session != NX_NULL) ||
         (server_ptr -> nx_web_http_server_allocation_errors != 1U))
+    {
+        error_count++;
+    }
+
+    /* Header append failure must leave the stream unselected and free the packet. */
+    server_ptr -> nx_web_http_server_packet_pool_ptr = &small_pool;
+    status = _nx_web_http_server_event_stream_start(server_ptr, &invalid_session);
+    server_ptr -> nx_web_http_server_packet_pool_ptr = saved_pool;
+    if ((status != NX_NO_PACKET) || (invalid_session != NX_NULL) ||
+        (small_pool.nx_packet_pool_available != small_pool.nx_packet_pool_total))
     {
         error_count++;
     }
@@ -411,6 +435,8 @@ UINT status;
                                    server_pool_memory, sizeof(server_pool_memory));
     status += nx_packet_pool_create(&client_pool, "client pool", PACKET_SIZE,
                                     client_pool_memory, sizeof(client_pool_memory));
+    status += nx_packet_pool_create(&small_pool, "one packet pool", 128U,
+                                    small_pool_memory, sizeof(small_pool_memory));
     status += nx_ip_create(&server_ip, "server ip", SERVER_ADDRESS, 0xFFFFFF00UL,
                            &server_pool, _nx_ram_network_driver_1024,
                            server_ip_stack, sizeof(server_ip_stack), 1);
@@ -428,6 +454,10 @@ UINT status;
                                client_thread_stack, sizeof(client_thread_stack), 5, 5,
                                TX_NO_TIME_SLICE, TX_AUTO_START);
     if(status != NX_SUCCESS)
+    {
+        error_count++;
+    }
+    if(small_pool.nx_packet_pool_total != 1U)
     {
         error_count++;
     }
