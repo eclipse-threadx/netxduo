@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 #include   "tx_api.h"
 #include   "nx_api.h"
 #include   "nx_tcp.h"
@@ -478,6 +480,9 @@ UCHAR test_iv[16];
 
     /* Print out test information banner.  */
     printf("NetX Secure Test:   TLS Coverage Test..................................");
+
+    memset(&cert_1, 0, sizeof(cert_1));
+    memset(&cert_2, 0, sizeof(cert_2));
 
     /* Ensure the IP instance has been initialized.  */
     status = nx_ip_status_check(&ip_0, NX_IP_INITIALIZE_DONE, &actual_status, NX_IP_PERIODIC_RATE);

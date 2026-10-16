@@ -230,22 +230,41 @@ VOID                 *handler = NX_CRYPTO_NULL;
     status = _nx_crypto_ecdsa_verify((NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, (UINT)-1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL);
     EXPECT_EQ(NX_CRYPTO_SIZE_ERROR, status);
 
-    /* signature[0] != 0x30. */
+    /* signature == NX_CRYPTO_NULL. A caller reaches this with a certificate whose
+       signature bit string is empty, which wraps the length the parser stores. The
+       assertion is on the status, but what this case really covers is that nothing
+       is dereferenced: without the check it faults rather than returning. */
+    status = _nx_crypto_ecdsa_verify((NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL);
+    EXPECT_EQ(NX_CRYPTO_SIZE_ERROR, status);
+
+    /* signature_length shorter than the sequence header the code reads. */
+    signature[0] = 0x30;
+    status = _nx_crypto_ecdsa_verify((NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, 0, signature, 1, NX_CRYPTO_NULL);
+    EXPECT_EQ(NX_CRYPTO_SIZE_ERROR, status);
+
+    /* Long form, but no third octet to hold the size. */
+    signature[0] = 0x30;
+    signature[1] = 0x80;
+    status = _nx_crypto_ecdsa_verify((NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, 0, signature, 2, NX_CRYPTO_NULL);
+    EXPECT_EQ(NX_CRYPTO_SIZE_ERROR, status);
+
+    /* signature[0] != 0x30. The length is now two rather than zero, because the
+       header check below it cannot be reached without the octets it reads. */
     signature[0] = 0;
-    status = _nx_crypto_ecdsa_verify((NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, 0, signature, 0, NX_CRYPTO_NULL);
+    status = _nx_crypto_ecdsa_verify((NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, 0, signature, 2, NX_CRYPTO_NULL);
     EXPECT_EQ(NX_CRYPTO_AUTHENTICATION_FAILED, status);
 
     /* signature[1] == 0x80 && signature_length < signature[2] + 3. */
     signature[0] = 0x30;
     signature[1] = 0x80;
-    signature[2] = 0;
-    status = _nx_crypto_ecdsa_verify((NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, 0, signature, 0, NX_CRYPTO_NULL);
+    signature[2] = 1;
+    status = _nx_crypto_ecdsa_verify((NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, 0, signature, 3, NX_CRYPTO_NULL);
     EXPECT_EQ(NX_CRYPTO_SIZE_ERROR, status);
 
     /* signature[1] != 0x80 && signature_length < signature[1] + 2. */
     signature[0] = 0x30;
-    signature[1] = 0;
-    status = _nx_crypto_ecdsa_verify((NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, 0, signature, 0, NX_CRYPTO_NULL);
+    signature[1] = 1;
+    status = _nx_crypto_ecdsa_verify((NX_CRYPTO_EC *)&_nx_crypto_ec_secp521r1, NX_CRYPTO_NULL, 0, NX_CRYPTO_NULL, 0, signature, 2, NX_CRYPTO_NULL);
     EXPECT_EQ(NX_CRYPTO_SIZE_ERROR, status);
 
 /* For NX_CRYPTO_STATE_CHECK. */
