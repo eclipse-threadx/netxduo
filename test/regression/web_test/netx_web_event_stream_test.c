@@ -22,6 +22,12 @@
 
 extern VOID _nx_ram_network_driver_1024(NX_IP_DRIVER *driver_req_ptr);
 extern VOID test_control_return(UINT status);
+extern volatile ULONG _tx_thread_system_state;
+extern TX_THREAD *_tx_thread_current_ptr;
+extern TX_THREAD _tx_timer_thread;
+extern UINT _nx_web_http_server_event_stream_start(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION **session_pptr);
+extern UINT _nx_web_http_server_event_stream_send(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION *session_ptr,
+                                                  VOID *data_ptr, ULONG data_length);
 
 #if !defined(NX_DISABLE_IPV4) && !defined(NX_WEB_HTTP_KEEPALIVE_DISABLE)
 
@@ -33,12 +39,14 @@ static NX_IP server_ip;
 static NX_IP client_ip;
 static NX_PACKET_POOL server_pool;
 static NX_PACKET_POOL client_pool;
+static NX_PACKET_POOL invalid_pool;
 static NX_WEB_HTTP_SERVER server;
+static NX_WEB_HTTP_SERVER invalid_server;
 static NX_TCP_SOCKET client_socket;
 static TX_THREAD server_thread;
 static TX_THREAD client_thread;
 static UCHAR server_stack[16384];
-static UCHAR server_pool_memory[PACKET_SIZE * 16];
+static UCHAR server_pool_memory[PACKET_SIZE * 32];
 static UCHAR client_pool_memory[PACKET_SIZE * 16];
 static UCHAR server_ip_stack[4096];
 static UCHAR client_ip_stack[4096];
@@ -49,12 +57,159 @@ static UCHAR worker_stack[4096];
 static NX_TCP_SESSION *stream_session;
 static UINT error_count;
 static UINT server_ready;
+#ifdef NX_WEB_HTTPS_ENABLE
+static UCHAR oversized_event[NX_SECURE_TLS_MAX_PLAINTEXT_LENGTH + 1U];
+#endif
+
+static VOID check_invalid_stream_requests(VOID);
+
+/* Reject invalid arguments and inactive stream state before sending packets. */
+static VOID check_invalid_stream_requests(VOID)
+{
+NX_TCP_SESSION *selected_session;
+UINT saved_request_type;
+UINT saved_keepalive;
+UINT saved_state;
+UINT saved_streaming;
+ULONG saved_system_state;
+TX_THREAD *saved_thread_ptr;
+NX_TCP_SESSION *saved_current_session;
+NX_PACKET_POOL *saved_pool;
+#ifdef NX_WEB_HTTPS_ENABLE
+UINT saved_https;
+NX_TCP_SOCKET *saved_tls_socket;
+UINT saved_ip_version;
+ULONG saved_tls_id;
+UINT tls_status;
+#endif
+CHAR payload[] = "data: x\n\n";
+
+    if ((nx_web_http_server_event_stream_start(NX_NULL, &selected_session) != NX_PTR_ERROR) ||
+        (nx_web_http_server_event_stream_start(&server, NX_NULL) != NX_PTR_ERROR) ||
+        (nx_web_http_server_event_stream_start(&invalid_server, &selected_session) != NX_PTR_ERROR) ||
+        (_nx_web_http_server_event_stream_start(NX_NULL, &selected_session) != NX_PTR_ERROR) ||
+        (_nx_web_http_server_event_stream_start(&server, NX_NULL) != NX_PTR_ERROR))
+    {
+        error_count++;
+    }
+
+    saved_request_type = server.nx_web_http_server_request_type;
+    saved_keepalive = server.nx_web_http_server_keepalive;
+    saved_current_session = server.nx_web_http_server_current_session_ptr;
+    server.nx_web_http_server_request_type = NX_WEB_HTTP_SERVER_POST_REQUEST;
+    server.nx_web_http_server_keepalive = NX_TRUE;
+    server.nx_web_http_server_current_session_ptr = stream_session;
+    if (_nx_web_http_server_event_stream_start(&server, &selected_session) != NX_WEB_HTTP_ERROR)
+    {
+        error_count++;
+    }
+    server.nx_web_http_server_request_type = NX_WEB_HTTP_SERVER_GET_REQUEST;
+    server.nx_web_http_server_keepalive = NX_FALSE;
+    if (_nx_web_http_server_event_stream_start(&server, &selected_session) != NX_WEB_HTTP_ERROR)
+    {
+        error_count++;
+    }
+    server.nx_web_http_server_keepalive = NX_TRUE;
+    server.nx_web_http_server_current_session_ptr = NX_NULL;
+    if (_nx_web_http_server_event_stream_start(&server, &selected_session) != NX_WEB_HTTP_ERROR)
+    {
+        error_count++;
+    }
+    server.nx_web_http_server_request_type = saved_request_type;
+    server.nx_web_http_server_keepalive = saved_keepalive;
+    server.nx_web_http_server_current_session_ptr = saved_current_session;
+
+    saved_system_state = _tx_thread_system_state;
+    _tx_thread_system_state = 1;
+    if ((nx_web_http_server_event_stream_start(&server, &selected_session) != NX_CALLER_ERROR) ||
+        (nx_web_http_server_event_stream_send(&server, stream_session, payload, sizeof(payload) - 1U) != NX_CALLER_ERROR))
+    {
+        error_count++;
+    }
+    _tx_thread_system_state = saved_system_state;
+    saved_thread_ptr = _tx_thread_current_ptr;
+    _tx_thread_current_ptr = TX_NULL;
+    if ((nx_web_http_server_event_stream_start(&server, &selected_session) != NX_CALLER_ERROR) ||
+        (nx_web_http_server_event_stream_send(&server, stream_session, payload, sizeof(payload) - 1U) != NX_CALLER_ERROR))
+    {
+        error_count++;
+    }
+    _tx_thread_current_ptr = saved_thread_ptr;
+    _tx_thread_current_ptr = &_tx_timer_thread;
+    if ((nx_web_http_server_event_stream_start(&server, &selected_session) != NX_CALLER_ERROR) ||
+        (nx_web_http_server_event_stream_send(&server, stream_session, payload, sizeof(payload) - 1U) != NX_CALLER_ERROR))
+    {
+        error_count++;
+    }
+    _tx_thread_current_ptr = saved_thread_ptr;
+
+    if ((nx_web_http_server_event_stream_send(NX_NULL, stream_session, payload, sizeof(payload) - 1U) != NX_PTR_ERROR) ||
+        (nx_web_http_server_event_stream_send(&server, NX_NULL, payload, sizeof(payload) - 1U) != NX_PTR_ERROR) ||
+        (nx_web_http_server_event_stream_send(&server, stream_session, NX_NULL, sizeof(payload) - 1U) != NX_PTR_ERROR) ||
+        (nx_web_http_server_event_stream_send(&invalid_server, stream_session, payload, sizeof(payload) - 1U) != NX_PTR_ERROR) ||
+        (_nx_web_http_server_event_stream_send(NX_NULL, stream_session, payload, sizeof(payload) - 1U) != NX_PTR_ERROR) ||
+        (_nx_web_http_server_event_stream_send(&server, NX_NULL, payload, sizeof(payload) - 1U) != NX_PTR_ERROR) ||
+        (_nx_web_http_server_event_stream_send(&server, stream_session, NX_NULL, sizeof(payload) - 1U) != NX_PTR_ERROR))
+    {
+        error_count++;
+    }
+
+    saved_streaming = stream_session -> nx_tcp_session_streaming;
+    stream_session -> nx_tcp_session_streaming = NX_FALSE;
+    if (_nx_web_http_server_event_stream_send(&server, stream_session, payload, sizeof(payload) - 1U) != NX_WEB_HTTP_ERROR)
+    {
+        error_count++;
+    }
+    stream_session -> nx_tcp_session_streaming = saved_streaming;
+    saved_state = stream_session -> nx_tcp_session_socket.nx_tcp_socket_state;
+    stream_session -> nx_tcp_session_socket.nx_tcp_socket_state = NX_TCP_CLOSED;
+    if (_nx_web_http_server_event_stream_send(&server, stream_session, payload, sizeof(payload) - 1U) != NX_WEB_HTTP_ERROR)
+    {
+        error_count++;
+    }
+    stream_session -> nx_tcp_session_socket.nx_tcp_socket_state = saved_state;
+
+    saved_pool = server.nx_web_http_server_packet_pool_ptr;
+    server.nx_web_http_server_packet_pool_ptr = &invalid_pool;
+    if (_nx_web_http_server_event_stream_send(&server, stream_session, payload,
+                                               sizeof(payload) - 1U) == NX_SUCCESS)
+    {
+        error_count++;
+    }
+    server.nx_web_http_server_packet_pool_ptr = saved_pool;
+
+#ifdef NX_WEB_HTTPS_ENABLE
+    /* The HTTPS path must release a packet rejected for excessive length. */
+    saved_https = server.nx_web_http_is_https_server;
+    saved_tls_socket = stream_session -> nx_tcp_session_tls_session.nx_secure_tls_tcp_socket;
+    saved_tls_id = stream_session -> nx_tcp_session_tls_session.nx_secure_tls_id;
+    saved_ip_version = stream_session -> nx_tcp_session_socket.nx_tcp_socket_connect_ip.nxd_ip_version;
+    stream_session -> nx_tcp_session_tls_session.nx_secure_tls_tcp_socket =
+        &stream_session -> nx_tcp_session_socket;
+    stream_session -> nx_tcp_session_tls_session.nx_secure_tls_id = NX_SECURE_TLS_ID;
+    stream_session -> nx_tcp_session_socket.nx_tcp_socket_connect_ip.nxd_ip_version = NX_IP_VERSION_V4;
+    server.nx_web_http_is_https_server = NX_TRUE;
+    tls_status = _nx_web_http_server_event_stream_send(&server, stream_session, oversized_event,
+                                                       sizeof(oversized_event));
+    if (tls_status != NX_SECURE_TLS_RECORD_OVERFLOW)
+    {
+        error_count++;
+    }
+    server.nx_web_http_is_https_server = saved_https;
+    stream_session -> nx_tcp_session_socket.nx_tcp_socket_connect_ip.nxd_ip_version = saved_ip_version;
+    stream_session -> nx_tcp_session_tls_session.nx_secure_tls_id = saved_tls_id;
+    stream_session -> nx_tcp_session_tls_session.nx_secure_tls_tcp_socket = saved_tls_socket;
+#endif
+}
 
 /* Start one event stream from the GET callback. */
 static UINT request_notify(NX_WEB_HTTP_SERVER *server_ptr, UINT request_type,
                            CHAR *resource, NX_PACKET *request_ptr)
 {
 UINT status;
+NX_PACKET_POOL *saved_pool;
+NX_TCP_SESSION *invalid_session;
+UINT saved_state;
 
     NX_PARAMETER_NOT_USED(resource);
     NX_PARAMETER_NOT_USED(request_ptr);
@@ -62,6 +217,30 @@ UINT status;
     {
         error_count++;
         return(NX_WEB_HTTP_CALLBACK_COMPLETED);
+    }
+
+    /* An invalid response pool must fail without selecting the stream. */
+    saved_pool = server_ptr -> nx_web_http_server_packet_pool_ptr;
+    server_ptr -> nx_web_http_server_packet_pool_ptr = &invalid_pool;
+    status = _nx_web_http_server_event_stream_start(server_ptr, &invalid_session);
+    server_ptr -> nx_web_http_server_packet_pool_ptr = saved_pool;
+    if ((status == NX_SUCCESS) || (invalid_session != NX_NULL) ||
+        (server_ptr -> nx_web_http_server_allocation_errors != 1U))
+    {
+        error_count++;
+    }
+
+    /* A failed header send must release its packet and leave no stream. */
+    saved_state = server_ptr -> nx_web_http_server_current_session_ptr ->
+                  nx_tcp_session_socket.nx_tcp_socket_state;
+    server_ptr -> nx_web_http_server_current_session_ptr ->
+                  nx_tcp_session_socket.nx_tcp_socket_state = NX_TCP_CLOSED;
+    status = _nx_web_http_server_event_stream_start(server_ptr, &invalid_session);
+    server_ptr -> nx_web_http_server_current_session_ptr ->
+                  nx_tcp_session_socket.nx_tcp_socket_state = saved_state;
+    if ((status == NX_SUCCESS) || (invalid_session != NX_NULL))
+    {
+        error_count++;
     }
 
     status = nx_web_http_server_event_stream_start(server_ptr, &stream_session);
@@ -183,6 +362,7 @@ UINT status;
     {
         error_count++;
     }
+    check_invalid_stream_requests();
 
     status = nx_tcp_socket_receive(&client_socket, &packet_ptr, 16 * NX_IP_PERIODIC_RATE);
     if(status == NX_SUCCESS)
