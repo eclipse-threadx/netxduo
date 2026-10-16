@@ -87,6 +87,8 @@ UCHAR                                 session_id_length;
 UINT                                  i;
 UINT                                  status;
 USHORT                                protocol_version;
+UCHAR                                 cookie_length;
+UCHAR                                 cookie_verified;
 UINT                                  total_extensions_length;
 const NX_SECURE_TLS_CIPHERSUITE_INFO *ciphersuite_info = NX_NULL;
 USHORT                                ciphersuite_priority;
@@ -186,6 +188,12 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
     session_id_length = packet_buffer[0];
     packet_buffer++;
 
+    /* The declared session ID must fit in the bytes the message actually carries. */
+    if (((UINT)(packet_buffer - packet_buffer_start) + session_id_length) > message_length)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
+
     /* If there is a session ID, copy it into our TLS socket structure. */
     tls_session -> nx_secure_tls_session_id_length = session_id_length;
     if (session_id_length > 0)
@@ -194,35 +202,67 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
         packet_buffer += session_id_length;
     }
 
-    /* DTLS - there might be a cookie we need to save. */
+    /* DTLS - there might be a cookie we need to check. */
 
-    /* Extract the cookie from the client. */
-    dtls_session -> nx_secure_dtls_cookie_length = packet_buffer[0];
-    packet_buffer += 1;
-
-    if (dtls_session -> nx_secure_dtls_cookie_length > sizeof(dtls_session -> nx_secure_dtls_cookie))
+    /* The cookie length is one byte and must be present. */
+    if (((UINT)(packet_buffer - packet_buffer_start) + 1) > message_length)
     {
         return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
     }
 
-    if (dtls_session -> nx_secure_dtls_cookie_length > 0)
+    /* Extract the cookie length the client declares. */
+    cookie_length = packet_buffer[0];
+    packet_buffer += 1;
+
+    /* The declared cookie must fit in the bytes the message actually carries. */
+    if (((UINT)(packet_buffer - packet_buffer_start) + cookie_length) > message_length)
     {
-        NX_SECURE_MEMCPY(dtls_session -> nx_secure_dtls_cookie, packet_buffer, dtls_session -> nx_secure_dtls_cookie_length); /* Use case of memcpy is verified. */
-        packet_buffer += dtls_session -> nx_secure_dtls_cookie_length;
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
+
+    /* A client is verified only by returning the cookie this server issued to it, which
+       is what proves it can receive at the address it claims. The client's bytes are
+       compared against the stored cookie and never written over it - that field holds
+       the value this server generated. A client that returns nothing, or the wrong
+       cookie, is sent a HelloVerifyRequest and must try again. */
+    if ((cookie_length != 0) &&
+        (cookie_length == dtls_session -> nx_secure_dtls_cookie_length) &&
+        (NX_SECURE_MEMCMP(dtls_session -> nx_secure_dtls_cookie, packet_buffer, cookie_length) == 0))
+    {
+        cookie_verified = NX_TRUE;
+    }
+    else
+    {
+        cookie_verified = NX_FALSE;
+    }
+    packet_buffer += cookie_length;
+
+    /* The ciphersuite list length is two bytes and must be present. */
+    if (((UINT)(packet_buffer - packet_buffer_start) + 2) > message_length)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
     }
 
     /* Negotiate the ciphersuite we want to use. */
     ciphersuite_list_length = (USHORT)((packet_buffer[0] << 8) + packet_buffer[1]);
     packet_buffer += 2;
 
-    /* Make sure the list length makes sense. */
-    if (ciphersuite_list_length > message_length)
+    /* Make sure the list length fits in the bytes still unconsumed, not merely in the
+       message as a whole, and that it can hold at least one ciphersuite. */
+    if ((ciphersuite_list_length < 2) ||
+        (((UINT)(packet_buffer - packet_buffer_start) + ciphersuite_list_length) > message_length))
     {
         return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
     }
 
     ciphersuite_list = packet_buffer;
     packet_buffer += ciphersuite_list_length;
+
+    /* The compression methods length is one byte and must be present. */
+    if (((UINT)(packet_buffer - packet_buffer_start) + 1) > message_length)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
 
     /* Compression methods length - one byte. For now we only support the NULL method. */
     compression_methods_length = packet_buffer[0];
@@ -385,7 +425,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
 
     /* Check if there are extensions.  */
     if ((ciphersuite_info -> nx_secure_tls_public_auth -> nx_crypto_algorithm == NX_CRYPTO_KEY_EXCHANGE_ECJPAKE) &&
-        (dtls_session -> nx_secure_dtls_cookie_length != 0))
+        (cookie_verified == NX_TRUE))
     {
 
         if (packet_buffer - packet_buffer_start > (INT)message_length - 2)
@@ -577,7 +617,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
     tls_session -> nx_secure_tls_client_state = NX_SECURE_TLS_CLIENT_STATE_ERROR;
     return(NX_SECURE_TLS_INVALID_STATE);
 #else
-    if (dtls_session -> nx_secure_dtls_cookie_length == 0)
+    if (cookie_verified == NX_FALSE)
     {
         /* In DTLS, we actually send a HelloVerifyReqeust (expecting a second ClientHello in
          * response) before sending our ServerHello. */

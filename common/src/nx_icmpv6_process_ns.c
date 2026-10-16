@@ -251,6 +251,16 @@ ULONG             dest_address[4];
     while (option_length > 0)
     {
 
+        /* An option length of zero advances this walk by nothing and subtracts
+           nothing from its counter, so the loop would never end. The validator
+           rejects it; it is rejected here as well, because this walk trusts the
+           validator's guarantee about an area the validator may not have seen. */
+        if (option_ptr -> nx_icmpv6_option_length == 0)
+        {
+            _nx_packet_release(packet_ptr);
+            return;
+        }
+
         /* Handle the source link-layer address option for a solicited NS request. */
         if (option_ptr -> nx_icmpv6_option_type == ICMPV6_OPTION_TYPE_SRC_LINK_ADDR)
         {

@@ -245,6 +245,16 @@ UINT                          interface_index;
     while (packet_length > 0)
     {
 
+        /* An option length of zero advances this walk by nothing and subtracts
+           nothing from its counter, so the loop would never end. The validator
+           rejects it; it is rejected here as well, because this walk trusts the
+           validator's guarantee about an area the validator may not have seen. */
+        if (option_ptr -> nx_icmpv6_option_length == 0)
+        {
+            _nx_packet_release(packet_ptr);
+            return;
+        }
+
         /* If there are prefix info options, we pick the last one. */
 
         /* Is the current option a prefix option? */

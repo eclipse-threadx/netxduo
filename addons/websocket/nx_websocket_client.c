@@ -2024,7 +2024,9 @@ UCHAR is_control_frame = NX_FALSE;
             {
 #endif /* NX_DISABLE_PACKET_CHAIN  */
 
-                data_ptr = (*packet_ptr) -> nx_packet_prepend_ptr;
+                /* Unmask within the current packet of the chain, so that the cursor and
+                   its bound always belong to the same packet.  */
+                data_ptr = data_packet -> nx_packet_prepend_ptr;
                 while (data_ptr < data_packet -> nx_packet_append_ptr)
                 {
 

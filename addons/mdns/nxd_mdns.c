@@ -11400,6 +11400,7 @@ UINT    memory_len;
 UINT    used_cache_size;
 USHORT  len, cnt;
 USHORT  min_len = 0xFFFF;
+UINT    stored_length;
 UCHAR   *p, *available, *start;
 
 
@@ -11445,8 +11446,24 @@ UCHAR   *p, *available, *start;
         cnt = *((USHORT*)(p - 4));
         start = p - len;
 
+        /* The slot records the size it was rounded up to, not the length of the
+           name inside it, so names of several lengths share one slot size and are
+           all eligible to match here. _nx_mdns_name_match compares only as far as
+           its destination runs and is called below with the incoming name as that
+           destination and with the incoming name's own length, which makes its
+           trailing length check always true: a shorter incoming name matched a
+           longer stored one and the caller walked away with the longer string.
+           Measure the stored name and require the two to be the same length. */
+        stored_length = 0;
+        if ((add_name == NX_TRUE) &&
+            _nx_utility_string_length_check((CHAR *)start, &stored_length, len))
+        {
+            stored_length = 0;
+        }
+
         if((len == memory_len) &&
            (((add_name == NX_TRUE) &&
+             (stored_length == memory_size) &&
              (!_nx_mdns_name_match(start, memory_ptr, memory_size))) ||
             ((add_name == NX_FALSE) &&
              (!memcmp(start, memory_ptr, memory_size)))))

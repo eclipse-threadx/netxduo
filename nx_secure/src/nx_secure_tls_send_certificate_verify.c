@@ -124,6 +124,7 @@ const CHAR client_context[] = "TLS 1.3, client CertificateVerify\0"; /* Includes
 const NX_CRYPTO_METHOD    *curve_method_cert;
 NX_SECURE_EC_PRIVATE_KEY  *ec_privkey;
 NX_SECURE_EC_PUBLIC_KEY   *ec_pubkey;
+UCHAR                     *ecdsa_hash;
 NX_SECURE_EC_PRIVATE_KEY  ec_hardware_privkey;
 NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
@@ -826,6 +827,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
     else if (local_certificate -> nx_secure_x509_public_algorithm == NX_SECURE_TLS_X509_TYPE_EC)
     {
+        ecdsa_hash = handshake_hash;
         /* Pointer to where we are going to place our data. */
         current_buffer = send_packet -> nx_packet_append_ptr;
 
@@ -875,8 +877,9 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
 #endif /* NX_SECURE_ENABLE_DTLS */
         {
 
-            /* Hash size is the size of SHA-1 (20) + MD5 (16). */
-            data_size = 36;
+            /* ECDSA signs the SHA-1 handshake hash. */
+            ecdsa_hash = &handshake_hash[16];
+            data_size = 20;
 
         }
 #endif
@@ -963,7 +966,7 @@ NX_CRYPTO_EXTENDED_OUTPUT  extended_output;
                                                              (NX_CRYPTO_METHOD*)public_cipher_method,
                                                              (UCHAR *)ec_privkey -> nx_secure_ec_private_key,
                                                              (NX_CRYPTO_KEY_SIZE)(ec_privkey -> nx_secure_ec_private_key_length << 3),
-                                                             handshake_hash,
+                                                             ecdsa_hash,
                                                              data_size, NX_NULL,
                                                              (UCHAR *)&extended_output,
                                                              sizeof(extended_output),
