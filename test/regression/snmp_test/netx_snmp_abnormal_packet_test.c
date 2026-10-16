@@ -20,6 +20,10 @@
 
 extern void    test_control_return(UINT);
 
+/* nxd_snmp.h declares this only when NX_SNMP_SOURCE_CODE is defined, which a test
+   does not define. Declared here as the web tests declare the internals they reach. */
+extern UINT    _nx_snmp_utility_object_id_get(UCHAR *buffer_ptr, UCHAR *object_string, INT buffer_length);
+
 #define     DEMO_STACK_SIZE         4096
 
 #if !defined(NX_DISABLE_IPV4)
@@ -233,6 +237,9 @@ static void    thread_0_entry(ULONG thread_input)
 {
 
 UINT status;
+UCHAR oid_buffer[16];
+UCHAR oid_string[NX_SNMP_MAX_OCTET_STRING + 1];
+UINT  oid_length;
 NX_SNMP_TRAP_OBJECT trap_list[7];
 NX_SNMP_OBJECT_DATA trap_data0;
 NX_SNMP_OBJECT_DATA trap_data1;
@@ -240,6 +247,46 @@ UINT                counter = 133;
 
 
     printf("NetX Test:   SNMP Abnormal Packet Test.................................");
+
+    /* An OID whose declared length does not fit the buffer must be rejected. The
+       single byte length form was always checked; neither BER multi-byte form was,
+       so a peer could declare far more object data than the packet carries and the
+       parse loop would run that many times past the end. */
+
+    /* Two byte form: claims 64 bytes of object data in a 16 byte buffer. */
+    memset(oid_buffer, 0, sizeof(oid_buffer));
+    oid_buffer[0] = 0x06;   /* object identifier */
+    oid_buffer[1] = 0x82;   /* multi-byte length, two length bytes follow */
+    oid_buffer[2] = 0x00;
+    oid_buffer[3] = 0x40;   /* 64 */
+    oid_buffer[4] = 0x2b;
+    oid_length = _nx_snmp_utility_object_id_get(oid_buffer, oid_string, 16);
+    if (oid_length != 0)
+        error_counter++;
+
+    /* One byte form: claims 255 bytes, and had no length check at all. */
+    memset(oid_buffer, 0, sizeof(oid_buffer));
+    oid_buffer[0] = 0x06;
+    oid_buffer[1] = 0x81;   /* multi-byte length, one length byte follows */
+    oid_buffer[2] = 0xff;   /* 255 */
+    oid_buffer[3] = 0x2b;
+    oid_length = _nx_snmp_utility_object_id_get(oid_buffer, oid_string, 16);
+    if (oid_length != 0)
+        error_counter++;
+
+    /* A well formed OID that does fit must still parse, so that a fix which simply
+       rejects more does not pass. 1.3.6.1.2.1 in six content bytes. */
+    memset(oid_buffer, 0, sizeof(oid_buffer));
+    oid_buffer[0] = 0x06;
+    oid_buffer[1] = 0x05;   /* single byte length form, five content bytes */
+    oid_buffer[2] = 0x2b;   /* 1.3 */
+    oid_buffer[3] = 0x06;
+    oid_buffer[4] = 0x01;
+    oid_buffer[5] = 0x02;
+    oid_buffer[6] = 0x01;
+    oid_length = _nx_snmp_utility_object_id_get(oid_buffer, oid_string, 16);
+    if (oid_length == 0)
+        error_counter++;
 
     if (error_counter)
     {

@@ -13,6 +13,10 @@
 set -euo pipefail
 
 # Install the host tools used by the CMake regression suites on Ubuntu 24.04.
+# Every suite here builds for the host. The Cortex-M toolchain files under
+# cmake/ are for cross builds done by hand and are used by no suite, so the
+# arm-none-eabi cross toolchain is deliberately not installed: it is the
+# largest download in the set and nothing in CI links against it.
 readonly GCOVR_VERSION="8.6"
 readonly GCOVR_PREFIX="/opt/netxduo/gcovr-${GCOVR_VERSION}"
 
@@ -33,8 +37,7 @@ sudo apt-get install -y \
     dos2unix \
     gawk \
     libssl-dev:i386 \
-    libcmocka-dev:i386 \
-    gcc-arm-none-eabi
+    libcmocka-dev:i386
 
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 140
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 140

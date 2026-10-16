@@ -279,9 +279,59 @@ static UCHAR dtls_clienthello_bad_compression[] = {
   0x00, 0x02, 0x00, 0x01, 0x00, 0xff, 0xff, 0x00
 };
 
+
+/* A ClientHello whose declared session ID is far longer than the message carrying it.
+   The parser must reject it rather than copy 255 bytes out of a 56 byte message. */
+static UCHAR dtls_clienthello_long_session_id[] = {
+  0xfe, 0xfd, 0x00, 0x00, 0x00, 0x00, 0x32, 0x7b, 0x23, 0xc6, 0x64, 0x3c,
+  0x98, 0x69, 0x66, 0x33, 0x48, 0x73, 0x74, 0xb0, 0xdc, 0x51, 0x19, 0x49,
+  0x5c, 0xff, 0x2a, 0xe8, 0x94, 0x4a, 0x62, 0x55, 0x58, 0xec, 0xff, 0x00,
+  0x00, 0x10, 0x00, 0x3d, 0x00, 0x35, 0x00, 0x3c, 0x00, 0x2f, 0x00, 0x9c,
+  0x00, 0x02, 0x00, 0x01, 0x00, 0xff, 0x01, 0x00
+};
+
+/* A ClientHello declaring a ciphersuite list too short to hold one ciphersuite.
+   The unfixed parser accepted it, walked a one byte list and fell through to the
+   compression method, reporting a bad compression method instead. */
+static UCHAR dtls_clienthello_short_ciphersuite_list[] = {
+  0xfe, 0xfd, 0x00, 0x00, 0x00, 0x00, 0x32, 0x7b, 0x23, 0xc6, 0x64, 0x3c,
+  0x98, 0x69, 0x66, 0x33, 0x48, 0x73, 0x74, 0xb0, 0xdc, 0x51, 0x19, 0x49,
+  0x5c, 0xff, 0x2a, 0xe8, 0x94, 0x4a, 0x62, 0x55, 0x58, 0xec, 0x00, 0x00,
+  0x00, 0x01, 0x00, 0x00
+};
+
+/* A ClientHello whose ciphersuite list length equals the whole message length. The
+   old bound compared it against the message rather than the bytes left unconsumed,
+   so this value passed and the parse cursor advanced past the end. The status alone
+   does not distinguish fixed from unfixed here: a cursor past the message is caught
+   further down by the compression method bound either way. It is kept to pin the
+   rejection at the point the length is read. */
+static UCHAR dtls_clienthello_ciphersuites_overrun[] = {
+  0xfe, 0xfd, 0x00, 0x00, 0x00, 0x00, 0x32, 0x7b, 0x23, 0xc6, 0x64, 0x3c,
+  0x98, 0x69, 0x66, 0x33, 0x48, 0x73, 0x74, 0xb0, 0xdc, 0x51, 0x19, 0x49,
+  0x5c, 0xff, 0x2a, 0xe8, 0x94, 0x4a, 0x62, 0x55, 0x58, 0xec, 0x00, 0x00,
+  0x00, 0x38, 0x00, 0x3d, 0x00, 0x35, 0x00, 0x3c, 0x00, 0x2f, 0x00, 0x9c,
+  0x00, 0x02, 0x00, 0x01, 0x00, 0xff, 0x01, 0x00
+};
+
+/* A first ClientHello carrying a cookie the server never issued. Parsing it must
+   leave the server's own cookie untouched: that field holds the value this server
+   generated, and overwriting it with the client's bytes is what destroyed the only
+   copy the server could have verified against. */
+static UCHAR dtls_clienthello_wrong_cookie[] = {
+  0xfe, 0xfd, 0x00, 0x00, 0x00, 0x00, 0x32, 0x7b, 0x23, 0xc6, 0x64, 0x3c,
+  0x98, 0x69, 0x66, 0x33, 0x48, 0x73, 0x74, 0xb0, 0xdc, 0x51, 0x19, 0x49,
+  0x5c, 0xff, 0x2a, 0xe8, 0x94, 0x4a, 0x62, 0x55, 0x58, 0xec, 0x00, 0x14,
+  0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb,
+  0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb,
+  0x00, 0x10, 0x00, 0x3d, 0x00, 0x35, 0x00, 0x3c, 0x00, 0x2f, 0x00, 0x9c,
+  0x00, 0x02, 0x00, 0x01, 0x00, 0xff, 0xff, 0x00
+};
+
 static void ntest_0_entry(ULONG thread_input)
 {
 UINT status;
+UINT i;
 ULONG response_length;
 NX_PACKET *packet_ptr = NX_NULL, *pp1, *pp2, unused_packet;
 NX_SECURE_TLS_SESSION *tls_session_ptr;
@@ -351,6 +401,38 @@ UINT active_value;
 
     status = _nx_secure_dtls_process_clienthello(&dtls_server_session_0, dtls_clienthello_bad_compression, sizeof(dtls_clienthello_bad_compression));
     EXPECT_EQ(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, status);
+
+    /* A declared session ID longer than the message must be rejected before it is
+       copied. The status alone does not prove that: the unfixed parser copies 255
+       bytes out of a 56 byte message and is then stopped further down by a cookie
+       length it read out of bounds, returning the same code. What distinguishes the
+       two is the recorded length, which the unfixed parser sets to 255 on its way
+       past. Seed it with a sentinel and require that it survives. */
+    dtls_server_session_0.nx_secure_dtls_tls_session.nx_secure_tls_session_id_length = 7;
+    status = _nx_secure_dtls_process_clienthello(&dtls_server_session_0, dtls_clienthello_long_session_id, sizeof(dtls_clienthello_long_session_id));
+    EXPECT_EQ(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, status);
+    EXPECT_EQ(7, dtls_server_session_0.nx_secure_dtls_tls_session.nx_secure_tls_session_id_length);
+
+    /* A ciphersuite list must be able to hold at least one ciphersuite. The unfixed
+       parser accepted a one byte list and reported a bad compression method. */
+    status = _nx_secure_dtls_process_clienthello(&dtls_server_session_0, dtls_clienthello_short_ciphersuite_list, sizeof(dtls_clienthello_short_ciphersuite_list));
+    EXPECT_EQ(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, status);
+
+    status = _nx_secure_dtls_process_clienthello(&dtls_server_session_0, dtls_clienthello_ciphersuites_overrun, sizeof(dtls_clienthello_ciphersuites_overrun));
+    EXPECT_EQ(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, status);
+
+    /* The cookie a client returns is compared against the one this server issued and
+       never stored over it. Seed the session with a known cookie, parse a ClientHello
+       carrying a different one, and the seeded value must survive unchanged. */
+    dtls_server_session_0.nx_secure_dtls_cookie_length = 20;
+    memset(dtls_server_session_0.nx_secure_dtls_cookie, 0xaa, 20);
+    status = _nx_secure_dtls_process_clienthello(&dtls_server_session_0, dtls_clienthello_wrong_cookie, sizeof(dtls_clienthello_wrong_cookie));
+    EXPECT_EQ(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH, status);
+    EXPECT_EQ(20, dtls_server_session_0.nx_secure_dtls_cookie_length);
+    for (i = 0; i < 20; i++)
+    {
+        EXPECT_EQ(0xaa, dtls_server_session_0.nx_secure_dtls_cookie[i]);
+    }
 
     /* Error checkings for invalid ciphersuites. */
     tls_session_ptr = &(dtls_server_session_0.nx_secure_dtls_tls_session);
