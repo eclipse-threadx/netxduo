@@ -21,7 +21,7 @@
 
 extern VOID test_control_return(UINT status);
 
-#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED) && !defined(NX_SECURE_TLS_CLIENT_DISABLED)
 
 #define TEST_PACKET_SIZE 256
 #define TEST_PACKET_COUNT 8
@@ -201,7 +201,7 @@ VOID nx_secure_tls_1_3_post_handshake_packet_test_application_define(VOID *first
 
 #else
 
-/* Report that TLS 1.3 is unavailable in this build. */
+/* Report that the TLS 1.3 client path is unavailable in this build. */
 #ifdef CTEST
 void test_application_define(void *first_unused_memory);
 void test_application_define(void *first_unused_memory)
