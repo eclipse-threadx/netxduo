@@ -158,6 +158,23 @@ static const HEADER_CASE header_cases[] =
     {"HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n", NX_TRUE, 0, NX_FALSE}
 };
 
+/* Retain embedded NUL bytes when sending malformed response headers.  */
+typedef struct HEADER_RAW_CASE_STRUCT
+{
+    const CHAR *data;
+    ULONG length;
+} HEADER_RAW_CASE;
+
+static const CHAR nul_status[] = "HTTP/1.1 200\0 OK\r\n\r\n";
+static const CHAR nul_name[] = "HTTP/1.1 200 OK\r\nX\0: a\r\n\r\n";
+static const CHAR nul_value[] = "HTTP/1.1 200 OK\r\nX: a\0b\r\n\r\n";
+static const HEADER_RAW_CASE nul_cases[] =
+{
+    {nul_status, sizeof(nul_status) - 1U},
+    {nul_name, sizeof(nul_name) - 1U},
+    {nul_value, sizeof(nul_value) - 1U}
+};
+
 static char pkt[] = {
 0x48, 0x54,                                     /* ......HT */
 0x54, 0x50, 0x2f, 0x31, 0x2e, 0x30, 0x20, 0x32, /* TP/1.0 2 */
@@ -329,7 +346,9 @@ UINT                offset;
 UINT                length;
 ULONG               data_length;
 const CHAR         *prefix = "HTTP/1.1 200 OK\r\n";
-const CHAR         *suffix = ": a\r\n\r\n";
+const CHAR         *field_prefix = "X: ";
+const CHAR         *field_suffix = ": a\r\n\r\n";
+const CHAR         *terminator = "\r\n\r\n";
 
     for (i = 0; i < (sizeof(header_cases) / sizeof(header_cases[0])); i++)
     {
@@ -371,39 +390,115 @@ const CHAR         *suffix = ": a\r\n\r\n";
         }
     }
 
+    for (i = 0; i < 2U; i++)
+    {
+        data_length = (ULONG)strlen(prefix);
+        memcpy(response, prefix, data_length);
+        if (i != 0U)
+        {
+            memcpy(response + data_length, field_prefix, strlen(field_prefix));
+            data_length += (ULONG)strlen(field_prefix);
+        }
+        memset(response + data_length, 'X', NX_WEB_HTTP_MAX_HEADER_FIELD + 1U);
+        data_length += NX_WEB_HTTP_MAX_HEADER_FIELD + 1U;
+        if (i == 0U)
+        {
+            memcpy(response + data_length, field_suffix, strlen(field_suffix));
+            data_length += (ULONG)strlen(field_suffix);
+        }
+        else
+        {
+            memcpy(response + data_length, terminator, strlen(terminator));
+            data_length += (ULONG)strlen(terminator);
+        }
+        packet_ptr = NX_NULL;
+        second_packet = NX_NULL;
+        status = nx_packet_allocate(&client_pool, &packet_ptr, NX_TCP_PACKET, NX_NO_WAIT);
+        if (status == NX_SUCCESS)
+        {
+            status = nx_packet_allocate(&client_pool, &second_packet, NX_TCP_PACKET, NX_NO_WAIT);
+        }
+        if (status == NX_SUCCESS)
+        {
+            status = nx_packet_data_append(packet_ptr, response, data_length / 2U, &client_pool, NX_NO_WAIT);
+        }
+        if (status == NX_SUCCESS)
+        {
+            status = nx_packet_data_append(second_packet, response + (data_length / 2U),
+                                           data_length - (data_length / 2U), &client_pool, NX_NO_WAIT);
+        }
+        if (status == NX_SUCCESS)
+        {
+            packet_ptr -> nx_packet_next = second_packet;
+            packet_ptr -> nx_packet_last = second_packet;
+            packet_ptr -> nx_packet_length += second_packet -> nx_packet_length;
+            memset(&client, 0, sizeof(client));
+            client.nx_web_http_client_response_callback = header_callback;
+            if (_nx_web_http_client_process_header_fields(&client, packet_ptr) != 0)
+            {
+                error_counter++;
+            }
+        }
+        else
+        {
+            error_counter++;
+        }
+        if (packet_ptr != NX_NULL)
+        {
+            nx_packet_release(packet_ptr);
+        }
+        if ((status != NX_SUCCESS) && (second_packet != NX_NULL))
+        {
+            nx_packet_release(second_packet);
+        }
+    }
+
+    for (i = 0; i < (sizeof(nul_cases) / sizeof(nul_cases[0])); i++)
+    {
+        packet_ptr = NX_NULL;
+        memcpy(response, nul_cases[i].data, nul_cases[i].length);
+        status = nx_packet_allocate(&client_pool, &packet_ptr, NX_TCP_PACKET, NX_NO_WAIT);
+        if (status == NX_SUCCESS)
+        {
+            status = nx_packet_data_append(packet_ptr, response, nul_cases[i].length,
+                                           &client_pool, NX_NO_WAIT);
+        }
+        if (status == NX_SUCCESS)
+        {
+            memset(&client, 0, sizeof(client));
+            if (_nx_web_http_client_process_header_fields(&client, packet_ptr) != 0)
+            {
+                error_counter++;
+            }
+        }
+        else
+        {
+            error_counter++;
+        }
+        if (packet_ptr != NX_NULL)
+        {
+            nx_packet_release(packet_ptr);
+        }
+    }
+
+    /* Reject a chain whose advertised length exceeds its stored bytes.  */
+    packet_ptr = NX_NULL;
     data_length = (ULONG)strlen(prefix);
     memcpy(response, prefix, data_length);
-    memset(response + data_length, 'X', NX_WEB_HTTP_MAX_HEADER_FIELD + 1U);
-    data_length += NX_WEB_HTTP_MAX_HEADER_FIELD + 1U;
-    memcpy(response + data_length, suffix, strlen(suffix));
-    data_length += (ULONG)strlen(suffix);
-    packet_ptr = NX_NULL;
-    second_packet = NX_NULL;
     status = nx_packet_allocate(&client_pool, &packet_ptr, NX_TCP_PACKET, NX_NO_WAIT);
     if (status == NX_SUCCESS)
     {
-        status = nx_packet_allocate(&client_pool, &second_packet, NX_TCP_PACKET, NX_NO_WAIT);
+        status = nx_packet_data_append(packet_ptr, response, data_length, &client_pool, NX_NO_WAIT);
     }
     if (status == NX_SUCCESS)
     {
-        status = nx_packet_data_append(packet_ptr, response, data_length / 2U, &client_pool, NX_NO_WAIT);
-    }
-    if (status == NX_SUCCESS)
-    {
-        status = nx_packet_data_append(second_packet, response + (data_length / 2U),
-                                       data_length - (data_length / 2U), &client_pool, NX_NO_WAIT);
-    }
-    if (status == NX_SUCCESS)
-    {
-        packet_ptr -> nx_packet_next = second_packet;
-        packet_ptr -> nx_packet_last = second_packet;
-        packet_ptr -> nx_packet_length += second_packet -> nx_packet_length;
         memset(&client, 0, sizeof(client));
-        client.nx_web_http_client_response_callback = header_callback;
+        packet_ptr -> nx_packet_length++;
         if (_nx_web_http_client_process_header_fields(&client, packet_ptr) != 0)
         {
             error_counter++;
         }
+        packet_ptr -> nx_packet_length--;
     }
     else
     {
@@ -412,10 +507,6 @@ const CHAR         *suffix = ": a\r\n\r\n";
     if (packet_ptr != NX_NULL)
     {
         nx_packet_release(packet_ptr);
-    }
-    if ((status != NX_SUCCESS) && (second_packet != NX_NULL))
-    {
-        nx_packet_release(second_packet);
     }
 }
 
